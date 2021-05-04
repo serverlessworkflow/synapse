@@ -1,0 +1,12 @@
+﻿apiVersion: synapse.io/v1alpha1
+kind: WorkflowInstance
+metadata:
+  generateName: inject-test-
+  namespace: synapse
+spec:
+  definition:
+    id: inject-test
+    version: latest
+  input:
+    message: Hello, World!
+    type: FakeInput

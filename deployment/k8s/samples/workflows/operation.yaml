@@ -1,0 +1,21 @@
+﻿id: petStoreLogin
+version: '1.0'
+name: Pet Store Login
+description: Logs in Swagger's Pet Store API
+start: login
+functions:
+- name: petStoreLogin
+  operation: https://petstore.swagger.io/v2/swagger.json#loginUser
+states:
+- name: login
+  type: operation
+  actions:
+  - name: petStoreLogin
+    functionRef:
+      refName: petStoreLogin
+      parameters:
+        username: runtime@synapse.sw
+        password: FakePassword
+    actionDataFilter:
+      results: '${ { loginResult: .message } }'
+  end: true
