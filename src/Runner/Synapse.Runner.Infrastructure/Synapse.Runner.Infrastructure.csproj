@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <AssemblyVersion>0.1.0.0</AssemblyVersion>
+    <FileVersion>0.1.0.0</FileVersion>
+    <Version>0.1.0</Version>
+    <PackageTags>serverless workflow synapse</PackageTags>
+    <NeutralLanguage>English</NeutralLanguage>
+    <Authors>The Synapse authors</Authors>
+    <Copyright>Copyright</Copyright>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DocumentationFile>Synapse.Runner.Infrastructure.xml</DocumentationFile>
+  </PropertyGroup>
+
+</Project>

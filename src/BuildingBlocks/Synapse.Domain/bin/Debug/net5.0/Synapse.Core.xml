@@ -1,0 +1,749 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Synapse.Core</name>
+    </assembly>
+    <members>
+        <member name="T:Synapse.BranchDefinitionExtensions">
+            <summary>
+            Defines extensions for <see cref="T:ServerlessWorkflow.Sdk.Models.BranchDefinition"/>s
+            </summary>
+        </member>
+        <member name="M:Synapse.BranchDefinitionExtensions.GetAction(ServerlessWorkflow.Sdk.Models.BranchDefinition,System.String)">
+            <summary>
+            Gets the <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> with the specified name
+            </summary>
+            <param name="branch">The <see cref="T:ServerlessWorkflow.Sdk.Models.BranchDefinition"/> to search for the specified <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/></param>
+            <param name="name">The name of the <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> to get</param>
+            <returns>The <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> with the specified name</returns>
+        </member>
+        <member name="M:Synapse.BranchDefinitionExtensions.TryGetAction(ServerlessWorkflow.Sdk.Models.BranchDefinition,System.String,ServerlessWorkflow.Sdk.Models.ActionDefinition@)">
+            <summary>
+            Attempts to get the <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> with the specified name
+            </summary>
+            <param name="branch">The <see cref="T:ServerlessWorkflow.Sdk.Models.BranchDefinition"/> to search for the specified <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/></param>
+            <param name="name">The name of the <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> to get</param>
+            <param name="action">The <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> with the specified name</param>
+            <returns>A boolean indicating whether or not a <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> with the specified name could be found</returns>
+        </member>
+        <member name="M:Synapse.BranchDefinitionExtensions.TryGetNextAction(ServerlessWorkflow.Sdk.Models.BranchDefinition,System.String,ServerlessWorkflow.Sdk.Models.ActionDefinition@)">
+            <summary>
+            Attempts to get the next <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> in the pipeline
+            </summary>
+            <param name="branch">The <see cref="T:ServerlessWorkflow.Sdk.Models.BranchDefinition"/> to search</param>
+            <param name="previousActionName">The name of the <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> to get the next <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> for</param>
+            <param name="action">The next <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/>, if any</param>
+            <returns>A boolean indicating whether or not there is a next <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> in the pipeline</returns>
+        </member>
+        <member name="T:Synapse.Case">
+            <summary>
+            Enumerates all string cases
+            </summary>
+        </member>
+        <member name="F:Synapse.Case.Lower">
+            <summary>
+            Indicates lowercase
+            </summary>
+        </member>
+        <member name="F:Synapse.Case.Upper">
+            <summary>
+            Indicates uppercase
+            </summary>
+        </member>
+        <member name="T:Synapse.EventStateTriggerDefinitionExtensions">
+            <summary>
+            Defines extensions for <see cref="T:ServerlessWorkflow.Sdk.Models.EventStateTriggerDefinition"/>s
+            </summary>
+        </member>
+        <member name="M:Synapse.EventStateTriggerDefinitionExtensions.GetAction(ServerlessWorkflow.Sdk.Models.EventStateTriggerDefinition,System.String)">
+            <summary>
+            Gets the <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> with the specified name
+            </summary>
+            <param name="branch">The <see cref="T:ServerlessWorkflow.Sdk.Models.EventStateTriggerDefinition"/> to search for the specified <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/></param>
+            <param name="name">The name of the <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> to get</param>
+            <returns>The <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> with the specified name</returns>
+        </member>
+        <member name="M:Synapse.EventStateTriggerDefinitionExtensions.TryGetAction(ServerlessWorkflow.Sdk.Models.EventStateTriggerDefinition,System.String,ServerlessWorkflow.Sdk.Models.ActionDefinition@)">
+            <summary>
+            Attempts to get the <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> with the specified name
+            </summary>
+            <param name="branch">The <see cref="T:ServerlessWorkflow.Sdk.Models.EventStateTriggerDefinition"/> to search for the specified <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/></param>
+            <param name="name">The name of the <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> to get</param>
+            <param name="action">The <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> with the specified name</param>
+            <returns>A boolean indicating whether or not a <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> with the specified name could be found</returns>
+        </member>
+        <member name="M:Synapse.EventStateTriggerDefinitionExtensions.TryGetNextAction(ServerlessWorkflow.Sdk.Models.EventStateTriggerDefinition,System.String,ServerlessWorkflow.Sdk.Models.ActionDefinition@)">
+            <summary>
+            Attempts to get the next <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> in the pipeline
+            </summary>
+            <param name="branch">The <see cref="T:ServerlessWorkflow.Sdk.Models.EventStateTriggerDefinition"/> to search</param>
+            <param name="previousActionName">The name of the <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> to get the next <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> for</param>
+            <param name="action">The next <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/>, if any</param>
+            <returns>A boolean indicating whether or not there is a next <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> in the pipeline</returns>
+        </member>
+        <member name="T:Synapse.FunctionDefinitionExtensions">
+            <summary>
+            Defines extensions for <see cref="T:ServerlessWorkflow.Sdk.Models.FunctionDefinition"/>s
+            </summary>
+        </member>
+        <member name="M:Synapse.FunctionDefinitionExtensions.BuildParameters(ServerlessWorkflow.Sdk.Models.FunctionReference,Newtonsoft.Json.Linq.JToken)">
+            <summary>
+            Builds the parameters to pass to the <see cref="T:ServerlessWorkflow.Sdk.Models.FunctionReference"/> based on the specified inpit
+            </summary>
+            <param name="function">The <see cref="T:ServerlessWorkflow.Sdk.Models.FunctionReference"/> to build parameters for</param>
+            <param name="input">The input data to build the parameters from</param>
+            <returns>A new <see cref="T:Newtonsoft.Json.Linq.JObject"/> that contains the <see cref="T:ServerlessWorkflow.Sdk.Models.FunctionReference"/>'s parameters</returns>
+        </member>
+        <member name="T:Synapse.AsyncObservableExtensions">
+            <summary>
+            Defines extensions for <see cref="T:System.IObservable`1"/>
+            </summary>
+            <remarks>Original source: <see href="https://github.com/dotnet/reactive/issues/459#issuecomment-357735068">davidnemeti post</see></remarks>
+        </member>
+        <member name="M:Synapse.AsyncObservableExtensions.SubscribeAsync``1(System.IObservable{``0},System.Func{``0,System.Threading.Tasks.Task},System.Func{System.Exception,System.Threading.Tasks.Task},System.Func{System.Threading.Tasks.Task})">
+            <summary>
+            Subscribes to the specified <see cref="T:System.IObservable`1"/>
+            </summary>
+            <typeparam name="T">The type of the elements in the source sequence.</typeparam>
+            <param name="source">The source sequence.</param>
+            <param name="onNextAsync">Action to invoke for each element in the observable sequence.</param>
+            <param name="onErrorAsync">Action to invoke upon exceptional termination of the observable sequence.</param>
+            <param name="onCompletedAsync">Action to invoke upon graceful termination of the observable sequence.</param>
+            <returns><see cref="T:System.IDisposable"/> object used to unsubscribe from the observable sequence.</returns>
+        </member>
+        <member name="M:Synapse.AsyncObservableExtensions.SubscribeAsync``1(System.IObservable{``0},System.Func{``0,System.Threading.Tasks.Task},System.Threading.CancellationToken)">
+            <summary>
+            Subscribes to the specified <see cref="T:System.IObservable`1"/>
+            </summary>
+            <typeparam name="T">The type of the elements in the source sequence.</typeparam>
+            <param name="source">The source sequence.</param>
+            <param name="onNextAsync">Action to invoke for each element in the observable sequence.</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+        </member>
+        <member name="M:Synapse.AsyncObservableExtensions.SubscribeAsync``1(System.IObservable{``0},System.Func{``0,System.Threading.Tasks.Task},System.Func{System.Exception,System.Threading.Tasks.Task},System.Func{System.Threading.Tasks.Task},System.Threading.CancellationToken)">
+            <summary>
+            Subscribes to the specified <see cref="T:System.IObservable`1"/>
+            </summary>
+            <typeparam name="T">The type of the elements in the source sequence.</typeparam>
+            <param name="source">The source sequence.</param>
+            <param name="onNextAsync">Action to invoke for each element in the observable sequence.</param>
+            <param name="onErrorAsync">Action to invoke upon exceptional termination of the observable sequence.</param>
+            <param name="onCompletedAsync">Action to invoke upon graceful termination of the observable sequence.</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+        </member>
+        <member name="M:Synapse.AsyncObservableExtensions.SubscribeAsyncConcurrent``1(System.IObservable{``0},System.Func{``0,System.Threading.Tasks.Task})">
+            <summary>
+            Subscribes to the specified <see cref="T:System.IObservable`1"/> concurrently
+            </summary>
+            <typeparam name="T">The type of the elements in the source sequence.</typeparam>
+            <param name="source">The source sequence.</param>
+            <param name="onNextAsync">Action to invoke for each element in the observable sequence.</param>
+            <returns><see cref="T:System.IDisposable"/> object used to unsubscribe from the observable sequence.</returns>
+        </member>
+        <member name="M:Synapse.AsyncObservableExtensions.SubscribeAsyncConcurrent``1(System.IObservable{``0},System.Func{``0,System.Threading.Tasks.Task},System.Threading.CancellationToken)">
+            <summary>
+            Subscribes to the specified <see cref="T:System.IObservable`1"/> concurrently
+            </summary>
+            <typeparam name="T">The type of the elements in the source sequence.</typeparam>
+            <param name="source">The source sequence.</param>
+            <param name="onNextAsync">Action to invoke for each element in the observable sequence.</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+        </member>
+        <member name="M:Synapse.AsyncObservableExtensions.SubscribeAsyncConcurrent``1(System.IObservable{``0},System.Func{``0,System.Threading.Tasks.Task},System.Int32)">
+            <summary>
+            Subscribes to the specified <see cref="T:System.IObservable`1"/> concurrently
+            </summary>
+            <typeparam name="T">The type of the elements in the source sequence.</typeparam>
+            <param name="source">The source sequence.</param>
+            <param name="onNextAsync">Action to invoke for each element in the observable sequence.</param>
+            <param name="maxConcurrent">The maximum amount of concurrent threads.</param>
+            <returns><see cref="T:System.IDisposable"/> object used to unsubscribe from the observable sequence.</returns>
+        </member>
+        <member name="M:Synapse.AsyncObservableExtensions.SubscribeAsyncConcurrent``1(System.IObservable{``0},System.Func{``0,System.Threading.Tasks.Task},System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Subscribes to the specified <see cref="T:System.IObservable`1"/> concurrently
+            </summary>
+            <typeparam name="T">The type of the elements in the source sequence.</typeparam>
+            <param name="source">The source sequence.</param>
+            <param name="onNextAsync">Action to invoke for each element in the observable sequence.</param>
+            <param name="maxConcurrent">The maximum amount of concurrent threads.</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+        </member>
+        <member name="T:Synapse.StateDefinitionExtensions">
+            <summary>
+            Defines extensions for <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/>s
+            </summary>
+        </member>
+        <member name="M:Synapse.StateDefinitionExtensions.TryGetErrorHandlerFor(ServerlessWorkflow.Sdk.Models.StateDefinition,System.String,System.String,ServerlessWorkflow.Sdk.Models.ErrorHandlerDefinition@)">
+            <summary>
+            Gets the <see cref="T:ServerlessWorkflow.Sdk.Models.ErrorHandlerDefinition"/> used to handle the specified error
+            </summary>
+            <param name="state">The <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/> to search</param>
+            <param name="error">The error to handle</param>
+            <param name="code">The code of the error to handle</param>
+            <param name="errorHandler">The <see cref="T:ServerlessWorkflow.Sdk.Models.ErrorHandlerDefinition"/> used to handle the specified error</param>
+            <returns>The <see cref="T:ServerlessWorkflow.Sdk.Models.ErrorHandlerDefinition"/> used to handle the specified error</returns>
+        </member>
+        <member name="M:Synapse.StateDefinitionExtensions.GetAction(ServerlessWorkflow.Sdk.Models.OperationStateDefinition,System.String)">
+            <summary>
+            Gets the <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> with the specified name
+            </summary>
+            <param name="state">The <see cref="T:ServerlessWorkflow.Sdk.Models.OperationStateDefinition"/> to search for the specified <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/></param>
+            <param name="name">The name of the <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> to get</param>
+            <returns>The <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> with the specified name</returns>
+        </member>
+        <member name="M:Synapse.StateDefinitionExtensions.TryGetAction(ServerlessWorkflow.Sdk.Models.OperationStateDefinition,System.String,ServerlessWorkflow.Sdk.Models.ActionDefinition@)">
+            <summary>
+            Attempts to get the <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> with the specified name
+            </summary>
+            <param name="state">The <see cref="T:ServerlessWorkflow.Sdk.Models.OperationStateDefinition"/> to search for the specified <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/></param>
+            <param name="name">The name of the <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> to get</param>
+            <param name="action">The <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> with the specified name</param>
+            <returns>A boolean indicating whether or not a <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> with the specified name could be found</returns>
+        </member>
+        <member name="M:Synapse.StateDefinitionExtensions.TryGetNextAction(ServerlessWorkflow.Sdk.Models.OperationStateDefinition,System.String,ServerlessWorkflow.Sdk.Models.ActionDefinition@)">
+            <summary>
+            Attempts to get the next <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> in the pipeline
+            </summary>
+            <param name="state">The <see cref="T:ServerlessWorkflow.Sdk.Models.OperationStateDefinition"/> to search</param>
+            <param name="previousActionName">The name of the <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> to get the next <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> for</param>
+            <param name="action">The next <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/>, if any</param>
+            <returns>A boolean indicating whether or not there is a next <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> in the pipeline</returns>
+        </member>
+        <member name="M:Synapse.StateDefinitionExtensions.GetAction(ServerlessWorkflow.Sdk.Models.ForEachStateDefinition,System.String)">
+            <summary>
+            Gets the <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> with the specified name
+            </summary>
+            <param name="state">The <see cref="T:ServerlessWorkflow.Sdk.Models.ForEachStateDefinition"/> to search for the specified <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/></param>
+            <param name="name">The name of the <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> to get</param>
+            <returns>The <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> with the specified name</returns>
+        </member>
+        <member name="M:Synapse.StateDefinitionExtensions.TryGetAction(ServerlessWorkflow.Sdk.Models.ForEachStateDefinition,System.String,ServerlessWorkflow.Sdk.Models.ActionDefinition@)">
+            <summary>
+            Attempts to get the <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> with the specified name
+            </summary>
+            <param name="state">The <see cref="T:ServerlessWorkflow.Sdk.Models.ForEachStateDefinition"/> to search for the specified <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/></param>
+            <param name="name">The name of the <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> to get</param>
+            <param name="action">The <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> with the specified name</param>
+            <returns>A boolean indicating whether or not a <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> with the specified name could be found</returns>
+        </member>
+        <member name="M:Synapse.StateDefinitionExtensions.TryGetNextAction(ServerlessWorkflow.Sdk.Models.ForEachStateDefinition,System.String,ServerlessWorkflow.Sdk.Models.ActionDefinition@)">
+            <summary>
+            Attempts to get the next <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> in the pipeline
+            </summary>
+            <param name="state">The <see cref="T:ServerlessWorkflow.Sdk.Models.ForEachStateDefinition"/> to search</param>
+            <param name="previousActionName">The name of the <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> to get the next <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> for</param>
+            <param name="action">The next <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/>, if any</param>
+            <returns>A boolean indicating whether or not there is a next <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> in the pipeline</returns>
+        </member>
+        <member name="M:Synapse.StateDefinitionExtensions.GetBranch(ServerlessWorkflow.Sdk.Models.ParallelStateDefinition,System.String)">
+            <summary>
+            Gets the <see cref="T:ServerlessWorkflow.Sdk.Models.BranchDefinition"/> with the specified name
+            </summary>
+            <param name="state">The <see cref="T:ServerlessWorkflow.Sdk.Models.ParallelStateDefinition"/> to search for the specified <see cref="T:ServerlessWorkflow.Sdk.Models.BranchDefinition"/></param>
+            <param name="name">The name of the <see cref="T:ServerlessWorkflow.Sdk.Models.BranchDefinition"/> to get</param>
+            <returns>The <see cref="T:ServerlessWorkflow.Sdk.Models.BranchDefinition"/> with the specified name</returns>
+        </member>
+        <member name="M:Synapse.StateDefinitionExtensions.TryGetBranch(ServerlessWorkflow.Sdk.Models.ParallelStateDefinition,System.String,ServerlessWorkflow.Sdk.Models.BranchDefinition@)">
+            <summary>
+            Attempts to get the <see cref="T:ServerlessWorkflow.Sdk.Models.BranchDefinition"/> with the specified name
+            </summary>
+            <param name="state">The <see cref="T:ServerlessWorkflow.Sdk.Models.ParallelStateDefinition"/> to search for the specified <see cref="T:ServerlessWorkflow.Sdk.Models.BranchDefinition"/></param>
+            <param name="name">The name of the <see cref="T:ServerlessWorkflow.Sdk.Models.BranchDefinition"/> to get</param>
+            <param name="branch">The <see cref="T:ServerlessWorkflow.Sdk.Models.BranchDefinition"/> with the specified name</param>
+            <returns>A boolean indicating whether or not a <see cref="T:ServerlessWorkflow.Sdk.Models.BranchDefinition"/> with the specified name could be found</returns>
+        </member>
+        <member name="M:Synapse.StateDefinitionExtensions.GetTrigger(ServerlessWorkflow.Sdk.Models.EventStateDefinition,System.Int32)">
+            <summary>
+            Gets the <see cref="T:ServerlessWorkflow.Sdk.Models.EventStateTriggerDefinition"/> with the specified id
+            </summary>
+            <param name="state">The <see cref="T:ServerlessWorkflow.Sdk.Models.EventStateDefinition"/> to search for the specified <see cref="T:ServerlessWorkflow.Sdk.Models.EventStateTriggerDefinition"/></param>
+            <param name="id">The id of the <see cref="T:ServerlessWorkflow.Sdk.Models.EventStateTriggerDefinition"/> to get</param>
+            <returns>The <see cref="T:ServerlessWorkflow.Sdk.Models.EventStateTriggerDefinition"/> with the specified id</returns>
+        </member>
+        <member name="M:Synapse.StateDefinitionExtensions.TryGetTrigger(ServerlessWorkflow.Sdk.Models.EventStateDefinition,System.Int32,ServerlessWorkflow.Sdk.Models.EventStateTriggerDefinition@)">
+            <summary>
+            Attempts to get the <see cref="T:ServerlessWorkflow.Sdk.Models.EventStateTriggerDefinition"/> with the specified id
+            </summary>
+            <param name="state">The <see cref="T:ServerlessWorkflow.Sdk.Models.EventStateDefinition"/> to search for the specified <see cref="T:ServerlessWorkflow.Sdk.Models.EventStateTriggerDefinition"/></param>
+            <param name="id">The name of the <see cref="T:ServerlessWorkflow.Sdk.Models.EventStateTriggerDefinition"/> to get</param>
+            <param name="trigger">The <see cref="T:ServerlessWorkflow.Sdk.Models.EventStateTriggerDefinition"/> with the specified id</param>
+            <returns>A boolean indicating whether or not a <see cref="T:ServerlessWorkflow.Sdk.Models.EventStateTriggerDefinition"/> with the specified id could be found</returns>
+        </member>
+        <member name="M:Synapse.StateDefinitionExtensions.GetCondition(ServerlessWorkflow.Sdk.Models.SwitchStateDefinition,System.String)">
+            <summary>
+            Gets the <see cref="T:ServerlessWorkflow.Sdk.Models.SwitchCaseDefinition"/> with the specified name
+            </summary>
+            <param name="state">The <see cref="T:ServerlessWorkflow.Sdk.Models.SwitchStateDefinition"/> to search for the <see cref="T:ServerlessWorkflow.Sdk.Models.SwitchCaseDefinition"/> with the specified name</param>
+            <param name="conditionName">The name of the <see cref="T:ServerlessWorkflow.Sdk.Models.SwitchCaseDefinition"/> to get</param>
+            <returns>The <see cref="T:ServerlessWorkflow.Sdk.Models.SwitchCaseDefinition"/> with the specified name</returns>
+        </member>
+        <member name="M:Synapse.StateDefinitionExtensions.TryGetCondition(ServerlessWorkflow.Sdk.Models.SwitchStateDefinition,System.String,ServerlessWorkflow.Sdk.Models.SwitchCaseDefinition@)">
+            <summary>
+            Attempts to get the <see cref="T:ServerlessWorkflow.Sdk.Models.SwitchCaseDefinition"/> with the specified name
+            </summary>
+            <param name="state">The <see cref="T:ServerlessWorkflow.Sdk.Models.SwitchStateDefinition"/> to search for the <see cref="T:ServerlessWorkflow.Sdk.Models.SwitchCaseDefinition"/> with the specified name</param>
+            <param name="conditionName">The name of the <see cref="T:ServerlessWorkflow.Sdk.Models.SwitchCaseDefinition"/> to get</param>
+            <param name="condition">The <see cref="T:ServerlessWorkflow.Sdk.Models.SwitchCaseDefinition"/> with the specified name</param>
+            <returns>A boolean indicating whether or not the <see cref="T:ServerlessWorkflow.Sdk.Models.SwitchCaseDefinition"/> with the specified name could be found</returns>
+        </member>
+        <member name="M:Synapse.StateDefinitionExtensions.GetEventCondition(ServerlessWorkflow.Sdk.Models.SwitchStateDefinition,System.String)">
+            <summary>
+            Gets the <see cref="T:ServerlessWorkflow.Sdk.Models.EventCaseDefinition"/> that applies to the specified event
+            </summary>
+            <param name="state">The <see cref="T:ServerlessWorkflow.Sdk.Models.SwitchStateDefinition"/> to search for the <see cref="T:ServerlessWorkflow.Sdk.Models.EventCaseDefinition"/> that applies to the specified event</param>
+            <param name="eventReference">The name of the event the <see cref="T:ServerlessWorkflow.Sdk.Models.EventCaseDefinition"/> to get applies to</param>
+            <returns>The <see cref="T:ServerlessWorkflow.Sdk.Models.EventCaseDefinition"/> that applies to the specified event</returns>
+        </member>
+        <member name="M:Synapse.StateDefinitionExtensions.TryGetEventCondition(ServerlessWorkflow.Sdk.Models.SwitchStateDefinition,System.String,ServerlessWorkflow.Sdk.Models.EventCaseDefinition@)">
+            <summary>
+            Attempts to get the <see cref="T:ServerlessWorkflow.Sdk.Models.EventCaseDefinition"/> that applies to the specified event
+            </summary>
+            <param name="state">The <see cref="T:ServerlessWorkflow.Sdk.Models.SwitchStateDefinition"/> to search for the specified <see cref="T:ServerlessWorkflow.Sdk.Models.EventCaseDefinition"/></param>
+            <param name="eventReference">The reference of the event the <see cref="T:ServerlessWorkflow.Sdk.Models.EventCaseDefinition"/> to get applies to</param>
+            <param name="condition">The <see cref="T:ServerlessWorkflow.Sdk.Models.EventCaseDefinition"/> that applies to the specified event</param>
+            <returns>A boolean indicating whether or not a <see cref="T:ServerlessWorkflow.Sdk.Models.EventCaseDefinition"/> with the specified id could be found</returns>
+        </member>
+        <member name="T:Synapse.StringExtensions">
+            <summary>
+            Defines extensions for <see cref="T:System.String"/>s
+            </summary>
+        </member>
+        <member name="M:Synapse.StringExtensions.GenerateRandomAlphabeticString(System.Int32,Synapse.Case)">
+            <summary>
+            Generates a random alphabetic string of the specified length
+            </summary>
+            <param name="length">The length of the string to generate</param>
+            <param name="stringCase">The case of the resulting string</param>
+            <returns>A new random string of the specified length</returns>
+        </member>
+        <member name="M:Synapse.StringExtensions.GenerateRandomAlphanumericString(System.Int32,Synapse.Case)">
+            <summary>
+            Generates a random alphanumeric string of the specified length
+            </summary>
+            <param name="length">The length of the string to generate</param>
+            <param name="stringCase">The case of the resulting string</param>
+            <returns>A new random string of the specified length</returns>
+        </member>
+        <member name="M:Synapse.StringExtensions.GenerateRandomNumericString(System.Int32,Synapse.Case)">
+            <summary>
+            Generates a random numeric string of the specified length
+            </summary>
+            <param name="length">The length of the string to generate</param>
+            <param name="stringCase">The case of the resulting string</param>
+            <returns>A new random string of the specified length</returns>
+        </member>
+        <member name="M:Synapse.StringExtensions.IsAlphabetic(System.String)">
+            <summary>
+            Checks that the string is alphabetic
+            </summary>
+            <param name="text">The string to check</param>
+            <returns>A boolean indicating whether or not the string is alphabetic</returns>
+        </member>
+        <member name="M:Synapse.StringExtensions.IsNumeric(System.String)">
+            <summary>
+            Checks that the string is numeric
+            </summary>
+            <param name="text">The string to check</param>
+            <returns>A boolean indicating whether or not the string is numeric</returns>
+        </member>
+        <member name="M:Synapse.StringExtensions.IsAlphanumeric(System.String)">
+            <summary>
+            Checks that the string is alphanumeric
+            </summary>
+            <param name="text">The string to check</param>
+            <returns>A boolean indicating whether or not the string is alphanumeric</returns>
+        </member>
+        <member name="M:Synapse.StringExtensions.IsNumericalValue(System.String)">
+            <summary>
+            Checks that the string represents a numerical value
+            </summary>
+            <param name="text">The string to check</param>
+            <returns>A boolean indicating whether or not the string represents a numerical value</returns>
+        </member>
+        <member name="M:Synapse.StringExtensions.IsValidEmail(System.String)">
+            <summary>
+            Determines whether or not the string is a valid email address
+            </summary>
+            <param name="text">The string to check</param>
+            <returns>A boolean indicating whether or not the string is a valid email address</returns>
+        </member>
+        <member name="M:Synapse.StringExtensions.IsValidCountryCode(System.String)">
+            <summary>
+            Determines whether or not the string is a valid two-letter ISO 3166 country code
+            </summary>
+            <param name="text">The string to check</param>
+            <returns>A boolean indicating whether or not the string is a valid two-letter ISO 3166 country code</returns>
+        </member>
+        <member name="M:Synapse.StringExtensions.IsValidLanguageCode(System.String)">
+            <summary>
+            Determines whether or not the string is a valid two-letter ISO 6391 language code
+            </summary>
+            <param name="text">The string to check</param>
+            <returns>A boolean indicating whether or not the string is a valid two-letter ISO 6391 language code</returns>
+        </member>
+        <member name="M:Synapse.StringExtensions.IsValidCurrencyCode(System.String)">
+            <summary>
+            Determines whether or not the string is a valid three-letter ISO 4217 currency code
+            </summary>
+            <param name="text">The text to check</param>
+            <returns>A boolean indicating whether or not the string is a valid three-letter ISO 4217 currency code</returns>
+        </member>
+        <member name="M:Synapse.StringExtensions.IsValidTimeZoneId(System.String)">
+            <summary>
+            Determines whether or not the string is a valid time zone id
+            </summary>
+            <param name="text">The text to check</param>
+            <returns>A boolean indicating whether or not the string is a valid time zone id</returns>
+        </member>
+        <member name="M:Synapse.StringExtensions.IsValidUri(System.String)">
+            <summary>
+            Determines whether or not the string is a valid uri
+            </summary>
+            <param name="text">The string to check</param>
+            <returns>A boolean indicating whether or not the string is a valid uri</returns>
+        </member>
+        <member name="M:Synapse.StringExtensions.SplitCamelCase(System.String,System.Boolean,System.Boolean)">
+            <summary>
+            Replaces the upper case characters by their lowercase counterpart and prepend them with a whitespace character
+            </summary>
+            <param name="text">The string to split</param>
+            <param name="toLowerCase">A boolean indicating whether or not to lowercase the first character of each resulting word</param>
+            <param name="keepFirstLetterInUpercase">A boolean indicating whether or not to keep the first letter in upper case</param>
+            <returns>The resulting string</returns>
+        </member>
+        <member name="M:Synapse.StringExtensions.RemoveDiacritics(System.String)">
+            <summary>
+            Removes diacritics from the string
+            </summary>
+            <param name="text">The string to remove diacritics from</param>
+            <returns>The resulting string</returns>
+        </member>
+        <member name="M:Synapse.StringExtensions.Slugify(System.String,System.String,System.Boolean,System.Nullable{System.Int32})">
+            <summary>
+            Slugifies the string by replacing whitespace by the specified delimiter character, removing diacritics, making it lowercase and restricting it to the specified max length, if any
+            </summary>
+            <param name="text">The string to slugify</param>
+            <param name="delimiter">The delimiter character. Defaults to '_'</param>
+            <param name="splitCamelCase">A boolean indicating whether or not to split camel cases</param>
+            <param name="maxLength">The resulting string's maximum length</param>
+            <returns>The resulting string</returns>
+        </member>
+        <member name="M:Synapse.StringExtensions.Format(System.String,System.Object[])">
+            <summary>
+            Formats the string
+            </summary>
+            <param name="text">The string to format</param>
+            <param name="args">The arguments to format the string with</param>
+            <remarks>Accepts named arguments, which will be replaced in sequence by the specified values</remarks>
+            <returns>The resulting string</returns>
+        </member>
+        <member name="M:Synapse.StringExtensions.ToCamelCase(System.String)">
+            <summary>
+            Converts the specified text to a camel-cased string
+            </summary>
+            <param name="text">The text to convert</param>
+            <returns>The camel-cased text</returns>
+        </member>
+        <member name="M:Synapse.StringExtensions.ToDashCase(System.String)">
+            <summary>
+            Converts the specified text to a dash-cased string
+            </summary>
+            <param name="text">The text to convert</param>
+            <returns>The dash-cased text</returns>
+        </member>
+        <member name="T:Synapse.WorkflowDefinitionExtensions">
+            <summary>
+            Defines extensions for <see cref="T:ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/>s
+            </summary>
+        </member>
+        <member name="M:Synapse.WorkflowDefinitionExtensions.GetStartupState(ServerlessWorkflow.Sdk.Models.WorkflowDefinition)">
+            <summary>
+            Gets the startup <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/>
+            </summary>
+            <param name="workflowDefinition">The <see cref="T:ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/> to search for the specified <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/></param>
+            <returns>The startup <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/></returns>
+        </member>
+        <member name="M:Synapse.WorkflowDefinitionExtensions.GetStartupState``1(ServerlessWorkflow.Sdk.Models.WorkflowDefinition)">
+            <summary>
+            Gets the startup <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/>
+            </summary>
+            <typeparam name="TState">The expected type of the <see cref="T:ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/>'s startup <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/></typeparam>
+            <param name="workflowDefinition">The <see cref="T:ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/> to search for the specified <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/></param>
+            <returns>The startup <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/></returns>
+        </member>
+        <member name="M:Synapse.WorkflowDefinitionExtensions.TryGetStartupState(ServerlessWorkflow.Sdk.Models.WorkflowDefinition,ServerlessWorkflow.Sdk.Models.StateDefinition@)">
+            <summary>
+            Attempts to the startup <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/>
+            </summary>
+            <param name="workflowDefinition">The <see cref="T:ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/> to search for the specified <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/></param>
+            <param name="state">The startup <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/></param>
+            <returns>A boolean indicating whether or not the <see cref="T:ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/>'s startup <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/> could be found</returns>
+        </member>
+        <member name="M:Synapse.WorkflowDefinitionExtensions.GetState(ServerlessWorkflow.Sdk.Models.WorkflowDefinition,System.String)">
+            <summary>
+            Gets the <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/> with the specified name
+            </summary>
+            <param name="workflowDefinition">The <see cref="T:ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/> to search for the specified <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/></param>
+            <param name="name">The name of the <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/> to get</param>
+            <returns>The <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/> with the specified id</returns>
+        </member>
+        <member name="M:Synapse.WorkflowDefinitionExtensions.TryGetState(ServerlessWorkflow.Sdk.Models.WorkflowDefinition,System.String,ServerlessWorkflow.Sdk.Models.StateDefinition@)">
+            <summary>
+            Attempts to get the <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/> with the specified name
+            </summary>
+            <param name="workflowDefinition">The <see cref="T:ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/> to search for the specified <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/></param>
+            <param name="name">The name of the <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/> to get</param>
+            <param name="state">The <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/> with the specified id</param>
+            <returns>A boolean indicating whether or not a <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/> with the specified id could be found</returns>
+        </member>
+        <member name="M:Synapse.WorkflowDefinitionExtensions.TryGetState``1(ServerlessWorkflow.Sdk.Models.WorkflowDefinition,System.String,``0@)">
+            <summary>
+            Attempts to get the <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/> with the specified name
+            </summary>
+            <typeparam name="TState">The type of <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/> to get</typeparam>
+            <param name="workflowDefinition">The <see cref="T:ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/> to search for the specified <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/></param>
+            <param name="name">The name of the <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/> to get</param>
+            <param name="state">The <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/> with the specified id</param>
+            <returns>A boolean indicating whether or not a <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/> with the specified id could be found</returns>
+        </member>
+        <member name="M:Synapse.WorkflowDefinitionExtensions.TryGetNextState(ServerlessWorkflow.Sdk.Models.WorkflowDefinition,System.String,ServerlessWorkflow.Sdk.Models.StateDefinition@)">
+            <summary>
+            Attempts to get the <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/> that comes after the one with the specified name
+            </summary>
+            <param name="workflowDefinition">The <see cref="T:ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/> to search</param>
+            <param name="previousStateName">The name of the <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/> to find the next <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/> for</param>
+            <param name="state">The next <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/></param>
+            <returns>A boolean indicating whether or not the next <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/> could be found</returns>
+        </member>
+        <member name="M:Synapse.WorkflowDefinitionExtensions.GetFunction(ServerlessWorkflow.Sdk.Models.WorkflowDefinition,System.String)">
+            <summary>
+            Gets the <see cref="T:ServerlessWorkflow.Sdk.Models.FunctionDefinition"/> with the specified name
+            </summary>
+            <param name="workflowDefinition">The <see cref="T:ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/> to search for the specified <see cref="T:ServerlessWorkflow.Sdk.Models.FunctionDefinition"/></param>
+            <param name="name">The name of the <see cref="T:ServerlessWorkflow.Sdk.Models.FunctionDefinition"/> to get</param>
+            <returns>The <see cref="T:ServerlessWorkflow.Sdk.Models.FunctionDefinition"/> with the specified name</returns>
+        </member>
+        <member name="M:Synapse.WorkflowDefinitionExtensions.TryGetFunction(ServerlessWorkflow.Sdk.Models.WorkflowDefinition,System.String,ServerlessWorkflow.Sdk.Models.FunctionDefinition@)">
+            <summary>
+            Attempts to get the <see cref="T:ServerlessWorkflow.Sdk.Models.FunctionDefinition"/> with the specified name
+            </summary>
+            <param name="workflowDefinition">The <see cref="T:ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/> to search for the specified <see cref="T:ServerlessWorkflow.Sdk.Models.FunctionDefinition"/></param>
+            <param name="name">The name of the <see cref="T:ServerlessWorkflow.Sdk.Models.FunctionDefinition"/> to get</param>
+            <param name="function">The <see cref="T:ServerlessWorkflow.Sdk.Models.FunctionDefinition"/> with the specified name</param>
+            <returns>A boolean indicating whether or not a <see cref="T:ServerlessWorkflow.Sdk.Models.FunctionDefinition"/> with the specified name could be found</returns>
+        </member>
+        <member name="M:Synapse.WorkflowDefinitionExtensions.GetEvent(ServerlessWorkflow.Sdk.Models.WorkflowDefinition,System.String)">
+            <summary>
+            Gets the <see cref="T:ServerlessWorkflow.Sdk.Models.EventDefinition"/> with the specified name
+            </summary>
+            <param name="workflowDefinition">The <see cref="T:ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/> to search for the specified <see cref="T:ServerlessWorkflow.Sdk.Models.EventDefinition"/></param>
+            <param name="name">The name of the <see cref="T:ServerlessWorkflow.Sdk.Models.EventDefinition"/> to get</param>
+            <returns>The <see cref="T:ServerlessWorkflow.Sdk.Models.EventDefinition"/> with the specified name</returns>
+        </member>
+        <member name="M:Synapse.WorkflowDefinitionExtensions.TryGetEvent(ServerlessWorkflow.Sdk.Models.WorkflowDefinition,System.String,ServerlessWorkflow.Sdk.Models.EventDefinition@)">
+            <summary>
+            Attempts to get the <see cref="T:ServerlessWorkflow.Sdk.Models.EventDefinition"/> with the specified name
+            </summary>
+            <param name="workflowDefinition">The <see cref="T:ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/> to search for the specified <see cref="T:ServerlessWorkflow.Sdk.Models.EventDefinition"/></param>
+            <param name="name">The name of the <see cref="T:ServerlessWorkflow.Sdk.Models.EventDefinition"/> to get</param>
+            <param name="e">The <see cref="T:ServerlessWorkflow.Sdk.Models.EventDefinition"/> with the specified name</param>
+            <returns>A boolean indicating whether or not a <see cref="T:ServerlessWorkflow.Sdk.Models.EventDefinition"/> with the specified name could be found</returns>
+        </member>
+        <member name="M:Synapse.WorkflowDefinitionExtensions.GetRetryStrategy(ServerlessWorkflow.Sdk.Models.WorkflowDefinition,System.String)">
+            <summary>
+            Gets the <see cref="T:ServerlessWorkflow.Sdk.Models.RetryStrategyDefinition"/> with the specified name
+            </summary>
+            <param name="workflowDefinition">The <see cref="T:ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/> to search for the specified <see cref="T:ServerlessWorkflow.Sdk.Models.RetryStrategyDefinition"/></param>
+            <param name="name">The name of the <see cref="T:ServerlessWorkflow.Sdk.Models.RetryStrategyDefinition"/> to get</param>
+            <returns>The <see cref="T:ServerlessWorkflow.Sdk.Models.RetryStrategyDefinition"/> with the specified name</returns>
+        </member>
+        <member name="M:Synapse.WorkflowDefinitionExtensions.TryGetRetryStrategy(ServerlessWorkflow.Sdk.Models.WorkflowDefinition,System.String,ServerlessWorkflow.Sdk.Models.RetryStrategyDefinition@)">
+            <summary>
+            Attempts to get the <see cref="T:ServerlessWorkflow.Sdk.Models.RetryStrategyDefinition"/> with the specified name
+            </summary>
+            <param name="workflowDefinition">The <see cref="T:ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/> to search for the specified <see cref="T:ServerlessWorkflow.Sdk.Models.RetryStrategyDefinition"/></param>
+            <param name="name">The name of the <see cref="T:ServerlessWorkflow.Sdk.Models.RetryStrategyDefinition"/> to get</param>
+            <param name="strategy">The <see cref="T:ServerlessWorkflow.Sdk.Models.RetryStrategyDefinition"/> with the specified name</param>
+            <returns>A boolean indicating whether or not a <see cref="T:ServerlessWorkflow.Sdk.Models.RetryStrategyDefinition"/> with the specified name could be found</returns>
+        </member>
+        <member name="M:Synapse.WorkflowDefinitionExtensions.GetCompensationState(ServerlessWorkflow.Sdk.Models.WorkflowDefinition,System.String)">
+            <summary>
+            Gets the compensation <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/> with the specified id
+            </summary>
+            <param name="workflowDefinition">The <see cref="T:ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/> to search for the specified compensation <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/></param>
+            <param name="compensationStateId">The id of the compensation <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/> to get</param>
+            <returns>The compensation <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/> with the specified id</returns>
+        </member>
+        <member name="T:Synapse.SynapseConstants">
+            <summary>
+            Exposes constants about Synapse
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseConstants.Namespace">
+            <summary>
+            Gets Synapse's resource namespace
+            </summary>
+        </member>
+        <member name="T:Synapse.SynapseConstants.EnvironmentVariables">
+            <summary>
+            Exposes constants about Synapse environment variables
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseConstants.EnvironmentVariables.Prefix">
+            <summary>
+            Gets the prefix for all Synapse environment variables
+            </summary>
+        </member>
+        <member name="T:Synapse.SynapseConstants.EnvironmentVariables.Kubernetes">
+            <summary>
+            Exposes constants about Kuberneres environment variables
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseConstants.EnvironmentVariables.Kubernetes.Prefix">
+            <summary>
+            Gets the prefix for all Kubernetes environment variables
+            </summary>
+        </member>
+        <member name="T:Synapse.SynapseConstants.EnvironmentVariables.Kubernetes.Namespace">
+            <summary>
+            Exposes constants about the Kubernetes namespace environment variable
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseConstants.EnvironmentVariables.Kubernetes.Namespace.Name">
+            <summary>
+            Gets the name of the Kubernetes namespace environment variable
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseConstants.EnvironmentVariables.Kubernetes.Namespace.Value">
+            <summary>
+            Gets the value of the Kubernetes namespace environment variable
+            </summary>
+        </member>
+        <member name="T:Synapse.SynapseConstants.EnvironmentVariables.Kubernetes.PodName">
+            <summary>
+            Exposes constants about the Kubernetes pod name environment variable
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseConstants.EnvironmentVariables.Kubernetes.PodName.Name">
+            <summary>
+            Gets the name of the Kubernetes pod name environment variable
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseConstants.EnvironmentVariables.Kubernetes.PodName.Value">
+            <summary>
+            Gets the value of the Kubernetes pod name environment variable
+            </summary>
+        </member>
+        <member name="T:Synapse.SynapseConstants.EnvironmentVariables.Workflows">
+            <summary>
+            Exposes constants about Synapse workflow-related environment variables
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseConstants.EnvironmentVariables.Workflows.Prefix">
+            <summary>
+            Gets the prefix for all Synapse workflow-related environment variables
+            </summary>
+        </member>
+        <member name="T:Synapse.SynapseConstants.EnvironmentVariables.Workflows.Id">
+            <summary>
+            Exposes constants about the Synapse workflow id environment variable
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseConstants.EnvironmentVariables.Workflows.Id.Name">
+            <summary>
+            Gets the name of the Synapse workflow id environment variable
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseConstants.EnvironmentVariables.Workflows.Id.Value">
+            <summary>
+            Gets the value of the Synapse workflow version environment variable
+            </summary>
+        </member>
+        <member name="T:Synapse.SynapseConstants.EnvironmentVariables.Workflows.Version">
+            <summary>
+            Exposes constants about the Synapse workflow version environment variable
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseConstants.EnvironmentVariables.Workflows.Version.Name">
+            <summary>
+            Gets the name of the Synapse workflow version environment variable
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseConstants.EnvironmentVariables.Workflows.Version.Value">
+            <summary>
+            Gets the value of the Synapse workflow version environment variable
+            </summary>
+        </member>
+        <member name="T:Synapse.SynapseConstants.EnvironmentVariables.Workflows.Instance">
+            <summary>
+            Exposes constants about the Synapse workflow instance environment variable
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseConstants.EnvironmentVariables.Workflows.Instance.Name">
+            <summary>
+            Gets the name of the Synapse workflow instance environment variable
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseConstants.EnvironmentVariables.Workflows.Instance.Value">
+            <summary>
+            Gets the value of the Synapse workflow instance environment variable
+            </summary>
+        </member>
+        <member name="T:Synapse.SynapseConstants.Labels">
+            <summary>
+            Exposes constants about Synapse's annotations
+            </summary>
+        </member>
+        <member name="T:Synapse.SynapseConstants.Labels.Workflows">
+            <summary>
+            Exposes constants about Synapse workflow-related labels
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseConstants.Labels.Workflows.Prefix">
+            <summary>
+            Gets the prefix for all Synapse workflow-related labels
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseConstants.Labels.Workflows.Id">
+            <summary>
+            Gets the name of the Synapse workflow id label
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseConstants.Labels.Workflows.Version">
+            <summary>
+            Gets the name of the Synapse workflow version label
+            </summary>
+        </member>
+        <member name="T:Synapse.SynapseConstants.Logging">
+            <summary>
+            Exposes constants about Synapse's logging
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseConstants.Logging.Header">
+            <summary>
+            Gets the header of all Synapse products logs
+            </summary>
+        </member>
+        <member name="T:Synapse.SynapseConstants.Resources">
+            <summary>
+            Exposes constants about Synapse's K8s Custom Resources
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseConstants.Resources.Group">
+            <summary>
+            Gets the default group for all Synapse resources
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseConstants.Resources.Version">
+            <summary>
+            Gets the default version for all Synapse resources
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseConstants.Resources.ApiVersion">
+            <summary>
+            Gets the default api version for all Synapse resources
+            </summary>
+        </member>
+    </members>
+</doc>
