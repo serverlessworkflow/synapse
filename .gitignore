@@ -1,0 +1,15 @@
+.vscode
+.vs
+obj/
+bin/
+**/TestResults
+
+# User-specific VS files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# JetBrains Rider
+.idea/
+*.sln.iml
