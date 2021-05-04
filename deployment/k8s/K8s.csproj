@@ -1,0 +1,14 @@
+﻿<Project ToolsVersion="Current">
+  <PropertyGroup>
+    <OldToolsVersion>2.0</OldToolsVersion>
+    <ProjectGuid>{3066A901-72F5-486B-9BA6-A795930638C9}</ProjectGuid>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="crds\v1\v1-workflow-instance.yaml" />
+    <None Include="crds\v1\v1-workflow.yaml" />
+    <None Include="operator.yaml" />
+    <None Include="samples\workflows\inject.instance.yaml" />
+    <None Include="samples\workflows\inject.yaml" />
+    <None Include="samples\workflows\operation.yaml" />
+  </ItemGroup>
+</Project>

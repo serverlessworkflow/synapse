@@ -1,0 +1,12 @@
+C:\Dev\Synapse\src\Runner\Synapse.Runner.Infrastructure\bin\Debug\net5.0\Synapse.Runner.Infrastructure.deps.json
+C:\Dev\Synapse\src\Runner\Synapse.Runner.Infrastructure\bin\Debug\net5.0\Synapse.Runner.Infrastructure.dll
+C:\Dev\Synapse\src\Runner\Synapse.Runner.Infrastructure\bin\Debug\net5.0\ref\Synapse.Runner.Infrastructure.dll
+C:\Dev\Synapse\src\Runner\Synapse.Runner.Infrastructure\bin\Debug\net5.0\Synapse.Runner.Infrastructure.pdb
+C:\Dev\Synapse\src\Runner\Synapse.Runner.Infrastructure\obj\Debug\net5.0\Synapse.Runner.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+C:\Dev\Synapse\src\Runner\Synapse.Runner.Infrastructure\obj\Debug\net5.0\Synapse.Runner.Infrastructure.AssemblyInfoInputs.cache
+C:\Dev\Synapse\src\Runner\Synapse.Runner.Infrastructure\obj\Debug\net5.0\Synapse.Runner.Infrastructure.AssemblyInfo.cs
+C:\Dev\Synapse\src\Runner\Synapse.Runner.Infrastructure\obj\Debug\net5.0\Synapse.Runner.Infrastructure.csproj.CoreCompileInputs.cache
+C:\Dev\Synapse\src\Runner\Synapse.Runner.Infrastructure\obj\Debug\net5.0\Synapse.Runner.Infrastructure.dll
+C:\Dev\Synapse\src\Runner\Synapse.Runner.Infrastructure\obj\Debug\net5.0\ref\Synapse.Runner.Infrastructure.dll
+C:\Dev\Synapse\src\Runner\Synapse.Runner.Infrastructure\obj\Debug\net5.0\Synapse.Runner.Infrastructure.pdb
+C:\Dev\Synapse\src\Runner\Synapse.Runner.Infrastructure\obj\Debug\net5.0\Synapse.Runner.Infrastructure.csprojAssemblyReference.cache
