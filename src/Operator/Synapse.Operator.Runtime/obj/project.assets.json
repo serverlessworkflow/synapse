@@ -883,6 +883,46 @@
           }
         }
       },
+      "Serilog/2.8.0": {
+        "type": "package",
+        "dependencies": {
+          "System.Collections.NonGeneric": "4.3.0"
+        },
+        "compile": {
+          "lib/netstandard2.0/Serilog.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/Serilog.dll": {}
+        }
+      },
+      "Serilog.Extensions.Logging/3.0.1": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.Logging": "2.0.0",
+          "Serilog": "2.8.0"
+        },
+        "compile": {
+          "lib/netstandard2.0/Serilog.Extensions.Logging.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/Serilog.Extensions.Logging.dll": {}
+        }
+      },
+      "Serilog.Sinks.Console/3.1.1": {
+        "type": "package",
+        "dependencies": {
+          "Serilog": "2.5.0",
+          "System.Console": "4.3.0",
+          "System.Runtime.InteropServices": "4.3.0",
+          "System.Runtime.InteropServices.RuntimeInformation": "4.3.0"
+        },
+        "compile": {
+          "lib/netcoreapp1.1/Serilog.Sinks.Console.dll": {}
+        },
+        "runtime": {
+          "lib/netcoreapp1.1/Serilog.Sinks.Console.dll": {}
+        }
+      },
       "ServerlessWorkflow.Sdk/0.6.1": {
         "type": "package",
         "dependencies": {
@@ -3435,6 +3475,62 @@
         "runtime.ubuntu.16.10-x64.runtime.native.system.security.cryptography.openssl.4.3.0.nupkg.sha512",
         "runtime.ubuntu.16.10-x64.runtime.native.system.security.cryptography.openssl.nuspec",
         "runtimes/ubuntu.16.10-x64/native/System.Security.Cryptography.Native.OpenSsl.so"
+      ]
+    },
+    "Serilog/2.8.0": {
+      "sha512": "zjuKXW5IQws43IHX7VY9nURsaCiBYh2kyJCWLJRSWrTsx/syBKHV8MibWe2A+QH3Er0AiwA+OJmO3DhFJDY1+A==",
+      "type": "package",
+      "path": "serilog/2.8.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net45/Serilog.dll",
+        "lib/net45/Serilog.pdb",
+        "lib/net45/Serilog.xml",
+        "lib/net46/Serilog.dll",
+        "lib/net46/Serilog.pdb",
+        "lib/net46/Serilog.xml",
+        "lib/netstandard1.0/Serilog.dll",
+        "lib/netstandard1.0/Serilog.pdb",
+        "lib/netstandard1.0/Serilog.xml",
+        "lib/netstandard1.3/Serilog.dll",
+        "lib/netstandard1.3/Serilog.pdb",
+        "lib/netstandard1.3/Serilog.xml",
+        "lib/netstandard2.0/Serilog.dll",
+        "lib/netstandard2.0/Serilog.pdb",
+        "lib/netstandard2.0/Serilog.xml",
+        "serilog.2.8.0.nupkg.sha512",
+        "serilog.nuspec"
+      ]
+    },
+    "Serilog.Extensions.Logging/3.0.1": {
+      "sha512": "U0xbGoZuxJRjE3C5vlCfrf9a4xHTmbrCXKmaA14cHAqiT1Qir0rkV7Xss9GpPJR3MRYH19DFUUqZ9hvWeJrzdQ==",
+      "type": "package",
+      "path": "serilog.extensions.logging/3.0.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/netstandard2.0/Serilog.Extensions.Logging.dll",
+        "lib/netstandard2.0/Serilog.Extensions.Logging.xml",
+        "serilog.extensions.logging.3.0.1.nupkg.sha512",
+        "serilog.extensions.logging.nuspec"
+      ]
+    },
+    "Serilog.Sinks.Console/3.1.1": {
+      "sha512": "56mI5AqvyF/i/c2451nvV71kq370XOCE4Uu5qiaJ295sOhMb9q3BWwG7mWLOVSnmpWiq0SBT3SXfgRXGNP6vzA==",
+      "type": "package",
+      "path": "serilog.sinks.console/3.1.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net45/Serilog.Sinks.Console.dll",
+        "lib/net45/Serilog.Sinks.Console.xml",
+        "lib/netcoreapp1.1/Serilog.Sinks.Console.dll",
+        "lib/netcoreapp1.1/Serilog.Sinks.Console.xml",
+        "lib/netstandard1.3/Serilog.Sinks.Console.dll",
+        "lib/netstandard1.3/Serilog.Sinks.Console.xml",
+        "serilog.sinks.console.3.1.1.nupkg.sha512",
+        "serilog.sinks.console.nuspec"
       ]
     },
     "ServerlessWorkflow.Sdk/0.6.1": {
@@ -6895,6 +6991,8 @@
     "net5.0": [
       "Microsoft.Extensions.Hosting >= 5.0.0",
       "Microsoft.VisualStudio.Azure.Containers.Tools.Targets >= 1.10.13",
+      "Serilog.Extensions.Logging >= 3.0.1",
+      "Serilog.Sinks.Console >= 3.1.1",
       "Synapse.Operator.Application >= 0.1.0"
     ]
   },
@@ -6955,6 +7053,14 @@
           "Microsoft.VisualStudio.Azure.Containers.Tools.Targets": {
             "target": "Package",
             "version": "[1.10.13, )"
+          },
+          "Serilog.Extensions.Logging": {
+            "target": "Package",
+            "version": "[3.0.1, )"
+          },
+          "Serilog.Sinks.Console": {
+            "target": "Package",
+            "version": "[3.1.1, )"
           }
         },
         "imports": [

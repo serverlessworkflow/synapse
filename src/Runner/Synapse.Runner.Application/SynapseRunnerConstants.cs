@@ -13,18 +13,22 @@
         public static class Logging
         {
 
+            /// <summary>
+            /// Gets the Synapse Runner log header
+            /// </summary>
+            /// <returns>The Synapse Runner log header</returns>
             public static string GetHeader(string workflowId, string workflowVersion, string workflowInstance)
             {
-                return SynapseConstants.Logging.Header + $@"
-            
-            SYNAPSE RUNNER {typeof(SynapseRunnerConstants).Assembly.GetName().Version}
+                return SynapseConstants.Logging.Header + $@"           
+SYNAPSE RUNNER {typeof(SynapseRunnerConstants).Assembly.GetName().Version}
         
-            ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-            WORKFLOW
-            ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-            DEFINITION ID:         {workflowId}
-            DEFINITION VERSION:    {workflowVersion}
-            INSTANCE ID:           {workflowInstance}
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+WORKFLOW
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+DEFINITION ID:         {workflowId}
+DEFINITION VERSION:    {workflowVersion}
+INSTANCE ID:           {workflowInstance}
+
             ";
             }
 

@@ -1,0 +1,106 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Synapse.Correlator.Application</name>
+    </assembly>
+    <members>
+        <member name="T:Synapse.Runner.Application.Configuration.ConfigurationExtensions">
+            <summary>
+            Defines configuration extensions for the <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/>
+            </summary>
+        </member>
+        <member name="M:Synapse.Runner.Application.Configuration.ConfigurationExtensions.AddSynapseBroker(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration,Microsoft.Extensions.Hosting.IHostEnvironment)">
+            <summary>
+            Adds and configures the services required by the Synapse Broker application
+            </summary>
+            <param name="services">The <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> to configure</param>
+            <param name="configuration">The current <see cref="T:Microsoft.Extensions.Configuration.IConfiguration"/></param>
+            <param name="environment">The current <see cref="T:Microsoft.Extensions.Hosting.IHostEnvironment"/></param>
+            <returns>The configured <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/></returns>
+        </member>
+        <member name="T:Synapse.Correlator.Application.Services.CorrelationService">
+            <summary>
+            Represents the default implementation of the <see cref="T:Synapse.Correlator.Application.Services.ICorrelationService"/> interface
+            </summary>
+        </member>
+        <member name="M:Synapse.Correlator.Application.Services.CorrelationService.#ctor(Microsoft.Extensions.Logging.ILogger{Synapse.Correlator.Application.Services.CorrelationService},Synapse.Services.ICloudEventBus,CloudNative.CloudEvents.ICloudEventFormatter,Synapse.Services.IRepository{Synapse.Domain.Models.V1WorkflowInstance},Synapse.Services.IRepository{Synapse.Domain.Models.V1Trigger})">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Correlator.Application.Services.CorrelationService"/>
+            </summary>
+            <param name="logger">The service used to perform logging</param>
+            <param name="cloudEventBus">The service used to publish and subscribe to <see cref="T:CloudNative.CloudEvents.CloudEvent"/>s</param>
+            <param name="cloudEventFormatter">The service used to format <see cref="T:CloudNative.CloudEvents.CloudEvent"/>s</param>
+            <param name="workflowInstances">The <see cref="T:Synapse.Services.IRepository`1"/> used to manage <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>s</param>
+            <param name="triggers">The <see cref="T:Synapse.Services.IRepository`1"/> used to manage <see cref="T:Synapse.Domain.Models.V1Trigger"/>s</param>
+        </member>
+        <member name="P:Synapse.Correlator.Application.Services.CorrelationService.Logger">
+            <summary>
+            Gets the service used to perform logging
+            </summary>
+        </member>
+        <member name="P:Synapse.Correlator.Application.Services.CorrelationService.CloudEventBus">
+            <summary>
+            Gets the service used to publish and subscribe to <see cref="T:CloudNative.CloudEvents.CloudEvent"/>s
+            </summary>
+        </member>
+        <member name="P:Synapse.Correlator.Application.Services.CorrelationService.CloudEventFormatter">
+            <summary>
+            Gets the service used to format <see cref="T:CloudNative.CloudEvents.CloudEvent"/>s
+            </summary>
+        </member>
+        <member name="P:Synapse.Correlator.Application.Services.CorrelationService.WorkflowInstances">
+            <summary>
+            Gets the <see cref="T:Synapse.Services.IRepository`1"/> used to manage <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>s
+            </summary>
+        </member>
+        <member name="P:Synapse.Correlator.Application.Services.CorrelationService.Triggers">
+            <summary>
+            Gets the <see cref="T:Synapse.Services.IRepository`1"/> used to manage <see cref="T:Synapse.Domain.Models.V1Trigger"/>s
+            </summary>
+        </member>
+        <member name="P:Synapse.Correlator.Application.Services.CorrelationService.Subscription">
+            <summary>
+            Gets an <see cref="T:System.IDisposable"/> that represents the <see cref="T:Synapse.Correlator.Application.Services.CorrelationService"/>'s subscription to the <see cref="T:Synapse.Services.ICloudEventBus"/>
+            </summary>
+        </member>
+        <member name="P:Synapse.Correlator.Application.Services.CorrelationService.Channel">
+            <summary>
+            Gets the <see cref="T:System.Threading.Channels.Channel`1"/> used to process incoming <see cref="T:CloudNative.CloudEvents.CloudEvent"/>s
+            </summary>
+        </member>
+        <member name="M:Synapse.Correlator.Application.Services.CorrelationService.ExecuteAsync(System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Synapse.Correlator.Application.Services.CorrelationService.CorrelateAsync(System.Threading.CancellationToken)">
+            <summary>
+            Correlates incoming <see cref="T:CloudNative.CloudEvents.CloudEvent"/>s
+            </summary>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>A new awaitable <see cref="T:System.Threading.Tasks.Task"/></returns>
+        </member>
+        <member name="M:Synapse.Correlator.Application.Services.CorrelationService.Dispose">
+            <inheritdoc/>
+        </member>
+        <member name="T:Synapse.Correlator.Application.Services.ICorrelationService">
+            <summary>
+            Defines the fundamentals of a service used to correlate incoming <see cref="T:CloudNative.CloudEvents.CloudEvent"/>s
+            </summary>
+        </member>
+        <member name="T:Synapse.Correlator.Application.SynapseCorrelatorConstants">
+            <summary>
+            Exposes constants about the Synapse Broker
+            </summary>
+        </member>
+        <member name="T:Synapse.Correlator.Application.SynapseCorrelatorConstants.Logging">
+            <summary>
+            Exposes constants about Synapse Broker's logging
+            </summary>
+        </member>
+        <member name="M:Synapse.Correlator.Application.SynapseCorrelatorConstants.Logging.GetHeader">
+            <summary>
+            Gets the Synapse Broker log header
+            </summary>
+            <returns>The Synapse Broker log header</returns>
+        </member>
+    </members>
+</doc>

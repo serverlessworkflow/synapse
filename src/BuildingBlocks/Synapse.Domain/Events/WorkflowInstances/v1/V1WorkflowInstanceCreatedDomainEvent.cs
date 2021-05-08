@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
+using ServerlessWorkflow.Sdk.Models;
 using Synapse.Domain.Models;
 using System;
 

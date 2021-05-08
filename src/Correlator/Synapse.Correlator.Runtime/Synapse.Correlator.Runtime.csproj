@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <DockerfileTag>synapse/correlator:0.1.0</DockerfileTag>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerfileContext>..\..</DockerfileContext>
+    <AssemblyVersion>0.1.0.0</AssemblyVersion>
+    <FileVersion>0.1.0.0</FileVersion>
+    <Version>0.1.0</Version>
+    <PackageTags>serverless workflow synapse correlator cloudevent</PackageTags>
+    <NeutralLanguage>English</NeutralLanguage>
+    <Authors>The Synapse authors</Authors>
+    <Copyright>Copyright</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.13" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="3.0.1" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\BuildingBlocks\Synapse.Infrastructure.AspNet\Synapse.Infrastructure.AspNet.csproj" />
+    <ProjectReference Include="..\Synapse.Correlator.Application\Synapse.Correlator.Application.csproj" />
+  </ItemGroup>
+
+</Project>

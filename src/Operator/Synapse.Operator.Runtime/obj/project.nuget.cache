@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "visOBxkrfGoldF0uosBkXUHhU3tIkQbCb21mjvPiunCvQrS+n/Lhc5l4lEjM8aX3D/GX8nCaehV97DeyyMkrpg==",
+  "dgSpecHash": "q0/YleVzbjqDx2DeOJM8V3fNVAavS3FRAkpOLpBBvpMF44twlOEpi0ooL0C6beTo8L80uRhfyxvHMx4JWjX8ig==",
   "success": true,
   "projectFilePath": "C:\\Dev\\Synapse\\src\\Operator\\Synapse.Operator.Runtime\\Synapse.Operator.Runtime.csproj",
   "expectedPackageFiles": [
@@ -71,6 +71,9 @@
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\runtime.ubuntu.14.04-x64.runtime.native.system.security.cryptography.openssl\\4.3.0\\runtime.ubuntu.14.04-x64.runtime.native.system.security.cryptography.openssl.4.3.0.nupkg.sha512",
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\runtime.ubuntu.16.04-x64.runtime.native.system.security.cryptography.openssl\\4.3.0\\runtime.ubuntu.16.04-x64.runtime.native.system.security.cryptography.openssl.4.3.0.nupkg.sha512",
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\runtime.ubuntu.16.10-x64.runtime.native.system.security.cryptography.openssl\\4.3.0\\runtime.ubuntu.16.10-x64.runtime.native.system.security.cryptography.openssl.4.3.0.nupkg.sha512",
+    "C:\\Users\\User\\.nuget\\packages\\serilog\\2.8.0\\serilog.2.8.0.nupkg.sha512",
+    "C:\\Users\\User\\.nuget\\packages\\serilog.extensions.logging\\3.0.1\\serilog.extensions.logging.3.0.1.nupkg.sha512",
+    "C:\\Users\\User\\.nuget\\packages\\serilog.sinks.console\\3.1.1\\serilog.sinks.console.3.1.1.nupkg.sha512",
     "C:\\Users\\User\\.nuget\\packages\\serverlessworkflow.sdk\\0.6.1\\serverlessworkflow.sdk.0.6.1.nupkg.sha512",
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\system.appcontext\\4.3.0\\system.appcontext.4.3.0.nupkg.sha512",
     "C:\\Users\\User\\.nuget\\packages\\system.buffers\\4.5.1\\system.buffers.4.5.1.nupkg.sha512",

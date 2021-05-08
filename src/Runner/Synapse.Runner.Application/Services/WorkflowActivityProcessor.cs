@@ -1,4 +1,5 @@
-﻿using ConcurrentCollections;
+﻿using CloudNative.CloudEvents;
+using ConcurrentCollections;
 using Microsoft.Extensions.Logging;
 using Microsoft.Rest;
 using Synapse.Domain.Models;
@@ -115,7 +116,7 @@ namespace Synapse.Runner.Application.Services
         }
 
         /// <summary>
-        /// Suspends the <see cref="ExecutionPointer"/>'s processing
+        /// Suspends the <see cref="V1WorkflowActivity"/>'s processing
         /// </summary>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A new awaitable <see cref="Task"/></returns>
@@ -134,7 +135,7 @@ namespace Synapse.Runner.Application.Services
         }
 
         /// <summary>
-        /// Terminates the <see cref="ExecutionPointerProcessor"/>'s execution
+        /// Terminates the <see cref="IWorkflowActivityProcessor"/>'s execution
         /// </summary>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A new awaitable <see cref="Task"/></returns>
@@ -143,6 +144,7 @@ namespace Synapse.Runner.Application.Services
             return Task.CompletedTask;
         }
 
+        /// <inheritdoc/>
         public IDisposable Subscribe(IObserver<V1WorkflowExecutionResult> observer)
         {
             return this.Subject.Subscribe(observer);
@@ -197,9 +199,9 @@ namespace Synapse.Runner.Application.Services
             catch (Exception cex)
             {
                 if (cex is HttpOperationException httpEx)
-                    this.Logger.LogError($"A critical exception occured while faulting the execution of the activity '{{activityId}}'(type: '{{activityType}}'): the Kubernetes API returned an non-success status code '{{statusCode}}''{Environment.NewLine}Response content: {{responseContent}}{Environment.NewLine}Details: {{ex}}", httpEx.Response.StatusCode, httpEx.Response.Content, ex.ToString());
+                    this.Logger.LogError($"A critical exception occured while faulting the execution of the activity '{{activityId}}'(type: '{{activityType}}'): the Kubernetes API returned an non-success status code '{{statusCode}}''{Environment.NewLine}Response content: {{responseContent}}{Environment.NewLine}Details: {{ex}}", this.Activity.Id, this.Activity.Type, httpEx.Response.StatusCode, httpEx.Response.Content, ex.ToString());
                 else
-                    this.Logger.LogError($"A critical exception occured while faulting the execution of the activity '{{activityId}}'(type: '{{activityType}}'):{ Environment.NewLine}{{ex}}", cex.ToString());
+                    this.Logger.LogError($"A critical exception occured while faulting the execution of the activity '{{activityId}}'(type: '{{activityType}}'):{ Environment.NewLine}{{ex}}", this.Activity.Id, this.Activity.Type, cex.ToString());
                 throw;
             }
         }
@@ -224,9 +226,9 @@ namespace Synapse.Runner.Application.Services
         }
 
         /// <summary>
-        /// Disposes of the <see cref="WorkflowActivityProcessor{TActivity}"/>
+        /// Disposes of the <see cref="WorkflowActivityProcessor"/>
         /// </summary>
-        /// <param name="disposing">A boolean indicating whether or not the <see cref="WorkflowActivityProcessor{TActivity}"/> is being disposed of</param>
+        /// <param name="disposing">A boolean indicating whether or not the <see cref="WorkflowActivityProcessor"/> is being disposed of</param>
         protected virtual void Dispose(bool disposing)
         {
             if (!this._Disposed)

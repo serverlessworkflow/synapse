@@ -18,3 +18,6 @@ C:\Dev\Synapse\src\Operator\Synapse.Operator.Application\bin\Debug\net5.0\Synaps
 C:\Dev\Synapse\src\Operator\Synapse.Operator.Application\bin\Debug\net5.0\Synapse.Infrastructure.pdb
 C:\Dev\Synapse\src\Operator\Synapse.Operator.Application\bin\Debug\net5.0\Synapse.Domain.pdb
 C:\Dev\Synapse\src\Operator\Synapse.Operator.Application\bin\Debug\net5.0\Assets\Charts\runner.yaml
+C:\Dev\Synapse\src\Operator\Synapse.Operator.Application\bin\Debug\net5.0\Synapse.Operator.Application.xml
+C:\Dev\Synapse\src\Operator\Synapse.Operator.Application\bin\Debug\net5.0\Synapse.Core.xml
+C:\Dev\Synapse\src\Operator\Synapse.Operator.Application\bin\Debug\net5.0\Synapse.Domain.xml

@@ -141,6 +141,18 @@ namespace Synapse.Domain.Models
         [JsonProperty("errors")]
         public List<V1Error> Errors { get; set; } = new List<V1Error>();
 
+        /// <summary>
+        /// Gets a boolean indicating whether or not the <see cref="V1WorkflowActivity"/> is active
+        /// </summary>
+        [JsonIgnore]
+        public bool IsActive
+        {
+            get
+            {
+                return this.Status == V1WorkflowActivityStatus.Pending || this.Status == V1WorkflowActivityStatus.Executing || this.Status == V1WorkflowActivityStatus.Suspended;
+            }
+        }
+
         private JsonPatchDocument<V1WorkflowActivity> _Patch;
         /// <summary>
         /// Gets the <see cref="V1WorkflowActivity"/>'s <see cref="IJsonPatchDocument"/>
@@ -412,6 +424,82 @@ namespace Synapse.Domain.Models
             if (parent == null)
                 throw new ArgumentNullException(nameof(parent));
             return new V1WorkflowActivity(V1WorkflowActivityType.Action, workflowInstance, input, new V1WorkflowActivityMetadata() { State = state.Name, Action = action.Name }, parent);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="V1WorkflowActivity"/> for the specified <see cref="ActionDefinition"/>
+        /// </summary>
+        /// <param name="workflowInstance">The <see cref="V1WorkflowInstance"/> that owns the <see cref="V1WorkflowActivity"/> to create</param>
+        /// <param name="state">The <see cref="EventStateDefinition"/> that owns the <see cref="V1WorkflowActivity"/> to create</param>
+        /// <param name="trigger">The <see cref="EventStateTriggerDefinition"/> the <see cref="ActionDefinition"/> to process belongs to</param>
+        /// <param name="action">The <see cref="ActionDefinition"/> to create the <see cref="V1WorkflowActivity"/> for</param>
+        /// <param name="input">The input data</param>
+        /// <param name="parent">The parent <see cref="V1WorkflowActivity"/></param>
+        /// <returns>A new <see cref="V1WorkflowActivity"/></returns>
+        public static V1WorkflowActivity Action(V1WorkflowInstance workflowInstance, EventStateDefinition state, EventStateTriggerDefinition trigger, ActionDefinition action, JToken input, V1WorkflowActivity parent)
+        {
+            if (workflowInstance == null)
+                throw new ArgumentNullException(nameof(workflowInstance));
+            if (state == null)
+                throw new ArgumentNullException(nameof(state));
+            if (trigger == null)
+                throw new ArgumentNullException(nameof(trigger));
+            if (action == null)
+                throw new ArgumentNullException(nameof(action));
+            if (input == null)
+                throw new ArgumentNullException(nameof(input));
+            if (parent == null)
+                throw new ArgumentNullException(nameof(parent));
+            return new V1WorkflowActivity(V1WorkflowActivityType.Action, workflowInstance, input, new V1WorkflowActivityMetadata() { State = state.Name, Action = action.Name, TriggerId = state.Triggers.ToList().IndexOf(trigger) }, parent);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="V1WorkflowActivity"/> for the specified <see cref="EventStateTriggerDefinition"/>
+        /// </summary>
+        /// <param name="workflowInstance">The <see cref="V1WorkflowInstance"/> that owns the <see cref="V1WorkflowActivity"/> to create</param>
+        /// <param name="state">The <see cref="EventStateDefinition"/> the <see cref="EventStateTriggerDefinition"/> to process belongs to</param>
+        /// <param name="trigger">The <see cref="EventStateTriggerDefinition"/> to create the <see cref="V1WorkflowActivity"/> for</param>
+        /// <param name="input">The input data</param>
+        /// <param name="parent">The parent <see cref="V1WorkflowActivity"/></param>
+        /// <returns>A new <see cref="V1WorkflowActivity"/></returns>
+        public static V1WorkflowActivity EventStateTrigger(V1WorkflowInstance workflowInstance, EventStateDefinition state, EventStateTriggerDefinition trigger, JToken input, V1WorkflowActivity parent)
+        {
+            if (workflowInstance == null)
+                throw new ArgumentNullException(nameof(workflowInstance));
+            if (state == null)
+                throw new ArgumentNullException(nameof(state));
+            if (trigger == null)
+                throw new ArgumentNullException(nameof(trigger));
+            if (input == null)
+                throw new ArgumentNullException(nameof(input));
+            if (parent == null)
+                throw new ArgumentNullException(nameof(parent));
+            return new V1WorkflowActivity(V1WorkflowActivityType.EventStateTrigger, workflowInstance, input, new V1WorkflowActivityMetadata() { State = state.Name, TriggerId = state.Triggers.ToList().IndexOf(trigger) }, parent);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="V1WorkflowActivity"/> for the specified <see cref="EventDefinition"/> to consume
+        /// </summary>
+        /// <param name="workflowInstance">The <see cref="V1WorkflowInstance"/> that owns the <see cref="V1WorkflowActivity"/> to create</param>
+        /// <param name="state">The <see cref="StateDefinition"/> the <see cref="EventDefinition"/> to process belongs to</param>
+        /// <param name="eventRef">The reference of the <see cref="EventDefinition"/> to consume</param>
+        /// <param name="input">The input data</param>
+        /// <param name="parent">The parent <see cref="V1WorkflowActivity"/></param>
+        /// <returns>A new <see cref="V1WorkflowActivity"/></returns>
+        public static V1WorkflowActivity ConsumeEvent(V1WorkflowInstance workflowInstance, StateDefinition state, string eventRef, JToken input, V1WorkflowActivity parent)
+        {
+            if (workflowInstance == null)
+                throw new ArgumentNullException(nameof(workflowInstance));
+            if (state == null)
+                throw new ArgumentNullException(nameof(state));
+            if (parent == null)
+                if (string.IsNullOrWhiteSpace(eventRef))
+                throw new ArgumentNullException(nameof(eventRef));
+            if (input == null)
+                throw new ArgumentNullException(nameof(input));
+            if (parent == null)
+                throw new ArgumentNullException(nameof(parent));
+            return new V1WorkflowActivity(V1WorkflowActivityType.ConsumeEvent, workflowInstance, input, new V1WorkflowActivityMetadata() { State = state.Name, Event = eventRef }, parent);
         }
 
         #endregion

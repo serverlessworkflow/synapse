@@ -591,6 +591,78 @@
             Gets an <see cref="T:System.Collections.Generic.IReadOnlyCollection`1"/> containing the <see cref="T:Synapse.Domain.Models.V1Error"/>s that describe the validation failures
             </summary>
         </member>
+        <member name="T:Synapse.Domain.Events.Triggers.V1TriggerCorrelationContextCreatedDomainEvent">
+            <summary>
+            Represents the <see cref="T:Synapse.Domain.IDomainEvent"/> fired whenever a new <see cref="T:Synapse.Domain.Models.V1CorrelationContext"/> for an existing <see cref="T:Synapse.Domain.Models.V1Trigger"/>
+            </summary>
+        </member>
+        <member name="M:Synapse.Domain.Events.Triggers.V1TriggerCorrelationContextCreatedDomainEvent.#ctor">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Domain.Events.Triggers.V1TriggerCorrelationContextCreatedDomainEvent"/>
+            </summary>
+        </member>
+        <member name="M:Synapse.Domain.Events.Triggers.V1TriggerCorrelationContextCreatedDomainEvent.#ctor(System.String,Synapse.Domain.Models.V1CorrelationContext)">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Domain.Events.Triggers.V1TriggerCorrelationContextCreatedDomainEvent"/>
+            </summary>
+            <param name="triggerId">The id of the <see cref="T:Synapse.Domain.Models.V1Trigger"/> the specified <see cref="T:Synapse.Domain.Models.V1CorrelationContext"/> has been created for</param>
+            <param name="correlationContext">The <see cref="T:Synapse.Domain.Models.V1Trigger"/>'s newly created <see cref="T:Synapse.Domain.Models.V1CorrelationContext"/></param>
+        </member>
+        <member name="P:Synapse.Domain.Events.Triggers.V1TriggerCorrelationContextCreatedDomainEvent.CorrelationContext">
+            <summary>
+            Gets the <see cref="T:Synapse.Domain.Models.V1Trigger"/>'s newly created <see cref="T:Synapse.Domain.Models.V1CorrelationContext"/>
+            </summary>
+        </member>
+        <member name="T:Synapse.Domain.Events.Triggers.V1TriggerCorrelationContextReleasedDomainEvent">
+            <summary>
+            Represents the <see cref="T:Synapse.Domain.IDomainEvent"/> fired whenever a <see cref="T:Synapse.Domain.Models.V1CorrelationContext"/> has been released by a <see cref="T:Synapse.Domain.Models.V1Trigger"/>
+            </summary>
+        </member>
+        <member name="M:Synapse.Domain.Events.Triggers.V1TriggerCorrelationContextReleasedDomainEvent.#ctor">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Domain.Events.Triggers.V1TriggerCorrelationContextReleasedDomainEvent"/>
+            </summary>
+        </member>
+        <member name="M:Synapse.Domain.Events.Triggers.V1TriggerCorrelationContextReleasedDomainEvent.#ctor(System.String,System.Guid)">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Domain.Events.Triggers.V1TriggerCorrelationContextReleasedDomainEvent"/>
+            </summary>
+            <param name="triggerId">The id of the <see cref="T:Synapse.Domain.Models.V1Trigger"/> that has released the specified <see cref="T:Synapse.Domain.Models.V1CorrelationContext"/></param>
+            <param name="correlationContextId">The id of the <see cref="T:Synapse.Domain.Models.V1CorrelationContext"/> that has been released by the <see cref="T:Synapse.Domain.Models.V1Trigger"/></param>
+        </member>
+        <member name="P:Synapse.Domain.Events.Triggers.V1TriggerCorrelationContextReleasedDomainEvent.CorrelationContextId">
+            <summary>
+            Gets the id of the <see cref="T:Synapse.Domain.Models.V1CorrelationContext"/> that has been released by the <see cref="T:Synapse.Domain.Models.V1Trigger"/>
+            </summary>
+        </member>
+        <member name="T:Synapse.Domain.Events.WorkflowInstances.V1WorkflowInstanceCloudEventCorrelatedDomainEvent">
+            <summary>
+            Represents the <see cref="T:Synapse.Domain.IDomainEvent"/> fired whenever an existing <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/> has successfully correlated an incoming <see cref="T:CloudNative.CloudEvents.CloudEvent"/>
+            </summary>
+        </member>
+        <member name="M:Synapse.Domain.Events.WorkflowInstances.V1WorkflowInstanceCloudEventCorrelatedDomainEvent.#ctor">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Domain.Events.WorkflowInstances.V1WorkflowInstanceCloudEventCorrelatedDomainEvent"/>
+            </summary>
+        </member>
+        <member name="M:Synapse.Domain.Events.WorkflowInstances.V1WorkflowInstanceCloudEventCorrelatedDomainEvent.#ctor(System.String,Synapse.Domain.Models.V1CloudEvent,System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Domain.Events.WorkflowInstances.V1WorkflowInstanceCloudEventCorrelatedDomainEvent"/>
+            </summary>
+            <param name="workflowId">The id of the <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/> has correlated an incoming <see cref="T:CloudNative.CloudEvents.CloudEvent"/></param>
+            <param name="e">The <see cref="T:Synapse.Domain.Models.V1CloudEvent"/> that has been correlated by the <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/></param>
+            <param name="contextAttributes">An <see cref="T:System.Collections.Generic.IEnumerable`1"/> containing the context attributes used to correlate the specified <see cref="T:CloudNative.CloudEvents.CloudEvent"/></param>
+        </member>
+        <member name="P:Synapse.Domain.Events.WorkflowInstances.V1WorkflowInstanceCloudEventCorrelatedDomainEvent.CloudEvent">
+            <summary>
+            Gets the <see cref="T:Synapse.Domain.Models.V1CloudEvent"/> that has been correlated by the <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>
+            </summary>
+        </member>
+        <member name="P:Synapse.Domain.Events.WorkflowInstances.V1WorkflowInstanceCloudEventCorrelatedDomainEvent.ContextAttributes">
+            <summary>
+            Gets an <see cref="T:System.Collections.Generic.IEnumerable`1"/> containing the context attributes used to correlate the specified <see cref="T:CloudNative.CloudEvents.CloudEvent"/>
+            </summary>
+        </member>
         <member name="T:Synapse.Domain.Events.WorkflowInstances.V1WorkflowInstanceCreatedDomainEvent">
             <summary>
             Represents the <see cref="T:Synapse.Domain.IDomainEvent"/> fired whenever a new <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/> has been created
@@ -606,18 +678,18 @@
             Initializes a new <see cref="T:Synapse.Domain.Events.WorkflowInstances.V1WorkflowInstanceCreatedDomainEvent"/>
             </summary>
             <param name="id">The id of the newly created <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/></param>
-            <param name="definitionId">The id of the <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>'s <see cref="!:WorkflowDefinition"/></param>
-            <param name="definitionVersion">The version of the <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>'s <see cref="!:WorkflowDefinition"/></param>
+            <param name="definitionId">The id of the <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>'s <see cref="T:ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/></param>
+            <param name="definitionVersion">The version of the <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>'s <see cref="T:ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/></param>
             <param name="input">The newly created <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>'s input data</param>
         </member>
         <member name="P:Synapse.Domain.Events.WorkflowInstances.V1WorkflowInstanceCreatedDomainEvent.DefinitionId">
             <summary>
-            Gets the id of the <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>'s <see cref="!:WorkflowDefinition"/>
+            Gets the id of the <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>'s <see cref="T:ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/>
             </summary>
         </member>
         <member name="P:Synapse.Domain.Events.WorkflowInstances.V1WorkflowInstanceCreatedDomainEvent.DefinitionVersion">
             <summary>
-            Gets the version of the <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>'s <see cref="!:WorkflowDefinition"/>
+            Gets the version of the <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>'s <see cref="T:ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/>
             </summary>
         </member>
         <member name="P:Synapse.Domain.Events.WorkflowInstances.V1WorkflowInstanceCreatedDomainEvent.Input">
@@ -678,7 +750,7 @@
             Initializes a new <see cref="T:Synapse.Domain.Events.WorkflowInstances.V1WorkflowInstanceExecutedDomainEvent"/>
             </summary>
             <param name="workflowId">The id of the <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/> that has been executed</param>
-            <param name="executionResult">The <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>'s output</param>
+            <param name="output">The <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>'s output</param>
         </member>
         <member name="P:Synapse.Domain.Events.WorkflowInstances.V1WorkflowInstanceExecutedDomainEvent.Output">
             <summary>
@@ -805,7 +877,7 @@
         </member>
         <member name="T:Synapse.Domain.Events.WorkflowInstances.V1WorkflowInstanceTransitionedDomainEvent">
             <summary>
-            Represents the <see cref="T:Synapse.Domain.IDomainEvent"/> fired whenever an existing <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/> has transitioned to a new <see cref="!:StateDefinition"/>
+            Represents the <see cref="T:Synapse.Domain.IDomainEvent"/> fired whenever an existing <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/> has transitioned to a new <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/>
             </summary>
         </member>
         <member name="M:Synapse.Domain.Events.WorkflowInstances.V1WorkflowInstanceTransitionedDomainEvent.#ctor">
@@ -817,12 +889,12 @@
             <summary>
             Initializes a new <see cref="T:Synapse.Domain.Events.WorkflowInstances.V1WorkflowInstanceTransitionedDomainEvent"/>
             </summary>
-            <param name="workflowId">The id of the <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/> that has transitioned to a new <see cref="!:StateDefinition"/></param>
-            <param name="stateName">The new <see cref="!:StateDefinition"/> the <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/> has transitioned to</param>
+            <param name="workflowId">The id of the <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/> that has transitioned to a new <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/></param>
+            <param name="stateName">The new <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/> the <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/> has transitioned to</param>
         </member>
         <member name="P:Synapse.Domain.Events.WorkflowInstances.V1WorkflowInstanceTransitionedDomainEvent.StateName">
             <summary>
-            Gets the new <see cref="!:StateDefinition"/> the <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/> has transitioned to
+            Gets the new <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/> the <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/> has transitioned to
             </summary>
         </member>
         <member name="T:Synapse.Domain.Events.Workflows.V1WorkflowProcessingFaulted">
@@ -891,6 +963,59 @@
             Gets an <see cref="T:System.Collections.Generic.IEnumerable`1"/> containing the <see cref="T:Synapse.Domain.Models.V1Workflow"/> validation <see cref="T:Synapse.Domain.Models.V1Error"/>s
             </summary>
         </member>
+        <member name="T:Synapse.Domain.IAggregateRoot">
+            <summary>
+            Defines the fundamentals of an aggregate root
+            </summary>
+        </member>
+        <member name="P:Synapse.Domain.IAggregateRoot.Id">
+            <summary>
+            Gets the <see cref="T:Synapse.Domain.IAggregateRoot"/>'s id
+            </summary>
+        </member>
+        <member name="P:Synapse.Domain.IAggregateRoot.Version">
+            <summary>
+            Gets the <see cref="T:Synapse.Domain.IAggregateRoot"/>'s version
+            </summary>
+        </member>
+        <member name="P:Synapse.Domain.IAggregateRoot.PendingEvents">
+            <summary>
+            Gets an <see cref="T:System.Collections.Generic.IReadOnlyCollection`1"/> containing the <see cref="T:Synapse.Domain.IAggregateRoot"/>'s pending <see cref="T:Synapse.Domain.IDomainEvent"/>
+            </summary>
+        </member>
+        <member name="P:Synapse.Domain.IAggregateRoot.HasPatch">
+            <summary>
+            Gets a boolean indicating whether or not the <see cref="T:Synapse.Domain.IAggregateRoot"/> has a patch pending
+            </summary>
+        </member>
+        <member name="P:Synapse.Domain.IAggregateRoot.HasStatusPatch">
+            <summary>
+            Gets a boolean indicating whether or not the <see cref="T:Synapse.Domain.IAggregateRoot"/> has a status patch pending
+            </summary>
+        </member>
+        <member name="M:Synapse.Domain.IAggregateRoot.GetPatch">
+            <summary>
+            Gets the <see cref="T:Synapse.Domain.IAggregateRoot"/>'s patch
+            </summary>
+            <returns>The <see cref="T:Synapse.Domain.IAggregateRoot"/>'s patch</returns>
+        </member>
+        <member name="M:Synapse.Domain.IAggregateRoot.GetStatusPatch">
+            <summary>
+            Gets the <see cref="T:Synapse.Domain.IAggregateRoot"/>'s status patch
+            </summary>
+            <returns>The <see cref="T:Synapse.Domain.IAggregateRoot"/>'s status patch</returns>
+        </member>
+        <member name="M:Synapse.Domain.IAggregateRoot.ReplayEvents(Synapse.Domain.IDomainEvent[])">
+            <summary>
+            Replays the specified <see cref="T:Synapse.Domain.IDomainEvent"/>s
+            </summary>
+            <param name="events">An array containing the <see cref="T:Synapse.Domain.IDomainEvent"/>s to replay</param>
+        </member>
+        <member name="M:Synapse.Domain.IAggregateRoot.ClearPendingEvents">
+            <summary>
+            Clears pending <see cref="T:Synapse.Domain.IDomainEvent"/>s
+            </summary>
+        </member>
         <member name="T:Synapse.Domain.IDomainEvent">
             <summary>
             Defines the fundamentals of a domain event
@@ -942,6 +1067,399 @@
         <member name="P:Synapse.Domain.Models.V1Error.Message">
             <summary>
             Gets the error's message
+            </summary>
+        </member>
+        <member name="T:Synapse.Domain.Models.V1CloudEvent">
+            <summary>
+            Represents a wrapper for an encoded <see cref="T:CloudNative.CloudEvents.CloudEvent"/>
+            </summary>
+        </member>
+        <member name="P:Synapse.Domain.Models.V1CloudEvent.Id">
+            <summary>
+            Gets the wrapped <see cref="T:CloudNative.CloudEvents.CloudEvent"/>'s id
+            </summary>
+        </member>
+        <member name="P:Synapse.Domain.Models.V1CloudEvent.Type">
+            <summary>
+            Gets the wrapped <see cref="T:CloudNative.CloudEvents.CloudEvent"/>'s type
+            </summary>
+        </member>
+        <member name="P:Synapse.Domain.Models.V1CloudEvent.Source">
+            <summary>
+            Gets the wrapped <see cref="T:CloudNative.CloudEvents.CloudEvent"/>'s source
+            </summary>
+        </member>
+        <member name="P:Synapse.Domain.Models.V1CloudEvent.Attributes">
+            <summary>
+            Gets an <see cref="T:System.Collections.Generic.IDictionary`2"/> representing the wrapped <see cref="T:CloudNative.CloudEvents.CloudEvent"/>'s attributes
+            </summary>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1CloudEvent.TryGetAttribute(System.String,System.String@)">
+            <summary>
+            Attempts to retrieve the specified attribute
+            </summary>
+            <param name="key">The key of the attribute to retrieve</param>
+            <param name="value">The attribute's value, if any</param>
+            <returns>A boolean indicating whether or not the specified attribute could be retrieved</returns>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1CloudEvent.Matches(ServerlessWorkflow.Sdk.Models.EventDefinition)">
+            <summary>
+            Determines whether or not the <see cref="T:Synapse.Domain.Models.V1CloudEvent"/> matches the specified <see cref="T:ServerlessWorkflow.Sdk.Models.EventDefinition"/>
+            </summary>
+            <param name="eventDefinition">The <see cref="T:ServerlessWorkflow.Sdk.Models.EventDefinition"/> to match</param>
+            <returns>A boolean indicating whether or not the <see cref="T:Synapse.Domain.Models.V1CloudEvent"/> matches the specified <see cref="T:ServerlessWorkflow.Sdk.Models.EventDefinition"/></returns>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1CloudEvent.ToCloudEvent(CloudNative.CloudEvents.ICloudEventFormatter)">
+            <summary>
+            Converts the <see cref="T:Synapse.Domain.Models.V1CloudEvent"/> into a new <see cref="T:CloudNative.CloudEvents.CloudEvent"/>
+            </summary>
+            <param name="formatter">The service used to format the <see cref="T:CloudNative.CloudEvents.CloudEvent"/></param>
+            <returns>A new <see cref="T:CloudNative.CloudEvents.CloudEvent"/></returns>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1CloudEvent.CreateFor(CloudNative.CloudEvents.CloudEvent,CloudNative.CloudEvents.ICloudEventFormatter)">
+            <summary>
+            Creates a new <see cref="T:Synapse.Domain.Models.V1CloudEvent"/> for the specified <see cref="T:CloudNative.CloudEvents.CloudEvent"/>
+            </summary>
+            <param name="e">The <see cref="T:CloudNative.CloudEvents.CloudEvent"/> to create a new <see cref="T:Synapse.Domain.Models.V1CloudEvent"/> for</param>
+            <param name="formatter">The service used to encode the specified <see cref="T:CloudNative.CloudEvents.CloudEvent"/></param>
+            <returns>A new <see cref="T:Synapse.Domain.Models.V1CloudEvent"/></returns>
+        </member>
+        <member name="T:Synapse.Domain.Models.V1CorrelationContext">
+            <summary>
+            Represents the context of a <see cref="T:CloudNative.CloudEvents.CloudEvent"/> correlation
+            </summary>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1CorrelationContext.#ctor">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Domain.Models.V1CorrelationContext"/>
+            </summary>
+        </member>
+        <member name="P:Synapse.Domain.Models.V1CorrelationContext.Id">
+            <summary>
+            Gets the <see cref="T:Synapse.Domain.Models.V1CorrelationContext"/>'s id
+            </summary>
+        </member>
+        <member name="P:Synapse.Domain.Models.V1CorrelationContext.ContextAttributes">
+            <summary>
+            Gets an <see cref="T:System.Collections.Generic.IDictionary`2"/> containing the correlation context attribute mappings
+            </summary>
+        </member>
+        <member name="P:Synapse.Domain.Models.V1CorrelationContext.BootstrapEvents">
+            <summary>
+            Gets an <see cref="T:System.Collections.Generic.IList`1"/> containing the <see cref="T:Synapse.Domain.Models.V1CorrelationContext"/> boostrap <see cref="T:Synapse.Domain.Models.V1CloudEvent"/>s
+            </summary>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1CorrelationContext.CorrelatesTo(CloudNative.CloudEvents.CloudEvent)">
+            <summary>
+            Determines whether or not the specified <see cref="T:CloudNative.CloudEvents.CloudEvent"/> correlates to the <see cref="T:Synapse.Domain.Models.V1CorrelationContext"/>
+            </summary>
+            <param name="e">The <see cref="T:CloudNative.CloudEvents.CloudEvent"/> to correlate</param>
+            <returns>A boolean indicating whether or not the specified <see cref="T:CloudNative.CloudEvents.CloudEvent"/> correlates to the <see cref="T:Synapse.Domain.Models.V1CorrelationContext"/></returns>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1CorrelationContext.Correlate(Synapse.Domain.Models.V1CloudEvent,System.Collections.Generic.IEnumerable{System.String},System.Boolean)">
+            <summary>
+            Correlates the specified <see cref="T:Synapse.Domain.Models.V1CloudEvent"/>
+            </summary>
+            <param name="e">The <see cref="T:Synapse.Domain.Models.V1CloudEvent"/> to correlate</param>
+            <param name="contextAttributes">An <see cref="T:System.Collections.Generic.IEnumerable`1"/> containing the context attributes used to correlate the specified <see cref="T:Synapse.Domain.Models.V1CloudEvent"/></param>
+            <param name="isBootstrapEvent">Determines whether or not the specified <see cref="T:CloudNative.CloudEvents.CloudEvent"/> is a boostrap event and should be persisted. Defaults to false</param>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1CorrelationContext.CorrelateBoostrapEvent(CloudNative.CloudEvents.CloudEvent,System.Collections.Generic.IEnumerable{System.String},CloudNative.CloudEvents.ICloudEventFormatter)">
+            <summary>
+            Correlates the specified <see cref="T:CloudNative.CloudEvents.CloudEvent"/>
+            </summary>
+            <param name="e">The <see cref="T:CloudNative.CloudEvents.CloudEvent"/> to correlate</param>
+            <param name="contextAttributes">An <see cref="T:System.Collections.Generic.IEnumerable`1"/> containing the context attributes used to correlate the specified <see cref="T:CloudNative.CloudEvents.CloudEvent"/></param>
+            <param name="formatter">The service used to encode the specified <see cref="T:CloudNative.CloudEvents.CloudEvent"/></param>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1CorrelationContext.CreateFor(CloudNative.CloudEvents.CloudEvent,System.Collections.Generic.IEnumerable{System.String},CloudNative.CloudEvents.ICloudEventFormatter)">
+            <summary>
+            Creates a new <see cref="T:Synapse.Domain.Models.V1CorrelationContext"/> for the specified bootstrap <see cref="T:CloudNative.CloudEvents.CloudEvent"/>
+            </summary>
+            <param name="e">The <see cref="T:CloudNative.CloudEvents.CloudEvent"/> that has bootstrapped the <see cref="T:Synapse.Domain.Models.V1CorrelationContext"/></param>
+            <param name="contextAttributes">An <see cref="T:System.Collections.Generic.IEnumerable`1"/> containing the context attributes used to correlate <see cref="T:CloudNative.CloudEvents.CloudEvent"/>s</param>
+            <param name="formatter">The service used to encode the specified <see cref="T:CloudNative.CloudEvents.CloudEvent"/></param>
+            <returns>A new <see cref="T:Synapse.Domain.Models.V1CorrelationContext"/></returns>
+        </member>
+        <member name="T:Synapse.Domain.Models.V1EventFilter">
+            <summary>
+            Represents an object used to filter <see cref="T:CloudNative.CloudEvents.CloudEvent"/>s
+            </summary>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1EventFilter.#ctor">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Domain.Models.V1EventFilter"/>
+            </summary>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1EventFilter.#ctor(System.Collections.Generic.IDictionary{System.String,System.String})">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Domain.Models.V1EventFilter"/>
+            </summary>
+            <param name="contextAttributes">An <see cref="T:System.Collections.Generic.IDictionary`2"/> containing the context attributes to filter <see cref="T:CloudNative.CloudEvents.CloudEvent"/>s by</param>
+        </member>
+        <member name="P:Synapse.Domain.Models.V1EventFilter.ContextAttributes">
+            <summary>
+            Gets an <see cref="T:System.Collections.Generic.IDictionary`2"/> containing the context attributes to filter <see cref="T:CloudNative.CloudEvents.CloudEvent"/>s by
+            </summary>
+        </member>
+        <member name="P:Synapse.Domain.Models.V1EventFilter.Correlations">
+            <summary>
+            Gets an <see cref="T:System.Collections.Generic.IDictionary`2"/> containing the attributes key/value to use when correlating an incoming <see cref="T:CloudNative.CloudEvents.CloudEvent"/> to the <see cref="T:Synapse.Domain.Models.V1Trigger"/>
+            </summary>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1EventFilter.Filters(CloudNative.CloudEvents.CloudEvent)">
+            <summary>
+            Determines whether or not the <see cref="T:Synapse.Domain.Models.V1EventFilter"/> filters the specified <see cref="T:CloudNative.CloudEvents.CloudEvent"/>
+            </summary>
+            <param name="e">The <see cref="T:CloudNative.CloudEvents.CloudEvent"/> to filter</param>
+            <returns>A boolean indicating whether or not the <see cref="T:Synapse.Domain.Models.V1EventFilter"/> filters the specified <see cref="T:CloudNative.CloudEvents.CloudEvent"/></returns>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1EventFilter.Filters(Synapse.Domain.Models.V1CloudEvent)">
+            <summary>
+            Determines whether or not the <see cref="T:Synapse.Domain.Models.V1EventFilter"/> filters the specified <see cref="T:Synapse.Domain.Models.V1CloudEvent"/>
+            </summary>
+            <param name="e">The <see cref="T:Synapse.Domain.Models.V1CloudEvent"/> to filter</param>
+            <returns>A boolean indicating whether or not the <see cref="T:Synapse.Domain.Models.V1EventFilter"/> filters the specified <see cref="T:Synapse.Domain.Models.V1CloudEvent"/></returns>
+        </member>
+        <member name="T:Synapse.Domain.Models.V1Trigger">
+            <summary>
+            Represents an instance of a <see cref="T:Synapse.Domain.Models.V1TriggerDefinition"/>
+            </summary>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1Trigger.#ctor">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Domain.Models.V1Trigger"/>
+            </summary>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1Trigger.#ctor(Synapse.Domain.Models.V1TriggerSpec)">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Domain.Models.V1Trigger"/>
+            </summary>
+            <param name="spec">The <see cref="T:Synapse.Domain.Models.V1Trigger"/>'s <see cref="T:Synapse.Domain.Models.V1TriggerSpec"/></param>
+        </member>
+        <member name="P:Synapse.Domain.Models.V1Trigger.Patch">
+            <inheritdoc/>
+        </member>
+        <member name="P:Synapse.Domain.Models.V1Trigger.StatusPatch">
+            <inheritdoc/>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1Trigger.Initialize">
+            <summary>
+            Initializes the <see cref="T:Synapse.Domain.Models.V1Trigger"/>
+            </summary>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1Trigger.TriggeredBy(CloudNative.CloudEvents.CloudEvent)">
+            <summary>
+            Determines whether or not the specified <see cref="T:CloudNative.CloudEvents.CloudEvent"/> matches one of the <see cref="T:Synapse.Domain.Models.V1Trigger"/>'s conditions
+            </summary>
+            <param name="e">The <see cref="T:CloudNative.CloudEvents.CloudEvent"/> to check</param>
+            <returns>A boolean indicating whether or not the specified <see cref="T:CloudNative.CloudEvents.CloudEvent"/> matches one of the <see cref="T:Synapse.Domain.Models.V1Trigger"/>'s conditions</returns>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1Trigger.TryFireIn(Synapse.Domain.Models.V1CorrelationContext)">
+            <summary>
+            Attempts to fire the <see cref="T:Synapse.Domain.Models.V1Trigger"/> in the specified <see cref="T:Synapse.Domain.Models.V1CorrelationContext"/>
+            </summary>
+            <param name="context">The <see cref="T:Synapse.Domain.Models.V1CorrelationContext"/> to attempt firing the <see cref="T:Synapse.Domain.Models.V1Trigger"/> in</param>
+            <returns>A boolean indicating whether or not the <see cref="T:Synapse.Domain.Models.V1Trigger"/> fired in the specified <see cref="T:Synapse.Domain.Models.V1CorrelationContext"/></returns>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1Trigger.GetMatchingConditionFor(CloudNative.CloudEvents.CloudEvent)">
+            <summary>
+            Gets the first matching <see cref="T:Synapse.Domain.Models.V1TriggerCondition"/> for the specified <see cref="T:CloudNative.CloudEvents.CloudEvent"/>
+            </summary>
+            <param name="e">The <see cref="T:CloudNative.CloudEvents.CloudEvent"/> to get the <see cref="T:Synapse.Domain.Models.V1TriggerCondition"/> for</param>
+            <returns>The first matching <see cref="T:Synapse.Domain.Models.V1TriggerCondition"/> for the specified <see cref="T:CloudNative.CloudEvents.CloudEvent"/>, if any</returns>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1Trigger.CreateCorrelationContextFor(CloudNative.CloudEvents.CloudEvent,System.Collections.Generic.IEnumerable{System.String},CloudNative.CloudEvents.ICloudEventFormatter)">
+            <summary>
+            Creates a new <see cref="T:Synapse.Domain.Models.V1CorrelationContext"/> for the specified <see cref="T:CloudNative.CloudEvents.CloudEvent"/>
+            </summary>
+            <param name="e">The <see cref="T:CloudNative.CloudEvents.CloudEvent"/> to create a new <see cref="T:Synapse.Domain.Models.V1CorrelationContext"/> for</param>
+            <param name="contextAttributes">An <see cref="T:System.Collections.Generic.IEnumerable`1"/> containing the keys of the context attributes to use during correlation</param>
+            <param name="formatter">The service used to encode the specified <see cref="T:CloudNative.CloudEvents.CloudEvent"/></param>
+            <returns>A new <see cref="T:Synapse.Domain.Models.V1CorrelationContext"/></returns>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1Trigger.Correlate(CloudNative.CloudEvents.CloudEvent,System.Collections.Generic.IEnumerable{System.String},CloudNative.CloudEvents.ICloudEventFormatter)">
+            <summary>
+            Correlates the specified <see cref="T:CloudNative.CloudEvents.CloudEvent"/>
+            </summary>
+            <param name="e">The <see cref="T:CloudNative.CloudEvents.CloudEvent"/> to correlate</param>
+            <param name="contextAttributes">An <see cref="T:System.Collections.Generic.IEnumerable`1"/> containing the context attributes used to correlate the specified <see cref="T:CloudNative.CloudEvents.CloudEvent"/></param>
+            <param name="formatter">The <see cref="T:CloudNative.CloudEvents.ICloudEventFormatter"/> used to encode the specified <see cref="T:CloudNative.CloudEvents.CloudEvent"/></param>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1Trigger.ReleaseContext(Synapse.Domain.Models.V1CorrelationContext)">
+            <summary>
+            Releases the specified <see cref="T:Synapse.Domain.Models.V1CorrelationContext"/>
+            </summary>
+            <param name="context">The <see cref="T:Synapse.Domain.Models.V1CorrelationContext"/> to release</param>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1Trigger.On(Synapse.Domain.Events.Triggers.V1TriggerCorrelationContextCreatedDomainEvent)">
+            <summary>
+            Handles the specified <see cref="T:Synapse.Domain.Events.Triggers.V1TriggerCorrelationContextCreatedDomainEvent"/>
+            </summary>
+            <param name="e">The <see cref="T:Synapse.Domain.Events.Triggers.V1TriggerCorrelationContextCreatedDomainEvent"/> to handle</param>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1Trigger.On(Synapse.Domain.Events.Triggers.V1TriggerCorrelationContextReleasedDomainEvent)">
+            <summary>
+            Handles the specified <see cref="T:Synapse.Domain.Events.Triggers.V1TriggerCorrelationContextReleasedDomainEvent"/>
+            </summary>
+            <param name="e">The <see cref="T:Synapse.Domain.Events.Triggers.V1TriggerCorrelationContextReleasedDomainEvent"/> to handle</param>
+        </member>
+        <member name="T:Synapse.Domain.Models.V1TriggerCondition">
+            <summary>
+            Represents the object used to configure a <see cref="T:Synapse.Domain.Models.V1Trigger"/> condition
+            </summary>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1TriggerCondition.#ctor">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Domain.Models.V1TriggerCondition"/>
+            </summary>
+        </member>
+        <member name="P:Synapse.Domain.Models.V1TriggerCondition.Filters">
+            <summary>
+            Gets an <see cref="T:System.Collections.Generic.IList`1"/> containing the <see cref="T:Synapse.Domain.Models.V1EventFilter"/> used to configure the filtering of <see cref="T:CloudNative.CloudEvents.CloudEvent"/>s that can fire the <see cref="T:Synapse.Domain.Models.V1Trigger"/>
+            </summary>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1TriggerCondition.Matches(CloudNative.CloudEvents.CloudEvent)">
+            <summary>
+            Determines whether or not the <see cref="T:Synapse.Domain.Models.V1TriggerCondition"/> matches the specified <see cref="T:CloudNative.CloudEvents.CloudEvent"/>
+            </summary>
+            <param name="e">The <see cref="T:CloudNative.CloudEvents.CloudEvent"/> to match</param>
+            <returns>A boolean indicating whether or not the <see cref="T:Synapse.Domain.Models.V1TriggerCondition"/> matches the specified <see cref="T:CloudNative.CloudEvents.CloudEvent"/></returns>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1TriggerCondition.Matches(Synapse.Domain.Models.V1CorrelationContext)">
+            <summary>
+            Determines whether or not the <see cref="T:Synapse.Domain.Models.V1TriggerCondition"/> matches the specified <see cref="T:Synapse.Domain.Models.V1CorrelationContext"/>
+            </summary>
+            <param name="context">The <see cref="T:Synapse.Domain.Models.V1CorrelationContext"/> to match</param>
+            <returns>A boolean indicating whether or not the <see cref="T:Synapse.Domain.Models.V1TriggerCondition"/> matches the specified <see cref="T:Synapse.Domain.Models.V1CorrelationContext"/></returns>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1TriggerCondition.GetMatchingFilterFor(CloudNative.CloudEvents.CloudEvent)">
+            <summary>
+            Gets the matching <see cref="T:Synapse.Domain.Models.V1EventFilter"/> for the specified <see cref="T:CloudNative.CloudEvents.CloudEvent"/>
+            </summary>
+            <param name="e">The <see cref="T:CloudNative.CloudEvents.CloudEvent"/> to get the matching <see cref="T:Synapse.Domain.Models.V1EventFilter"/> for</param>
+            <returns>The matching <see cref="T:Synapse.Domain.Models.V1EventFilter"/> for the specified <see cref="T:CloudNative.CloudEvents.CloudEvent"/>, if any</returns>
+        </member>
+        <member name="T:Synapse.Domain.Models.V1TriggerDefinition">
+            <summary>
+            Represents a <see cref="T:Neuroglia.K8s.CustomResourceDefinition"/> used to represent an event trigger
+            </summary>
+        </member>
+        <member name="F:Synapse.Domain.Models.V1TriggerDefinition.KIND">
+            <summary>
+            Gets the <see cref="T:Synapse.Domain.Models.V1TriggerDefinition"/>'s kind
+            </summary>
+        </member>
+        <member name="F:Synapse.Domain.Models.V1TriggerDefinition.PLURAL">
+            <summary>
+            Gets the <see cref="T:Synapse.Domain.Models.V1TriggerDefinition"/>'s plural
+            </summary>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1TriggerDefinition.#ctor">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Domain.Models.V1TriggerDefinition"/>
+            </summary>
+        </member>
+        <member name="T:Synapse.Domain.Models.V1TriggerOutcome">
+            <summary>
+            Represents the object used to configure the outcome of a <see cref="T:Synapse.Domain.Models.V1Trigger"/>
+            </summary>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1TriggerOutcome.#ctor">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Domain.Models.V1TriggerOutcome"/>
+            </summary>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1TriggerOutcome.#ctor(Synapse.V1TriggerOutcomeType,Synapse.Domain.Models.V1WorkflowReference)">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Domain.Models.V1TriggerOutcome"/>
+            </summary>
+            <param name="type">The <see cref="T:Synapse.Domain.Models.V1TriggerOutcome"/>'s type</param>
+            <param name="workflow">A reference to the <see cref="T:Synapse.Domain.Models.V1Workflow"/> to run or resume</param>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1TriggerOutcome.#ctor(Synapse.V1TriggerOutcomeType,Synapse.Domain.Models.V1WorkflowReference,System.String)">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Domain.Models.V1TriggerOutcome"/>
+            </summary>
+            <param name="type">The <see cref="T:Synapse.Domain.Models.V1TriggerOutcome"/>'s type</param>
+            <param name="workflow">A reference to the <see cref="T:Synapse.Domain.Models.V1Workflow"/> to run or resume</param>
+            <param name="workflowInstance">The name of the <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/> to run or resume</param>
+        </member>
+        <member name="P:Synapse.Domain.Models.V1TriggerOutcome.Type">
+            <summary>
+            Gets the <see cref="T:Synapse.Domain.Models.V1TriggerOutcome"/>'s type
+            </summary>
+        </member>
+        <member name="P:Synapse.Domain.Models.V1TriggerOutcome.Workflow">
+            <summary>
+            Gets a reference to the <see cref="T:Synapse.Domain.Models.V1Workflow"/> to run or resume
+            </summary>
+        </member>
+        <member name="P:Synapse.Domain.Models.V1TriggerOutcome.WorkflowInstance">
+            <summary>
+            Gets the name of the <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/> to run or resume
+            </summary>
+        </member>
+        <member name="T:Synapse.Domain.Models.V1TriggerSpec">
+            <summary>
+            Represents the spec of a <see cref="T:Synapse.Domain.Models.V1Trigger"/>
+            </summary>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1TriggerSpec.#ctor">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Domain.Models.V1TriggerSpec"/>
+            </summary>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1TriggerSpec.#ctor(Synapse.V1TriggerCorrelationMode,Synapse.V1TriggerConditionType,Synapse.Domain.Models.V1TriggerOutcome)">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Domain.Models.V1TriggerSpec"/>
+            </summary>
+            <param name="correlationMode">The <see cref="T:Synapse.Domain.Models.V1Trigger"/>'s correlation mode</param>
+            <param name="conditionType">The <see cref="T:Synapse.Domain.Models.V1Trigger"/>'s condition type</param>
+            <param name="outcome">The <see cref="T:Synapse.Domain.Models.V1TriggerOutcome"/> used to configure the <see cref="T:Synapse.Domain.Models.V1Trigger"/>'s outcome</param>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1TriggerSpec.#ctor(Synapse.V1TriggerCorrelationMode,Synapse.V1TriggerConditionType,Synapse.Domain.Models.V1TriggerOutcome,Synapse.Domain.Models.V1TriggerCondition[])">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Domain.Models.V1TriggerSpec"/>
+            </summary>
+            <param name="correlationMode">The <see cref="T:Synapse.Domain.Models.V1Trigger"/>'s correlation mode</param>
+            <param name="conditionType">The <see cref="T:Synapse.Domain.Models.V1Trigger"/>'s condition type</param>
+            <param name="outcome">The <see cref="T:Synapse.Domain.Models.V1TriggerOutcome"/> used to configure the <see cref="T:Synapse.Domain.Models.V1Trigger"/>'s outcome</param>
+            <param name="conditions">An array containing the <see cref="T:Synapse.Domain.Models.V1Trigger"/>'s <see cref="T:Synapse.Domain.Models.V1TriggerCondition"/>s</param>
+        </member>
+        <member name="P:Synapse.Domain.Models.V1TriggerSpec.CorrelationMode">
+            <summary>
+            Gets the <see cref="T:Synapse.Domain.Models.V1Trigger"/>'s correlation mode
+            </summary>
+        </member>
+        <member name="P:Synapse.Domain.Models.V1TriggerSpec.ConditionType">
+            <summary>
+            Gets the <see cref="T:Synapse.Domain.Models.V1Trigger"/>'s condition type
+            </summary>
+        </member>
+        <member name="P:Synapse.Domain.Models.V1TriggerSpec.Conditions">
+            <summary>
+            Gets an <see cref="T:System.Collections.Generic.IList`1"/> containing the <see cref="T:Synapse.Domain.Models.V1Trigger"/>'s conditions
+            </summary>
+        </member>
+        <member name="P:Synapse.Domain.Models.V1TriggerSpec.Outcome">
+            <summary>
+            Gets the <see cref="T:Synapse.Domain.Models.V1TriggerOutcome"/> used to configure the <see cref="T:Synapse.Domain.Models.V1Trigger"/>'s outcome
+            </summary>
+        </member>
+        <member name="T:Synapse.Domain.Models.V1TriggerStatus">
+            <summary>
+            Represents the status of a <see cref="T:Synapse.Domain.Models.V1Trigger"/>
+            </summary>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1TriggerStatus.#ctor">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Domain.Models.V1TriggerStatus"/>
+            </summary>
+        </member>
+        <member name="P:Synapse.Domain.Models.V1TriggerStatus.CorrelationContexts">
+            <summary>
+            Gets an <see cref="T:System.Collections.Generic.IList`1"/> containing the <see cref="T:Synapse.Domain.Models.V1Trigger"/>'s <see cref="T:Synapse.Domain.Models.V1CorrelationContext"/>s
             </summary>
         </member>
         <member name="T:Synapse.Domain.Models.V1WorkflowActivity">
@@ -1041,6 +1559,11 @@
         <member name="P:Synapse.Domain.Models.V1WorkflowActivity.Errors">
             <summary>
             Gets a <see cref="T:System.Collections.Generic.List`1"/> containing the <see cref="T:Synapse.Domain.Models.V1Error"/>s that have occured during the <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/>'s execution
+            </summary>
+        </member>
+        <member name="P:Synapse.Domain.Models.V1WorkflowActivity.IsActive">
+            <summary>
+            Gets a boolean indicating whether or not the <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/> is active
             </summary>
         </member>
         <member name="P:Synapse.Domain.Models.V1WorkflowActivity.Patch">
@@ -1167,6 +1690,40 @@
             <param name="parent">The parent <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/></param>
             <returns>A new <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/></returns>
         </member>
+        <member name="M:Synapse.Domain.Models.V1WorkflowActivity.Action(Synapse.Domain.Models.V1WorkflowInstance,ServerlessWorkflow.Sdk.Models.EventStateDefinition,ServerlessWorkflow.Sdk.Models.EventStateTriggerDefinition,ServerlessWorkflow.Sdk.Models.ActionDefinition,Newtonsoft.Json.Linq.JToken,Synapse.Domain.Models.V1WorkflowActivity)">
+            <summary>
+            Creates a new <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/> for the specified <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/>
+            </summary>
+            <param name="workflowInstance">The <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/> that owns the <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/> to create</param>
+            <param name="state">The <see cref="T:ServerlessWorkflow.Sdk.Models.EventStateDefinition"/> that owns the <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/> to create</param>
+            <param name="trigger">The <see cref="T:ServerlessWorkflow.Sdk.Models.EventStateTriggerDefinition"/> the <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> to process belongs to</param>
+            <param name="action">The <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> to create the <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/> for</param>
+            <param name="input">The input data</param>
+            <param name="parent">The parent <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/></param>
+            <returns>A new <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/></returns>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1WorkflowActivity.EventStateTrigger(Synapse.Domain.Models.V1WorkflowInstance,ServerlessWorkflow.Sdk.Models.EventStateDefinition,ServerlessWorkflow.Sdk.Models.EventStateTriggerDefinition,Newtonsoft.Json.Linq.JToken,Synapse.Domain.Models.V1WorkflowActivity)">
+            <summary>
+            Creates a new <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/> for the specified <see cref="T:ServerlessWorkflow.Sdk.Models.EventStateTriggerDefinition"/>
+            </summary>
+            <param name="workflowInstance">The <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/> that owns the <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/> to create</param>
+            <param name="state">The <see cref="T:ServerlessWorkflow.Sdk.Models.EventStateDefinition"/> the <see cref="T:ServerlessWorkflow.Sdk.Models.EventStateTriggerDefinition"/> to process belongs to</param>
+            <param name="trigger">The <see cref="T:ServerlessWorkflow.Sdk.Models.EventStateTriggerDefinition"/> to create the <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/> for</param>
+            <param name="input">The input data</param>
+            <param name="parent">The parent <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/></param>
+            <returns>A new <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/></returns>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1WorkflowActivity.ConsumeEvent(Synapse.Domain.Models.V1WorkflowInstance,ServerlessWorkflow.Sdk.Models.StateDefinition,System.String,Newtonsoft.Json.Linq.JToken,Synapse.Domain.Models.V1WorkflowActivity)">
+            <summary>
+            Creates a new <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/> for the specified <see cref="T:ServerlessWorkflow.Sdk.Models.EventDefinition"/> to consume
+            </summary>
+            <param name="workflowInstance">The <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/> that owns the <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/> to create</param>
+            <param name="state">The <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/> the <see cref="T:ServerlessWorkflow.Sdk.Models.EventDefinition"/> to process belongs to</param>
+            <param name="eventRef">The reference of the <see cref="T:ServerlessWorkflow.Sdk.Models.EventDefinition"/> to consume</param>
+            <param name="input">The input data</param>
+            <param name="parent">The parent <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/></param>
+            <returns>A new <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/></returns>
+        </member>
         <member name="T:Synapse.Domain.Models.V1WorkflowExecutionResult">
             <summary>
             Represents the result of a <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/>'s execution
@@ -1259,13 +1816,19 @@
         </member>
         <member name="T:Synapse.Domain.Models.V1WorkflowInstance">
             <summary>
-            Represents an instance of a <see cref="T:Synapse.Domain.Models.V1Workflow"/>
+            Represents an instance of a <see cref="T:Synapse.Domain.Models.V1WorkflowDefinition"/>
             </summary>
         </member>
         <member name="M:Synapse.Domain.Models.V1WorkflowInstance.#ctor">
             <summary>
             Initializes a new <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>
             </summary>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1WorkflowInstance.#ctor(Synapse.Domain.Models.V1WorkflowInstanceSpec)">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>
+            </summary>
+            <param name="spec">The <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>'s spec</param>
         </member>
         <member name="P:Synapse.Domain.Models.V1WorkflowInstance.Patch">
             <inheritdoc/>
@@ -1311,6 +1874,19 @@
             <summary>
             Executes the <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>
             </summary>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1WorkflowInstance.Correlate(Synapse.Domain.Models.V1CloudEvent,System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Correlates the specified <see cref="T:CloudNative.CloudEvents.CloudEvent"/>
+            </summary>
+            <param name="e">The <see cref="T:Synapse.Domain.Models.V1CloudEvent"/> to correlate</param>
+            <param name="contextAttributes">An <see cref="T:System.Collections.Generic.IEnumerable`1"/> containing the context attributes used to correlate the specified <see cref="T:Synapse.Domain.Models.V1CloudEvent"/></param>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1WorkflowInstance.ConsumeBootstrapEvent(Synapse.Domain.Models.V1CloudEvent)">
+            <summary>
+            Consumes the specified <see cref="T:Synapse.Domain.Models.V1CloudEvent"/>
+            </summary>
+            <param name="e">The <see cref="T:Synapse.Domain.Models.V1CloudEvent"/> to consume</param>
         </member>
         <member name="M:Synapse.Domain.Models.V1WorkflowInstance.AddActivity(Synapse.Domain.Models.V1WorkflowActivity)">
             <summary>
@@ -1395,7 +1971,7 @@
             <summary>
             Sets the <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>'s output
             </summary>
-            <param name="result">The <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>'s output</param>
+            <param name="output">The <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>'s output</param>
         </member>
         <member name="M:Synapse.Domain.Models.V1WorkflowInstance.On(Synapse.Domain.Events.WorkflowInstances.V1WorkflowInstanceInitializingDomainEvent)">
             <summary>
@@ -1426,6 +2002,12 @@
             Handles the specified <see cref="T:Synapse.Domain.Events.WorkflowInstances.V1WorkflowInstanceResumedDomainEvent"/>
             </summary>
             <param name="e">The <see cref="T:Synapse.Domain.Events.WorkflowInstances.V1WorkflowInstanceResumedDomainEvent"/> to handle</param>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1WorkflowInstance.On(Synapse.Domain.Events.WorkflowInstances.V1WorkflowInstanceCloudEventCorrelatedDomainEvent)">
+            <summary>
+            Handles the specified <see cref="T:Synapse.Domain.Events.WorkflowInstances.V1WorkflowInstanceCloudEventCorrelatedDomainEvent"/>
+            </summary>
+            <param name="e">The <see cref="T:Synapse.Domain.Events.WorkflowInstances.V1WorkflowInstanceCloudEventCorrelatedDomainEvent"/> to handle</param>
         </member>
         <member name="M:Synapse.Domain.Models.V1WorkflowInstance.On(Synapse.Domain.Events.WorkflowInstances.V1WorkflowInstanceFaultedDomainEvent)">
             <summary>
@@ -1471,6 +2053,46 @@
             Initializes a new <see cref="T:Synapse.Domain.Models.V1WorkflowInstanceDefinition"/>
             </summary>
         </member>
+        <member name="T:Synapse.Domain.Models.V1WorkflowInstanceSpec">
+            <summary>
+            Represents a <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/> spec
+            </summary>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1WorkflowInstanceSpec.#ctor">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Domain.Models.V1WorkflowInstanceSpec"/>
+            </summary>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1WorkflowInstanceSpec.#ctor(Synapse.Domain.Models.V1WorkflowReference,Newtonsoft.Json.Linq.JObject)">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Domain.Models.V1WorkflowInstanceSpec"/>
+            </summary>
+            <param name="definition">A <see cref="T:Synapse.Domain.Models.V1WorkflowReference"/> to the <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>'s <see cref="T:Synapse.Domain.Models.V1Workflow"/></param>
+            <param name="input">The <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>'s input data</param>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1WorkflowInstanceSpec.#ctor(Synapse.Domain.Models.V1WorkflowReference,Newtonsoft.Json.Linq.JObject,Synapse.Domain.Models.V1CorrelationContext)">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Domain.Models.V1WorkflowInstanceSpec"/>
+            </summary>
+            <param name="definition">A <see cref="T:Synapse.Domain.Models.V1WorkflowReference"/> to the <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>'s <see cref="T:Synapse.Domain.Models.V1Workflow"/></param>
+            <param name="input">The <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>'s input data</param>
+            <param name="correlationContext">The <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>'s <see cref="T:Synapse.Domain.Models.V1CorrelationContext"/></param>
+        </member>
+        <member name="P:Synapse.Domain.Models.V1WorkflowInstanceSpec.Definition">
+            <summary>
+            Gets a <see cref="T:Synapse.Domain.Models.V1WorkflowReference"/> to the <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>'s <see cref="T:Synapse.Domain.Models.V1Workflow"/>
+            </summary>
+        </member>
+        <member name="P:Synapse.Domain.Models.V1WorkflowInstanceSpec.Input">
+            <summary>
+            Gets the <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>'s input data
+            </summary>
+        </member>
+        <member name="P:Synapse.Domain.Models.V1WorkflowInstanceSpec.CorrelationContext">
+            <summary>
+            Gets the <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>'s <see cref="T:Synapse.Domain.Models.V1CorrelationContext"/>
+            </summary>
+        </member>
         <member name="T:Synapse.Domain.Models.V1WorkflowInstanceStatus">
             <summary>
             Represents the status of a <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>
@@ -1504,6 +2126,11 @@
         <member name="P:Synapse.Domain.Models.V1WorkflowInstanceStatus.Pod">
             <summary>
             Gets the <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>'s pod <see cref="T:k8s.Models.V1ObjectReference"/>
+            </summary>
+        </member>
+        <member name="P:Synapse.Domain.Models.V1WorkflowInstanceStatus.CorrelationContext">
+            <summary>
+            Gets <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>'s <see cref="T:Synapse.Domain.Models.V1CorrelationContext"/>
             </summary>
         </member>
         <member name="P:Synapse.Domain.Models.V1WorkflowInstanceStatus.Interruptions">
@@ -1546,11 +2173,78 @@
             Gets/sets the name of the <see cref="T:ServerlessWorkflow.Sdk.Models.SwitchCaseDefinition"/> the <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/> processes
             </summary>
         </member>
+        <member name="P:Synapse.Domain.Models.V1WorkflowActivityMetadata.TriggerId">
+            <summary>
+            Gets/sets the id of the <see cref="T:ServerlessWorkflow.Sdk.Models.EventStateTriggerDefinition"/> the <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/> processes
+            </summary>
+        </member>
+        <member name="P:Synapse.Domain.Models.V1WorkflowActivityMetadata.Event">
+            <summary>
+            Gets/sets the name of the <see cref="T:ServerlessWorkflow.Sdk.Models.EventDefinition"/> the <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/> processes
+            </summary>
+        </member>
+        <member name="T:Synapse.Domain.Models.V1Workflow">
+            <summary>
+            Represents an instance of a <see cref="T:Synapse.Domain.Models.V1WorkflowDefinition"/>
+            </summary>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1Workflow.#ctor">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Domain.Models.V1Workflow"/>
+            </summary>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1Workflow.#ctor(Synapse.Domain.Models.V1WorkflowSpec)">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Domain.Models.V1Workflow"/>
+            </summary>
+            <param name="spec">The <see cref="T:Synapse.Domain.Models.V1Workflow"/>'s spec</param>
+        </member>
         <member name="P:Synapse.Domain.Models.V1Workflow.Patch">
             <inheritdoc/>
         </member>
         <member name="P:Synapse.Domain.Models.V1Workflow.StatusPatch">
             <inheritdoc/>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1Workflow.StartProcessing">
+            <summary>
+            Starts processing the <see cref="T:Synapse.Domain.Models.V1Workflow"/>
+            </summary>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1Workflow.Label">
+            <summary>
+            Labels the <see cref="T:Synapse.Domain.Models.V1Workflow"/>
+            </summary>
+            <returns>A boolean indicating whether or not the operation was successfull</returns>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1Workflow.SetValidationResult(FluentValidation.Results.ValidationResult)">
+            <summary>
+            Sets the <see cref="T:Synapse.Domain.Models.V1Workflow"/>'s <see cref="T:FluentValidation.Results.ValidationResult"/>
+            </summary>
+            <param name="validationResult">The <see cref="T:Synapse.Domain.Models.V1Workflow"/>'s <see cref="T:FluentValidation.Results.ValidationResult"/></param>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1Workflow.Fault(System.Exception)">
+            <summary>
+            Faults the <see cref="T:Synapse.Domain.Models.V1Workflow"/>
+            </summary>
+            <param name="ex">The <see cref="T:System.Exception"/> that has occured while processing the <see cref="T:Synapse.Domain.Models.V1Workflow"/></param>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1Workflow.On(Synapse.Domain.Events.Workflows.V1WorkflowProcessingStarted)">
+            <summary>
+            Handles the specified <see cref="T:Synapse.Domain.Events.Workflows.V1WorkflowProcessingStarted"/>
+            </summary>
+            <param name="e">The <see cref="T:Synapse.Domain.Events.Workflows.V1WorkflowProcessingStarted"/> to handle</param>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1Workflow.On(Synapse.Domain.Events.Workflows.V1WorkflowValidationCompleted)">
+            <summary>
+            Handles the specified <see cref="T:Synapse.Domain.Events.Workflows.V1WorkflowValidationCompleted"/>
+            </summary>
+            <param name="e">The <see cref="T:Synapse.Domain.Events.Workflows.V1WorkflowValidationCompleted"/> to handle</param>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1Workflow.On(Synapse.Domain.Events.Workflows.V1WorkflowProcessingFaulted)">
+            <summary>
+            Handles the specified <see cref="T:Synapse.Domain.Events.Workflows.V1WorkflowProcessingFaulted"/>
+            </summary>
+            <param name="e">The <see cref="T:Synapse.Domain.Events.Workflows.V1WorkflowProcessingFaulted"/> to handle</param>
         </member>
         <member name="T:Synapse.Domain.Models.V1WorkflowDefinition">
             <summary>
@@ -1572,6 +2266,54 @@
             Initializes a new <see cref="T:Synapse.Domain.Models.V1WorkflowDefinition"/>
             </summary>
         </member>
+        <member name="T:Synapse.Domain.Models.V1WorkflowReference">
+            <summary>
+            Represents a reference to a <see cref="T:ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/>
+            </summary>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1WorkflowReference.#ctor">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Domain.Models.V1WorkflowReference"/>
+            </summary>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1WorkflowReference.#ctor(System.String,System.String)">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Domain.Models.V1WorkflowReference"/>
+            </summary>
+            <param name="id">The id of the <see cref="T:ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/> to reference</param>
+            <param name="version">The version of the <see cref="T:ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/> to reference</param>
+        </member>
+        <member name="P:Synapse.Domain.Models.V1WorkflowReference.Id">
+            <summary>
+            Gets the id of the <see cref="T:ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/> to reference
+            </summary>
+        </member>
+        <member name="P:Synapse.Domain.Models.V1WorkflowReference.Version">
+            <summary>
+            Gets the version of the <see cref="T:ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/> to reference
+            </summary>
+        </member>
+        <member name="T:Synapse.Domain.Models.V1WorkflowSpec">
+            <summary>
+            Represents a <see cref="T:Synapse.Domain.Models.V1Workflow"/>'s spec
+            </summary>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1WorkflowSpec.#ctor">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Domain.Models.V1WorkflowSpec"/>
+            </summary>
+        </member>
+        <member name="M:Synapse.Domain.Models.V1WorkflowSpec.#ctor(ServerlessWorkflow.Sdk.Models.WorkflowDefinition)">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Domain.Models.V1WorkflowSpec"/>
+            </summary>
+            <param name="definition">The <see cref="T:Synapse.Domain.Models.V1Workflow"/>'s <see cref="T:ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/></param>
+        </member>
+        <member name="P:Synapse.Domain.Models.V1WorkflowSpec.Definition">
+            <summary>
+            Gets the <see cref="T:Synapse.Domain.Models.V1Workflow"/>'s <see cref="T:ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/>
+            </summary>
+        </member>
         <member name="T:Synapse.Domain.Models.V1WorkflowStatus">
             <summary>
             Represents the status of a <see cref="T:Synapse.Domain.Models.V1Workflow"/>
@@ -1585,6 +2327,16 @@
         <member name="P:Synapse.Domain.Models.V1WorkflowStatus.Errors">
             <summary>
             Gets a <see cref="T:System.Collections.Generic.List`1"/> containing all the <see cref="T:Synapse.Domain.Models.V1Error"/>s that have occured during the processing of the <see cref="T:Synapse.Domain.Models.V1Workflow"/>
+            </summary>
+        </member>
+        <member name="T:Synapse.Domain.Models.V1WorkflowValidationStatus">
+            <summary>
+            Represents the object used to describe a <see cref="T:Synapse.Domain.Models.V1Workflow"/>'s validation status
+            </summary>
+        </member>
+        <member name="P:Synapse.Domain.Models.V1WorkflowValidationStatus.State">
+            <summary>
+            Gets the <see cref="T:Synapse.Domain.Models.V1Workflow"/>'s validation state
             </summary>
         </member>
         <member name="T:Synapse.Domain.Properties.Resources">
@@ -1920,6 +2672,66 @@
             <param name="ex">The <see cref="T:System.Exception"/> to convert</param>
             <returns>A new <see cref="T:Synapse.Domain.Models.V1Error"/></returns>
         </member>
+        <member name="T:Synapse.SynapseCustomResources">
+            <summary>
+            Exposes Synapse <see cref="T:Neuroglia.K8s.ICustomResourceDefinition"/>s
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseCustomResources.Workflow">
+            <summary>
+            Gets Synapse's <see cref="T:Synapse.Domain.Models.V1WorkflowDefinition"/>
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseCustomResources.WorkflowInstance">
+            <summary>
+            Gets Synapse's <see cref="T:Synapse.Domain.Models.V1WorkflowInstanceDefinition"/>
+            </summary>
+        </member>
+        <member name="T:Synapse.V1TriggerConditionType">
+            <summary>
+            Enumerates all supported <see cref="T:Synapse.Domain.Models.V1Trigger"/> condition types
+            </summary>
+        </member>
+        <member name="F:Synapse.V1TriggerConditionType.AnyOf">
+            <summary>
+            Indicates that the trigger should fire if any of its conditions are met
+            </summary>
+        </member>
+        <member name="F:Synapse.V1TriggerConditionType.AllOf">
+            <summary>
+            Indicates that the trigger should fire only if all of its conditions are met
+            </summary>
+        </member>
+        <member name="T:Synapse.V1TriggerCorrelationMode">
+            <summary>
+            Enumerates all supported <see cref="T:Synapse.Domain.Models.V1Trigger"/> correlation modes
+            </summary>
+        </member>
+        <member name="F:Synapse.V1TriggerCorrelationMode.Exclusive">
+            <summary>
+            Indicates that the trigger is pending activation
+            </summary>
+        </member>
+        <member name="F:Synapse.V1TriggerCorrelationMode.Parallel">
+            <summary>
+            Indicates that the trigger is pending activation
+            </summary>
+        </member>
+        <member name="T:Synapse.V1TriggerOutcomeType">
+            <summary>
+            Enumerates all possible types of trigger outcomes 
+            </summary>
+        </member>
+        <member name="F:Synapse.V1TriggerOutcomeType.Run">
+            <summary>
+            Indicates that the trigger should create and run a new workflow instance
+            </summary>
+        </member>
+        <member name="F:Synapse.V1TriggerOutcomeType.Resume">
+            <summary>
+            Indicates that the trigger should resume the execution of an existing workflow instance
+            </summary>
+        </member>
         <member name="T:Synapse.V1WorkflowActivityStatus">
             <summary>
             Enumerates all supported values for a <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/> status
@@ -2000,7 +2812,7 @@
             Indicates an activity that produces an output <see cref="T:CloudNative.CloudEvents.CloudEvent"/>
             </summary>
         </member>
-        <member name="F:Synapse.V1WorkflowActivityType.EventTrigger">
+        <member name="F:Synapse.V1WorkflowActivityType.EventStateTrigger">
             <summary>
             Indicates an activity that processes an event trigger
             </summary>

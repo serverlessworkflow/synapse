@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using CloudNative.CloudEvents;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Rest;
 using Newtonsoft.Json.Linq;
 using ServerlessWorkflow.Sdk.Models;
 using Synapse.Domain.Models;
@@ -28,14 +28,16 @@ namespace Synapse.Runner.Application.Services
         /// <param name="applicationLifetime">The service used to manage the application's lifetime</param>
         /// <param name="expressionEvaluatorFactory">The service used to create <see cref="IExpressionEvaluator"/>s</param>
         /// <param name="definitions">The <see cref="IRepository{TResource}"/> used to manage <see cref="V1Workflow"/>s</param>
-        /// <param name="definitions">The <see cref="IRepository{TResource}"/> used to manage <see cref="V1WorkflowInstance"/>s</param>
-        public WorkflowExecutionContext(ILogger<WorkflowExecutionContext> logger, IHostApplicationLifetime applicationLifetime, IExpressionEvaluatorFactory expressionEvaluatorFactory, IRepository<V1Workflow> definitions, IRepository<V1WorkflowInstance> instances)
+        /// <param name="instances">The <see cref="IRepository{TResource}"/> used to manage <see cref="V1WorkflowInstance"/>s</param>
+        /// <param name="cloudEventFormatter">The service used to format <see cref="CloudEvent"/>s</param>
+        public WorkflowExecutionContext(ILogger<WorkflowExecutionContext> logger, IHostApplicationLifetime applicationLifetime, IExpressionEvaluatorFactory expressionEvaluatorFactory, IRepository<V1Workflow> definitions, IRepository<V1WorkflowInstance> instances, ICloudEventFormatter cloudEventFormatter)
         {
             this.Logger = logger;
             this.ApplicationLifetime = applicationLifetime;
             this.ExpressionEvaluatorFactory = expressionEvaluatorFactory;
             this.Definitions = definitions;
             this.Instances = instances;
+            this.CloudEventFormatter = cloudEventFormatter;
         }
 
         /// <summary>
@@ -52,6 +54,11 @@ namespace Synapse.Runner.Application.Services
         /// Gets the service used to create <see cref="IExpressionEvaluator"/>s
         /// </summary>
         protected IExpressionEvaluatorFactory ExpressionEvaluatorFactory { get; }
+
+        /// <summary>
+        /// Gets the service used to format <see cref="CloudEvent"/>s
+        /// </summary>
+        protected ICloudEventFormatter CloudEventFormatter { get; }
 
         /// <summary>
         /// Gets the <see cref="IRepository{TResource}"/> used to manage <see cref="V1Workflow"/>s
@@ -151,17 +158,50 @@ namespace Synapse.Runner.Application.Services
         }
 
         /// <inheritdoc/>
+        public virtual async Task<bool> TryCorrelateAsync(CloudEvent e, IEnumerable<string> contextAttributes, CancellationToken cancellationToken)
+        {
+            if (e == null)
+                throw new ArgumentNullException(nameof(e));
+            if (!this.Instance.Status.CorrelationContext.CorrelatesTo(e))
+                return false;
+            this.Instance.Correlate(V1CloudEvent.CreateFor(e, this.CloudEventFormatter), contextAttributes);
+            this.Instance = await this.Instances.UpdateAsync(this.Instance, cancellationToken);
+            return true;
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<CloudEvent> GetBoostrapEventAsync(EventDefinition eventDefinition, CancellationToken cancellationToken = default)
+        {
+            if (eventDefinition == null)
+                throw new ArgumentNullException(nameof(eventDefinition));
+            V1CloudEvent e = this.Instance.Status.CorrelationContext.BootstrapEvents.FirstOrDefault(e => e.Matches(eventDefinition));
+            if (e == null)
+                return null;
+            this.Instance.ConsumeBootstrapEvent(e);
+            this.Instance = await this.Instances.UpdateAsync(this.Instance, cancellationToken);
+            return e.ToCloudEvent(this.CloudEventFormatter);
+        }
+
+        /// <inheritdoc/>
         public virtual async Task<List<V1WorkflowActivity>> ListChildActivitiesAsync(CancellationToken cancellationToken = default)
         {
             return await Task.Run(() => this.Instance.Status.ActivityLog.ToList().Where(a => a.Status == V1WorkflowActivityStatus.Pending && !a.ParentId.HasValue).ToList(), cancellationToken);
         }
 
         /// <inheritdoc/>
-        public virtual async Task<List<V1WorkflowActivity>> ListChildActivitiesAsync(V1WorkflowActivity activity, CancellationToken cancellationToken = default)
+        public virtual async Task<List<V1WorkflowActivity>> ListActiveChildActivitiesAsync(V1WorkflowActivity activity, CancellationToken cancellationToken = default)
         {
             if (activity == null)
                 throw new ArgumentNullException(nameof(activity));
-            return await Task.Run(() => this.Instance.Status.ActivityLog.ToList().Where(a => a.ParentId.HasValue && a.ParentId == activity.Id).ToList(), cancellationToken);
+            return await this.ListChildActivitiesAsync(activity, false, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<List<V1WorkflowActivity>> ListChildActivitiesAsync(V1WorkflowActivity activity, bool includeInactive = false, CancellationToken cancellationToken = default)
+        {
+            if (activity == null)
+                throw new ArgumentNullException(nameof(activity));
+            return await Task.Run(() => this.Instance.Status.ActivityLog.ToList().Where(a => includeInactive ? true : a.IsActive && a.ParentId.HasValue && a.ParentId == activity.Id).ToList(), cancellationToken);
         }
 
         /// <inheritdoc/>
@@ -249,7 +289,6 @@ namespace Synapse.Runner.Application.Services
             this.Instance = await this.Instances.UpdateAsync(this.Instance, cancellationToken);
             return this.Instance.Status.ActivityLog.Single(a => a.Id == activity.Id);
         }
-
     }
 
 }

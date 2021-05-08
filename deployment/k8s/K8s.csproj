@@ -4,9 +4,13 @@
     <ProjectGuid>{3066A901-72F5-486B-9BA6-A795930638C9}</ProjectGuid>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="crds\v1\v1-trigger.yaml" />
     <None Include="crds\v1\v1-workflow-instance.yaml" />
     <None Include="crds\v1\v1-workflow.yaml" />
+    <None Include="correlator.yaml" />
     <None Include="operator.yaml" />
+    <None Include="samples\triggers\trigger1.yaml" />
+    <None Include="samples\workflows\event.yaml" />
     <None Include="samples\workflows\inject.instance.yaml" />
     <None Include="samples\workflows\inject.yaml" />
     <None Include="samples\workflows\operation.yaml" />

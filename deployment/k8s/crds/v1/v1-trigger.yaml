@@ -1,0 +1,95 @@
+﻿apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: triggers.synapse.io
+spec:
+  scope: Namespaced
+  names:
+    plural: triggers
+    singular: trigger
+    kind: Trigger
+  group: synapse.io
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      subresources:
+        status: {}
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                correlationMode:
+                  type: string
+                  enum:
+                    - EXCLUSIVE
+                    - PARALLEL
+                conditionType:
+                  type: string
+                  enum:
+                    - ANY
+                    - ALL
+                conditions:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      filters:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            contextAttributes:
+                              type: object
+                              x-kubernetes-preserve-unknown-fields: true
+                            correlations:
+                              type: object
+                              x-kubernetes-preserve-unknown-fields: true
+                    required:
+                        - filters
+                outcome:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      enum:
+                        - RUN
+                        - RESUME
+                    workflow:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        version:
+                          type: string
+                      required:
+                        - id
+                        - version
+                    workflowInstance:
+                      type: string
+              required:
+                - correlationMode
+                - conditionType
+                - conditions
+                - outcome
+            status:
+              type: object
+              properties:
+                correlationContexts:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      contextAttributes:
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                      bootstrapEvents:
+                        type: array
+                        items:
+                          type: object
+                          x-kubernetes-preserve-unknown-fields: true
