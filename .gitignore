@@ -1,7 +1,7 @@
-.vscode
-.vs
-obj/
-bin/
+**/.vscode
+**/.vs
+**/obj/
+**/bin/
 **/TestResults
 
 # User-specific VS files
