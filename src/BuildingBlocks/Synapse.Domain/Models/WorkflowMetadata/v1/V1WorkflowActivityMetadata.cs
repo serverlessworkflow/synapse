@@ -28,6 +28,18 @@ namespace Synapse.Domain.Models
         [JsonProperty("case")]
         public string Case { get; set; }
 
+        /// <summary>
+        /// Gets/sets the id of the <see cref="EventStateTriggerDefinition"/> the <see cref="V1WorkflowActivity"/> processes
+        /// </summary>
+        [JsonProperty("triggerId")]
+        public int? TriggerId { get; set; }
+
+        /// <summary>
+        /// Gets/sets the name of the <see cref="EventDefinition"/> the <see cref="V1WorkflowActivity"/> processes
+        /// </summary>
+        [JsonProperty("event")]
+        public string Event { get; set; }
+
     }
 
 }

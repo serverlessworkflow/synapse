@@ -83,7 +83,7 @@ namespace Synapse.Cli.Services
             if (string.IsNullOrWhiteSpace(reference))
                 throw new ArgumentNullException(nameof(reference));
             string id = reference.Split(":", StringSplitOptions.RemoveEmptyEntries).First();
-            string version = reference.Substring(id.Length + 1);
+            string version = reference[(id.Length + 1)..];
             return await this.Workflows.FindAsync(id, version, cancellationToken);
         }
 
@@ -94,7 +94,7 @@ namespace Synapse.Cli.Services
                 throw new ArgumentNullException(nameof(stream));
             return await Task.Run(() => 
             {
-                V1Workflow workflow = new V1Workflow(new V1WorkflowSpec(this.WorkflowReader.Read(stream, definitionFormat)));
+                V1Workflow workflow = new(new V1WorkflowSpec(this.WorkflowReader.Read(stream, definitionFormat)));
                 workflow.Metadata = new V1ObjectMeta() { Name = $"{workflow.Spec.Definition.Id}-{workflow.Spec.Definition.Version.Slugify("-")}".ToLower() };
                 return workflow;
             }, cancellationToken);
@@ -114,7 +114,7 @@ namespace Synapse.Cli.Services
             while ((workflow.Status == null || workflow.Status.Type < V1WorkflowDefinitionStatus.Valid)
                 && !cancellationToken.IsCancellationRequested)
             {
-                await Task.Delay(50);
+                await Task.Delay(50, cancellationToken);
                 workflow = await this.Workflows.FindByNameAsync(workflow.Name(), workflow.Namespace(), cancellationToken);
             }
             if(cancellationToken.IsCancellationRequested)
@@ -159,7 +159,7 @@ namespace Synapse.Cli.Services
             while ((workflowInstance.Status == null || workflowInstance.Status.Type < V1WorkflowActivityStatus.Faulted)
                && !cancellationToken.IsCancellationRequested)
             {
-                await Task.Delay(50);
+                await Task.Delay(50, cancellationToken);
                 workflowInstance = await this.WorkflowInstances.FindByNameAsync(workflowInstance.Name(), workflowInstance.Namespace(), cancellationToken);
             }
             if (cancellationToken.IsCancellationRequested)

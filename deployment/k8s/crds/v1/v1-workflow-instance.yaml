@@ -34,6 +34,19 @@ spec:
                 input:
                   type: object
                   x-kubernetes-preserve-unknown-fields: true
+                correlationContext:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    contextAttributes:
+                      type: object
+                      x-kubernetes-preserve-unknown-fields: true
+                    bootstrapEvents:
+                      type: array
+                      items:
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
               required:
                 - definition
                 - input
@@ -54,6 +67,19 @@ spec:
                     - TERMINATED
                     - FAULTED
                     - TIMEDOUT
+                correlationContext:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    contextAttributes:
+                      type: object
+                      x-kubernetes-preserve-unknown-fields: true
+                    bootstrapEvents:
+                      type: array
+                      items:
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
                 initializedAt:
                   type: string
                 deployedAt:

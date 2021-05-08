@@ -3,9 +3,10 @@
   <metadata>
     <id>synctl</id>
     <version>0.1.0</version>
-    <authors>synctl</authors>
+    <authors>The Synapse authors</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Package Description</description>
+    <copyright>Copyright</copyright>
     <dependencies>
       <group targetFramework="net5.0">
         <dependency id="Synapse.Infrastructure" version="1.0.0" exclude="Build,Analyzers" />

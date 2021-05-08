@@ -1,4 +1,5 @@
-﻿using k8s.Models;
+﻿using CloudNative.CloudEvents;
+using k8s.Models;
 using Microsoft.AspNetCore.JsonPatch;
 using Newtonsoft.Json.Linq;
 using ServerlessWorkflow.Sdk.Models;
@@ -11,7 +12,7 @@ namespace Synapse.Domain.Models
 {
 
     /// <summary>
-    /// Represents an instance of a <see cref="V1Workflow"/>
+    /// Represents an instance of a <see cref="V1WorkflowDefinition"/>
     /// </summary>
     public class V1WorkflowInstance
         : CustomResourceAggregate<V1WorkflowInstanceSpec, V1WorkflowInstanceStatus>
@@ -24,6 +25,16 @@ namespace Synapse.Domain.Models
             : base(new V1WorkflowInstanceDefinition())
         {
 
+        }
+
+        /// <summary>
+        /// Initializes a new <see cref="V1WorkflowInstance"/>
+        /// </summary>
+        /// <param name="spec">The <see cref="V1WorkflowInstance"/>'s spec</param>
+        public V1WorkflowInstance(V1WorkflowInstanceSpec spec)
+            : this()
+        {
+            this.Spec = spec ?? throw new ArgumentNullException(nameof(spec));
         }
 
         /// <inheritdoc/>
@@ -140,6 +151,37 @@ namespace Synapse.Domain.Models
                 default:
                     throw DomainException.UnexpectedState(typeof(V1WorkflowInstance), this.Id, this.Status.Type);
             }
+        }
+
+        /// <summary>
+        /// Correlates the specified <see cref="CloudEvent"/>
+        /// </summary>
+        /// <param name="e">The <see cref="V1CloudEvent"/> to correlate</param>
+        /// <param name="contextAttributes">An <see cref="IEnumerable{T}"/> containing the context attributes used to correlate the specified <see cref="V1CloudEvent"/></param>
+        public virtual void Correlate(V1CloudEvent e, IEnumerable<string> contextAttributes)
+        {
+            if (e == null)
+                throw DomainException.ArgumentNull(nameof(e));
+            if(contextAttributes == null)
+                contextAttributes = Array.Empty<string>();
+            if (this.Status.Type != V1WorkflowActivityStatus.Executing)
+                throw DomainException.UnexpectedState(typeof(V1WorkflowInstance), this.Id, this.Status.Type);
+            this.On(this.RegisterEvent(new V1WorkflowInstanceCloudEventCorrelatedDomainEvent(this.Id, e, contextAttributes)));
+        }
+
+        /// <summary>
+        /// Consumes the specified <see cref="V1CloudEvent"/>
+        /// </summary>
+        /// <param name="e">The <see cref="V1CloudEvent"/> to consume</param>
+        public virtual void ConsumeBootstrapEvent(V1CloudEvent e)
+        {
+            if (e == null)
+                throw new ArgumentNullException(nameof(e));
+            int index = this.Status.CorrelationContext.BootstrapEvents.IndexOf(e);
+            if (index < 0)
+                return;
+            this.StatusPatch.Remove(w => w.Status.CorrelationContext.BootstrapEvents, index);
+            this.StatusPatch.ApplyTo(this);
         }
 
         /// <summary>
@@ -330,7 +372,7 @@ namespace Synapse.Domain.Models
         /// <summary>
         /// Sets the <see cref="V1WorkflowInstance"/>'s output
         /// </summary>
-        /// <param name="result">The <see cref="V1WorkflowInstance"/>'s output</param>
+        /// <param name="output">The <see cref="V1WorkflowInstance"/>'s output</param>
         public virtual void SetOutput(JToken output)
         {
             if (output == null)
@@ -346,7 +388,10 @@ namespace Synapse.Domain.Models
         /// <param name="e">The <see cref="V1WorkflowInstanceInitializingDomainEvent"/> to handle</param>
         protected virtual void On(V1WorkflowInstanceInitializingDomainEvent e)
         {
-            this.StatusPatch.Replace(w => w.Status, new V1WorkflowInstanceStatus() { Type = V1WorkflowActivityStatus.Initializing });
+            V1WorkflowInstanceStatus status = new V1WorkflowInstanceStatus() { Type = V1WorkflowActivityStatus.Initializing };
+            if (this.Spec.CorrelationContext != null)
+                status.CorrelationContext = this.Spec.CorrelationContext;
+            this.StatusPatch.Replace(w => w.Status, status);
             this.StatusPatch.Replace(w => w.Status.InitializedAt, DateTimeOffset.Now);
             this.StatusPatch.ApplyTo(this);
         }
@@ -395,6 +440,17 @@ namespace Synapse.Domain.Models
             interruption.Resume(DateTimeOffset.Now);
             this.StatusPatch.Replace(w => w.Status.Type, V1WorkflowActivityStatus.Executing);
             this.StatusPatch.Replace(w => w.Status.Interruptions, interruption, interruptionIndex);
+            this.StatusPatch.ApplyTo(this);
+        }
+
+        /// <summary>
+        /// Handles the specified <see cref="V1WorkflowInstanceCloudEventCorrelatedDomainEvent"/>
+        /// </summary>
+        /// <param name="e">The <see cref="V1WorkflowInstanceCloudEventCorrelatedDomainEvent"/> to handle</param>
+        protected virtual void On(V1WorkflowInstanceCloudEventCorrelatedDomainEvent e)
+        {
+            this.Status.CorrelationContext.Correlate(e.CloudEvent, e.ContextAttributes);
+            this.StatusPatch.Replace(w => w.Status.CorrelationContext, this.Status.CorrelationContext);
             this.StatusPatch.ApplyTo(this);
         }
 

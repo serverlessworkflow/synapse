@@ -41,8 +41,8 @@ namespace Synapse
         /// <summary>
         /// Indicates an activity that processes an event trigger
         /// </summary>
-        [EnumMember(Value = "EVENTTRIGGER")]
-        EventTrigger,
+        [EnumMember(Value = "EVENT_TRIGGER")]
+        EventStateTrigger,
         /// <summary>
         /// Indicates an activity that processes a function call
         /// </summary>

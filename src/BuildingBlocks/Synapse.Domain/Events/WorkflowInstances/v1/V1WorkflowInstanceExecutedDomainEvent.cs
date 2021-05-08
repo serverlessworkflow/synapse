@@ -23,7 +23,7 @@ namespace Synapse.Domain.Events.WorkflowInstances
         /// Initializes a new <see cref="V1WorkflowInstanceExecutedDomainEvent"/>
         /// </summary>
         /// <param name="workflowId">The id of the <see cref="V1WorkflowInstance"/> that has been executed</param>
-        /// <param name="executionResult">The <see cref="V1WorkflowInstance"/>'s output</param>
+        /// <param name="output">The <see cref="V1WorkflowInstance"/>'s output</param>
         public V1WorkflowInstanceExecutedDomainEvent(string workflowId, JToken output)
         {
             this.AggregateId = workflowId;

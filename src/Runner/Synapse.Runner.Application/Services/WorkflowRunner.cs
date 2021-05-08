@@ -1,4 +1,5 @@
-﻿using ConcurrentCollections;
+﻿using CloudNative.CloudEvents;
+using ConcurrentCollections;
 using k8s.Models;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -9,6 +10,7 @@ using Synapse.Domain.Models;
 using Synapse.Runner.Application.Configuration;
 using System;
 using System.Linq;
+using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -30,13 +32,18 @@ namespace Synapse.Runner.Application.Services
         /// <param name="executionContext">The current <see cref="IWorkflowExecutionContext"/></param>
         /// <param name="activityProcessorFactory">The service used to create <see cref="IWorkflowActivityProcessor"/>s</param>
         /// <param name="applicationOptions">The service used to access the current <see cref="Configuration.ApplicationOptions"/></param>
-        public WorkflowRunner(ILogger<WorkflowRunner> logger, IHostApplicationLifetime applicationLifetime, IWorkflowExecutionContext executionContext, IWorkflowActivityProcessorFactory activityProcessorFactory, IOptions<ApplicationOptions> applicationOptions)
+        /// <param name="cloudEventFormatter">The service used to format <see cref="CloudEvent"/>s</param>
+        /// <param name="cloudEventStream">The <see cref="Subject{T}"/> used to monitor consumed <see cref="CloudEvent"/>s</param>
+        public WorkflowRunner(ILogger<WorkflowRunner> logger, IHostApplicationLifetime applicationLifetime, IWorkflowExecutionContext executionContext, IWorkflowActivityProcessorFactory activityProcessorFactory, 
+            IOptions<ApplicationOptions> applicationOptions, ICloudEventFormatter cloudEventFormatter, Subject<CloudEvent> cloudEventStream)
         {
             this.Logger = logger;
             this.ApplicationLifetime = applicationLifetime;
             this.ExecutionContext = executionContext;
             this.ActivityProcessorFactory = activityProcessorFactory;
             this.ApplicationOptions = applicationOptions.Value;
+            this.CloudEventFormatter = cloudEventFormatter;
+            this.CloudEventStream = cloudEventStream;
         }
         
         /// <summary>
@@ -63,6 +70,16 @@ namespace Synapse.Runner.Application.Services
         /// Gets the service used to create <see cref="IWorkflowActivityProcessor"/>s
         /// </summary>
         protected IWorkflowActivityProcessorFactory ActivityProcessorFactory { get; }
+
+        /// <summary>
+        /// Gets the service used to format <see cref="CloudEvent"/>s
+        /// </summary>
+        protected ICloudEventFormatter CloudEventFormatter { get; }
+
+        /// <summary>
+        /// Gets the <see cref="Subject{T}"/> used to monitor consumed <see cref="CloudEvent"/>s
+        /// </summary>
+        protected Subject<CloudEvent> CloudEventStream { get; }
 
         /// <summary>
         /// Gets the <see cref="WorkflowRunner"/>'s <see cref="CancellationTokenSource"/>
@@ -110,7 +127,6 @@ namespace Synapse.Runner.Application.Services
                     default:
                         throw new InvalidOperationException($"The workflow instance '{this.ExecutionContext.Instance.Name()}' is in an unexpected state '{this.ExecutionContext.Instance.Status.Type}'");
                 }
-                this.Logger.LogInformation($"Runner context initialized");
                 foreach (V1WorkflowActivity activity in await this.ExecutionContext.ListChildActivitiesAsync(cancellationToken))
                 {
                     IWorkflowActivityProcessor processor = this.CreateProcessorFor(activity);
@@ -353,6 +369,7 @@ namespace Synapse.Runner.Application.Services
             {
                 this.Logger.LogWarning($"An error occured while executing the workflow instance{Environment.NewLine}Details: {{ex}}", ex.ToString());
                 await this.ExecutionContext.FaultWorkflowAsync(ex, cancellationToken);
+                this.ApplicationLifetime.StopApplication();
             }
             catch (Exception cex)
             {

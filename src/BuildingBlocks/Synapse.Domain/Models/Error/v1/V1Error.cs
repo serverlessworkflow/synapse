@@ -32,13 +32,13 @@ namespace Synapse.Domain.Models
         /// Gets the error's code
         /// </summary>
         [JsonProperty("code")]
-        public string Code { get; protected set; }
+        public string Code { get; set; }
 
         /// <summary>
         /// Gets the error's message
         /// </summary>
         [JsonProperty("message")]
-        public string Message { get; protected set; }
+        public string Message { get; set; }
 
     }
 

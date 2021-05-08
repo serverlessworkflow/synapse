@@ -1088,7 +1088,7 @@
           }
         }
       },
-      "Synapse.Core/1.0.0": {
+      "Synapse.Core/0.1.0": {
         "dependencies": {
           "Microsoft.AspNetCore.JsonPatch": "5.0.5",
           "Neuroglia.K8s": "1.0.1.3",
@@ -1099,9 +1099,9 @@
           "Synapse.Core.dll": {}
         }
       },
-      "Synapse.Domain/1.0.0": {
+      "Synapse.Domain/0.1.0": {
         "dependencies": {
-          "Synapse.Core": "1.0.0"
+          "Synapse.Core": "0.1.0"
         },
         "runtime": {
           "Synapse.Domain.dll": {}
@@ -1110,7 +1110,7 @@
       "Synapse.Infrastructure/1.0.0": {
         "dependencies": {
           "Microsoft.Extensions.Http": "5.0.0",
-          "Synapse.Domain": "1.0.0"
+          "Synapse.Domain": "0.1.0"
         },
         "runtime": {
           "Synapse.Infrastructure.dll": {}
@@ -1922,12 +1922,12 @@
       "path": "yamldotnet/10.1.0",
       "hashPath": "yamldotnet.10.1.0.nupkg.sha512"
     },
-    "Synapse.Core/1.0.0": {
+    "Synapse.Core/0.1.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
     },
-    "Synapse.Domain/1.0.0": {
+    "Synapse.Domain/0.1.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

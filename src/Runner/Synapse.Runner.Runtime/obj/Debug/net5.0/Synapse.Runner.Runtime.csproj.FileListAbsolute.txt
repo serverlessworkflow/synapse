@@ -63,3 +63,12 @@ C:\Dev\Synapse\src\Runner\Synapse.Runner.Runtime\bin\Debug\net5.0\SharpYaml.dll
 C:\Dev\Synapse\src\Runner\Synapse.Runner.Runtime\bin\Debug\net5.0\Synapse.Runner.Application.xml
 C:\Dev\Synapse\src\Runner\Synapse.Runner.Runtime\bin\Debug\net5.0\Synapse.Core.xml
 C:\Dev\Synapse\src\Runner\Synapse.Runner.Runtime\bin\Debug\net5.0\Synapse.Domain.xml
+C:\Dev\Synapse\src\Runner\Synapse.Runner.Runtime\bin\Debug\net5.0\Serilog.dll
+C:\Dev\Synapse\src\Runner\Synapse.Runner.Runtime\bin\Debug\net5.0\Serilog.Extensions.Logging.dll
+C:\Dev\Synapse\src\Runner\Synapse.Runner.Runtime\bin\Debug\net5.0\Serilog.Sinks.Console.dll
+C:\Dev\Synapse\src\Runner\Synapse.Runner.Runtime\bin\Debug\net5.0\CloudNative.CloudEvents.AspNetCore.dll
+C:\Dev\Synapse\src\Runner\Synapse.Runner.Runtime\bin\Debug\net5.0\Microsoft.DotNet.PlatformAbstractions.dll
+C:\Dev\Synapse\src\Runner\Synapse.Runner.Runtime\bin\Debug\net5.0\Microsoft.Extensions.DependencyModel.dll
+C:\Dev\Synapse\src\Runner\Synapse.Runner.Runtime\bin\Debug\net5.0\Synapse.Infrastructure.AspNet.dll
+C:\Dev\Synapse\src\Runner\Synapse.Runner.Runtime\bin\Debug\net5.0\Synapse.Infrastructure.AspNet.pdb
+C:\Dev\Synapse\src\Runner\Synapse.Runner.Runtime\obj\Debug\net5.0\Synapse.Runner.Runtime.MvcApplicationPartsAssemblyInfo.cs

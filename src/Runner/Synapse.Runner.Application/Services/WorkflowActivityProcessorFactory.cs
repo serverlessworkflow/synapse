@@ -45,8 +45,8 @@ namespace Synapse.Runner.Application.Services
         {
             if (activity == null)
                 throw new ArgumentNullException(nameof(activity));
-            StateDefinition state = null;
-            if (!this.ExecutionContext.Definition.Spec.Definition.TryGetState(activity.Metadata.State, out state))
+            EventStateTriggerDefinition trigger = null;
+            if (!this.ExecutionContext.Definition.Spec.Definition.TryGetState(activity.Metadata.State, out StateDefinition state))
                 throw new NullReferenceException($"Failed to find the workflow state with the specified name '{activity.Metadata.State}'");
             switch (activity.Type)
             {
@@ -57,8 +57,8 @@ namespace Synapse.Runner.Application.Services
                         //    return ActivatorUtilities.CreateInstance<CallbackStateProcessor>(this.ServiceProvider, expressionEvaluator, state, activity);
                         //case DelayStateDefinition delayState:
                         //    return ActivatorUtilities.CreateInstance<DelayStateProcessor>(this.ServiceProvider, expressionEvaluator, state, activity);
-                        //case EventStateDefinition eventState:
-                        //    return ActivatorUtilities.CreateInstance<EventStateProcessor>(this.ServiceProvider, expressionEvaluator, state, activity);
+                        case EventStateDefinition eventState:
+                            return ActivatorUtilities.CreateInstance<EventStateProcessor>(this.ServiceProvider, state, activity);
                         //case ForEachStateDefinition forEachState:
                         //    return ActivatorUtilities.CreateInstance<ForEachStateProcessor>(this.ServiceProvider, expressionEvaluator, state, activity);
                         case InjectStateDefinition injectState:
@@ -95,12 +95,12 @@ namespace Synapse.Runner.Application.Services
                         //    if (!branch.TryGetAction(actionPointer.ActionName, out action))
                         //        throw new NullReferenceException($"Failed to find an action with the specified name '{action.Name}' in the branch with name '{branch.Name}'");
                         //    break;
-                        //case EventStateDefinition eventState:
-                        //    if (!eventState.TryGetTrigger(actionPointer.TriggerId.Value, out trigger))
-                        //        throw new NullReferenceException($"Failed to find a branch with the specified name '{actionPointer.BranchName}' in the state with name '{state.Name}'");
-                        //    if (!trigger.TryGetAction(actionPointer.ActionName, out action))
-                        //        throw new NullReferenceException($"Failed to find an action with the specified name '{action.Name}' in the trigger with id '{actionPointer.TriggerId}'");
-                        //    break;
+                        case EventStateDefinition eventState:
+                            if (!eventState.TryGetTrigger(activity.Metadata.TriggerId.Value, out trigger))
+                                throw new NullReferenceException($"Failed to find an event state trigger at the specified index '{activity.Metadata.TriggerId.Value}' in the state with name'{state.Name}'");
+                            if (!trigger.TryGetAction(activity.Metadata.Action, out action))
+                                throw new NullReferenceException($"Failed to find an action with the specified name '{action.Name}' in the trigger with id '{activity.Metadata.TriggerId}'");
+                            break;
                         default:
                             throw new NotSupportedException($"The specified {nameof(StateDefinition)} type '{state.GetType().Name}' is not supported in this context");
                     }
@@ -119,6 +119,16 @@ namespace Synapse.Runner.Application.Services
                         default:
                             throw new NotSupportedException($"The specified {nameof(ActionType)} '{action.Type}' is not supported");
                     }
+                case V1WorkflowActivityType.EventStateTrigger:
+                    if (!((EventStateDefinition)state).TryGetTrigger(activity.Metadata.TriggerId.Value, out trigger))
+                        throw new NullReferenceException($"Failed to find an event state trigger at the specified index '{activity.Metadata.TriggerId.Value}' in the state with name'{state.Name}'");
+                    return ActivatorUtilities.CreateInstance<EventStateTriggerProcessor>(this.ServiceProvider, state, trigger, activity);
+                case V1WorkflowActivityType.ConsumeEvent:
+                    if (!this.ExecutionContext.Definition.Spec.Definition.TryGetEvent(activity.Metadata.Event, out EventDefinition eventToConsume))
+                        throw new NullReferenceException($"Failed to find a event with the specified name '{activity.Metadata.Event}' in the state with name'{state.Name}'");
+                    if (eventToConsume.Kind != EventKind.Consumed)
+                        throw new InvalidOperationException($"The event with name '{eventToConsume.Name}' is of kind '{eventToConsume.Kind}' and therefore cannot be consumed");
+                    return ActivatorUtilities.CreateInstance<ConsumeEventProcessor>(this.ServiceProvider, eventToConsume, activity);
                 case V1WorkflowActivityType.End:
                     return ActivatorUtilities.CreateInstance<EndProcessor>(this.ServiceProvider, state.End, activity);
                 default:

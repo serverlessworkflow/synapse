@@ -13,11 +13,16 @@
         public static class Logging
         {
 
+            /// <summary>
+            /// Gets the Synapse Operator log header
+            /// </summary>
+            /// <returns>The Synapse Operator log header</returns>
             public static string GetHeader()
             {
-                return SynapseConstants.Logging.Header + $@"
-            
-            SYNAPSE OPERATOR {typeof(SynapseOperatorConstants).Assembly.GetName().Version}";
+                return SynapseConstants.Logging.Header + $@"           
+SYNAPSE OPERATOR {typeof(SynapseOperatorConstants).Assembly.GetName().Version}
+
+";
             }
 
         }
