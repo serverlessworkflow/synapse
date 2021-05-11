@@ -58,7 +58,7 @@ namespace Synapse.Services
         public virtual async Task<TResource> AddAsync(TResource resource, CancellationToken cancellationToken = default)
         {
             if (resource == null)
-                throw new ArgumentException(nameof(resource));
+                throw new ArgumentNullException(nameof(resource));
             return ((JObject)await this.Kubernetes.CreateNamespacedCustomObjectAsync(resource, resource.Definition.Group, resource.Definition.Version, resource.Namespace(), resource.Definition.Plural , cancellationToken: cancellationToken)).ToObject<TResource>();
         }
 

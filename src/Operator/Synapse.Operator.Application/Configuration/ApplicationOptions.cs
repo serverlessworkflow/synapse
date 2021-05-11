@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO;
-
-namespace Synapse.Operator.Application.Configuration
+﻿namespace Synapse.Operator.Application.Configuration
 {
 
     /// <summary>
@@ -10,19 +7,10 @@ namespace Synapse.Operator.Application.Configuration
     public class ApplicationOptions
     {
 
+        /// <summary>
+        /// Gets the options used to configure a Synapse Runner
+        /// </summary>
         public RunnerOptions Runner { get; set; } = new RunnerOptions();
-
-    }
-
-    public class RunnerOptions
-    {
-
-        public static string DefaultDeploymentFilePath = Path.Combine(AppContext.BaseDirectory, "Assets", "Charts", "runner.yaml");
-        public const string DefaultNamespace = "default";
-
-        public string DeploymentFilePath { get; set; } = DefaultDeploymentFilePath;
-
-        public string Namespace { get; set; } = DefaultNamespace;
 
     }
 

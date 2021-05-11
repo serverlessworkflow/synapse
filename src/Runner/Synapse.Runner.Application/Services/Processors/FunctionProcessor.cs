@@ -24,7 +24,7 @@ namespace Synapse.Runner.Application.Services.Processors
 {
 
     /// <summary>
-    /// Represents an <see cref="ExecutionPointerProcessor"/> used to process <see cref="ServerlessWorkflow.Sdk.Models.FunctionReference"/>s
+    /// Represents an <see cref="ActionProcessor"/> used to process <see cref="ServerlessWorkflow.Sdk.Models.FunctionReference"/>s
     /// </summary>
     public class FunctionProcessor
         : ActionProcessor
@@ -36,6 +36,7 @@ namespace Synapse.Runner.Application.Services.Processors
         /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
         /// <param name="executionContext">The current <see cref="IWorkflowExecutionContext"/></param>
         /// <param name="activityProcessorFactory">The service used to create <see cref="IWorkflowActivityProcessor"/>s</param>
+        /// <param name="httpClientFactory">The service used to create <see cref="System.Net.Http.HttpClient"/>s</param>
         /// <param name="activity">The <see cref="V1WorkflowActivity"/> to process</param>
         /// <param name="action">The <see cref="ActionDefinition"/> to process</param>
         /// <param name="function">The <see cref="FunctionDefinition"/> to process</param>
@@ -126,25 +127,21 @@ namespace Synapse.Runner.Application.Services.Processors
         protected override async Task InitializeAsync(CancellationToken cancellationToken)
         {
             string[] operationComponents = this.Function.Operation.Split('#');
-            Uri openApiUri = new Uri(operationComponents.First());
+            Uri openApiUri = new(operationComponents.First());
             this.OperationId = operationComponents.Last();
             try
             {
-                using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, openApiUri))
+                using (HttpRequestMessage request = new(HttpMethod.Get, openApiUri))
                 {
-                    using (HttpResponseMessage response = await this.HttpClient.SendAsync(request, cancellationToken))
+                    using HttpResponseMessage response = await this.HttpClient.SendAsync(request, cancellationToken);
+                    if (!response.IsSuccessStatusCode)
                     {
-                        if (!response.IsSuccessStatusCode)
-                        {
-                            this.Logger.LogInformation("Failed to retrieve the Open API document at location '{uri}'. The remote server responded with a non-success status code '{statusCode}'.");
-                            this.Logger.LogDebug($"Response content:{Environment.NewLine}{{responseContent}}", response.Content == null ? "None" : await response.Content.ReadAsStringAsync(cancellationToken));
-                            response.EnsureSuccessStatusCode();
-                        }
-                        using (Stream responseStream = await response.Content?.ReadAsStreamAsync(cancellationToken))
-                        {
-                            this.OpenApiDocument = new OpenApiStreamReader().Read(responseStream, out OpenApiDiagnostic diagnostic);
-                        }
+                        this.Logger.LogInformation("Failed to retrieve the Open API document at location '{uri}'. The remote server responded with a non-success status code '{statusCode}'.");
+                        this.Logger.LogDebug($"Response content:{Environment.NewLine}{{responseContent}}", response.Content == null ? "None" : await response.Content.ReadAsStringAsync(cancellationToken));
+                        response.EnsureSuccessStatusCode();
                     }
+                    using Stream responseStream = await response.Content?.ReadAsStreamAsync(cancellationToken);
+                    this.OpenApiDocument = new OpenApiStreamReader().Read(responseStream, out OpenApiDiagnostic diagnostic);
                 }
                 KeyValuePair<OperationType, OpenApiOperation> operation = this.OpenApiDocument.Paths
                     .SelectMany(p => p.Value.Operations)
@@ -185,7 +182,7 @@ namespace Synapse.Runner.Application.Services.Processors
                     else if (param.Required)
                         throw new NullReferenceException($"Failed to find the definition of the required parameter '{param.Name}' in the function definition with name '{this.Function.Name}'");
                 }
-                Dictionary<string, string> queryParameters = new Dictionary<string, string>();
+                Dictionary<string, string> queryParameters = new();
                 foreach (OpenApiParameter param in this.OpenApiOperation.Parameters
                     .Where(p => p.In == ParameterLocation.Query))
                 {
@@ -218,7 +215,7 @@ namespace Synapse.Runner.Application.Services.Processors
             }
             catch (Exception ex)
             {
-                //TODO
+                await this.OnErrorAsync(ex, cancellationToken);
             }
         }
 
@@ -234,21 +231,19 @@ namespace Synapse.Runner.Application.Services.Processors
             string json = this.FunctionReference.Arguments.ToString();
             foreach (Match match in Regex.Matches(json, @"""\$\{.+?\}"""))
             {
-                string jsonPath = match.Value.Substring(3, match.Value.Length - 5).Trim();
-                JToken valueToken = this.ExecutionContext.ExpressionEvaluator.Evaluate(jsonPath, this.Activity.Data);
+                string expression = match.Value.Substring(3, match.Value.Length - 5).Trim();
+                JToken valueToken = this.ExecutionContext.ExpressionEvaluator.Evaluate(expression, this.Activity.Data);
                 string value = null;
                 if (valueToken != null)
                 {
-                    switch (valueToken.Type)
+                    value = valueToken.Type switch
                     {
-                        case JTokenType.String:
-                            value = @$"""{valueToken}""";
-                            break;
-                        default:
-                            value = valueToken.ToString();
-                            break;
-                    }
+                        JTokenType.String => @$"""{valueToken}""",
+                        _ => valueToken.ToString(),
+                    };
                 }
+                if (string.IsNullOrEmpty(value))
+                    value = "null";
                 json = json.Replace(match.Value, value);
             }
             this.Parameters = JObject.Parse(json);
@@ -280,13 +275,11 @@ namespace Synapse.Runner.Application.Services.Processors
                 foreach (string server in this.Servers)
                 {
                     string requestUri = $"{server}{this.Path}";
-
                     if (requestUri.StartsWith("//"))
                         requestUri = $"https:{requestUri}";
-
                     if (!string.IsNullOrWhiteSpace(this.QueryString))
                         requestUri += $"?{this.QueryString}";
-                    HttpRequestMessage request = new HttpRequestMessage(this.HttpMethod, requestUri);
+                    HttpRequestMessage request = new(this.HttpMethod, requestUri);
                     foreach (KeyValuePair<string, string> header in this.Headers)
                     {
                         request.Headers.Add(header.Key, header.Value);
@@ -296,43 +289,41 @@ namespace Synapse.Runner.Application.Services.Processors
                         request.Content = new StringContent(this.Body.ToString(), Encoding.UTF8, MediaTypeNames.Application.Json);
                     using (request)
                     {
-                        using (HttpResponseMessage response = await this.HttpClient.SendAsync(request, cancellationToken))
+                        using HttpResponseMessage response = await this.HttpClient.SendAsync(request, cancellationToken);
+                        if (response.StatusCode == HttpStatusCode.ServiceUnavailable)
+                            continue;
+                        string rawContent = await response.Content?.ReadAsStringAsync(cancellationToken);
+                        if (!response.IsSuccessStatusCode)
                         {
-                            if (response.StatusCode == HttpStatusCode.ServiceUnavailable)
-                                continue;
-                            string rawContent = await response.Content?.ReadAsStringAsync(cancellationToken);
-                            if (!response.IsSuccessStatusCode)
-                            {
-                                this.Logger.LogInformation("Failed to execute the REST operation '{operationId}' at '{uri}'. The remote server responded with a non-success status code '{statusCode}'.", this.OperationId, response.RequestMessage.RequestUri, response.StatusCode);
-                                this.Logger.LogDebug($"Response content:{Environment.NewLine}{{responseContent}}", response.Content == null ? "None" : await response.Content.ReadAsStringAsync(cancellationToken), rawContent);
-                                response.EnsureSuccessStatusCode();
-                            }
-                            if (!string.IsNullOrWhiteSpace(rawContent))
-                            {
-                                switch (response.Content?.Headers.ContentType?.MediaType)
-                                {
-                                    case MediaTypeNames.Application.Json:
-                                        output = JToken.Parse(rawContent);
-                                        break;
-                                    case MediaTypeNames.Application.Xml:
-                                        XmlDocument doc = new XmlDocument();
-                                        doc.LoadXml(rawContent);
-                                        string json = JsonConvert.SerializeXmlNode(doc);
-                                        output = JToken.Parse(json);
-                                        break;
-                                    default:
-                                        if (response.Content.Headers.TryGetValues("Content-Disposition", out IEnumerable<string> contentDispositionValues)
-                                            && contentDispositionValues.FirstOrDefault() == "attachment")
-                                        {
-                                            string fileName = contentDispositionValues.First(cdv => cdv.StartsWith("filename", StringComparison.InvariantCultureIgnoreCase));
-
-                                        }
-                                        break;
-                                }
-                            }
-                            success = true;
-                            break;
+                            this.Logger.LogInformation("Failed to execute the REST operation '{operationId}' at '{uri}'. The remote server responded with a non-success status code '{statusCode}'.", this.OperationId, response.RequestMessage.RequestUri, response.StatusCode);
+                            this.Logger.LogDebug($"Response content:{Environment.NewLine}{{responseContent}}", response.Content == null ? "None" : await response.Content.ReadAsStringAsync(cancellationToken), rawContent);
+                            response.EnsureSuccessStatusCode();
                         }
+                        if (!string.IsNullOrWhiteSpace(rawContent))
+                        {
+                            switch (response.Content?.Headers.ContentType?.MediaType)
+                            {
+                                case MediaTypeNames.Application.Json:
+                                    output = JToken.Parse(rawContent);
+                                    break;
+                                case MediaTypeNames.Application.Xml:
+                                    XmlDocument doc = new();
+                                    doc.LoadXml(rawContent);
+                                    string json = JsonConvert.SerializeXmlNode(doc);
+                                    output = JToken.Parse(json);
+                                    break;
+                                default:
+                                    if (response.Content.Headers.TryGetValues("Content-Disposition", out IEnumerable<string> contentDispositionValues)
+                                        && contentDispositionValues.FirstOrDefault() == "attachment")
+                                    {
+                                        string fileName = contentDispositionValues.First(cdv => cdv.StartsWith("filename", StringComparison.InvariantCultureIgnoreCase));
+
+                                    }
+                                    break;
+                            }
+                        }
+                        success = true;
+                        break;
                     }
                 }
                 if (output == null)

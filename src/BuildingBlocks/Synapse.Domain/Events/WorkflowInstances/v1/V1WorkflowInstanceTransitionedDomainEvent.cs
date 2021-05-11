@@ -1,4 +1,5 @@
-﻿using Synapse.Domain.Models;
+﻿using ServerlessWorkflow.Sdk.Models;
+using Synapse.Domain.Models;
 
 namespace Synapse.Domain.Events.WorkflowInstances
 {

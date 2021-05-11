@@ -18,10 +18,23 @@ using System.Threading.Tasks;
 namespace Synapse.Operator.Application.Services
 {
 
+    /// <summary>
+    /// Represents the <see cref="ResourceController{TResource}"/> used to manage <see cref="V1WorkflowInstance"/>s
+    /// </summary>
     public class V1WorkflowInstanceController
         : ResourceController<V1WorkflowInstance>
     {
 
+        /// <summary>
+        /// Initializes a new <see cref="V1WorkflowInstanceController"/>
+        /// </summary>
+        /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
+        /// <param name="kubernetes">The service used to interact with the <see cref="Kubernetes"/> API</param>
+        /// <param name="resourceWatcherFactory">The service used to create <see cref="IResourceWatcher"/>s</param>
+        /// <param name="options">The <see cref="V1WorkflowController"/>'s <see cref="ResourceControllerOptions{TResource}"/></param>
+        /// <param name="applicationOptions">The current <see cref="Configuration.ApplicationOptions"/></param>
+        /// <param name="workflows">The <see cref="IRepository{TResource}"/> used to manage <see cref="V1Workflow"/>s</param>
+        /// <param name="workflowInstances">The <see cref="IRepository{TResource}"/> used to manage <see cref="V1WorkflowInstance"/>s</param>
         public V1WorkflowInstanceController(ILoggerFactory loggerFactory, IKubernetes kubernetes, IResourceWatcherFactory resourceWatcherFactory, IOptions<ResourceControllerOptions<V1WorkflowInstance>> options, 
             IOptions<ApplicationOptions> applicationOptions, IRepository<V1Workflow> workflows, IRepository<V1WorkflowInstance> workflowInstances) 
             : base(loggerFactory, kubernetes, resourceWatcherFactory, options)
@@ -31,12 +44,22 @@ namespace Synapse.Operator.Application.Services
             this.WorkflowInstances = workflowInstances;
         }
 
+        /// <summary>
+        /// Gets the current <see cref="Configuration.ApplicationOptions"/>
+        /// </summary>
         protected ApplicationOptions ApplicationOptions { get; }
 
+        /// <summary>
+        /// Gets the <see cref="IRepository{TResource}"/> used to manage <see cref="V1Workflow"/>s
+        /// </summary>
         protected IRepository<V1Workflow> Workflows { get; }
 
+        /// <summary>
+        /// Gets the <see cref="IRepository{TResource}"/> used to manage <see cref="V1WorkflowInstance"/>s
+        /// </summary>
         protected IRepository<V1WorkflowInstance> WorkflowInstances { get; }
 
+        /// <inheritdoc/>
         protected override void OnEvent(IResourceEvent<V1WorkflowInstance> e)
         {
             base.OnEvent(e);
@@ -51,6 +74,7 @@ namespace Synapse.Operator.Application.Services
             }
         }
 
+        /// <inheritdoc/>
         public override async Task ReconcileAsync(CancellationToken cancellationToken = default)
         {
             KubernetesList<V1WorkflowInstance> workflowInstanceResources = await this.Kubernetes.ListClusterCustomObjectAsync<V1WorkflowInstance>(this.ResourceDefinition.Group, this.ResourceDefinition.Version, this.ResourceDefinition.Plural, cancellationToken: cancellationToken);
@@ -61,25 +85,28 @@ namespace Synapse.Operator.Application.Services
             }
         }
 
+        /// <summary>
+        /// Processes the specified <see cref="V1WorkflowInstance"/>
+        /// </summary>
+        /// <param name="workflowInstance">The <see cref="V1WorkflowInstance"/> to process</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awitable <see cref="Task"/></returns>
         protected virtual async Task ProcessAsync(V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default)
         {
+            if (workflowInstance == null)
+                throw new ArgumentNullException(nameof(workflowInstance));
             try
             {
-                if (workflowInstance == null)
-                    throw new ArgumentNullException(nameof(workflowInstance));
+                this.Logger.LogInformation("Processing workflow Instance '{workflowInstance}'...", workflowInstance.Name());
                 V1Workflow workflowDefinition = await this.Workflows.FindAsync(workflowInstance.Spec.Definition.Id, workflowInstance.Spec.Definition.Version, cancellationToken);
                 if(workflowDefinition == null)
                 {
                     this.Logger.LogError("Failed to find the specified Workflow Custom Resource '{workflowDefinitionId}:{workflowDefinitionVersion}'", workflowInstance.Spec.Definition.Id, workflowInstance.Spec.Definition.Version);
                     throw new NullReferenceException($"Failed to find the specified Workflow Custom Resource '{workflowInstance.Spec.Definition.Id}:{workflowInstance.Spec.Definition.Version}'");
                 }
-
                 workflowInstance = await this.InitializeAsync(workflowInstance, workflowDefinition, cancellationToken);
-
-                if (workflowDefinition.Spec.Definition.GetStartupState() is EventStateDefinition eventState)
-                    workflowInstance = await this.CreateEventTriggerAsync(workflowInstance, cancellationToken);
-                else
-                    workflowInstance = await this.DeployAsync(workflowInstance, cancellationToken);
+                workflowInstance = await this.DeployAsync(workflowInstance, cancellationToken);
+                this.Logger.LogInformation("Workflow Instance '{workflowInstance}' successfully processed", workflowInstance.Name());
             }
             catch (Exception ex)
             {
@@ -93,41 +120,54 @@ namespace Synapse.Operator.Application.Services
             }
         }
 
+        /// <summary>
+        /// Initializes the specified <see cref="V1WorkflowInstance"/>
+        /// </summary>
+        /// <param name="workflowInstance">The <see cref="V1WorkflowInstance"/> to initialize</param>
+        /// <param name="workflowDefinition">The <see cref="V1Workflow"/> of the <see cref="V1WorkflowInstance"/> to initialize</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The updated <see cref="V1WorkflowInstance"/></returns>
         protected virtual async Task<V1WorkflowInstance> InitializeAsync(V1WorkflowInstance workflowInstance, V1Workflow workflowDefinition, CancellationToken cancellationToken = default)
         {
             if (workflowInstance == null)
                 throw new ArgumentNullException(nameof(workflowInstance));
             if (workflowDefinition == null)
                 throw new ArgumentNullException(nameof(workflowDefinition));
+            this.Logger.LogInformation("Initialzing workflow instance '{workflowInstance}'...", workflowInstance.Name());
             workflowInstance.Initialize();
             workflowInstance = await this.WorkflowInstances.UpdateAsync(workflowInstance, cancellationToken);
             workflowInstance.SetVersion(workflowDefinition.Spec.Definition.Version);
             workflowInstance.Label();
             workflowInstance = await this.WorkflowInstances.UpdateAsync(workflowInstance, cancellationToken);
+            this.Logger.LogInformation("Workflow instance '{workflowInstance}' successfully initialized", workflowInstance.Name());
             return workflowInstance;
         }
 
-        protected virtual async Task<V1WorkflowInstance> CreateEventTriggerAsync(V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default)
-        {
-            if (workflowInstance == null)
-                throw new ArgumentNullException(nameof(workflowInstance));
-            //TODO
-            //workflowInstance.WaitForEvents();
-            //workflowInstance = await this.WorkflowInstances.UpdateAsync(workflowInstance, cancellationToken);
-            return workflowInstance;
-        }
-
+        /// <summary>
+        /// Deploys the specified <see cref="V1WorkflowInstance"/>
+        /// </summary>
+        /// <param name="workflowInstance">The <see cref="V1WorkflowInstance"/> to deploy</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The updated <see cref="V1WorkflowInstance"/></returns>
         protected virtual async Task<V1WorkflowInstance> DeployAsync(V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default)
         {
             if (workflowInstance == null)
                 throw new ArgumentNullException(nameof(workflowInstance));
+            this.Logger.LogInformation("Deploying workflow instance '{workflowInstance}'...", workflowInstance.Name());
             V1Pod pod = await this.BuildRunnerPodAsync(workflowInstance, cancellationToken);
             pod = await this.Kubernetes.CreateNamespacedPodAsync(pod, SynapseConstants.EnvironmentVariables.Kubernetes.Namespace.Value, cancellationToken: cancellationToken);
             workflowInstance.Deploy(pod.Name());
             workflowInstance = await this.WorkflowInstances.UpdateAsync(workflowInstance, cancellationToken);
+            this.Logger.LogInformation("Workflow instance '{workflowInstance}' successfully deployed. Workload: {pod}.{namespace}", workflowInstance.Name(), workflowInstance.Status.Pod.Name, workflowInstance.Status.Pod.NamespaceProperty);
             return workflowInstance;
         }
 
+        /// <summary>
+        /// Builds a new <see cref="V1Pod"/> for the specified <see cref="V1WorkflowInstance"/>
+        /// </summary>
+        /// <param name="workflowInstance">The <see cref="V1WorkflowInstance"/> to build a new <see cref="V1Pod"/> for</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new <see cref="V1Pod"/></returns>
         protected virtual async Task<V1Pod> BuildRunnerPodAsync(V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default)
         {
             if (workflowInstance == null)
@@ -141,10 +181,8 @@ namespace Synapse.Operator.Application.Services
             string json;
             using (FileStream stream = new(deploymentFilePath, FileMode.Open, FileAccess.Read))
             {
-                using (StreamReader streamReader = new(stream))
-                {
-                    json = await streamReader.ReadToEndAsync();
-                }
+                using StreamReader streamReader = new(stream);
+                json = await streamReader.ReadToEndAsync();
             }
             V1Pod pod = Yaml.LoadFromString<V1Pod>(json);
             pod.Spec.RestartPolicy = "Never";
@@ -178,7 +216,7 @@ namespace Synapse.Operator.Application.Services
             if (workflowInstance.Status == null
                 || workflowInstance.Status.Pod == null)
                 return;
-            await this.Kubernetes.DeleteNamespacedPodAsync(workflowInstance.Status.Pod.Name, workflowInstance.Namespace());
+            await this.Kubernetes.DeleteNamespacedPodAsync(workflowInstance.Status.Pod.Name, workflowInstance.Namespace(), cancellationToken: cancellationToken);
         }
 
     }

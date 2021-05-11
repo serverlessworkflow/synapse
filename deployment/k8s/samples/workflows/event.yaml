@@ -1,0 +1,45 @@
+﻿id: petstore-user-registration
+version: '1.0'
+name: Pet Store - User Registration
+description: An Event-based workflow for handling user registrations
+start: handleSubscription
+events:
+  - name: UserSubscribed
+    type: io.swagger.petstore.user.subscribed
+    source: synapse::petstore.swagger.io
+    correlation:
+      - contextAttributeName: correlationId
+  - name: UserInfoSubmitted
+    type: io.swagger.petstore.user.submitted
+    source: synapse::petstore.swagger.io
+    correlation:
+      - contextAttributeName: correlationId
+functions:
+  - name: getUserByName
+    operation: https://petstore.swagger.io/v2/swagger.json#getUserByName
+states:
+- name: handleSubscription
+  type: event
+  exclusive: false
+  onEvents:
+  - eventRefs:
+      - UserSubscribed
+    eventDataFilter:
+      data: '${ .data }'
+    actions:
+      - functionRef:
+          refName: getUserByName
+          arguments:
+            username: '${ .username }'
+  - eventRefs:
+      - UserInfoSubmitted
+    eventDataFilter:
+      data: '${ .data }'
+    actions:
+      - functionRef:
+          refName: getUserByName
+          arguments:
+            username: '${ .username }'
+  stateDataFilter:
+    output: '${ .user.firstName + " " + .user.lastName }'
+  end: true

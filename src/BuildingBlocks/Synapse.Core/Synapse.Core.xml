@@ -50,6 +50,29 @@
             Indicates uppercase
             </summary>
         </member>
+        <member name="T:Synapse.CloudEventExtensions">
+            <summary>
+            Defines extensions for <see cref="T:CloudNative.CloudEvents.CloudEvent"/>s
+            </summary>
+        </member>
+        <member name="M:Synapse.CloudEventExtensions.TryGetAttribute(CloudNative.CloudEvents.CloudEvent,System.String,System.Object@)">
+            <summary>
+            Attempts to retrieve the specified attribute
+            </summary>
+            <param name="e">The <see cref="T:CloudNative.CloudEvents.CloudEvent"/> to attempt to get an attribute of</param>
+            <param name="key">The key of the attribute to retrieve</param>
+            <param name="value">The attribute's value, if any</param>
+            <returns>A boolean indicating whether or not the specified attribute could be retrieved</returns>
+        </member>
+        <member name="M:Synapse.CloudEventExtensions.TryGetAttribute(CloudNative.CloudEvents.CloudEvent,System.String,System.String@)">
+            <summary>
+            Attempts to retrieve the specified attribute
+            </summary>
+            <param name="e">The <see cref="T:CloudNative.CloudEvents.CloudEvent"/> to attempt to get an attribute of</param>
+            <param name="key">The key of the attribute to retrieve</param>
+            <param name="value">The attribute's value, if any</param>
+            <returns>A boolean indicating whether or not the specified attribute could be retrieved</returns>
+        </member>
         <member name="T:Synapse.EventStateTriggerDefinitionExtensions">
             <summary>
             Defines extensions for <see cref="T:ServerlessWorkflow.Sdk.Models.EventStateTriggerDefinition"/>s
@@ -593,6 +616,31 @@
         <member name="F:Synapse.SynapseConstants.EnvironmentVariables.Prefix">
             <summary>
             Gets the prefix for all Synapse environment variables
+            </summary>
+        </member>
+        <member name="T:Synapse.SynapseConstants.EnvironmentVariables.CloudEvents">
+            <summary>
+            Exposes constants about <see cref="T:CloudNative.CloudEvents.CloudEvent"/>-related environment variables
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseConstants.EnvironmentVariables.CloudEvents.Prefix">
+            <summary>
+            Gets the prefix for all <see cref="T:CloudNative.CloudEvents.CloudEvent"/>-related environment variables
+            </summary>
+        </member>
+        <member name="T:Synapse.SynapseConstants.EnvironmentVariables.CloudEvents.Sink">
+            <summary>
+            Exposes constants about the <see cref="T:CloudNative.CloudEvents.CloudEvent"/> sink environment variable
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseConstants.EnvironmentVariables.CloudEvents.Sink.Name">
+            <summary>
+            Gets the name of the <see cref="T:CloudNative.CloudEvents.CloudEvent"/> sink environment variable
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseConstants.EnvironmentVariables.CloudEvents.Sink.Value">
+            <summary>
+            Gets the value of the <see cref="T:CloudNative.CloudEvents.CloudEvent"/> sink environment variable
             </summary>
         </member>
         <member name="T:Synapse.SynapseConstants.EnvironmentVariables.Kubernetes">

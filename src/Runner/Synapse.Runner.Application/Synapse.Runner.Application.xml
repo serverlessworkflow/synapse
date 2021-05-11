@@ -4,6 +4,43 @@
         <name>Synapse.Runner.Application</name>
     </assembly>
     <members>
+        <member name="T:Synapse.Runner.Application.AsyncLock">
+            <summary>
+            Represents an object used to lock aynschronous processes
+            </summary>
+            <remarks>Code based on <see href="https://medium.com/swlh/async-lock-mechanism-on-asynchronous-programing-d43f15ad0b3"/></remarks>
+        </member>
+        <member name="M:Synapse.Runner.Application.AsyncLock.#ctor">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Runner.Application.AsyncLock"/>
+            </summary>
+        </member>
+        <member name="M:Synapse.Runner.Application.AsyncLock.LockAsync(System.Threading.CancellationToken)">
+            <summary>
+            Locks asynchronously
+            </summary>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>A new object which releases the lock upon disposal</returns>
+        </member>
+        <member name="T:Synapse.Runner.Application.Configuration.ApplicationOptions">
+            <summary>
+            Represents the options used to configure the Synapse Runner application
+            </summary>
+        </member>
+        <member name="T:Synapse.Runner.Application.Configuration.ConfigurationExtensions">
+            <summary>
+            Defines configuration extensions for <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/>s
+            </summary>
+        </member>
+        <member name="M:Synapse.Runner.Application.Configuration.ConfigurationExtensions.AddSynapseRunner(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration,Microsoft.Extensions.Hosting.IHostEnvironment)">
+            <summary>
+            Adds and configures the service required for the Synapse Runner application
+            </summary>
+            <param name="services">The <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> to configure</param>
+            <param name="configuration">The current <see cref="T:Microsoft.Extensions.Configuration.IConfiguration"/></param>
+            <param name="environment">The current <see cref="T:Microsoft.Extensions.Hosting.IHostEnvironment"/></param>
+            <returns>The configured <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/></returns>
+        </member>
         <member name="T:Synapse.Runner.Application.OperationTypeExtensions">
             <summary>
             Defines extensions for <see cref="T:System.Net.Http.HttpMethod"/>s
@@ -187,6 +224,7 @@
             <summary>
             Faults the <see cref="P:Synapse.Runner.Application.Services.IWorkflowExecutionContext.Instance"/>'s execution
             </summary>
+            <param name="ex">The <see cref="T:System.Exception"/> that has occured during the <see cref="P:Synapse.Runner.Application.Services.IWorkflowExecutionContext.Instance"/>'s execution</param>
             <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
             <returns>A new awaitable <see cref="T:System.Threading.Tasks.Task"/></returns>
         </member>
@@ -205,6 +243,15 @@
             <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
             <returns>A new awaitable <see cref="T:System.Threading.Tasks.Task"/></returns>
         </member>
+        <member name="M:Synapse.Runner.Application.Services.IWorkflowExecutionContext.TryCorrelateAsync(CloudNative.CloudEvents.CloudEvent,System.Collections.Generic.IEnumerable{System.String},System.Threading.CancellationToken)">
+            <summary>
+            Attempts to correlate the specified <see cref="T:CloudNative.CloudEvents.CloudEvent"/>
+            </summary>
+            <param name="e">The <see cref="T:CloudNative.CloudEvents.CloudEvent"/> to correlate</param>
+            <param name="contextAttributes">An <see cref="T:System.Collections.Generic.IEnumerable`1"/> containing the context attributes used to correlate the specified <see cref="T:CloudNative.CloudEvents.CloudEvent"/></param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>A boolean indicating whether or not the specified <see cref="T:CloudNative.CloudEvents.CloudEvent"/> could be correlated</returns>
+        </member>
         <member name="M:Synapse.Runner.Application.Services.IWorkflowExecutionContext.SetWorkflowOutputAsync(Newtonsoft.Json.Linq.JToken,System.Threading.CancellationToken)">
             <summary>
             Sets the <see cref="P:Synapse.Runner.Application.Services.IWorkflowExecutionContext.Instance"/>'s output
@@ -213,6 +260,14 @@
             <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
             <returns>A new awaitable <see cref="T:System.Threading.Tasks.Task"/></returns>
         </member>
+        <member name="M:Synapse.Runner.Application.Services.IWorkflowExecutionContext.GetBoostrapEventAsync(ServerlessWorkflow.Sdk.Models.EventDefinition,System.Threading.CancellationToken)">
+            <summary>
+            Attempts to get a bootstrap <see cref="T:CloudNative.CloudEvents.CloudEvent"/> matching the specified <see cref="T:ServerlessWorkflow.Sdk.Models.EventDefinition"/>
+            </summary>
+            <param name="eventDefinition">The <see cref="T:ServerlessWorkflow.Sdk.Models.EventDefinition"/> that describes the <see cref="T:CloudNative.CloudEvents.CloudEvent"/> to get</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>The matching <see cref="T:CloudNative.CloudEvents.CloudEvent"/>, if any</returns>
+        </member>
         <member name="M:Synapse.Runner.Application.Services.IWorkflowExecutionContext.ListChildActivitiesAsync(System.Threading.CancellationToken)">
             <summary>
             Lists the <see cref="P:Synapse.Runner.Application.Services.IWorkflowExecutionContext.Instance"/>'s child <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/> instances
@@ -220,11 +275,20 @@
             <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
             <returns>A new awaitable <see cref="T:System.Threading.Tasks.Task"/></returns>
         </member>
-        <member name="M:Synapse.Runner.Application.Services.IWorkflowExecutionContext.ListChildActivitiesAsync(Synapse.Domain.Models.V1WorkflowActivity,System.Threading.CancellationToken)">
+        <member name="M:Synapse.Runner.Application.Services.IWorkflowExecutionContext.ListActiveChildActivitiesAsync(Synapse.Domain.Models.V1WorkflowActivity,System.Threading.CancellationToken)">
             <summary>
             Lists the specified <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/>'s child <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/> instances
             </summary>
             <param name="activity">The <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/> to list the children of</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>A new awaitable <see cref="T:System.Threading.Tasks.Task"/></returns>
+        </member>
+        <member name="M:Synapse.Runner.Application.Services.IWorkflowExecutionContext.ListChildActivitiesAsync(Synapse.Domain.Models.V1WorkflowActivity,System.Boolean,System.Threading.CancellationToken)">
+            <summary>
+            Lists the specified <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/>'s child <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/> instances
+            </summary>
+            <param name="activity">The <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/> to list the children of</param>
+            <param name="includeInactive">A boolean indicating whether or not to include inactive instances. Defaults to false.</param>
             <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
             <returns>A new awaitable <see cref="T:System.Threading.Tasks.Task"/></returns>
         </member>
@@ -265,6 +329,7 @@
             Faults the specified <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/>'s execution
             </summary>
             <param name="activity">The <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/> to fault the execution of</param>
+            <param name="ex">The <see cref="T:System.Exception"/> that has occured during the <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/>'s execution</param>
             <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
             <returns>The updated <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/></returns>
         </member>
@@ -294,6 +359,11 @@
             <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
             <returns>The updated <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/></returns>
         </member>
+        <member name="T:Synapse.Runner.Application.Services.IWorkflowRunner">
+            <summary>
+            Defines the fundamentals of a service used to run <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>s
+            </summary>
+        </member>
         <member name="T:Synapse.Runner.Application.Services.Processors.ActionProcessor">
             <summary>
             Represents a <see cref="T:Synapse.Runner.Application.Services.IWorkflowActivityProcessor"/> used to process <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/>s
@@ -315,6 +385,54 @@
             </summary>
         </member>
         <member name="M:Synapse.Runner.Application.Services.Processors.ActionProcessor.OnResultAsync(Synapse.Domain.Models.V1WorkflowExecutionResult,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="T:Synapse.Runner.Application.Services.Processors.ConsumeEventProcessor">
+            <summary>
+            Represents a <see cref="T:Synapse.Runner.Application.Services.IWorkflowActivityProcessor"/> used to process <see cref="T:ServerlessWorkflow.Sdk.Models.EventStateTriggerDefinition"/>s
+            </summary>
+        </member>
+        <member name="M:Synapse.Runner.Application.Services.Processors.ConsumeEventProcessor.#ctor(Microsoft.Extensions.Logging.ILoggerFactory,Synapse.Services.ICloudEventBus,Synapse.Runner.Application.Services.IWorkflowExecutionContext,Synapse.Runner.Application.Services.IWorkflowActivityProcessorFactory,Synapse.Domain.Models.V1WorkflowActivity,ServerlessWorkflow.Sdk.Models.EventDefinition)">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Runner.Application.Services.Processors.ConsumeEventProcessor"/>
+            </summary>
+            <param name="loggerFactory">The service used to create <see cref="T:Microsoft.Extensions.Logging.ILogger"/>s</param>
+            <param name="cloudEventBus">The service used to publish and subscribe to <see cref="T:CloudNative.CloudEvents.CloudEvent"/>s</param>
+            <param name="executionContext">The current <see cref="T:Synapse.Runner.Application.Services.IWorkflowExecutionContext"/></param>
+            <param name="activityProcessorFactory">The service used to create <see cref="T:Synapse.Runner.Application.Services.IWorkflowActivityProcessor"/>s</param>
+            <param name="activity">The <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/> to process</param>
+            <param name="eventDefinition">The <see cref="T:ServerlessWorkflow.Sdk.Models.EventDefinition"/> that defines the <see cref="T:CloudNative.CloudEvents.CloudEvent"/> to consume</param>
+        </member>
+        <member name="P:Synapse.Runner.Application.Services.Processors.ConsumeEventProcessor.CloudEventBus">
+            <summary>
+            Gets the service used to publish and subscribe to <see cref="T:CloudNative.CloudEvents.CloudEvent"/>s
+            </summary>
+        </member>
+        <member name="P:Synapse.Runner.Application.Services.Processors.ConsumeEventProcessor.Subscription">
+            <summary>
+            Gets the <see cref="T:CloudNative.CloudEvents.CloudEvent"/> subscription
+            </summary>
+        </member>
+        <member name="P:Synapse.Runner.Application.Services.Processors.ConsumeEventProcessor.EventDefinition">
+            <summary>
+            Gets the <see cref="T:ServerlessWorkflow.Sdk.Models.EventDefinition"/> that defines the <see cref="T:CloudNative.CloudEvents.CloudEvent"/> to consume
+            </summary>
+        </member>
+        <member name="M:Synapse.Runner.Application.Services.Processors.ConsumeEventProcessor.InitializeAsync(System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Synapse.Runner.Application.Services.Processors.ConsumeEventProcessor.ProcessAsync(System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Synapse.Runner.Application.Services.Processors.ConsumeEventProcessor.OnEventAsync(CloudNative.CloudEvents.CloudEvent,System.Threading.CancellationToken)">
+            <summary>
+            Handles an incoming <see cref="T:CloudNative.CloudEvents.CloudEvent"/>
+            </summary>
+            <param name="e">The <see cref="T:CloudNative.CloudEvents.CloudEvent"/> to handle</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>A new awaitable <see cref="T:System.Threading.Tasks.Task"/></returns>
+        </member>
+        <member name="M:Synapse.Runner.Application.Services.Processors.ConsumeEventProcessor.Dispose(System.Boolean)">
             <inheritdoc/>
         </member>
         <member name="T:Synapse.Runner.Application.Services.Processors.EndProcessor">
@@ -343,9 +461,119 @@
         <member name="M:Synapse.Runner.Application.Services.Processors.EndProcessor.ProcessAsync(System.Threading.CancellationToken)">
             <inheritdoc/>
         </member>
+        <member name="T:Synapse.Runner.Application.Services.Processors.EventStateProcessor">
+            <summary>
+            Represents a <see cref="T:Synapse.Runner.Application.Services.IWorkflowActivityProcessor"/> used to process <see cref="T:ServerlessWorkflow.Sdk.Models.EventStateDefinition"/>s
+            </summary>
+        </member>
+        <member name="M:Synapse.Runner.Application.Services.Processors.EventStateProcessor.#ctor(Microsoft.Extensions.Logging.ILoggerFactory,Synapse.Runner.Application.Services.IWorkflowExecutionContext,Synapse.Runner.Application.Services.IWorkflowActivityProcessorFactory,Synapse.Domain.Models.V1WorkflowActivity,ServerlessWorkflow.Sdk.Models.EventStateDefinition)">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Runner.Application.Services.Processors.EventStateProcessor"/>
+            </summary>
+            <param name="loggerFactory">The service used to create <see cref="T:Microsoft.Extensions.Logging.ILogger"/>s</param>
+            <param name="executionContext">The current <see cref="T:Synapse.Runner.Application.Services.IWorkflowExecutionContext"/></param>
+            <param name="activityProcessorFactory">The service used to create <see cref="T:Synapse.Runner.Application.Services.IWorkflowActivityProcessor"/>s</param>
+            <param name="activity">The <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/> to process</param>
+            <param name="state">The <see cref="T:ServerlessWorkflow.Sdk.Models.EventStateDefinition"/> to process</param>
+        </member>
+        <member name="M:Synapse.Runner.Application.Services.Processors.EventStateProcessor.CreateProcessorFor(Synapse.Domain.Models.V1WorkflowActivity)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Synapse.Runner.Application.Services.Processors.EventStateProcessor.InitializeAsync(System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Synapse.Runner.Application.Services.Processors.EventStateProcessor.ProcessAsync(System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Synapse.Runner.Application.Services.Processors.EventStateProcessor.OnTriggerResultAsync(Synapse.Runner.Application.Services.IWorkflowActivityProcessor,Synapse.Domain.Models.V1WorkflowExecutionResult,System.Threading.CancellationToken)">
+            <summary>
+            Handles the next <see cref="T:Synapse.Runner.Application.Services.IWorkflowActivityProcessor"/>'s <see cref="T:Synapse.Domain.Models.V1WorkflowExecutionResult"/>
+            </summary>
+            <param name="processor">The <see cref="T:Synapse.Runner.Application.Services.IWorkflowActivityProcessor"/> that returned the <see cref="T:Synapse.Domain.Models.V1WorkflowExecutionResult"/></param>
+            <param name="result">The <see cref="T:Synapse.Domain.Models.V1WorkflowExecutionResult"/> to handle</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>A new awaitable <see cref="T:System.Threading.Tasks.Task"/></returns>
+        </member>
+        <member name="M:Synapse.Runner.Application.Services.Processors.EventStateProcessor.OnTriggerCompletedAsync(Synapse.Runner.Application.Services.IWorkflowActivityProcessor,System.Threading.CancellationToken)">
+            <summary>
+            Handles the completion of the specified <see cref="T:Synapse.Runner.Application.Services.IWorkflowActivityProcessor"/>
+            </summary>
+            <param name="processor">The <see cref="T:Synapse.Runner.Application.Services.IWorkflowActivityProcessor"/> to handle the completion of</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>A new awaitable <see cref="T:System.Threading.Tasks.Task"/></returns>
+        </member>
+        <member name="T:Synapse.Runner.Application.Services.Processors.EventStateTriggerProcessor">
+            <summary>
+            Represents a <see cref="T:Synapse.Runner.Application.Services.IWorkflowActivityProcessor"/> used to process <see cref="T:ServerlessWorkflow.Sdk.Models.EventStateTriggerDefinition"/>s
+            </summary>
+        </member>
+        <member name="M:Synapse.Runner.Application.Services.Processors.EventStateTriggerProcessor.#ctor(Microsoft.Extensions.Logging.ILoggerFactory,Synapse.Runner.Application.Services.IWorkflowExecutionContext,Synapse.Runner.Application.Services.IWorkflowActivityProcessorFactory,Synapse.Domain.Models.V1WorkflowActivity,ServerlessWorkflow.Sdk.Models.EventStateDefinition,ServerlessWorkflow.Sdk.Models.EventStateTriggerDefinition)">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Runner.Application.Services.Processors.EventStateTriggerProcessor"/>
+            </summary>
+            <param name="loggerFactory">The service used to create <see cref="T:Microsoft.Extensions.Logging.ILogger"/>s</param>
+            <param name="executionContext">The current <see cref="T:Synapse.Runner.Application.Services.IWorkflowExecutionContext"/></param>
+            <param name="activityProcessorFactory">The service used to create <see cref="T:Synapse.Runner.Application.Services.IWorkflowActivityProcessor"/>s</param>
+            <param name="activity">The <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/> to process</param>
+            <param name="state">The <see cref="T:ServerlessWorkflow.Sdk.Models.EventStateDefinition"/> to process</param>
+            <param name="trigger">The <see cref="T:ServerlessWorkflow.Sdk.Models.EventStateTriggerDefinition"/> to process</param>
+        </member>
+        <member name="P:Synapse.Runner.Application.Services.Processors.EventStateTriggerProcessor.State">
+            <summary>
+            Gets the <see cref="T:ServerlessWorkflow.Sdk.Models.EventStateDefinition"/> to process
+            </summary>
+        </member>
+        <member name="P:Synapse.Runner.Application.Services.Processors.EventStateTriggerProcessor.Trigger">
+            <summary>
+            Gets the <see cref="T:ServerlessWorkflow.Sdk.Models.EventStateTriggerDefinition"/> to process
+            </summary>
+        </member>
+        <member name="M:Synapse.Runner.Application.Services.Processors.EventStateTriggerProcessor.CreateProcessorFor(Synapse.Domain.Models.V1WorkflowActivity)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Synapse.Runner.Application.Services.Processors.EventStateTriggerProcessor.InitializeAsync(System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Synapse.Runner.Application.Services.Processors.EventStateTriggerProcessor.ProcessAsync(System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Synapse.Runner.Application.Services.Processors.EventStateTriggerProcessor.OnEventResultAsync(Synapse.Runner.Application.Services.Processors.ConsumeEventProcessor,Synapse.Domain.Models.V1WorkflowExecutionResult,System.Threading.CancellationToken)">
+            <summary>
+            Handles the next <see cref="T:Synapse.Runner.Application.Services.Processors.ConsumeEventProcessor"/>'s <see cref="T:Synapse.Domain.Models.V1WorkflowExecutionResult"/>
+            </summary>
+            <param name="processor">The <see cref="T:Synapse.Runner.Application.Services.Processors.ConsumeEventProcessor"/> that returned the <see cref="T:Synapse.Domain.Models.V1WorkflowExecutionResult"/></param>
+            <param name="result">The <see cref="T:Synapse.Domain.Models.V1WorkflowExecutionResult"/> to handle</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>A new awaitable <see cref="T:System.Threading.Tasks.Task"/></returns>
+        </member>
+        <member name="M:Synapse.Runner.Application.Services.Processors.EventStateTriggerProcessor.OnEventCompletedAsync(Synapse.Runner.Application.Services.Processors.ConsumeEventProcessor,System.Threading.CancellationToken)">
+            <summary>
+            Handles the completion of the specified <see cref="T:Synapse.Runner.Application.Services.Processors.ConsumeEventProcessor"/>
+            </summary>
+            <param name="processor">The <see cref="T:Synapse.Runner.Application.Services.Processors.ConsumeEventProcessor"/> to handle the completion of</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>A new awaitable <see cref="T:System.Threading.Tasks.Task"/></returns>
+        </member>
+        <member name="M:Synapse.Runner.Application.Services.Processors.EventStateTriggerProcessor.OnActionResultAsync(Synapse.Runner.Application.Services.Processors.ActionProcessor,Synapse.Domain.Models.V1WorkflowExecutionResult,System.Threading.CancellationToken)">
+            <summary>
+            Handles the next <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/>'s <see cref="T:Synapse.Domain.Models.V1WorkflowExecutionResult"/>
+            </summary>
+            <param name="processor">The <see cref="T:Synapse.Runner.Application.Services.Processors.ActionProcessor"/> that has returned the <see cref="T:Synapse.Domain.Models.V1WorkflowExecutionResult"/></param>
+            <param name="result">The returned <see cref="T:Synapse.Domain.Models.V1WorkflowExecutionResult"/></param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>A new awaitable <see cref="T:System.Threading.Tasks.Task"/></returns>
+        </member>
+        <member name="M:Synapse.Runner.Application.Services.Processors.EventStateTriggerProcessor.OnActionCompletedAsync(Synapse.Runner.Application.Services.Processors.ActionProcessor,System.Threading.CancellationToken)">
+            <summary>
+            Handles the completion of the specified <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/>
+            </summary>
+            <param name="processor">The <see cref="T:Synapse.Runner.Application.Services.Processors.ActionProcessor"/> that has returned the <see cref="T:Synapse.Domain.Models.V1WorkflowExecutionResult"/></param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>A new awaitable <see cref="T:System.Threading.Tasks.Task"/></returns>
+        </member>
         <member name="T:Synapse.Runner.Application.Services.Processors.FunctionProcessor">
             <summary>
-            Represents an <see cref="!:ExecutionPointerProcessor"/> used to process <see cref="T:ServerlessWorkflow.Sdk.Models.FunctionReference"/>s
+            Represents an <see cref="T:Synapse.Runner.Application.Services.Processors.ActionProcessor"/> used to process <see cref="T:ServerlessWorkflow.Sdk.Models.FunctionReference"/>s
             </summary>
         </member>
         <member name="M:Synapse.Runner.Application.Services.Processors.FunctionProcessor.#ctor(Microsoft.Extensions.Logging.ILoggerFactory,Synapse.Runner.Application.Services.IWorkflowExecutionContext,Synapse.Runner.Application.Services.IWorkflowActivityProcessorFactory,System.Net.Http.IHttpClientFactory,Synapse.Domain.Models.V1WorkflowActivity,ServerlessWorkflow.Sdk.Models.ActionDefinition,ServerlessWorkflow.Sdk.Models.FunctionDefinition)">
@@ -355,6 +583,7 @@
             <param name="loggerFactory">The service used to create <see cref="T:Microsoft.Extensions.Logging.ILogger"/>s</param>
             <param name="executionContext">The current <see cref="T:Synapse.Runner.Application.Services.IWorkflowExecutionContext"/></param>
             <param name="activityProcessorFactory">The service used to create <see cref="T:Synapse.Runner.Application.Services.IWorkflowActivityProcessor"/>s</param>
+            <param name="httpClientFactory">The service used to create <see cref="T:System.Net.Http.HttpClient"/>s</param>
             <param name="activity">The <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/> to process</param>
             <param name="action">The <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> to process</param>
             <param name="function">The <see cref="T:ServerlessWorkflow.Sdk.Models.FunctionDefinition"/> to process</param>
@@ -513,9 +742,9 @@
         </member>
         <member name="M:Synapse.Runner.Application.Services.Processors.OperationStateProcessor.OnActionCompletedAsync(Synapse.Runner.Application.Services.Processors.ActionProcessor,System.Threading.CancellationToken)">
             <summary>
-            Handles the completion of the specified <see cref="!:ExecutionPointer"/>
+            Handles the completion of the specified <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/>
             </summary>
-            <param name="processor">The <see cref="T:Synapse.Runner.Application.Services.Processors.ActionProcessor"/> that has returned the <see cref="!:ExecutionResult"/></param>
+            <param name="processor">The <see cref="T:Synapse.Runner.Application.Services.Processors.ActionProcessor"/> that has returned the <see cref="T:Synapse.Domain.Models.V1WorkflowExecutionResult"/></param>
             <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
             <returns>A new awaitable <see cref="T:System.Threading.Tasks.Task"/></returns>
         </member>
@@ -587,6 +816,11 @@
             Gets the <see cref="T:Synapse.Runner.Application.Services.IWorkflowActivityProcessor"/>'s <see cref="T:System.Threading.CancellationTokenSource"/>
             </summary>
         </member>
+        <member name="P:Synapse.Runner.Application.Services.WorkflowActivityProcessor.Lock">
+            <summary>
+            Gets the object used to asynchronously lock the <see cref="T:Synapse.Runner.Application.Services.WorkflowActivityProcessor"/>
+            </summary>
+        </member>
         <member name="M:Synapse.Runner.Application.Services.WorkflowActivityProcessor.InitializeAsync(System.Threading.CancellationToken)">
             <summary>
             Initializes the <see cref="T:Synapse.Runner.Application.Services.IWorkflowActivityProcessor"/>
@@ -603,17 +837,20 @@
         </member>
         <member name="M:Synapse.Runner.Application.Services.WorkflowActivityProcessor.SuspendAsync(System.Threading.CancellationToken)">
             <summary>
-            Suspends the <see cref="!:ExecutionPointer"/>'s processing
+            Suspends the <see cref="T:Synapse.Domain.Models.V1WorkflowActivity"/>'s processing
             </summary>
             <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
             <returns>A new awaitable <see cref="T:System.Threading.Tasks.Task"/></returns>
         </member>
         <member name="M:Synapse.Runner.Application.Services.WorkflowActivityProcessor.TerminateAsync(System.Threading.CancellationToken)">
             <summary>
-            Terminates the <see cref="!:ExecutionPointerProcessor"/>'s execution
+            Terminates the <see cref="T:Synapse.Runner.Application.Services.IWorkflowActivityProcessor"/>'s execution
             </summary>
             <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
             <returns>A new awaitable <see cref="T:System.Threading.Tasks.Task"/></returns>
+        </member>
+        <member name="M:Synapse.Runner.Application.Services.WorkflowActivityProcessor.Subscribe(System.IObserver{Synapse.Domain.Models.V1WorkflowExecutionResult})">
+            <inheritdoc/>
         </member>
         <member name="M:Synapse.Runner.Application.Services.WorkflowActivityProcessor.CreateProcessorFor(Synapse.Domain.Models.V1WorkflowActivity)">
             <summary>
@@ -646,9 +883,9 @@
         </member>
         <member name="M:Synapse.Runner.Application.Services.WorkflowActivityProcessor.Dispose(System.Boolean)">
             <summary>
-            Disposes of the <see cref="!:WorkflowActivityProcessor&lt;TActivity&gt;"/>
+            Disposes of the <see cref="T:Synapse.Runner.Application.Services.WorkflowActivityProcessor"/>
             </summary>
-            <param name="disposing">A boolean indicating whether or not the <see cref="!:WorkflowActivityProcessor&lt;TActivity&gt;"/> is being disposed of</param>
+            <param name="disposing">A boolean indicating whether or not the <see cref="T:Synapse.Runner.Application.Services.WorkflowActivityProcessor"/> is being disposed of</param>
         </member>
         <member name="M:Synapse.Runner.Application.Services.WorkflowActivityProcessor.Dispose">
             <inheritdoc/>
@@ -687,7 +924,7 @@
             Represents the default implementation of the <see cref="T:Synapse.Runner.Application.Services.IWorkflowExecutionContext"/> interface
             </summary>
         </member>
-        <member name="M:Synapse.Runner.Application.Services.WorkflowExecutionContext.#ctor(Microsoft.Extensions.Logging.ILogger{Synapse.Runner.Application.Services.WorkflowExecutionContext},Microsoft.Extensions.Hosting.IHostApplicationLifetime,Synapse.Services.IExpressionEvaluatorFactory,Synapse.Services.IRepository{Synapse.Domain.Models.V1Workflow},Synapse.Services.IRepository{Synapse.Domain.Models.V1WorkflowInstance})">
+        <member name="M:Synapse.Runner.Application.Services.WorkflowExecutionContext.#ctor(Microsoft.Extensions.Logging.ILogger{Synapse.Runner.Application.Services.WorkflowExecutionContext},Microsoft.Extensions.Hosting.IHostApplicationLifetime,Synapse.Services.IExpressionEvaluatorFactory,Synapse.Services.IRepository{Synapse.Domain.Models.V1Workflow},Synapse.Services.IRepository{Synapse.Domain.Models.V1WorkflowInstance},CloudNative.CloudEvents.ICloudEventFormatter)">
             <summary>
             Initializes a new <see cref="T:Synapse.Runner.Application.Services.WorkflowExecutionContext"/>
             </summary>
@@ -695,7 +932,8 @@
             <param name="applicationLifetime">The service used to manage the application's lifetime</param>
             <param name="expressionEvaluatorFactory">The service used to create <see cref="T:Synapse.Services.IExpressionEvaluator"/>s</param>
             <param name="definitions">The <see cref="T:Synapse.Services.IRepository`1"/> used to manage <see cref="T:Synapse.Domain.Models.V1Workflow"/>s</param>
-            <param name="definitions">The <see cref="T:Synapse.Services.IRepository`1"/> used to manage <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>s</param>
+            <param name="instances">The <see cref="T:Synapse.Services.IRepository`1"/> used to manage <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>s</param>
+            <param name="cloudEventFormatter">The service used to format <see cref="T:CloudNative.CloudEvents.CloudEvent"/>s</param>
         </member>
         <member name="P:Synapse.Runner.Application.Services.WorkflowExecutionContext.Logger">
             <summary>
@@ -712,6 +950,11 @@
             Gets the service used to create <see cref="T:Synapse.Services.IExpressionEvaluator"/>s
             </summary>
         </member>
+        <member name="P:Synapse.Runner.Application.Services.WorkflowExecutionContext.CloudEventFormatter">
+            <summary>
+            Gets the service used to format <see cref="T:CloudNative.CloudEvents.CloudEvent"/>s
+            </summary>
+        </member>
         <member name="P:Synapse.Runner.Application.Services.WorkflowExecutionContext.Definitions">
             <summary>
             Gets the <see cref="T:Synapse.Services.IRepository`1"/> used to manage <see cref="T:Synapse.Domain.Models.V1Workflow"/>s
@@ -720,6 +963,11 @@
         <member name="P:Synapse.Runner.Application.Services.WorkflowExecutionContext.Instances">
             <summary>
             Gets the <see cref="T:Synapse.Services.IRepository`1"/> used to manage <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>s
+            </summary>
+        </member>
+        <member name="P:Synapse.Runner.Application.Services.WorkflowExecutionContext.Lock">
+            <summary>
+            Gets the <see cref="T:Synapse.Runner.Application.AsyncLock"/> used to ensure thread safe use of the <see cref="T:Synapse.Runner.Application.Services.WorkflowExecutionContext"/>
             </summary>
         </member>
         <member name="P:Synapse.Runner.Application.Services.WorkflowExecutionContext.Definition">
@@ -755,10 +1003,19 @@
         <member name="M:Synapse.Runner.Application.Services.WorkflowExecutionContext.SetWorkflowOutputAsync(Newtonsoft.Json.Linq.JToken,System.Threading.CancellationToken)">
             <inheritdoc/>
         </member>
+        <member name="M:Synapse.Runner.Application.Services.WorkflowExecutionContext.TryCorrelateAsync(CloudNative.CloudEvents.CloudEvent,System.Collections.Generic.IEnumerable{System.String},System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Synapse.Runner.Application.Services.WorkflowExecutionContext.GetBoostrapEventAsync(ServerlessWorkflow.Sdk.Models.EventDefinition,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
         <member name="M:Synapse.Runner.Application.Services.WorkflowExecutionContext.ListChildActivitiesAsync(System.Threading.CancellationToken)">
             <inheritdoc/>
         </member>
-        <member name="M:Synapse.Runner.Application.Services.WorkflowExecutionContext.ListChildActivitiesAsync(Synapse.Domain.Models.V1WorkflowActivity,System.Threading.CancellationToken)">
+        <member name="M:Synapse.Runner.Application.Services.WorkflowExecutionContext.ListActiveChildActivitiesAsync(Synapse.Domain.Models.V1WorkflowActivity,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Synapse.Runner.Application.Services.WorkflowExecutionContext.ListChildActivitiesAsync(Synapse.Domain.Models.V1WorkflowActivity,System.Boolean,System.Threading.CancellationToken)">
             <inheritdoc/>
         </member>
         <member name="M:Synapse.Runner.Application.Services.WorkflowExecutionContext.CreateActivityAsync(Synapse.Domain.Models.V1WorkflowActivity,System.Threading.CancellationToken)">
@@ -790,7 +1047,7 @@
             Represents the default implementation of the <see cref="T:Synapse.Runner.Application.Services.IWorkflowRunner"/> interface
             </summary>
         </member>
-        <member name="M:Synapse.Runner.Application.Services.WorkflowRunner.#ctor(Microsoft.Extensions.Logging.ILogger{Synapse.Runner.Application.Services.WorkflowRunner},Microsoft.Extensions.Hosting.IHostApplicationLifetime,Synapse.Runner.Application.Services.IWorkflowExecutionContext,Synapse.Runner.Application.Services.IWorkflowActivityProcessorFactory,Microsoft.Extensions.Options.IOptions{Synapse.Runner.Application.Configuration.ApplicationOptions})">
+        <member name="M:Synapse.Runner.Application.Services.WorkflowRunner.#ctor(Microsoft.Extensions.Logging.ILogger{Synapse.Runner.Application.Services.WorkflowRunner},Microsoft.Extensions.Hosting.IHostApplicationLifetime,Synapse.Runner.Application.Services.IWorkflowExecutionContext,Synapse.Runner.Application.Services.IWorkflowActivityProcessorFactory,Microsoft.Extensions.Options.IOptions{Synapse.Runner.Application.Configuration.ApplicationOptions},CloudNative.CloudEvents.ICloudEventFormatter,System.Reactive.Subjects.Subject{CloudNative.CloudEvents.CloudEvent})">
             <summary>
             Initializes a new <see cref="T:Synapse.Runner.Application.Services.WorkflowRunner"/>
             </summary>
@@ -799,6 +1056,8 @@
             <param name="executionContext">The current <see cref="T:Synapse.Runner.Application.Services.IWorkflowExecutionContext"/></param>
             <param name="activityProcessorFactory">The service used to create <see cref="T:Synapse.Runner.Application.Services.IWorkflowActivityProcessor"/>s</param>
             <param name="applicationOptions">The service used to access the current <see cref="T:Synapse.Runner.Application.Configuration.ApplicationOptions"/></param>
+            <param name="cloudEventFormatter">The service used to format <see cref="T:CloudNative.CloudEvents.CloudEvent"/>s</param>
+            <param name="cloudEventStream">The <see cref="T:System.Reactive.Subjects.Subject`1"/> used to monitor consumed <see cref="T:CloudNative.CloudEvents.CloudEvent"/>s</param>
         </member>
         <member name="P:Synapse.Runner.Application.Services.WorkflowRunner.Logger">
             <summary>
@@ -823,6 +1082,16 @@
         <member name="P:Synapse.Runner.Application.Services.WorkflowRunner.ActivityProcessorFactory">
             <summary>
             Gets the service used to create <see cref="T:Synapse.Runner.Application.Services.IWorkflowActivityProcessor"/>s
+            </summary>
+        </member>
+        <member name="P:Synapse.Runner.Application.Services.WorkflowRunner.CloudEventFormatter">
+            <summary>
+            Gets the service used to format <see cref="T:CloudNative.CloudEvents.CloudEvent"/>s
+            </summary>
+        </member>
+        <member name="P:Synapse.Runner.Application.Services.WorkflowRunner.CloudEventStream">
+            <summary>
+            Gets the <see cref="T:System.Reactive.Subjects.Subject`1"/> used to monitor consumed <see cref="T:CloudNative.CloudEvents.CloudEvent"/>s
             </summary>
         </member>
         <member name="P:Synapse.Runner.Application.Services.WorkflowRunner.CancellationTokenSource">
@@ -955,6 +1224,12 @@
             <summary>
             Exposes constants about Synapse Runner's logging
             </summary>
+        </member>
+        <member name="M:Synapse.Runner.Application.SynapseRunnerConstants.Logging.GetHeader(System.String,System.String,System.String)">
+            <summary>
+            Gets the Synapse Runner log header
+            </summary>
+            <returns>The Synapse Runner log header</returns>
         </member>
         <member name="T:Synapse.Runner.Application.V1WorkflowActivityMetadata">
             <summary>

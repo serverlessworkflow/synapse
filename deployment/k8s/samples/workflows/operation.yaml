@@ -13,9 +13,9 @@ states:
   - name: petStoreLogin
     functionRef:
       refName: petStoreLogin
-      parameters:
+      arguments:
         username: runtime@synapse.sw
         password: FakePassword
     actionDataFilter:
-      results: '${ { loginResult: .message } }'
+      results: '${ { loginResult: . } }'
   end: true

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CloudNative.CloudEvents;
+using System;
 
 namespace Synapse
 {
@@ -24,6 +25,37 @@ namespace Synapse
             /// Gets the prefix for all Synapse environment variables
             /// </summary>
             public const string Prefix = "SYNAPSE_";
+
+            /// <summary>
+            /// Exposes constants about <see cref="CloudEvent"/>-related environment variables
+            /// </summary>
+            public static class CloudEvents
+            {
+
+                /// <summary>
+                /// Gets the prefix for all <see cref="CloudEvent"/>-related environment variables
+                /// </summary>
+                public const string Prefix = EnvironmentVariables.Prefix + "CLOUDEVENT_";
+
+                /// <summary>
+                /// Exposes constants about the <see cref="CloudEvent"/> sink environment variable
+                /// </summary>
+                public static class Sink
+                {
+
+                    /// <summary>
+                    /// Gets the name of the <see cref="CloudEvent"/> sink environment variable
+                    /// </summary>
+                    public const string Name = Prefix + "SINK";
+
+                    /// <summary>
+                    /// Gets the value of the <see cref="CloudEvent"/> sink environment variable
+                    /// </summary>
+                    public static string Value = Environment.GetEnvironmentVariable(Name);
+
+                }
+
+            }
 
             /// <summary>
             /// Exposes constants about Kuberneres environment variables
@@ -184,24 +216,24 @@ namespace Synapse
             /// Gets the header of all Synapse products logs
             /// </summary>
             public const string Header = @"
-                                                      ___                       ___           ___           ___         ___           ___     
-                                                     /  /\          ___        /__/\         /  /\         /  /\       /  /\         /  /\    
-                                                    /  /:/_        /__/|       \  \:\       /  /::\       /  /::\     /  /:/_       /  /:/_   
-                                                   /  /:/ /\      |  |:|        \  \:\     /  /:/\:\     /  /:/\:\   /  /:/ /\     /  /:/ /\  
-                                                  /  /:/ /::\     |  |:|    _____\__\:\   /  /:/~/::\   /  /:/~/:/  /  /:/ /::\   /  /:/ /:/_ 
-                                                 /__/:/ /:/\:\  __|__|:|   /__/::::::::\ /__/:/ /:/\:\ /__/:/ /:/  /__/:/ /:/\:\ /__/:/ /:/ /\
-                                                 \  \:\/:/~/:/ /__/::::\   \  \:\~~\~~\/ \  \:\/:/__\/ \  \:\/:/   \  \:\/:/~/:/ \  \:\/:/ /:/
-                                                  \  \::/ /:/     ~\~~\:\   \  \:\  ~~~   \  \::/       \  \::/     \  \::/ /:/   \  \::/ /:/ 
-                                                   \__\/ /:/        \  \:\   \  \:\        \  \:\        \  \:\      \__\/ /:/     \  \:\/:/  
-                                                     /__/:/          \__\/    \  \:\        \  \:\        \  \:\       /__/:/       \  \::/   
-                                                     \__\/                     \__\/         \__\/         \__\/       \__\/         \__\/    
-
-             _______                               __                         ________              __     ___ __                      ______               __   __                 
-            |     __|.-----.----.--.--.-----.----.|  |.-----.-----.-----.    |  |  |  |.-----.----.|  |--.'  _|  |.-----.--.--.--.    |   __ \.--.--.-----.|  |_|__|.--------.-----.
-            |__     ||  -__|   _|  |  |  -__|   _||  ||  -__|__ --|__ --|    |  |  |  ||  _  |   _||    <|   _|  ||  _  |  |  |  |    |      <|  |  |     ||   _|  ||        |  -__|
-            |_______||_____|__|  \___/|_____|__|  |__||_____|_____|_____|    |________||_____|__|  |__|__|__| |__||_____|________|    |___|__||_____|__|__||____|__||__|__|__|_____|
-                                                                                                                                                                        
-            ";
+                                      ___                       ___           ___           ___         ___           ___     
+                                     /  /\          ___        /__/\         /  /\         /  /\       /  /\         /  /\    
+                                    /  /:/_        /__/|       \  \:\       /  /::\       /  /::\     /  /:/_       /  /:/_   
+                                   /  /:/ /\      |  |:|        \  \:\     /  /:/\:\     /  /:/\:\   /  /:/ /\     /  /:/ /\  
+                                  /  /:/ /::\     |  |:|    _____\__\:\   /  /:/~/::\   /  /:/~/:/  /  /:/ /::\   /  /:/ /:/_ 
+                                 /__/:/ /:/\:\  __|__|:|   /__/::::::::\ /__/:/ /:/\:\ /__/:/ /:/  /__/:/ /:/\:\ /__/:/ /:/ /\
+                                 \  \:\/:/~/:/ /__/::::\   \  \:\~~\~~\/ \  \:\/:/__\/ \  \:\/:/   \  \:\/:/~/:/ \  \:\/:/ /:/
+                                  \  \::/ /:/     ~\~~\:\   \  \:\  ~~~   \  \::/       \  \::/     \  \::/ /:/   \  \::/ /:/ 
+                                   \__\/ /:/        \  \:\   \  \:\        \  \:\        \  \:\      \__\/ /:/     \  \:\/:/  
+                                     /__/:/          \__\/    \  \:\        \  \:\        \  \:\       /__/:/       \  \::/   
+                                     \__\/                     \__\/         \__\/         \__\/       \__\/         \__\/    
+                                                                                                                    
+ _______                               __                         ________              __     ___ __                      ______               __   __                 
+|     __|.-----.----.--.--.-----.----.|  |.-----.-----.-----.    |  |  |  |.-----.----.|  |--.'  _|  |.-----.--.--.--.    |   __ \.--.--.-----.|  |_|__|.--------.-----.
+|__     ||  -__|   _|  |  |  -__|   _||  ||  -__|__ --|__ --|    |  |  |  ||  _  |   _||    <|   _|  ||  _  |  |  |  |    |      <|  |  |     ||   _|  ||        |  -__|
+|_______||_____|__|  \___/|_____|__|  |__||_____|_____|_____|    |________||_____|__|  |__|__|__| |__||_____|________|    |___|__||_____|__|__||____|__||__|__|__|_____|
+                                                                                                                                                                                                                                                                                                                                
+";
 
         }
 

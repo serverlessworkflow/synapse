@@ -50,6 +50,12 @@ namespace Synapse.Domain.Models
         public V1ObjectReference Pod { get; set; }
 
         /// <summary>
+        /// Gets <see cref="V1WorkflowInstance"/>'s <see cref="V1CorrelationContext"/>
+        /// </summary>
+        [JsonProperty("correlationContext")]
+        public V1CorrelationContext CorrelationContext { get; set; } = new V1CorrelationContext();
+
+        /// <summary>
         /// Gets a <see cref="List{T}"/> containing the <see cref="V1ExecutionInterruption"/>s that have occured during the <see cref="V1WorkflowInstance"/>'s execution
         /// </summary>
         [JsonProperty("interruptions")]

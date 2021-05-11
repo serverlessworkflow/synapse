@@ -11,9 +11,19 @@ using System.Reactive.Subjects;
 namespace Synapse.Runner.Application.Configuration
 {
 
+    /// <summary>
+    /// Defines configuration extensions for <see cref="IServiceCollection"/>s
+    /// </summary>
     public static class ConfigurationExtensions
     {
 
+        /// <summary>
+        /// Adds and configures the service required for the Synapse Runner application
+        /// </summary>
+        /// <param name="services">The <see cref="IServiceCollection"/> to configure</param>
+        /// <param name="configuration">The current <see cref="IConfiguration"/></param>
+        /// <param name="environment">The current <see cref="IHostEnvironment"/></param>
+        /// <returns>The configured <see cref="IServiceCollection"/></returns>
         public static IServiceCollection AddSynapseRunner(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
         {
             services.Configure<ApplicationOptions>(configuration);
@@ -22,6 +32,7 @@ namespace Synapse.Runner.Application.Configuration
 
             services.AddSingleton<IExpressionEvaluatorFactory, ExpressionEvaluatorFactory>();
 
+            services.AddSingleton<ICloudEventFormatter, JsonEventFormatter>();
             services.AddSingleton<Subject<CloudEvent>>();
             services.AddHttpClient(nameof(CloudEventBus), http => { });
             services.AddSingleton<ICloudEventBus, CloudEventBus>();

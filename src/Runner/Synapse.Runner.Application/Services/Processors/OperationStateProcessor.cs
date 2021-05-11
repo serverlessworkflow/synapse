@@ -67,7 +67,7 @@ namespace Synapse.Runner.Application.Services.Processors
                         throw new NotSupportedException($"The specified {nameof(ActionExecutionMode)} '{this.State.ActionMode}' is not supported");
                 }
             }
-            foreach (V1WorkflowActivity activity in await this.ExecutionContext.ListChildActivitiesAsync(this.Activity, cancellationToken))
+            foreach (V1WorkflowActivity activity in await this.ExecutionContext.ListActiveChildActivitiesAsync(this.Activity, cancellationToken))
             {
                 this.CreateProcessorFor(activity);
             }
@@ -117,7 +117,7 @@ namespace Synapse.Runner.Application.Services.Processors
             }
             else
             {
-                List<V1WorkflowActivity> activities = (await this.ExecutionContext.ListChildActivitiesAsync(this.Activity, cancellationToken))
+                List<V1WorkflowActivity> activities = (await this.ExecutionContext.ListActiveChildActivitiesAsync(this.Activity, cancellationToken))
                     .Where(a => a.Type == V1WorkflowActivityType.Action)
                     .Where(a => a.Status == V1WorkflowActivityStatus.Executed
                         && a.Result.Type == V1WorkflowExecutionResultType.Next
@@ -150,16 +150,16 @@ namespace Synapse.Runner.Application.Services.Processors
         }
 
         /// <summary>
-        /// Handles the completion of the specified <see cref="ExecutionPointer"/>
+        /// Handles the completion of the specified <see cref="V1WorkflowActivity"/>
         /// </summary>
-        /// <param name="processor">The <see cref="ActionProcessor"/> that has returned the <see cref="ExecutionResult"/></param>
+        /// <param name="processor">The <see cref="ActionProcessor"/> that has returned the <see cref="V1WorkflowExecutionResult"/></param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A new awaitable <see cref="Task"/></returns>
         protected virtual async Task OnActionCompletedAsync(ActionProcessor processor, CancellationToken cancellationToken)
         {
             this.Processors.TryRemove(processor);
             processor.Dispose();
-            IEnumerable<V1WorkflowActivity> activities = (await this.ExecutionContext.ListChildActivitiesAsync(this.Activity, cancellationToken)).Where(a => a.Type == V1WorkflowActivityType.Action);
+            IEnumerable<V1WorkflowActivity> activities = (await this.ExecutionContext.ListActiveChildActivitiesAsync(this.Activity, cancellationToken)).Where(a => a.Type == V1WorkflowActivityType.Action);
             if (activities.All(p => p.Status == V1WorkflowActivityStatus.Executed))
             {
                 await base.OnCompletedAsync(cancellationToken);

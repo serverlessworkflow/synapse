@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using CloudNative.CloudEvents;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Rest;
 using Newtonsoft.Json.Linq;
 using ServerlessWorkflow.Sdk.Models;
 using Synapse.Domain.Models;
@@ -28,14 +28,16 @@ namespace Synapse.Runner.Application.Services
         /// <param name="applicationLifetime">The service used to manage the application's lifetime</param>
         /// <param name="expressionEvaluatorFactory">The service used to create <see cref="IExpressionEvaluator"/>s</param>
         /// <param name="definitions">The <see cref="IRepository{TResource}"/> used to manage <see cref="V1Workflow"/>s</param>
-        /// <param name="definitions">The <see cref="IRepository{TResource}"/> used to manage <see cref="V1WorkflowInstance"/>s</param>
-        public WorkflowExecutionContext(ILogger<WorkflowExecutionContext> logger, IHostApplicationLifetime applicationLifetime, IExpressionEvaluatorFactory expressionEvaluatorFactory, IRepository<V1Workflow> definitions, IRepository<V1WorkflowInstance> instances)
+        /// <param name="instances">The <see cref="IRepository{TResource}"/> used to manage <see cref="V1WorkflowInstance"/>s</param>
+        /// <param name="cloudEventFormatter">The service used to format <see cref="CloudEvent"/>s</param>
+        public WorkflowExecutionContext(ILogger<WorkflowExecutionContext> logger, IHostApplicationLifetime applicationLifetime, IExpressionEvaluatorFactory expressionEvaluatorFactory, IRepository<V1Workflow> definitions, IRepository<V1WorkflowInstance> instances, ICloudEventFormatter cloudEventFormatter)
         {
             this.Logger = logger;
             this.ApplicationLifetime = applicationLifetime;
             this.ExpressionEvaluatorFactory = expressionEvaluatorFactory;
             this.Definitions = definitions;
             this.Instances = instances;
+            this.CloudEventFormatter = cloudEventFormatter;
         }
 
         /// <summary>
@@ -54,6 +56,11 @@ namespace Synapse.Runner.Application.Services
         protected IExpressionEvaluatorFactory ExpressionEvaluatorFactory { get; }
 
         /// <summary>
+        /// Gets the service used to format <see cref="CloudEvent"/>s
+        /// </summary>
+        protected ICloudEventFormatter CloudEventFormatter { get; }
+
+        /// <summary>
         /// Gets the <see cref="IRepository{TResource}"/> used to manage <see cref="V1Workflow"/>s
         /// </summary>
         protected IRepository<V1Workflow> Definitions { get; }
@@ -63,9 +70,13 @@ namespace Synapse.Runner.Application.Services
         /// </summary>
         protected IRepository<V1WorkflowInstance> Instances { get; }
 
+        /// <summary>
+        /// Gets the <see cref="AsyncLock"/> used to ensure thread safe use of the <see cref="WorkflowExecutionContext"/>
+        /// </summary>
+        protected AsyncLock Lock { get; } = new AsyncLock();
+
         /// <inheritdoc/>
         public V1Workflow Definition { get; private set; }
-
         /// <inheritdoc/>
         public V1WorkflowInstance Instance { get; private set; }
 
@@ -75,68 +86,91 @@ namespace Synapse.Runner.Application.Services
         /// <inheritdoc/>
         public virtual async Task InitializeAsync(CancellationToken cancellationToken = default)
         {
-            this.Logger.LogInformation($"Initializing the current workflow context...");
-            this.Definition = await this.Definitions.FindAsync(SynapseConstants.EnvironmentVariables.Workflows.Id.Value, SynapseConstants.EnvironmentVariables.Workflows.Version.Value, cancellationToken: cancellationToken);
-            if (this.Definition == null)
-                throw new NullReferenceException($"Failed to find the Workflow Custom Resource '{SynapseConstants.EnvironmentVariables.Workflows.Id.Value}:{SynapseConstants.EnvironmentVariables.Workflows.Version.Value}'. The runner might be incorrectly configured.");
-            this.Instance = await Instances.FindByNameAsync(SynapseConstants.EnvironmentVariables.Workflows.Instance.Value, cancellationToken);
-            if (this.Instance == null)
-                throw new NullReferenceException($"Failed to find the Workflow Instance Custom Resource '{SynapseConstants.EnvironmentVariables.Workflows.Instance.Value}'. The runner might be incorrectly configured.");
-            this.ExpressionEvaluator = this.ExpressionEvaluatorFactory.Create(this.Definition);
-            this.Logger.LogInformation($"Workflow context initialized");
+            using (await this.Lock.LockAsync())
+            {
+                this.Logger.LogInformation($"Initializing the current workflow context...");
+                this.Definition = await this.Definitions.FindAsync(SynapseConstants.EnvironmentVariables.Workflows.Id.Value, SynapseConstants.EnvironmentVariables.Workflows.Version.Value, cancellationToken: cancellationToken);
+                if (this.Definition == null)
+                    throw new NullReferenceException($"Failed to find the Workflow Custom Resource '{SynapseConstants.EnvironmentVariables.Workflows.Id.Value}:{SynapseConstants.EnvironmentVariables.Workflows.Version.Value}'. The runner might be incorrectly configured.");
+                this.Instance = await Instances.FindByNameAsync(SynapseConstants.EnvironmentVariables.Workflows.Instance.Value, cancellationToken);
+                if (this.Instance == null)
+                    throw new NullReferenceException($"Failed to find the Workflow Instance Custom Resource '{SynapseConstants.EnvironmentVariables.Workflows.Instance.Value}'. The runner might be incorrectly configured.");
+                this.ExpressionEvaluator = this.ExpressionEvaluatorFactory.Create(this.Definition);
+                this.Logger.LogInformation($"Workflow context initialized");
+            }   
         }
 
         /// <inheritdoc/>
         public virtual async Task StartWorkflowAsync(CancellationToken cancellationToken = default)
         {
-            this.Logger.LogInformation("Starting workflow instance");
-            this.Instance.Start();
-            this.Instance = await this.Instances.UpdateAsync(this.Instance, cancellationToken);
-            this.Logger.LogInformation("Workflow instance started");
+            using (await this.Lock.LockAsync())
+            {
+                this.Logger.LogInformation("Starting workflow instance");
+                this.Instance.Start();
+                this.Instance = await this.Instances.UpdateAsync(this.Instance, cancellationToken);
+                this.Logger.LogInformation("Workflow instance started");
+            }
         }
 
         /// <inheritdoc/>
         public virtual async Task ExecuteWorkflowAsync(CancellationToken cancellationToken = default)
         {
-            this.Instance.Execute();
-            this.Instance = await this.Instances.UpdateAsync(this.Instance, cancellationToken);
-            this.Logger.LogInformation("Executing workflow instance");
+            using (await this.Lock.LockAsync())
+            {
+                if (this.Instance.Status.Type == V1WorkflowActivityStatus.Executed)
+                    return;
+                this.Instance.Execute();
+                this.Instance = await this.Instances.UpdateAsync(this.Instance, cancellationToken);
+                this.Logger.LogInformation("Executing workflow instance");
+            }
         }
 
         /// <inheritdoc/>
         public virtual async Task SuspendWorkflowAsync(CancellationToken cancellationToken = default)
         {
-            this.Logger.LogInformation("Suspending workflow instance execution...");
-            this.Instance.Suspend();
-            this.Instance = await this.Instances.UpdateAsync(this.Instance, cancellationToken);
-            this.Logger.LogInformation("Workflow instance execution suspended");
+            using (await this.Lock.LockAsync())
+            {
+                this.Logger.LogInformation("Suspending workflow instance execution...");
+                this.Instance.Suspend();
+                this.Instance = await this.Instances.UpdateAsync(this.Instance, cancellationToken);
+                this.Logger.LogInformation("Workflow instance execution suspended");
+            }
         }
 
         /// <inheritdoc/>
         public virtual async Task FaultWorkflowAsync(Exception ex, CancellationToken cancellationToken = default)
         {
-            this.Logger.LogInformation("Faulting workflow instance execution...");
-            this.Instance.Fault(ex);
-            this.Instance = await this.Instances.UpdateAsync(this.Instance, cancellationToken);
-            this.Logger.LogInformation("Workflow instance execution faulted");
+            using (await this.Lock.LockAsync())
+            {
+                this.Logger.LogInformation("Faulting workflow instance execution...");
+                this.Instance.Fault(ex);
+                this.Instance = await this.Instances.UpdateAsync(this.Instance, cancellationToken);
+                this.Logger.LogInformation("Workflow instance execution faulted");
+            }
         }
 
         /// <inheritdoc/>
         public virtual async Task TerminateWorkflowAsync(CancellationToken cancellationToken = default)
         {
-            this.Logger.LogInformation("Terminating workflow instance execution...");
-            this.Instance.Terminate();
-            this.Instance = await this.Instances.UpdateAsync(this.Instance, cancellationToken);
-            this.Logger.LogInformation("Workflow instance execution terminated");
+            using (await this.Lock.LockAsync())
+            {
+                this.Logger.LogInformation("Terminating workflow instance execution...");
+                this.Instance.Terminate();
+                this.Instance = await this.Instances.UpdateAsync(this.Instance, cancellationToken);
+                this.Logger.LogInformation("Workflow instance execution terminated");
+            }
         }
 
         /// <inheritdoc/>
         public virtual async Task TransitionToAsync(StateDefinition state, CancellationToken cancellationToken = default)
         {
-            this.Logger.LogInformation("Transitioning to state '{state}'...", state.Name);
-            this.Instance.TransitionTo(state);
-            this.Instance = await this.Instances.UpdateAsync(this.Instance, cancellationToken);
-            this.Logger.LogInformation("Transitioned to state '{state}'", state.Name);
+            using (await this.Lock.LockAsync())
+            {
+                this.Logger.LogInformation("Transitioning to state '{state}'...", state.Name);
+                this.Instance.TransitionTo(state);
+                this.Instance = await this.Instances.UpdateAsync(this.Instance, cancellationToken);
+                this.Logger.LogInformation("Transitioned to state '{state}'", state.Name);
+            }
         }
 
         /// <inheritdoc/>
@@ -144,24 +178,72 @@ namespace Synapse.Runner.Application.Services
         {
             if (output == null)
                 throw new ArgumentNullException(nameof(output));
-            this.Logger.LogInformation("Setting workflow instance output...");
-            this.Instance.SetOutput(output);
-            this.Instance = await this.Instances.UpdateAsync(this.Instance, cancellationToken);
-            this.Logger.LogInformation("Workflow instance output set");
+            using (await this.Lock.LockAsync())
+            {
+                this.Logger.LogInformation("Setting workflow instance output...");
+                this.Instance.SetOutput(output);
+                this.Instance = await this.Instances.UpdateAsync(this.Instance, cancellationToken);
+                this.Logger.LogInformation("Workflow instance output set");
+            }
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<bool> TryCorrelateAsync(CloudEvent e, IEnumerable<string> contextAttributes, CancellationToken cancellationToken)
+        {
+            if (e == null)
+                throw new ArgumentNullException(nameof(e));
+            using (await this.Lock.LockAsync())
+            {
+                if (!this.Instance.Status.CorrelationContext.CorrelatesTo(e))
+                    return false;
+                this.Instance.Correlate(V1CloudEvent.CreateFor(e, this.CloudEventFormatter), contextAttributes);
+                this.Instance = await this.Instances.UpdateAsync(this.Instance, cancellationToken);
+            }
+            return true;
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<CloudEvent> GetBoostrapEventAsync(EventDefinition eventDefinition, CancellationToken cancellationToken = default)
+        {
+            if (eventDefinition == null)
+                throw new ArgumentNullException(nameof(eventDefinition));
+            using (await this.Lock.LockAsync())
+            {
+                V1CloudEvent e = this.Instance.Status.CorrelationContext.BootstrapEvents.FirstOrDefault(e => e.Matches(eventDefinition));
+                if (e == null)
+                    return null;
+                this.Instance.ConsumeBootstrapEvent(e);
+                this.Instance = await this.Instances.UpdateAsync(this.Instance, cancellationToken);
+                return e.ToCloudEvent(this.CloudEventFormatter);
+            }
         }
 
         /// <inheritdoc/>
         public virtual async Task<List<V1WorkflowActivity>> ListChildActivitiesAsync(CancellationToken cancellationToken = default)
         {
-            return await Task.Run(() => this.Instance.Status.ActivityLog.ToList().Where(a => a.Status == V1WorkflowActivityStatus.Pending && !a.ParentId.HasValue).ToList(), cancellationToken);
+            using (await this.Lock.LockAsync())
+            {
+                return this.Instance.Status.ActivityLog.ToList().Where(a => a.Status == V1WorkflowActivityStatus.Pending && !a.ParentId.HasValue).ToList();
+            }
         }
 
         /// <inheritdoc/>
-        public virtual async Task<List<V1WorkflowActivity>> ListChildActivitiesAsync(V1WorkflowActivity activity, CancellationToken cancellationToken = default)
+        public virtual async Task<List<V1WorkflowActivity>> ListActiveChildActivitiesAsync(V1WorkflowActivity activity, CancellationToken cancellationToken = default)
         {
             if (activity == null)
                 throw new ArgumentNullException(nameof(activity));
-            return await Task.Run(() => this.Instance.Status.ActivityLog.ToList().Where(a => a.ParentId.HasValue && a.ParentId == activity.Id).ToList(), cancellationToken);
+            return await this.ListChildActivitiesAsync(activity, false, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<List<V1WorkflowActivity>> ListChildActivitiesAsync(V1WorkflowActivity activity, bool includeInactive = false, CancellationToken cancellationToken = default)
+        {
+            if (activity == null)
+                throw new ArgumentNullException(nameof(activity));
+            using (await this.Lock.LockAsync())
+            {
+                return await Task.Run(() => this.Instance.Status.ActivityLog.ToList().Where(a => includeInactive ? true : a.IsActive && a.ParentId.HasValue && a.ParentId == activity.Id).ToList(), cancellationToken);
+            }
         }
 
         /// <inheritdoc/>
@@ -169,9 +251,12 @@ namespace Synapse.Runner.Application.Services
         {
             if (activity == null)
                 throw new ArgumentNullException(nameof(activity));
-            this.Instance.AddActivity(activity);
-            this.Instance = await this.Instances.UpdateAsync(this.Instance, cancellationToken);
-            return this.Instance.Status.ActivityLog.Single(a => a.Id == activity.Id);
+            using (await this.Lock.LockAsync())
+            {
+                this.Instance.AddActivity(activity);
+                this.Instance = await this.Instances.UpdateAsync(this.Instance, cancellationToken);
+                return this.Instance.Status.ActivityLog.Single(a => a.Id == activity.Id);
+            }
         }
 
         /// <inheritdoc/>
@@ -179,9 +264,12 @@ namespace Synapse.Runner.Application.Services
         {
             if (activity == null)
                 throw new ArgumentNullException(nameof(activity));
-            this.Instance.InitializeActivity(activity);
-            this.Instance = await this.Instances.UpdateAsync(this.Instance, cancellationToken);
-            return this.Instance.Status.ActivityLog.Single(a => a.Id == activity.Id);
+            using (await this.Lock.LockAsync())
+            {
+                this.Instance.InitializeActivity(activity);
+                this.Instance = await this.Instances.UpdateAsync(this.Instance, cancellationToken);
+                return this.Instance.Status.ActivityLog.Single(a => a.Id == activity.Id);
+            }
         }
 
         /// <inheritdoc/>
@@ -189,9 +277,12 @@ namespace Synapse.Runner.Application.Services
         {
             if (activity == null)
                 throw new ArgumentNullException(nameof(activity));
-            this.Instance.ProcessActivity(activity);
-            this.Instance = await this.Instances.UpdateAsync(this.Instance, cancellationToken);
-            return this.Instance.Status.ActivityLog.Single(a => a.Id == activity.Id);
+            using (await this.Lock.LockAsync())
+            {
+                this.Instance.ProcessActivity(activity);
+                this.Instance = await this.Instances.UpdateAsync(this.Instance, cancellationToken);
+                return this.Instance.Status.ActivityLog.Single(a => a.Id == activity.Id);
+            }
         }
 
         /// <inheritdoc/>
@@ -199,9 +290,12 @@ namespace Synapse.Runner.Application.Services
         {
             if (activity == null)
                 throw new ArgumentNullException(nameof(activity));
-            this.Instance.SuspendActivity(activity);
-            this.Instance = await this.Instances.UpdateAsync(this.Instance, cancellationToken);
-            return this.Instance.Status.ActivityLog.Single(a => a.Id == activity.Id);
+            using (await this.Lock.LockAsync())
+            {
+                this.Instance.SuspendActivity(activity);
+                this.Instance = await this.Instances.UpdateAsync(this.Instance, cancellationToken);
+                return this.Instance.Status.ActivityLog.Single(a => a.Id == activity.Id);
+            }
         }
 
         /// <inheritdoc/>
@@ -211,9 +305,14 @@ namespace Synapse.Runner.Application.Services
                 throw new ArgumentNullException(nameof(activity));
             if (ex == null)
                 throw new ArgumentNullException(nameof(ex));
-            this.Instance.FaultActivity(activity, ex);
-            this.Instance = await this.Instances.UpdateAsync(this.Instance, cancellationToken);
-            return this.Instance.Status.ActivityLog.Single(a => a.Id == activity.Id);
+            if (activity.Status == V1WorkflowActivityStatus.Faulted)
+                return activity;
+            using (await this.Lock.LockAsync())
+            {
+                this.Instance.FaultActivity(activity, ex);
+                this.Instance = await this.Instances.UpdateAsync(this.Instance, cancellationToken);
+                return this.Instance.Status.ActivityLog.Single(a => a.Id == activity.Id);
+            }
         }
 
         /// <inheritdoc/>
@@ -221,9 +320,12 @@ namespace Synapse.Runner.Application.Services
         {
             if (activity == null)
                 throw new ArgumentNullException(nameof(activity));
-            this.Instance.TerminateActivity(activity);
-            this.Instance = await this.Instances.UpdateAsync(this.Instance, cancellationToken);
-            return this.Instance.Status.ActivityLog.Single(a => a.Id == activity.Id);
+            using (await this.Lock.LockAsync())
+            {
+                this.Instance.TerminateActivity(activity);
+                this.Instance = await this.Instances.UpdateAsync(this.Instance, cancellationToken);
+                return this.Instance.Status.ActivityLog.Single(a => a.Id == activity.Id);
+            }
         }
 
         /// <inheritdoc/>
@@ -233,9 +335,12 @@ namespace Synapse.Runner.Application.Services
                 throw new ArgumentNullException(nameof(activity));
             if (result == null)
                 throw new ArgumentNullException(nameof(result));
-            this.Instance.SetActivityResult(activity, result);
-            this.Instance = await this.Instances.UpdateAsync(this.Instance, cancellationToken);
-            return this.Instance.Status.ActivityLog.Single(a => a.Id == activity.Id);
+            using (await this.Lock.LockAsync())
+            {
+                this.Instance.SetActivityResult(activity, result);
+                this.Instance = await this.Instances.UpdateAsync(this.Instance, cancellationToken);
+                return this.Instance.Status.ActivityLog.Single(a => a.Id == activity.Id);
+            }
         }
 
         /// <inheritdoc/>
@@ -245,9 +350,12 @@ namespace Synapse.Runner.Application.Services
                 throw new ArgumentNullException(nameof(activity));
             if (data == null)
                 throw new ArgumentNullException(nameof(data));
-            this.Instance.UpdateActivityData(activity, data);
-            this.Instance = await this.Instances.UpdateAsync(this.Instance, cancellationToken);
-            return this.Instance.Status.ActivityLog.Single(a => a.Id == activity.Id);
+            using (await this.Lock.LockAsync())
+            {
+                this.Instance.UpdateActivityData(activity, data);
+                this.Instance = await this.Instances.UpdateAsync(this.Instance, cancellationToken);
+                return this.Instance.Status.ActivityLog.Single(a => a.Id == activity.Id);
+            }
         }
 
     }
