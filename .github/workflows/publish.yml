@@ -1,0 +1,32 @@
+name: Publish
+on:
+  release:
+    types: [published]
+jobs:
+  push_to_registry:
+    name: Push Docker image to GitHub Packages
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Publish Operator
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: docker.pkg.github.com
+          repository: serverlessworkflow/synapse/operator
+          dockerfile: src/Operator/Synapse.Operator.Runtime/Dockerfile
+          tag_with_ref: true
+      - name: Publish Correlator
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: docker.pkg.github.com
+          repository: serverlessworkflow/synapse/correlator
+          dockerfile: src/Correlator/Synapse.Correlator.Runtime/Dockerfile
+          tag_with_ref: true
