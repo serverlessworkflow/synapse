@@ -19,6 +19,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
           registry: docker.pkg.github.com
           repository: serverlessworkflow/synapse/operator
+          context: src
           dockerfile: src/Operator/Synapse.Operator.Runtime/Dockerfile
           tag_with_ref: true
       - name: Publish Correlator
@@ -28,5 +29,6 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
           registry: docker.pkg.github.com
           repository: serverlessworkflow/synapse/correlator
+          context: src
           dockerfile: src/Correlator/Synapse.Correlator.Runtime/Dockerfile
           tag_with_ref: true
