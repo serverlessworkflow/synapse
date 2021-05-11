@@ -22,6 +22,7 @@ jobs:
           registry: docker.pkg.github.com
           repository: serverlessworkflow/synapse/operator
           context: src
+          path: src
           dockerfile: src/Operator/Synapse.Operator.Runtime/Dockerfile
           tag_with_ref: true
       - name: Publish Correlator
