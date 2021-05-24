@@ -1,5 +1,7 @@
 ﻿using CloudNative.CloudEvents;
 using System;
+using System.Linq;
+using System.Reflection;
 
 namespace Synapse
 {
@@ -14,6 +16,10 @@ namespace Synapse
         /// Gets Synapse's resource namespace
         /// </summary>
         public const string Namespace = "synapse.io";
+        /// <summary>
+        /// Gets Synapse's version
+        /// </summary>
+        public static string Version = typeof(SynapseConstants).Assembly.GetCustomAttributes().OfType<AssemblyInformationalVersionAttribute>().First().InformationalVersion;
 
         /// <summary>
         /// Exposes constants about Synapse environment variables
@@ -107,6 +113,104 @@ namespace Synapse
             }
 
             /// <summary>
+            /// Exposes constants about Synapse runtime-related environment variables
+            /// </summary>
+            public static class Runtime
+            {
+
+                /// <summary>
+                /// Gets the prefix for all Synapse runtime-related environment variables
+                /// </summary>
+                public const string Prefix = EnvironmentVariables.Prefix + "RUNTIME_";
+
+                /// <summary>
+                /// Exposes constants about Synapse correlation-related environment variables
+                /// </summary>
+                public static class Correlation
+                {
+
+                    /// <summary>
+                    /// Gets the prefix for all Synapse correlation-related environment variables
+                    /// </summary>
+                    public const string Prefix = Runtime.Prefix + "CORRELATION_";
+
+                    /// <summary>
+                    /// Exposes constants about the Synapse runtime correlation mode environment variable
+                    /// </summary>
+                    public static class Mode
+                    {
+
+                        /// <summary>
+                        /// Gets the name of the Synapse runtime correlation mode environment variable
+                        /// </summary>
+                        public const string Name = Prefix + "MODE";
+
+                        /// <summary>
+                        /// Gets the value of the Synapse runtime correlation mode environment variable
+                        /// </summary>
+                        public static string Value = Environment.GetEnvironmentVariable(Name);
+
+                    }
+
+                    /// <summary>
+                    /// Exposes constants about the Synapse runtime correlation max duration environment variable
+                    /// </summary>
+                    public static class MaxDuration
+                    {
+
+                        /// <summary>
+                        /// Gets the name of the Synapse runtime correlation max duration environment variable
+                        /// </summary>
+                        public const string Name = Prefix + "MAXDURATION";
+
+                        /// <summary>
+                        /// Gets the value of the Synapse runtime correlation max duration environment variable
+                        /// </summary>
+                        public static string Value = Environment.GetEnvironmentVariable(Name);
+
+                    }
+
+                }
+
+                /// <summary>
+                /// Exposes constants about the Synapse runtime grace period environment variable
+                /// </summary>
+                public static class GracePeriod
+                {
+
+                    /// <summary>
+                    /// Gets the name of the Synapse runtime grace period environment variable
+                    /// </summary>
+                    public const string Name = Prefix + "GRACEPERIOD";
+
+                    /// <summary>
+                    /// Gets the value of the Synapse runtime grace period environment variable
+                    /// </summary>
+                    public static string Value = Environment.GetEnvironmentVariable(Name);
+
+                }
+
+                /// <summary>
+                /// Exposes constants about the Synapse runtime startup mode environment variable
+                /// </summary>
+                public static class Startup
+                {
+
+                    /// <summary>
+                    /// Gets the name of the Synapse runtime startup mode environment variable
+                    /// </summary>
+                    public const string Name = Prefix + "STARTUP";
+
+                    /// <summary>
+                    /// Gets the value of the Synapse runtime startup mode environment variable
+                    /// </summary>
+                    public static string Value = Environment.GetEnvironmentVariable(Name);
+
+                }
+
+            }
+
+            /// <summary>
             /// Exposes constants about Synapse workflow-related environment variables
             /// </summary>
             public static class Workflows
@@ -182,6 +286,16 @@ namespace Synapse
         {
 
             /// <summary>
+            /// Gets the prefix for all Synapse labels
+            /// </summary>
+            public const string Prefix = Namespace + "/";
+
+            /// <summary>
+            /// Gets the name of the Synapse label indicating that the marked resource has been scheduled and should be ignored by the operator
+            /// </summary>
+            public const string Scheduled = "scheduled";
+
+            /// <summary>
             /// Exposes constants about Synapse workflow-related labels
             /// </summary>
             public static class Workflows
@@ -190,7 +304,7 @@ namespace Synapse
                 /// <summary>
                 /// Gets the prefix for all Synapse workflow-related labels
                 /// </summary>
-                public const string Prefix = "workflows." + Namespace + "/";
+                public const string Prefix = "workflows." + Labels.Prefix;
 
                 /// <summary>
                 /// Gets the name of the Synapse workflow id label
@@ -257,6 +371,19 @@ namespace Synapse
             /// Gets the default api version for all Synapse resources
             /// </summary>
             public static string ApiVersion = string.Join("/", Group, Version);
+
+        }
+
+        /// <summary>
+        /// Exposes constants about Synapse git repository
+        /// </summary>
+        public static class GitRepository
+        {
+
+            /// <summary>
+            /// Gets the uri of Synapse's git repository 
+            /// </summary>
+            public static Uri Uri = new($"https://raw.githubusercontent.com/serverlessworkflow/synapse/{Version}/");
 
         }
 

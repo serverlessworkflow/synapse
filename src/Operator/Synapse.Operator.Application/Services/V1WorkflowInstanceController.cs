@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Rest;
 using Neuroglia.K8s;
-using ServerlessWorkflow.Sdk.Models;
+using ServerlessWorkflow.Sdk;
 using Synapse.Domain.Models;
 using Synapse.Operator.Application.Configuration;
 using Synapse.Services;
@@ -79,7 +79,7 @@ namespace Synapse.Operator.Application.Services
         {
             KubernetesList<V1WorkflowInstance> workflowInstanceResources = await this.Kubernetes.ListClusterCustomObjectAsync<V1WorkflowInstance>(this.ResourceDefinition.Group, this.ResourceDefinition.Version, this.ResourceDefinition.Plural, cancellationToken: cancellationToken);
             foreach (V1WorkflowInstance workflowInstanceResource in (await this.WorkflowInstances.ToListAsync(cancellationToken))
-                .Where(w => w.Status == null || w.Status.Type == V1WorkflowActivityStatus.Pending))
+                .Where(w => w.Status == null || w.Status.Type == V1WorkflowActivityStatus.Pending || w.Status.Type == V1WorkflowActivityStatus.Awakening))
             {
                 await this.ProcessAsync(workflowInstanceResource, cancellationToken);
             }
@@ -95,6 +95,12 @@ namespace Synapse.Operator.Application.Services
         {
             if (workflowInstance == null)
                 throw new ArgumentNullException(nameof(workflowInstance));
+            if (workflowInstance.GetLabel(SynapseConstants.Labels.Scheduled) == true.ToString())
+                return;
+            if (workflowInstance.Status != null
+                && workflowInstance.Status.Type != V1WorkflowActivityStatus.Pending
+                && workflowInstance.Status.Type != V1WorkflowActivityStatus.Awakening)
+                return;
             try
             {
                 this.Logger.LogInformation("Processing workflow Instance '{workflowInstance}'...", workflowInstance.Name());
@@ -104,8 +110,15 @@ namespace Synapse.Operator.Application.Services
                     this.Logger.LogError("Failed to find the specified Workflow Custom Resource '{workflowDefinitionId}:{workflowDefinitionVersion}'", workflowInstance.Spec.Definition.Id, workflowInstance.Spec.Definition.Version);
                     throw new NullReferenceException($"Failed to find the specified Workflow Custom Resource '{workflowInstance.Spec.Definition.Id}:{workflowInstance.Spec.Definition.Version}'");
                 }
-                workflowInstance = await this.InitializeAsync(workflowInstance, workflowDefinition, cancellationToken);
-                workflowInstance = await this.DeployAsync(workflowInstance, cancellationToken);
+                if(workflowInstance.Status != null && workflowInstance.Status.Type == V1WorkflowActivityStatus.Awakening)
+                {
+                    workflowInstance = await this.WakeUpAsync(workflowInstance, cancellationToken);
+                }
+                else
+                {
+                    workflowInstance = await this.InitializeAsync(workflowInstance, workflowDefinition, cancellationToken);
+                    workflowInstance = await this.DeployAsync(workflowInstance, cancellationToken);
+                }
                 this.Logger.LogInformation("Workflow Instance '{workflowInstance}' successfully processed", workflowInstance.Name());
             }
             catch (Exception ex)
@@ -163,6 +176,38 @@ namespace Synapse.Operator.Application.Services
         }
 
         /// <summary>
+        /// Wakes up the specified <see cref="V1WorkflowInstance"/>
+        /// </summary>
+        /// <param name="workflowInstance">The <see cref="V1WorkflowInstance"/> to wakeup</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The updated <see cref="V1WorkflowInstance"/></returns>
+        protected virtual async Task<V1WorkflowInstance> WakeUpAsync(V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default)
+        {
+            if (workflowInstance == null)
+                throw new ArgumentNullException(nameof(workflowInstance));
+            this.Logger.LogInformation("Awakening workflow instance '{workflowInstance}'...", workflowInstance.Name());
+            workflowInstance.Awaken();
+            workflowInstance = await this.WorkflowInstances.UpdateAsync(workflowInstance, cancellationToken);
+            V1Pod pod;
+            try
+            {
+                pod = await this.Kubernetes.ReadNamespacedPodAsync(workflowInstance.Status.Pod.Name, workflowInstance.Status.Pod.NamespaceProperty, cancellationToken: cancellationToken);
+                if(pod != null)
+                    await this.Kubernetes.DeleteNamespacedPodAsync(pod.Name(), pod.Namespace(), cancellationToken: cancellationToken);
+            }
+            catch { }
+            pod = await this.BuildRunnerPodAsync(workflowInstance, cancellationToken);
+            pod.Metadata = new V1ObjectMeta()
+            {
+                Name = workflowInstance.Status.Pod.Name,
+                NamespaceProperty = workflowInstance.Status.Pod.NamespaceProperty
+            };
+            pod = await this.Kubernetes.CreateNamespacedPodAsync(pod, pod.Namespace(), cancellationToken: cancellationToken);
+            this.Logger.LogInformation("Workflow instance '{workflowInstance}' successfully awakened", workflowInstance.Name());
+            return workflowInstance;
+        }
+
+        /// <summary>
         /// Builds a new <see cref="V1Pod"/> for the specified <see cref="V1WorkflowInstance"/>
         /// </summary>
         /// <param name="workflowInstance">The <see cref="V1WorkflowInstance"/> to build a new <see cref="V1Pod"/> for</param>
@@ -199,6 +244,8 @@ namespace Synapse.Operator.Application.Services
                 container.Env.Add(new V1EnvVar(SynapseConstants.EnvironmentVariables.Workflows.Instance.Name, workflowInstance.Name()));
                 container.Env.Add(new V1EnvVar(SynapseConstants.EnvironmentVariables.Kubernetes.Namespace.Name, valueFrom: new V1EnvVarSource() { FieldRef = new V1ObjectFieldSelector("metadata.namespace") }));
                 container.Env.Add(new V1EnvVar(SynapseConstants.EnvironmentVariables.Kubernetes.PodName.Name, valueFrom: new V1EnvVarSource() { FieldRef = new V1ObjectFieldSelector("metadata.name") }));
+                container.Env.Add(new V1EnvVar(SynapseConstants.EnvironmentVariables.Runtime.Startup.Name, EnumHelper.Stringify(RuntimeStartupType.Explicit)));
+                container.Env.Add(new V1EnvVar(SynapseConstants.EnvironmentVariables.CloudEvents.Sink.Name, SynapseConstants.EnvironmentVariables.CloudEvents.Sink.Value));
             }
             return pod;
         }

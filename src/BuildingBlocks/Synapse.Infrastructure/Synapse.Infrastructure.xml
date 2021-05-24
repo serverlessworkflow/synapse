@@ -1,0 +1,461 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Synapse.Infrastructure</name>
+    </assembly>
+    <members>
+        <member name="T:Synapse.Configuration.CloudEventBusOptions">
+            <summary>
+            Represents the options used to configure a <see cref="T:Synapse.Services.CloudEventBus"/>
+            </summary>
+        </member>
+        <member name="M:Synapse.Configuration.CloudEventBusOptions.#ctor">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Services.CloudEventBus"/>
+            </summary>
+        </member>
+        <member name="P:Synapse.Configuration.CloudEventBusOptions.SinkUri">
+            <summary>
+            Gets/sets the <see cref="T:System.Uri"/> to post produced <see cref="T:CloudNative.CloudEvents.CloudEvent"/>s to
+            </summary>
+        </member>
+        <member name="T:Synapse.ConfigurationExtensions">
+            <summary>
+            Defines configuration-related extensions for Synapse infrastructure services
+            </summary>
+        </member>
+        <member name="M:Synapse.ConfigurationExtensions.AddCloudEventBus(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Synapse.Configuration.CloudEventBusOptions})">
+            <summary>
+            Adds and configures a <see cref="T:Synapse.Services.CloudEventBus"/>
+            </summary>
+            <param name="services">The <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> to configure</param>
+            <param name="configurationAction">The <see cref="T:System.Action`1"/> used to configure the <see cref="T:Synapse.Configuration.CloudEventBusOptions"/></param>
+            <returns>The configured <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/></returns>
+        </member>
+        <member name="M:Synapse.ConfigurationExtensions.AddCloudEventBus(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Adds and configures a <see cref="T:Synapse.Services.CloudEventBus"/>
+            </summary>
+            <param name="services">The <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> to configure</param>
+            <returns>The configured <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/></returns>
+        </member>
+        <member name="T:Synapse.IExpressionEvaluatorExtensions">
+            <summary>
+            Defines extensions for <see cref="T:Synapse.Services.IExpressionEvaluator"/>s
+            </summary>
+        </member>
+        <member name="M:Synapse.IExpressionEvaluatorExtensions.EvaluateCondition(Synapse.Services.IExpressionEvaluator,System.String,Newtonsoft.Json.Linq.JToken)">
+            <summary>
+            Evaluates the specified condition expression
+            </summary>
+            <param name="evaluator">The <see cref="T:Synapse.Services.IExpressionEvaluator"/> to use</param>
+            <param name="expression">The condition expression to evaluate</param>
+            <param name="data">The data to perform the evaluation against</param>
+            <returns>A boolean indicating whether or not the condition expression matches to the specified data</returns>
+        </member>
+        <member name="M:Synapse.IExpressionEvaluatorExtensions.FilterInput(Synapse.Services.IExpressionEvaluator,ServerlessWorkflow.Sdk.Models.StateDefinition,Newtonsoft.Json.Linq.JToken)">
+            <summary>
+            Filters the input of the specified <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/>
+            </summary>
+            <param name="evaluator">The <see cref="T:Synapse.Services.IExpressionEvaluator"/> to use</param>
+            <param name="state">The <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/> to filter the input for</param>
+            <param name="input">The input data to filter</param>
+            <returns>The filtered input</returns>
+        </member>
+        <member name="M:Synapse.IExpressionEvaluatorExtensions.FilterOutput(Synapse.Services.IExpressionEvaluator,ServerlessWorkflow.Sdk.Models.StateDefinition,Newtonsoft.Json.Linq.JToken)">
+            <summary>
+            Filters the output of the specified <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/>
+            </summary>
+            <param name="evaluator">The <see cref="T:Synapse.Services.IExpressionEvaluator"/> to use</param>
+            <param name="state">The <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/> to filter the output for</param>
+            <param name="output">The output data to filter</param>
+            <returns>The filtered output</returns>
+        </member>
+        <member name="M:Synapse.IExpressionEvaluatorExtensions.FilterInput(Synapse.Services.IExpressionEvaluator,ServerlessWorkflow.Sdk.Models.ActionDefinition,Newtonsoft.Json.Linq.JToken)">
+            <summary>
+            Filters the input of the specified <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/>
+            </summary>
+            <param name="evaluator">The <see cref="T:Synapse.Services.IExpressionEvaluator"/> to use</param>
+            <param name="action">The <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> to filter the input for</param>
+            <param name="input">The input data to filter</param>
+            <returns>The filtered input</returns>
+        </member>
+        <member name="M:Synapse.IExpressionEvaluatorExtensions.FilterResults(Synapse.Services.IExpressionEvaluator,ServerlessWorkflow.Sdk.Models.ActionDefinition,Newtonsoft.Json.Linq.JToken)">
+            <summary>
+            Filters the output of the specified <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/>
+            </summary>
+            <param name="evaluator">The <see cref="T:Synapse.Services.IExpressionEvaluator"/> to use</param>
+            <param name="action">The <see cref="T:ServerlessWorkflow.Sdk.Models.ActionDefinition"/> to filter the output for</param>
+            <param name="output">The output data to filter</param>
+            <returns>The filtered output</returns>
+        </member>
+        <member name="M:Synapse.IExpressionEvaluatorExtensions.FilterOutput(Synapse.Services.IExpressionEvaluator,ServerlessWorkflow.Sdk.Models.EventDataFilterDefinition,Newtonsoft.Json.Linq.JToken)">
+            <summary>
+            Filters output data based on the specified <see cref="T:ServerlessWorkflow.Sdk.Models.EventDataFilterDefinition"/>
+            </summary>
+            <param name="evaluator">The <see cref="T:Synapse.Services.IExpressionEvaluator"/> to use</param>
+            <param name="filter">The <see cref="T:ServerlessWorkflow.Sdk.Models.EventDataFilterDefinition"/> used to filter the specified output</param>
+            <param name="output">The output data to filter</param>
+            <returns>The filtered output</returns>
+        </member>
+        <member name="T:Synapse.V1WorkflowInstanceRepositoryExtensions">
+            <summary>
+            Defines extensions for <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>s
+            </summary>
+        </member>
+        <member name="M:Synapse.V1WorkflowInstanceRepositoryExtensions.StartAsync(Synapse.Services.IRepository{Synapse.Domain.Models.V1WorkflowInstance},Synapse.Domain.Models.V1WorkflowInstance,System.Threading.CancellationToken)">
+            <summary>
+            Starts the specified <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>
+            </summary>
+            <param name="repository">The <see cref="T:Synapse.Services.IRepository`1"/> used to persist <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>s</param>
+            <param name="workflowInstance">The <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/> to start</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>The started <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/></returns>
+        </member>
+        <member name="M:Synapse.V1WorkflowInstanceRepositoryExtensions.ExecuteAsync(Synapse.Services.IRepository{Synapse.Domain.Models.V1WorkflowInstance},Synapse.Domain.Models.V1WorkflowInstance,System.Threading.CancellationToken)">
+            <summary>
+            Executes the specified <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>
+            </summary>
+            <param name="repository">The <see cref="T:Synapse.Services.IRepository`1"/> used to persist <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>s</param>
+            <param name="workflowInstance">The <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/> to execute</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>The executing <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/></returns>
+        </member>
+        <member name="M:Synapse.V1WorkflowInstanceRepositoryExtensions.SuspendAsync(Synapse.Services.IRepository{Synapse.Domain.Models.V1WorkflowInstance},Synapse.Domain.Models.V1WorkflowInstance,System.Threading.CancellationToken)">
+            <summary>
+            Suspends the specified <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>'s execution
+            </summary>
+            <param name="repository">The <see cref="T:Synapse.Services.IRepository`1"/> used to persist <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>s</param>
+            <param name="workflowInstance">The <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/> to suspend the execution of</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>The executing <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/></returns>
+        </member>
+        <member name="M:Synapse.V1WorkflowInstanceRepositoryExtensions.FaultAsync(Synapse.Services.IRepository{Synapse.Domain.Models.V1WorkflowInstance},Synapse.Domain.Models.V1WorkflowInstance,System.Exception,System.Threading.CancellationToken)">
+            <summary>
+            Faults the specified <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>'s execution
+            </summary>
+            <param name="repository">The <see cref="T:Synapse.Services.IRepository`1"/> used to persist <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>s</param>
+            <param name="workflowInstance">The <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/> to fault the execution of</param>
+            <param name="ex">The <see cref="T:System.Exception"/> that has occured during the <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>'s execution</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>The executing <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/></returns>
+        </member>
+        <member name="M:Synapse.V1WorkflowInstanceRepositoryExtensions.TerminateAsync(Synapse.Services.IRepository{Synapse.Domain.Models.V1WorkflowInstance},Synapse.Domain.Models.V1WorkflowInstance,System.Threading.CancellationToken)">
+            <summary>
+            Terminates the specified <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>'s execution
+            </summary>
+            <param name="repository">The <see cref="T:Synapse.Services.IRepository`1"/> used to persist <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>s</param>
+            <param name="workflowInstance">The <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/> to terminate the execution of</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>The executing <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/></returns>
+        </member>
+        <member name="M:Synapse.V1WorkflowInstanceRepositoryExtensions.TransitionToAsync(Synapse.Services.IRepository{Synapse.Domain.Models.V1WorkflowInstance},Synapse.Domain.Models.V1WorkflowInstance,ServerlessWorkflow.Sdk.Models.StateDefinition,System.Threading.CancellationToken)">
+            <summary>
+            Operates a transition to the specified <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/> on a running <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/> 
+            </summary>
+            <param name="repository">The <see cref="T:Synapse.Services.IRepository`1"/> used to persist <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>s</param>
+            <param name="workflowInstance">The <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/> to operate a transition on</param>
+            <param name="state">The <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/> to transition to</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>The transitioned <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/></returns>
+        </member>
+        <member name="T:Synapse.V1WorkflowRepositoryExtensions">
+            <summary>
+            Defines extensions for <see cref="T:Synapse.Domain.Models.V1Workflow"/>s
+            </summary>
+        </member>
+        <member name="M:Synapse.V1WorkflowRepositoryExtensions.GetLatestVersionOfAsync(Synapse.Services.IRepository{Synapse.Domain.Models.V1Workflow},System.String,System.Threading.CancellationToken)">
+            <summary>
+            Gets the latest version of the specified <see cref="T:ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/>
+            </summary>
+            <param name="workflows">The extended <see cref="T:Synapse.Services.IRepository`1"/></param>
+            <param name="id">The id of the <see cref="T:ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/> to get the latest version of</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>The latest version of the specified <see cref="T:ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/></returns>
+        </member>
+        <member name="M:Synapse.V1WorkflowRepositoryExtensions.FindAsync(Synapse.Services.IRepository{Synapse.Domain.Models.V1Workflow},System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Finds the <see cref="T:Synapse.Domain.Models.V1Workflow"/> with the specified <see cref="T:ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/>
+            </summary>
+            <param name="workflows">The extended <see cref="T:Synapse.Services.IRepository`1"/></param>
+            <param name="id">The id of the <see cref="T:ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/> to get the <see cref="T:Synapse.Domain.Models.V1Workflow"/> for</param>
+            <param name="version">The version of the <see cref="T:ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/> to get the <see cref="T:Synapse.Domain.Models.V1Workflow"/> for</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>The <see cref="T:Synapse.Domain.Models.V1Workflow"/> with the specified <see cref="T:ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/></returns>
+        </member>
+        <member name="T:Synapse.Services.CloudEventBus">
+            <summary>
+            Represents the default implementation of the <see cref="T:Synapse.Services.ICloudEventBus"/> interface
+            </summary>
+        </member>
+        <member name="M:Synapse.Services.CloudEventBus.#ctor(Microsoft.Extensions.Logging.ILogger{Synapse.Services.CloudEventBus},CloudNative.CloudEvents.ICloudEventFormatter,Microsoft.Extensions.Options.IOptions{Synapse.Configuration.CloudEventBusOptions},System.Reactive.Subjects.Subject{CloudNative.CloudEvents.CloudEvent},System.Net.Http.IHttpClientFactory)">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Services.CloudEventBus"/>
+            </summary>
+            <param name="logger">The service used to perform logging</param>
+            <param name="formatter">The service used to format <see cref="T:CloudNative.CloudEvents.CloudEvent"/>s</param>
+            <param name="options">The service used to access the current <see cref="T:Synapse.Configuration.CloudEventBusOptions"/></param>
+            <param name="subject">The <see cref="T:System.Reactive.Subjects.Subject`1"/> used to monitor consumed <see cref="T:CloudNative.CloudEvents.CloudEvent"/>s</param>
+            <param name="httpClientFactory">The service used to create <see cref="T:System.Net.Http.HttpClient"/>s</param>
+        </member>
+        <member name="P:Synapse.Services.CloudEventBus.Logger">
+            <summary>
+            Gets the service used to perform logging
+            </summary>
+        </member>
+        <member name="P:Synapse.Services.CloudEventBus.Formatter">
+            <summary>
+            Gets the service used to format <see cref="T:CloudNative.CloudEvents.CloudEvent"/>s
+            </summary>
+        </member>
+        <member name="P:Synapse.Services.CloudEventBus.Options">
+            <summary>
+            Gets the options used to configure the <see cref="T:Synapse.Services.CloudEventBus"/>
+            </summary>
+        </member>
+        <member name="P:Synapse.Services.CloudEventBus.Subject">
+            <summary>
+            Gets the <see cref="T:System.Reactive.Subjects.Subject`1"/> used to monitor consumed <see cref="T:CloudNative.CloudEvents.CloudEvent"/>s
+            </summary>
+        </member>
+        <member name="P:Synapse.Services.CloudEventBus.HttpClient">
+            <summary>
+            Gets the <see cref="T:System.Net.Http.HttpClient"/> used to publish <see cref="T:CloudNative.CloudEvents.CloudEvent"/>s
+            </summary>
+        </member>
+        <member name="P:Synapse.Services.CloudEventBus.Channel">
+            <summary>
+            Gets the <see cref="T:System.Threading.Channels.Channel`1"/> used to enqueue outgoing <see cref="T:CloudNative.CloudEvents.CloudEvent"/>s
+            </summary>
+        </member>
+        <member name="M:Synapse.Services.CloudEventBus.ExecuteAsync(System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Synapse.Services.CloudEventBus.PublishPendingEventsAsync(System.Threading.CancellationToken)">
+            <summary>
+            Publishes pending <see cref="T:CloudNative.CloudEvents.CloudEvent"/>s read from the <see cref="P:Synapse.Services.CloudEventBus.Channel"/>
+            </summary>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>A new awaitable <see cref="T:System.Threading.Tasks.Task"/></returns>
+        </member>
+        <member name="M:Synapse.Services.CloudEventBus.PublishAsync(CloudNative.CloudEvents.CloudEvent,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Synapse.Services.CloudEventBus.Subscribe(System.IObserver{CloudNative.CloudEvents.CloudEvent})">
+            <inheritdoc/>
+        </member>
+        <member name="M:Synapse.Services.CloudEventBus.Dispose(System.Boolean)">
+            <summary>
+            Disposes of the <see cref="T:Synapse.Services.CloudEventBus"/>
+            </summary>
+            <param name="disposing">A boolean indicating whether or not to dispose of the <see cref="T:CloudNative.CloudEvents.CloudEvent"/></param>
+        </member>
+        <member name="M:Synapse.Services.CloudEventBus.Dispose">
+            <inheritdoc/>
+        </member>
+        <member name="T:Synapse.Services.ExpressionEvaluatorFactory">
+            <summary>
+            Represents the default implementation of the <see cref="T:Synapse.Services.IExpressionEvaluatorFactory"/> interface
+            </summary>
+        </member>
+        <member name="M:Synapse.Services.ExpressionEvaluatorFactory.Create(Synapse.Domain.Models.V1Workflow)">
+            <inheritdoc/>
+        </member>
+        <member name="T:Synapse.Services.ICloudEventBus">
+            <summary>
+            Defines the fundamentals of a service used to publish and subscribe to <see cref="T:CloudNative.CloudEvents.CloudEvent"/>s
+            </summary>
+        </member>
+        <member name="M:Synapse.Services.ICloudEventBus.PublishAsync(CloudNative.CloudEvents.CloudEvent,System.Threading.CancellationToken)">
+            <summary>
+            Publishes the specified <see cref="T:CloudNative.CloudEvents.CloudEvent"/>
+            </summary>
+            <param name="e">The <see cref="T:CloudNative.CloudEvents.CloudEvent"/> to publish</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>A new awaitable <see cref="T:System.Threading.Tasks.Task"/></returns>
+        </member>
+        <member name="T:Synapse.Services.IExpressionEvaluator">
+            <summary>
+            Defines the fundamentals of a service used to evaluate serverless workflow expressions
+            </summary>
+        </member>
+        <member name="P:Synapse.Services.IExpressionEvaluator.Language">
+            <summary>
+            Gets the <see cref="T:Synapse.Services.IExpressionEvaluator"/>'s language
+            </summary>
+        </member>
+        <member name="M:Synapse.Services.IExpressionEvaluator.Evaluate(System.String,Newtonsoft.Json.Linq.JToken)">
+            <summary>
+            Evaluates the value of the specified serverless workflow expression
+            </summary>
+            <param name="expression">The serverless workflow expression to evaluate</param>
+            <param name="data">The data to evaluate the specified expression against</param>
+            <returns>A new <see cref="T:Newtonsoft.Json.Linq.JToken"/> that represents the resolved serverless workflow expression's value</returns>
+        </member>
+        <member name="T:Synapse.Services.IExpressionEvaluatorFactory">
+            <summary>
+            Defines the fundamentals of a service used to create <see cref="T:Synapse.Services.IExpressionEvaluator"/>s
+            </summary>
+        </member>
+        <member name="M:Synapse.Services.IExpressionEvaluatorFactory.Create(Synapse.Domain.Models.V1Workflow)">
+            <summary>
+            Creates a new <see cref="T:Synapse.Services.IExpressionEvaluator"/> for the specified <see cref="T:Synapse.Domain.Models.V1Workflow"/>
+            </summary>
+            <param name="workflow">The <see cref="T:Synapse.Domain.Models.V1Workflow"/> to create a new <see cref="T:Synapse.Services.IExpressionEvaluator"/> for</param>
+            <returns>A new <see cref="T:Synapse.Services.IExpressionEvaluator"/></returns>
+        </member>
+        <member name="T:Synapse.Services.IRepository`1">
+            <summary>
+            Defines the fundamentals of a service used to query and persist <see cref="T:Neuroglia.K8s.ICustomResource"/>s
+            </summary>
+            <typeparam name="TResource">The type of <see cref="T:Neuroglia.K8s.ICustomResource"/> to manage</typeparam>
+        </member>
+        <member name="M:Synapse.Services.IRepository`1.FindByNameAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Finds the specified <see cref="T:Neuroglia.K8s.ICustomResource"/>
+            </summary>
+            <param name="name">The unique name of the <see cref="T:Neuroglia.K8s.ICustomResource"/> to find</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>The <see cref="T:Neuroglia.K8s.ICustomResource"/> with the specified name, if any</returns>
+        </member>
+        <member name="M:Synapse.Services.IRepository`1.FindByNameAsync(System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Finds the specified <see cref="T:Neuroglia.K8s.ICustomResource"/>
+            </summary>
+            <param name="name">The unique name of the <see cref="T:Neuroglia.K8s.ICustomResource"/> to find</param>
+            <param name="namespace">The namespace the resource to find belongs to</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>The <see cref="T:Neuroglia.K8s.ICustomResource"/> with the specified name, if any</returns>
+        </member>
+        <member name="M:Synapse.Services.IRepository`1.AddAsync(`0,System.Threading.CancellationToken)">
+            <summary>
+            Adds and persists the specified <see cref="T:Neuroglia.K8s.ICustomResource"/>
+            </summary>
+            <param name="resource">The <see cref="T:Neuroglia.K8s.ICustomResource"/> to add</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>The newly added <see cref="T:Neuroglia.K8s.ICustomResource"/></returns>
+        </member>
+        <member name="M:Synapse.Services.IRepository`1.UpdateAsync(`0,System.Threading.CancellationToken)">
+            <summary>
+            Updates the specified <see cref="T:Neuroglia.K8s.ICustomResource"/>
+            </summary>
+            <param name="resource">The <see cref="T:Neuroglia.K8s.ICustomResource"/> to update</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>The updated <see cref="T:Neuroglia.K8s.ICustomResource"/></returns>
+        </member>
+        <member name="M:Synapse.Services.IRepository`1.RemoveAsync(`0,System.Threading.CancellationToken)">
+            <summary>
+            Removes the specified <see cref="T:Neuroglia.K8s.ICustomResource"/>
+            </summary>
+            <param name="resource">The <see cref="T:Neuroglia.K8s.ICustomResource"/> to remove</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>A new awaitable <see cref="T:System.Threading.Tasks.Task"/></returns>
+        </member>
+        <member name="M:Synapse.Services.IRepository`1.FilterAsync(System.String,System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Filters <see cref="T:Neuroglia.K8s.ICustomResource"/>s
+            </summary>
+            <param name="labelSelector">The CSV label selectors to use</param>
+            <param name="fieldSelector">The CSV field selectors to use</param>
+            <param name="namespace">The namespace the <see cref="T:Neuroglia.K8s.ICustomResource"/> to filter belong to</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>A new <see cref="T:System.Collections.Generic.IEnumerable`1"/> containing the filtered <see cref="T:Neuroglia.K8s.ICustomResource"/>s</returns>
+        </member>
+        <member name="M:Synapse.Services.IRepository`1.ToListAsync(System.Threading.CancellationToken)">
+            <summary>
+            Lists all <see cref="T:Neuroglia.K8s.ICustomResource"/>s
+            </summary>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>A new <see cref="T:System.Collections.Generic.IEnumerable`1"/> containing all available <see cref="T:Neuroglia.K8s.ICustomResource"/>s</returns>
+        </member>
+        <member name="M:Synapse.Services.IRepository`1.ClearAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Clears all <see cref="T:Neuroglia.K8s.ICustomResource"/>s in the specified namespace
+            </summary>
+            <param name="namespace">The namespace to remove all <see cref="T:Neuroglia.K8s.ICustomResource"/>s of the specified type from</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>A new awaitable <see cref="T:System.Threading.Tasks.Task"/></returns>
+        </member>
+        <member name="T:Synapse.Services.JQExpressionEvaluator">
+            <summary>
+            Represents the default jq implementation of the <see cref="T:Synapse.Services.IExpressionEvaluator"/> interface
+            </summary>
+        </member>
+        <member name="P:Synapse.Services.JQExpressionEvaluator.Language">
+            <inheritdoc/>
+        </member>
+        <member name="M:Synapse.Services.JQExpressionEvaluator.#ctor(Synapse.Domain.Models.V1Workflow)">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Services.JQExpressionEvaluator"/>
+            </summary>
+            <param name="workflow">The <see cref="T:Synapse.Domain.Models.V1Workflow"/> the <see cref="T:Synapse.Services.JQExpressionEvaluator"/> belongs to</param>
+        </member>
+        <member name="P:Synapse.Services.JQExpressionEvaluator.Workflow">
+            <summary>
+            Gets the <see cref="T:Synapse.Domain.Models.V1Workflow"/> the <see cref="T:Synapse.Services.JQExpressionEvaluator"/> belongs to
+            </summary>
+        </member>
+        <member name="M:Synapse.Services.JQExpressionEvaluator.Evaluate(System.String,Newtonsoft.Json.Linq.JToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Synapse.Services.JQExpressionEvaluator.EscapeJson(System.String)">
+            <summary>
+            Escapes doubles quotes in the supplied json
+            </summary>
+            <param name="json">The json string to escape</param>
+            <returns>The escaped json</returns>
+        </member>
+        <member name="T:Synapse.Services.K8sRepository`1">
+            <summary>
+            Represents an <see cref="T:Synapse.Services.IRepository`1"/> implementation for Kubernetes
+            </summary>
+            <typeparam name="TResource">The type of <see cref="T:Neuroglia.K8s.ICustomResource"/> to manage</typeparam>
+        </member>
+        <member name="M:Synapse.Services.K8sRepository`1.#ctor(Microsoft.Extensions.Logging.ILoggerFactory,k8s.IKubernetes)">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Services.K8sRepository`1"/>
+            </summary>
+            <param name="loggerFactory">The service used to create <see cref="T:Microsoft.Extensions.Logging.ILogger"/>s</param>
+            <param name="kubernetes">The service used to interact with the Kubernetes API</param>
+        </member>
+        <member name="P:Synapse.Services.K8sRepository`1.Logger">
+            <summary>
+            Gets the service used to perform logging
+            </summary>
+        </member>
+        <member name="P:Synapse.Services.K8sRepository`1.Kubernetes">
+            <summary>
+            Gets the service used to interact with the Kubernetes API
+            </summary>
+        </member>
+        <member name="P:Synapse.Services.K8sRepository`1.ResourceDefinition">
+            <summary>
+            Gets the <see cref="T:Neuroglia.K8s.ICustomResourceDefinition"/> of the <see cref="T:Neuroglia.K8s.ICustomResource"/>s to manage
+            </summary>
+        </member>
+        <member name="M:Synapse.Services.K8sRepository`1.FilterAsync(System.String,System.String,System.String,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Synapse.Services.K8sRepository`1.FindByNameAsync(System.String,System.String,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Synapse.Services.K8sRepository`1.FindByNameAsync(System.String,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Synapse.Services.K8sRepository`1.AddAsync(`0,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Synapse.Services.K8sRepository`1.UpdateAsync(`0,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Synapse.Services.K8sRepository`1.RemoveAsync(`0,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Synapse.Services.K8sRepository`1.ToListAsync(System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Synapse.Services.K8sRepository`1.ClearAsync(System.String,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+    </members>
+</doc>

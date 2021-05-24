@@ -58,14 +58,15 @@ spec:
                   enum:
                     - PENDING
                     - INITIALIZING
-                    - SCHEDULED
                     - DEPLOYED
                     - EXECUTING
-                    - WAITING
                     - SUSPENDED
+                    - WAITING
+                    - AWAKENING
+                    - AWAKENED
+                    - FAULTED
                     - EXECUTED
                     - TERMINATED
-                    - FAULTED
                     - TIMEDOUT
                 correlationContext:
                   type: object

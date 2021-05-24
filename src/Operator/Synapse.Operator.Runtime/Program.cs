@@ -16,12 +16,18 @@ namespace Synapse.Operator.Runtime
 
         static async Task Main(string[] args)
         {
-            using (IHost host = CreateHostBuilder(args).Build())
+            try
             {
+                using IHost host = CreateHostBuilder(args).Build();
                 Microsoft.Extensions.Logging.ILogger logger = host.Services.GetRequiredService<ILogger<Program>>();
                 logger.LogInformation(SynapseOperatorConstants.Logging.GetHeader());
                 await host.RunAsync();
             }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+           
         }
 
         static IHostBuilder CreateHostBuilder(string[] args)

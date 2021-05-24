@@ -211,7 +211,7 @@ namespace Synapse
         /// <param name="conditionName">The name of the <see cref="SwitchCaseDefinition"/> to get</param>
         /// <param name="condition">The <see cref="SwitchCaseDefinition"/> with the specified name</param>
         /// <returns>A boolean indicating whether or not the <see cref="SwitchCaseDefinition"/> with the specified name could be found</returns>
-        public static bool TryGetCondition(this SwitchStateDefinition state, string conditionName, out SwitchCaseDefinition condition)
+        public static bool TryGetCase(this SwitchStateDefinition state, string conditionName, out SwitchCaseDefinition condition)
         {
             condition = null;
             try

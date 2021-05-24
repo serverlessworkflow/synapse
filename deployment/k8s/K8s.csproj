@@ -10,7 +10,9 @@
     <None Include="correlator.yaml" />
     <None Include="operator.yaml" />
     <None Include="samples\triggers\trigger1.yaml" />
+    <None Include="samples\workflows\async-operation.yaml" />
     <None Include="samples\workflows\event.yaml" />
+    <None Include="samples\workflows\inject.schedule.yaml" />
     <None Include="samples\workflows\inject.instance.yaml" />
     <None Include="samples\workflows\inject.yaml" />
     <None Include="samples\workflows\operation.yaml" />

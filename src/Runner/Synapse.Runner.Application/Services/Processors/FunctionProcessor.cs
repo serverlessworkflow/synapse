@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Interfaces;
 using Microsoft.OpenApi.Models;
@@ -7,6 +8,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ServerlessWorkflow.Sdk.Models;
 using Synapse.Domain.Models;
+using Synapse.Runner.Application.Configuration;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -37,11 +39,12 @@ namespace Synapse.Runner.Application.Services.Processors
         /// <param name="executionContext">The current <see cref="IWorkflowExecutionContext"/></param>
         /// <param name="activityProcessorFactory">The service used to create <see cref="IWorkflowActivityProcessor"/>s</param>
         /// <param name="httpClientFactory">The service used to create <see cref="System.Net.Http.HttpClient"/>s</param>
+        /// <param name="options">The service used to access the current <see cref="ApplicationOptions"/></param>
         /// <param name="activity">The <see cref="V1WorkflowActivity"/> to process</param>
         /// <param name="action">The <see cref="ActionDefinition"/> to process</param>
         /// <param name="function">The <see cref="FunctionDefinition"/> to process</param>
-        public FunctionProcessor(ILoggerFactory loggerFactory, IWorkflowExecutionContext executionContext, IWorkflowActivityProcessorFactory activityProcessorFactory, IHttpClientFactory httpClientFactory, V1WorkflowActivity activity, ActionDefinition action, FunctionDefinition function)
-            : base(loggerFactory, executionContext, activityProcessorFactory, activity, action)
+        public FunctionProcessor(ILoggerFactory loggerFactory, IWorkflowExecutionContext executionContext, IWorkflowActivityProcessorFactory activityProcessorFactory, IHttpClientFactory httpClientFactory, IOptions<ApplicationOptions> options, V1WorkflowActivity activity, ActionDefinition action, FunctionDefinition function)
+            : base(loggerFactory, executionContext, activityProcessorFactory, options, activity, action)
         {
             this.HttpClient = httpClientFactory.CreateClient();
             this.Function = function;
@@ -231,7 +234,7 @@ namespace Synapse.Runner.Application.Services.Processors
             string json = this.FunctionReference.Arguments.ToString();
             foreach (Match match in Regex.Matches(json, @"""\$\{.+?\}"""))
             {
-                string expression = match.Value.Substring(3, match.Value.Length - 5).Trim();
+                string expression = match.Value[3..^2].Trim();
                 JToken valueToken = this.ExecutionContext.ExpressionEvaluator.Evaluate(expression, this.Activity.Data);
                 string value = null;
                 if (valueToken != null)

@@ -201,9 +201,9 @@ namespace Synapse.Domain.Models
         }
 
         /// <summary>
-        /// Processes the <see cref="V1WorkflowActivity"/>
+        /// Executes the <see cref="V1WorkflowActivity"/>
         /// </summary>
-        internal virtual void Process()
+        internal virtual void Execute()
         {
             switch (this.Status)
             {
@@ -214,6 +214,8 @@ namespace Synapse.Domain.Models
                     break;
                 case V1WorkflowActivityStatus.Suspended:
                     this.Resume();
+                    break;
+                case V1WorkflowActivityStatus.Executing:
                     break;
                 default:
                     throw DomainException.UnexpectedState(typeof(V1WorkflowActivity), this.Id, this.Status);
@@ -500,6 +502,31 @@ namespace Synapse.Domain.Models
             if (parent == null)
                 throw new ArgumentNullException(nameof(parent));
             return new V1WorkflowActivity(V1WorkflowActivityType.ConsumeEvent, workflowInstance, input, new V1WorkflowActivityMetadata() { State = state.Name, Event = eventRef }, parent);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="V1WorkflowActivity"/> for the specified <see cref="EventDefinition"/> to produce
+        /// </summary>
+        /// <param name="workflowInstance">The <see cref="V1WorkflowInstance"/> that owns the <see cref="V1WorkflowActivity"/> to create</param>
+        /// <param name="state">The <see cref="StateDefinition"/> the <see cref="EventDefinition"/> to process belongs to</param>
+        /// <param name="eventRef">The reference of the <see cref="EventDefinition"/> to produce</param>
+        /// <param name="input">The input data</param>
+        /// <param name="parent">The parent <see cref="V1WorkflowActivity"/></param>
+        /// <returns>A new <see cref="V1WorkflowActivity"/></returns>
+        public static V1WorkflowActivity ProduceEvent(V1WorkflowInstance workflowInstance, StateDefinition state, string eventRef, JToken input, V1WorkflowActivity parent)
+        {
+            if (workflowInstance == null)
+                throw new ArgumentNullException(nameof(workflowInstance));
+            if (state == null)
+                throw new ArgumentNullException(nameof(state));
+            if (parent == null)
+                if (string.IsNullOrWhiteSpace(eventRef))
+                    throw new ArgumentNullException(nameof(eventRef));
+            if (input == null)
+                throw new ArgumentNullException(nameof(input));
+            if (parent == null)
+                throw new ArgumentNullException(nameof(parent));
+            return new V1WorkflowActivity(V1WorkflowActivityType.ProduceEvent, workflowInstance, input, new V1WorkflowActivityMetadata() { State = state.Name, Event = eventRef }, parent);
         }
 
         #endregion

@@ -38,6 +38,21 @@ namespace Synapse
         [EnumMember(Value = "SUSPENDED")]
         Suspended,
         /// <summary>
+        /// Indicates that the workflow activity is waiting to be awakened. Indicates that the activity is in passive correlation mode or is waiting for a specific amount of time (due to a delay state)
+        /// </summary>
+        [EnumMember(Value = "WAITING")]
+        Waiting,
+        /// <summary>
+        /// Indicates that the workflow activity is awakening
+        /// </summary>
+        [EnumMember(Value = "AWAKENING")]
+        Awakening,
+        /// <summary>
+        /// Indicates that the workflow activity has been awakened and is pending execution
+        /// </summary>
+        [EnumMember(Value = "AWAKENED")]
+        Awakened,
+        /// <summary>
         /// Indicates that the workflow activity's execution has faulted
         /// </summary>
         [EnumMember(Value = "FAULTED")]

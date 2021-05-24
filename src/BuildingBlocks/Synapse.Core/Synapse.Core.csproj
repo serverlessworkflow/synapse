@@ -8,7 +8,7 @@
     <FileVersion>0.1.0.0</FileVersion>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Version>0.1.0</Version>
+    <Version>0.1.0-alpha1</Version>
     <PackageProjectUrl>https://github.com/serverlessworkflow/synapse</PackageProjectUrl>
     <RepositoryUrl>https://github.com/serverlessworkflow/synapse</RepositoryUrl>
     <RepositoryType>git</RepositoryType>

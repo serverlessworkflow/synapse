@@ -11,6 +11,7 @@ using Synapse.Services;
 using System;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -29,14 +30,16 @@ namespace Synapse.Cli.Services
         /// </summary>
         /// <param name="kubernetes">The service used to interact with Kubernetes</param>
         /// <param name="workflowReader">The service used to read <see cref="WorkflowDefinition"/>s</param>
+        /// <param name="httpClientFactory">The service used to create <see cref="System.Net.Http.HttpClient"/></param>
         /// <param name="workflows">The <see cref="IRepository{TResource}"/> used to manage <see cref="V1Workflow"/>s</param>
         /// <param name="workflowInstances">The <see cref="IRepository{TResource}"/> used to manage <see cref="V1WorkflowInstance"/>s</param>
-        public SynapseService(IKubernetes kubernetes, IWorkflowReader workflowReader, IRepository<V1Workflow> workflows, IRepository<V1WorkflowInstance> workflowInstances)
+        public SynapseService(IKubernetes kubernetes, IWorkflowReader workflowReader, IHttpClientFactory httpClientFactory, IRepository<V1Workflow> workflows, IRepository<V1WorkflowInstance> workflowInstances)
         {
             this.Kubernetes = kubernetes;
             this.WorkflowReader = workflowReader;
             this.Workflows = workflows;
             this.WorkflowInstances = workflowInstances;
+            this.HttpClient = httpClientFactory.CreateClient();
         }
 
         /// <summary>
@@ -59,22 +62,31 @@ namespace Synapse.Cli.Services
         /// </summary>
         protected IRepository<V1WorkflowInstance> WorkflowInstances { get; }
 
+        /// <summary>
+        /// Gets the <see cref="System.Net.Http.HttpClient"/> used to query Synapse's repository
+        /// </summary>
+        protected HttpClient HttpClient { get; }
+
         /// <inheritdoc/>
         public virtual async Task InstallAsync(string @namespace = "synapse", CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(@namespace))
                 throw new ArgumentNullException(nameof(@namespace));
-            Console.WriteLine("Installing Synapse...");
-            V1Namespace ns = (await this.Kubernetes.ListNamespaceAsync(cancellationToken: cancellationToken)).Items.SingleOrDefault(n => n.Name() == @namespace);
-            if (ns == null)
-            {
-                Console.WriteLine("Namespace '{namespace}' does not exist. Creating it...", @namespace);
-                ns = await this.Kubernetes.CreateNamespaceAsync(new V1Namespace() { Metadata = new V1ObjectMeta() { Name = @namespace } }, cancellationToken: cancellationToken);
-                Console.WriteLine("Namespace '{namespace}' created.", @namespace);
-            }
+            Console.WriteLine($"Installing Synapse v{SynapseConstants.Version}...");
             await this.DeployCustomResourceDefinitionsAsync(cancellationToken);
+            await this.DeployNamespaceAsync(@namespace, cancellationToken);
             await this.DeployOperatorAsync(@namespace, cancellationToken);
-            Console.WriteLine("Synapse has been successfully installed.");
+            Console.WriteLine($"Synapse v{SynapseConstants.Version} has been successfully installed.");
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task UninstallAsync(string @namespace = "synapse", CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(@namespace))
+                throw new ArgumentNullException(nameof(@namespace));
+            Console.WriteLine("Uninstalling Synapse...");
+            await this.Kubernetes.DeleteNamespaceAsync(@namespace, cancellationToken: cancellationToken);
+            Console.WriteLine("Synapse has been successfully uninstalled.");
         }
 
         /// <inheritdoc/>
@@ -200,16 +212,107 @@ namespace Synapse.Cli.Services
           
         }
 
+        /// <summary>
+        /// Deploys Synapse's <see href="https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/">Kubernetes Custom Resource Definitions</see> (<see cref="V1WorkflowDefinition"/>, <see cref="V1WorkflowInstanceDefinition"/>, ...)
+        /// </summary>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
         protected virtual async Task DeployCustomResourceDefinitionsAsync(CancellationToken cancellationToken = default)
         {
-            
+            V1CustomResourceDefinition crd;
+            Console.WriteLine("Installing Kubernetes Custom Resource Definitions for Synapse...");
+            Console.Write("Installing V1WorkflowDefinition... ");
+            crd = await this.DownloadFromGitAsync<V1CustomResourceDefinition>("crds/v1/v1-workflow.yaml", cancellationToken);
+            try
+            {
+                await this.Kubernetes.CreateCustomResourceDefinitionAsync(crd, cancellationToken: cancellationToken);
+                Console.WriteLine("INSTALLED");
+            }
+            catch (HttpOperationException ex) 
+            when (ex.Response.StatusCode == System.Net.HttpStatusCode.Conflict)
+            {
+                Console.WriteLine("SKIPPED");
+            }
+            Console.Write("Installing V1WorkflowInstanceDefinition... ");
+            crd = await this.DownloadFromGitAsync<V1CustomResourceDefinition>("crds/v1/v1-workflow-instance.yaml", cancellationToken);
+            try
+            {
+                await this.Kubernetes.CreateCustomResourceDefinitionAsync(crd, cancellationToken: cancellationToken);
+                Console.WriteLine("INSTALLED");
+            }
+            catch (HttpOperationException ex)
+            when (ex.Response.StatusCode == System.Net.HttpStatusCode.Conflict)
+            {
+                Console.WriteLine("SKIPPED");
+            }
+            Console.WriteLine("INSTALLED");
+            Console.Write("Installing V1TriggerDefinition... ");
+            crd = await this.DownloadFromGitAsync<V1CustomResourceDefinition>("crds/v1/v1-trigger.yaml", cancellationToken);
+            try
+            {
+                await this.Kubernetes.CreateCustomResourceDefinitionAsync(crd, cancellationToken: cancellationToken);
+                Console.WriteLine("INSTALLED");
+            }
+            catch (HttpOperationException ex)
+            when (ex.Response.StatusCode == System.Net.HttpStatusCode.Conflict)
+            {
+                Console.WriteLine("SKIPPED");
+            }
+            Console.WriteLine("INSTALLED");
+            Console.WriteLine("Synapse Kubernetes Custom Resource Definitions successfully installed.");
         }
 
-        protected virtual async Task DeployOperatorAsync(string @namespace, CancellationToken cancellationToken = default)
+        /// <summary>
+        /// Deploys Synapse's <see cref="V1Namespace"/>
+        /// </summary>
+        /// <param name="namespace">Synapse's namespace</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        protected virtual async Task DeployNamespaceAsync(string @namespace, CancellationToken cancellationToken = default)
+        {
+            V1Namespace ns = (await this.Kubernetes.ListNamespaceAsync(cancellationToken: cancellationToken)).Items.SingleOrDefault(n => n.Name() == @namespace);
+            if (ns != null)
+                return;
+            Console.WriteLine("Namespace '{namespace}' does not exist. Creating it...", @namespace);
+            ns = await this.DownloadFromGitAsync<V1Namespace>("namespace.yaml", cancellationToken);
+            ns = await this.Kubernetes.CreateNamespaceAsync(new V1Namespace() { Metadata = new V1ObjectMeta() { Name = @namespace } }, cancellationToken: cancellationToken);
+            Console.WriteLine("Namespace '{namespace}' created.", @namespace);
+        }
+
+        /// <summary>
+        /// Deploys Synapse's operator
+        /// </summary>
+        /// <param name="namespace">Synapse's namespace</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        protected virtual Task DeployOperatorAsync(string @namespace, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(@namespace))
                 throw new ArgumentNullException(nameof(@namespace));
+            //TODO
+            return Task.CompletedTask;
+        }
 
+        /// <summary>
+        /// Downloads the specified <see cref="IKubernetesObject"/> from Synapse's Git repository
+        /// </summary>
+        /// <typeparam name="TObject">The type of <see cref="IKubernetesObject"/> to download</typeparam>
+        /// <param name="deploymentResourcePath">The path to the deployment resource to download from git</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        protected virtual async Task<TObject> DownloadFromGitAsync<TObject>(string deploymentResourcePath, CancellationToken cancellationToken = default)
+            where TObject : class, IKubernetesObject
+        {
+            if (string.IsNullOrWhiteSpace(deploymentResourcePath))
+                throw new ArgumentNullException(nameof(deploymentResourcePath));
+            using HttpResponseMessage response = await this.HttpClient.GetAsync(new Uri(SynapseConstants.GitRepository.Uri, $"deployment/k8s/{deploymentResourcePath}"), cancellationToken);
+            string yaml = await response.Content?.ReadAsStringAsync(cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                //TODO: log
+                response.EnsureSuccessStatusCode();
+            }
+            return Yaml.LoadFromString<TObject>(yaml);
         }
 
     }

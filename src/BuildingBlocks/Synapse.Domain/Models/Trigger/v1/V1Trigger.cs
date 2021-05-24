@@ -109,6 +109,18 @@ namespace Synapse.Domain.Models
         }
 
         /// <summary>
+        /// Adds a new <see cref="V1CorrelationContext"/> to the <see cref="V1Trigger"/>
+        /// </summary>
+        /// <param name="correlationContext">The <see cref="V1CorrelationContext"/> to add</param>
+        public virtual void AddCorrelationContext(V1CorrelationContext correlationContext)
+        {
+            if (correlationContext == null)
+                throw DomainException.ArgumentNull(nameof(correlationContext));
+            this.StatusPatch.Add(t => t.Status.CorrelationContexts, correlationContext);
+            this.StatusPatch.ApplyTo(this);
+        }
+
+        /// <summary>
         /// Creates a new <see cref="V1CorrelationContext"/> for the specified <see cref="CloudEvent"/>
         /// </summary>
         /// <param name="e">The <see cref="CloudEvent"/> to create a new <see cref="V1CorrelationContext"/> for</param>

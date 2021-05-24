@@ -1,0 +1,362 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>synctl</name>
+    </assembly>
+    <members>
+        <member name="T:Synapse.Cli.Commands.DeleteAllWorkflowInstancesCommand">
+            <summary>
+            Represents the <see cref="T:Synapse.Cli.Commands.Command"/> used to delete all <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>s
+            </summary>
+        </member>
+        <member name="M:Synapse.Cli.Commands.DeleteAllWorkflowInstancesCommand.#ctor(Synapse.Cli.Services.ISynapseService)">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Cli.Commands.DeleteAllWorkflowInstancesCommand"/>
+            </summary>
+            <param name="synapse">The service used to interact with Synapse</param>
+        </member>
+        <member name="T:Synapse.Cli.Commands.DeleteAllWorkflowsCommand">
+            <summary>
+            Represents the <see cref="T:Synapse.Cli.Commands.Command"/> used to delete all <see cref="T:Synapse.Domain.Models.V1Workflow"/>s
+            </summary>
+        </member>
+        <member name="M:Synapse.Cli.Commands.DeleteAllWorkflowsCommand.#ctor(Synapse.Cli.Services.ISynapseService)">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Cli.Commands.DeleteAllWorkflowsCommand"/>
+            </summary>
+            <param name="synapse">The service used to interact with Synapse</param>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:Synapse.Cli.Commands.DeleteAllWorkflowsCommand.HandleAsync(System.String)" -->
+        <member name="T:Synapse.Cli.Commands.DeleteCommand">
+            <summary>
+            Represents the <see cref="T:Synapse.Cli.Commands.Command"/> used to delete <see cref="T:Synapse.Domain.Models.V1Workflow"/>s and <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>s
+            </summary>
+        </member>
+        <member name="M:Synapse.Cli.Commands.DeleteCommand.#ctor(Synapse.Cli.Services.ISynapseService)">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Cli.Commands.DeleteCommand"/>
+            </summary>
+            <param name="synapse">The service used to interact with Synapse</param>
+        </member>
+        <member name="T:Synapse.Cli.Commands.DeleteWorkflowCommand">
+            <summary>
+            Represents the <see cref="T:Synapse.Cli.Commands.Command"/> used to delete a single <see cref="T:Synapse.Domain.Models.V1Workflow"/>
+            </summary>
+        </member>
+        <member name="M:Synapse.Cli.Commands.DeleteWorkflowCommand.#ctor(Synapse.Cli.Services.ISynapseService)">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Cli.Commands.DeleteWorkflowCommand"/>
+            </summary>
+            <param name="synapse">The service used to interact with Synapse</param>
+        </member>
+        <member name="M:Synapse.Cli.Commands.DeleteWorkflowCommand.HandleAsync(System.String,System.String)">
+            <summary>
+            Handles the <see cref="T:Synapse.Cli.Commands.DeleteWorkflowCommand"/>
+            </summary>
+            <param name="name">The name of the workflow to delete</param>
+            <param name="namespace">The namespace of the workflow to delete</param>
+            <returns>A new int representing the program's return code</returns>
+        </member>
+        <member name="T:Synapse.Cli.Commands.DeleteWorkflowInstanceCommand">
+            <summary>
+            Represents the <see cref="T:Synapse.Cli.Commands.Command"/> used to delete a single <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>
+            </summary>
+        </member>
+        <member name="M:Synapse.Cli.Commands.DeleteWorkflowInstanceCommand.#ctor(Synapse.Cli.Services.ISynapseService)">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Cli.Commands.DeleteWorkflowInstanceCommand"/>
+            </summary>
+            <param name="synapse">The service used to interact with Synapse</param>
+        </member>
+        <member name="T:Synapse.Cli.Commands.DeployCommand">
+            <summary>
+            Represents the <see cref="T:Synapse.Cli.Commands.Command"/> used to deploy a workflow definition
+            </summary>
+        </member>
+        <member name="M:Synapse.Cli.Commands.DeployCommand.#ctor(Synapse.Cli.Services.ISynapseService)">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Cli.Commands.DeployCommand"/>
+            </summary>
+            <param name="synapse">The service used to interact with Synapse</param>
+        </member>
+        <member name="M:Synapse.Cli.Commands.DeployCommand.HandleAsync(System.String,System.String,System.String,System.String,System.Boolean)">
+            <summary>
+            Handles the <see cref="T:Synapse.Cli.Commands.DeployCommand"/>
+            </summary>
+            <param name="file">The definition's file path</param>
+            <param name="yaml">The YAML of the definition to deploy</param>
+            <param name="json">The JSON of the definition to deploy</param>
+            <param name="wait">A boolean indicating whether or not to wait for the deployment to be completed. Defaults to false.</param>
+            <returns>A new int representing the program's return code</returns>
+        </member>
+        <member name="T:Synapse.Cli.Commands.InstallCommand">
+            <summary>
+            Represents the <see cref="T:Synapse.Cli.Commands.Command"/> used to install Synapse
+            </summary>
+        </member>
+        <member name="M:Synapse.Cli.Commands.InstallCommand.#ctor(Synapse.Cli.Services.ISynapseService)">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Cli.Commands.InstallCommand"/>
+            </summary>
+            <param name="synapse">The service used to interact with Synapse</param>
+        </member>
+        <member name="M:Synapse.Cli.Commands.InstallCommand.HandleAsync(System.String)">
+            <summary>
+            Handles an <see cref="T:Synapse.Cli.Commands.InstallCommand"/>
+            </summary>
+            <param name="namespace">The namespace to install Synapse into. Defaults to 'synapse'</param>
+            <returns>A new int representing the program's return code</returns>
+        </member>
+        <member name="T:Synapse.Cli.Commands.RunCommand">
+            <summary>
+            Represents the <see cref="T:Synapse.Cli.Commands.Command"/> used to run a workflow definition
+            </summary>
+        </member>
+        <member name="M:Synapse.Cli.Commands.RunCommand.#ctor(Synapse.Cli.Services.ISynapseService)">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Cli.Commands.RunCommand"/>
+            </summary>
+            <param name="synapse">The service used to interact with Synapse</param>
+        </member>
+        <member name="M:Synapse.Cli.Commands.RunCommand.HandleAsync(System.String,System.String,System.String,System.String,System.String,System.String,System.Boolean,System.Boolean)">
+            <summary>
+            Handles a <see cref="T:Synapse.Cli.Commands.RunCommand"/>
+            </summary>
+            <param name="input">The input data of the workflow to run</param>
+            <param name="file">The definition's file path</param>
+            <param name="yaml">The YAML of the definition to run</param>
+            <param name="json">The JSON of the definition to run</param>
+            <param name="namespace">The namespace in which to deploy and run the specified workflow</param>
+            <param name="reference">The reference of the workflow to run (ex: 'myworkflow:latest')</param>
+            <param name="wait">A boolean indicating whether or not to wait for the execution to be completed. Defaults to false.</param>
+            <param name="clean">A boolean indicating whether or not to clean all related resources when the workflow ran to completion</param>
+            <returns>A new int representing the program's return code</returns>
+        </member>
+        <member name="T:Synapse.Cli.Commands.ValidateCommand">
+            <summary>
+            Represents the <see cref="T:Synapse.Cli.Commands.Command"/> used to validate a workflow definition
+            </summary>
+        </member>
+        <member name="M:Synapse.Cli.Commands.ValidateCommand.#ctor(Synapse.Cli.Services.ISynapseService)">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Cli.Commands.ValidateCommand"/>
+            </summary>
+            <param name="synapse">The service used to interact with Synapse</param>
+        </member>
+        <member name="M:Synapse.Cli.Commands.ValidateCommand.HandleAsync(System.String,System.String,System.String)">
+            <summary>
+            Handles the <see cref="T:Synapse.Cli.Commands.ValidateCommand"/>
+            </summary>
+            <param name="file">The definition's file path</param>
+            <param name="yaml">The YAML of the definition to validate</param>
+            <param name="json">The JSON of the definition to validate</param>
+            <returns>A new int representing the program's return code</returns>
+        </member>
+        <member name="T:Synapse.Cli.IServiceCollectionExtensions">
+            <summary>
+            Defines extensions for <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/>s
+            </summary>
+        </member>
+        <member name="M:Synapse.Cli.IServiceCollectionExtensions.AddCliCommands(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Type[])">
+            <summary>
+            Adds and configures all <see cref="T:System.CommandLine.Command"/>s loaded from the specified assemblies
+            </summary>
+            <param name="services">The <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> to configure</param>
+            <param name="markupTypes">An array containing the markup types of the assemblies to load <see cref="T:System.CommandLine.Command"/>s from</param>
+            <returns>The configured <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/></returns>
+        </member>
+        <member name="T:Synapse.Cli.ISynapseServiceExtensions">
+            <summary>
+            Defines extensions for <see cref="T:Synapse.Cli.Services.ISynapseService"/>s
+            </summary>
+        </member>
+        <member name="M:Synapse.Cli.ISynapseServiceExtensions.ReadWorkflowFromFileAsync(Synapse.Cli.Services.ISynapseService,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Reads a <see cref="T:Synapse.Domain.Models.V1Workflow"/> from the specified file
+            </summary>
+            <param name="synapse">The extended <see cref="T:Synapse.Cli.Services.ISynapseService"/></param>
+            <param name="file">The file to read the <see cref="T:Synapse.Domain.Models.V1Workflow"/> from</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>A new <see cref="T:Synapse.Domain.Models.V1Workflow"/></returns>
+        </member>
+        <member name="M:Synapse.Cli.ISynapseServiceExtensions.ReadWorkflowAsync(Synapse.Cli.Services.ISynapseService,System.String,ServerlessWorkflow.Sdk.WorkflowDefinitionFormat,System.Threading.CancellationToken)">
+            <summary>
+            Reads a <see cref="T:Synapse.Domain.Models.V1Workflow"/> from the specified raw definition
+            </summary>
+            <param name="synapse">The extended <see cref="T:Synapse.Cli.Services.ISynapseService"/></param>
+            <param name="rawDefinition">The raw definition to read the <see cref="T:Synapse.Domain.Models.V1Workflow"/> from</param>
+            <param name="definitionFormat">The format of the raw definition</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>A new <see cref="T:Synapse.Domain.Models.V1Workflow"/></returns>
+        </member>
+        <member name="T:Synapse.Cli.Services.ISynapseService">
+            <summary>
+            Defines the fundamentals of a service used to interact with Synapse
+            </summary>
+        </member>
+        <member name="M:Synapse.Cli.Services.ISynapseService.InstallAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Installs Synapse
+            </summary>
+            <param name="namespace">The namespace to install Synapse into. Defaults to 'synapse'</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>A new awaitable <see cref="T:System.Threading.Tasks.Task"/></returns>
+        </member>
+        <member name="M:Synapse.Cli.Services.ISynapseService.UninstallAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Uninstalls Synapse
+            </summary>
+            <param name="namespace">The namespace Synapse is installed into. Defaults to 'synapse'</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>A new awaitable <see cref="T:System.Threading.Tasks.Task"/></returns>
+        </member>
+        <member name="M:Synapse.Cli.Services.ISynapseService.FindWorkflowByReferenceAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Finds the specified <see cref="T:Synapse.Domain.Models.V1Workflow"/>
+            </summary>
+            <param name="reference">The <see cref="T:Synapse.Domain.Models.V1Workflow"/>'s reference</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>The matching <see cref="T:Synapse.Domain.Models.V1Workflow"/></returns>
+        </member>
+        <member name="M:Synapse.Cli.Services.ISynapseService.ReadWorkflowAsync(System.IO.Stream,ServerlessWorkflow.Sdk.WorkflowDefinitionFormat,System.Threading.CancellationToken)">
+            <summary>
+            Reads a <see cref="T:Synapse.Domain.Models.V1Workflow"/> from the specified <see cref="T:System.IO.Stream"/>
+            </summary>
+            <param name="stream">The <see cref="T:System.IO.Stream"/> to load the <see cref="T:Synapse.Domain.Models.V1Workflow"/> from</param>
+            <param name="definitionFormat">The format of the <see cref="T:Synapse.Domain.Models.V1WorkflowDefinition"/> to read</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>A new <see cref="T:Synapse.Domain.Models.V1Workflow"/></returns>
+        </member>
+        <member name="M:Synapse.Cli.Services.ISynapseService.DeployWorkflowAsync(Synapse.Domain.Models.V1Workflow,System.Boolean,System.Threading.CancellationToken)">
+            <summary>
+            Deploys the specified <see cref="T:Synapse.Domain.Models.V1Workflow"/>
+            </summary>
+            <param name="workflow">The <see cref="T:Synapse.Domain.Models.V1Workflow"/> to deploy</param>
+            <param name="wait">Wait for the <see cref="T:Synapse.Domain.Models.V1Workflow"/> to be successfully deployed. Default to false</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>The newly deployed <see cref="T:Synapse.Domain.Models.V1Workflow"/></returns>
+        </member>
+        <member name="M:Synapse.Cli.Services.ISynapseService.RunWorkflowAsync(Synapse.Domain.Models.V1Workflow,Newtonsoft.Json.Linq.JObject,System.Boolean,System.Threading.CancellationToken)">
+            <summary>
+            Ryns the specified <see cref="T:Synapse.Domain.Models.V1Workflow"/>
+            </summary>
+            <param name="workflow">The <see cref="T:Synapse.Domain.Models.V1Workflow"/> to run</param>
+            <param name="input">The <see cref="T:Synapse.Domain.Models.V1Workflow"/>'s input data</param>
+            <param name="wait">A boolean indicating whether or not to wait for the <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>'s execution</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>The newly created <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/></returns>
+        </member>
+        <member name="M:Synapse.Cli.Services.ISynapseService.DeleteWorkflowAsync(System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Deletes the specified <see cref="T:Synapse.Domain.Models.V1Workflow"/>
+            </summary>
+            <param name="name">The name of the <see cref="T:Synapse.Domain.Models.V1Workflow"/> to delete</param>
+            <param name="namespace">The namespace the <see cref="T:Synapse.Domain.Models.V1Workflow"/> to delete belongs to</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>A new awaitable <see cref="T:System.Threading.Tasks.Task"/></returns>
+        </member>
+        <member name="M:Synapse.Cli.Services.ISynapseService.DeleteAllWorkflowsAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Deletes all deployed <see cref="T:Synapse.Domain.Models.V1Workflow"/>s
+            </summary>
+            <param name="namespace">The namespace the <see cref="T:Synapse.Domain.Models.V1Workflow"/>s to delete belong to</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>A new awaitable <see cref="T:System.Threading.Tasks.Task"/></returns>
+        </member>
+        <member name="T:Synapse.Cli.Services.SynapseService">
+            <summary>
+            Represents the default implementation of the <see cref="T:Synapse.Cli.Services.ISynapseService"/>
+            </summary>
+        </member>
+        <member name="M:Synapse.Cli.Services.SynapseService.#ctor(k8s.IKubernetes,ServerlessWorkflow.Sdk.Services.IO.IWorkflowReader,Synapse.Services.IRepository{Synapse.Domain.Models.V1Workflow},Synapse.Services.IRepository{Synapse.Domain.Models.V1WorkflowInstance})">
+            <summary>
+            Initializes a new <see cref="T:Synapse.Cli.Services.SynapseService"/>
+            </summary>
+            <param name="kubernetes">The service used to interact with Kubernetes</param>
+            <param name="workflowReader">The service used to read <see cref="T:ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/>s</param>
+            <param name="workflows">The <see cref="T:Synapse.Services.IRepository`1"/> used to manage <see cref="T:Synapse.Domain.Models.V1Workflow"/>s</param>
+            <param name="workflowInstances">The <see cref="T:Synapse.Services.IRepository`1"/> used to manage <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>s</param>
+        </member>
+        <member name="P:Synapse.Cli.Services.SynapseService.Kubernetes">
+            <summary>
+            Gets the service used to interact with Kubernetes
+            </summary>
+        </member>
+        <member name="P:Synapse.Cli.Services.SynapseService.WorkflowReader">
+            <summary>
+            Gets the service used to read <see cref="T:ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/>s
+            </summary>
+        </member>
+        <member name="P:Synapse.Cli.Services.SynapseService.Workflows">
+            <summary>
+            Gets the <see cref="T:Synapse.Services.IRepository`1"/> used to manage <see cref="T:Synapse.Domain.Models.V1Workflow"/>s
+            </summary>
+        </member>
+        <member name="P:Synapse.Cli.Services.SynapseService.WorkflowInstances">
+            <summary>
+            Gets the <see cref="T:Synapse.Services.IRepository`1"/> used to manage <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>s
+            </summary>
+        </member>
+        <member name="P:Synapse.Cli.Services.SynapseService.HttpClient">
+            <summary>
+            Gets the <see cref="T:System.Net.Http.HttpClient"/> used to query Synapse's repository
+            </summary>
+        </member>
+        <member name="M:Synapse.Cli.Services.SynapseService.InstallAsync(System.String,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Synapse.Cli.Services.SynapseService.UninstallAsync(System.String,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Synapse.Cli.Services.SynapseService.FindWorkflowByReferenceAsync(System.String,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Synapse.Cli.Services.SynapseService.ReadWorkflowAsync(System.IO.Stream,ServerlessWorkflow.Sdk.WorkflowDefinitionFormat,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Synapse.Cli.Services.SynapseService.DeployWorkflowAsync(Synapse.Domain.Models.V1Workflow,System.Boolean,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Synapse.Cli.Services.SynapseService.RunWorkflowAsync(Synapse.Domain.Models.V1Workflow,Newtonsoft.Json.Linq.JObject,System.Boolean,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Synapse.Cli.Services.SynapseService.DeleteWorkflowAsync(System.String,System.String,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Synapse.Cli.Services.SynapseService.DeleteAllWorkflowsAsync(System.String,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Synapse.Cli.Services.SynapseService.DeployCustomResourceDefinitionsAsync(System.Threading.CancellationToken)">
+            <summary>
+            Deploys Synapse's <see href="https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/">Kubernetes Custom Resource Definitions</see> (<see cref="T:Synapse.Domain.Models.V1WorkflowDefinition"/>, <see cref="T:Synapse.Domain.Models.V1WorkflowInstanceDefinition"/>, ...)
+            </summary>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>A new awaitable <see cref="T:System.Threading.Tasks.Task"/></returns>
+        </member>
+        <member name="M:Synapse.Cli.Services.SynapseService.DeployNamespaceAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Deploys Synapse's <see cref="T:k8s.Models.V1Namespace"/>
+            </summary>
+            <param name="namespace">Synapse's namespace</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>A new awaitable <see cref="T:System.Threading.Tasks.Task"/></returns>
+        </member>
+        <member name="M:Synapse.Cli.Services.SynapseService.DeployOperatorAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Deploys Synapse's operator
+            </summary>
+            <param name="namespace">Synapse's namespace</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>A new awaitable <see cref="T:System.Threading.Tasks.Task"/></returns>
+        </member>
+        <member name="M:Synapse.Cli.Services.SynapseService.DownloadFromGitAsync``1(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Downloads the specified <see cref="T:k8s.IKubernetesObject"/> from Synapse's Git repository
+            </summary>
+            <typeparam name="TObject">The type of <see cref="T:k8s.IKubernetesObject"/> to download</typeparam>
+            <param name="deploymentResourcePath">The path to the deployment resource to download from git</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>A new awaitable <see cref="T:System.Threading.Tasks.Task"/></returns>
+        </member>
+    </members>
+</doc>

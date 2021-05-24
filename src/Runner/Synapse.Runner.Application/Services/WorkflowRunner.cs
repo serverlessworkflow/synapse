@@ -122,6 +122,7 @@ namespace Synapse.Runner.Application.Services
                     case V1WorkflowActivityStatus.Executing:
                         break;
                     case V1WorkflowActivityStatus.Suspended:
+                    case V1WorkflowActivityStatus.Awakened:
                         await this.ExecutionContext.ExecuteWorkflowAsync(this.CancellationTokenSource.Token);
                         break;
                     default:
@@ -139,8 +140,22 @@ namespace Synapse.Runner.Application.Services
                     this.Logger.LogError($"An error occured while starting the workflow runner: the Kubernetes API returned an non-success status code '{{statusCode}}''{Environment.NewLine}Response content: {{responseContent}}{Environment.NewLine}Details: {{ex}}", httpEx.Response.StatusCode, httpEx.Response.Content, ex.ToString());
                 else
                     this.Logger.LogError($"An error occured while starting the workflow runner:{Environment.NewLine}{{ex}}", ex.ToString());
-                if(this.ExecutionContext?.Instance != null)
-                    await this.ExecutionContext.FaultWorkflowAsync(ex, cancellationToken);   
+                if (this.ExecutionContext?.Instance != null)
+                {
+                    try
+                    {
+                        await this.ExecutionContext.FaultWorkflowAsync(ex, cancellationToken);
+                    }
+                    catch (Exception cex)
+                    {
+                        if (cex is HttpOperationException chttpEx)
+                            this.Logger.LogError($"A critical exception occured while faulting the execution of workflow instance '{{instanceId}}': the Kubernetes API returned an non-success status code '{{statusCode}}''{Environment.NewLine}Response content: {{responseContent}}{Environment.NewLine}Details: {{ex}}", SynapseConstants.EnvironmentVariables.Workflows.Instance.Value, chttpEx.Response.StatusCode, chttpEx.Response.Content, ex.ToString());
+                        else
+                            this.Logger.LogError($"A critical exception occured while faulting the execution of workflow instance '{{instanceId}}':{ Environment.NewLine}{{ex}}", SynapseConstants.EnvironmentVariables.Workflows.Instance.Value, cex.ToString());
+                        throw;
+                    }
+                }
+                this.ApplicationLifetime.StopApplication();
                 throw;
             }
         }
@@ -399,6 +414,7 @@ namespace Synapse.Runner.Application.Services
             base.Dispose();
             this.Processors?.ToList().ForEach(p => p.Dispose());
             this.Processors?.Clear();
+            GC.SuppressFinalize(this);
         }
 
     }

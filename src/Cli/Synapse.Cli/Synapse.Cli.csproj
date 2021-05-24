@@ -4,13 +4,17 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
     <AssemblyName>synctl</AssemblyName>
-    <Version>0.1.0</Version>
+    <Version>0.1.0-alpha1</Version>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <NeutralLanguage>English</NeutralLanguage>
     <PackageId>synctl</PackageId>
     <Authors>The Synapse authors</Authors>
     <Copyright>Copyright</Copyright>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>synctl.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

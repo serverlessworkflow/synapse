@@ -88,6 +88,8 @@ namespace Synapse.Domain.Models
                 throw DomainException.UnexpectedState(typeof(V1Workflow), this.Name(), this.Status.Type);
             bool updated = false;
             IDictionary<string, string> labels = this.Metadata.Labels;
+            if (labels != null && labels.ContainsKey(SynapseConstants.Labels.Scheduled))
+                labels.Remove(SynapseConstants.Labels.Scheduled);
             if (labels == null || !labels.ContainsKey(SynapseConstants.Labels.Workflows.Id))
             {
                 this.SetLabel(SynapseConstants.Labels.Workflows.Id, this.Spec.Definition.Id);
@@ -136,6 +138,37 @@ namespace Synapse.Domain.Models
         }
 
         /// <summary>
+        /// Resumes the <see cref="V1WorkflowInstance"/>'s execution
+        /// </summary>
+        public virtual void Resume()
+        {
+            if (this.Status.Type != V1WorkflowActivityStatus.Awakened)
+                throw DomainException.UnexpectedState(typeof(V1WorkflowInstance), this.Id, this.Status.Type);
+            this.On(this.RegisterEvent(new V1WorkflowInstanceResumedDomainEvent(this.Id)));
+        }
+
+        /// <summary>
+        /// Wakes the <see cref="V1WorkflowInstance"/> up
+        /// </summary>
+        public virtual void WakeUp()
+        {
+            if (this.Status.Type != V1WorkflowActivityStatus.Suspended
+               && this.Status.Type != V1WorkflowActivityStatus.Waiting)
+                throw DomainException.UnexpectedState(typeof(V1WorkflowInstance), this.Id, this.Status.Type);
+            this.On(this.RegisterEvent(new V1WorkflowInstanceAwakingDomainEvent(this.Id)));
+        }
+
+        /// <summary>
+        /// Marks the <see cref="V1WorkflowInstance"/> as awake
+        /// </summary>
+        public virtual void Awaken()
+        {
+            if (this.Status.Type != V1WorkflowActivityStatus.Awakening)
+                throw DomainException.UnexpectedState(typeof(V1WorkflowInstance), this.Id, this.Status.Type);
+            this.On(this.RegisterEvent(new V1WorkflowInstanceAwakenedDomainEvent(this.Id)));
+        }
+
+        /// <summary>
         /// Executes the <see cref="V1WorkflowInstance"/>
         /// </summary>
         public virtual void Execute()
@@ -145,12 +178,52 @@ namespace Synapse.Domain.Models
                 case V1WorkflowActivityStatus.Deployed:
                     this.Start();
                     break;
-                case V1WorkflowActivityStatus.Suspended:
-                    this.On(this.RegisterEvent(new V1WorkflowInstanceResumedDomainEvent(this.Id)));
+                case V1WorkflowActivityStatus.Waiting:
+                case V1WorkflowActivityStatus.Awakened:
+                    this.Resume();
                     break;
                 default:
                     throw DomainException.UnexpectedState(typeof(V1WorkflowInstance), this.Id, this.Status.Type);
             }
+        }
+
+        /// <summary>
+        /// Puts the <see cref="V1WorkflowInstance"/> while correlating it to consumed <see cref="CloudEvent"/>s
+        /// </summary>
+        public virtual void WaitForEvents()
+        {
+            if (this.Status.Type != V1WorkflowActivityStatus.Executing)
+                throw DomainException.UnexpectedState(typeof(V1WorkflowInstance), this.Id, this.Status.Type);
+            this.On(this.RegisterEvent(new V1WorkflowInstanceWaitingForEventsDomainEvent(this.Id)));
+        }
+
+        /// <summary>
+        /// Sets the <see cref="V1Workflow"/>'s <see cref="V1CorrelationContext"/>
+        /// </summary>
+        /// <param name="correlationContext">The <see cref="V1CorrelationContext"/> to set</param>
+        public virtual void SetCorrelationContext(V1CorrelationContext correlationContext)
+        {
+            if (correlationContext == null)
+                throw DomainException.ArgumentNull(nameof(correlationContext));
+            if (this.Status.Type != V1WorkflowActivityStatus.Waiting)
+                throw DomainException.UnexpectedState(typeof(V1WorkflowInstance), this.Id, this.Status.Type);
+            this.On(this.RegisterEvent(new V1WorkflowCorrelationContextUpdatedDomainEvent(this.Id, correlationContext)));
+        }
+
+        /// <summary>
+        /// Sets the specified correlation key
+        /// </summary>
+        /// <param name="key">The correlation key to set</param>
+        /// <param name="value">The value of the correlation key to set</param>
+        public virtual void SetCorrelationKey(string key, string value)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+                throw DomainException.ArgumentNull(nameof(key));
+            if (string.IsNullOrWhiteSpace(value))
+                throw DomainException.ArgumentNull(nameof(value));
+            if (this.Status.Type != V1WorkflowActivityStatus.Executing)
+                throw DomainException.UnexpectedState(typeof(V1WorkflowInstance), this.Id, this.Status.Type);
+            this.On(this.RegisterEvent(new V1WorkflowCorrelationKeySetDomainEvent(this.Id, key, value)));
         }
 
         /// <summary>
@@ -213,16 +286,16 @@ namespace Synapse.Domain.Models
         }
 
         /// <summary>
-        /// Processes the specified <see cref="V1WorkflowActivity"/>
+        /// Executes the specified <see cref="V1WorkflowActivity"/>
         /// </summary>
-        /// <param name="activity">The <see cref="V1WorkflowActivity"/> to process</param>
-        public virtual void ProcessActivity(V1WorkflowActivity activity)
+        /// <param name="activity">The <see cref="V1WorkflowActivity"/> to execute</param>
+        public virtual void ExecuteActivity(V1WorkflowActivity activity)
         {
             if (activity == null)
                 throw DomainException.ArgumentNull(nameof(activity));
             if (this.Status.Type != V1WorkflowActivityStatus.Executing)
                 throw DomainException.UnexpectedState(typeof(V1WorkflowInstance), this.Id, this.Status.Type);
-            activity.Process();
+            activity.Execute();
             this.UpdateActivity(activity);
         }
 
@@ -388,7 +461,7 @@ namespace Synapse.Domain.Models
         /// <param name="e">The <see cref="V1WorkflowInstanceInitializingDomainEvent"/> to handle</param>
         protected virtual void On(V1WorkflowInstanceInitializingDomainEvent e)
         {
-            V1WorkflowInstanceStatus status = new V1WorkflowInstanceStatus() { Type = V1WorkflowActivityStatus.Initializing };
+            V1WorkflowInstanceStatus status = new() { Type = V1WorkflowActivityStatus.Initializing };
             if (this.Spec.CorrelationContext != null)
                 status.CorrelationContext = this.Spec.CorrelationContext;
             this.StatusPatch.Replace(w => w.Status, status);
@@ -440,6 +513,58 @@ namespace Synapse.Domain.Models
             interruption.Resume(DateTimeOffset.Now);
             this.StatusPatch.Replace(w => w.Status.Type, V1WorkflowActivityStatus.Executing);
             this.StatusPatch.Replace(w => w.Status.Interruptions, interruption, interruptionIndex);
+            this.StatusPatch.ApplyTo(this);
+        }
+
+        /// <summary>
+        /// Handles the specified <see cref="V1WorkflowInstanceAwakingDomainEvent"/>
+        /// </summary>
+        /// <param name="e">The <see cref="V1WorkflowInstanceAwakingDomainEvent"/> to handle</param>
+        protected virtual void On(V1WorkflowInstanceAwakingDomainEvent e)
+        {
+            this.StatusPatch.Replace(w => w.Status.Type, V1WorkflowActivityStatus.Awakening);
+            this.StatusPatch.ApplyTo(this);
+        }
+
+        /// <summary>
+        /// Handles the specified <see cref="V1WorkflowInstanceAwakenedDomainEvent"/>
+        /// </summary>
+        /// <param name="e">The <see cref="V1WorkflowInstanceAwakenedDomainEvent"/> to handle</param>
+        protected virtual void On(V1WorkflowInstanceAwakenedDomainEvent e)
+        {
+            this.StatusPatch.Replace(w => w.Status.Type, V1WorkflowActivityStatus.Awakened);
+            this.StatusPatch.ApplyTo(this);
+        }
+
+        /// <summary>
+        /// Handles the specified <see cref="V1WorkflowInstanceWaitingForEventsDomainEvent"/>
+        /// </summary>
+        /// <param name="e">The <see cref="V1WorkflowInstanceWaitingForEventsDomainEvent"/> to handle</param>
+        protected virtual void On(V1WorkflowInstanceWaitingForEventsDomainEvent e)
+        {
+            this.StatusPatch.Replace(w => w.Status.Type, V1WorkflowActivityStatus.Waiting);
+            this.StatusPatch.Add(w => w.Status.Interruptions, new V1ExecutionInterruption(DateTimeOffset.Now));
+            this.StatusPatch.ApplyTo(this);
+        }
+
+        /// <summary>
+        /// Handles the specified <see cref="V1WorkflowCorrelationContextUpdatedDomainEvent"/>
+        /// </summary>
+        /// <param name="e">The <see cref="V1WorkflowCorrelationContextUpdatedDomainEvent"/> to handle</param>
+        protected virtual void On(V1WorkflowCorrelationContextUpdatedDomainEvent e)
+        {
+            this.StatusPatch.Replace(w => w.Status.CorrelationContext, e.CorrelationContext);
+            this.StatusPatch.ApplyTo(this);
+        }
+
+        /// <summary>
+        /// Handles the specified <see cref="V1WorkflowCorrelationKeySetDomainEvent"/>
+        /// </summary>
+        /// <param name="e">The <see cref="V1WorkflowCorrelationKeySetDomainEvent"/> to handle</param>
+        protected virtual void On(V1WorkflowCorrelationKeySetDomainEvent e)
+        {
+            this.Status.CorrelationContext.ContextAttributes[e.Key] = e.Value;
+            this.StatusPatch.Replace(w => w.Status.CorrelationContext.ContextAttributes, this.Status.CorrelationContext.ContextAttributes);
             this.StatusPatch.ApplyTo(this);
         }
 

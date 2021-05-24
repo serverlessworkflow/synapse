@@ -2,7 +2,7 @@
   "profiles": {
     "Synapse.Cli": {
       "commandName": "Project",
-      "commandLineArgs": "deploy --file  \"C:\\Dev\\Cisco\\Infrastructure\\Workflow\\Adapters\\Serverless\\src\\Cisco.Workflows.Serverless.UnitTests\\Resources\\parallel.yaml\""
+      "commandLineArgs": "install"
     }
   }
 }

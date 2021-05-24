@@ -147,11 +147,35 @@
         </member>
         <member name="M:Synapse.Operator.Application.Services.V1WorkflowController.DeployCronJobAsync(Synapse.Domain.Models.V1Workflow,System.Threading.CancellationToken)">
             <summary>
+            Deploys a new CronJob for the specified <see cref="T:Synapse.Domain.Models.V1Workflow"/>
+            </summary>
+            <param name="workflow">The <see cref="T:Synapse.Domain.Models.V1Workflow"/> to deploy a new CronJob for</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>The updated <see cref="T:Synapse.Domain.Models.V1Workflow"/></returns>
+        </member>
+        <member name="M:Synapse.Operator.Application.Services.V1WorkflowController.DeployV1beta1CronJobAsync(Synapse.Domain.Models.V1Workflow,System.Threading.CancellationToken)">
+            <summary>
+            Deploys a new <see cref="T:k8s.Models.V1beta1CronJob"/> for the specified <see cref="T:Synapse.Domain.Models.V1Workflow"/>
+            </summary>
+            <param name="workflow">The <see cref="T:Synapse.Domain.Models.V1Workflow"/> to deploy a new <see cref="T:k8s.Models.V1beta1CronJob"/> for</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>The updated <see cref="T:Synapse.Domain.Models.V1Workflow"/></returns>
+        </member>
+        <member name="M:Synapse.Operator.Application.Services.V1WorkflowController.DeployV1CronJobAsync(Synapse.Domain.Models.V1Workflow,System.Threading.CancellationToken)">
+            <summary>
             Deploys a new <see cref="T:k8s.Models.V1CronJob"/> for the specified <see cref="T:Synapse.Domain.Models.V1Workflow"/>
             </summary>
             <param name="workflow">The <see cref="T:Synapse.Domain.Models.V1Workflow"/> to deploy a new <see cref="T:k8s.Models.V1CronJob"/> for</param>
             <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
             <returns>The updated <see cref="T:Synapse.Domain.Models.V1Workflow"/></returns>
+        </member>
+        <member name="M:Synapse.Operator.Application.Services.V1WorkflowController.BuildRunnerPodAsync(Synapse.Domain.Models.V1Workflow,System.Threading.CancellationToken)">
+            <summary>
+            Builds a new <see cref="T:k8s.Models.V1Pod"/> for the specified <see cref="T:Synapse.Domain.Models.V1Workflow"/>
+            </summary>
+            <param name="workflow">The <see cref="T:Synapse.Domain.Models.V1Workflow"/> to build a new <see cref="T:k8s.Models.V1Pod"/> for</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>A new <see cref="T:k8s.Models.V1Pod"/></returns>
         </member>
         <member name="M:Synapse.Operator.Application.Services.V1WorkflowController.CleanUpAsync(Synapse.Domain.Models.V1Workflow,System.Threading.CancellationToken)">
             <summary>
@@ -221,6 +245,14 @@
             Deploys the specified <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>
             </summary>
             <param name="workflowInstance">The <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/> to deploy</param>
+            <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
+            <returns>The updated <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/></returns>
+        </member>
+        <member name="M:Synapse.Operator.Application.Services.V1WorkflowInstanceController.WakeUpAsync(Synapse.Domain.Models.V1WorkflowInstance,System.Threading.CancellationToken)">
+            <summary>
+            Wakes up the specified <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/>
+            </summary>
+            <param name="workflowInstance">The <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/> to wakeup</param>
             <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken"/></param>
             <returns>The updated <see cref="T:Synapse.Domain.Models.V1WorkflowInstance"/></returns>
         </member>

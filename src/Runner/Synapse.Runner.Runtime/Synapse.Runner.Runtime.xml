@@ -50,11 +50,12 @@
             </summary>
             <param name="services">The <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> to configure</param>
         </member>
-        <member name="M:Synapse.Runner.Runtime.Startup.Configure(Microsoft.AspNetCore.Builder.IApplicationBuilder)">
+        <member name="M:Synapse.Runner.Runtime.Startup.Configure(Microsoft.AspNetCore.Builder.IApplicationBuilder,Microsoft.Extensions.Options.IOptions{Synapse.Runner.Application.Configuration.ApplicationOptions})">
             <summary>
             Configures the application's pipeline
             </summary>
             <param name="app">The <see cref="T:Microsoft.AspNetCore.Builder.IApplicationBuilder"/> to configure</param>
+            <param name="options">The service used to access the current <see cref="T:Synapse.Runner.Application.Configuration.ApplicationOptions"/></param>
         </member>
     </members>
 </doc>

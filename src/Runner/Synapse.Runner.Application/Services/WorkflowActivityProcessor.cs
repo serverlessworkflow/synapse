@@ -1,7 +1,9 @@
 ﻿using ConcurrentCollections;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.Rest;
 using Synapse.Domain.Models;
+using Synapse.Runner.Application.Configuration;
 using System;
 using System.Linq;
 using System.Reactive.Subjects;
@@ -26,12 +28,14 @@ namespace Synapse.Runner.Application.Services
         /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
         /// <param name="executionContext">The current <see cref="IWorkflowExecutionContext"/></param>
         /// <param name="activityProcessorFactory">The service used to create <see cref="IWorkflowActivityProcessor"/>s</param>
+        /// <param name="options">The service used to access the current <see cref="ApplicationOptions"/></param>
         /// <param name="activity">The <see cref="V1WorkflowActivity"/> to process</param>
-        protected WorkflowActivityProcessor(ILoggerFactory loggerFactory, IWorkflowExecutionContext executionContext, IWorkflowActivityProcessorFactory activityProcessorFactory, V1WorkflowActivity activity)
+        protected WorkflowActivityProcessor(ILoggerFactory loggerFactory, IWorkflowExecutionContext executionContext, IWorkflowActivityProcessorFactory activityProcessorFactory, IOptions<ApplicationOptions> options, V1WorkflowActivity activity)
         {
             this.Logger = loggerFactory.CreateLogger(this.GetType());
             this.ExecutionContext = executionContext;
             this.ActivityProcessorFactory = activityProcessorFactory;
+            this.Options = options.Value;
             this.Activity = activity;
         }
 
@@ -49,6 +53,11 @@ namespace Synapse.Runner.Application.Services
         /// Gets the service used to create <see cref="IWorkflowActivityProcessor"/>s
         /// </summary>
         protected IWorkflowActivityProcessorFactory ActivityProcessorFactory { get; }
+
+        /// <summary>
+        /// Gets the current <see cref="ApplicationOptions"/>
+        /// </summary>
+        protected ApplicationOptions Options { get; }
 
         /// <inheritdoc/>
         public V1WorkflowActivity Activity { get; }
@@ -81,11 +90,12 @@ namespace Synapse.Runner.Application.Services
                 try
                 {
                     this.Logger.LogInformation("Initializing activity '{activityId}' (type: '{activityType}')...", this.Activity.Id, this.Activity.Type);
-                    await this.ExecutionContext.InitializeActivityAsync(this.Activity, cancellationToken);
+                    if (this.Activity.Status == V1WorkflowActivityStatus.Pending)
+                        await this.ExecutionContext.InitializeActivityAsync(this.Activity, cancellationToken);
                     await this.InitializeAsync(this.CancellationTokenSource.Token);
                     this.Logger.LogInformation("Activity '{activityId}' (type: '{activityType}') initialized", this.Activity.Id, this.Activity.Type);
                     this.Logger.LogInformation("Executing activity '{activityId}' (type: '{activityType}')...", this.Activity.Id, this.Activity.Type);
-                    await this.ExecutionContext.ProcessActivityAsync(this.Activity, this.CancellationTokenSource.Token);
+                    await this.ExecutionContext.ExecuteActivityAsync(this.Activity, this.CancellationTokenSource.Token);
                     await this.ProcessAsync(this.CancellationTokenSource.Token);
                 }
                 catch (Exception ex)

@@ -27,12 +27,7 @@ namespace Synapse.Runner.Application.Configuration
         public static IServiceCollection AddSynapseBroker(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
         {
             services.AddHttpClient();
-
-            services.AddSingleton<ICloudEventFormatter, JsonEventFormatter>();
-            services.AddSingleton<Subject<CloudEvent>>();
-            services.AddHttpClient(nameof(CloudEventBus), http => { });
-            services.AddSingleton<ICloudEventBus, CloudEventBus>();
-
+            services.AddCloudEventBus();
             services.AddKubernetesClient();
 
             services.AddSingleton<IRepository<V1WorkflowInstance>, K8sRepository<V1WorkflowInstance>>();

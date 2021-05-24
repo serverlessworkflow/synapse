@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Synapse.Runner.Application.Configuration;
 
 namespace Synapse.Runner.Runtime
@@ -48,11 +49,14 @@ namespace Synapse.Runner.Runtime
         /// Configures the application's pipeline
         /// </summary>
         /// <param name="app">The <see cref="IApplicationBuilder"/> to configure</param>
-        public void Configure(IApplicationBuilder app)
+        /// <param name="options">The service used to access the current <see cref="ApplicationOptions"/></param>
+        public void Configure(IApplicationBuilder app, IOptions<ApplicationOptions> options)
         {
             if (this.Environment.IsDevelopment())
                 app.UseDeveloperExceptionPage();
-            app.UseCloudEvents();
+            if(options.Value.Runtime.Correlation.Mode == RuntimeCorrelationMode.Active
+                || options.Value.Runtime.Correlation.Mode == RuntimeCorrelationMode.Dual)
+                app.UseCloudEvents();
         }
 
     }

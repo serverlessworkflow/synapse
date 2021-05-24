@@ -1,0 +1,25 @@
+﻿id: inject-test
+version: '1.0'
+name: Inject Test Workflow
+description: Injects Hello World into state data
+start:
+  stateName: inject
+  schedule:
+    cron: 
+      expression: '*/1 * * * *'
+states:
+  - name: inject
+    type: inject
+    data:
+      id: 1
+      category:
+        id: 0
+        name: mammals
+      name: doggie
+      photoUrls:
+        - string
+      tags:
+        - id: 0
+          name: dog
+      status: available
+    end: true

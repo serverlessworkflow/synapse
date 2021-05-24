@@ -12,6 +12,8 @@ using Synapse.Domain.Models;
 using Synapse.Operator.Application.Configuration;
 using Synapse.Services;
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -179,8 +181,8 @@ namespace Synapse.Operator.Application.Services
                 workflow = await this.DeployTriggerAsync(workflow, cancellationToken);
             else if(workflow.Spec.Definition.Start.Schedule != null)
             {
-                if(!string.IsNullOrWhiteSpace(workflow.Spec.Definition.Start.Schedule.Cron.Expression))
-                    workflow = await this.DeployCronJobAsync(workflow, cancellationToken);
+                if(!string.IsNullOrWhiteSpace(workflow.Spec.Definition.Start.Schedule.Cron?.Expression))
+                    workflow = await this.DeployV1CronJobAsync(workflow, cancellationToken);
                 if (!string.IsNullOrWhiteSpace(workflow.Spec.Definition.Start.Schedule.Interval))
                     workflow = await this.DeployJobAsync(workflow, cancellationToken);
             }
@@ -198,7 +200,7 @@ namespace Synapse.Operator.Application.Services
             try
             {
                 EventStateDefinition eventState = workflow.Spec.Definition.GetStartupState<EventStateDefinition>();
-                this.Logger.LogInformation("The startup state '{startupState}' of workflow '{workflowId}:{workflowDefinition}' is an event state definition", eventState.Name, workflow.Spec.Definition.Id, workflow.Spec.Definition.Version);
+                this.Logger.LogInformation("Startup state '{startupState}' of workflow '{workflowId}:{workflowDefinition}' is an event state definition", eventState.Name, workflow.Spec.Definition.Id, workflow.Spec.Definition.Version);
                 this.Logger.LogInformation("Creating a new V1Trigger...");
                 V1TriggerSpec triggerSpec = new(V1TriggerCorrelationMode.Parallel, eventState.Exclusive ? V1TriggerConditionType.AnyOf : V1TriggerConditionType.AllOf, new V1TriggerOutcome(V1TriggerOutcomeType.Run, new V1WorkflowReference(workflow.Spec.Definition.Id, workflow.Spec.Definition.Version)));
                 foreach (EventStateTriggerDefinition triggerDefinition in eventState.Triggers)
@@ -252,10 +254,116 @@ namespace Synapse.Operator.Application.Services
         /// <param name="workflow">The <see cref="V1Workflow"/> to deploy a new <see cref="V1Job"/> for</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>The updated <see cref="V1Workflow"/></returns>
-        protected virtual Task<V1Workflow> DeployJobAsync(V1Workflow workflow, CancellationToken cancellationToken = default)
+        protected virtual async Task<V1Workflow> DeployJobAsync(V1Workflow workflow, CancellationToken cancellationToken = default)
         {
-            //TODO
-            throw new NotImplementedException();
+            try
+            {
+                this.Logger.LogInformation("Start definition of workflow '{workflowId}:{workflowDefinition}' defines an interval-based schedule.", workflow.Spec.Definition.Id, workflow.Spec.Definition.Version);
+                this.Logger.LogInformation("Creating a new V1Job...");
+                V1Pod pod = await this.BuildRunnerPodAsync(workflow, cancellationToken);
+                V1Job job = new()
+                {
+                    Metadata = new V1ObjectMeta()
+                    {
+                        GenerateName = "synapse-job-",
+                        NamespaceProperty = workflow.Namespace()
+                    },
+                    Spec = new V1JobSpec()
+                    {
+                        Template = new V1PodTemplateSpec()
+                        {
+                            Metadata = pod.Metadata,
+                            Spec = pod.Spec
+                        }
+                    }
+                };
+                job = await this.Kubernetes.CreateNamespacedJobAsync(job, workflow.Namespace(), cancellationToken: cancellationToken);
+                this.Logger.LogInformation("A new V1Job has been successfully created for workflow '{workflowId}:{workflowDefinition}'.", workflow.Spec.Definition.Id, workflow.Spec.Definition.Version);
+                return workflow;
+            }
+            catch (Exception ex)
+            {
+                if (ex is HttpOperationException httpEx)
+                    this.Logger.LogError($"An error occured while scheduling workflow '{{workflowId}}:{{workflowDefinition}}: the Kubernetes API returned an non-success status code '{{statusCode}}'{Environment.NewLine}Response content: {{responseContent}}Details: {{ex}}", workflow.Spec.Definition.Id, workflow.Spec.Definition.Version, httpEx.Response.StatusCode, httpEx.Response.Content, ex.ToString());
+                else
+                    this.Logger.LogError($"An error occured while scheduling Workflow '{{workflowId}}:{{workflowDefinition}}':{Environment.NewLine}{{ex}}", workflow.Name(), ex.ToString());
+                workflow.Fault(ex);
+                await this.Workflows.UpdateAsync(workflow, cancellationToken);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Deploys a new CronJob for the specified <see cref="V1Workflow"/>
+        /// </summary>
+        /// <param name="workflow">The <see cref="V1Workflow"/> to deploy a new CronJob for</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The updated <see cref="V1Workflow"/></returns>
+        protected virtual async Task<V1Workflow> DeployCronJobAsync(V1Workflow workflow, CancellationToken cancellationToken = default)
+        {
+            V1APIVersions versions = await this.Kubernetes.GetAPIVersionsAsync(cancellationToken);
+            if (string.Compare(versions.ApiVersion, "1.21") == -1)
+                return await this.DeployV1beta1CronJobAsync(workflow, cancellationToken);
+            else
+                return await this.DeployV1CronJobAsync(workflow, cancellationToken);
+        }
+
+        /// <summary>
+        /// Deploys a new <see cref="V1beta1CronJob"/> for the specified <see cref="V1Workflow"/>
+        /// </summary>
+        /// <param name="workflow">The <see cref="V1Workflow"/> to deploy a new <see cref="V1beta1CronJob"/> for</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The updated <see cref="V1Workflow"/></returns>
+        protected virtual async Task<V1Workflow> DeployV1beta1CronJobAsync(V1Workflow workflow, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                this.Logger.LogInformation("Start definition of workflow '{workflowId}:{workflowDefinition}' defines a CRON-based schedule.", workflow.Spec.Definition.Id, workflow.Spec.Definition.Version);
+                this.Logger.LogInformation("Creating a new V1CronJob...");
+                V1Pod pod = await this.BuildRunnerPodAsync(workflow, cancellationToken);
+                foreach (V1Container container in pod.Spec.Containers)
+                {
+                    if (container.Env == null)
+                        container.Env = new List<V1EnvVar>();
+                    container.Env.Add(new V1EnvVar(SynapseConstants.EnvironmentVariables.Runtime.Startup.Name, EnumHelper.Stringify(RuntimeStartupType.Schedule)));
+                }
+                V1beta1CronJob cronJob = new()
+                {
+                    Metadata = new V1ObjectMeta()
+                    {
+                        GenerateName = "synapse-cronjob-",
+                        NamespaceProperty = workflow.Namespace()
+                    },
+                    Spec = new V1beta1CronJobSpec()
+                    {
+                        Schedule = workflow.Spec.Definition.Start.Schedule.Cron.Expression,
+                        JobTemplate = new V1beta1JobTemplateSpec()
+                        {
+                            Spec = new V1JobSpec()
+                            {
+                                Template = new V1PodTemplateSpec()
+                                {
+                                    Metadata = pod.Metadata,
+                                    Spec = pod.Spec
+                                }
+                            }
+                        }
+                    }
+                };
+                cronJob = await this.Kubernetes.CreateNamespacedCronJob1Async(cronJob, workflow.Namespace(), cancellationToken: cancellationToken);
+                this.Logger.LogInformation("A new V1CronJob has been successfully created for workflow '{workflowId}:{workflowDefinition}'.", workflow.Spec.Definition.Id, workflow.Spec.Definition.Version);
+                return workflow;
+            }
+            catch (Exception ex)
+            {
+                if (ex is HttpOperationException httpEx)
+                    this.Logger.LogError($"An error occured while scheduling workflow '{{workflowId}}:{{workflowDefinition}}: the Kubernetes API returned an non-success status code '{{statusCode}}'{Environment.NewLine}Response content: {{responseContent}}Details: {{ex}}", workflow.Spec.Definition.Id, workflow.Spec.Definition.Version, httpEx.Response.StatusCode, httpEx.Response.Content, ex.ToString());
+                else
+                    this.Logger.LogError($"An error occured while scheduling Workflow '{{workflowId}}:{{workflowDefinition}}':{Environment.NewLine}{{ex}}", workflow.Name(), ex.ToString());
+                workflow.Fault(ex);
+                await this.Workflows.UpdateAsync(workflow, cancellationToken);
+                throw;
+            }
         }
 
         /// <summary>
@@ -264,12 +372,19 @@ namespace Synapse.Operator.Application.Services
         /// <param name="workflow">The <see cref="V1Workflow"/> to deploy a new <see cref="V1CronJob"/> for</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>The updated <see cref="V1Workflow"/></returns>
-        protected virtual async Task<V1Workflow> DeployCronJobAsync(V1Workflow workflow, CancellationToken cancellationToken = default)
+        protected virtual async Task<V1Workflow> DeployV1CronJobAsync(V1Workflow workflow, CancellationToken cancellationToken = default)
         {
             try
             {
-                this.Logger.LogInformation("The start definition of workflow '{workflowId}:{workflowDefinition}' defines a CRON schedule.", workflow.Spec.Definition.Id, workflow.Spec.Definition.Version);
-                this.Logger.LogInformation("Creating a new CronJob...");
+                this.Logger.LogInformation("Start definition of workflow '{workflowId}:{workflowDefinition}' defines a CRON-based schedule.", workflow.Spec.Definition.Id, workflow.Spec.Definition.Version);
+                this.Logger.LogInformation("Creating a new V1CronJob...");
+                V1Pod pod = await this.BuildRunnerPodAsync(workflow, cancellationToken);
+                foreach (V1Container container in pod.Spec.Containers)
+                {
+                    if (container.Env == null)
+                        container.Env = new List<V1EnvVar>();
+                    container.Env.Add(new V1EnvVar(SynapseConstants.EnvironmentVariables.Runtime.Startup.Name, EnumHelper.Stringify(RuntimeStartupType.Schedule)));
+                }
                 V1CronJob cronJob = new()
                 {
                     Metadata = new V1ObjectMeta()
@@ -280,40 +395,75 @@ namespace Synapse.Operator.Application.Services
                     Spec = new V1CronJobSpec()
                     {
                         Schedule = workflow.Spec.Definition.Start.Schedule.Cron.Expression,
-
                         JobTemplate = new V1JobTemplateSpec()
                         {
                             Spec = new V1JobSpec()
                             {
                                 Template = new V1PodTemplateSpec()
                                 {
-                                    Metadata = new V1ObjectMeta()
-                                    {
-
-                                    },
-                                    Spec = new V1PodSpec()
-                                    {
-
-                                    }
+                                    Metadata = pod.Metadata,
+                                    Spec = pod.Spec
                                 }
                             }
                         }
                     }
                 };
-                //TODO
-                this.Logger.LogInformation("A new CronJob has been successfully created for workflow '{workflowId}:{workflowDefinition}'.", workflow.Spec.Definition.Id, workflow.Spec.Definition.Version);
+                cronJob = await this.Kubernetes.CreateNamespacedCronJobAsync(cronJob, workflow.Namespace(), cancellationToken: cancellationToken);
+                this.Logger.LogInformation("A new V1CronJob has been successfully created for workflow '{workflowId}:{workflowDefinition}'.", workflow.Spec.Definition.Id, workflow.Spec.Definition.Version);
                 return workflow;
             }
             catch (Exception ex)
             {
                 if (ex is HttpOperationException httpEx)
-                    this.Logger.LogError($"An error occured while scheduling workflow '{{workflowId}}:{{workflowDefinition}}: the Kubernetes API returned an non-success status code '{{statusCode}}'{Environment.NewLine}Response content: {{responseContent}}{Environment.NewLine}Details: {{ex}}", workflow.Spec.Definition.Id, workflow.Spec.Definition.Version, httpEx.Response.StatusCode, httpEx.Response.Content, ex.ToString());
+                    this.Logger.LogError($"An error occured while scheduling workflow '{{workflowId}}:{{workflowDefinition}}: the Kubernetes API returned an non-success status code '{{statusCode}}'{Environment.NewLine}Response content: {{responseContent}}Details: {{ex}}", workflow.Spec.Definition.Id, workflow.Spec.Definition.Version, httpEx.Response.StatusCode, httpEx.Response.Content, ex.ToString());
                 else
                     this.Logger.LogError($"An error occured while scheduling Workflow '{{workflowId}}:{{workflowDefinition}}':{Environment.NewLine}{{ex}}", workflow.Name(), ex.ToString());
                 workflow.Fault(ex);
                 await this.Workflows.UpdateAsync(workflow, cancellationToken);
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Builds a new <see cref="V1Pod"/> for the specified <see cref="V1Workflow"/>
+        /// </summary>
+        /// <param name="workflow">The <see cref="V1Workflow"/> to build a new <see cref="V1Pod"/> for</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new <see cref="V1Pod"/></returns>
+        protected virtual async Task<V1Pod> BuildRunnerPodAsync(V1Workflow workflow, CancellationToken cancellationToken = default)
+        {
+            if (workflow == null)
+                throw new ArgumentNullException(nameof(workflow));
+            string deploymentFilePath = this.ApplicationOptions.Runner.DeploymentFilePath;
+            if (!File.Exists(deploymentFilePath))
+            {
+                deploymentFilePath = RunnerOptions.DefaultDeploymentFilePath;
+                this.Logger.LogWarning($"Failed to find the specified pod declaration file '{{filePath}}'. Using default file path instead ('{RunnerOptions.DefaultDeploymentFilePath}').", deploymentFilePath);
+            }
+            string json;
+            using (FileStream stream = new(deploymentFilePath, FileMode.Open, FileAccess.Read))
+            {
+                using StreamReader streamReader = new(stream);
+                json = await streamReader.ReadToEndAsync();
+            }
+            V1Pod pod = Yaml.LoadFromString<V1Pod>(json);
+            pod.Spec.RestartPolicy = "Never";
+            if (pod.Spec == null
+                || pod.Spec.Containers == null
+                || !pod.Spec.Containers.Any())
+                throw new InvalidOperationException($"The specified pod declaration file '{deploymentFilePath}' does not contain a valid K8s Pod declaration");
+            foreach (V1Container container in pod.Spec.Containers)
+            {
+                if (container.Env == null)
+                    container.Env = new List<V1EnvVar>();
+                container.Env.Add(new V1EnvVar(SynapseConstants.EnvironmentVariables.Workflows.Id.Name, workflow.Spec.Definition.Id));
+                container.Env.Add(new V1EnvVar(SynapseConstants.EnvironmentVariables.Workflows.Version.Name, workflow.GetLabel(SynapseConstants.Labels.Workflows.Version)));
+                container.Env.Add(new V1EnvVar(SynapseConstants.EnvironmentVariables.Kubernetes.Namespace.Name, valueFrom: new V1EnvVarSource() { FieldRef = new V1ObjectFieldSelector("metadata.namespace") }));
+                container.Env.Add(new V1EnvVar(SynapseConstants.EnvironmentVariables.Kubernetes.PodName.Name, valueFrom: new V1EnvVarSource() { FieldRef = new V1ObjectFieldSelector("metadata.name") }));
+                container.Env.Add(new V1EnvVar(SynapseConstants.EnvironmentVariables.Runtime.Startup.Name, EnumHelper.Stringify(RuntimeStartupType.Schedule)));
+                container.Env.Add(new V1EnvVar(SynapseConstants.EnvironmentVariables.CloudEvents.Sink.Name, SynapseConstants.EnvironmentVariables.CloudEvents.Sink.Value));
+            }
+            return pod;
         }
 
         /// <summary>

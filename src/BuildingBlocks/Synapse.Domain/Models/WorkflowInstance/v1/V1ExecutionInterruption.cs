@@ -30,13 +30,13 @@ namespace Synapse.Domain.Models
         /// Gets the UTC date and time at which the execution has been suspended
         /// </summary>
         [JsonProperty("suspendedAt")]
-        public virtual DateTimeOffset SuspendedAt { get; protected set; }
+        public virtual DateTimeOffset SuspendedAt { get; set; }
 
         /// <summary>
         /// Gets the UTC date and time at which the execution has been resumed
         /// </summary>
         [JsonProperty("resumedAt")]
-        public virtual DateTimeOffset? ResumedAt { get; protected set; }
+        public virtual DateTimeOffset? ResumedAt { get; set; }
 
         /// <summary>
         /// Gets a boolean indicating whether or not the execution has been resumed

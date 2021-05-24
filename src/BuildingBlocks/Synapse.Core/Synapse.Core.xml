@@ -301,7 +301,7 @@
             <param name="conditionName">The name of the <see cref="T:ServerlessWorkflow.Sdk.Models.SwitchCaseDefinition"/> to get</param>
             <returns>The <see cref="T:ServerlessWorkflow.Sdk.Models.SwitchCaseDefinition"/> with the specified name</returns>
         </member>
-        <member name="M:Synapse.StateDefinitionExtensions.TryGetCondition(ServerlessWorkflow.Sdk.Models.SwitchStateDefinition,System.String,ServerlessWorkflow.Sdk.Models.SwitchCaseDefinition@)">
+        <member name="M:Synapse.StateDefinitionExtensions.TryGetCase(ServerlessWorkflow.Sdk.Models.SwitchStateDefinition,System.String,ServerlessWorkflow.Sdk.Models.SwitchCaseDefinition@)">
             <summary>
             Attempts to get the <see cref="T:ServerlessWorkflow.Sdk.Models.SwitchCaseDefinition"/> with the specified name
             </summary>
@@ -348,12 +348,11 @@
             <param name="stringCase">The case of the resulting string</param>
             <returns>A new random string of the specified length</returns>
         </member>
-        <member name="M:Synapse.StringExtensions.GenerateRandomNumericString(System.Int32,Synapse.Case)">
+        <member name="M:Synapse.StringExtensions.GenerateRandomNumericString(System.Int32)">
             <summary>
             Generates a random numeric string of the specified length
             </summary>
             <param name="length">The length of the string to generate</param>
-            <param name="stringCase">The case of the resulting string</param>
             <returns>A new random string of the specified length</returns>
         </member>
         <member name="M:Synapse.StringExtensions.IsAlphabetic(System.String)">
@@ -474,6 +473,13 @@
             </summary>
             <param name="text">The text to convert</param>
             <returns>The dash-cased text</returns>
+        </member>
+        <member name="M:Synapse.StringExtensions.IsWorkflowExpression(System.String)">
+            <summary>
+            Determines whether or not the string is a workflow expression
+            </summary>
+            <param name="text">The string to test</param>
+            <returns>A boolean indicating whether or not the string is a workflow expression</returns>
         </member>
         <member name="T:Synapse.WorkflowDefinitionExtensions">
             <summary>
@@ -598,6 +604,46 @@
             <param name="compensationStateId">The id of the compensation <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/> to get</param>
             <returns>The compensation <see cref="T:ServerlessWorkflow.Sdk.Models.StateDefinition"/> with the specified id</returns>
         </member>
+        <member name="T:Synapse.RuntimeCorrelationMode">
+            <summary>
+            Enumerates all supported runtime correlation modes
+            </summary>
+        </member>
+        <member name="F:Synapse.RuntimeCorrelationMode.Dual">
+            <summary>
+            Indicates that the runtime actibvely for inbound <see cref="T:CloudNative.CloudEvents.CloudEvent"/>s for a specified amount of time before shutting down and waiting for a Synapse Correlator to restart it upon consumption of correlated <see cref="T:CloudNative.CloudEvents.CloudEvent"/>s
+            </summary>
+        </member>
+        <member name="F:Synapse.RuntimeCorrelationMode.Active">
+            <summary>
+            Indicates that the runtime actively listens for inbound <see cref="T:CloudNative.CloudEvents.CloudEvent"/>s
+            </summary>
+        </member>
+        <member name="F:Synapse.RuntimeCorrelationMode.Passive">
+            <summary>
+            Indicates that when requested to consume <see cref="T:CloudNative.CloudEvents.CloudEvent"/>s, the runtime shuts down and waits for a Synapse Correlator to restart it upon consumption of correlated <see cref="T:CloudNative.CloudEvents.CloudEvent"/>s
+            </summary>
+        </member>
+        <member name="T:Synapse.RuntimeStartupType">
+            <summary>
+            Enumerates all supported types of runtime startups
+            </summary>
+        </member>
+        <member name="F:Synapse.RuntimeStartupType.Explicit">
+            <summary>
+            Indicates that the runtime has been explicitely started, by creating a new workflow instance
+            </summary>
+        </member>
+        <member name="F:Synapse.RuntimeStartupType.Schedule">
+            <summary>
+            Indicates that the runtime has been started by a schedule (CronJob or Job)
+            </summary>
+        </member>
+        <member name="F:Synapse.RuntimeStartupType.Trigger">
+            <summary>
+            Indicates that the runtime has been started by a trigger
+            </summary>
+        </member>
         <member name="T:Synapse.SynapseConstants">
             <summary>
             Exposes constants about Synapse
@@ -606,6 +652,11 @@
         <member name="F:Synapse.SynapseConstants.Namespace">
             <summary>
             Gets Synapse's resource namespace
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseConstants.Version">
+            <summary>
+            Gets Synapse's version
             </summary>
         </member>
         <member name="T:Synapse.SynapseConstants.EnvironmentVariables">
@@ -683,6 +734,86 @@
             Gets the value of the Kubernetes pod name environment variable
             </summary>
         </member>
+        <member name="T:Synapse.SynapseConstants.EnvironmentVariables.Runtime">
+            <summary>
+            Exposes constants about Synapse runtime-related environment variables
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseConstants.EnvironmentVariables.Runtime.Prefix">
+            <summary>
+            Gets the prefix for all Synapse runtime-related environment variables
+            </summary>
+        </member>
+        <member name="T:Synapse.SynapseConstants.EnvironmentVariables.Runtime.Correlation">
+            <summary>
+            Exposes constants about Synapse correlation-related environment variables
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseConstants.EnvironmentVariables.Runtime.Correlation.Prefix">
+            <summary>
+            Gets the prefix for all Synapse correlation-related environment variables
+            </summary>
+        </member>
+        <member name="T:Synapse.SynapseConstants.EnvironmentVariables.Runtime.Correlation.Mode">
+            <summary>
+            Exposes constants about the Synapse runtime correlation mode environment variable
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseConstants.EnvironmentVariables.Runtime.Correlation.Mode.Name">
+            <summary>
+            Gets the name of the Synapse runtime correlation mode environment variable
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseConstants.EnvironmentVariables.Runtime.Correlation.Mode.Value">
+            <summary>
+            Gets the value of the Synapse runtime correlation mode environment variable
+            </summary>
+        </member>
+        <member name="T:Synapse.SynapseConstants.EnvironmentVariables.Runtime.Correlation.MaxDuration">
+            <summary>
+            Exposes constants about the Synapse runtime correlation max duration environment variable
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseConstants.EnvironmentVariables.Runtime.Correlation.MaxDuration.Name">
+            <summary>
+            Gets the name of the Synapse runtime correlation max duration environment variable
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseConstants.EnvironmentVariables.Runtime.Correlation.MaxDuration.Value">
+            <summary>
+            Gets the value of the Synapse runtime correlation max duration environment variable
+            </summary>
+        </member>
+        <member name="T:Synapse.SynapseConstants.EnvironmentVariables.Runtime.GracePeriod">
+            <summary>
+            Exposes constants about the Synapse runtime grace period environment variable
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseConstants.EnvironmentVariables.Runtime.GracePeriod.Name">
+            <summary>
+            Gets the name of the Synapse runtime grace period environment variable
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseConstants.EnvironmentVariables.Runtime.GracePeriod.Value">
+            <summary>
+            Gets the value of the Synapse runtime grace period environment variable
+            </summary>
+        </member>
+        <member name="T:Synapse.SynapseConstants.EnvironmentVariables.Runtime.Startup">
+            <summary>
+            Exposes constants about the Synapse runtime startup mode environment variable
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseConstants.EnvironmentVariables.Runtime.Startup.Name">
+            <summary>
+            Gets the name of the Synapse runtime startup mode environment variable
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseConstants.EnvironmentVariables.Runtime.Startup.Value">
+            <summary>
+            Gets the value of the Synapse runtime startup mode environment variable
+            </summary>
+        </member>
         <member name="T:Synapse.SynapseConstants.EnvironmentVariables.Workflows">
             <summary>
             Exposes constants about Synapse workflow-related environment variables
@@ -743,6 +874,16 @@
             Exposes constants about Synapse's annotations
             </summary>
         </member>
+        <member name="F:Synapse.SynapseConstants.Labels.Prefix">
+            <summary>
+            Gets the prefix for all Synapse labels
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseConstants.Labels.Scheduled">
+            <summary>
+            Gets the name of the Synapse label indicating that the marked resource has been scheduled and should be ignored by the operator
+            </summary>
+        </member>
         <member name="T:Synapse.SynapseConstants.Labels.Workflows">
             <summary>
             Exposes constants about Synapse workflow-related labels
@@ -791,6 +932,16 @@
         <member name="F:Synapse.SynapseConstants.Resources.ApiVersion">
             <summary>
             Gets the default api version for all Synapse resources
+            </summary>
+        </member>
+        <member name="T:Synapse.SynapseConstants.GitRepository">
+            <summary>
+            Exposes constants about Synapse git repository
+            </summary>
+        </member>
+        <member name="F:Synapse.SynapseConstants.GitRepository.Uri">
+            <summary>
+            Gets the uri of Synapse's git repository 
             </summary>
         </member>
     </members>

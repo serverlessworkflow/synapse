@@ -50,6 +50,20 @@ namespace Synapse.Runner.Application.Services
                 throw new NullReferenceException($"Failed to find the workflow state with the specified name '{activity.Metadata.State}'");
             switch (activity.Type)
             {
+                case V1WorkflowActivityType.Transition:
+                    TransitionDefinition transition;
+                    if (state is SwitchStateDefinition @switch
+                        && !string.IsNullOrWhiteSpace(activity.Metadata.Case))
+                    {
+                        if (!@switch.TryGetCase(activity.Metadata.Case, out SwitchCaseDefinition dataCondition))
+                            throw new NullReferenceException($"Failed to find a condition with the specified name '{activity.Metadata.Case}'");
+                        transition = dataCondition.Transition;
+                    }
+                    else
+                    {
+                        transition = state.Transition;
+                    }
+                    return ActivatorUtilities.CreateInstance<TransitionProcessor>(this.ServiceProvider, state, transition, activity);
                 case V1WorkflowActivityType.State:
                     switch (state)
                     {
@@ -110,12 +124,12 @@ namespace Synapse.Runner.Application.Services
                             if (!this.ExecutionContext.Definition.Spec.Definition.TryGetFunction(action.Function.Name, out FunctionDefinition function))
                                 throw new NullReferenceException($"Failed to find a function with the specified name '{action.Function.Name}' in the workflow with name '{this.ExecutionContext.Definition.Spec.Definition.Id}' and version '{this.ExecutionContext.Definition.Spec.Definition.Version}'");
                             return ActivatorUtilities.CreateInstance<FunctionProcessor>(this.ServiceProvider, activity, action, function);
-                        //case ActionType.EventTrigger:
-                        //    if (!workflowDefinition.TryGetEvent(action.Event.TriggerEvent, out EventDefinition triggerEvent))
-                        //        throw new NullReferenceException($"Failed to find an event with the specified name '{action.Event.TriggerEvent}' in the workflow with name '{workflowInstance.DefinitionId}' and version '{workflowInstance.DefinitionVersion}'");
-                        //    if (!workflowDefinition.TryGetEvent(action.Event.ResultEvent, out EventDefinition resultEvent))
-                        //        throw new NullReferenceException($"Failed to find an event with the specified name '{action.Event.ResultEvent}' in the workflow with name '{workflowInstance.DefinitionId}' and version '{workflowInstance.DefinitionVersion}'");
-                        //    return ActivatorUtilities.CreateInstance<EventActionProcessor>(this.ServiceProvider, expressionEvaluator, workflowInstance, state, pointer, action, triggerEvent, resultEvent);
+                        case ActionType.EventTrigger:
+                            if (!this.ExecutionContext.Definition.Spec.Definition.TryGetEvent(action.Event.TriggerEvent, out EventDefinition triggerEvent))
+                                throw new NullReferenceException($"Failed to find an event with the specified name '{action.Event.TriggerEvent}' in the workflow with name '{this.ExecutionContext.Definition.Spec.Definition.Id}' and version '{this.ExecutionContext.Definition.Spec.Definition.Version}'");
+                            if (!this.ExecutionContext.Definition.Spec.Definition.TryGetEvent(action.Event.ResultEvent, out EventDefinition resultEvent))
+                                throw new NullReferenceException($"Failed to find an event with the specified name '{action.Event.ResultEvent}' in the workflow with name '{this.ExecutionContext.Definition.Spec.Definition.Id}' and version '{this.ExecutionContext.Definition.Spec.Definition.Version}'");
+                            return ActivatorUtilities.CreateInstance<AsyncFunctionProcessor>(this.ServiceProvider, state, activity, action, triggerEvent, resultEvent);
                         default:
                             throw new NotSupportedException($"The specified {nameof(ActionType)} '{action.Type}' is not supported");
                     }
@@ -129,6 +143,12 @@ namespace Synapse.Runner.Application.Services
                     if (eventToConsume.Kind != EventKind.Consumed)
                         throw new InvalidOperationException($"The event with name '{eventToConsume.Name}' is of kind '{eventToConsume.Kind}' and therefore cannot be consumed");
                     return ActivatorUtilities.CreateInstance<ConsumeEventProcessor>(this.ServiceProvider, eventToConsume, activity);
+                case V1WorkflowActivityType.ProduceEvent:
+                    if (!this.ExecutionContext.Definition.Spec.Definition.TryGetEvent(activity.Metadata.Event, out EventDefinition eventToProduce))
+                        throw new NullReferenceException($"Failed to find a event with the specified name '{activity.Metadata.Event}' in the state with name'{state.Name}'");
+                    if (eventToProduce.Kind != EventKind.Produced)
+                        throw new InvalidOperationException($"The event with name '{eventToProduce.Name}' is of kind '{eventToProduce.Kind}' and therefore cannot be produced");
+                    return ActivatorUtilities.CreateInstance<ProduceEventProcessor>(this.ServiceProvider, eventToProduce, activity);
                 case V1WorkflowActivityType.End:
                     return ActivatorUtilities.CreateInstance<EndProcessor>(this.ServiceProvider, state.End, activity);
                 default:

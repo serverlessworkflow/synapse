@@ -12,21 +12,39 @@ using System.Threading.Tasks;
 namespace Synapse.Services
 {
 
+    /// <summary>
+    /// Represents an <see cref="IRepository{TResource}"/> implementation for Kubernetes
+    /// </summary>
+    /// <typeparam name="TResource">The type of <see cref="ICustomResource"/> to manage</typeparam>
     public class K8sRepository<TResource>
         : IRepository<TResource>
         where TResource : class, ICustomResource, IAggregateRoot, new()
     {
 
+        /// <summary>
+        /// Initializes a new <see cref="K8sRepository{TResource}"/>
+        /// </summary>
+        /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
+        /// <param name="kubernetes">The service used to interact with the Kubernetes API</param>
         public K8sRepository(ILoggerFactory loggerFactory, IKubernetes kubernetes)
         {
             this.Logger = loggerFactory.CreateLogger(this.GetType());
             this.Kubernetes = kubernetes;
         }
 
+        /// <summary>
+        /// Gets the service used to perform logging
+        /// </summary>
         protected ILogger Logger { get; }
 
+        /// <summary>
+        /// Gets the service used to interact with the Kubernetes API
+        /// </summary>
         protected IKubernetes Kubernetes { get; }
 
+        /// <summary>
+        /// Gets the <see cref="ICustomResourceDefinition"/> of the <see cref="ICustomResource"/>s to manage
+        /// </summary>
         protected ICustomResourceDefinition ResourceDefinition { get; } = new TResource().Definition;
 
         /// <inheritdoc/>

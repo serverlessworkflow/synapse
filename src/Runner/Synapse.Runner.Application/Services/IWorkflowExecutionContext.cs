@@ -40,6 +40,16 @@ namespace Synapse.Runner.Application.Services
         Task InitializeAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Suspends the execution of the <see cref="V1WorkflowInstance"/> and starts correlating consumed <see cref="CloudEvent"/>s
+        /// </summary>
+        /// <param name="events">An <see cref="IEnumerable{T}"/> containing the definitions of the <see cref="CloudEvent"/>s to wait for</param>
+        /// <param name="correlationMode">The correlation mode to use</param>
+        /// <param name="triggerConditionType">The type of conditions the trigger has to meet to fire</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        Task WaitForEventsAsync(IEnumerable<EventDefinition> events, V1TriggerCorrelationMode correlationMode, V1TriggerConditionType triggerConditionType, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Starts the <see cref="Instance"/>'s execution
         /// </summary>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
@@ -82,6 +92,15 @@ namespace Synapse.Runner.Application.Services
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A new awaitable <see cref="Task"/></returns>
         Task TransitionToAsync(StateDefinition state, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Sets the specified correlation key
+        /// </summary>
+        /// <param name="key">The correlation key to set</param>
+        /// <param name="value">The value of the correlation key to set</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        Task SetCorrelationKeyAsync(string key, string value, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Attempts to correlate the specified <see cref="CloudEvent"/>
@@ -149,12 +168,12 @@ namespace Synapse.Runner.Application.Services
         Task<V1WorkflowActivity> InitializeActivityAsync(V1WorkflowActivity activity, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Processes the specified <see cref="V1WorkflowActivity"/>
+        /// Executes the specified <see cref="V1WorkflowActivity"/>
         /// </summary>
-        /// <param name="activity">The <see cref="V1WorkflowActivity"/> to process</param>
+        /// <param name="activity">The <see cref="V1WorkflowActivity"/> to execute</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>The updated <see cref="V1WorkflowActivity"/></returns>
-        Task<V1WorkflowActivity> ProcessActivityAsync(V1WorkflowActivity activity, CancellationToken cancellationToken = default);
+        Task<V1WorkflowActivity> ExecuteActivityAsync(V1WorkflowActivity activity, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Suspends the specified <see cref="V1WorkflowActivity"/>
@@ -198,6 +217,22 @@ namespace Synapse.Runner.Application.Services
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>The updated <see cref="V1WorkflowActivity"/></returns>
         Task<V1WorkflowActivity> UpdateActivityDataAsync(V1WorkflowActivity activity, JToken data, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Gets the parent of the specified <see cref="V1WorkflowActivity"/>, if any
+        /// </summary>
+        /// <param name="activity">The <see cref="V1WorkflowActivity"/> to get the parent of</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The parent of the specified <see cref="V1WorkflowActivity"/>, if any</returns>
+        Task<V1WorkflowActivity> GetParentActivityAsync(V1WorkflowActivity activity, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Gets the data of the <see cref="StateDefinition"/> the specified <see cref="V1WorkflowActivity"/> belongs to
+        /// </summary>
+        /// <param name="activity">The <see cref="V1WorkflowActivity"/> to get the <see cref="StateDefinition"/> data for</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The data of the <see cref="StateDefinition"/> the specified <see cref="V1WorkflowActivity"/> belongs to</returns>
+        Task<JToken> GetActivityStateDataAsync(V1WorkflowActivity activity, CancellationToken cancellationToken = default);
 
     }
 

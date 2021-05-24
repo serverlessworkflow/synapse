@@ -16,10 +16,10 @@ namespace Synapse
     {
 
         private const string SubstitutionBlock = "§§";
-        private static Regex ReduceSpaces = new Regex(@"\s+", RegexOptions.Compiled);
-        private static Regex InvalidChars = new Regex(@"[^a-zA-Z0-9\s]", RegexOptions.Compiled);
-        private static Regex ReplaceSubstitutionBlock = new Regex(SubstitutionBlock, RegexOptions.Compiled);
-        private static Regex MatchCurlyBracedWords = new Regex(@"\{([^}]+)\}", RegexOptions.Compiled);
+        private static readonly Regex ReduceSpaces = new(@"\s+", RegexOptions.Compiled);
+        private static readonly Regex InvalidChars = new(@"[^a-zA-Z0-9\s]", RegexOptions.Compiled);
+        private static readonly Regex ReplaceSubstitutionBlock = new(SubstitutionBlock, RegexOptions.Compiled);
+        private static readonly Regex MatchCurlyBracedWords = new(@"\{([^}]+)\}", RegexOptions.Compiled);
 
         private static readonly string LowerCaseAlphabeticCharacters = "abcdefghijklmnopqrstuvwxyz";
         private static readonly string UpperCaseAlphabeticCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -35,27 +35,19 @@ namespace Synapse
         /// <returns>A new random string of the specified length</returns>
         public static string GenerateRandomAlphabeticString(int length, Case stringCase = Case.Lower | Case.Upper)
         {
-            char[] characters;
-            switch (stringCase)
+            char[] characters = stringCase switch
             {
-                case Case.Lower | Case.Upper:
-                    characters = LowerCaseAlphabeticCharacters.ToArray();
-                    break;
-                case Case.Lower:
-                    characters = LowerCaseAlphabeticCharacters.ToArray();
-                    break;
-                case Case.Upper:
-                    characters = UpperCaseAlphabeticCharacters.ToArray();
-                    break;
-                default:
-                    throw new NotSupportedException($"The specified {nameof(Case)} '{stringCase}' is not supported");
-            }
+                Case.Lower | Case.Upper => LowerCaseAlphabeticCharacters.ToArray(),
+                Case.Lower => LowerCaseAlphabeticCharacters.ToArray(),
+                Case.Upper => UpperCaseAlphabeticCharacters.ToArray(),
+                _ => throw new NotSupportedException($"The specified {nameof(Case)} '{stringCase}' is not supported"),
+            };
             byte[] data = new byte[4 * length];
-            using (RNGCryptoServiceProvider crypto = new RNGCryptoServiceProvider())
+            using (RNGCryptoServiceProvider crypto = new())
             {
                 crypto.GetBytes(data);
             }
-            StringBuilder result = new StringBuilder(length);
+            StringBuilder result = new(length);
             for (int i = 0; i < length; i++)
             {
                 uint rnd = BitConverter.ToUInt32(data, i * 4);
@@ -73,27 +65,19 @@ namespace Synapse
         /// <returns>A new random string of the specified length</returns>
         public static string GenerateRandomAlphanumericString(int length, Case stringCase = Case.Lower | Case.Upper)
         {
-            char[] characters;
-            switch (stringCase)
+            char[] characters = stringCase switch
             {
-                case Case.Lower | Case.Upper:
-                    characters = (AlphabeticCharacters + NumericCharacters).ToArray();
-                    break;
-                case Case.Lower:
-                    characters = (LowerCaseAlphabeticCharacters + NumericCharacters).ToArray();
-                    break;
-                case Case.Upper:
-                    characters = (UpperCaseAlphabeticCharacters + NumericCharacters).ToArray();
-                    break;
-                default:
-                    throw new NotSupportedException($"The specified {nameof(Case)} '{stringCase}' is not supported");
-            }
+                Case.Lower | Case.Upper => (AlphabeticCharacters + NumericCharacters).ToArray(),
+                Case.Lower => (LowerCaseAlphabeticCharacters + NumericCharacters).ToArray(),
+                Case.Upper => (UpperCaseAlphabeticCharacters + NumericCharacters).ToArray(),
+                _ => throw new NotSupportedException($"The specified {nameof(Case)} '{stringCase}' is not supported"),
+            };
             byte[] data = new byte[4 * length];
-            using (RNGCryptoServiceProvider crypto = new RNGCryptoServiceProvider())
+            using (RNGCryptoServiceProvider crypto = new())
             {
                 crypto.GetBytes(data);
             }
-            StringBuilder result = new StringBuilder(length);
+            StringBuilder result = new(length);
             for (int i = 0; i < length; i++)
             {
                 uint rnd = BitConverter.ToUInt32(data, i * 4);
@@ -107,17 +91,16 @@ namespace Synapse
         /// Generates a random numeric string of the specified length
         /// </summary>
         /// <param name="length">The length of the string to generate</param>
-        /// <param name="stringCase">The case of the resulting string</param>
         /// <returns>A new random string of the specified length</returns>
-        public static string GenerateRandomNumericString(int length, Case stringCase = Case.Lower | Case.Upper)
+        public static string GenerateRandomNumericString(int length)
         {
             char[] characters = NumericCharacters.ToCharArray();
             byte[] data = new byte[4 * length];
-            using (RNGCryptoServiceProvider crypto = new RNGCryptoServiceProvider())
+            using (RNGCryptoServiceProvider crypto = new())
             {
                 crypto.GetBytes(data);
             }
-            StringBuilder result = new StringBuilder(length);
+            StringBuilder result = new(length);
             for (int i = 0; i < length; i++)
             {
                 uint rnd = BitConverter.ToUInt32(data, i * 4);
@@ -275,7 +258,7 @@ namespace Synapse
         {
             if (string.IsNullOrWhiteSpace(text))
                 throw new ArgumentNullException(nameof(text));
-            TimeZoneInfo timeZone = null;
+            TimeZoneInfo timeZone;
             try
             {
                 timeZone = TimeZoneInfo.FindSystemTimeZoneById(text);
@@ -340,7 +323,7 @@ namespace Synapse
         public static string RemoveDiacritics(this string text)
         {
             string normalizedString = text.Normalize(NormalizationForm.FormD);
-            StringBuilder stringBuilder = new StringBuilder();
+            StringBuilder stringBuilder = new();
             foreach (var c in normalizedString)
             {
                 UnicodeCategory unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
@@ -405,7 +388,7 @@ namespace Synapse
         /// <returns>The camel-cased text</returns>
         public static string ToCamelCase(this string text)
         {
-            return string.IsNullOrEmpty(text) || text.Length < 2 ? text.ToLowerInvariant() : char.ToLowerInvariant(text[0]) + text.Substring(1);
+            return string.IsNullOrEmpty(text) || text.Length < 2 ? text.ToLowerInvariant() : char.ToLowerInvariant(text[0]) + text[1..];
         }
 
         /// <summary>
@@ -420,9 +403,21 @@ namespace Synapse
                 .ToLower();
         }
 
+        /// <summary>
+        /// Determines whether or not the string is a workflow expression
+        /// </summary>
+        /// <param name="text">The string to test</param>
+        /// <returns>A boolean indicating whether or not the string is a workflow expression</returns>
+        public static bool IsWorkflowExpression(this string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                return false;
+            return text.StartsWith("${") && text.EndsWith("}");
+        }
+
         private static string MapEmailDomain(Match match)
         {
-            IdnMapping idn = new IdnMapping();
+            IdnMapping idn = new();
             string domainName = idn.GetAscii(match.Groups[2].Value);
             return match.Groups[1].Value + domainName;
         }

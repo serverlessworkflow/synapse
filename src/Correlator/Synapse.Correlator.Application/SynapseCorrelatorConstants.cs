@@ -20,7 +20,7 @@
             public static string GetHeader()
             {
                 return SynapseConstants.Logging.Header + $@"           
-SYNAPSE BROKER {typeof(SynapseCorrelatorConstants).Assembly.GetName().Version}        
+SYNAPSE BROKER {SynapseConstants.Version}        
 
             ";
             }

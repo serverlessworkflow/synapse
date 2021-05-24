@@ -53,38 +53,36 @@ namespace Synapse.Services
             }
             string fileName;
             string args;
-            using (Process process = new())
+            using Process process = new();
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    fileName = "cmd.exe";
-                    args = @$"/c echo {data.ToString(Formatting.None)} | jq ""{this.EscapeJson(expression)}""";
-                }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                {
-                    fileName = "bash";
-                    args = @$"-c ""echo '{this.EscapeJson(data.ToString(Formatting.None))}' | jq '{this.EscapeJson(expression)}'""";
-                }
-                else
-                {
-                    throw new PlatformNotSupportedException();
-                }
-                process.StartInfo.FileName = fileName;
-                process.StartInfo.Arguments = args;
-                process.StartInfo.UseShellExecute = false;
-                process.StartInfo.RedirectStandardOutput = true;
-                process.StartInfo.RedirectStandardError = true;
-                process.Start();
-                string output = process.StandardOutput.ReadToEnd();
-                string error = process.StandardError.ReadToEnd();
-                process.WaitForExit();
-                if (process.ExitCode != 0)
-                    throw new Exception($"An error occured while evaluting the specified expression:{Environment.NewLine}Details: {error}");
-                if (string.IsNullOrWhiteSpace(output))
-                    return null;
-                else
-                    return JToken.Parse(output);
+                fileName = "cmd.exe";
+                args = @$"/c echo {data.ToString(Formatting.None)} | jq ""{this.EscapeJson(expression)}""";
             }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                fileName = "bash";
+                args = @$"-c ""echo '{this.EscapeJson(data.ToString(Formatting.None))}' | jq '{this.EscapeJson(expression)}'""";
+            }
+            else
+            {
+                throw new PlatformNotSupportedException();
+            }
+            process.StartInfo.FileName = fileName;
+            process.StartInfo.Arguments = args;
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.RedirectStandardError = true;
+            process.Start();
+            string output = process.StandardOutput.ReadToEnd();
+            string error = process.StandardError.ReadToEnd();
+            process.WaitForExit();
+            if (process.ExitCode != 0)
+                throw new Exception($"An error occured while evaluting the specified expression:{Environment.NewLine}Details: {error}");
+            if (string.IsNullOrWhiteSpace(output))
+                return null;
+            else
+                return JToken.Parse(output);
         }
 
         /// <summary>

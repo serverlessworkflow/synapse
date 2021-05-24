@@ -23,6 +23,14 @@ namespace Synapse.Cli.Services
         Task InstallAsync(string @namespace = "synapse", CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Uninstalls Synapse
+        /// </summary>
+        /// <param name="namespace">The namespace Synapse is installed into. Defaults to 'synapse'</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        Task UninstallAsync(string @namespace = "synapse", CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Finds the specified <see cref="V1Workflow"/>
         /// </summary>
         /// <param name="reference">The <see cref="V1Workflow"/>'s reference</param>
@@ -34,6 +42,7 @@ namespace Synapse.Cli.Services
         /// Reads a <see cref="V1Workflow"/> from the specified <see cref="Stream"/>
         /// </summary>
         /// <param name="stream">The <see cref="Stream"/> to load the <see cref="V1Workflow"/> from</param>
+        /// <param name="definitionFormat">The format of the <see cref="V1WorkflowDefinition"/> to read</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A new <see cref="V1Workflow"/></returns>
         Task<V1Workflow> ReadWorkflowAsync(Stream stream, WorkflowDefinitionFormat definitionFormat = WorkflowDefinitionFormat.Yaml, CancellationToken cancellationToken = default);

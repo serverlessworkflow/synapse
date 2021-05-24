@@ -1,4 +1,5 @@
 ﻿using CloudNative.CloudEvents;
+using k8s;
 using k8s.Models;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -161,10 +162,11 @@ namespace Synapse.Correlator.Application.Services
                         }
                         await this.Triggers.UpdateAsync(trigger, cancellationToken);
                         this.Logger.LogInformation("Trigger fired. Computing outcome...");
+                        V1WorkflowInstance workflowInstance;
                         switch (trigger.Spec.Outcome.Type)
                         {
                             case V1TriggerOutcomeType.Run:
-                                V1WorkflowInstance workflowInstance = new(new V1WorkflowInstanceSpec(trigger.Spec.Outcome.Workflow, new JObject(), correlationContext))
+                                workflowInstance = new(new V1WorkflowInstanceSpec(trigger.Spec.Outcome.Workflow, new JObject(), correlationContext))
                                 {
                                     Metadata = new V1ObjectMeta()
                                     {
@@ -175,7 +177,14 @@ namespace Synapse.Correlator.Application.Services
                                 workflowInstance = await this.WorkflowInstances.AddAsync(workflowInstance, cancellationToken);
                                 break;
                             case V1TriggerOutcomeType.Resume:
-                                //TODO: implement
+                                if (string.IsNullOrWhiteSpace(trigger.Spec.Outcome.WorkflowInstance))
+                                    throw new InvalidOperationException($"Invalid configuration: the trigger '{trigger.Name()}' has an outcome of type '{trigger.Spec.Outcome.Type}' but the referenced workflow instance id has not been set");
+                                workflowInstance = await this.WorkflowInstances.FindByNameAsync(trigger.Spec.Outcome.WorkflowInstance, cancellationToken);
+                                if (workflowInstance == null)
+                                    throw new NullReferenceException($"Failed to find a workflow instance with the specified id '{trigger.Spec.Outcome.WorkflowInstance}'. The trigger '{trigger.Name()}' might be incorrectly configured.");
+                                workflowInstance.SetCorrelationContext(correlationContext);
+                                workflowInstance.WakeUp();
+                                workflowInstance = await this.WorkflowInstances.UpdateAsync(workflowInstance, cancellationToken);
                                 break;
                             default:
                                 throw new NotSupportedException($"The specified {nameof(V1TriggerOutcomeType)} '{trigger.Spec.Outcome.Type}' is not supported");

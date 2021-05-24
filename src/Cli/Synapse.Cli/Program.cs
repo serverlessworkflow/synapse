@@ -42,6 +42,7 @@ namespace Synapse.Cli
         {
             IServiceCollection services = new ServiceCollection();
             services.AddLogging();
+            services.AddHttpClient();
             services.AddCliCommands(typeof(RunCommand));
             services.AddServerlessWorkflow();
             services.AddSingleton<ISynapseService, SynapseService>();

@@ -20,7 +20,7 @@
             public static string GetHeader(string workflowId, string workflowVersion, string workflowInstance)
             {
                 return SynapseConstants.Logging.Header + $@"           
-SYNAPSE RUNNER {typeof(SynapseRunnerConstants).Assembly.GetName().Version}
+SYNAPSE RUNNER {SynapseConstants.Version}
         
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 WORKFLOW
