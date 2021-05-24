@@ -1,10 +1,12 @@
 name: Publish
+
 on:
   release:
     types: [published]
+    
 jobs:
   push_to_registry:
-    name: Push Docker image to GitHub Packages
+    name: Publish
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -19,6 +21,8 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
           registry: docker.pkg.github.com
           repository: serverlessworkflow/synapse/operator
+          context: src
+          path: src
           dockerfile: src/Operator/Synapse.Operator.Runtime/Dockerfile
           tag_with_ref: true
       - name: Publish Correlator
@@ -28,5 +32,18 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
           registry: docker.pkg.github.com
           repository: serverlessworkflow/synapse/correlator
+          context: src
+          path: src
           dockerfile: src/Correlator/Synapse.Correlator.Runtime/Dockerfile
+          tag_with_ref: true
+      - name: Publish Runner
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: docker.pkg.github.com
+          repository: serverlessworkflow/synapse/runner
+          context: src
+          path: src
+          dockerfile: src/Runner/Synapse.Runner.Runtime/Dockerfile
           tag_with_ref: true
