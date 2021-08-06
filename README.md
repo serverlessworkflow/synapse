@@ -1,5 +1,5 @@
 <p align="center">
-<img src="logos/synapse-color.png" height="600px" alt="Synapse Logo"/>
+<img src="logos/synapse-color.png" height="400px" alt="Synapse Logo"/>
 </p>
 
 # Synapse - Kubernetes-native Serverless Workflow Runtime
