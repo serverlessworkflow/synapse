@@ -2,7 +2,7 @@
 <img src="logos/synapse-color.png" height="350px" alt="Synapse Logo"/>
 </p>
 
-# Synapse - Kubernetes-native Serverless Workflow Runtime
+# Kubernetes-native Serverless Workflow Runtime
 
 Kubernetes-native runtime implementation of the Serverless Workflow specification
 written in .NET 5.0
