@@ -1,6 +1,11 @@
-# Synapse - Serverless Workflow Runtime
+<p align="center">
+<img src="logos/synapse-color.png" height="600px" alt="Synapse Logo"/>
+</p>
 
-.NET 5.0 runtime implementation of the Serverless Workflow specification.
+# Synapse - Kubernetes-native Serverless Workflow Runtime
+
+Kubernetes-native runtime implementation of the Serverless Workflow specification
+written in .NET 5.0
 
 ## Overview
 
