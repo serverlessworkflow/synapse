@@ -1,0 +1,11 @@
+﻿global using CloudNative.CloudEvents;
+global using Microsoft.Extensions.Logging;
+global using Microsoft.Extensions.Options;
+global using Neuroglia;
+global using Neuroglia.Data;
+global using Neuroglia.Eventing;
+global using Neuroglia.Mapping;
+global using Neuroglia.Mediation;
+global using Synapse.Application.Configuration;
+global using Synapse.Application.Services;
+global using Synapse.Domain.Models;

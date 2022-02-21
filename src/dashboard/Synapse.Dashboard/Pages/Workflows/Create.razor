@@ -1,0 +1,80 @@
+﻿@page "/workflows/new"
+@using Neuroglia.Data
+@using Newtonsoft.Json.Schema
+@using ServerlessWorkflow.Sdk.Services.IO
+@using Synapse.Integration.Commands.Workflows
+@using Synapse.Integration.Models
+@using Synapse.Integration.Services
+@using Synapse.Dashboard.Components
+@using System.Text
+@inject ISynapseApi SynapseApi
+@inject IWorkflowSchemaValidator WorkflowSchemaValidator
+@inject IWorkflowReader WorkflowReader
+
+<PageTitle>Create new workflow</PageTitle>
+<AppHeader>Create new workflow</AppHeader>
+
+<EditForm Model="command" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    @if(validationErrors != null && validationErrors.Any())
+    {
+        <div class="alert alert-danger">
+            <ul>
+                @foreach (var error in validationErrors)
+                {
+                    <li>@error.ToString()</li>
+                }
+            </ul>
+        </div>
+    }
+    <div>
+        <label for="Definition" class="form-form-label">Definition</label>
+        <textarea type="text" value="@rawDefinition" @onchange="OnWorkflowDefinitionChanged" class="w-100 h-100 form-control"></textarea>
+    </div>
+    <button type="submit" class="btn btn-blockquote btn-dark">Create Workflow</button>
+</EditForm>
+
+@code {
+
+    V1CreateWorkflowCommandDto command = new();
+
+    IList<ValidationError> validationErrors;
+
+    string rawDefinition = string.Empty;
+
+    async Task OnValidSubmit()
+    {
+        if (this.command == null)
+            return;
+        var workflow = await this.SynapseApi.CreateWorkflowAsync(this.command);
+    }
+
+    async Task OnWorkflowDefinitionChanged(ChangeEventArgs e)
+    {
+        this.rawDefinition = (string)e.Value!;
+        if (string.IsNullOrWhiteSpace(this.rawDefinition))
+        {
+            this.command.Definition = null;
+            return;
+        }
+        try
+        {
+            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(this.rawDefinition));
+            this.command.Definition = await this.WorkflowReader.ReadAsync(stream);
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            //todo: warn the user
+            return;
+        }
+    }
+
+    async Task OnCreateWorkflow()
+    {
+        var command = new V1CreateWorkflowCommandDto();
+        var workflow = await this.SynapseApi.CreateWorkflowAsync(command);
+    }
+
+}

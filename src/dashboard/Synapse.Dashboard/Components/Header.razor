@@ -1,0 +1,38 @@
+﻿@implements IDisposable
+@using System.ComponentModel
+@using Synapse.Dashboard.Services
+
+<h5>@Layout.Header?.ChildContent</h5>
+<div class="d-inline ms-auto">
+    <div>
+        
+    </div>
+</div>
+
+@code
+{
+
+    [Inject]
+    public ILayoutService Layout { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        this.Layout.PropertyChanged += OnLayoutHeaderChanged;
+        await base.OnInitializedAsync();
+    }
+
+    private void OnLayoutHeaderChanged(object sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ILayoutService.Header))
+        {
+            this.StateHasChanged();
+        }
+    }
+
+    public void Dispose()
+    {
+        if (this.Layout != null)
+            this.Layout.PropertyChanged -= OnLayoutHeaderChanged;
+    }
+
+}

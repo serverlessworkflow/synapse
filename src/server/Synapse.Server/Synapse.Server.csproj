@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerfileContext>..\..\..</DockerfileContext>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="6.0.2" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.14.0" />
+    <PackageReference Include="Neuroglia.Caching.InMemory" Version="2.0.1.26" />
+    <PackageReference Include="Neuroglia.Data.Expressions.JQ" Version="2.0.1.26" />
+    <PackageReference Include="Neuroglia.Serialization.Json" Version="2.0.1.26" />
+    <PackageReference Include="protobuf-net.Grpc.AspNetCore" Version="1.0.152" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\dashboard\Synapse.Dashboard\Synapse.Dashboard.csproj" />
+    <ProjectReference Include="..\..\ports\Synapse.Ports.Grpc\Synapse.Ports.Grpc.csproj" />
+    <ProjectReference Include="..\..\ports\Synapse.Ports.HttpRest\Synapse.Ports.HttpRest.csproj" />
+    <ProjectReference Include="..\..\ports\Synapse.Ports.WebSockets\Synapse.Ports.WebSockets.csproj" />
+    <ProjectReference Include="..\..\runtime\Synapse.Runtime.Docker\Synapse.Runtime.Docker.csproj" />
+  </ItemGroup>
+
+</Project>

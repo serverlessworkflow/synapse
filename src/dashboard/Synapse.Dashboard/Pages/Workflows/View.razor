@@ -1,0 +1,45 @@
+﻿@page "/workflows/{workflowId}"
+@using Synapse.Dashboard.Components
+@using Synapse.Integration.Models
+@using Synapse.Integration.Services
+@inject ISynapseApi SynapseApi
+
+<PageTitle>@workflow?.Id</PageTitle>
+<AppHeader>@workflow?.Id</AppHeader>
+
+@if (workflow != null)
+{
+    <WorkflowDiagram Definition="workflow.Definition" />
+    <Modal @ref="modal">
+        <Title>Error</Title>
+        <Body>
+            <p>An error occured:</p>
+            <div class="border rounded bg-danger text-white text-break p-1">@((MarkupString)error)</div>
+        </Body>
+        <Footer>
+            <button @onclick="() => modal.Hide()" class="btn btn-secondary">Close</button>
+        </Footer>
+    </Modal>
+}
+else
+{
+    <p>Loading...</p>
+}
+@code
+{
+
+    [Parameter]
+    public string WorkflowId { get; set; } = null!;
+
+    private Modal modal = null!;
+    private V1WorkflowDto workflow = null!;
+    private string error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        this.workflow = await this.SynapseApi.GetWorkflowByIdAsync(this.WorkflowId);
+        this.StateHasChanged();
+        await base.OnInitializedAsync();
+    }
+
+}

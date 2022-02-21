@@ -1,0 +1,41 @@
+﻿<div class="top-row ps-4 navbar navbar-dark">
+    <a class="navbar-brand" href="">SYNAPSE</a>
+    <button class="navbar-toggler" @onclick="ToggleNavMenu">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+</div>
+
+<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+    <ul class="nav flex-column">
+        <li class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="oi oi-home" aria-hidden="true"></span> Overview
+            </NavLink>
+        </li>
+        <li><h6 class="text-white ms-3">Workflows</h6></li>
+        <li class="nav-item px-3">
+            <NavLink class="nav-link" href="workflows" Match="NavLinkMatch.All">
+                <span class="oi oi-briefcase" aria-hidden="true"></span> Definitions
+            </NavLink>
+        </li>
+        <li class="nav-item px-3">
+            <NavLink class="nav-link" href="workflow-instances" Match="NavLinkMatch.All">
+                <span class="oi oi-briefcase" aria-hidden="true"></span> Instances
+            </NavLink>
+        </li>
+    </ul>
+</div>
+
+@code 
+{
+
+    private bool collapseNavMenu = true;
+
+    private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+
+}

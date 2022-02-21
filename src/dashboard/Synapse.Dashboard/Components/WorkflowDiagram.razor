@@ -1,0 +1,132 @@
+﻿@page "/diagrams"
+
+@using Blazor.Diagrams.Core
+@using Blazor.Diagrams.Core.Geometry
+@using Blazor.Diagrams.Core.Models
+@using Blazor.Diagrams.Components
+@using Blazor.Diagrams.Core.Models.Base
+@using QG = QuikGraph
+@using GraphShape.Algorithms.Layout
+@using ServerlessWorkflow.Sdk.Models
+
+<div class="diagram-container">
+  <CascadingValue Value="Diagram">
+    <DiagramCanvas></DiagramCanvas>
+  </CascadingValue>
+</div>
+
+@code {
+
+    [Parameter]
+    public WorkflowDefinition Definition { get; set; } = null!;
+
+    private Diagram Diagram { get; set; } = null!;
+
+    protected override void OnInitialized()
+    {
+        this.BuildDiagram();
+        base.OnInitialized();
+    }
+
+    private void BuildDiagram()
+    {
+        this.Diagram = new Diagram(new DiagramOptions());
+        var previousNode = this.AddStartNode();
+        var currentNode = null as NodeModel;
+        foreach(var state in this.Definition.States)
+        {
+            currentNode = this.AddStateNode(state);
+            this.AddLinkBetween(previousNode, currentNode);
+            previousNode = currentNode;
+        }
+        currentNode = this.AddEndNode();
+        this.AddLinkBetween(previousNode, currentNode);
+        this.ComputeNodePositions();
+        this.Diagram.SelectionChanged += this.OnNodeSelectionChanged;
+    }
+
+    private NodeModel AddStartNode()
+    {
+        var node = new NodeModel()
+        {
+            Title = "Start",
+            Locked = true
+        };
+        node.AddPort(PortAlignment.Bottom);
+        this.Diagram.Nodes.Add(node);
+        return node;
+    }
+
+    private NodeModel AddStateNode(StateDefinition state)
+    {
+        var node = new NodeModel()
+        {
+            Title = state.Name,
+            Locked = true
+        };
+        node.AddPort(PortAlignment.Top);
+        node.AddPort(PortAlignment.Bottom);
+        this.Diagram.Nodes.Add(node);
+        return node;
+    }
+
+    private NodeModel AddEndNode()
+    {
+        var node = new NodeModel()
+        {
+            Title = "End",
+            Locked = true
+        };
+        node.AddPort(PortAlignment.Top);
+        this.Diagram.Nodes.Add(node);
+        return node;
+    }
+
+    private void AddLinkBetween(NodeModel node1, NodeModel node2)
+    {
+        this.Diagram.Links.Add(new LinkModel(node1.GetPort(PortAlignment.Bottom), node2.GetPort(PortAlignment.Top)) { Locked = true });
+    }
+
+    private void ComputeNodePositions()
+    {
+        var graph = new QG.BidirectionalGraph<NodeModel, QG.Edge<NodeModel>>();
+        var nodes = this.Diagram.Nodes.OfType<NodeModel>().ToList();
+        var edges = this.Diagram.Links.OfType<LinkModel>()
+            .Select(lm =>
+            {
+                var source = nodes.Single(dn => dn.Id == lm.SourceNode.Id);
+                var target = nodes.Single(dn => dn.Id == lm?.TargetNode?.Id);
+                return new QG.Edge<NodeModel>(source, target);
+            })
+            .ToList();
+        graph.AddVertexRange(nodes);
+        graph.AddEdgeRange(edges);
+        var positions = nodes.ToDictionary(nm => nm, dn => new GraphShape.Point(dn.Position.X, dn.Position.Y));
+        var sizes = nodes.ToDictionary(nm => nm, dn => new GraphShape.Size(dn.Size?.Width ?? 150, dn.Size?.Height ?? 150));
+        var context = new LayoutContext<NodeModel, QG.Edge<NodeModel>, QG.BidirectionalGraph<NodeModel, QG.Edge<NodeModel>>>(graph, positions, sizes, LayoutMode.Simple);
+        var algorithmFactory = new StandardLayoutAlgorithmFactory<NodeModel, QG.Edge<NodeModel>, QG.BidirectionalGraph<NodeModel, QG.Edge<NodeModel>>>();
+        var algorithm = algorithmFactory.CreateAlgorithm("Tree", context, null);
+        algorithm.Compute();
+        try
+        {
+            this.Diagram.SuspendRefresh = true;
+            foreach (var vertex in algorithm.VerticesPositions)
+            {
+                vertex.Key.SetPosition(vertex.Value.X, vertex.Value.Y);
+            }
+        }
+        finally
+        {
+            this.Diagram.SuspendRefresh = false;
+        }
+    }
+
+    private void OnNodeSelectionChanged(SelectableModel elem)
+    {
+        if (!elem.Selected
+         || elem is not NodeModel node)
+            return;
+        Console.WriteLine(node.Title + " has been selected");
+    }
+
+}

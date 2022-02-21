@@ -1,0 +1,35 @@
+﻿@import url("open-iconic/font/css/open-iconic-bootstrap.min.css");
+@import url(bootstrap/bootstrap.min.css);
+#blazor-error-ui {
+  background: lightyellow;
+  bottom: 0;
+  box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+  display: none;
+  left: 0;
+  padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+  position: fixed;
+  width: 100%;
+  z-index: 1000; }
+
+#blazor-error-ui .dismiss {
+  cursor: pointer;
+  position: absolute;
+  right: 0.75rem;
+  top: 0.5rem; }
+
+.form-control.invalid {
+  border-color: red; }
+
+input[type=time]::-webkit-datetime-edit-ampm-field {
+  display: none; }
+
+input[type=time]::-webkit-clear-button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  -o-appearance: none;
+  -ms-appearance: none;
+  appearance: none;
+  margin: -10px; }
+
+.cursor-pointer {
+  cursor: pointer; }

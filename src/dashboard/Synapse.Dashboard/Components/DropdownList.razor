@@ -1,0 +1,110 @@
+﻿@typeparam TItem
+<div class="dropdown">
+    <div @onclick="ToggleExpand">
+        @HeaderTemplate(this)
+    </div>
+    <div class="dropdown-menu @(IsExpanded ? "show" : "")">
+        @foreach (var item in Items)
+        { 
+            <div @onclick="() => SelectItem(item)">
+                @ItemTemplate(new(this, item))
+            </div>
+        }
+    </div>
+</div>
+
+@code
+{
+
+    [Parameter]
+    public EventCallback<bool> OnToggleExpand { get; set; }
+
+    [Parameter]
+    public EventCallback<TItem> OnSelectItem { get; set; }
+
+    [Parameter]
+    public EventCallback<ChangeEventArgs> OnChange { get; set; }
+
+    [Parameter]
+    public Func<TItem, string> NameProvider { get; set; } = elem => elem.ToString();
+
+    [Parameter]
+    public Func<TItem, object> ValueProvider { get; set; } = elem => elem;
+
+    /// <summary>
+    /// Gets/sets the <see cref="DropdownList{TItem}"/>'s header template <see cref="RenderFragment"/>
+    /// </summary>
+    [Parameter]
+    public RenderFragment<DropdownList<TItem>> HeaderTemplate { get; set; } = context =>
+    {
+        return @<div class="dropdown-toggle btn btn-outline-secondary">
+                    @if (context.SelectedItem == null)
+                        @context.Placeholder
+                    else
+                        @context.NameProvider(context.SelectedItem)
+                </div>;
+    };
+
+    /// <summary>
+    /// Gets/sets the <see cref="DropdownList{TItem}"/>'s placeholder
+    /// </summary>
+    [Parameter]
+    public string Placeholder { get; set; }
+
+    [Parameter]
+    public RenderFragment<ItemRenderContext<TItem>> ItemTemplate { get; set; } = context =>
+    {
+        return @<div class="dropdown-item">@context.Name</div>;
+    };
+
+    [Parameter]
+    public IEnumerable<TItem> Items { get; set; }
+
+    [Parameter]
+    public TItem SelectedItem { get; set; }
+
+    public object SelectedValue { get; private set; }
+
+    /// <summary>
+    /// Gets a boolean indicating whether or not the <see cref="DropdownList{TItem}"/> is expanded
+    /// </summary>
+    public bool IsExpanded { get; private set; }
+
+    public async Task ToggleExpand()
+    {
+        this.IsExpanded = !this.IsExpanded;
+        this.StateHasChanged();
+        await this.OnToggleExpand.InvokeAsync(this.IsExpanded);
+    }
+
+    private async Task SelectItem(TItem item)
+    {
+        this.SelectedItem = item;
+        this.SelectedValue = this.ValueProvider(this.SelectedItem);
+        if (this.IsExpanded)
+            this.IsExpanded = false;
+        this.StateHasChanged();
+        await this.OnSelectItem.InvokeAsync(this.SelectedItem);
+        await this.OnChange.InvokeAsync(new() { Value = this.SelectedValue });
+    }
+
+    public class ItemRenderContext<T>
+    {
+
+        public ItemRenderContext(DropdownList<T> dropdown, T item)
+        {
+            this.Dropdown = dropdown;
+            this.Item = item;
+        }
+
+        public DropdownList<T> Dropdown { get; }
+
+        public T Item { get; }
+
+        public string Name => this.Dropdown.NameProvider(this.Item);
+
+        public object Value => this.Dropdown.ValueProvider(this.Item);
+
+    }
+
+}

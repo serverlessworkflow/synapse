@@ -1,0 +1,17 @@
+﻿@page "/workflow-instances"
+@using Neuroglia.Data
+@using Synapse.Integration.Models
+@using Synapse.Integration.Services
+@using Synapse.Dashboard.Components
+@inject IServiceProvider ServiceProvider
+
+<PageTitle>Workflow Instances</PageTitle>
+<AppHeader>Workflow Instances</AppHeader>
+
+<DataTable DataSource="new ODataQueryable<V1WorkflowInstanceDto>(this.ServiceProvider)" AutoGenerateColumns="true" OrderByDefault="(IQueryable query) => ((IQueryable<V1WorkflowInstanceDto>)query).OrderByDescending(c => c.CreatedAt)" />
+
+@code {
+
+   
+
+}

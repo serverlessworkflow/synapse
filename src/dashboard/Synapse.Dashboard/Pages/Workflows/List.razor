@@ -1,0 +1,22 @@
+﻿@page "/workflows"
+@using Neuroglia.Data
+@using Synapse.Integration.Models
+@using Synapse.Integration.Services
+@using Synapse.Dashboard.Components
+@inject IServiceProvider ServiceProvider
+@inject NavigationManager NavigationManager
+
+<PageTitle>Workflows</PageTitle>
+<AppHeader>Workflows</AppHeader>
+
+<button @onclick="OnNewWorkflow" class="btn btn-block btn-dark">New workflow</button>
+<DataTable DataSource="new ODataQueryable<V1WorkflowDto>(this.ServiceProvider)" AutoGenerateColumns="true" OrderByDefault="(IQueryable query) => ((IQueryable<V1WorkflowDto>)query).OrderBy(c => c.Id)" />
+
+@code {
+
+    void OnNewWorkflow()
+    {
+        this.NavigationManager.NavigateTo("/workflows/new");
+    }
+
+}
