@@ -18,17 +18,18 @@ builder.Services.AddServerlessWorkflow();
 builder.Services.AddPluralizer();
 builder.Services.AddSingleton<IODataClient>(new ODataClient(new ODataClientSettings()
 {
-    BaseUri = new($"http://localhost:49158/api/odata"),
+    BaseUri = new($"http://localhost:49154/api/odata"),
     PayloadFormat = ODataPayloadFormat.Json
 }));
 //builder.Services.AddNewtonsoftJsonSerializer(); //todo: include this in the add synapse rest api client call
 builder.Services.AddScoped<ILayoutService, LayoutService>();
 builder.Services.AddSingleton<IToastManager, ToastManager>();
 builder.Services.AddSingleton<IIntegrationEventStream, IntegrationEventStream>();
+builder.Services.AddScoped<IWorkflowDiagramBuilder, WorkflowDiagramBuilder>();
 builder.Services.AddSingleton(provider =>
 {
     return new HubConnectionBuilder()
-        .WithUrl($"http://localhost:49158/api/ws")
+        .WithUrl($"http://localhost:49154/api/ws")
         .WithAutomaticReconnect()
         .AddNewtonsoftJsonProtocol()
         .Build();
