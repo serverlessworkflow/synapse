@@ -1,16 +1,18 @@
 ﻿@page "/workflows/{workflowId}"
+@using Blazor.Diagrams.Core
 @using Microsoft.AspNetCore.SignalR.Client
 @using Synapse.Dashboard.Components
 @using Synapse.Integration.Models
 @using Synapse.Integration.Services
 @inject ISynapseApi SynapseApi
+@inject IWorkflowDiagramBuilder WorkflowDiagramBuilder
 
 <PageTitle>@workflow?.Id</PageTitle>
 <AppHeader>@workflow?.Id</AppHeader>
 
 @if (workflow != null)
 {
-    <WorkflowDiagram Definition="workflow.Definition" />
+    <WorkflowDiagram Diagram="diagram" />
     <Modal @ref="modal">
         <Title>Error</Title>
         <Body>
@@ -34,11 +36,13 @@ else
 
     private Modal modal = null!;
     private V1WorkflowDto workflow = null!;
+    private Diagram diagram { get; set; } = null!;
     private string error;
 
     protected override async Task OnInitializedAsync()
     {
         this.workflow = await this.SynapseApi.GetWorkflowByIdAsync(this.WorkflowId);
+        this.diagram = await this.WorkflowDiagramBuilder.BuildDiagram(this.workflow.Definition);
         this.StateHasChanged();
         await base.OnInitializedAsync();
     }
