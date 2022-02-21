@@ -8,7 +8,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-	<PackageReference Include="GraphShape" Version="1.2.0" />
+    <None Remove="Components\WorkflowStartNode - Copy.razor.css" />
+    <None Remove="Components\WorkflowStartNode.razor.css" />
+    <None Remove="Components\WorkflowStateNode.razor.css" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Components\WorkflowStartNode.razor.css" />
+    <Content Include="Components\WorkflowStateNode.razor.css" />
+  </ItemGroup>
+
+  <ItemGroup>
+	<PackageReference Include="GraphShape" Version="1.2.1" />
 	<PackageReference Include="MatBlazor" Version="2.9.0-develop-042" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.2" PrivateAssets="all" />

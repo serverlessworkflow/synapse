@@ -1,0 +1,18 @@
+﻿@using Blazor.Diagrams.Components.Renderers
+@using Synapse.Dashboard.Models
+
+<div class=start-node-container>
+    <div class="border border-dark rounded-circle bg-white start-node">
+        @foreach (var port in Node.Ports)
+        {
+            <PortRenderer Port="port" />
+        }
+    </div>
+</div>
+
+@code {
+
+    [Parameter]
+    public WorkflowStartNodeModel Node { get; set; }
+
+}

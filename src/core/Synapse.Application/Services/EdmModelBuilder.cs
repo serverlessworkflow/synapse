@@ -39,6 +39,7 @@ namespace Synapse.Application.Services
             builder.EntitySet<V1WorkflowInstanceDto>("V1WorkflowInstances"); //todo: fix name?
             builder.EntitySet<V1WorkflowActivityDto>("V1WorkflowActivities"); //todo: fix name?
 
+            builder.AddComplexType(typeof(Any));
             builder.AddComplexType(typeof(WorkflowDefinition));
             builder.AddComplexType(typeof(NameValueCollection<string>));
 
