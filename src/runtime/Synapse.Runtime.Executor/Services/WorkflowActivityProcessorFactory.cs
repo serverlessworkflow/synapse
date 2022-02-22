@@ -61,66 +61,124 @@ namespace Synapse.Runtime.Services
             switch (activity.Type)
             {
                 case V1WorkflowActivityType.Action:
-
-                    break;
+                    return this.CreateActionActivityProcessor(state, activity);
                 case V1WorkflowActivityType.Branch:
-
-                    break;
+                    throw new NotImplementedException(); //todo
                 case V1WorkflowActivityType.ConsumeEvent:
-
-                    break;
+                    throw new NotImplementedException(); //todo
                 case V1WorkflowActivityType.End:
-                    return ActivatorUtilities.CreateInstance<EndProcessor>(this.ServiceProvider, activity);
+                    return ActivatorUtilities.CreateInstance<EndProcessor>(this.ServiceProvider, activity, state.End == null ? new() : state.End);
                 case V1WorkflowActivityType.Error:
-
-                    break;
+                    throw new NotImplementedException(); //todo
                 case V1WorkflowActivityType.EventTrigger:
-
-                    break;
+                    throw new NotImplementedException(); //todo
                 case V1WorkflowActivityType.Function:
-
-                    break;
+                    throw new NotImplementedException(); //todo
                 case V1WorkflowActivityType.Iteration:
-
-                    break;
+                    throw new NotImplementedException(); //todo
                 case V1WorkflowActivityType.ProduceEvent:
-
-                    break;
+                    throw new NotImplementedException(); //todo
                 case V1WorkflowActivityType.Start:
-
-                    break;
+                    return ActivatorUtilities.CreateInstance<StartProcessor>(this.ServiceProvider, activity, this.Context.Workflow.Definition.Start == null ? new() : this.Context.Workflow.Definition.Start);
                 case V1WorkflowActivityType.State:
-                    return state switch
-                    {
-                        //case CallbackStateDefinition callbackState:
-                        //    return ActivatorUtilities.CreateInstance<CallbackStateProcessor>(this.ServiceProvider, expressionEvaluator, state, activity);
-                        //case DelayStateDefinition delayState:
-                        //    return ActivatorUtilities.CreateInstance<DelayStateProcessor>(this.ServiceProvider, expressionEvaluator, state, activity);
-                        //case EventStateDefinition eventState:
-                        //    return ActivatorUtilities.CreateInstance<EventStateProcessor>(this.ServiceProvider, state, activity);
-                        //case ForEachStateDefinition forEachState:
-                        //    return ActivatorUtilities.CreateInstance<ForEachStateProcessor>(this.ServiceProvider, expressionEvaluator, state, activity);
-                        InjectStateDefinition injectState => ActivatorUtilities.CreateInstance<InjectStateProcessor>(this.ServiceProvider, state, activity),
-                        //case OperationStateDefinition operationState:
-                        //    return ActivatorUtilities.CreateInstance<OperationStateProcessor>(this.ServiceProvider, state, activity);
-                        //case ParallelStateDefinition parallelState:
-                        //    return ActivatorUtilities.CreateInstance<ParallelStateProcessor>(this.ServiceProvider, expressionEvaluator, state, activity);
-                        //case SubFlowStateDefinition subFlowState:
-                        //    return ActivatorUtilities.CreateInstance<SubFlowStateProcessor>(this.ServiceProvider, expressionEvaluator, state, activity);
-                        //case SwitchStateDefinition switchState:
-                        //    return ActivatorUtilities.CreateInstance<SwitchStateProcessor>(this.ServiceProvider, expressionEvaluator, state, activity);
-                        _ => throw new NotSupportedException($"The specified {nameof(StateDefinition)} type '{state.GetType().Name}' is not supported"),
-                    };
+                    return this.CreateStateActivityProcessor(state, activity);
                 case V1WorkflowActivityType.SubFlow:
-
-                    break;
+                    throw new NotImplementedException(); //todo
                 case V1WorkflowActivityType.Transition:
-
-                    break;
+                    throw new NotImplementedException(); //todo
                 default:
                     throw new NotSupportedException($"The specified {typeof(V1WorkflowActivityType).Name} '{activity.Type}' is not supported");
             }
-            return null; //todo: throw exception
+        }
+
+        protected virtual IStateProcessor CreateStateActivityProcessor(StateDefinition state, V1WorkflowActivityDto activity)
+        {
+            return state switch
+            {
+                CallbackStateDefinition callbackState => ActivatorUtilities.CreateInstance<CallbackStateProcessor>(this.ServiceProvider, state, activity),
+                EventStateDefinition eventState => ActivatorUtilities.CreateInstance<EventStateProcessor>(this.ServiceProvider, state, activity),
+                ForEachStateDefinition forEachState => ActivatorUtilities.CreateInstance<ForEachStateProcessor>(this.ServiceProvider, state, activity),
+                InjectStateDefinition injectState => ActivatorUtilities.CreateInstance<InjectStateProcessor>(this.ServiceProvider, state, activity),
+                OperationStateDefinition operationState => ActivatorUtilities.CreateInstance<OperationStateProcessor>(this.ServiceProvider, state, activity),
+                ParallelStateDefinition parallelState => ActivatorUtilities.CreateInstance<ParallelStateProcessor>(this.ServiceProvider, state, activity),
+                SleepStateDefinition delayState => ActivatorUtilities.CreateInstance<DelayStateProcessor>(this.ServiceProvider, state, activity),
+                SwitchStateDefinition switchState => ActivatorUtilities.CreateInstance<SwitchStateProcessor>(this.ServiceProvider, state, activity),
+                _ => throw new NotSupportedException($"The specified {nameof(StateDefinition)} type '{state.GetType().Name}' is not supported"),
+            };
+        }
+
+        protected virtual IWorkflowActivityProcessor CreateActionActivityProcessor(StateDefinition state, V1WorkflowActivityDto activity)
+        {
+            ActionDefinition action;
+            if (!activity.Metadata.TryGetValue(V1WorkflowActivityMetadata.Action, out var actionName))
+                throw new ArgumentException($"The specified activity '{activity.Id}' is missing the required metadata field '{V1WorkflowActivityMetadata.Action}'");
+            switch (state)
+            {
+                case OperationStateDefinition operationState:
+                    if (!operationState.TryGetAction(actionName, out action))
+                        throw new NullReferenceException($"Failed to find an action with the specified name '{actionName}' in the state with name '{state.Name}'");
+                    break;
+                case ForEachStateDefinition forEachState:
+                    if (!forEachState.TryGetAction(actionName, out action))
+                        throw new NullReferenceException($"Failed to find an action with the specified name '{actionName}' in the state with name '{state.Name}'");
+                    break;
+                case CallbackStateDefinition callbackState:
+                    action = callbackState.Action!;
+                    break;
+                case ParallelStateDefinition parallelState:
+                    if (!activity.Metadata.TryGetValue(V1WorkflowActivityMetadata.Branch, out var branchName))
+                        throw new ArgumentException($"The specified activity '{activity.Id}' is missing the required metadata field '{V1WorkflowActivityMetadata.Branch}'");
+                    if (!parallelState.TryGetBranch(branchName, out var branch))
+                        throw new NullReferenceException($"Failed to find a branch with the specified name '{branchName}' in the state with name '{state.Name}'");
+                    if (!branch.TryGetAction(actionName, out action))
+                        throw new NullReferenceException($"Failed to find an action with the specified name '{action.Name}' in the branch with name '{branch.Name}'");
+                    break;
+                case EventStateDefinition eventState:
+                    if (!activity.Metadata.TryGetValue(V1WorkflowActivityMetadata.Trigger, out var triggerId))
+                        throw new ArgumentException($"The specified activity '{activity.Id}' is missing the required metadata field '{V1WorkflowActivityMetadata.Trigger}'");
+                    if (!int.TryParse(triggerId, out var triggerIndex))
+                        throw new ArgumentException($"The specified activity '{activity.Id}' has an unexpected value '{triggerId}' set for the metadata field '{V1WorkflowActivityMetadata.Trigger}'");
+                    if (!eventState.TryGetTrigger(triggerIndex, out var trigger))
+                        throw new NullReferenceException($"Failed to find an event state trigger at the specified index '{triggerIndex}' in the state with name'{state.Name}'");
+                    if (!trigger.TryGetAction(actionName, out action))
+                        throw new NullReferenceException($"Failed to find an action with the specified name '{action.Name}' in the trigger at the specified index '{triggerIndex}'");
+                    break;
+                default:
+                    throw new NotSupportedException($"The specified {nameof(StateDefinition)} type '{state.GetType().Name}' is not supported in this context");
+            }
+            switch (action.Type)
+            {
+                case ActionType.Function:
+                    if (!this.Context.Workflow.Definition.TryGetFunction(action.Function!.RefName, out FunctionDefinition function))
+                        throw new NullReferenceException($"Failed to find a function with the specified name '{action.Function.RefName}' in the workflow with name '{this.Context.Workflow.Definition.Id}' and version '{this.Context.Workflow.Definition.Version}'");
+                    switch (function.Type)
+                    {
+                        //case FunctionType.AsyncApi://todo
+                        //    break;
+                        //case FunctionType.Expression:
+                        //    return ActivatorUtilities.CreateInstance<ExpressionFunctionProcessor>(this.ServiceProvider, state, activity, action, function);
+                        case FunctionType.GraphQL:
+                            return ActivatorUtilities.CreateInstance<GraphQLFunctionProcessor>(this.ServiceProvider, state, activity, action, function);
+                        case FunctionType.OData:
+                            return ActivatorUtilities.CreateInstance<ODataFunctionProcessor>(this.ServiceProvider, state, activity, action, function);
+                        //case FunctionType.OpenApi://todo
+                        //    break;
+                        case FunctionType.Rest:
+                            return ActivatorUtilities.CreateInstance<OpenApiFunctionProcessor>(this.ServiceProvider, state, activity, action, function);
+                        case FunctionType.Rpc:
+                            return ActivatorUtilities.CreateInstance<RpcFunctionProcessor>(this.ServiceProvider, state, activity, action, function);
+                        default:
+                            throw new NotSupportedException($"The specified {nameof(FunctionType)} '{function.Type}' is not supported");
+                    }
+                case ActionType.Trigger:
+                    if (!this.Context.Workflow.Definition.TryGetEvent(action.Event!.ProduceEvent, out EventDefinition produceEvent))
+                        throw new NullReferenceException($"Failed to find an event with the specified name '{action.Event.ProduceEvent}' in the workflow with name '{this.Context.Workflow.Definition.Id}' and version '{this.Context.Workflow.Definition.Version}'");
+                    if (!this.Context.Workflow.Definition.TryGetEvent(action.Event.ResultEvent, out EventDefinition consumeEvent))
+                        throw new NullReferenceException($"Failed to find an event with the specified name '{action.Event.ResultEvent}' in the workflow with name '{this.Context.Workflow.Definition.Id}' and version '{this.Context.Workflow.Definition.Version}'");
+                    return ActivatorUtilities.CreateInstance<AsyncFunctionProcessor>(this.ServiceProvider, state, activity, action, produceEvent, consumeEvent);
+                default:
+                    throw new NotSupportedException($"The specified {nameof(ActionType)} '{action.Type}' is not supported");
+            }
         }
 
         IWorkflowActivityProcessor IWorkflowActivityProcessorFactory.Create(V1WorkflowActivityDto activity)

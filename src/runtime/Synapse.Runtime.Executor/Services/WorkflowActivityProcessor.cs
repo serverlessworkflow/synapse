@@ -35,10 +35,10 @@ namespace Synapse.Runtime.Executor.Services
         /// Initializes a new <see cref="WorkflowActivityProcessor"/>
         /// </summary>
         /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
-        /// <param name="context">The current <see cref="IWorkflowExecutionContext"/></param>
+        /// <param name="context">The current <see cref="IWorkflowRuntimeContext"/></param>
         /// <param name="activityProcessorFactory">The service used to create <see cref="IWorkflowActivityProcessor"/>s</param>
         /// <param name="options">The service used to access the current <see cref="ApplicationOptions"/></param>
-        /// <param name="activity">The <see cref="V1WorkflowActivity"/> to process</param>
+        /// <param name="activity">The <see cref="V1WorkflowActivityDto"/> to process</param>
         protected WorkflowActivityProcessor(ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory, IOptions<ApplicationOptions> options, V1WorkflowActivityDto activity)
         {
             this.Logger = loggerFactory.CreateLogger(this.GetType());
@@ -54,7 +54,7 @@ namespace Synapse.Runtime.Executor.Services
         protected ILogger Logger { get; }
 
         /// <summary>
-        /// Gets the current <see cref="IWorkflowExecutionContext"/>
+        /// Gets the current <see cref="IWorkflowRuntimeContext"/>
         /// </summary>
         protected IWorkflowRuntimeContext Context { get; }
 

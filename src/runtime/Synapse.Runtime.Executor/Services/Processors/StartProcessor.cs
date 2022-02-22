@@ -19,26 +19,25 @@ using Synapse.Integration.Events.WorkflowActivities;
 
 namespace Synapse.Runtime.Executor.Services.Processors
 {
-
     /// <summary>
-    /// Represents an <see cref="IWorkflowActivityProcessor"/> used to process <see cref="EndDefinition"/>s
+    /// Represents an <see cref="IWorkflowActivityProcessor"/> used to process <see cref="StartDefinition"/>s
     /// </summary>
-    public class EndProcessor
-        : WorkflowActivityProcessor, IEndProcessor
+    public class StartProcessor
+        : WorkflowActivityProcessor
     {
 
         /// <inheritdoc/>
-        public EndProcessor(ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory, 
-            IOptions<ApplicationOptions> options, V1WorkflowActivityDto activity, EndDefinition end) 
+        public StartProcessor(ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory,
+            IOptions<ApplicationOptions> options, V1WorkflowActivityDto activity, StartDefinition start)
             : base(loggerFactory, context, activityProcessorFactory, options, activity)
         {
-            this.End = end;
+            this.Start = start;
         }
 
         /// <summary>
-        /// Gets the <see cref="EndDefinition"/> to process
+        /// Gets the <see cref="StartDefinition"/> to process
         /// </summary>
-        public EndDefinition? End { get; }
+        public StartDefinition? Start { get; }
 
         /// <inheritdoc/>
         protected override Task InitializeAsync(CancellationToken cancellationToken)
@@ -50,7 +49,6 @@ namespace Synapse.Runtime.Executor.Services.Processors
         /// <inheritdoc/>
         protected override async Task ProcessAsync(CancellationToken cancellationToken)
         {
-            //TODO
             await this.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, this.Activity.Input), cancellationToken);
             await this.OnCompletedAsync(cancellationToken);
         }

@@ -58,6 +58,8 @@ namespace Synapse
                 values.Add($"$skip={queryOptions.RawValues.Skip}");
             if (!string.IsNullOrWhiteSpace(queryOptions.RawValues.SkipToken))
                 values.Add($"$skiptoken={queryOptions.RawValues.SkipToken}");
+            if (!string.IsNullOrWhiteSpace(queryOptions.RawValues.Top))
+                values.Add($"$top={queryOptions.RawValues.Top}");
             return string.Join("&", values);
         }
 
