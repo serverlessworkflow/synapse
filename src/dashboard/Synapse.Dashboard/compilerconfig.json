@@ -1,0 +1,34 @@
+﻿[
+  {
+    "outputFile": "wwwroot/css/app.css",
+    "inputFile": "wwwroot/css/app.scss"
+  },
+  {
+    "outputFile": "Components/WorkflowStateNode.razor.css",
+    "inputFile": "Components/WorkflowStateNode.razor.scss"
+  },
+  {
+    "outputFile": "Components/WorkflowStartNode.razor.css",
+    "inputFile": "Components/WorkflowStartNode.razor.scss"
+  },
+  {
+    "outputFile": "Components/WorkflowEndNode.razor.css",
+    "inputFile": "Components/WorkflowEndNode.razor.scss"
+  },
+  {
+    "outputFile": "Components/toaster.razor.css",
+    "inputFile": "Components/toaster.razor.scss"
+  },
+  {
+    "outputFile": "Components/NavMenu.razor.css",
+    "inputFile": "Components/NavMenu.razor.scss"
+  },
+  {
+    "outputFile": "Components/MainLayout.razor.css",
+    "inputFile": "Components/MainLayout.razor.scss"
+  },
+  {
+    "outputFile": "Components/FunctionRefNode.razor.css",
+    "inputFile": "Components/FunctionRefNode.razor.scss"
+  }
+]
