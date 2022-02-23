@@ -1,4 +1,4 @@
-  <link href="_content/Z.Blazor.Diagrams/default.styles.min.css" rel="stylesheet"/><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Synapse</title>
     <base href="/" />
-    <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
     <link href="css/app.css" rel="stylesheet" />
     <link href="Synapse.Dashboard.styles.css" rel="stylesheet" />
     <link href="manifest.json" rel="manifest" />
@@ -14,6 +13,8 @@
     <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png" />
     <link href="_content/Z.Blazor.Diagrams/style.min.css" rel="stylesheet" />
     <link href="_content/Z.Blazor.Diagrams/default.styles.min.css" rel="stylesheet" />
+    <link href="_content/BlazorMonaco/lib/monaco-editor/min/vs/editor/editor.main.css" rel="stylesheet" />
+
 </head>
 
 <body>
@@ -34,10 +35,12 @@
     </div>
     <script src="_framework/blazor.webassembly.js"></script>
     <script>navigator.serviceWorker.register('service-worker.js');</script>
-    <!-- Create a simple CodeMirror instance -->
-    <link rel="stylesheet" href="css/codemirror.css">
-    <script src="js/codemirror.js"></script>
+    <script src="js/monaco-editor-schema-validation.js"></script>
     <script src="_content/Z.Blazor.Diagrams/script.min.js"></script>
+    <script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/loader.js"></script>
+    <script>require.config({ paths: { 'vs': '_content/BlazorMonaco/lib/monaco-editor/min/vs' } });</script>
+    <script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/editor/editor.main.js"></script>
+    <script src="_content/BlazorMonaco/jsInterop.js"></script>
 </body>
 
 </html>

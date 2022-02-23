@@ -8,17 +8,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="compilerconfig.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Components\WorkflowStartNode - Copy.razor.css" />
-    <None Remove="Components\WorkflowStartNode.razor.css" />
-    <None Remove="Components\WorkflowStateNode.razor.css" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Components\WorkflowStartNode.razor.css" />
-    <Content Include="Components\WorkflowStateNode.razor.css" />
+    <None Include="compilerconfig.json" />
   </ItemGroup>
 
   <ItemGroup>
+	<PackageReference Include="BlazorMonaco" Version="2.1.0" />
 	<PackageReference Include="GraphShape" Version="1.2.1" />
 	<PackageReference Include="MatBlazor" Version="2.9.0-develop-042" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.2" />

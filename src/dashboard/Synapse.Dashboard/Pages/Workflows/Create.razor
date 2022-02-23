@@ -15,67 +15,68 @@
 <PageTitle>Create new workflow</PageTitle>
 <AppHeader>Create new workflow</AppHeader>
 
-<EditForm Model="command" OnValidSubmit="OnValidSubmit">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
-    @if(validationErrors != null && validationErrors.Any())
-    {
-        <div class="alert alert-danger">
-            <ul>
-                @foreach (var error in validationErrors)
-                {
-                    <li>@error.ToString()</li>
-                }
-            </ul>
-        </div>
-    }
-    <div>
-        <label for="Definition" class="form-form-label">Definition</label>
-        <textarea type="text" value="@rawDefinition" @onchange="OnWorkflowDefinitionChanged" class="w-100 h-100 form-control"></textarea>
+@if(validationErrors != null && validationErrors.Any())
+{
+    <div class="alert alert-danger">
+        <ul>
+            @foreach (var error in validationErrors)
+            {
+                <li>@error.ToString()</li>
+            }
+        </ul>
     </div>
-    <button type="submit" class="btn btn-blockquote btn-dark">Create Workflow</button>
-</EditForm>
+}
+<div>
+    <label class="form-form-label">Definition</label>
+    <MonacoEditor
+        @ref="editor"
+        Id="definition-editor"
+        ConstructionOptions="MonacoEditorOptionsBuilder"
+        OnDidInit="OnMonacoEditorDidInit"
+    />
+</div>
+<button @onclick="OnCreateWorkflow" type="button" class="btn btn-blockquote btn-dark">Create Workflow</button>
+
 
 @code {
 
-    V1CreateWorkflowCommandDto command = new();
-
     IList<ValidationError> validationErrors;
+    private MonacoEditor editor;
 
-    string rawDefinition = string.Empty;
-
-    async Task OnValidSubmit()
+    async Task OnCreateWorkflow()
     {
-        if (this.command == null)
-            return;
-        var workflow = await this.SynapseApi.CreateWorkflowAsync(this.command);
-    }
-
-    async Task OnWorkflowDefinitionChanged(ChangeEventArgs e)
-    {
-        this.rawDefinition = (string)e.Value!;
-        if (string.IsNullOrWhiteSpace(this.rawDefinition))
+        var rawDefinition = await this.editor.GetValue();
+        if (string.IsNullOrWhiteSpace(rawDefinition))
         {
-            this.command.Definition = null;
             return;
         }
+        var command = new V1CreateWorkflowCommandDto();
         try
         {
-            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(this.rawDefinition));
-            this.command.Definition = await this.WorkflowReader.ReadAsync(stream);
+            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(rawDefinition));
+            command.Definition = await this.WorkflowReader.ReadAsync(stream);
         }
         catch(Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            //todo: warn the user
+            //todo: warn the user via validationErrors
             return;
         }
+        var workflow = await this.SynapseApi.CreateWorkflowAsync(command);
     }
 
-    async Task OnCreateWorkflow()
+    private async Task OnMonacoEditorDidInit(MonacoEditorBase editorBase)
     {
-        var command = new V1CreateWorkflowCommandDto();
-        var workflow = await this.SynapseApi.CreateWorkflowAsync(command);
+        var model = await this.editor.GetModel();
+        await model.jsRuntime.InvokeVoidAsync("enableJsonValidation08" , model.Uri);
+    }
+
+    private StandaloneEditorConstructionOptions MonacoEditorOptionsBuilder(MonacoEditor editor)
+    {
+        return new StandaloneEditorConstructionOptions {
+		    AutomaticLayout = true,
+		    Language = "json"
+	    };
     }
 
 }
