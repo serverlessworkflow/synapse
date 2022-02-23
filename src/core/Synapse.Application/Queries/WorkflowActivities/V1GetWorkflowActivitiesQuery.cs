@@ -79,8 +79,7 @@ namespace Synapse.Application.Queries.WorkflowActivities
             return await Task.Run(() =>
             {
                 var activities = this.Repository.AsQueryable()
-                    .Where(a => a.WorkflowInstanceId == query.WorkflowInstanceId
-                    && a.ParentId == query.ParentId);
+                    .Where(a => a.WorkflowInstanceId == query.WorkflowInstanceId && a.ParentId == query.ParentId);
                 if (!query.IncludeNonOperative)
                     activities = activities.Where(a => a.Status < V1WorkflowActivityStatus.Faulted);
                 var results = activities as IQueryable;

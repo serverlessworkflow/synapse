@@ -18,6 +18,7 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
 using ServerlessWorkflow.Sdk.Models;
 using Synapse.Integration.Models;
+using System.Dynamic;
 
 namespace Synapse.Application.Services
 {
@@ -40,6 +41,7 @@ namespace Synapse.Application.Services
             builder.EntitySet<V1WorkflowActivityDto>("V1WorkflowActivities"); //todo: fix name?
 
             builder.AddComplexType(typeof(Any));
+            builder.AddComplexType(typeof(ExpandoObject));
             builder.AddComplexType(typeof(WorkflowDefinition));
             builder.AddComplexType(typeof(NameValueCollection<string>));
 

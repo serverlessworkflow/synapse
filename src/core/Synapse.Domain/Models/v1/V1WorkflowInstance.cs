@@ -17,7 +17,6 @@
 
 using Synapse.Domain.Events.WorkflowInstances;
 using System.Collections.ObjectModel;
-using System.Dynamic;
 
 namespace Synapse.Domain.Models
 {
@@ -53,7 +52,7 @@ namespace Synapse.Domain.Models
         {
             if(workflow == null)
                 throw DomainException.ArgumentNull(nameof(workflow));
-            this.On(this.RegisterEvent(new V1WorkflowInstanceCreatedDomainEvent($"{workflow.Definition.Id}-{key}", workflow.Id, key, activationType, input, triggerEvents)));
+            this.On(this.RegisterEvent(new V1WorkflowInstanceCreatedDomainEvent(BuildUniqueIdentifier(key, workflow), workflow.Id, key, activationType, input, triggerEvents)));
         }
 
         /// <summary>
@@ -428,6 +427,17 @@ namespace Synapse.Domain.Models
         protected virtual void On(V1WorkflowInstanceDeletedDomainEvent e)
         {
             
+        }
+
+        /// <summary>
+        /// Builds a <see cref="V1WorkflowInstance"/> unique identifier based on the specified key and <see cref="V1Workflow"/>
+        /// </summary>
+        /// <param name="key">The key of the <see cref="V1WorkflowInstance"/> to build the unique identifier for</param>
+        /// <param name="workflow">The <see cref="V1Workflow"/> of the <see cref="V1WorkflowInstance"/> to build the unique identifier for</param>
+        /// <returns>A <see cref="V1WorkflowInstance"/> unique identifier</returns>
+        public static string BuildUniqueIdentifier(string key, V1Workflow workflow)
+        {
+            return $"{workflow.Definition.Id}-{key}";
         }
 
     }

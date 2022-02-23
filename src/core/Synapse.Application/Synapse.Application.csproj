@@ -29,13 +29,13 @@
 	<PackageReference Include="CloudNative.CloudEvents.NewtonsoftJson" Version="2.2.0" />
 	<PackageReference Include="Microsoft.AspNetCore.OData" Version="8.0.8" />
 	<PackageReference Include="Microsoft.OData.ModelBuilder" Version="1.0.8" />
-	<PackageReference Include="Neuroglia.AspNetCore.JsonPatch" Version="2.0.1.28" />
-	<PackageReference Include="Neuroglia.Data.DistributedCache" Version="2.0.1.28" />
-	<PackageReference Include="Neuroglia.Data.Expressions" Version="2.0.1.28" />
-	<PackageReference Include="Neuroglia.Eventing.CloudEvents" Version="2.0.1.28" />
-	<PackageReference Include="Neuroglia.Mapping" Version="2.0.1.28" />
-	<PackageReference Include="Neuroglia.Mediation" Version="2.0.1.28" />
-	<PackageReference Include="Neuroglia.Mediation.FluentValidation" Version="2.0.1.28" />
+	<PackageReference Include="Neuroglia.AspNetCore.JsonPatch" Version="2.0.1.30" />
+	<PackageReference Include="Neuroglia.Data.DistributedCache" Version="2.0.1.30" />
+	<PackageReference Include="Neuroglia.Data.Expressions" Version="2.0.1.30" />
+	<PackageReference Include="Neuroglia.Eventing.CloudEvents" Version="2.0.1.30" />
+	<PackageReference Include="Neuroglia.Mapping" Version="2.0.1.30" />
+	<PackageReference Include="Neuroglia.Mediation" Version="2.0.1.30" />
+	<PackageReference Include="Neuroglia.Mediation.FluentValidation" Version="2.0.1.30" />
 	<PackageReference Include="ServerlessWorkflow.Sdk" Version="0.8.0.6" />
   </ItemGroup>
 

@@ -305,7 +305,7 @@ namespace Synapse.Runtime.Executor.Services.Processors
                 if (output == null)
                     output = new();
                 if (!success)
-                    throw new HttpRequestException($"Failed to execute the operation execution pointer '{this.Operation.OperationId}' (id: '{this.Activity.Id}'): No service available", null, HttpStatusCode.ServiceUnavailable);
+                    throw new HttpRequestException($"Failed to execute the operation activity '{this.Operation.OperationId}' (id: '{this.Activity.Id}'): No service available", null, HttpStatusCode.ServiceUnavailable);
                 await this.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, output), cancellationToken);
                 await this.OnCompletedAsync(cancellationToken);
             }

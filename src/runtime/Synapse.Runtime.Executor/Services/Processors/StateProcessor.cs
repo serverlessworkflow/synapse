@@ -48,17 +48,6 @@ namespace Synapse.Runtime.Executor.Services.Processors
         /// </summary>
         public virtual StateDefinition State { get; }
 
-        protected override Task OnNextAsync(IV1WorkflowActivityIntegrationEvent e, CancellationToken cancellationToken)
-        {
-            if(e is V1WorkflowActivityCompletedIntegrationEvent completedEvent
-                && completedEvent.Output != null)
-            {
-                var merged = completedEvent.Output.ToObject().Merge(this.Activity.Input.ToObject());
-                completedEvent.Output = Any.FromObject(merged);
-            }
-            return base.OnNextAsync(e, cancellationToken);
-        }
-
     }
 
     /// <summary>

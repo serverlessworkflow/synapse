@@ -53,8 +53,10 @@ namespace Synapse.Dashboard.Services
 
         private void BuildStateNodes(WorkflowDefinition definition, Diagram diagram, StateDefinition state, NodeModel endNode, NodeModel? previousNode = null)
         {
-            var stateNodeGroup = new GroupModel(Array.Empty<NodeModel>());
-            stateNodeGroup.Title = state.Name;
+            var stateNodeGroup = new GroupModel(Array.Empty<NodeModel>())
+            {
+                Title = state.Name
+            };
             diagram.AddGroup(stateNodeGroup);
             List<NodeModel> childNodes = new();
             NodeModel firstNode, lastNode;

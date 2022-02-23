@@ -15,6 +15,7 @@
  *
  */
 
+using Newtonsoft.Json;
 using Synapse.Integration.Events.WorkflowActivities;
 using System.Reactive.Linq;
 
@@ -89,10 +90,10 @@ namespace Synapse.Runtime.Executor.Services.Processors
                         activities.Add(await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Function, this.Activity.Input, metadata, this.Activity, cancellationToken));
                         break;
                     case ActionType.Subflow:
-                        activities.Add(await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Function, this.Activity.Input, metadata, this.Activity, cancellationToken));
+                        activities.Add(await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.SubFlow, this.Activity.Input, metadata, this.Activity, cancellationToken));
                         break;
                     case ActionType.Trigger:
-                        activities.Add(await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Function, this.Activity.Input, metadata, this.Activity, cancellationToken));
+                        activities.Add(await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.EventTrigger, this.Activity.Input, metadata, this.Activity, cancellationToken));
                         break;
                     default:
                         throw new NotSupportedException($"The specified {nameof(ActionType)} '{this.Action.Type}' is not supported");
@@ -112,7 +113,7 @@ namespace Synapse.Runtime.Executor.Services.Processors
                 await Task.Delay(this.Action.Sleep.After.Value, cancellationToken);
             var output = e.Output.ToObject();
             if (this.Action.ActionDataFilter != null)
-                output = this.Context.ExpressionEvaluator.FilterOutput(this.Action, e.Output);
+                output = this.Context.ExpressionEvaluator.FilterOutput(this.Action, output);
             await this.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, output), cancellationToken);
         }
 
