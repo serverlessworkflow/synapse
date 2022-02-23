@@ -103,7 +103,7 @@ namespace Synapse.Runtime.Executor.Services
                         await this.Context.Workflow.InitializeActivityAsync(this.Activity, cancellationToken);
                     await this.InitializeAsync(this.CancellationTokenSource.Token);
                     this.Logger.LogInformation("Activity '{activityId}' (type: '{activityType}') initialized", this.Activity.Id, this.Activity.Type);
-                    this.Logger.LogInformation("Executing activity '{activityId}' (type: '{activityType}')...", this.Activity.Id, this.Activity.Type);
+                    this.Logger.LogInformation("Starting/resuming activity '{activityId}' (type: '{activityType}')...", this.Activity.Id, this.Activity.Type);
                     await this.Context.Workflow.StartOrResumeActivityAsync(this.Activity, this.CancellationTokenSource.Token);
                     await this.ProcessAsync(this.CancellationTokenSource.Token);
                 }

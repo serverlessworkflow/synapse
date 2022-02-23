@@ -1,6 +1,4 @@
-﻿using Synapse.Integration.Models;
-
-namespace Synapse.Runtime.Services
+﻿namespace Synapse.Runtime.Services
 {
 
     /// <summary>

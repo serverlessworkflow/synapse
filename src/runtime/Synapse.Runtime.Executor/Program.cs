@@ -36,11 +36,13 @@ using var host = Host.CreateDefaultBuilder(args)
 
         services.AddNewtonsoftJsonSerializer();
         services.AddJQExpressionEvaluator();
+        services.AddHttpClient();
 
         services.AddSingleton<WorkflowActivityProcessorFactory>();
         services.AddSingleton<IWorkflowActivityProcessorFactory>(provider => provider.GetRequiredService<WorkflowActivityProcessorFactory>());
 
         services.AddSingleton<WorkflowRuntimeContext>();
+
         services.AddSingleton<IWorkflowRuntimeContext>(provider => provider.GetRequiredService<WorkflowRuntimeContext>());
 
         services.AddSingleton<WorkflowRuntime>();

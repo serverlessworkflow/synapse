@@ -17,13 +17,27 @@
 
 namespace Synapse.Integration.Events.WorkflowActivities
 {
-
-    public partial class V1WorkflowActivityCancelledIntegrationEvent
+    public partial class V1WorkflowActivitySkippedIntegrationEvent
 		: IV1WorkflowActivityIntegrationEvent
 	{
 
+        /// <summary>
+        /// Initializes a new <see cref="V1WorkflowActivitySkippedIntegrationEvent"/>
+        /// </summary>
+		public V1WorkflowActivitySkippedIntegrationEvent()
+        {
 
+        }
 
-    }
+        /// <summary>
+        /// Initializes a new <see cref="V1WorkflowActivitySkippedIntegrationEvent"/>
+        /// </summary>
+        /// <param name="id">The id of the skipped activity</param>
+		public V1WorkflowActivitySkippedIntegrationEvent(string id)
+        {
+            this.AggregateId = id;
+        }
+
+	}
 
 }

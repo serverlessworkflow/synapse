@@ -28,6 +28,7 @@ using Synapse.Application.Services;
 using Synapse.Integration.Commands.WorkflowActivities;
 using Synapse.Integration.Commands.WorkflowInstances;
 using Synapse.Integration.Models;
+using Synapse.Integration.Queries.WorkflowActivities;
 using Synapse.Integration.Services;
 using Synapse.Ports.Grpc.Models;
 
@@ -83,9 +84,9 @@ namespace Synapse.Ports.Grpc.Services
         }
 
         /// <inheritdoc/>
-        public virtual async Task<V1GrpcApiResult<List<V1WorkflowActivityDto>>> GetActivitiesAsync(string workflowInstanceId, CallContext context = default)
+        public virtual async Task<V1GrpcApiResult<List<V1WorkflowActivityDto>>> GetActivitiesAsync(V1GetWorkflowActivitiesQueryDto query, CallContext context = default)
         {
-            return V1GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new V1GetWorkflowActivitiesQuery(workflowInstanceId), context.CancellationToken));
+            return V1GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(this.Mapper.Map<V1GetWorkflowActivitiesQuery>(query), context.CancellationToken));
         }
 
         /// <inheritdoc/>
@@ -141,6 +142,7 @@ namespace Synapse.Ports.Grpc.Services
         {
             return V1GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(this.Mapper.Map<V1SetWorkflowInstanceOutputCommand>(command), context.CancellationToken));
         }
+
 
     }
 

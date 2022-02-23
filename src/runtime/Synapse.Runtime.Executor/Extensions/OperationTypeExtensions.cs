@@ -31,27 +31,18 @@ namespace Synapse.Runtime
         /// <returns>The reuslting <see cref="HttpMethod"/></returns>
         public static HttpMethod ToHttpMethod(this OperationType operationType)
         {
-            switch (operationType)
+            return operationType switch
             {
-                case OperationType.Delete:
-                    return HttpMethod.Delete;
-                case OperationType.Get:
-                    return HttpMethod.Get;
-                case OperationType.Head:
-                    return HttpMethod.Head;
-                case OperationType.Options:
-                    return HttpMethod.Options;
-                case OperationType.Patch:
-                    return HttpMethod.Patch;
-                case OperationType.Post:
-                    return HttpMethod.Post;
-                case OperationType.Put:
-                    return HttpMethod.Put;
-                case OperationType.Trace:
-                    return HttpMethod.Trace;
-                default:
-                    throw new NotSupportedException($"The specified {nameof(OperationType)} '{operationType}' is not supported");
-            }
+                OperationType.Delete => HttpMethod.Delete,
+                OperationType.Get => HttpMethod.Get,
+                OperationType.Head => HttpMethod.Head,
+                OperationType.Options => HttpMethod.Options,
+                OperationType.Patch => HttpMethod.Patch,
+                OperationType.Post => HttpMethod.Post,
+                OperationType.Put => HttpMethod.Put,
+                OperationType.Trace => HttpMethod.Trace,
+                _ => throw new NotSupportedException($"The specified {nameof(OperationType)} '{operationType}' is not supported"),
+            };
         }
 
     }

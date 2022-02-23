@@ -1,0 +1,17 @@
+﻿@using Blazor.Diagrams.Components.Renderers
+@using Synapse.Dashboard.Models
+
+<div class="border border-dark rounded bg-white px-3 py-1 text-wrap text-center function-node">
+    <div><b>@Node.Function.RefName</b></div>
+    @foreach (var port in Node.Ports)
+    {
+        <PortRenderer Port="port" />
+    }
+</div>
+
+@code {
+
+    [Parameter]
+    public FunctionRefNodeModel Node { get; set; }
+
+}

@@ -108,7 +108,7 @@ namespace Synapse.Runtime.Services
                     default:
                         throw new InvalidOperationException($"The workflow instance '{this.Context.Workflow.Instance.Id}' is in an unexpected state '{this.Context.Workflow.Instance.Status}'");
                 }
-                foreach (var activity in await this.Context.Workflow.GetActivitiesAsync(this.CancellationToken))
+                foreach (var activity in await this.Context.Workflow.GetOperativeActivitiesAsync(this.CancellationToken))
                 {
                     var processor = this.CreateActivityProcessor(activity);
                     await processor.ProcessAsync(this.CancellationToken);
@@ -184,10 +184,10 @@ namespace Synapse.Runtime.Services
                 switch (switchCase.Type)
                 {
                     case ConditionType.End:
-                        await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.End, e.Output, metadata, switchState.Id, cancellationToken);
+                        await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.End, e.Output, metadata, null, cancellationToken);
                         break;
                     case ConditionType.Transition:
-                        await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Transition, e.Output, metadata, switchState.Id, cancellationToken);
+                        await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Transition, e.Output, metadata, null, cancellationToken);
                         break;
                     default:
                         throw new NotSupportedException($"The specified condition type '{switchCase.Type}' is not supported in this context");
@@ -203,7 +203,7 @@ namespace Synapse.Runtime.Services
                     await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.End, e.Output, metadata, null, cancellationToken);
                 else
                     throw new InvalidOperationException($"The state '{processor.State.Name}' must declare a transition definition or an end definition for it is part of the main execution logic of the workflow '{this.Context.Workflow.Definition.Id}'");
-                foreach (var activity in await this.Context.Workflow.GetActivitiesAsync(cancellationToken))
+                foreach (var activity in await this.Context.Workflow.GetOperativeActivitiesAsync(cancellationToken))
                 {
                     this.CreateActivityProcessor(activity);
                 }

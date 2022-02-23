@@ -15,7 +15,6 @@
  *
  */
 using Neuroglia.Data.Expressions;
-using Synapse.Integration.Events;
 
 namespace Synapse.Runtime.Services
 {
@@ -31,44 +30,17 @@ namespace Synapse.Runtime.Services
         /// </summary>
         IExpressionEvaluator ExpressionEvaluator { get; }
 
+        /// <summary>
+        /// Gets the service used a Synapse API helper facade
+        /// </summary>
         IWorkflowFacade Workflow { get; }
 
+        /// <summary>
+        /// Initializes the <see cref="IWorkflowRuntimeContext"/>
+        /// </summary>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
         Task InitializeAsync(CancellationToken cancellationToken);
-
-    }
-
-    public interface IWorkflowFacade
-    {
-
-        WorkflowDefinition Definition { get; }
-
-        V1WorkflowInstanceDto Instance { get; }
-
-        Task StartAsync(CancellationToken cancellationToken = default);
-
-        Task TransitionToAsync(StateDefinition state, CancellationToken cancellationToken = default);
-
-        Task<V1WorkflowActivityDto> CreateActivityAsync(V1WorkflowActivityType type, object? data, IDictionary<string, string>? metadata, string? parentId, CancellationToken cancellationToken = default);
-
-        Task<List<V1WorkflowActivityDto>> GetActivitiesAsync(CancellationToken cancellationToken = default);
-
-        Task InitializeActivityAsync(V1WorkflowActivityDto activity, CancellationToken cancellationToken = default);
-
-        Task StartOrResumeActivityAsync(V1WorkflowActivityDto activity, CancellationToken cancellationToken = default);
-
-        Task SuspendActivityAsync(V1WorkflowActivityDto activity, CancellationToken cancellationToken = default);
-
-        Task CancelActivityAsync(V1WorkflowActivityDto activity, CancellationToken cancellationToken = default);
-
-        Task FaultActivityAsync(V1WorkflowActivityDto activity, Exception ex, CancellationToken cancellationToken = default);
-
-        Task FaultActivityAsync(V1WorkflowActivityDto activity, ErrorDto error, CancellationToken cancellationToken = default);
-
-        Task FaultAsync(Exception ex, CancellationToken cancellationToken = default);
-
-        Task SetOutputAsync(object? output, CancellationToken cancellationToken = default);
-
-        Task On(V1WorkflowActivityDto activity, IV1WorkflowActivityIntegrationEvent e, CancellationToken cancellationToken = default);
 
     }
 

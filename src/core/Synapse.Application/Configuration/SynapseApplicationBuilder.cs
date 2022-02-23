@@ -49,9 +49,7 @@ namespace Synapse.Application.Configuration
         /// <inheritdoc/>
         public virtual ISynapseApplicationBuilder UseConfiguration(IConfiguration configuration)
         {
-            if(configuration == null)
-                throw new ArgumentNullException(nameof(configuration));
-            this.Configuration = configuration;
+            this.Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             return this;
         }
 

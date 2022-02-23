@@ -18,7 +18,6 @@
 using Neuroglia.Serialization;
 using Simple.OData.Client;
 using Synapse.Integration.Events.WorkflowActivities;
-using System.Text;
 
 namespace Synapse.Runtime.Executor.Services.Processors
 {
@@ -62,6 +61,11 @@ namespace Synapse.Runtime.Executor.Services.Processors
         protected ISerializerProvider SerializerProvider { get; }
 
         /// <summary>
+        /// Gets the service used to query the remote ODATA API
+        /// </summary>
+        protected IODataClient ODataClient { get; private set; } = null!;
+
+        /// <summary>
         /// Gets the <see cref="Uri"/> of the OData service to query
         /// </summary>
         protected Uri ServiceUri { get; private set; } = null!;
@@ -79,6 +83,7 @@ namespace Synapse.Runtime.Executor.Services.Processors
                 throw new FormatException($"The 'operation' property of the ODATA function with name '{this.Function.Name}' has an invalid value '{this.Function.Operation}'. ODATA functions expect a value in the following format: <URI_to_odata_service>#<Entity_Set_Name>");
             this.ServiceUri = new(components.First());
             this.EntitySet = components.Last();
+            this.ODataClient = new ODataClient(new ODataClientSettings(this.HttpClient, this.ServiceUri));
             return Task.CompletedTask;
         }
 
@@ -87,36 +92,17 @@ namespace Synapse.Runtime.Executor.Services.Processors
         {
             try
             {
-                var client = new ODataClient();
-                await client.FindEntriesAsync("Packages?$filter=Title eq 'Simple.OData.Client'");
-
                 var commandOptions = this.FunctionReference.Arguments?.ToObject<ODataCommandOptions>();
-
-                var uri = $"{this.ServiceUri}/{this.EntitySet}";
+                var command = this.EntitySet;
+                if (!string.IsNullOrWhiteSpace(commandOptions?.Key))
+                    command += $"({commandOptions.Key})";
                 if (commandOptions?.QueryOptions != null)
-                    uri += $"?{commandOptions.QueryOptions.ToQueryString()}";
-                using var request = new HttpRequestMessage(HttpMethod.Get, uri);
-                using var response = await this.HttpClient.SendAsync(request, cancellationToken);
-                var content = await response.Content?.ReadAsStringAsync(cancellationToken)!;
-                var rawContent = await response.Content.ReadAsByteArrayAsync(cancellationToken)!;
-                var contentString = null as string;
-                if (rawContent != null)
-                    contentString = Encoding.UTF8.GetString(rawContent);
-                if (!response.IsSuccessStatusCode)
-                {
-                    this.Logger.LogInformation("Failed to execute the ODATA function '{functionName}' at '{uri}'. The remote server responded with a non-success status code '{statusCode}'.", this.Function.Name, response.RequestMessage!.RequestUri, response.StatusCode);
-                    this.Logger.LogDebug("Response content:/r/n{responseContent}", contentString == null ? "None" : contentString);
-                    response.EnsureSuccessStatusCode();
-                }
-                if (rawContent != null)
-                {
-                    var mediaType = response.Content?.Headers.ContentType?.MediaType;
-                    var serializer = this.SerializerProvider.GetSerializersFor(mediaType).FirstOrDefault();
-                    if (serializer == null)
-                        throw new NotSupportedException($"Failed to find a serializer for the specified media type '{mediaType}'");
-                    using var stream = new MemoryStream(rawContent!);
-                    output = await serializer.DeserializeAsync<ExpandoObject>(stream, cancellationToken);
-                }
+                    command += $"?{commandOptions.QueryOptions.ToQueryString()}";
+                var output = null as object;
+                if (string.IsNullOrWhiteSpace(commandOptions?.Key))
+                    output = await this.ODataClient.FindEntriesAsync(command, cancellationToken);
+                else
+                    output = await this.ODataClient.FindEntryAsync(command, cancellationToken);
                 if (output == null)
                     output = new();
                 await this.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, output), cancellationToken);
@@ -128,6 +114,7 @@ namespace Synapse.Runtime.Executor.Services.Processors
             }
             
         }
+
     }
 
 }

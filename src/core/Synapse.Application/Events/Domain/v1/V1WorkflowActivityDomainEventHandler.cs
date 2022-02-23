@@ -15,6 +15,7 @@ namespace Synapse.Application.Events.Domain
         INotificationHandler<V1WorkflowActivityResumedDomainEvent>,
         INotificationHandler<V1WorkflowActivityFaultedDomainEvent>,
         INotificationHandler<V1WorkflowActivityCancelledDomainEvent>,
+        INotificationHandler<V1WorkflowActivitySkippedDomainEvent>,
         INotificationHandler<V1WorkflowActivityCompletedDomainEvent>
     {
 
@@ -105,6 +106,19 @@ namespace Synapse.Application.Events.Domain
         }
 
         /// <inheritdoc/>
+        public virtual async Task HandleAsync(V1WorkflowActivitySkippedDomainEvent e, CancellationToken cancellationToken = default)
+        {
+            var activity = await this.GetOrReconcileProjectionAsync(e.AggregateId, cancellationToken);
+            activity.LastModified = e.CreatedAt.UtcDateTime;
+            activity.ExecutedAt = e.CreatedAt.UtcDateTime;
+            activity.Status = V1WorkflowActivityStatus.Skipped;
+            await this.Projections.UpdateAsync(activity, cancellationToken);
+            await this.Projections.SaveChangesAsync(cancellationToken);
+            await this.UpdateParentWorkflowInstanceAsync(activity, cancellationToken);
+            await this.PublishIntegrationEventAsync(e, cancellationToken);
+        }
+
+        /// <inheritdoc/>
         public virtual async Task HandleAsync(V1WorkflowActivityCompletedDomainEvent e, CancellationToken cancellationToken = default)
         {
             var activity = await this.GetOrReconcileProjectionAsync(e.AggregateId, cancellationToken);
@@ -122,6 +136,7 @@ namespace Synapse.Application.Events.Domain
             await this.PublishIntegrationEventAsync(e, cancellationToken);
         }
 
+
         /// <summary>
         /// Updates the specified <see cref="V1WorkflowActivityDto"/> parent <see cref="V1WorkflowInstance"/>
         /// </summary>
@@ -132,9 +147,10 @@ namespace Synapse.Application.Events.Domain
         {
             var instance = await this.WorkflowInstances.FindAsync(activity.WorkflowInstanceId, cancellationToken);
             var existingActivity = instance.Activities.FirstOrDefault(a => a.Id == activity.Id);
-            if (existingActivity != null)
-                instance.Activities.Remove(existingActivity);
-            instance.Activities.Add(activity);
+            if (existingActivity == null)
+                instance.Activities.Add(activity);
+            else
+                this.Mapper.Map(activity, existingActivity);
             await this.WorkflowInstances.UpdateAsync(instance, cancellationToken);
             await this.WorkflowInstances.SaveChangesAsync(cancellationToken);
         }

@@ -34,6 +34,7 @@ namespace Synapse.Dashboard.Services
             var diagram = new Diagram(new DiagramOptions());
             diagram.RegisterModelComponent<WorkflowStartNodeModel, WorkflowStartNode>();
             diagram.RegisterModelComponent<WorkflowStateNodeModel, WorkflowStateNode>();
+            diagram.RegisterModelComponent<FunctionRefNodeModel, FunctionRefNode>();
             diagram.RegisterModelComponent<WorkflowEndNodeModel, WorkflowEndNode>();
             var startState = definition.GetStartState();
             var startNode = this.BuildStartNode(diagram);            
@@ -47,14 +48,13 @@ namespace Synapse.Dashboard.Services
 
         private NodeModel BuildStartNode(Diagram diagram)
         {
-            var node = new WorkflowStartNodeModel();
-            diagram.Nodes.Add(node);
-            return node;
+            return new WorkflowStartNodeModel();
         }
 
         private void BuildStateNodes(WorkflowDefinition definition, Diagram diagram, StateDefinition state, NodeModel endNode, NodeModel? previousNode = null)
         {
             var stateNodeGroup = new GroupModel(Array.Empty<NodeModel>());
+            stateNodeGroup.Title = state.Name;
             diagram.AddGroup(stateNodeGroup);
             List<NodeModel> childNodes = new();
             NodeModel firstNode, lastNode;
@@ -241,9 +241,7 @@ namespace Synapse.Dashboard.Services
 
         private NodeModel BuildEndNode(Diagram diagram)
         {
-            var node = new WorkflowEndNodeModel();
-            diagram.Nodes.Add(node);
-            return node;
+            return new WorkflowEndNodeModel();
         }
 
         private void BuildLinkBetween(Diagram diagram, NodeModel node1, NodeModel node2)

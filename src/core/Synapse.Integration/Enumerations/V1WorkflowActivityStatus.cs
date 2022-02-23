@@ -29,32 +29,37 @@ namespace Synapse
         /// Indicates that the activity is pending execution
         /// </summary>
         [EnumMember(Value = "pending")]
-        Pending = 0,
+        Pending,
         /// <summary>
         /// Indicates that the activity is running
         /// </summary>
         [EnumMember(Value = "running")]
-        Running = 1,
+        Running,
         /// <summary>
         /// Indicates that the activity has been suspended
         /// </summary>
         [EnumMember(Value = "suspended")]
-        Suspended = 2,
+        Suspended,
         /// <summary>
         /// Indicates that the activity has faulted due to an unhandled exception
         /// </summary>
         [EnumMember(Value = "faulted")]
-        Faulted = 16,
+        Faulted,
         /// <summary>
         /// Indicates that the activity has been cancelled
         /// </summary>
         [EnumMember(Value = "cancelled")]
-        Cancelled = 32,
+        Cancelled,
+        /// <summary>
+        /// Indicates that the activity has been skipped
+        /// </summary>
+        [EnumMember(Value = "skipped")]
+        Skipped,
         /// <summary>
         /// Indicates that the activity ran to completion
         /// </summary>
         [EnumMember(Value = "completed")]
-        Completed = 64
+        Completed
     }
 
 }

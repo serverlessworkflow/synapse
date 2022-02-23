@@ -18,6 +18,7 @@ using ProtoBuf.Grpc;
 using Synapse.Integration.Commands.WorkflowActivities;
 using Synapse.Integration.Commands.WorkflowInstances;
 using Synapse.Integration.Models;
+using Synapse.Integration.Queries.WorkflowActivities;
 using Synapse.Integration.Services;
 using Synapse.Ports.Grpc.Models;
 using System.ServiceModel;
@@ -42,13 +43,13 @@ namespace Synapse.Ports.Grpc.Services
         Task<V1GrpcApiResult<V1WorkflowInstanceDto>> StartAsync(string workflowInstanceId, CallContext context = default);
 
         /// <summary>
-        /// Gets the activities of the specified workflow instance
+        /// Gets the activities (including non-operative ones) of the specified workflow instance
         /// </summary>
         /// <param name="workflowInstanceId">The id of the workflow instance to get the activities of</param>
         /// <param name="context">The current server call context</param>
         /// <returns>A new object that describes the result of the operation</returns>
         [OperationContract]
-        Task<V1GrpcApiResult<List<V1WorkflowActivityDto>>> GetActivitiesAsync(string workflowInstanceId, CallContext context = default);
+        Task<V1GrpcApiResult<List<V1WorkflowActivityDto>>> GetActivitiesAsync(V1GetWorkflowActivitiesQueryDto query, CallContext context = default);
 
         /// <summary>
         /// Creates a new workflow activity

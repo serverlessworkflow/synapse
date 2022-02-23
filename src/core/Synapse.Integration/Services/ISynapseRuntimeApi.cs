@@ -38,13 +38,42 @@ namespace Synapse.Integration.Services
         Task<V1WorkflowInstanceDto> StartAsync(string workflowInstanceId, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Gets the activities of the specified workflow instance
+        /// Gets all the activities (including non-operative ones) of the specified workflow instance
         /// </summary>
         /// <param name="workflowInstanceId">The id of the workflow instance to get the activities of</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-        /// <returns>The activities of the specified workflow instance</returns>
+        /// <returns>A new <see cref="List{T}"/> containing all the activities (including non-operative ones) of the specified workflow instance</returns>
         [OperationContract]
         Task<List<V1WorkflowActivityDto>> GetActivitiesAsync(string workflowInstanceId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Gets the operative activities of the specified workflow instance
+        /// </summary>
+        /// <param name="workflowInstanceId">The id of the workflow instance to get the activities of</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The operative activities of the specified workflow instance</returns>
+        [OperationContract]
+        Task<List<V1WorkflowActivityDto>> GetOperativeActivitiesAsync(string workflowInstanceId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Gets the all the child activities (including non-operative ones) of the specified activity
+        /// </summary>
+        /// <param name="workflowInstanceId">The id of the workflow instance to get the activities of</param>
+        /// <param name="activityId">The id of the activity to get the child activities of</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The child activities (including non-operative ones) of the specified activity</returns>
+        [OperationContract]
+        Task<List<V1WorkflowActivityDto>> GetActivitiesAsync(string workflowInstanceId, string activityId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Gets the operative child activities of the specified activity
+        /// </summary>
+        /// <param name="workflowInstanceId">The id of the workflow instance to get the activities of</param>
+        /// <param name="activityId">The id of the activity to get the child activities of</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The operative child activities of the specified activity</returns>
+        [OperationContract]
+        Task<List<V1WorkflowActivityDto>> GetOperativeActivitiesAsync(string workflowInstanceId, string activityId, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Creates a new workflow activity

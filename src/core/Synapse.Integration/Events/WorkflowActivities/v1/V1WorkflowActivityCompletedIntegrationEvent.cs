@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+using Newtonsoft.Json;
+
 namespace Synapse.Integration.Events.WorkflowActivities
 {
 
@@ -34,9 +36,14 @@ namespace Synapse.Integration.Events.WorkflowActivities
 		/// </summary>
 		/// <param name="id">The id of the completed workflow activity</param>
 		/// <param name="output">The output of the completed workflow activity</param>
-		public V1WorkflowActivityCompletedIntegrationEvent(string id, object? output)
+		public V1WorkflowActivityCompletedIntegrationEvent(string id, object output)
         {
 			this.AggregateId = id;
+
+			//todo: remove
+			Console.WriteLine("TYPE = " + output?.GetType().Name);
+			Console.WriteLine(output == null ? "NULL" : JsonConvert.SerializeObject(output));
+
 			var outputValue = output as Any;
 			if (outputValue == null
 				&& output != null)

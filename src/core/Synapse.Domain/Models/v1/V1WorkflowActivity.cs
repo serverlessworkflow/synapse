@@ -161,6 +161,16 @@ namespace Synapse.Domain.Models
         }
 
         /// <summary>
+        /// Skips the <see cref="V1WorkflowActivity"/>
+        /// </summary>
+        public virtual void Skip()
+        {
+            if (this.Status >= V1WorkflowActivityStatus.Faulted)
+                throw DomainException.UnexpectedState(typeof(V1WorkflowActivity), this.Id, this.Status);
+            this.On(this.RegisterEvent(new V1WorkflowActivitySkippedDomainEvent(this.Id)));
+        }
+
+        /// <summary>
         /// Completes and sets the <see cref="V1WorkflowActivity"/>'s output
         /// </summary>
         public virtual void SetOutput(object? output)
@@ -238,6 +248,17 @@ namespace Synapse.Domain.Models
             this.LastModified = e.CreatedAt;
             this.ExecutedAt = e.CreatedAt;
             this.Status = V1WorkflowActivityStatus.Cancelled;
+        }
+
+        /// <summary>
+        /// Handles the specified <see cref="V1WorkflowActivitySkippedDomainEvent"/>
+        /// </summary>
+        /// <param name="e">The <see cref="V1WorkflowActivitySkippedDomainEvent"/> to handle</param>
+        protected virtual void On(V1WorkflowActivitySkippedDomainEvent e)
+        {
+            this.LastModified = e.CreatedAt;
+            this.ExecutedAt = e.CreatedAt;
+            this.Status = V1WorkflowActivityStatus.Skipped;
         }
 
         /// <summary>

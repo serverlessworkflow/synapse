@@ -52,18 +52,45 @@ namespace Synapse.Ports.Grpc.Services
         protected ISynapseGrpcRuntimeApi GrpcRuntimeApi { get; }
 
         /// <inheritdoc/>
-        public virtual async Task<V1WorkflowActivityDto> CancelActivityAsync(string activityId, CancellationToken cancellationToken = default)
+        public virtual async Task<List<V1WorkflowActivityDto>> GetActivitiesAsync(string workflowInstanceId, CancellationToken cancellationToken = default)
         {
-            var result = await this.GrpcRuntimeApi.CancelActivityAsync(activityId, cancellationToken);
+            var result = await this.GrpcRuntimeApi.GetActivitiesAsync(new(workflowInstanceId, true), cancellationToken);
             if (!result.Succeeded)
                 throw new SynapseApiException(result);
-            return result.Data!;
+            return result.Data ?? (new());
         }
 
         /// <inheritdoc/>
-        public virtual async Task<V1WorkflowInstanceDto> CancelAsync(string workflowInstanceId, CancellationToken cancellationToken = default)
+        public virtual async Task<List<V1WorkflowActivityDto>> GetOperativeActivitiesAsync(string workflowInstanceId, CancellationToken cancellationToken = default)
         {
-            var result = await this.GrpcRuntimeApi.CancelAsync(workflowInstanceId, cancellationToken);
+            var result = await this.GrpcRuntimeApi.GetActivitiesAsync(new(workflowInstanceId), cancellationToken);
+            if (!result.Succeeded)
+                throw new SynapseApiException(result);
+            return result.Data ?? (new());
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<List<V1WorkflowActivityDto>> GetActivitiesAsync(string workflowInstanceId, string activityId, CancellationToken cancellationToken = default)
+        {
+            var result = await this.GrpcRuntimeApi.GetActivitiesAsync(new(workflowInstanceId, true, activityId), cancellationToken);
+            if (!result.Succeeded)
+                throw new SynapseApiException(result);
+            return result.Data ?? (new());
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<List<V1WorkflowActivityDto>> GetOperativeActivitiesAsync(string workflowInstanceId, string activityId, CancellationToken cancellationToken = default)
+        {
+            var result = await this.GrpcRuntimeApi.GetActivitiesAsync(new(workflowInstanceId, false, activityId), cancellationToken);
+            if (!result.Succeeded)
+                throw new SynapseApiException(result);
+            return result.Data ?? (new());
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<V1WorkflowInstanceDto> StartAsync(string workflowInstanceId, CancellationToken cancellationToken = default)
+        {
+            var result = await this.GrpcRuntimeApi.StartAsync(workflowInstanceId, cancellationToken);
             if (!result.Succeeded)
                 throw new SynapseApiException(result);
             return result.Data!;
@@ -79,9 +106,45 @@ namespace Synapse.Ports.Grpc.Services
         }
 
         /// <inheritdoc/>
+        public virtual async Task<V1WorkflowActivityDto> StartActivityAsync(string activityId, CancellationToken cancellationToken = default)
+        {
+            var result = await this.GrpcRuntimeApi.StartActivityAsync(activityId, cancellationToken);
+            if (!result.Succeeded)
+                throw new SynapseApiException(result);
+            return result.Data!;
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<V1WorkflowActivityDto> SuspendActivityAsync(string activityId, CancellationToken cancellationToken = default)
+        {
+            var result = await this.GrpcRuntimeApi.SuspendActivityAsync(activityId, cancellationToken);
+            if (!result.Succeeded)
+                throw new SynapseApiException(result);
+            return result.Data!;
+        }
+
+        /// <inheritdoc/>
         public virtual async Task<V1WorkflowActivityDto> FaultActivityAsync(V1FaultWorkflowActivityCommandDto command, CancellationToken cancellationToken = default)
         {
             var result = await this.GrpcRuntimeApi.FaultActivityAsync(command, cancellationToken);
+            if (!result.Succeeded)
+                throw new SynapseApiException(result);
+            return result.Data!;
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<V1WorkflowActivityDto> CancelActivityAsync(string activityId, CancellationToken cancellationToken = default)
+        {
+            var result = await this.GrpcRuntimeApi.CancelActivityAsync(activityId, cancellationToken);
+            if (!result.Succeeded)
+                throw new SynapseApiException(result);
+            return result.Data!;
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<V1WorkflowActivityDto> SetActivityOutputAsync(V1SetWorkflowActivityOutputCommandDto command, CancellationToken cancellationToken = default)
+        {
+            var result = await this.GrpcRuntimeApi.SetActivityOutputAsync(command, cancellationToken);
             if (!result.Succeeded)
                 throw new SynapseApiException(result);
             return result.Data!;
@@ -97,18 +160,9 @@ namespace Synapse.Ports.Grpc.Services
         }
 
         /// <inheritdoc/>
-        public virtual async Task<List<V1WorkflowActivityDto>> GetActivitiesAsync(string workflowInstanceId, CancellationToken cancellationToken = default)
+        public virtual async Task<V1WorkflowInstanceDto> CancelAsync(string workflowInstanceId, CancellationToken cancellationToken = default)
         {
-            var result = await this.GrpcRuntimeApi.GetActivitiesAsync(workflowInstanceId, cancellationToken);
-            if (!result.Succeeded)
-                throw new SynapseApiException(result);
-            return result.Data == null ? new() : result.Data;
-        }
-
-        /// <inheritdoc/>
-        public virtual async Task<V1WorkflowActivityDto> SetActivityOutputAsync(V1SetWorkflowActivityOutputCommandDto command, CancellationToken cancellationToken = default)
-        {
-            var result = await this.GrpcRuntimeApi.SetActivityOutputAsync(command, cancellationToken);
+            var result = await this.GrpcRuntimeApi.CancelAsync(workflowInstanceId, cancellationToken);
             if (!result.Succeeded)
                 throw new SynapseApiException(result);
             return result.Data!;
@@ -118,33 +172,6 @@ namespace Synapse.Ports.Grpc.Services
         public virtual async Task<V1WorkflowInstanceDto> SetOutputAsync(V1SetWorkflowInstanceOutputCommandDto command, CancellationToken cancellationToken = default)
         {
             var result = await this.GrpcRuntimeApi.SetOutputAsync(command, cancellationToken);
-            if (!result.Succeeded)
-                throw new SynapseApiException(result);
-            return result.Data!;
-        }
-
-        /// <inheritdoc/>
-        public virtual async Task<V1WorkflowActivityDto> StartActivityAsync(string activityId, CancellationToken cancellationToken = default)
-        {
-            var result = await this.GrpcRuntimeApi.StartActivityAsync(activityId, cancellationToken);
-            if (!result.Succeeded)
-                throw new SynapseApiException(result);
-            return result.Data!;
-        }
-
-        /// <inheritdoc/>
-        public virtual async Task<V1WorkflowInstanceDto> StartAsync(string workflowInstanceId, CancellationToken cancellationToken = default)
-        {
-            var result = await this.GrpcRuntimeApi.StartAsync(workflowInstanceId, cancellationToken);
-            if (!result.Succeeded)
-                throw new SynapseApiException(result);
-            return result.Data!;
-        }
-
-        /// <inheritdoc/>
-        public virtual async Task<V1WorkflowActivityDto> SuspendActivityAsync(string activityId, CancellationToken cancellationToken = default)
-        {
-            var result = await this.GrpcRuntimeApi.SuspendActivityAsync(activityId, cancellationToken);
             if (!result.Succeeded)
                 throw new SynapseApiException(result);
             return result.Data!;

@@ -286,8 +286,8 @@ namespace Synapse.Runtime.Executor.Services.Processors
                         contentString = Encoding.UTF8.GetString(rawContent);
                     if (!response.IsSuccessStatusCode)
                     {
-                        this.Logger.LogInformation("Failed to execute the REST operation '{operationId}' at '{uri}'. The remote server responded with a non-success status code '{statusCode}'.", this.Operation.OperationId, response.RequestMessage!.RequestUri, response.StatusCode);
-                        this.Logger.LogDebug("Response content:/r/n{responseContent}", contentString == null ? "None" : contentString);
+                        this.Logger.LogInformation("Failed to execute the Open API operation '{operationId}' at '{uri}'. The remote server responded with a non-success status code '{statusCode}'.", this.Operation.OperationId, response.RequestMessage!.RequestUri, response.StatusCode);
+                        this.Logger.LogDebug("Response content:/r/n{responseContent}", contentString ?? "None");
                         response.EnsureSuccessStatusCode();
                     }
                     if (rawContent!= null)
