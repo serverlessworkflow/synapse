@@ -15,6 +15,8 @@
  *
  */
 
+using System.Text.RegularExpressions;
+
 namespace Synapse
 {
     /// <summary>
@@ -30,7 +32,7 @@ namespace Synapse
         /// <returns>The <see cref="Guid"/>'s base 64 representation</returns>
         public static string ToBase64(this Guid guid)
         {
-            return Convert.ToBase64String(guid.ToByteArray()).Replace("/", "_").Replace("+", "-")[..22];
+            return Regex.Replace(Convert.ToBase64String(guid.ToByteArray()), "[/+=]", ""); ;
         }
 
     }

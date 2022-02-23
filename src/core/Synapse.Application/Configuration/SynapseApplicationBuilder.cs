@@ -66,6 +66,15 @@ namespace Synapse.Application.Configuration
         /// <inheritdoc/>
         public virtual void Build()
         {
+            JsonConvert.DefaultSettings = () =>
+            {
+                var settings = new JsonSerializerSettings()
+                {
+                    NullValueHandling = NullValueHandling.Ignore
+                };
+                return settings;
+            };
+
             List<Type> writeModelTypes = TypeCacheUtil.FindFilteredTypes("domain:aggregates", t => t.IsClass && !t.IsAbstract && typeof(IAggregateRoot).IsAssignableFrom(t), typeof(V1Workflow).Assembly).ToList();
             List<Type> readModelTypes = writeModelTypes
                 .Where(t => t.TryGetCustomAttribute<DataTransferObjectTypeAttribute>(out _))

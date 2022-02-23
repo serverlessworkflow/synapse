@@ -16,6 +16,7 @@
  */
 
 using Neuroglia.Serialization;
+using Newtonsoft.Json;
 using Synapse.Integration.Events.WorkflowActivities;
 using System.Reactive.Linq;
 
@@ -124,7 +125,7 @@ namespace Synapse.Runtime.Executor.Services.Processors
                 if (action.UseResults())
                 {
                     var expression = action.ActionDataFilter?.ToStateData?.Trim();
-                    var json = await this.JsonSerializer.SerializeAsync(output, cancellationToken);
+                    var json = await this.JsonSerializer.SerializeAsync(activity.Output, cancellationToken);
                     if (string.IsNullOrWhiteSpace(expression))
                     {
                         expression = json;
@@ -135,7 +136,7 @@ namespace Synapse.Runtime.Executor.Services.Processors
                             expression = expression[2..^1];
                         expression = $"{expression} = {json}";
                     }
-                    output = this.Context.ExpressionEvaluator.Evaluate(expression, activity.Output.ToObject())!;
+                    output = this.Context.ExpressionEvaluator.Evaluate(expression, output)!;
                 }
             }
             return output;

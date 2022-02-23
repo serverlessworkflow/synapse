@@ -117,9 +117,19 @@ namespace Synapse.Application.Commands.WorkflowInstances
             string? key = null;
             if (!string.IsNullOrWhiteSpace(workflow.Definition.Key)
                 && command.InputData != null)
-                key = this.ExpressionEvaluatorProvider.GetEvaluator(workflow.Definition.ExpressionLanguage)!.Evaluate(workflow.Definition.Key, command.InputData)?.ToString();
+            {
+                try
+                {
+                    key = this.ExpressionEvaluatorProvider.GetEvaluator(workflow.Definition.ExpressionLanguage)!.Evaluate(workflow.Definition.Key, command.InputData)?.ToString();
+                }
+                catch { }
+            }
             if (string.IsNullOrWhiteSpace(key))
                 key = Guid.NewGuid().ToBase64();
+            while (await this.WorkflowInstances.ContainsAsync(V1WorkflowInstance.BuildUniqueIdentifier(key, workflow), cancellationToken))
+            {
+                key = Guid.NewGuid().ToBase64();
+            }
             var workflowInstance = await this.WorkflowInstances.AddAsync(new(key, workflow, command.ActivationType, command.InputData, command.TriggerEvents), cancellationToken);
             await this.WorkflowInstances.SaveChangesAsync(cancellationToken);
             return this.Ok(this.Mapper.Map<V1WorkflowInstanceDto>(workflowInstance));
