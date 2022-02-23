@@ -1,4 +1,4 @@
-﻿/*
+﻿ /*
  * Copyright © 2022-Present The Synapse Authors
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +19,7 @@ using Synapse.Integration.Events.WorkflowActivities;
 
 namespace Synapse.Runtime.Executor.Services.Processors
 {
+
     /// <summary>
     /// Represents an <see cref="IWorkflowActivityProcessor"/> used to process <see cref="StartDefinition"/>s
     /// </summary>

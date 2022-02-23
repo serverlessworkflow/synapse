@@ -16,6 +16,7 @@
  */
 
 using ServerlessWorkflow.Sdk.Models;
+using ServerlessWorkflow.Sdk.Services.Validation;
 using Synapse.Integration.Commands.Workflows;
 using Synapse.Integration.Models;
 using System.ComponentModel.DataAnnotations;
@@ -70,14 +71,21 @@ namespace Synapse.Application.Commands.Workflows
         /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
         /// <param name="mediator">The service used to mediate calls</param>
         /// <param name="mapper">The service used to map objects</param>
+        /// <param name="workflowValidator">The service used to validate <see cref="WorkflowDefinition"/>s</param>
         /// <param name="workflows">The <see cref="IRepository"/> used to manage <see cref="V1Workflow"/>s</param>
         /// <param name="runtimeHost">The current <see cref="IWorkflowRuntimeHost"/></param>
-        public V1CreateWorkflowCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IRepository<V1Workflow> workflows, IWorkflowRuntimeHost runtimeHost) 
+        public V1CreateWorkflowCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IWorkflowValidator workflowValidator, IRepository<V1Workflow> workflows, IWorkflowRuntimeHost runtimeHost) 
             : base(loggerFactory, mediator, mapper)
         {
+            this.WorkflowValidator = workflowValidator;
             this.Workflows = workflows;
             this.RuntimeHost = runtimeHost;
         }
+
+        /// <summary>
+        /// Gets the service used to validate <see cref="WorkflowDefinition"/>s
+        /// </summary>
+        protected IWorkflowValidator WorkflowValidator { get; }
 
         /// <summary>
         /// Gets the <see cref="IRepository"/> used to manage <see cref="V1Workflow"/>s
@@ -92,6 +100,9 @@ namespace Synapse.Application.Commands.Workflows
         /// <inheritdoc/>
         public virtual async Task<IOperationResult<V1WorkflowDto>> HandleAsync(V1CreateWorkflowCommand command, CancellationToken cancellationToken = default)
         {
+            var validationResult = await this.WorkflowValidator.ValidateAsync(command.Definition, true, true, cancellationToken);
+            if (!validationResult.IsValid)
+                return this.Invalid(validationResult.AsErrors().ToArray());
             while (await this.Workflows.ContainsAsync(command.Definition.GetUniqueIdentifier(), cancellationToken))
             {
                 var version = Version.Parse(command.Definition.Version);

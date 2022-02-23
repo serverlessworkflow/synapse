@@ -2,14 +2,15 @@
 @using Neuroglia.Data
 @using Newtonsoft.Json.Schema
 @using ServerlessWorkflow.Sdk.Services.IO
+@using ServerlessWorkflow.Sdk.Services.Validation
 @using Synapse.Integration.Commands.Workflows
 @using Synapse.Integration.Models
 @using Synapse.Integration.Services
 @using Synapse.Dashboard.Components
 @using System.Text
 @inject ISynapseApi SynapseApi
-@inject IWorkflowSchemaValidator WorkflowSchemaValidator
 @inject IWorkflowReader WorkflowReader
+@inject IWorkflowValidator WorkflowValidator
 
 <PageTitle>Create new workflow</PageTitle>
 <AppHeader>Create new workflow</AppHeader>
