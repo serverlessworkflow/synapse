@@ -51,7 +51,7 @@ namespace Synapse.Dashboard.Services
             return new WorkflowStartNodeModel();
         }
 
-        private void BuildStateNodes(WorkflowDefinition definition, Diagram diagram, StateDefinition state, NodeModel endNode, NodeModel? previousNode = null)
+        private void BuildStateNodes(WorkflowDefinition definition, Diagram diagram, StateDefinition state, NodeModel endNode, NodeModel previousNode)
         {
             var stateNodeGroup = new GroupModel(Array.Empty<NodeModel>())
             {
@@ -59,7 +59,7 @@ namespace Synapse.Dashboard.Services
             };
             diagram.AddGroup(stateNodeGroup);
             List<NodeModel> childNodes = new();
-            NodeModel firstNode, lastNode;
+            NodeModel node, firstNode, lastNode;
             switch (state)
             {
                 case CallbackStateDefinition callbackState:
@@ -76,10 +76,12 @@ namespace Synapse.Dashboard.Services
 
                     break;
                 case InjectStateDefinition injectState:
-
+                    node = new WorkflowStateNodeModel(state);
+                    childNodes.Add(node);
+                    this.BuildLinkBetween(diagram, node, previousNode);
                     break;
                 case OperationStateDefinition operationState:
-                    var node = previousNode;
+                    node = previousNode;
                     switch (operationState.ActionMode)
                     {
                         case ActionExecutionMode.Parallel:

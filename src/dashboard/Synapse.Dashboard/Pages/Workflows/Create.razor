@@ -20,7 +20,7 @@
     <MonacoEditor
         @ref="editor"
         Id="definition-editor"
-        CssClass="flex-grow"
+        CssClass="w-100"
         ConstructionOptions="MonacoEditorOptionsBuilder"
         OnDidInit="OnMonacoEditorDidInit"
         OnDidChangeModelDecorations="OnMonacoEditorDidChangeModelDecorations"
@@ -57,11 +57,24 @@
         {
             using var stream = new MemoryStream(Encoding.UTF8.GetBytes(rawDefinition));
             command.Definition = await this.WorkflowReader.ReadAsync(stream);
-            var validationResult = await this.WorkflowValidator.ValidateAsync(command.Definition);
+            var validationResult = await this.WorkflowValidator.ValidateAsync(command.Definition, false, true);
+            if (!validationResult.IsValid)
+            {
+                validationResult.SchemaValidationErrors.ToList().ForEach(error =>
+                {
+                    this.validationErrors.Add($"(Schema) ${error.Message}");
+                });
+                validationResult.DslValidationErrors.ToList().ForEach(error =>
+                {
+                    this.validationErrors.Add($"(DSL) ${error.ErrorMessage}");
+                });
+                return;
+            }
         }
         catch(Exception ex)
         {
             Console.WriteLine(ex.ToString());
+            //todo: warn the user via validationErrors
             return;
         }
         var workflow = await this.SynapseApi.CreateWorkflowAsync(command);
@@ -106,7 +119,8 @@
     {
         return new StandaloneEditorConstructionOptions {
 		    AutomaticLayout = true,
-		    Language = "json"
+		    Language = "json",
+            Minimap = new EditorMinimapOptions { Enabled = false }
 	    };
     }
 
