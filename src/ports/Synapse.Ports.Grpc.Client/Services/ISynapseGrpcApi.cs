@@ -82,6 +82,16 @@ namespace Synapse.Ports.Grpc.Services
         [OperationContract]
         Task<V1GrpcApiResult<V1WorkflowInstanceDto>> CreateWorkflowInstanceAsync(V1CreateWorkflowInstanceCommandDto command, CancellationToken cancellationToken = default);
 
+
+        /// <summary>
+        /// Starts a workflow instance
+        /// </summary>
+        /// <param name="id">The id of the workflow instance to start</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new object that describes the result of the operation</returns>
+        [OperationContract]
+        Task<V1GrpcApiResult<V1WorkflowInstanceDto>> StartWorkflowInstanceAsync(string id, CancellationToken cancellationToken = default);
+
         /// <summary>
         /// Gets the workflow instance with the specified id
         /// </summary>

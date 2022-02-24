@@ -89,6 +89,15 @@ namespace Synapse.Integration.Services
         Task<V1WorkflowInstanceDto> CreateWorkflowInstanceAsync(V1CreateWorkflowInstanceCommandDto command, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Starts a workflow instance
+        /// </summary>
+        /// <param name="id">The id of the workflow instance to start</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The started workflow instance</returns>
+        [OperationContract]
+        Task<V1WorkflowInstanceDto> StartWorkflowInstanceAsync(string id, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Gets the workflow instance with the specified id
         /// </summary>
         /// <param name="id">The id of the workflow instance to get</param>

@@ -62,11 +62,11 @@ namespace Synapse.Ports.HttpRest.Client.Services
             var json = await this.Serializer.SerializeAsync(command, cancellationToken);
             request.Content = new StringContent(json, Encoding.UTF8, MediaTypeNames.Application.Json);
             using var response = await this.HttpClient.SendAsync(request, cancellationToken);
-            json = await response.Content?.ReadAsStringAsync()!;
+            json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
             if (!response.IsSuccessStatusCode)
                 this.Logger.LogError("An error occured while creating a new workflow: {details}", json);
             response.EnsureSuccessStatusCode();
-            return await this.Serializer.DeserializeAsync<V1WorkflowDto>(json);
+            return await this.Serializer.DeserializeAsync<V1WorkflowDto>(json, cancellationToken);
         }
 
         /// <inheritdoc/>
@@ -77,11 +77,11 @@ namespace Synapse.Ports.HttpRest.Client.Services
                 requestUri += $"?{query}";
             using var request = this.CreateRequest(HttpMethod.Get, requestUri);
             using var response = await this.HttpClient.SendAsync(request, cancellationToken);
-            var json = await response.Content?.ReadAsStringAsync()!;
+            var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
             if (!response.IsSuccessStatusCode)
                 this.Logger.LogError("An error occured while querying workflows: {details}", json);
             response.EnsureSuccessStatusCode();
-            return await this.Serializer.DeserializeAsync<List<V1WorkflowDto>>(json);
+            return await this.Serializer.DeserializeAsync<List<V1WorkflowDto>>(json, cancellationToken);
         }
 
         /// <inheritdoc/>
@@ -95,17 +95,22 @@ namespace Synapse.Ports.HttpRest.Client.Services
         {
             using var request = this.CreateRequest(HttpMethod.Get, $"/api/v1/workflows/{id}");
             using var response = await this.HttpClient.SendAsync(request, cancellationToken);
-            var json = await response.Content?.ReadAsStringAsync()!;
+            var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
             if (!response.IsSuccessStatusCode)
                 this.Logger.LogError("An error occured while querying workflows: {details}", json);
             response.EnsureSuccessStatusCode();
-            return await this.Serializer.DeserializeAsync<V1WorkflowDto>(json);
+            return await this.Serializer.DeserializeAsync<V1WorkflowDto>(json, cancellationToken);
         }
 
         /// <inheritdoc/>
         public virtual async Task DeleteWorkflowAsync(string id, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            using var request = this.CreateRequest(HttpMethod.Delete, $"/api/v1/workflows/{id}");
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while querying workflows: {details}", json);
+            response.EnsureSuccessStatusCode();
         }
 
         #endregion region
@@ -115,28 +120,56 @@ namespace Synapse.Ports.HttpRest.Client.Services
         /// <inheritdoc/>
         public virtual async Task<V1WorkflowInstanceDto> CreateWorkflowInstanceAsync(V1CreateWorkflowInstanceCommandDto command, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var requestUri = "/api/v1/workflow-instances";
+            using var request = this.CreateRequest(HttpMethod.Post, requestUri);
+            var json = await this.Serializer.SerializeAsync(command, cancellationToken);
+            request.Content = new StringContent(json, Encoding.UTF8, MediaTypeNames.Application.Json);
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while creating a new workflow instance: {details}", json);
+            response.EnsureSuccessStatusCode();
+            return await this.Serializer.DeserializeAsync<V1WorkflowInstanceDto>(json, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<V1WorkflowInstanceDto> StartWorkflowInstanceAsync(string id, CancellationToken cancellationToken = default)
+        {
+            var requestUri = $"/api/v1/workflow-instances/byid/{id}/start";
+            using var request = this.CreateRequest(HttpMethod.Post, requestUri);
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while starting the workflow instance with id '{workflowInstanceId}': {details}", id, json);
+            response.EnsureSuccessStatusCode();
+            return await this.Serializer.DeserializeAsync<V1WorkflowInstanceDto>(json, cancellationToken);
         }
 
         /// <inheritdoc/>
         public virtual async Task<V1WorkflowInstanceDto> GetWorkflowInstanceByIdAsync(string id, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            using var request = this.CreateRequest(HttpMethod.Get, $"/api/v1/workflow-instances/{id}");
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while querying workflow instances: {details}", json);
+            response.EnsureSuccessStatusCode();
+            return await this.Serializer.DeserializeAsync<V1WorkflowInstanceDto>(json, cancellationToken);
         }
 
         /// <inheritdoc/>
         public virtual async Task<List<V1WorkflowInstanceDto>> GetWorkflowInstancesAsync(string? query, CancellationToken cancellationToken = default)
         {
-            var requestUri = "/api/v1/workflows";
+            var requestUri = "/api/v1/workflow-instances";
             if (!string.IsNullOrWhiteSpace(query))
                 requestUri += $"?{query}";
             using var request = this.CreateRequest(HttpMethod.Get, requestUri);
             using var response = await this.HttpClient.SendAsync(request, cancellationToken);
-            var json = await response.Content?.ReadAsStringAsync()!;
+            var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
             if (!response.IsSuccessStatusCode)
                 this.Logger.LogError("An error occured while querying workflows: {details}", json);
             response.EnsureSuccessStatusCode();
-            return await this.Serializer.DeserializeAsync<List<V1WorkflowInstanceDto>>(json);
+            return await this.Serializer.DeserializeAsync<List<V1WorkflowInstanceDto>>(json, cancellationToken);
         }
 
         /// <inheritdoc/>

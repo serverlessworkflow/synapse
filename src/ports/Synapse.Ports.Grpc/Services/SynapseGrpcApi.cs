@@ -113,6 +113,12 @@ namespace Synapse.Ports.Grpc.Services
         }
 
         /// <inheritdoc/>
+        public virtual async Task<V1GrpcApiResult<V1WorkflowInstanceDto>> StartWorkflowInstanceAsync(string id, CancellationToken cancellationToken = default)
+        {
+            return V1GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new V1StartWorkflowInstanceCommand(id), cancellationToken));
+        }
+
+        /// <inheritdoc/>
         public virtual async Task<V1GrpcApiResult<V1WorkflowInstanceDto>> GetWorkflowInstanceByIdAsync(string id, CancellationToken cancellationToken = default)
         {
             return V1GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new V1FindByIdQuery<V1WorkflowInstanceDto, string>(id), cancellationToken));
@@ -129,6 +135,7 @@ namespace Synapse.Ports.Grpc.Services
         {
             return V1GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(this.Mapper.Map<V1DeleteCommand<V1WorkflowInstance, string>>(id), cancellationToken));
         }
+
 
         #endregion
     }

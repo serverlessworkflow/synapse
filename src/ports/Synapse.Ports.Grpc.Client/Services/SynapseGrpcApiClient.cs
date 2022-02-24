@@ -107,6 +107,15 @@ namespace Synapse.Ports.Grpc.Services
         }
 
         /// <inheritdoc/>
+        public virtual async Task<V1WorkflowInstanceDto> StartWorkflowInstanceAsync(string id, CancellationToken cancellationToken = default)
+        {
+            var result = await this.Adapter.StartWorkflowInstanceAsync(id, cancellationToken);
+            if (!result.Succeeded)
+                throw new SynapseApiException(result);
+            return result.Data!;
+        }
+
+        /// <inheritdoc/>
         public virtual async Task<V1WorkflowInstanceDto> GetWorkflowInstanceByIdAsync(string id, CancellationToken cancellationToken = default)
         {
             var result = await this.Adapter.GetWorkflowInstanceByIdAsync(id, cancellationToken);
