@@ -42,4 +42,6 @@ app.MapGrpcService<SynapseGrpcApi>();
 app.MapGrpcService<SynapseGrpcRuntimeApi>();
 app.MapHub<SynapseWebSocketApi>("/api/ws");
 app.MapFallbackToFile("index.html");
+app.MapFallbackToFile("/workflows/{param?}", "index.html");
+app.MapFallbackToFile("/workflow-instances/{param?}", "index.html");
 await app.RunAsync();
