@@ -12,8 +12,10 @@
 @inject IWorkflowReader WorkflowReader
 @inject IWorkflowValidator WorkflowValidator
 
-<PageTitle>Create new workflow</PageTitle>
-<AppHeader>Create new workflow</AppHeader>
+<PageTitle>New workflow</PageTitle>
+<AppHeader>
+    <span class="h5 m-0 p-0">New workflow</span>
+</AppHeader>
 
 @if(validationErrors != null && validationErrors.Any())
 {
@@ -35,7 +37,7 @@
         OnDidInit="OnMonacoEditorDidInit"
     />
 </div>
-<button @onclick="OnCreateWorkflow" type="button" class="btn btn-blockquote btn-dark">Create Workflow</button>
+<button @onclick="OnCreateWorkflow" type="button" class="btn btn-blockquote btn-dark">Create</button>
 
 
 @code {

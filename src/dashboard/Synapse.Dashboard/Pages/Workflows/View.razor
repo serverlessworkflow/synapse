@@ -8,7 +8,9 @@
 @inject IWorkflowDiagramBuilder WorkflowDiagramBuilder
 
 <PageTitle>@workflow?.Id</PageTitle>
-<AppHeader>@workflow?.Id</AppHeader>
+<AppHeader>
+    <span class="h5 m-0 p-0">@workflow?.Id</span>
+</AppHeader>
 
 @if (workflow != null)
 {
