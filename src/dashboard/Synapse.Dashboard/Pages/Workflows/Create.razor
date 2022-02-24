@@ -1,6 +1,4 @@
 ﻿@page "/workflows/new"
-@using Neuroglia.Data
-@using Newtonsoft.Json.Schema
 @using ServerlessWorkflow.Sdk.Services.IO
 @using ServerlessWorkflow.Sdk.Services.Validation
 @using Synapse.Integration.Commands.Workflows
@@ -15,36 +13,38 @@
 <PageTitle>Create new workflow</PageTitle>
 <AppHeader>Create new workflow</AppHeader>
 
-@if(validationErrors != null && validationErrors.Any())
-{
-    <div class="alert alert-danger">
-        <ul>
-            @foreach (var error in validationErrors)
-            {
-                <li>@error.ToString()</li>
-            }
-        </ul>
-    </div>
-}
-<div>
+<div class="h-100 mh-100 d-flex flex-column justify-content-between align-items-start">
     <label class="form-form-label">Definition</label>
     <MonacoEditor
         @ref="editor"
         Id="definition-editor"
+        CssClass="flex-grow"
         ConstructionOptions="MonacoEditorOptionsBuilder"
         OnDidInit="OnMonacoEditorDidInit"
+        OnDidChangeModelDecorations="OnMonacoEditorDidChangeModelDecorations"
     />
+    @if(validationErrors != null && validationErrors.Any())
+    {
+        <div class="validation-errors alert alert-danger">
+            <ul>
+                @foreach (var error in validationErrors)
+                {
+                    <li>@error.ToString()</li>
+                }
+            </ul>
+        </div>
+    }
+    <button disabled="@IsCreateDisabled" @onclick="OnCreateWorkflow" type="button" class="btn btn-blockquote btn-dark">Create Workflow</button>
 </div>
-<button @onclick="OnCreateWorkflow" type="button" class="btn btn-blockquote btn-dark">Create Workflow</button>
-
 
 @code {
-
-    IList<ValidationError> validationErrors;
-    private MonacoEditor editor;
+    protected IList<string> validationErrors = new List<string>();
+    protected MonacoEditor editor;
+    protected bool IsCreateDisabled { get; set; } = true;
 
     async Task OnCreateWorkflow()
     {
+        await this.Validate();
         var rawDefinition = await this.editor.GetValue();
         if (string.IsNullOrWhiteSpace(rawDefinition))
         {
@@ -65,13 +65,42 @@
         var workflow = await this.SynapseApi.CreateWorkflowAsync(command);
     }
 
-    private async Task OnMonacoEditorDidInit(MonacoEditorBase editorBase)
+    protected async Task OnMonacoEditorDidInit(MonacoEditorBase editorBase)
     {
         var model = await this.editor.GetModel();
         await model.jsRuntime.InvokeVoidAsync("enableJsonValidation08" , model.Uri);
     }
 
-    private StandaloneEditorConstructionOptions MonacoEditorOptionsBuilder(MonacoEditor editor)
+    protected async Task OnMonacoEditorDidChangeModelDecorations(ModelDecorationsChangedEvent modelDecorationsChangedEvent)
+    {
+        await this.Validate();
+    }
+
+    protected async Task Validate()
+    {
+        this.validationErrors.Clear();
+        this.IsCreateDisabled = false;
+        var model = await this.editor.GetModel();
+        var owner = await model.GetModeId();
+        var markers = await model.jsRuntime.InvokeAsync<IEnumerable<Models.MonacoEditorMarker>>("getModelMarkers" , owner);
+        var severeMarkers = markers.Where(marker => marker.Severity >= (int)Models.MonacoEditorMarkerSeverity.Warning);
+        var rawDefinition = await this.editor.GetValue();
+        if (severeMarkers.Any())
+        {
+            this.IsCreateDisabled = true;
+            severeMarkers.ToList().ForEach(marker =>
+            {
+                this.validationErrors.Add($"{marker.Message} ");
+            });
+        }
+        else if (String.IsNullOrEmpty(rawDefinition))
+        {
+            this.validationErrors.Add("The definition cannot be empty");
+            this.IsCreateDisabled = true;
+        }
+    }
+
+    protected StandaloneEditorConstructionOptions MonacoEditorOptionsBuilder(MonacoEditor editor)
     {
         return new StandaloneEditorConstructionOptions {
 		    AutomaticLayout = true,

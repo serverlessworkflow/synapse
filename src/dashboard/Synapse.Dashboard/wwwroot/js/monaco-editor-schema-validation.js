@@ -9,3 +9,7 @@
         }]
     });
 }
+
+function getModelMarkers(owner) {
+    return monaco.editor.getModelMarkers({ owner }) || [];
+}

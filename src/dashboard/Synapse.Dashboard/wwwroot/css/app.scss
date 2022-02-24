@@ -41,5 +41,6 @@ input[type=time]::-webkit-clear-button {
 }
 
 #definition-editor {
-  min-height: calc(100vh - 180px);
+  flex-grow: 1;
+  width: 100%;
 }
