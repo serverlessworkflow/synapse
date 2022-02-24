@@ -5,6 +5,8 @@ using Synapse.Integration.Commands.WorkflowInstances;
 using Synapse.Integration.Commands.Workflows;
 using Synapse.Integration.Models;
 using Synapse.Integration.Services;
+using System.Net.Mime;
+using System.Text;
 
 namespace Synapse.Ports.HttpRest.Client.Services
 {
@@ -55,7 +57,16 @@ namespace Synapse.Ports.HttpRest.Client.Services
         /// <inheritdoc/>
         public virtual async Task<V1WorkflowDto> CreateWorkflowAsync(V1CreateWorkflowCommandDto command, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var requestUri = "/api/v1/workflows";
+            using var request = this.CreateRequest(HttpMethod.Post, requestUri);
+            var json = await this.Serializer.SerializeAsync(command, cancellationToken);
+            request.Content = new StringContent(json, Encoding.UTF8, MediaTypeNames.Application.Json);
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            json = await response.Content?.ReadAsStringAsync()!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while creating a new workflow: {details}", json);
+            response.EnsureSuccessStatusCode();
+            return await this.Serializer.DeserializeAsync<V1WorkflowDto>(json);
         }
 
         /// <inheritdoc/>

@@ -57,11 +57,11 @@
         {
             using var stream = new MemoryStream(Encoding.UTF8.GetBytes(rawDefinition));
             command.Definition = await this.WorkflowReader.ReadAsync(stream);
+            var validationResult = await this.WorkflowValidator.ValidateAsync(command.Definition);
         }
         catch(Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            //todo: warn the user via validationErrors
             return;
         }
         var workflow = await this.SynapseApi.CreateWorkflowAsync(command);
