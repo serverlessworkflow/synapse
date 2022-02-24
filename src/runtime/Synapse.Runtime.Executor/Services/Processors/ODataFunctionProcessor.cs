@@ -16,6 +16,7 @@
  */
 
 using Neuroglia.Serialization;
+using Newtonsoft.Json;
 using Simple.OData.Client;
 using Synapse.Integration.Events.WorkflowActivities;
 
@@ -79,11 +80,12 @@ namespace Synapse.Runtime.Executor.Services.Processors
         protected override Task InitializeAsync(CancellationToken cancellationToken)
         {
             var components = this.Function.Operation.Split("#", StringSplitOptions.RemoveEmptyEntries);
-            if (components.Length <= 2)
+            if (components.Length != 2)
                 throw new FormatException($"The 'operation' property of the ODATA function with name '{this.Function.Name}' has an invalid value '{this.Function.Operation}'. ODATA functions expect a value in the following format: <URI_to_odata_service>#<Entity_Set_Name>");
             this.ServiceUri = new(components.First());
             this.EntitySet = components.Last();
-            this.ODataClient = new ODataClient(new ODataClientSettings(this.HttpClient, this.ServiceUri));
+            this.HttpClient.BaseAddress = new($"{this.ServiceUri.Scheme}://{this.ServiceUri.Authority}");
+            this.ODataClient = new ODataClient(new ODataClientSettings(this.HttpClient, this.HttpClient.BaseAddress.MakeRelativeUri(this.ServiceUri)) { PayloadFormat = ODataPayloadFormat.Json });
             return Task.CompletedTask;
         }
 
@@ -112,7 +114,6 @@ namespace Synapse.Runtime.Executor.Services.Processors
             {
                 await this.OnErrorAsync(ex, cancellationToken);
             }
-            
         }
 
     }

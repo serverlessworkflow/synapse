@@ -100,9 +100,10 @@ namespace Synapse.Application.Commands.Workflows
         /// <inheritdoc/>
         public virtual async Task<IOperationResult<V1WorkflowDto>> HandleAsync(V1CreateWorkflowCommand command, CancellationToken cancellationToken = default)
         {
-            var validationResult = await this.WorkflowValidator.ValidateAsync(command.Definition, true, true, cancellationToken);
-            if (!validationResult.IsValid)
-                return this.Invalid(validationResult.AsErrors().ToArray());
+            //todo: validate
+            //var validationResult = await this.WorkflowValidator.ValidateAsync(command.Definition, true, true, cancellationToken); 
+            //if (!validationResult.IsValid)
+            //    return this.Invalid(validationResult.AsErrors().ToArray());
             while (await this.Workflows.ContainsAsync(command.Definition.GetUniqueIdentifier(), cancellationToken))
             {
                 var version = Version.Parse(command.Definition.Version);
