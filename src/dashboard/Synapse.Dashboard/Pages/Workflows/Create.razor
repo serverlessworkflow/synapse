@@ -9,6 +9,7 @@
 @inject ISynapseApi SynapseApi
 @inject IWorkflowReader WorkflowReader
 @inject IWorkflowValidator WorkflowValidator
+@inject NavigationManager NavigationManager
 
 <PageTitle>New workflow</PageTitle>
 <AppHeader>
@@ -17,25 +18,31 @@
 
 <div class="h-100 mh-100 d-flex flex-column justify-content-between align-items-start">
     <label class="form-form-label">Definition</label>
-    <MonacoEditor
-        @ref="editor"
-        Id="definition-editor"
-        CssClass="w-100"
-        ConstructionOptions="MonacoEditorOptionsBuilder"
-        OnDidInit="OnMonacoEditorDidInit"
-        OnDidChangeModelDecorations="OnMonacoEditorDidChangeModelDecorations"
-    />
-    @if(validationErrors != null && validationErrors.Any())
-    {
-        <div class="validation-errors alert alert-danger">
-            <ul>
-                @foreach (var error in validationErrors)
-                {
-                    <li>@error.ToString()</li>
-                }
-            </ul>
+    <div class="flex-grow d-flex flex-row w-100 h-100">
+        <div class="w-75 h-100 mh-100">
+            <MonacoEditor
+                @ref="editor"
+                Id="definition-editor"
+                CssClass="h-100"
+                ConstructionOptions="MonacoEditorOptionsBuilder"
+                OnDidInit="OnMonacoEditorDidInit"
+                OnDidChangeModelDecorations="OnMonacoEditorDidChangeModelDecorations"
+            />
         </div>
-    }
+        <div class="w-25">            
+            @if(validationErrors != null && validationErrors.Any())
+            {
+                <div class="validation-errors alert alert-danger">
+                    <ul>
+                        @foreach (var error in validationErrors)
+                        {
+                            <li>@error.ToString()</li>
+                        }
+                    </ul>
+                </div>
+            }
+        </div>
+    </div>
     <button disabled="@IsCreateDisabled" @onclick="OnCreateWorkflow" type="button" class="btn btn-blockquote btn-dark">Create Workflow</button>
 </div>
 
@@ -78,6 +85,10 @@
             return;
         }
         var workflow = await this.SynapseApi.CreateWorkflowAsync(command);
+        if (workflow != null)
+        {
+            this.NavigationManager.NavigateTo("workflows");
+        }
     }
 
     protected async Task OnMonacoEditorDidInit(MonacoEditorBase editorBase)
