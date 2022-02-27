@@ -15,27 +15,18 @@
  *
  */
 using AutoMapper;
-using Neuroglia.Serialization;
 using System.Dynamic;
 
 namespace Synapse.Application.Mapping.Configuration
 {
 
     internal class ExpandoObjectMappingConfiguration
-        : IMappingConfiguration<ExpandoObject, ProtoObject>
+        : IMappingConfiguration<ExpandoObject, Neuroglia.Serialization.DynamicObject>
     {
 
-        void IMappingConfiguration<ExpandoObject, ProtoObject>.Configure(IMappingExpression<ExpandoObject, ProtoObject> mapping)
+        public void Configure(IMappingExpression<ExpandoObject, Neuroglia.Serialization.DynamicObject> mapping)
         {
-            mapping.ConvertUsing((source, target) =>
-            {
-                var proto = new ProtoObject();
-                foreach (var kvp in source)
-                {
-                    proto.Set(kvp.Key, kvp.Value);
-                }
-                return proto;
-            });
+            mapping.ConvertUsing((source, destination) => (source == null ? null : new(source!))!);
         }
 
     }

@@ -16,9 +16,9 @@
     <PackageReference Include="Microsoft.OpenApi" Version="1.2.3" />
     <PackageReference Include="Microsoft.OpenApi.Readers" Version="1.2.3" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.14.0" />
-    <PackageReference Include="Neuroglia.Data.Expressions.JQ" Version="2.0.1.31" />
-    <PackageReference Include="Neuroglia.Eventing.CloudEvents" Version="2.0.1.31" />
-    <PackageReference Include="Neuroglia.Serialization.NewtonsoftJson" Version="2.0.1.31" />
+    <PackageReference Include="Neuroglia.Data.Expressions.JQ" Version="2.0.1.32" />
+    <PackageReference Include="Neuroglia.Eventing.CloudEvents" Version="2.0.1.32" />
+    <PackageReference Include="Neuroglia.Serialization.NewtonsoftJson" Version="2.0.1.32" />
     <PackageReference Include="protobuf-net.Grpc" Version="1.0.152" />
     <PackageReference Include="protobuf-net.Grpc.ClientFactory" Version="1.0.152" />
     <PackageReference Include="Simple.OData.Client" Version="5.26.0" />

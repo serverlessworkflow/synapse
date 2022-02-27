@@ -16,6 +16,7 @@
  */
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
+using Neuroglia.Serialization;
 using ServerlessWorkflow.Sdk.Models;
 using Synapse.Integration.Models;
 using System.Dynamic;
@@ -40,7 +41,9 @@ namespace Synapse.Application.Services
             builder.EntitySet<V1WorkflowInstanceDto>("V1WorkflowInstances"); //todo: fix name?
             builder.EntitySet<V1WorkflowActivityDto>("V1WorkflowActivities"); //todo: fix name?
 
-            builder.AddComplexType(typeof(Any));
+            builder.AddComplexType(typeof(Dynamic));
+            builder.AddComplexType(typeof(Neuroglia.Serialization.DynamicObject));
+            builder.AddComplexType(typeof(DynamicArray));
             builder.AddComplexType(typeof(ExpandoObject));
             builder.AddComplexType(typeof(WorkflowDefinition));
             builder.AddComplexType(typeof(NameValueCollection<string>));

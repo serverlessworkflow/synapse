@@ -40,10 +40,10 @@ namespace Synapse.Integration.Models
 		public virtual Uri DataSchema { get; set; }
 
 		[DataMember(Name = "Data", Order = 4)]
-		public virtual Any Data { get; set; }
+		public virtual DynamicObject Data { get; set; }
 
 		[DataMember(Name = "Extensions", Order = 5)]
-		public virtual NameValueCollection<Any> Extensions { get; set; }
+		public virtual NameValueCollection<Dynamic> Extensions { get; set; }
 
     }
 

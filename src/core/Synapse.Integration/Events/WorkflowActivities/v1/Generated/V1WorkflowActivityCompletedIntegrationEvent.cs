@@ -36,7 +36,7 @@ namespace Synapse.Integration.Events.WorkflowActivities
 		/// </summary>
 		[DataMember(Name = "Output", Order = 1)]
 		[Description("The V1WorkflowActivity's output, if any")]
-		public virtual Any Output { get; set; }
+		public virtual Dynamic Output { get; set; }
 
     }
 

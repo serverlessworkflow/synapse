@@ -37,10 +37,10 @@ namespace Synapse.Integration.Events.WorkflowActivities
 		public V1WorkflowActivityCompletedIntegrationEvent(string id, object output)
         {
 			this.AggregateId = id;
-			var outputValue = output as Any;
+			var outputValue = output as Dynamic;
 			if (outputValue == null
 				&& output != null)
-				outputValue = Any.FromObject(output);
+				outputValue = Dynamic.FromObject(output);
 			this.Output = outputValue;
         }
 

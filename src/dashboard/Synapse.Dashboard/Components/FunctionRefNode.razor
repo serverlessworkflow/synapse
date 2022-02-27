@@ -1,8 +1,9 @@
 ﻿@using Blazor.Diagrams.Components.Renderers
 @using Synapse.Dashboard.Models
 
-<div class="border border-dark rounded bg-white px-3 py-1 text-wrap text-center function-node">
+<div class="border border-dark rounded bg-white px-3 py-2 text-wrap text-center function-node">
     <div><b>@Node.Function.RefName</b></div>
+    <div class="border border-dark rounded-circle bg-success text-white p-3 position-absolute instance-counter"></div>
     @foreach (var port in Node.Ports)
     {
         <PortRenderer Port="port" />

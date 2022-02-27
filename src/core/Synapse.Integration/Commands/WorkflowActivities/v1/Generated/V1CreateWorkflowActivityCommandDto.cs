@@ -50,7 +50,7 @@ namespace Synapse.Integration.Commands.WorkflowActivities
 		/// </summary>
 		[DataMember(Name = "Input", Order = 3)]
 		[Description("The input data of the V1WorkflowActivity to create")]
-		public virtual Any Input { get; set; }
+		public virtual DynamicObject Input { get; set; }
 
 		/// <summary>
 		/// The metadata of the V1WorkflowActivity to create

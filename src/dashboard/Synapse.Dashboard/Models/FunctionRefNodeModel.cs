@@ -3,6 +3,7 @@ using ServerlessWorkflow.Sdk.Models;
 
 namespace Synapse.Dashboard.Models
 {
+
     /// <summary>
     /// Represents a <see cref="FunctionReference"/> <see cref="NodeModel"/>
     /// </summary>

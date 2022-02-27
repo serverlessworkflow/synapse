@@ -50,7 +50,7 @@ namespace Synapse.Integration.Commands.WorkflowInstances
 		/// </summary>
 		[DataMember(Name = "InputData", Order = 3)]
 		[Description("The input data of the V1WorkflowInstance to create")]
-		public virtual Any InputData { get; set; }
+		public virtual DynamicObject InputData { get; set; }
 
 		/// <summary>
 		/// An IReadOnlyCollection`1 containing the descriptors of the CloudEvents that have triggered the activation of the V1WorkflowInstance to create

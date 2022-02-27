@@ -79,7 +79,7 @@
     {
         if (this.ValueProvider == null)
             this.BuildValueProvider();
-        object value = this.ValueProvider(elem);
+        object value = this.ValueProvider!(elem);
         if (string.IsNullOrWhiteSpace(this.Format)
             || value is not IFormattable formattable)
             return value;

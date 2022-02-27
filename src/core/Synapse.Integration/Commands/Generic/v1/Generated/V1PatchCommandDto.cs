@@ -36,7 +36,7 @@ namespace Synapse.Integration.Commands.Generic
 		/// </summary>
 		[DataMember(Name = "Id", Order = 1)]
 		[Description("The id of the entity to patch")]
-		public virtual Any Id { get; set; }
+		public virtual string Id { get; set; }
 
 		/// <summary>
 		/// The JsonPatchDocument`1 to apply

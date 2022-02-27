@@ -86,9 +86,9 @@ namespace Synapse.Runtime.Services
         /// <inheritdoc/>
         public virtual async Task<V1WorkflowActivityDto> CreateActivityAsync(V1WorkflowActivityType type, object? input, IDictionary<string, string>? metadata, V1WorkflowActivityDto? parent, CancellationToken cancellationToken)
         {
-            var inputParam = input as Any;
+            var inputParam = input as DynamicObject;
             if (inputParam == null && input != null)
-                inputParam = Any.FromObject(input);
+                inputParam = DynamicObject.FromObject(input);
             var metadataParam = metadata == null ? null : new NameValueCollection<string>(metadata);
             return await this.SynapseRuntimeApi.CreateActivityAsync(new() { WorkflowInstanceId = this.Instance.Id, Type = type, Input = inputParam, Metadata = metadataParam, ParentId = parent?.Id }, cancellationToken);
         }
@@ -150,9 +150,9 @@ namespace Synapse.Runtime.Services
         {
             if (activity == null)
                 throw new ArgumentNullException(nameof(activity));
-            var outputParam = output as Any;
+            var outputParam = output as Dynamic;
             if (outputParam == null && output != null)
-                outputParam = Any.FromObject(output);
+                outputParam = Dynamic.FromObject(output);
             await this.SynapseRuntimeApi.SetActivityOutputAsync(new() { Id = activity.Id, Output = outputParam }, cancellationToken);
         }
 
@@ -171,9 +171,9 @@ namespace Synapse.Runtime.Services
         /// <inheritdoc/>
         public virtual async Task SetOutputAsync(object? output, CancellationToken cancellationToken = default)
         {
-            var outputParam = output as Any;
+            var outputParam = output as Dynamic;
             if (outputParam == null && output != null)
-                outputParam = Any.FromObject(output);
+                outputParam = Dynamic.FromObject(output);
             await this.SynapseRuntimeApi.SetOutputAsync(new() { Id = this.Instance.Id, Output = outputParam }, cancellationToken);
         }
 

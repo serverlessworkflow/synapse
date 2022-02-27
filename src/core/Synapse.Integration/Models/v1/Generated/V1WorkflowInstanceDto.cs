@@ -58,7 +58,7 @@ namespace Synapse.Integration.Models
 		/// </summary>
 		[DataMember(Name = "Input", Order = 4)]
 		[Description("The V1WorkflowInstance's input")]
-		public virtual Any Input { get; set; }
+		public virtual Dynamic Input { get; set; }
 
 		/// <summary>
 		/// An IReadOnlyCollection`1 containing descriptors of the CloudEvents that have triggered the V1WorkflowInstance
@@ -114,7 +114,7 @@ namespace Synapse.Integration.Models
 		/// </summary>
 		[DataMember(Name = "Output", Order = 12)]
 		[Description("The V1WorkflowInstance's output")]
-		public virtual Any Output { get; set; }
+		public virtual Dynamic Output { get; set; }
 
     }
 

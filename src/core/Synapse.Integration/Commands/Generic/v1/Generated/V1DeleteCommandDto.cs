@@ -36,7 +36,7 @@ namespace Synapse.Integration.Commands.Generic
 		/// </summary>
 		[DataMember(Name = "Id", Order = 1)]
 		[Description("The id of the entity to delete")]
-		public virtual Any Id { get; set; }
+		public virtual string Id { get; set; }
 
     }
 

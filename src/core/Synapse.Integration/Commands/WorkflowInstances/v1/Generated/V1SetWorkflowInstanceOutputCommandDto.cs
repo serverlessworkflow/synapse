@@ -43,7 +43,7 @@ namespace Synapse.Integration.Commands.WorkflowInstances
 		/// </summary>
 		[DataMember(Name = "Output", Order = 2)]
 		[Description("The V1WorkflowInstance's output")]
-		public virtual Any Output { get; set; }
+		public virtual Dynamic Output { get; set; }
 
     }
 

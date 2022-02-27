@@ -1,6 +1,7 @@
 ﻿global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Options;
 global using Neuroglia;
+global using Neuroglia.Serialization;
 global using ServerlessWorkflow.Sdk;
 global using ServerlessWorkflow.Sdk.Models;
 global using Synapse.Integration.Models;

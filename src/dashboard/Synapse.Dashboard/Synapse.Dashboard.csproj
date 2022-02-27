@@ -12,7 +12,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Components\TabControl.razor.css" />
     <None Remove="Components\WorkflowStartNode - Copy.razor.css" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Components\TabControl.razor.css" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,8 +32,8 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.2" PrivateAssets="all" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="6.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.NewtonsoftJson" Version="6.0.2" />
-	<PackageReference Include="Neuroglia.Core" Version="2.0.1.31" />
-	<PackageReference Include="Neuroglia.Data.OData" Version="2.0.1.31" />
+	<PackageReference Include="Neuroglia.Core" Version="2.0.1.32" />
+	<PackageReference Include="Neuroglia.Data.OData" Version="2.0.1.32" />
 	<PackageReference Include="Z.Blazor.Diagrams" Version="2.1.6" />
   </ItemGroup>
 

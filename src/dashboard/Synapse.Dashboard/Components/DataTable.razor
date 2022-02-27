@@ -212,6 +212,13 @@
         }
     }
 
+    protected override async Task OnParametersSetAsync()
+    {
+        Console.WriteLine("Source changed");
+        await this.FilterSourceAsync();
+        Console.WriteLine($"Should render '{this.elements.Count}' elements");
+    }
+
     private void OnToggleColumnVisibility(ChangeEventArgs e)
     {
         var selectedColumns = ((IEnumerable)e.Value).OfType<DataColumnProperties>().ToList();

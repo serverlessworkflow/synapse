@@ -4,8 +4,11 @@
 @using Synapse.Dashboard.Components
 @using Synapse.Integration.Models
 @using Synapse.Integration.Services
+@using Synapse.Ports.WebSockets.Client.Models
+@using Synapse.Ports.WebSockets.Client.Services
 @inject ISynapseApi SynapseApi
 @inject IWorkflowDiagramBuilder WorkflowDiagramBuilder
+@inject HubConnection HubConnection
 
 <PageTitle>@workflow?.Id</PageTitle>
 <AppHeader>
@@ -14,7 +17,39 @@
 
 @if (workflow != null)
 {
-    <WorkflowDiagram Diagram="diagram" />
+    <div class="container-fluid h-100">
+        <div class="row h-50">
+            <WorkflowDiagram Diagram="diagram" />
+        </div>
+        <div class="row h-50 border border-dark">
+            <TabControl>
+                <TabPage Header="Instances">
+                    <DataTable DataSource="instances">
+                        <Columns>
+                            <DataColumnProperties 
+                                Name="Key"
+                                ValueProvider="source => ((V1WorkflowInstanceDto)source).Key"
+                                PropertyPath="@PropertyPath.Parse(nameof(V1WorkflowInstanceDto.Key))" />
+                            <DataColumnProperties 
+                                Name="Status"
+                                ValueProvider="source => ((V1WorkflowInstanceDto)source).Status"
+                                PropertyPath="@PropertyPath.Parse(nameof(V1WorkflowInstanceDto.Status))" />
+                            <DataColumnProperties 
+                                Name="Started at"
+                                ValueProvider="source => ((V1WorkflowInstanceDto)source).StartedAt"
+                                PropertyPath="@PropertyPath.Parse(nameof(V1WorkflowInstanceDto.StartedAt))"
+                                Format="MM/dd/yyyy, HH:mm"/>
+                            <DataColumnProperties 
+                                Name="Executed at"
+                                ValueProvider="source => ((V1WorkflowInstanceDto)source).ExecutedAt"
+                                PropertyPath="@PropertyPath.Parse(nameof(V1WorkflowInstanceDto.ExecutedAt))"
+                                Format="MM/dd/yyyy, HH:mm"/>
+                        </Columns>
+                    </DataTable>
+                </TabPage>
+            </TabControl>
+        </div>
+    </div>
     <Modal @ref="modal">
         <Title>Error</Title>
         <Body>
@@ -39,14 +74,27 @@ else
     private Modal modal = null!;
     private V1WorkflowDto workflow = null!;
     private Diagram diagram { get; set; } = null!;
+    private IQueryable<V1WorkflowInstanceDto> instances = null!;
     private string error;
 
     protected override async Task OnInitializedAsync()
     {
         this.workflow = await this.SynapseApi.GetWorkflowByIdAsync(this.WorkflowId);
+        this.instances = (await this.SynapseApi.GetWorkflowInstancesAsync($"$filter={nameof(V1WorkflowInstanceDto.WorkflowId)} eq '{this.WorkflowId}'")).AsQueryable();
         this.diagram = await this.WorkflowDiagramBuilder.BuildDiagram(this.workflow.Definition);
+        this.diagram.ShowProgressFor(this.instances);
+        this.HubConnection.On<CloudEventDescriptor>(nameof(ISynapseWebSocketApiClient.PublishIntegrationEvent), this.OnIntegrationEvent);
         this.StateHasChanged();
         await base.OnInitializedAsync();
+    }
+
+    protected async Task OnIntegrationEvent(CloudEventDescriptor e)
+    {
+        if (e.Type.Split('/')[1] != "v1workflowinstance")
+            return;
+        this.instances = (await this.SynapseApi.GetWorkflowInstancesAsync($"$filter={nameof(V1WorkflowInstanceDto.WorkflowId)} eq '{this.WorkflowId}'&$orderby={nameof(V1WorkflowInstanceDto.CreatedAt)} desc&$top=10")).AsQueryable();
+        this.diagram.ShowProgressFor(this.instances);
+        this.StateHasChanged();
     }
 
 }

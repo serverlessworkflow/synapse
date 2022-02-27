@@ -154,14 +154,18 @@ ${
             case "Object":
             case "object":
             case "TKey":
+            case "JToken":
+                return "Dynamic";
+            case "IDictionary<string, object>":
+            case "IDictionary<string, object>?":
+            case "Dictionary<string, object>":
+            case "Dictionary<string, object>?":
             case "ExpandoObject":
-                return "Any";
+                return "DynamicObject";
+            case "JArray":
+                return "DynamicArray";
             case "Error":
                  return "ErrorDto";
-            case "JToken":
-                return "JToken";
-            case "JArray":
-                return "JArray";
             case "JsonPatchDocument":
                 return "JsonPatchDocument";
             case "JObject":

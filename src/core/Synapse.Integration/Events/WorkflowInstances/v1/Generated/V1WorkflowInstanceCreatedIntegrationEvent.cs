@@ -57,7 +57,7 @@ namespace Synapse.Integration.Events.WorkflowInstances
 		/// </summary>
 		[DataMember(Name = "Input", Order = 4)]
 		[Description("The newly created V1WorkflowInstance's input data")]
-		public virtual Any Input { get; set; }
+		public virtual Dynamic Input { get; set; }
 
 		/// <summary>
 		/// An IEnumerable`1 containing the newly created V1WorkflowInstance's trigger V1CloudEvents

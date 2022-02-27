@@ -3,7 +3,6 @@ using Neuroglia.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Synapse.Dashboard.Components;
-using Synapse.Integration.Models;
 using Synapse.Ports.WebSockets.Client.Models;
 using Synapse.Ports.WebSockets.Client.Services;
 using System.Reactive.Subjects;
@@ -27,7 +26,7 @@ namespace Synapse.Dashboard.Services
         {
             this.Logger = logger;
             this.HubConnection = hubConnection;
-            this.Subscription = this.HubConnection.On<CloudEventDescriptor>(nameof(ISynapseWebSocketApiClient.PublishIntegrationEvent), On);
+            //this.Subscription = this.HubConnection.On<CloudEventDescriptor>(nameof(ISynapseWebSocketApiClient.PublishIntegrationEvent), On); //We probably don't want to create a toast for each single event. If have to notify, do it in a more subtle way
             this.ToastManager = toastManager;
             this.JsonSerializer = jsonSerializer;
         }

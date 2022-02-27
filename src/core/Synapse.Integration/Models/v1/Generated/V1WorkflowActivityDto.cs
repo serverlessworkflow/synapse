@@ -79,14 +79,14 @@ namespace Synapse.Integration.Models
 		/// </summary>
 		[DataMember(Name = "Input", Order = 7)]
 		[Description("The V1WorkflowActivity's input")]
-		public virtual Any Input { get; set; }
+		public virtual Dynamic Input { get; set; }
 
 		/// <summary>
 		/// The V1WorkflowInstance's output
 		/// </summary>
 		[DataMember(Name = "Output", Order = 8)]
 		[Description("The V1WorkflowInstance's output")]
-		public virtual Any Output { get; set; }
+		public virtual Dynamic Output { get; set; }
 
 		/// <summary>
 		/// The V1WorkflowActivity's metadata

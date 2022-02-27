@@ -1,4 +1,5 @@
-﻿using ServerlessWorkflow.Sdk.Models;
+﻿using Neuroglia.Serialization;
+using ServerlessWorkflow.Sdk.Models;
 using Synapse.Domain.Events.WorkflowActivities;
 using Synapse.Integration.Models;
 
@@ -125,10 +126,10 @@ namespace Synapse.Application.Events.Domain
             activity.LastModified = e.CreatedAt.UtcDateTime;
             activity.ExecutedAt = e.CreatedAt.UtcDateTime;
             activity.Status = V1WorkflowActivityStatus.Completed;
-            var outputValue = e.Output as Any;
+            var outputValue = e.Output as Dynamic;
             if (outputValue == null
                 && e.Output != null)
-                outputValue = Any.FromObject(e.Output);
+                outputValue = Dynamic.FromObject(e.Output);
             activity.Output = outputValue;
             await this.Projections.UpdateAsync(activity, cancellationToken);
             await this.Projections.SaveChangesAsync(cancellationToken);

@@ -15,22 +15,22 @@
  *
  */
 using AutoMapper;
-using ServerlessWorkflow.Sdk.Models;
+using Neuroglia.Serialization;
 
 namespace Synapse.Application.Mapping.Configuration
 {
     internal class AnyMappingConfiguration
-       : IMappingConfiguration<object, Any>
+       : IMappingConfiguration<object, Dynamic>
     {
-        void IMappingConfiguration<object, Any>.Configure(IMappingExpression<object, Any> mapping)
+        void IMappingConfiguration<object, Dynamic>.Configure(IMappingExpression<object, Dynamic> mapping)
         {
             mapping.ConvertUsing((source, destination) =>
             {
                 if (source == null)
                     return null!;
-                if (source is Any any)
-                    return any;
-                return Any.FromObject(source);
+                if (source is Dynamic dyn)
+                    return dyn;
+                return Dynamic.FromObject(source)!;
             });
         }
 

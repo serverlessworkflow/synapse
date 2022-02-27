@@ -15,7 +15,7 @@ namespace Synapse.Dashboard.Services
         /// <inheritdoc/>
         public async Task<Diagram> BuildDiagram(WorkflowDefinition definition)
         {
-            await Task.CompletedTask;
+            await Task.CompletedTask; //??? => if anything, should be at the end or should be return Task.FromResult(diagram) or return await Task.Run(() =>  ...)
             /*            
             diagram = new Diagram(new DiagramOptions());
             diagram.RegisterModelComponent<WorkflowStartNodeModel, WorkflowStartNode>();
