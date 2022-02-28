@@ -57,17 +57,21 @@
                             <input type="text" class="form-control" readonly value="@workflowInstance.ExecutedAt" />
                         </div>
                         <div>
+                            <label class="form-label">Duration</label>
+                            <input type="text" class="form-control" readonly value="@workflowInstance.Duration" />
+                        </div>
+                        <div>
                             <label class="form-label">Input data</label>
                             <MonacoEditor
                                 @ref="workflowInputEditor"
-                                CssClass="monaco-small"
+                                CssClass="monaco-extra-small"
                                 ConstructionOptions="GetWorkflowEditorOptions" />
                         </div>
                         <div>
                             <label class="form-label">Output data</label>
                             <MonacoEditor
                                 @ref="workflowOutputEditor"
-                                CssClass="monaco-small"
+                                CssClass="monaco-extra-small"
                                 ConstructionOptions="GetWorkflowEditorOptions" />
                         </div>
                     </div>
@@ -86,6 +90,7 @@
                                     <th scope="col">Status</th>
                                     <th scope="col">Started At</th>
                                     <th scope="col">Executed At</th>
+                                    <th scope="col">Duration</th>
                                     <th scope="col">Input</th>
                                     <th scope="col">Output</th>
                                 </tr>
@@ -98,11 +103,12 @@
                                         <td>@activity.Status</td>
                                         <td>@activity.StartedAt?.ToString("MM/dd/yyyy, HH:mm")</td>
                                         <td>@activity.ExecutedAt?.ToString("MM/dd/yyyy, HH:mm")</td>
+                                        <td>@activity.Duration</td>
                                         <td>
                                             <!--@if(activity.Input != null)
                                             {
                                                 <MonacoEditor 
-                                                    CssClass="monaco-small"
+                                                    CssClass="monaco-extra-small"
                                                     ConstructionOptions="GetReadOnlyEditorOptions(JsonConvert.SerializeObject(activity.Input, Formatting.Indented))" />
                                             }-->
                                         </td>
@@ -110,13 +116,13 @@
                                             <!--@if(activity.Output != null)
                                             {
                                                 <MonacoEditor 
-                                                    CssClass="monaco-small"
+                                                    CssClass="monaco-extra-small"
                                                     ConstructionOptions="GetReadOnlyEditorOptions(JsonConvert.SerializeObject(activity.Output, Formatting.Indented))" />
                                             }
                                             @if(activity.Error != null)
                                             {
                                                 <MonacoEditor                                                 
-                                                    CssClass="monaco-small"
+                                                    CssClass="monaco-extra-small"
                                                     ConstructionOptions="GetReadOnlyEditorOptions(JsonConvert.SerializeObject(activity.Error, Formatting.Indented))" />
                                             }-->
 

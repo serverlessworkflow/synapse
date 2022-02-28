@@ -52,6 +52,11 @@
                                 ValueProvider="source => ((V1WorkflowInstanceDto)source).ExecutedAt"
                                 PropertyPath="@PropertyPath.Parse(nameof(V1WorkflowInstanceDto.ExecutedAt))"
                                 Format="MM/dd/yyyy, HH:mm"/>
+                            <DataColumnProperties 
+                                Name="Duration"
+                                ValueProvider="source => ((V1WorkflowInstanceDto)source).Duration"
+                                IsSorteable="false"
+                                IsFilterable="false"/>
                         </Columns>
                     </DataTable>
                 </TabPage>
@@ -74,7 +79,7 @@
             <MonacoEditor
                 @ref="workflowInputEditor"
                 Id="definition-editor"
-                CssClass="workflow-input"
+                CssClass="monaco-small"
                 ConstructionOptions="GetWorkflowInputEditorOptions"/>
         </Body>
         <Footer>
