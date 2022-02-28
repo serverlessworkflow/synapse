@@ -12110,6 +12110,6 @@ input[type=time]::-webkit-clear-button {
   margin: 0px !important;
 }
 
-.workflow-input {
+.monaco-small {
   height: 300px !important;
 }

@@ -1,4 +1,4 @@
-﻿@page "/workflows/{workflowInstanceId}"
+﻿@page "/workflows/{workflowId}/{workflowInstanceId}"
 @using Blazor.Diagrams.Core
 @using Microsoft.AspNetCore.SignalR.Client
 @using Neuroglia.Serialization
@@ -60,15 +60,108 @@
                             <label class="form-label">Input data</label>
                             <MonacoEditor
                                 @ref="workflowInputEditor"
-                                Id="definition-editor"
-                                CssClass="workflow-input"
-                                ConstructionOptions="GetWorkflowInputEditorOptions" />
+                                CssClass="monaco-small"
+                                ConstructionOptions="GetWorkflowEditorOptions" />
+                        </div>
+                        <div>
+                            <label class="form-label">Output data</label>
+                            <MonacoEditor
+                                @ref="workflowOutputEditor"
+                                CssClass="monaco-small"
+                                ConstructionOptions="GetWorkflowEditorOptions" />
                         </div>
                     </div>
                 </div>
             </div>
             <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">History</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Type</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Started At</th>
+                                    <th scope="col">Executed At</th>
+                                    <th scope="col">Input</th>
+                                    <th scope="col">Output</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach(var activity in workflowInstance.Activities.OrderBy(a => a.StartedAt))
+                                {
+                                    <tr>
+                                        <td>@activity.Type</td>
+                                        <td>@activity.Status</td>
+                                        <td>@activity.StartedAt?.ToString("MM/dd/yyyy, HH:mm")</td>
+                                        <td>@activity.ExecutedAt?.ToString("MM/dd/yyyy, HH:mm")</td>
+                                        <td>
+                                            <!--@if(activity.Input != null)
+                                            {
+                                                <MonacoEditor 
+                                                    CssClass="monaco-small"
+                                                    ConstructionOptions="GetReadOnlyEditorOptions(JsonConvert.SerializeObject(activity.Input, Formatting.Indented))" />
+                                            }-->
+                                        </td>
+                                        <td>
+                                            <!--@if(activity.Output != null)
+                                            {
+                                                <MonacoEditor 
+                                                    CssClass="monaco-small"
+                                                    ConstructionOptions="GetReadOnlyEditorOptions(JsonConvert.SerializeObject(activity.Output, Formatting.Indented))" />
+                                            }
+                                            @if(activity.Error != null)
+                                            {
+                                                <MonacoEditor                                                 
+                                                    CssClass="monaco-small"
+                                                    ConstructionOptions="GetReadOnlyEditorOptions(JsonConvert.SerializeObject(activity.Error, Formatting.Indented))" />
+                                            }-->
 
+                                            <!--
+                                                todo: fix serialization error
+
+                                                Unhandled exception rendering component: Specified cast is not valid.
+                                                System.InvalidCastException: Specified cast is not valid.
+                                                   at ProtoBuf.ProtoReader.State.ReadBaseType[Dynamic,DynamicObject](DynamicObject value, ISubTypeSerializer`1 serializer) in /_/src/protobuf-net.Core/ProtoReader.State.ReadMethods.cs:line 1027
+                                                   at ProtoBuf.Internal.Serializers.InheritanceCompiledSerializer`2[[Neuroglia.Serialization.Dynamic, Neuroglia.Serialization.Dynamic, Version=2.0.1.32, Culture=neutral, PublicKeyToken=null],[Neuroglia.Serialization.DynamicObject, Neuroglia.Serialization.Dynamic, Version=2.0.1.32, Culture=neutral, PublicKeyToken=null]].ProtoBuf.Serializers.ISerializer<T>.Read(State& state, DynamicObject value) in /_/src/protobuf-net/Internal/Serializers/CompiledSerializer.cs:line 20
+                                                   at ProtoBuf.ProtoReader.State.ReadMessage[ISerializer`1,DynamicObject](SerializerFeatures features, DynamicObject value, ISerializer`1& serializer) in /_/src/protobuf-net.Core/ProtoReader.State.ReadMethods.cs:line 962
+                                                   at ProtoBuf.ProtoReader.State.FillBuffer[ISerializer`1,DynamicObject](SerializerFeatures features, ISerializer`1& serializer, DynamicObject initialValue) in /_/src/protobuf-net.Core/ProtoReader.State.ReadMethods.cs:line 287
+                                                   at ProtoBuf.Serializers.RepeatedSerializer`2[[System.Collections.Generic.List`1[[Neuroglia.Serialization.DynamicObject, Neuroglia.Serialization.Dynamic, Version=2.0.1.32, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=6.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[Neuroglia.Serialization.DynamicObject, Neuroglia.Serialization.Dynamic, Version=2.0.1.32, Culture=neutral, PublicKeyToken=null]].ReadRepeated(State& state, SerializerFeatures features, List`1 values, ISerializer`1 serializer) in /_/src/protobuf-net.Core/Serializers/RepeatedSerializer.cs:line 282
+                                                   at ProtoBuf.Serializers.RepeatedSerializer`2[[System.Collections.Generic.List`1[[Neuroglia.Serialization.DynamicObject, Neuroglia.Serialization.Dynamic, Version=2.0.1.32, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=6.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[Neuroglia.Serialization.DynamicObject, Neuroglia.Serialization.Dynamic, Version=2.0.1.32, Culture=neutral, PublicKeyToken=null]].ProtoBuf.Serializers.IRepeatedSerializer<TCollection>.ReadRepeated(State& state, SerializerFeatures features, List`1 values) in /_/src/protobuf-net.Core/Serializers/RepeatedSerializer.cs:line 268
+                                                   at ProtoBuf.ProtoReader.State.<ReadAsRoot>g__ReadFieldOne|102_0[List`1](State& state, SerializerFeatures features, List`1 value, ISerializer`1 serializer) in /_/src/protobuf-net.Core/ProtoReader.State.ReadMethods.cs:line 1075
+                                                   at ProtoBuf.ProtoReader.State.ReadAsRoot[List`1](List`1 value, ISerializer`1 serializer) in /_/src/protobuf-net.Core/ProtoReader.State.ReadMethods.cs:line 1059
+                                                   at ProtoBuf.ProtoReader.State.DeserializeRoot[List`1](List`1 value, ISerializer`1 serializer) in /_/src/protobuf-net.Core/ProtoReader.State.ReadMethods.cs:line 1038
+                                                   at ProtoBuf.Internal.DynamicStub.ConcreteStub`1[[System.Collections.Generic.List`1[[Neuroglia.Serialization.DynamicObject, Neuroglia.Serialization.Dynamic, Version=2.0.1.32, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=6.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]].TryDeserializeRoot(TypeModel model, State& state, Object& value, Boolean autoCreate) in /_/src/protobuf-net.Core/Internal/DynamicStub.cs:line 218
+                                                   at ProtoBuf.Meta.TypeModel.DeserializeRootAny(State& state, Type type, Object value, Boolean autoCreate) in /_/src/protobuf-net.Core/Meta/TypeModel.cs:line 1058
+                                                   at ProtoBuf.ProtoReader.State.DeserializeRootFallback(Object value, Type type) in /_/src/protobuf-net.Core/ProtoReader.State.ReadMethods.cs:line 1146
+                                                   at ProtoBuf.Serializer.Deserialize(Type type, Stream source) in /_/src/protobuf-net/Serializer.Deserialize.cs:line 55
+                                                   at Neuroglia.Serialization.ProtobufHelper.Deserialize(Byte[] input, Type type)
+                                                   at Neuroglia.Serialization.DynamicArray.ToObject()
+                                                   at Newtonsoft.Json.DynamicConverter.WriteJson(JsonWriter writer, Dynamic value, JsonSerializer serializer)
+                                                   at Newtonsoft.Json.JsonConverter`1[[Neuroglia.Serialization.Dynamic, Neuroglia.Serialization.Dynamic, Version=2.0.1.32, Culture=neutral, PublicKeyToken=null]].WriteJson(JsonWriter writer, Object value, JsonSerializer serializer)
+                                                   at Newtonsoft.Json.Serialization.JsonSerializerInternalWriter.SerializeConvertable(JsonWriter writer, JsonConverter converter, Object value, JsonContract contract, JsonContainerContract collectionContract, JsonProperty containerProperty)
+                                                   at Newtonsoft.Json.Serialization.JsonSerializerInternalWriter.SerializeValue(JsonWriter writer, Object value, JsonContract valueContract, JsonProperty member, JsonContainerContract containerContract, JsonProperty containerProperty)
+                                                   at Newtonsoft.Json.Serialization.JsonSerializerInternalWriter.Serialize(JsonWriter jsonWriter, Object value, Type objectType)
+                                                   at Newtonsoft.Json.JsonSerializer.SerializeInternal(JsonWriter jsonWriter, Object value, Type objectType)
+                                                   at Newtonsoft.Json.JsonSerializer.Serialize(JsonWriter jsonWriter, Object value, Type objectType)
+                                                   at Newtonsoft.Json.JsonConvert.SerializeObjectInternal(Object value, Type type, JsonSerializer jsonSerializer)
+                                                   at Newtonsoft.Json.JsonConvert.SerializeObject(Object value, Type type, JsonSerializerSettings settings)
+                                                   at Newtonsoft.Json.JsonConvert.SerializeObject(Object value)
+                                                   at Synapse.Dashboard.Pages.WorkflowInstances.View.BuildRenderTree(RenderTreeBuilder __builder) in C:\Dev\Neuroglia\Github\synapse\src\dashboard\Synapse.Dashboard\Pages\WorkflowInstances\View.razor:line 107
+                                                   at Microsoft.AspNetCore.Components.ComponentBase.<.ctor>b__6_0(RenderTreeBuilder builder)
+                                                   at Microsoft.AspNetCore.Components.Rendering.ComponentState.RenderIntoBatch(RenderBatchBuilder batchBuilder, RenderFragment renderFragment, Exception& renderFragmentException)
+
+                                            -->
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -89,7 +182,9 @@ else
 }
 @code
 {
-
+    
+    [Parameter]
+    public string WorkflowId { get; set; } = null!;
     [Parameter]
     public string WorkflowInstanceId { get; set; } = null!;
 
@@ -97,16 +192,31 @@ else
     private string error = null!;
     private V1WorkflowInstanceDto workflowInstance = null!;
     private MonacoEditor workflowInputEditor = null!;
+    private MonacoEditor workflowOutputEditor = null!;
 
-    private StandaloneEditorConstructionOptions GetWorkflowInputEditorOptions(MonacoEditor editor)
+    private StandaloneEditorConstructionOptions GetWorkflowEditorOptions(MonacoEditor editor)
     {
         return new StandaloneEditorConstructionOptions 
         {
 		    AutomaticLayout = true,
 		    Language = "json",
-            Minimap = new EditorMinimapOptions { Enabled = false }
+            Minimap = new EditorMinimapOptions { Enabled = false },
+            ReadOnly = true
 	    };
     }
+
+    private Func<MonacoEditor, StandaloneEditorConstructionOptions> GetReadOnlyEditorOptions(string value)
+    {
+        return (MonacoEditor editor) => new StandaloneEditorConstructionOptions 
+        {
+		    AutomaticLayout = true,
+		    Language = "json",
+            Minimap = new EditorMinimapOptions { Enabled = false },
+            ReadOnly = true,
+            Value = value
+	    };
+    }
+    
 
     protected override async Task OnInitializedAsync()
     {
@@ -118,10 +228,21 @@ else
     protected override async Task OnParametersSetAsync()
     {
         var json = string.Empty;
-        if (this.workflowInstance.Input != null)
-            json = JsonConvert.SerializeObject(this.workflowInstance.Input);
-        await this.workflowInputEditor.SetValue(json);
+        if (this.workflowInstance.Input != null) {
+            json = JsonConvert.SerializeObject(this.workflowInstance.Input, Formatting.Indented);
+            await this.workflowInputEditor.SetValue(json);
+        }
+        if (this.workflowInstance.Output != null) {
+            json = JsonConvert.SerializeObject(this.workflowInstance.Output, Formatting.Indented);
+            await this.workflowOutputEditor.SetValue(json);
+        }
+        json = string.Empty;
+        if (this.workflowInstance.Error != null) {
+            json = JsonConvert.SerializeObject(this.workflowInstance.Error, Formatting.Indented);
+            await this.workflowOutputEditor.SetValue(json);
+        }
         await base.OnParametersSetAsync();
+        this.StateHasChanged();
     }
 
 }
