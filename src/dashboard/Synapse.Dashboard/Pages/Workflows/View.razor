@@ -82,7 +82,6 @@ else
         this.workflow = await this.SynapseApi.GetWorkflowByIdAsync(this.WorkflowId);
         this.instances = (await this.SynapseApi.GetWorkflowInstancesAsync($"$filter={nameof(V1WorkflowInstanceDto.WorkflowId)} eq '{this.WorkflowId}'")).AsQueryable();
         this.diagram = await this.WorkflowDiagramBuilder.BuildDiagram(this.workflow.Definition);
-        this.diagram.ShowProgressFor(this.instances);
         this.HubConnection.On<CloudEventDescriptor>(nameof(ISynapseWebSocketApiClient.PublishIntegrationEvent), this.OnIntegrationEvent);
         this.StateHasChanged();
         await base.OnInitializedAsync();
@@ -93,7 +92,6 @@ else
         if (e.Type.Split('/')[1] != "v1workflowinstance")
             return;
         this.instances = (await this.SynapseApi.GetWorkflowInstancesAsync($"$filter={nameof(V1WorkflowInstanceDto.WorkflowId)} eq '{this.WorkflowId}'&$orderby={nameof(V1WorkflowInstanceDto.CreatedAt)} desc&$top=10")).AsQueryable();
-        this.diagram.ShowProgressFor(this.instances);
         this.StateHasChanged();
     }
 

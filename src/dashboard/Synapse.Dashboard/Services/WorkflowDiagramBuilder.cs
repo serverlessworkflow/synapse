@@ -57,6 +57,8 @@ namespace Synapse.Dashboard.Services
             {
                 Title = state.Name
             };
+            stateNodeGroup.AddPort(PortAlignment.Top);
+            stateNodeGroup.AddPort(PortAlignment.Bottom);
             diagram.AddGroup(stateNodeGroup);
             List<NodeModel> childNodes = new();
             NodeModel node, firstNode, lastNode;
@@ -78,7 +80,6 @@ namespace Synapse.Dashboard.Services
                 case InjectStateDefinition injectState:
                     node = new WorkflowStateNodeModel(state);
                     childNodes.Add(node);
-                    this.BuildLinkBetween(diagram, node, previousNode);
                     break;
                 case OperationStateDefinition operationState:
                     node = previousNode;
@@ -174,13 +175,36 @@ namespace Synapse.Dashboard.Services
                     throw new Exception($"The specified state type '{state.Type}' is not supported");
             }
             childNodes.ForEach(n => stateNodeGroup.AddChild(n));
+            if (stateNodeGroup.Children.Any())
+            {
+                Console.WriteLine("STATE NODE IS NOT EMPTY");
+                node = stateNodeGroup.Children.First();
+                var port = node.Ports.FirstOrDefault(p => p.Alignment == PortAlignment.Top);
+                if (port != null)
+                {
+                    Console.WriteLine("TOP port removed");
+                    node.RemovePort(port);
+                }
+
+                node = stateNodeGroup.Children.Last();
+                port = node.Ports.FirstOrDefault(p => p.Alignment == PortAlignment.Bottom);
+                if (port != null)
+                {
+                    Console.WriteLine("BOTTOM port removed");
+                    node.RemovePort(port);
+                }
+            }
+            else
+            {
+                Console.WriteLine("STATE NODE IS EMPTY");
+            }
             lastNode = childNodes.Last();
             if (previousNode != null)
-                this.BuildLinkBetween(diagram, previousNode, childNodes.First());
+                this.BuildLinkBetween(diagram, previousNode, stateNodeGroup);
             if (state.IsEnd
                 || state.End != null)
             {
-                this.BuildLinkBetween(diagram, childNodes.Last(), endNode);
+                this.BuildLinkBetween(diagram, stateNodeGroup, endNode);
                 return;
             }
             if (!string.IsNullOrWhiteSpace(state.TransitionToStateName)
@@ -257,6 +281,7 @@ namespace Synapse.Dashboard.Services
         {
             var graph = new QuikGraph.BidirectionalGraph<NodeModel, QuikGraph.Edge<NodeModel>>();
             var nodes = diagram.Nodes.ToList();
+            nodes.AddRange(diagram.Groups);
             nodes.AddRange(diagram.Groups.SelectMany(g => g.Children));
             var edges = diagram.Links.OfType<LinkModel>()
                 .Select(lm =>
