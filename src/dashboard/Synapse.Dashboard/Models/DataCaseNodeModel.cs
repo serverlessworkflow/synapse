@@ -7,7 +7,7 @@ namespace Synapse.Dashboard.Models
     /// Represents a data case <see cref="NodeModel"/>
     /// </summary>
     public class DataCaseNodeModel
-        : NodeModel
+        : WorkflowNodeModel
     {
 
         /// <summary>

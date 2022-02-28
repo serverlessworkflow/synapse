@@ -6,14 +6,14 @@ namespace Synapse.Dashboard.Models
     /// <summary>
     /// Represents a <see cref="EndDefinition"/> <see cref="NodeModel"/>
     /// </summary>
-    public class WorkflowEndNodeModel
-        : NodeModel
+    public class EndNodeModel
+        : WorkflowNodeModel
     {
 
         /// <summary>
-        /// Initializes a new <see cref="WorkflowEndNodeModel"/>
+        /// Initializes a new <see cref="EndNodeModel"/>
         /// </summary>
-        public WorkflowEndNodeModel()
+        public EndNodeModel()
         {
             this.AddPort(PortAlignment.Top);
         }

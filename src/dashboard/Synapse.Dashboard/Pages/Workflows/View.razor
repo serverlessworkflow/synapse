@@ -75,23 +75,31 @@ else
     private V1WorkflowDto workflow = null!;
     private Diagram diagram { get; set; } = null!;
     private IQueryable<V1WorkflowInstanceDto> instances = null!;
-    private string error;
+    private string error = null!;
 
     protected override async Task OnInitializedAsync()
     {
         this.workflow = await this.SynapseApi.GetWorkflowByIdAsync(this.WorkflowId);
-        this.instances = (await this.SynapseApi.GetWorkflowInstancesAsync($"$filter={nameof(V1WorkflowInstanceDto.WorkflowId)} eq '{this.WorkflowId}'")).AsQueryable();
         this.diagram = await this.WorkflowDiagramBuilder.BuildDiagram(this.workflow.Definition);
+        this.instances = await this.FetchWorkflowInstancesAsync();
+        this.diagram.DisplayActivityStatusFor(this.instances);
         this.HubConnection.On<CloudEventDescriptor>(nameof(ISynapseWebSocketApiClient.PublishIntegrationEvent), this.OnIntegrationEvent);
         this.StateHasChanged();
         await base.OnInitializedAsync();
     }
 
-    protected async Task OnIntegrationEvent(CloudEventDescriptor e)
+    private async Task<IQueryable<V1WorkflowInstanceDto>> FetchWorkflowInstancesAsync()
     {
-        if (e.Type.Split('/')[1] != "v1workflowinstance")
+        return (await this.SynapseApi.GetWorkflowInstancesAsync($"$filter={nameof(V1WorkflowInstanceDto.WorkflowId)} eq '{this.WorkflowId}'")).AsQueryable();
+    }
+
+    private async Task OnIntegrationEvent(CloudEventDescriptor e)
+    {
+        if (e.Type.Split('/')[1] != "v1workflowinstance"
+            && e.Type.Split('/')[1] != "v1workflowactivity")
             return;
-        this.instances = (await this.SynapseApi.GetWorkflowInstancesAsync($"$filter={nameof(V1WorkflowInstanceDto.WorkflowId)} eq '{this.WorkflowId}'&$orderby={nameof(V1WorkflowInstanceDto.CreatedAt)} desc&$top=10")).AsQueryable();
+        this.instances = await this.FetchWorkflowInstancesAsync();
+        this.diagram.DisplayActivityStatusFor(this.instances);
         this.StateHasChanged();
     }
 

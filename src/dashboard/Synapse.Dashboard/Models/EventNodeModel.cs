@@ -8,7 +8,7 @@ namespace Synapse.Dashboard.Models
     /// Represents an <see cref="EventDefinition"/> reference <see cref="NodeModel"/>
     /// </summary>
     public class EventNodeModel
-        : NodeModel
+        : WorkflowNodeModel
     {
 
         /// <summary>

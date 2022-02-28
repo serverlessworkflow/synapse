@@ -6,14 +6,14 @@ namespace Synapse.Dashboard.Models
     /// <summary>
     /// Represents a <see cref="StartDefinition"/> <see cref="NodeModel"/>
     /// </summary>
-    public class WorkflowStartNodeModel
-        : NodeModel
+    public class StartNodeModel
+        : WorkflowNodeModel
     {
 
         /// <summary>
         /// Initializes a new <see cref="WorkflowStateNodeModel"/>
         /// </summary>
-        public WorkflowStartNodeModel()
+        public StartNodeModel()
         {
             this.AddPort(PortAlignment.Bottom);
         }

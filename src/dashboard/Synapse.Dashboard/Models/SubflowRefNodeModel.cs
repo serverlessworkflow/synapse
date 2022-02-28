@@ -7,7 +7,7 @@ namespace Synapse.Dashboard.Models
     /// Represents a <see cref="SubflowReference"/> <see cref="NodeModel"/>
     /// </summary>
     public class SubflowRefNodeModel
-        : NodeModel
+        : WorkflowNodeModel
     {
 
         /// <summary>

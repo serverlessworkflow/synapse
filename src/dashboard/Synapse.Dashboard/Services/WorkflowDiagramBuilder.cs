@@ -32,10 +32,9 @@ namespace Synapse.Dashboard.Services
             diagram.SelectionChanged += this.OnNodeSelectionChanged;
             */
             var diagram = new Diagram(new DiagramOptions());
-            diagram.RegisterModelComponent<WorkflowStartNodeModel, WorkflowStartNode>();
-            diagram.RegisterModelComponent<WorkflowStateNodeModel, WorkflowStateNode>();
+            diagram.RegisterModelComponent<StartNodeModel, StartNode>();
             diagram.RegisterModelComponent<FunctionRefNodeModel, FunctionRefNode>();
-            diagram.RegisterModelComponent<WorkflowEndNodeModel, WorkflowEndNode>();
+            diagram.RegisterModelComponent<EndNodeModel, EndNode>();
             var startState = definition.GetStartState();
             var startNode = this.BuildStartNode(diagram);            
             var endNode = this.BuildEndNode(diagram);
@@ -48,17 +47,15 @@ namespace Synapse.Dashboard.Services
 
         private NodeModel BuildStartNode(Diagram diagram)
         {
-            return new WorkflowStartNodeModel();
+            return new StartNodeModel();
         }
 
         private void BuildStateNodes(WorkflowDefinition definition, Diagram diagram, StateDefinition state, NodeModel endNode, NodeModel previousNode)
         {
-            var stateNodeGroup = new GroupModel(Array.Empty<NodeModel>())
+            var stateNodeGroup = new StateNodeModel(state)
             {
                 Title = state.Name
             };
-            stateNodeGroup.AddPort(PortAlignment.Top);
-            stateNodeGroup.AddPort(PortAlignment.Bottom);
             diagram.AddGroup(stateNodeGroup);
             List<NodeModel> childNodes = new();
             NodeModel node, firstNode, lastNode;
@@ -78,8 +75,7 @@ namespace Synapse.Dashboard.Services
 
                     break;
                 case InjectStateDefinition injectState:
-                    node = new WorkflowStateNodeModel(state);
-                    childNodes.Add(node);
+
                     break;
                 case OperationStateDefinition operationState:
                     node = previousNode;
@@ -177,26 +173,14 @@ namespace Synapse.Dashboard.Services
             childNodes.ForEach(n => stateNodeGroup.AddChild(n));
             if (stateNodeGroup.Children.Any())
             {
-                Console.WriteLine("STATE NODE IS NOT EMPTY");
                 node = stateNodeGroup.Children.First();
                 var port = node.Ports.FirstOrDefault(p => p.Alignment == PortAlignment.Top);
                 if (port != null)
-                {
-                    Console.WriteLine("TOP port removed");
                     node.RemovePort(port);
-                }
-
                 node = stateNodeGroup.Children.Last();
                 port = node.Ports.FirstOrDefault(p => p.Alignment == PortAlignment.Bottom);
                 if (port != null)
-                {
-                    Console.WriteLine("BOTTOM port removed");
                     node.RemovePort(port);
-                }
-            }
-            else
-            {
-                Console.WriteLine("STATE NODE IS EMPTY");
             }
             lastNode = childNodes.Last();
             if (previousNode != null)
@@ -224,7 +208,7 @@ namespace Synapse.Dashboard.Services
             switch (action.Type)
             {
                 case ActionType.Function:
-                    return new() { this.BuildFunctionNode(state, action.Function!) };
+                    return new() { this.BuildFunctionNode(state, action, action.Function!) };
                 case ActionType.Subflow:
                     return new() { this.BuildSubflowNode(state, action.Subflow!) };
                 case ActionType.Trigger:
@@ -237,9 +221,9 @@ namespace Synapse.Dashboard.Services
             }
         }
 
-        private FunctionRefNodeModel BuildFunctionNode(StateDefinition state, FunctionReference functionRef)
+        private FunctionRefNodeModel BuildFunctionNode(StateDefinition state, ActionDefinition action, FunctionReference function)
         {
-            return new(functionRef);
+            return new(action, function);
         }
 
         private SubflowRefNodeModel BuildSubflowNode(StateDefinition state, SubflowReference subflowRef)
@@ -269,7 +253,7 @@ namespace Synapse.Dashboard.Services
 
         private NodeModel BuildEndNode(Diagram diagram)
         {
-            return new WorkflowEndNodeModel();
+            return new EndNodeModel();
         }
 
         private void BuildLinkBetween(Diagram diagram, NodeModel node1, NodeModel node2)

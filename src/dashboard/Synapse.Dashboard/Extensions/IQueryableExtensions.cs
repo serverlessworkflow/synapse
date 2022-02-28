@@ -1,6 +1,5 @@
 ﻿using Neuroglia;
 using System.Collections;
-using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -82,93 +81,6 @@ namespace Synapse.Dashboard
                 throw new ArgumentNullException(nameof(queryable));
             MethodInfo method = ToListAsyncMethod.MakeGenericMethod(queryable.ElementType);
             return (IList<T>)await method.InvokeAsync(null, new object[] { queryable, cancellationToken });
-        }
-
-    }
-
-    public static class ExpressionExtensions
-    {
-
-        public static Expression CombineWith(this Expression left, Expression right)
-        {
-            return Expression.And(left, right);
-        }
-
-    }
-
-    public class ExpressionParameterReplacer
-        : ExpressionVisitor
-    {
-
-        public ExpressionParameterReplacer(ParameterExpression parameterExpression)
-        {
-            this.ParameterExpression = parameterExpression;
-        }
-
-        protected ParameterExpression ParameterExpression { get; }
-
-        /// <inheritdoc/>
-        protected override Expression VisitParameter(ParameterExpression node)
-        {
-            return base.VisitParameter(this.ParameterExpression);
-        }
-
-    }
-
-    /// <summary>
-    /// Defines extensions for <see cref="PropertyInfo"/>s
-    /// </summary>
-    public static class PropertyInfoExtensions
-    {
-
-        /// <summary>
-        /// Gets the property's display name
-        /// </summary>
-        /// <param name="property">The <see cref="PropertyInfo"/> to get the display name for</param>
-        /// <returns>The property's display name</returns>
-        public static string GetDisplayName(this PropertyInfo property)
-        {
-            string name = null;
-            if (property.TryGetCustomAttribute(out DisplayAttribute displayAttribute))
-                name = displayAttribute.Name;
-            if (string.IsNullOrWhiteSpace(name))
-                name = property.Name;
-            return name;
-        }
-
-        /// <summary>
-        /// Gets the property's display order
-        /// </summary>
-        /// <param name="property">The <see cref="PropertyInfo"/> to get the display order for</param>
-        /// <returns>The property's display order</returns>
-        public static int GetDisplayOrder(this PropertyInfo property)
-        {
-            int? order = 0;
-            if (property.TryGetCustomAttribute(out DisplayAttribute displayAttribute))
-                order = displayAttribute.GetOrder();
-            if (!order.HasValue)
-                order = 1;
-            return order.Value;
-        }
-
-    }
-
-    /// <summary>
-    /// Defines extensions for <see cref="Type"/>s
-    /// </summary>
-    public static class TypeExtensions
-    {
-
-        /// <summary>
-        /// Determines whether the type implements the <see cref="IAsyncEnumerable{T}"/> interface
-        /// </summary>
-        /// <param name="type">The type to check</param>
-        /// <returns>A boolean indicating whether the type implements the <see cref="IAsyncEnumerable{T}"/> interface</returns>
-        public static bool IsAsyncEnumerable(this Type type)
-        {
-            if (type == null)
-                throw new ArgumentNullException(nameof(type));
-            return type.GetGenericType(typeof(IAsyncEnumerable<>)) != null;
         }
 
     }

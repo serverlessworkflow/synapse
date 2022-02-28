@@ -7,7 +7,7 @@ namespace Synapse.Dashboard.Models
     /// Represents a logical gateway <see cref="NodeModel"/>
     /// </summary>
     public class GatewayNodeModel
-        : NodeModel
+        : WorkflowNodeModel
     {
 
         /// <summary>
