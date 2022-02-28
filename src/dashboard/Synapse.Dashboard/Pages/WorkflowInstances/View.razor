@@ -1,0 +1,127 @@
+﻿@page "/workflows/{workflowInstanceId}"
+@using Blazor.Diagrams.Core
+@using Microsoft.AspNetCore.SignalR.Client
+@using Neuroglia.Serialization
+@using Newtonsoft.Json
+@using Newtonsoft.Json.Linq
+@using Newtonsoft.Json.Schema
+@using Synapse.Dashboard.Components
+@using Synapse.Integration.Models
+@using Synapse.Integration.Services
+@using Synapse.Ports.WebSockets.Client.Models
+@using Synapse.Ports.WebSockets.Client.Services
+@using System.Text
+@inject ISynapseApi SynapseApi
+@inject IJsonSerializer JsonSerializer
+@inject IWorkflowDiagramBuilder WorkflowDiagramBuilder
+@inject HubConnection HubConnection
+@inject HttpClient HttpClient
+
+<PageTitle>@workflowInstance?.Id</PageTitle>
+<AppHeader>
+    <span class="h5 m-0 p-0">@workflowInstance?.Id</span>
+</AppHeader>
+
+@if (workflowInstance != null)
+{
+    <div class="container-fluid h-100">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <div>
+                            <label class="form-label">Workflow Id</label>
+                            <input type="text" class="form-control" readonly value="@workflowInstance.WorkflowId" />
+                        </div>
+                        <div>
+                            <label class="form-label">Activation Type</label>
+                            <input type="text" class="form-control" readonly value="@workflowInstance.ActivationType" />
+                        </div>
+                        <div>
+                            <label class="form-label">Key</label>
+                            <input type="text" class="form-control" readonly value="@workflowInstance.Key" />
+                        </div>
+                        <div>
+                            <label class="form-label">Created at</label>
+                            <input type="text" class="form-control" readonly value="@workflowInstance.CreatedAt" />
+                        </div>
+                        <div>
+                            <label class="form-label">Started at</label>
+                            <input type="text" class="form-control" readonly value="@workflowInstance.StartedAt" />
+                        </div>
+                        <div>
+                            <label class="form-label">Executed at</label>
+                            <input type="text" class="form-control" readonly value="@workflowInstance.ExecutedAt" />
+                        </div>
+                        <div>
+                            <label class="form-label">Input data</label>
+                            <MonacoEditor
+                                @ref="workflowInputEditor"
+                                Id="definition-editor"
+                                CssClass="workflow-input"
+                                ConstructionOptions="GetWorkflowInputEditorOptions" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+
+            </div>
+        </div>
+    </div>
+    <Modal @ref="errorModal">
+        <Title>Error</Title>
+        <Body>
+            <p>An error occured:</p>
+            <div class="border rounded bg-danger text-white text-break p-1">@((MarkupString)error)</div>
+        </Body>
+        <Footer>
+            <button @onclick="() => errorModal.Hide()" class="btn btn-secondary">Close</button>
+        </Footer>
+    </Modal>
+}
+else
+{
+    <p>Loading...</p>
+}
+@code
+{
+
+    [Parameter]
+    public string WorkflowInstanceId { get; set; } = null!;
+
+    private Modal errorModal = null!;
+    private string error = null!;
+    private V1WorkflowInstanceDto workflowInstance = null!;
+    private MonacoEditor workflowInputEditor = null!;
+
+    private StandaloneEditorConstructionOptions GetWorkflowInputEditorOptions(MonacoEditor editor)
+    {
+        return new StandaloneEditorConstructionOptions 
+        {
+		    AutomaticLayout = true,
+		    Language = "json",
+            Minimap = new EditorMinimapOptions { Enabled = false }
+	    };
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        this.workflowInstance = await this.SynapseApi.GetWorkflowInstanceByIdAsync(this.WorkflowInstanceId);
+        this.StateHasChanged();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var json = string.Empty;
+        if (this.workflowInstance.Input != null)
+            json = JsonConvert.SerializeObject(this.workflowInstance.Input);
+        await this.workflowInputEditor.SetValue(json);
+        await base.OnParametersSetAsync();
+    }
+
+}

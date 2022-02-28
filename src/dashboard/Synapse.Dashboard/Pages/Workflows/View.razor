@@ -68,7 +68,7 @@
             <button @onclick="() => errorModal.Hide()" class="btn btn-secondary">Close</button>
         </Footer>
     </Modal>
-     <Modal @ref="workflowInputModal">
+    <Modal @ref="workflowInputModal">
         <Title>Start new instance</Title>
         <Body>
             <MonacoEditor
@@ -103,13 +103,19 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        await base.OnInitializedAsync();
         this.workflow = await this.SynapseApi.GetWorkflowByIdAsync(this.WorkflowId);
         this.diagram = await this.WorkflowDiagramBuilder.BuildDiagram(this.workflow.Definition);
         this.instances = await this.FetchWorkflowInstancesAsync();
         this.diagram.DisplayActivityStatusFor(this.instances);
         this.HubConnection.On<CloudEventDescriptor>(nameof(ISynapseWebSocketApiClient.PublishIntegrationEvent), this.OnIntegrationEvent);
         this.StateHasChanged();
-        await base.OnInitializedAsync();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await this.workflowInputEditor.SetValue(string.Empty);
+        await base.OnParametersSetAsync();
     }
 
     private StandaloneEditorConstructionOptions GetWorkflowInputEditorOptions(MonacoEditor editor)
