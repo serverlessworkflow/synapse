@@ -12,7 +12,8 @@ namespace Synapse.Dashboard
             diagram.ClearActivityStatus();
             foreach (var instance in instances)
             {
-                if(instance.Status == V1WorkflowInstanceStatus.Starting)
+                if(instance.Status == V1WorkflowInstanceStatus.Pending 
+                    || instance.Status == V1WorkflowInstanceStatus.Starting)
                 {
                     var node = diagram.Nodes.OfType<StartNodeModel>().FirstOrDefault();
                     if(node != null)

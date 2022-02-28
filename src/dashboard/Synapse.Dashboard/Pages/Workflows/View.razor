@@ -1,18 +1,26 @@
 ﻿@page "/workflows/{workflowId}"
 @using Blazor.Diagrams.Core
 @using Microsoft.AspNetCore.SignalR.Client
+@using Neuroglia.Serialization
+@using Newtonsoft.Json
+@using Newtonsoft.Json.Linq
+@using Newtonsoft.Json.Schema
 @using Synapse.Dashboard.Components
 @using Synapse.Integration.Models
 @using Synapse.Integration.Services
 @using Synapse.Ports.WebSockets.Client.Models
 @using Synapse.Ports.WebSockets.Client.Services
+@using System.Text
 @inject ISynapseApi SynapseApi
+@inject IJsonSerializer JsonSerializer
 @inject IWorkflowDiagramBuilder WorkflowDiagramBuilder
 @inject HubConnection HubConnection
+@inject HttpClient HttpClient
 
 <PageTitle>@workflow?.Id</PageTitle>
 <AppHeader>
     <span class="h5 m-0 p-0">@workflow?.Id</span>
+    <button @onclick="OnShowWorkflowInputModal" class="btn btn-primary ms-auto" title="Start workflow"><span class="oi oi-media-play"></span></button>
 </AppHeader>
 
 @if (workflow != null)
@@ -50,14 +58,28 @@
             </TabControl>
         </div>
     </div>
-    <Modal @ref="modal">
+    <Modal @ref="errorModal">
         <Title>Error</Title>
         <Body>
             <p>An error occured:</p>
             <div class="border rounded bg-danger text-white text-break p-1">@((MarkupString)error)</div>
         </Body>
         <Footer>
-            <button @onclick="() => modal.Hide()" class="btn btn-secondary">Close</button>
+            <button @onclick="() => errorModal.Hide()" class="btn btn-secondary">Close</button>
+        </Footer>
+    </Modal>
+     <Modal @ref="workflowInputModal">
+        <Title>Start new instance</Title>
+        <Body>
+            <MonacoEditor
+                @ref="workflowInputEditor"
+                Id="definition-editor"
+                CssClass="workflow-input"
+                ConstructionOptions="GetWorkflowInputEditorOptions"/>
+        </Body>
+        <Footer>
+            <button @onclick="() => workflowInputModal.Hide()" class="btn btn-secondary">Cancel</button>
+            <button @onclick="OnStartWorkflowAsync" class="btn btn-primary">Start</button>
         </Footer>
     </Modal>
 }
@@ -71,7 +93,9 @@ else
     [Parameter]
     public string WorkflowId { get; set; } = null!;
 
-    private Modal modal = null!;
+    private Modal errorModal = null!;
+    private Modal workflowInputModal = null!;
+    private MonacoEditor workflowInputEditor = null!;
     private V1WorkflowDto workflow = null!;
     private Diagram diagram { get; set; } = null!;
     private IQueryable<V1WorkflowInstanceDto> instances = null!;
@@ -88,6 +112,16 @@ else
         await base.OnInitializedAsync();
     }
 
+    private StandaloneEditorConstructionOptions GetWorkflowInputEditorOptions(MonacoEditor editor)
+    {
+        return new StandaloneEditorConstructionOptions 
+        {
+		    AutomaticLayout = true,
+		    Language = "json",
+            Minimap = new EditorMinimapOptions { Enabled = false }
+	    };
+    }
+
     private async Task<IQueryable<V1WorkflowInstanceDto>> FetchWorkflowInstancesAsync()
     {
         return (await this.SynapseApi.GetWorkflowInstancesAsync($"$filter={nameof(V1WorkflowInstanceDto.WorkflowId)} eq '{this.WorkflowId}'")).AsQueryable();
@@ -101,6 +135,50 @@ else
         this.instances = await this.FetchWorkflowInstancesAsync();
         this.diagram.DisplayActivityStatusFor(this.instances);
         this.StateHasChanged();
+    }
+
+    private async Task OnShowWorkflowInputModal()
+    {
+        var schema = this.workflow.Definition.DataInputSchema?.Schema;
+        if(schema == null
+            && this.workflow.Definition.DataInputSchemaUri != null)
+        {
+            var json = await this.HttpClient.GetStringAsync(this.workflow.Definition.DataInputSchemaUri);
+            schema = JSchema.Parse(json);
+        }
+        if(schema != null)
+        {
+            var example = schema.GenerateExample();
+            if(example != null)
+            {
+                var json = JObject.FromObject(example).ToString(Formatting.Indented);
+                await this.workflowInputEditor.SetValue(json);
+            }  
+        }
+        this.workflowInputModal.Show();
+    }
+
+    private async Task OnStartWorkflowAsync()
+    {
+        this.workflowInputModal.Hide();
+        var json = await this.workflowInputEditor.GetValue();
+        await this.workflowInputEditor.SetValue(string.Empty);
+        var inputData = await this.JsonSerializer.DeserializeAsync<DynamicObject>(json);
+        try
+        {
+            var workflowInstance = await this.SynapseApi.CreateWorkflowInstanceAsync(new()
+            {
+                WorkflowId = this.WorkflowId,
+                ActivationType = V1WorkflowInstanceActivationType.Manual,
+                InputData = inputData
+            });
+            await this.SynapseApi.StartWorkflowInstanceAsync(workflowInstance.Id);
+        }
+        catch(Exception ex)
+        {
+            this.error = ex.ToString();
+            this.errorModal.Show();
+        } 
     }
 
 }

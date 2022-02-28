@@ -136,7 +136,7 @@ namespace Synapse.Ports.HttpRest.Client.Services
         public virtual async Task<V1WorkflowInstanceDto> StartWorkflowInstanceAsync(string id, CancellationToken cancellationToken = default)
         {
             var requestUri = $"/api/v1/workflow-instances/byid/{id}/start";
-            using var request = this.CreateRequest(HttpMethod.Post, requestUri);
+            using var request = this.CreateRequest(HttpMethod.Put, requestUri);
             using var response = await this.HttpClient.SendAsync(request, cancellationToken);
             var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
             if (!response.IsSuccessStatusCode)
