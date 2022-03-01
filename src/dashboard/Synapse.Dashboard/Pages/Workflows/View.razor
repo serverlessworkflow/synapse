@@ -20,14 +20,17 @@
 <PageTitle>@workflow?.Id</PageTitle>
 <AppHeader>
     <span class="h5 m-0 p-0">@workflow?.Id</span>
-    <button @onclick="OnShowWorkflowInputModal" class="btn btn-primary ms-auto" title="Start workflow"><span class="oi oi-media-play"></span></button>
+    <button @onclick="OnShowWorkflowInputModal" class="btn btn-primary" title="Start workflow"><span class="oi oi-media-play"></span></button>
 </AppHeader>
 
 @if (workflow != null)
 {
     <div class="container-fluid h-100">
-        <div class="row h-50">
+        <div class="row h-50 position-relative">
             <WorkflowDiagram Diagram="diagram" />
+            <div class="show-definition text-end">
+                <button type="button" @onclick="OnShowWorkflowDefinitionModal" class="btn btn-outline-dark" title="Detailed definition"><span class="oi oi-info"></span></button>
+            </div>
         </div>
         <div class="row h-50 border border-dark">
             <TabControl>
@@ -78,13 +81,24 @@
         <Body>
             <MonacoEditor
                 @ref="workflowInputEditor"
-                Id="definition-editor"
                 CssClass="monaco-small"
                 ConstructionOptions="GetWorkflowInputEditorOptions"/>
         </Body>
         <Footer>
             <button @onclick="() => workflowInputModal.Hide()" class="btn btn-secondary">Cancel</button>
             <button @onclick="OnStartWorkflowAsync" class="btn btn-primary">Start</button>
+        </Footer>
+    </Modal>
+    <Modal @ref="workflowDefinitionModal">
+        <Title>Workflow definition</Title>
+        <Body>
+            <MonacoEditor
+                @ref="workflowDefinitionEditor"
+                CssClass="monaco-small"
+                ConstructionOptions="GetWorkflowDefinitionEditorOptions"/>
+        </Body>
+        <Footer>
+            <button @onclick="() => workflowDefinitionModal.Hide()" class="btn btn-secondary">Close</button>
         </Footer>
     </Modal>
 }
@@ -100,7 +114,9 @@ else
 
     private Modal errorModal = null!;
     private Modal workflowInputModal = null!;
+    private Modal workflowDefinitionModal = null!;
     private MonacoEditor workflowInputEditor = null!;
+    private MonacoEditor workflowDefinitionEditor = null!;
     private V1WorkflowDto workflow = null!;
     private Diagram diagram { get; set; } = null!;
     private IQueryable<V1WorkflowInstanceDto> instances = null!;
@@ -133,6 +149,18 @@ else
 	    };
     }
 
+    private StandaloneEditorConstructionOptions GetWorkflowDefinitionEditorOptions(MonacoEditor editor)
+    {
+        return new StandaloneEditorConstructionOptions 
+        {
+		    AutomaticLayout = true,
+		    Language = "json",
+            Minimap = new EditorMinimapOptions { Enabled = false },
+            ReadOnly = false,
+            Value = JsonConvert.SerializeObject(this.workflow.Definition, Formatting.Indented)
+	    };
+    }
+
     private async Task<IQueryable<V1WorkflowInstanceDto>> FetchWorkflowInstancesAsync()
     {
         return (await this.SynapseApi.GetWorkflowInstancesAsync($"$filter={nameof(V1WorkflowInstanceDto.WorkflowId)} eq '{this.WorkflowId}'")).AsQueryable();
@@ -146,6 +174,11 @@ else
         this.instances = await this.FetchWorkflowInstancesAsync();
         this.diagram.DisplayActivityStatusFor(this.instances);
         this.StateHasChanged();
+    }
+
+    private void OnShowWorkflowDefinitionModal()
+    {
+        this.workflowDefinitionModal.Show();
     }
 
     private async Task OnShowWorkflowInputModal()

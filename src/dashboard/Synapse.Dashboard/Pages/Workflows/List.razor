@@ -9,7 +9,7 @@
 <PageTitle>Workflows</PageTitle>
 <AppHeader>
     <span class="h5 m-0 p-0">Workflows</span>
-    <button @onclick="OnNewWorkflow" class="btn btn-primary ms-auto" title="New workflow"><span class="oi oi-plus"></span></button>
+    <button @onclick="OnNewWorkflow" class="btn btn-primary" title="New workflow"><span class="oi oi-plus"></span></button>
 </AppHeader>
 
 <DataTable DataSource="new ODataQueryable<V1WorkflowDto>(this.ServiceProvider)" AutoGenerateColumns="true" OrderByDefault="(IQueryable query) => ((IQueryable<V1WorkflowDto>)query).OrderBy(c => c.Id)" />
