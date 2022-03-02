@@ -23,6 +23,7 @@ using Neuroglia.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Synapse.Integration.Events.WorkflowActivities;
+using System.Collections;
 using System.Dynamic;
 using System.Net;
 using System.Net.Mime;
@@ -225,7 +226,13 @@ namespace Synapse.Runtime.Executor.Services.Processors
             foreach (Match match in Regex.Matches(json, @"""\$\{.+?\}"""))
             {
                 var expression = match.Value[3..^2].Trim();
-                var valueToken = JToken.FromObject(this.Context.ExpressionEvaluator.Evaluate(expression, this.Activity.Input!)!);
+                var evaluationResult = this.Context.ExpressionEvaluator.Evaluate(expression, this.Activity.Input!.ToObject()!);
+                if(evaluationResult == null)
+                {
+                    Console.WriteLine($"Evaluation result of expression {expression} on data {JsonConvert.SerializeObject(this.Activity.Input)} is NULL"); //todo: replace with better message
+                    continue;
+                }
+                var valueToken = JToken.FromObject(evaluationResult);
                 var value = null as string;
                 if (valueToken != null)
                 {
@@ -257,7 +264,7 @@ namespace Synapse.Runtime.Executor.Services.Processors
         {
             try
             {
-                var output = null as ExpandoObject;
+                var output = null as object;
                 var success = false;
                 foreach (string server in this.Servers)
                 {
@@ -297,7 +304,7 @@ namespace Synapse.Runtime.Executor.Services.Processors
                         if (serializer == null)
                             throw new NotSupportedException($"Failed to find a serializer for the specified media type '{mediaType}'");
                         using var stream = new MemoryStream(rawContent!);
-                        output = await serializer.DeserializeAsync<ExpandoObject>(stream, cancellationToken);
+                        output = (await serializer.DeserializeAsync<JToken>(stream, cancellationToken)).ToObject();
                     }
                     success = true;
                     break;

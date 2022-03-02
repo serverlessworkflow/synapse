@@ -11,7 +11,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.OData" Version="8.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.OData.NewtonsoftJson" Version="8.0.4" />
-    <PackageReference Include="Neuroglia.Mediation.AspNetCore" Version="2.0.1.32" />
+    <PackageReference Include="Neuroglia.Mediation.AspNetCore" Version="2.0.1.33" />
   </ItemGroup>
 
   <ItemGroup>

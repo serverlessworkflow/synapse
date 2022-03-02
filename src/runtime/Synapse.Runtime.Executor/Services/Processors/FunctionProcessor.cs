@@ -15,6 +15,10 @@
  *
  */
 
+using Newtonsoft.Json;
+using Synapse.Integration.Events;
+using Synapse.Integration.Events.WorkflowActivities;
+
 namespace Synapse.Runtime.Executor.Services.Processors
 {
     /// <summary>
@@ -55,6 +59,23 @@ namespace Synapse.Runtime.Executor.Services.Processors
             {
                 return this.Action.Function!;
             }
+        }
+
+        protected override async Task OnNextAsync(IV1WorkflowActivityIntegrationEvent e, CancellationToken cancellationToken)
+        {
+            if (e is not V1WorkflowActivityCompletedIntegrationEvent completedEvent)
+                return;
+            var output = completedEvent.Output.ToObject();
+
+            Console.WriteLine($"BEFORE FILTER: {JsonConvert.SerializeObject(output)}");
+            Console.WriteLine($"FILTER EXPRESSION: {this.Action.ActionDataFilter?.Results}");
+
+            if (this.Action.ActionDataFilter != null)
+                output = this.Context.ExpressionEvaluator.FilterOutput(this.Action, output);
+
+            Console.WriteLine($"AFTER FILTER: {JsonConvert.SerializeObject(output)}");
+
+            await base.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, output), cancellationToken);
         }
 
     }

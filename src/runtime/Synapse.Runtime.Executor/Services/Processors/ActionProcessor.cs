@@ -15,7 +15,6 @@
  *
  */
 
-using Newtonsoft.Json;
 using Synapse.Integration.Events.WorkflowActivities;
 using System.Reactive.Linq;
 
@@ -111,10 +110,7 @@ namespace Synapse.Runtime.Executor.Services.Processors
             if (this.Action.Sleep != null
                 && this.Action.Sleep.After.HasValue)
                 await Task.Delay(this.Action.Sleep.After.Value, cancellationToken);
-            var output = e.Output.ToObject();
-            if (this.Action.ActionDataFilter != null)
-                output = this.Context.ExpressionEvaluator.FilterOutput(this.Action, output);
-            await this.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, output), cancellationToken);
+            await this.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, e.Output), cancellationToken);
         }
 
     }
