@@ -52,11 +52,11 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label">Activation Type</label>
-                                <div class="border border-dark rounded-pill p-1">@workflowInstance.ActivationType</div>
+                                <div class="border border-dark rounded-pill p-1 text-center">@workflowInstance.ActivationType</div>
                             </div>
                            <div class="col-md-6">
                                 <label class="form-label">Status</label>
-                                  <div class="border border-dark rounded-pill p-1 @GetStatusClass()">@workflowInstance.Status</div>
+                                  <div class="border border-dark rounded-pill p-1 text-center @GetStatusClass()">@workflowInstance.Status</div>
                             </div>
                         </div>
                         <div class="row g-3">
@@ -196,22 +196,22 @@ else
             case V1WorkflowInstanceStatus.Starting:
             case V1WorkflowInstanceStatus.Resuming:
             case V1WorkflowInstanceStatus.Running:
-                return "bg-primary";
+                return "bg-primary text-white";
             case V1WorkflowInstanceStatus.Suspending:
             case V1WorkflowInstanceStatus.Suspended:
-                return "bg-warning";
+                return "bg-warning text-white";
             case V1WorkflowInstanceStatus.Faulted:
             case V1WorkflowInstanceStatus.Cancelling:
             case V1WorkflowInstanceStatus.Cancelled:
-                return "bg-danger";
+                return "bg-danger text-white";
             case  V1WorkflowInstanceStatus.Completed:
-                return "bg-success";
+                return "bg-success text-white";
             default:
                 return string.Empty;
         }
     }
 
-    private StandaloneEditorConstructionOptions GetWorkflowEditorOptions(MonacoEditor editor)
+    protected DiffEditorConstructionOptions GetDiffEditorConstructionOptions(MonacoDiffEditor editor)
     {
         return new DiffEditorConstructionOptions
         {
