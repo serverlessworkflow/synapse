@@ -66,7 +66,6 @@ namespace Synapse.Runtime.Services
                 V1WorkflowActivityType.End => ActivatorUtilities.CreateInstance<EndProcessor>(this.ServiceProvider, activity, state.End ?? new()),
                 V1WorkflowActivityType.Error => throw new NotImplementedException(),//todo
                 V1WorkflowActivityType.EventTrigger => throw new NotImplementedException(),//todo
-                V1WorkflowActivityType.Function => this.CreateFunctionActivityProcessor(state, activity),
                 V1WorkflowActivityType.Iteration => throw new NotImplementedException(),//todo
                 V1WorkflowActivityType.ProduceEvent => throw new NotImplementedException(),//todo
                 V1WorkflowActivityType.Start => ActivatorUtilities.CreateInstance<StartProcessor>(this.ServiceProvider, activity, this.Context.Workflow.Definition.Start ?? new()),
@@ -97,7 +96,17 @@ namespace Synapse.Runtime.Services
         {
             if(!state.TryGetAction(activity.Metadata, out var action))
                 throw new NullReferenceException($"Failed to find an action that matches the metadata specified by the activity with id '{activity.Id}'");
-            return ActivatorUtilities.CreateInstance<ActionProcessor>(this.ServiceProvider, activity, action);
+            switch (action.Type)
+            {
+                case ActionType.Function:
+                    return this.CreateFunctionActivityProcessor(state, activity);
+                case ActionType.Subflow:
+                    throw new NotImplementedException(); //todo
+                case ActionType.Trigger:
+                    throw new NotImplementedException(); //todo
+                default:
+                    throw new NotSupportedException($"The specified {typeof(ActionType).Name} '{action.Type}' is not supported");
+            }
         }
 
         protected virtual IWorkflowActivityProcessor CreateFunctionActivityProcessor(StateDefinition state, V1WorkflowActivityDto activity)

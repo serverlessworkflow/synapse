@@ -19,8 +19,19 @@
 
 <PageTitle>@workflow?.Id</PageTitle>
 <AppHeader>
-    <span class="h5 m-0 p-0">@workflow?.Id</span>
-    <button @onclick="OnShowWorkflowInputModal" class="btn btn-primary" title="Start workflow"><span class="oi oi-media-play"></span></button>
+    <div>
+        <div class="border rounded-pill border-dark px-3 py-1 d-inline">
+            <span class="h5 m-0 p-0">@workflow?.Definition.Id</span>
+        </div>
+        <div class="border rounded-pill bg-dark border-dark text-white px-3 py-1 d-inline">
+            <span class="h5 m-0 p-0">@workflow?.Definition.Version</span>
+        </div>
+    </div>
+    <div>
+        <button @onclick="OnShowWorkflowInputModal" class="btn btn-outline-dark" title="Start workflow"><span class="oi oi-media-play"></span></button>
+        <button type="button" @onclick="OnShowWorkflowDefinitionModal" class="btn btn-outline-dark" title="Detailed definition"><span class="oi oi-info"></span></button>
+    </div>
+    
 </AppHeader>
 
 @if (workflow != null)
@@ -28,12 +39,14 @@
     <div class="container-fluid h-100">
         <div class="row h-50 position-relative">
             <WorkflowDiagram Diagram="diagram" />
-            <div class="show-definition text-end">
-                <button type="button" @onclick="OnShowWorkflowDefinitionModal" class="btn btn-outline-dark" title="Detailed definition"><span class="oi oi-info"></span></button>
-            </div>
         </div>
         <div class="row h-50 border border-dark">
             <TabControl>
+                <TabPage Header="Metrics">
+                    <div>
+                        Some metrics
+                    </div>
+                </TabPage>
                 <TabPage Header="Instances">
                     <DataTable DataSource="instances">
                         <Columns>
@@ -79,10 +92,28 @@
     <Modal @ref="workflowInputModal">
         <Title>Start new instance</Title>
         <Body>
-            <MonacoEditor
-                @ref="workflowInputEditor"
-                CssClass="monaco-small"
-                ConstructionOptions="GetWorkflowInputEditorOptions"/>
+            @if (dataInputSchema != null)
+            {
+                <JsonForm @ref="jsonForm" Schema="dataInputSchema" />
+            }
+            else
+            {
+                <MonacoEditor
+                    @ref="workflowInputEditor"
+                    CssClass="monaco-small"
+                    ConstructionOptions="GetWorkflowInputEditorOptions"/>
+            }
+            @if (inputValidationErrors != null)
+            {
+                <div class="alert alert-danger">
+                    <ul>
+                        @foreach (var error in inputValidationErrors)
+                        {
+                            <li>Line @error.LineNumber, Position @error.LinePosition: @error.Message</li>
+                        }
+                    </ul>
+                </div>
+            }
         </Body>
         <Footer>
             <button @onclick="() => workflowInputModal.Hide()" class="btn btn-secondary">Cancel</button>
@@ -115,12 +146,15 @@ else
     private Modal errorModal = null!;
     private Modal workflowInputModal = null!;
     private Modal workflowDefinitionModal = null!;
-    private MonacoEditor workflowInputEditor = null!;
+    private MonacoEditor? workflowInputEditor;
+    private JsonForm? jsonForm;
     private MonacoEditor workflowDefinitionEditor = null!;
     private V1WorkflowDto workflow = null!;
     private Diagram diagram { get; set; } = null!;
     private IQueryable<V1WorkflowInstanceDto> instances = null!;
     private string error = null!;
+    private JSchema? dataInputSchema;
+    private IList<ValidationError>? inputValidationErrors;
 
     protected override async Task OnInitializedAsync()
     {
@@ -130,13 +164,27 @@ else
         this.instances = await this.FetchWorkflowInstancesAsync();
         this.diagram.DisplayActivityStatusFor(this.instances);
         this.HubConnection.On<CloudEventDescriptor>(nameof(ISynapseWebSocketApiClient.PublishIntegrationEvent), this.OnIntegrationEvent);
+        await this.LoadDataInputSchemaAsync();
         this.StateHasChanged();
     }
 
     protected override async Task OnParametersSetAsync()
     {
-        await this.workflowInputEditor.SetValue(string.Empty);
         await base.OnParametersSetAsync();
+        if(this.workflowInputEditor != null)
+            await this.workflowInputEditor.SetValue(string.Empty);
+    }
+
+    private async Task LoadDataInputSchemaAsync()
+    {
+        var schema = this.workflow.Definition.DataInputSchema?.Schema;
+        if(schema == null
+            && this.workflow.Definition.DataInputSchemaUri != null)
+        {
+            var json = await this.HttpClient.GetStringAsync(this.workflow.Definition.DataInputSchemaUri);
+            schema = JSchema.Parse(json);
+        }
+        this.dataInputSchema = schema;
     }
 
     private StandaloneEditorConstructionOptions GetWorkflowInputEditorOptions(MonacoEditor editor)
@@ -156,7 +204,7 @@ else
 		    AutomaticLayout = true,
 		    Language = "json",
             Minimap = new EditorMinimapOptions { Enabled = false },
-            ReadOnly = false,
+            ReadOnly = true,
             Value = JsonConvert.SerializeObject(this.workflow.Definition, Formatting.Indented)
 	    };
     }
@@ -183,16 +231,13 @@ else
 
     private async Task OnShowWorkflowInputModal()
     {
-        var schema = this.workflow.Definition.DataInputSchema?.Schema;
-        if(schema == null
-            && this.workflow.Definition.DataInputSchemaUri != null)
+        this.inputValidationErrors = null;
+        if(this.workflowInputEditor != null)
+            await this.workflowInputEditor.SetValue(string.Empty);
+        if(this.dataInputSchema != null
+            && this.workflowInputEditor != null)
         {
-            var json = await this.HttpClient.GetStringAsync(this.workflow.Definition.DataInputSchemaUri);
-            schema = JSchema.Parse(json);
-        }
-        if(schema != null)
-        {
-            var example = schema.GenerateExample();
+            var example = this.dataInputSchema.GenerateExample();
             if(example != null)
             {
                 var json = JObject.FromObject(example).ToString(Formatting.Indented);
@@ -204,9 +249,33 @@ else
 
     private async Task OnStartWorkflowAsync()
     {
+        var json = string.Empty;
+        if(this.workflowInputEditor != null)
+        {
+            json = await this.workflowInputEditor.GetValue();
+            if(this.dataInputSchema != null)
+            {
+                var jobj = null as JObject;
+                if (string.IsNullOrWhiteSpace(json))
+                    jobj = new();
+                else
+                    jobj = JObject.Parse(json);
+                if(!jobj.IsValid(this.dataInputSchema, out IList<ValidationError> errors))
+                {
+                    this.inputValidationErrors = errors;
+                    return;
+                }
+            }
+        }
+        else
+        {
+            var value = await this.jsonForm.GetValueAsync();
+            json = await this.JsonSerializer.SerializeAsync(value);
+        }
         this.workflowInputModal.Hide();
-        var json = await this.workflowInputEditor.GetValue();
-        await this.workflowInputEditor.SetValue(string.Empty);
+        this.inputValidationErrors = null;
+        if(this.workflowInputEditor != null)
+            await this.workflowInputEditor.SetValue(string.Empty);
         var inputData = await this.JsonSerializer.DeserializeAsync<DynamicObject>(json);
         try
         {

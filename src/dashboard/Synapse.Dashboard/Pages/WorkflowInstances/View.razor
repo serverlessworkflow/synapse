@@ -19,7 +19,14 @@
 
 <PageTitle>@workflowInstance?.Id</PageTitle>
 <AppHeader>
-    <span class="h5 m-0 p-0">@workflowInstance?.Id</span>
+      <div>
+        <div class="border rounded-pill border-dark px-3 py-1 d-inline">
+            <span class="h5 m-0 p-0">@workflowInstance?.WorkflowId</span>
+        </div>
+        <div class="border rounded-pill bg-dark border-dark text-white px-3 py-1 d-inline">
+            <span class="h5 m-0 p-0">@workflowInstance?.Key</span>
+        </div>
+    </div>
 </AppHeader>
 
 @if (workflowInstance != null)
@@ -32,33 +39,39 @@
                         <h5 class="card-title">Details</h5>
                     </div>
                     <div class="card-body">
-                        <div>
-                            <label class="form-label">Workflow Id</label>
-                            <input type="text" class="form-control" readonly value="@workflowInstance.WorkflowId" />
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Workflow Id</label>
+                                <input type="text" class="form-control" readonly value="@workflowInstance.WorkflowId" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Activation Type</label>
+                                <input type="text" class="form-control" readonly value="@workflowInstance.ActivationType" />
+                            </div>
                         </div>
-                        <div>
-                            <label class="form-label">Activation Type</label>
-                            <input type="text" class="form-control" readonly value="@workflowInstance.ActivationType" />
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Key</label>
+                                <input type="text" class="form-control" readonly value="@workflowInstance.Key" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Created at</label>
+                                <input type="text" class="form-control" readonly value="@workflowInstance.CreatedAt" />
+                            </div>
                         </div>
-                        <div>
-                            <label class="form-label">Key</label>
-                            <input type="text" class="form-control" readonly value="@workflowInstance.Key" />
-                        </div>
-                        <div>
-                            <label class="form-label">Created at</label>
-                            <input type="text" class="form-control" readonly value="@workflowInstance.CreatedAt" />
-                        </div>
-                        <div>
-                            <label class="form-label">Started at</label>
-                            <input type="text" class="form-control" readonly value="@workflowInstance.StartedAt" />
-                        </div>
-                        <div>
-                            <label class="form-label">Executed at</label>
-                            <input type="text" class="form-control" readonly value="@workflowInstance.ExecutedAt" />
-                        </div>
-                        <div>
-                            <label class="form-label">Duration</label>
-                            <input type="text" class="form-control" readonly value="@workflowInstance.Duration" />
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Started at</label>
+                                <input type="text" class="form-control" readonly value="@workflowInstance.StartedAt" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Executed at</label>
+                                <input type="text" class="form-control" readonly value="@workflowInstance.ExecutedAt" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Duration</label>
+                                <input type="text" class="form-control" readonly value="@workflowInstance.Duration" />
+                            </div>
                         </div>
                         <div>
                             <label class="form-label">Input data</label>
@@ -117,7 +130,7 @@
                                             {
                                                 <MonacoEditor 
                                                     CssClass="monaco-extra-small"
-                                                    ConstructionOptions="GetReadOnlyEditorOptions(JsonConvert.SerializeObject(activity.Output, Formatting.Indented))" />
+                                                    ConstructionOptions="GetReadOnlyEditorOptions(JsonConvert.SerializeObject(activity.Output.ToObject(), Formatting.Indented))" />
                                             }
                                             @if(activity.Error != null)
                                             {
