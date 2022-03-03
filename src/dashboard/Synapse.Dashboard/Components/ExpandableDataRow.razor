@@ -1,0 +1,17 @@
+﻿@inject IAccordionManager AccordionManager
+
+<tr class="cursor-pointer" @onclick="Toggle">
+    @Title
+</tr>
+<tr class="@(IsExpanded ? "" : "d-none")">
+    @Body
+</tr>
+
+@implements IDisposable
+@inherits Accordion
+@code {
+    public void Dispose()
+    {
+        base.Dispose();
+    }
+}
