@@ -16,6 +16,8 @@
  */
 
 using Neuroglia.Data.Expressions;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Schema;
 using Synapse.Integration.Commands.WorkflowInstances;
 using Synapse.Integration.Models;
 
@@ -84,14 +86,20 @@ namespace Synapse.Application.Commands.WorkflowInstances
     {
 
         /// <inheritdoc/>
-        public V1CreateWorkflowInstanceCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, 
+        public V1CreateWorkflowInstanceCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IHttpClientFactory httpClientFactory,
             IRepository<V1Workflow> workflows, IRepository<V1WorkflowInstance> workflowInstances, IExpressionEvaluatorProvider expressionEvaluatorProvider)
             : base(loggerFactory, mediator, mapper)
         {
+            this.HttpClientFactory = httpClientFactory;
             this.Workflows = workflows;
             this.WorkflowInstances = workflowInstances;
             this.ExpressionEvaluatorProvider = expressionEvaluatorProvider;
         }
+
+        /// <summary>
+        /// Gets the service used to create <see cref="HttpClient"/>s
+        /// </summary>
+        protected IHttpClientFactory HttpClientFactory { get; }
 
         /// <summary>
         /// Gets the <see cref="IRepository"/> used to manage <see cref="V1Workflow"/>s
@@ -115,6 +123,25 @@ namespace Synapse.Application.Commands.WorkflowInstances
             if(workflow == null)
                 throw DomainException.NullReference(typeof(V1Workflow), command.WorkflowId);
             string? key = null;
+            var dataInputSchema = workflow.Definition.DataInputSchema?.Schema;
+            if (dataInputSchema == null
+                && workflow.Definition.DataInputSchemaUri != null)
+            {
+                using var httpClient = this.HttpClientFactory.CreateClient();
+                var json = await httpClient.GetStringAsync(workflow.Definition.DataInputSchemaUri);
+                dataInputSchema = JSchema.Parse(json);
+            }
+            if(dataInputSchema != null)
+            {
+                var input = command.InputData;
+                var jobj = null as JObject;
+                if (input == null)
+                    jobj = new JObject();
+                else
+                    jobj = JObject.FromObject(input);
+                if (!jobj.IsValid(dataInputSchema, out IList<string> errors))
+                    throw new DomainArgumentException($"Invalid workflow input data:{Environment.NewLine}{string.Join(Environment.NewLine, errors)}", nameof(command.InputData));
+            }
             if (!string.IsNullOrWhiteSpace(workflow.Definition.Key)
                 && command.InputData != null)
             {

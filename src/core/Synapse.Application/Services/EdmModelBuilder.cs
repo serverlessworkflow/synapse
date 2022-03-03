@@ -47,6 +47,7 @@ namespace Synapse.Application.Services
             builder.AddComplexType(typeof(ExpandoObject));
             builder.AddComplexType(typeof(WorkflowDefinition));
             builder.AddComplexType(typeof(NameValueCollection<string>));
+            builder.AddComplexType(typeof(List<object>));
 
             return builder.GetEdmModel();
         }

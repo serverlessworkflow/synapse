@@ -17,7 +17,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Neuroglia.Data.Expressions.JQ;
-using Neuroglia.Serialization;
 using Synapse.Ports.Grpc;
 
 AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
@@ -31,6 +30,7 @@ using var host = Host.CreateDefaultBuilder(args)
                 options.TimestampFormat = "[HH:mm:ss] ";
             });
         });
+        services.AddServerlessWorkflow();
         services.AddSynapseGrpcApiClient();
         services.AddSynapseGrpcRuntimeApiClient();
 

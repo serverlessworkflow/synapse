@@ -15,8 +15,8 @@
  *
  */
 
+using Synapse.Integration.Events;
 using Synapse.Integration.Events.WorkflowActivities;
-using System.Reactive.Linq;
 
 namespace Synapse.Runtime.Executor.Services.Processors
 {
@@ -24,7 +24,7 @@ namespace Synapse.Runtime.Executor.Services.Processors
     /// <summary>
     /// Represents the <see cref="WorkflowActivityProcessor"/> used to process <see cref="ActionDefinition"/>s
     /// </summary>
-    public class ActionProcessor
+    public abstract class ActionProcessor
         : WorkflowActivityProcessor, IActionProcessor
     {
 
@@ -49,68 +49,15 @@ namespace Synapse.Runtime.Executor.Services.Processors
         /// </summary>
         public ActionDefinition Action { get; }
 
-        protected override IWorkflowActivityProcessor CreateProcessorFor(V1WorkflowActivityDto activity)
-        {
-            var processor = base.CreateProcessorFor(activity);
-            processor.OfType<V1WorkflowActivityCompletedIntegrationEvent>().SubscribeAsync
-            (
-                async e => await this.OnChildActivityCompletedAsync(processor, e, this.CancellationTokenSource.Token),
-                async ex => await this.OnErrorAsync(ex, this.CancellationTokenSource.Token),
-                async () => await this.OnCompletedAsync(this.CancellationTokenSource.Token)
-            );
-            return processor;
-        }
-
         /// <inheritdoc/>
-        protected override Task InitializeAsync(CancellationToken cancellationToken)
+        protected override async Task OnNextAsync(IV1WorkflowActivityIntegrationEvent e, CancellationToken cancellationToken)
         {
-            return Task.CompletedTask;
-        }
-
-        /// <inheritdoc/>
-        protected override async Task ProcessAsync(CancellationToken cancellationToken)
-        {
-            var activities = await this.Context.Workflow.GetActivitiesAsync(this.Activity, cancellationToken);
-            if (!activities.Any())
-            {
-                if (!string.IsNullOrWhiteSpace(this.Action.Condition)
-                && !this.Context.ExpressionEvaluator.EvaluateCondition(this.Action.Condition, this.Activity.Input))
-                {
-                    await this.OnNextAsync(new V1WorkflowActivitySkippedIntegrationEvent(this.Activity.Id), cancellationToken);
-                    return;
-                }
-                if (this.Action.Sleep != null
-                    && this.Action.Sleep.Before.HasValue)
-                    await Task.Delay(this.Action.Sleep.Before.Value, cancellationToken);
-                var metadata = this.Activity.Metadata;
-                switch (this.Action.Type)
-                {
-                    case ActionType.Function:
-                        activities.Add(await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Function, this.Activity.Input, metadata, this.Activity, cancellationToken));
-                        break;
-                    case ActionType.Subflow:
-                        activities.Add(await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.SubFlow, this.Activity.Input, metadata, this.Activity, cancellationToken));
-                        break;
-                    case ActionType.Trigger:
-                        activities.Add(await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.EventTrigger, this.Activity.Input, metadata, this.Activity, cancellationToken));
-                        break;
-                    default:
-                        throw new NotSupportedException($"The specified {nameof(ActionType)} '{this.Action.Type}' is not supported");
-                }
-            }
-            foreach(var activity in activities)
-            {
-                var processor = this.CreateProcessorFor(activity);
-                await processor.ProcessAsync(cancellationToken);
-            }
-        }
-
-        protected virtual async Task OnChildActivityCompletedAsync(IWorkflowActivityProcessor processor, V1WorkflowActivityCompletedIntegrationEvent e, CancellationToken cancellationToken)
-        {
+            if (e is not V1WorkflowActivityCompletedIntegrationEvent)
+                return;
             if (this.Action.Sleep != null
                 && this.Action.Sleep.After.HasValue)
                 await Task.Delay(this.Action.Sleep.After.Value, cancellationToken);
-            await this.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, e.Output), cancellationToken);
+            await base.OnNextAsync(e, cancellationToken);
         }
 
     }
