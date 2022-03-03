@@ -12067,7 +12067,7 @@ body {
   overflow: hidden;
 }
 
-#animation-container {
+#logo-container, #animation-container {
   width: 100%;
   height: 100%;
   background-color: white;
