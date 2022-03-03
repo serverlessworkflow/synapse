@@ -45,32 +45,36 @@
                                 <input type="text" class="form-control" readonly value="@workflowInstance.WorkflowId" />
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Activation Type</label>
-                                <input type="text" class="form-control" readonly value="@workflowInstance.ActivationType" />
-                            </div>
-                        </div>
-                        <div class="row g-3">
-                            <div class="col-md-6">
                                 <label class="form-label">Key</label>
                                 <input type="text" class="form-control" readonly value="@workflowInstance.Key" />
                             </div>
+                        </div>
+                        <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label">Created at</label>
-                                <input type="text" class="form-control" readonly value="@workflowInstance.CreatedAt" />
+                                <label class="form-label">Activation Type</label>
+                                <div class="border border-dark rounded-pill p-1">@workflowInstance.ActivationType</div>
+                            </div>
+                           <div class="col-md-6">
+                                <label class="form-label">Status</label>
+                                  <div class="border border-dark rounded-pill p-1 @GetStatusClass()">@workflowInstance.Status</div>
                             </div>
                         </div>
                         <div class="row g-3">
-                            <div class="col-md-4">
+                             <div class="col-md-3">
+                                <label class="form-label">Created at</label>
+                                <input type="text" class="form-control" readonly value="@workflowInstance.CreatedAt" />
+                            </div>
+                            <div class="col-md-3">
                                 <label class="form-label">Started at</label>
                                 <input type="text" class="form-control" readonly value="@workflowInstance.StartedAt" />
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label class="form-label">Executed at</label>
                                 <input type="text" class="form-control" readonly value="@workflowInstance.ExecutedAt" />
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label class="form-label">Duration</label>
-                                <input type="text" class="form-control" readonly value="@workflowInstance.Duration" />
+                                <input type="text" class="form-control" readonly value="@workflowInstance.Duration?.ToString()" />
                             </div>
                         </div>
                         <div>
@@ -196,6 +200,30 @@ else
     private MonacoEditor workflowOutputEditor = null!;
     private List<V1WorkflowActivityDto> sortedActivities = new List<V1WorkflowActivityDto>();
     private Dictionary<int, ExpandableDataRow> rows = new Dictionary<int, ExpandableDataRow>();
+
+    private string GetStatusClass()
+    {
+        switch (this.workflowInstance.Status)
+        {
+            case V1WorkflowInstanceStatus.Pending:
+                return "bg-secondary";
+            case V1WorkflowInstanceStatus.Starting:
+            case V1WorkflowInstanceStatus.Resuming:
+            case V1WorkflowInstanceStatus.Running:
+                return "bg-primary";
+            case V1WorkflowInstanceStatus.Suspending:
+            case V1WorkflowInstanceStatus.Suspended:
+                return "bg-warning";
+            case V1WorkflowInstanceStatus.Faulted:
+            case V1WorkflowInstanceStatus.Cancelling:
+            case V1WorkflowInstanceStatus.Cancelled:
+                return "bg-danger";
+            case  V1WorkflowInstanceStatus.Completed:
+                return "bg-success";
+            default:
+                return string.Empty;
+        }
+    }
 
     private StandaloneEditorConstructionOptions GetWorkflowEditorOptions(MonacoEditor editor)
     {

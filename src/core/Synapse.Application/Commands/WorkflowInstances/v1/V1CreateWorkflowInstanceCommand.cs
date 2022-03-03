@@ -128,7 +128,7 @@ namespace Synapse.Application.Commands.WorkflowInstances
                 && workflow.Definition.DataInputSchemaUri != null)
             {
                 using var httpClient = this.HttpClientFactory.CreateClient();
-                var json = await httpClient.GetStringAsync(workflow.Definition.DataInputSchemaUri);
+                var json = await httpClient.GetStringAsync(workflow.Definition.DataInputSchemaUri, cancellationToken);
                 dataInputSchema = JSchema.Parse(json);
             }
             if(dataInputSchema != null)
