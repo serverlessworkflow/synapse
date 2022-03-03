@@ -77,20 +77,7 @@
                                 <input type="text" class="form-control" readonly value="@workflowInstance.Duration?.ToString()" />
                             </div>
                         </div>
-                        <div>
-                            <label class="form-label">Input data</label>
-                            <MonacoEditor
-                                @ref="workflowInputEditor"
-                                CssClass="monaco-extra-small"
-                                ConstructionOptions="GetWorkflowEditorOptions" />
-                        </div>
-                        <div>
-                            <label class="form-label">Output data</label>
-                            <MonacoEditor
-                                @ref="workflowOutputEditor"
-                                CssClass="monaco-extra-small"
-                                ConstructionOptions="GetWorkflowEditorOptions" />
-                        </div>
+                        <MonacoDiffEditor CssClass="monaco-normal" @ref="diffEditor" ConstructionOptions="GetDiffEditorConstructionOptions"></MonacoDiffEditor>
                     </div>
                 </div>
             </div>
@@ -193,13 +180,12 @@ else
     [Parameter]
     public string WorkflowInstanceId { get; set; } = null!;
 
-    private Modal errorModal = null!;
-    private string error = null!;
-    private V1WorkflowInstanceDto workflowInstance = null!;
-    private MonacoEditor workflowInputEditor = null!;
-    private MonacoEditor workflowOutputEditor = null!;
-    private List<V1WorkflowActivityDto> sortedActivities = new List<V1WorkflowActivityDto>();
-    private Dictionary<int, ExpandableDataRow> rows = new Dictionary<int, ExpandableDataRow>();
+    protected Modal errorModal = null!;
+    protected string error = null!;
+    protected V1WorkflowInstanceDto workflowInstance = null!;
+    protected List<V1WorkflowActivityDto> sortedActivities = new List<V1WorkflowActivityDto>();
+    protected Dictionary<int, ExpandableDataRow> rows = new Dictionary<int, ExpandableDataRow>();
+    protected MonacoDiffEditor diffEditor = null!;
 
     private string GetStatusClass()
     {
@@ -227,16 +213,15 @@ else
 
     private StandaloneEditorConstructionOptions GetWorkflowEditorOptions(MonacoEditor editor)
     {
-        return new StandaloneEditorConstructionOptions 
+        return new DiffEditorConstructionOptions
         {
 		    AutomaticLayout = true,
-		    Language = "json",
             Minimap = new EditorMinimapOptions { Enabled = false },
             ReadOnly = true
-	    };
+        };
     }
 
-    private Func<MonacoEditor, StandaloneEditorConstructionOptions> GetReadOnlyEditorOptions(string value)
+    protected Func<MonacoEditor, StandaloneEditorConstructionOptions> GetReadOnlyEditorOptions(string value)
     {
         return (MonacoEditor editor) => new StandaloneEditorConstructionOptions 
         {
@@ -259,20 +244,27 @@ else
 
     protected override async Task OnParametersSetAsync()
     {
-        var json = string.Empty;
+        var input = string.Empty;
+        var output = string.Empty;        
+        TextModel inputModel = await MonacoEditorBase.GetModel("inputModel");
+        TextModel outputModel = await MonacoEditorBase.GetModel("outputModel");
         if (this.workflowInstance.Input != null) {
-            json = JsonConvert.SerializeObject(this.workflowInstance.Input, Formatting.Indented);
-            await this.workflowInputEditor.SetValue(json);
+            input = JsonConvert.SerializeObject(this.workflowInstance.Input, Formatting.Indented);
+            inputModel = await MonacoEditorBase.CreateModel(input, "json", "inputModel");
         }
         if (this.workflowInstance.Output != null) {
-            json = JsonConvert.SerializeObject(this.workflowInstance.Output, Formatting.Indented);
-            await this.workflowOutputEditor.SetValue(json);
+            output = JsonConvert.SerializeObject(this.workflowInstance.Output, Formatting.Indented);
+            outputModel = await MonacoEditorBase.CreateModel(output, "json", "outputModel");
         }
-        json = string.Empty;
         if (this.workflowInstance.Error != null) {
-            json = JsonConvert.SerializeObject(this.workflowInstance.Error, Formatting.Indented);
-            await this.workflowOutputEditor.SetValue(json);
+            output = JsonConvert.SerializeObject(this.workflowInstance.Error, Formatting.Indented);
+            outputModel = await MonacoEditorBase.CreateModel(output, "json", "outputModel");
         }
+        await this.diffEditor.SetModel(new DiffEditorModel
+        {
+            Original = inputModel,
+            Modified = outputModel
+        });
         await base.OnParametersSetAsync();
         this.StateHasChanged();
     }
