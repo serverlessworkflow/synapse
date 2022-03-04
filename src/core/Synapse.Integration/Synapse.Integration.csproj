@@ -86,6 +86,9 @@
     <Compile Update="Commands\WorkflowActivities\v1\Generated\V1SetWorkflowActivityOutputCommandDto.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\WorkflowActivities\v1\V1SetWorkflowActivityOutputCommand.cs</CustomToolNamespace>
     </Compile>
+    <Compile Update="Commands\WorkflowActivities\v1\Generated\V1SkipWorkflowActivityCommandDto.cs">
+      <CustomToolNamespace>..\Synapse.Application\Commands\WorkflowActivities\v1\V1SkipWorkflowActivityCommand.cs</CustomToolNamespace>
+    </Compile>
     <Compile Update="Commands\WorkflowActivities\v1\Generated\V1StartWorkflowActivityCommandDto.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\WorkflowActivities\v1\V1StartWorkflowActivityCommand.cs</CustomToolNamespace>
     </Compile>

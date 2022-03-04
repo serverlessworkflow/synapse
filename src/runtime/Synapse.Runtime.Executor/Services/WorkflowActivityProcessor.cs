@@ -199,6 +199,8 @@ namespace Synapse.Runtime.Executor.Services
                     this.Logger.LogInformation("Activity '{activityId}' (type: '{activityType}') completed", this.Activity.Id, this.Activity.Type);
                 await this.Context.Workflow.On(this.Activity, e, cancellationToken);
                 this.Subject.OnNext(e);
+
+                Console.WriteLine("PROCESSED AT ACTIVITY LEVEL"); //todo: remove
             }
             catch (Exception ex)
             {
@@ -238,6 +240,8 @@ namespace Synapse.Runtime.Executor.Services
                 this.Processors.ToList().ForEach(p => p.Dispose());
                 this.Processors.Clear();
                 this.Subject.OnCompleted();
+
+                Console.WriteLine("COMPLETED AT ACTIVITY LEVEL"); //todo: remove
             }
             catch (Exception ex)
             {

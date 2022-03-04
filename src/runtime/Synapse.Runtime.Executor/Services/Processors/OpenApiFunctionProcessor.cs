@@ -262,6 +262,9 @@ namespace Synapse.Runtime.Executor.Services.Processors
         /// <inheritdoc/>
         protected override async Task ProcessAsync(CancellationToken cancellationToken)
         {
+            await base.ProcessAsync(cancellationToken);
+            if (this.Activity.Status == V1WorkflowActivityStatus.Skipped)
+                return;
             try
             {
                 var output = null as object;

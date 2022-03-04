@@ -63,12 +63,17 @@ namespace Synapse.Runtime.Executor.Services.Processors
 
         protected override async Task OnNextAsync(IV1WorkflowActivityIntegrationEvent e, CancellationToken cancellationToken)
         {
-            if (e is not V1WorkflowActivityCompletedIntegrationEvent completedEvent)
-                return;
-            var output = completedEvent.Output.ToObject();
-            if (this.Action.ActionDataFilter != null)
-                output = this.Context.ExpressionEvaluator.FilterOutput(this.Action, output);
-            await base.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, output), cancellationToken);
+            if (e is V1WorkflowActivityCompletedIntegrationEvent completedEvent)
+            {
+                var output = completedEvent.Output.ToObject();
+                if (this.Action.ActionDataFilter != null)
+                    output = this.Context.ExpressionEvaluator.FilterOutput(this.Action, output);
+                await base.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, output), cancellationToken);
+            }
+            else
+            {
+                await base.OnNextAsync(e, cancellationToken);
+            }
         }
 
     }

@@ -102,6 +102,12 @@ namespace Synapse.Ports.Grpc.Services
         }
 
         /// <inheritdoc/>
+        public virtual async Task<V1GrpcApiResult<V1WorkflowActivityDto>> SkipActivityAsync(string activityId, CallContext context = default)
+        {
+            return V1GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new V1SkipWorkflowActivityCommand(activityId), context.CancellationToken));
+        }
+
+        /// <inheritdoc/>
         public virtual async Task<V1GrpcApiResult<V1WorkflowActivityDto>> FaultActivityAsync(V1FaultWorkflowActivityCommandDto command, CallContext context = default)
         {
             return V1GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(this.Mapper.Map<V1FaultWorkflowActivityCommand>(command), context.CancellationToken));
@@ -142,7 +148,6 @@ namespace Synapse.Ports.Grpc.Services
         {
             return V1GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(this.Mapper.Map<V1SetWorkflowInstanceOutputCommand>(command), context.CancellationToken));
         }
-
 
     }
 

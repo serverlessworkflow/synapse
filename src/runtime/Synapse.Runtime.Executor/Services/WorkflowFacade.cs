@@ -118,6 +118,14 @@ namespace Synapse.Runtime.Services
         }
 
         /// <inheritdoc/>
+        public virtual async Task SkipActivityAsync(V1WorkflowActivityDto activity, CancellationToken cancellationToken = default)
+        {
+            if (activity == null)
+                throw new ArgumentNullException(nameof(activity));
+            await this.SynapseRuntimeApi.SkipActivityAsync(activity.Id, cancellationToken);
+        }
+
+        /// <inheritdoc/>
         public virtual async Task FaultActivityAsync(V1WorkflowActivityDto activity, Exception ex, CancellationToken cancellationToken = default)
         {
             if (activity == null)
@@ -190,6 +198,9 @@ namespace Synapse.Runtime.Services
                     break;
                 case V1WorkflowActivitySuspendedIntegrationEvent:
                     await this.SuspendActivityAsync(activity, cancellationToken);
+                    break;
+                case V1WorkflowActivitySkippedIntegrationEvent:
+                    await this.SkipActivityAsync(activity, cancellationToken);
                     break;
                 case V1WorkflowActivityFaultedIntegrationEvent faultedEvent:
                     await this.FaultActivityAsync(activity, faultedEvent.Error, cancellationToken);

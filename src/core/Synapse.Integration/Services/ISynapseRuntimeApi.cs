@@ -103,6 +103,15 @@ namespace Synapse.Integration.Services
         Task<V1WorkflowActivityDto> SuspendActivityAsync(string activityId, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Skips the specified activity
+        /// </summary>
+        /// <param name="activityId">The workflow activity to skip</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The skipped activity</returns>
+        [OperationContract]
+        Task<V1WorkflowActivityDto> SkipActivityAsync(string activityId, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Faults the specified activity
         /// </summary>
         /// <param name="command">The object that describes the command to execute</param>

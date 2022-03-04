@@ -50,14 +50,40 @@ namespace Synapse.Runtime.Executor.Services.Processors
         public ActionDefinition Action { get; }
 
         /// <inheritdoc/>
+        protected override async Task ProcessAsync(CancellationToken cancellationToken)
+        {
+            if (this.Action.Sleep != null
+             && this.Action.Sleep.Before.HasValue)
+                await Task.Delay(this.Action.Sleep.Before.Value, cancellationToken);
+            if (string.IsNullOrWhiteSpace(this.Action.Condition)
+                || this.Context.ExpressionEvaluator.EvaluateCondition(this.Action.Condition, this.Activity.Input.ToObject()!))
+                return;
+            this.Logger.LogInformation($"Skipping execution of workflow activity with id '{this.Activity.Id}' because the expression of the processed action with name '{this.Action.Name}' evaluated to false.");
+            this.Activity.Status = V1WorkflowActivityStatus.Skipped;
+
+            Console.WriteLine("PROCESSING 1"); //todo: remove
+
+            await this.OnNextAsync(new V1WorkflowActivitySkippedIntegrationEvent(this.Activity.Id), cancellationToken);
+            await this.OnCompletedAsync(cancellationToken);
+
+            Console.WriteLine("PROCESSED 1"); //todo: remove
+        }
+
+        /// <inheritdoc/>
         protected override async Task OnNextAsync(IV1WorkflowActivityIntegrationEvent e, CancellationToken cancellationToken)
         {
-            if (e is not V1WorkflowActivityCompletedIntegrationEvent)
-                return;
-            if (this.Action.Sleep != null
+            Console.WriteLine("PROCESSING 2-a"); //todo: remove
+
+            if (e is V1WorkflowActivityCompletedIntegrationEvent
+                && this.Action.Sleep != null
                 && this.Action.Sleep.After.HasValue)
                 await Task.Delay(this.Action.Sleep.After.Value, cancellationToken);
+
+            Console.WriteLine("PROCESSING 2-b"); //todo: remove
+
             await base.OnNextAsync(e, cancellationToken);
+
+            Console.WriteLine("PROCESSED 2"); //todo: remove
         }
 
     }
