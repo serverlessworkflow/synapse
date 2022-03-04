@@ -40,13 +40,8 @@
         <div class="row h-50 position-relative">
             <WorkflowDiagram Diagram="diagram" />
         </div>
-        <div class="row h-50 border border-dark">
+        <div class="row h-50">
             <TabControl>
-                <TabPage Header="Metrics">
-                    <div>
-                        Some metrics
-                    </div>
-                </TabPage>
                 <TabPage Header="Instances">
                     <DataTable DataSource="instances">
                         <Columns>
@@ -75,6 +70,11 @@
                                 IsFilterable="false"/>
                         </Columns>
                     </DataTable>
+                </TabPage>
+                <TabPage Header="Metrics">
+                    <div>
+                        Some metrics
+                    </div>
                 </TabPage>
             </TabControl>
         </div>
@@ -135,7 +135,7 @@
 }
 else
 {
-    <p>Loading...</p>
+    <Loader />
 }
 @code
 {

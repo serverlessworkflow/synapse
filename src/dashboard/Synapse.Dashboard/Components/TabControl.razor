@@ -1,11 +1,13 @@
-﻿<div class="container">
+﻿<div class="container">    
     <div class="row">
-        <div class="btn-group p-0" role="group">
+        <ul class="nav nav-tabs">
             @foreach (TabPage tabPage in Pages)
             {
-                <button type="button" class="btn @GetButtonClass(tabPage)" @onclick=@( () => ActivatePage(tabPage) )>@tabPage.Header</button>
+                <li class="nav-item">
+                    <a class="nav-link @GetButtonClass(tabPage)" @onclick=@( () => ActivatePage(tabPage) )>@tabPage.Header</a>
+                </li>
             }
-        </div>
+        </ul>
     </div>
     <div class="row">
         <CascadingValue Value="this">
@@ -34,7 +36,7 @@
 
     string GetButtonClass(TabPage page)
     {
-        return page == this.ActivePage ? "btn-dark" : "btn-secondary";
+        return page == this.ActivePage ? "active" : "";
     }
 
     void ActivatePage(TabPage page)
