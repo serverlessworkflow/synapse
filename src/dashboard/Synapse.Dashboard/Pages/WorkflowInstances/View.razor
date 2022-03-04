@@ -77,7 +77,9 @@
                                 <input type="text" class="form-control" readonly value="@workflowInstance.Duration?.ToString()" />
                             </div>
                         </div>
-                        <MonacoDiffEditor CssClass="monaco-normal" @ref="diffEditor" ConstructionOptions="GetDiffEditorConstructionOptions"></MonacoDiffEditor>
+                        <div class="mt-4">
+                            <MonacoDiffEditor CssClass="monaco-normal" @ref="diffEditor" ConstructionOptions="GetDiffEditorConstructionOptions"></MonacoDiffEditor>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -121,30 +123,45 @@
                                         <Body>
                                         <td colspan="5">
                                             <div class="row">
-                                                <div class="col-6">
-                                                    <p class="font-weight-bold">Input</p>
-                                                    @if(activity.Input != null)
-                                                    {
-                                                        <MonacoEditor 
+                                                @if (activity.Type == V1WorkflowActivityType.State)
+                                                {
+                                                    <div class="col">
+                                                        <MonacoDiffEditor                                                    
                                                             CssClass="monaco-small"
-                                                            ConstructionOptions="GetReadOnlyEditorOptions(JsonConvert.SerializeObject(activity.Input, Formatting.Indented))" />
-                                                    }
-                                                </div>
-                                                <div class="col-6">
-                                                    <p class="font-weight-bold">Output</p>
-                                                    @if(activity.Output != null)
-                                                    {
-                                                        <MonacoEditor 
-                                                            CssClass="monaco-small"
-                                                            ConstructionOptions="GetReadOnlyEditorOptions(JsonConvert.SerializeObject(activity.Output, Formatting.Indented))" />
-                                                    }
-                                                    @if(activity.Error != null)
-                                                    {
-                                                        <MonacoEditor                                                 
-                                                            CssClass="monaco-small"
-                                                            ConstructionOptions="GetReadOnlyEditorOptions(JsonConvert.SerializeObject(activity.Error, Formatting.Indented))" />
-                                                    }
-                                                </div>
+                                                            ConstructionOptions="GetDiffEditorConstructionOptions"
+                                                            OnDidInit="OnActivityDiffEditorDidInit(JsonConvert.SerializeObject(
+                                                                activity.Input, Formatting.Indented), 
+                                                                activity.Output != null ? JsonConvert.SerializeObject(activity.Output, Formatting.Indented) : JsonConvert.SerializeObject(activity.Error, Formatting.Indented)
+                                                            )"
+                                                        />
+                                                    </div>
+                                                } 
+                                                else {
+                                                     <div class="col-6">
+                                                        <p class="font-weight-bold">Input</p>
+                                                        @if(activity.Input != null)
+                                                        {
+                                                            <MonacoEditor 
+                                                                CssClass="monaco-small"
+                                                                ConstructionOptions="GetReadOnlyEditorOptions(JsonConvert.SerializeObject(activity.Input, Formatting.Indented))" />
+                                                        }
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <p class="font-weight-bold">Output</p>
+                                                        @if(activity.Output != null)
+                                                        {
+                                                            <MonacoEditor 
+                                                                CssClass="monaco-small"
+                                                                ConstructionOptions="GetReadOnlyEditorOptions(JsonConvert.SerializeObject(activity.Output, Formatting.Indented))" />
+                                                        }
+                                                        @if(activity.Error != null)
+                                                        {
+                                                            <MonacoEditor                                                 
+                                                                CssClass="monaco-small"
+                                                                ConstructionOptions="GetReadOnlyEditorOptions(JsonConvert.SerializeObject(activity.Error, Formatting.Indented))" />
+                                                        }
+                                                    </div>
+                                                }
                                             </div>
                                         </td>
                                         </Body>
@@ -221,6 +238,29 @@ else
         };
     }
 
+    protected Func<MonacoEditorBase, Task> OnActivityDiffEditorDidInit(string original, string modified)
+    {
+        return async (MonacoEditorBase editor) =>
+        {
+            var diffEditor = (MonacoDiffEditor)editor;    
+            TextModel inputModel = await MonacoEditorBase.CreateModel("", "json");
+            TextModel outputModel = await MonacoEditorBase.CreateModel("", "json");
+            if (!string.IsNullOrWhiteSpace(original))
+            {
+                inputModel = await MonacoEditorBase.CreateModel(original, "json");
+            }
+            if (!string.IsNullOrWhiteSpace(modified))
+            {
+                outputModel = await MonacoEditorBase.CreateModel(modified, "json");
+            }
+            await diffEditor.SetModel(new DiffEditorModel
+            {
+                Original = inputModel,
+                Modified = outputModel
+            });
+        };
+    }
+
     protected Func<MonacoEditor, StandaloneEditorConstructionOptions> GetReadOnlyEditorOptions(string value)
     {
         return (MonacoEditor editor) => new StandaloneEditorConstructionOptions 
@@ -232,7 +272,6 @@ else
             Value = value
 	    };
     }
-
 
     protected override async Task OnInitializedAsync()
     {
@@ -246,19 +285,19 @@ else
     {
         var input = string.Empty;
         var output = string.Empty;        
-        TextModel inputModel = await MonacoEditorBase.GetModel("inputModel");
-        TextModel outputModel = await MonacoEditorBase.GetModel("outputModel");
+        TextModel inputModel = await MonacoEditorBase.CreateModel("", "json");
+        TextModel outputModel = await MonacoEditorBase.CreateModel("", "json");
         if (this.workflowInstance.Input != null) {
             input = JsonConvert.SerializeObject(this.workflowInstance.Input, Formatting.Indented);
-            inputModel = await MonacoEditorBase.CreateModel(input, "json", "inputModel");
+            inputModel = await MonacoEditorBase.CreateModel(input, "json");
         }
         if (this.workflowInstance.Output != null) {
             output = JsonConvert.SerializeObject(this.workflowInstance.Output, Formatting.Indented);
-            outputModel = await MonacoEditorBase.CreateModel(output, "json", "outputModel");
+            outputModel = await MonacoEditorBase.CreateModel(output, "json");
         }
         if (this.workflowInstance.Error != null) {
             output = JsonConvert.SerializeObject(this.workflowInstance.Error, Formatting.Indented);
-            outputModel = await MonacoEditorBase.CreateModel(output, "json", "outputModel");
+            outputModel = await MonacoEditorBase.CreateModel(output, "json");
         }
         await this.diffEditor.SetModel(new DiffEditorModel
         {
