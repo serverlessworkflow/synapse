@@ -189,6 +189,9 @@ namespace Synapse.Runtime.Executor.Services.Processors
         /// <inheritdoc/>
         protected override async Task ProcessAsync(CancellationToken cancellationToken)
         {
+            await base.ProcessAsync(cancellationToken);
+            if (this.Activity.Status == V1WorkflowActivityStatus.Skipped)
+                return;
             var request = new GraphQLRequest()
             {
                 Query = @$"{this.OperationType}{{
@@ -217,7 +220,7 @@ namespace Synapse.Runtime.Executor.Services.Processors
             }
             catch (GraphQLHttpRequestException ex)
             {
-                throw new Exception($"An error occured while executing the GraphQL request: the server returned a non-success status code '{ex.StatusCode}'.{Environment.NewLine}Details: {ex.Content}");
+                await this.OnErrorAsync(new Exception($"An error occured while executing the GraphQL request: the server returned a non-success status code '{ex.StatusCode}'.{Environment.NewLine}Details: {ex.Content}"), cancellationToken);
             } 
         }
 

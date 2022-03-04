@@ -116,6 +116,14 @@ namespace Synapse.Runtime.Services
         Task SuspendActivityAsync(V1WorkflowActivityDto activity, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Skips the execution of the specified activity
+        /// </summary>
+        /// <param name="activity">The activity to skip the execution of</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        Task SkipActivityAsync(V1WorkflowActivityDto activity, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Cancels the execution of the specified activity
         /// </summary>
         /// <param name="activity">The activity to cancel the execution of</param>

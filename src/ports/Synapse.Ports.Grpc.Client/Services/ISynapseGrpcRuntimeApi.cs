@@ -79,6 +79,15 @@ namespace Synapse.Ports.Grpc.Services
         Task<V1GrpcApiResult<V1WorkflowActivityDto>> SuspendActivityAsync(string activityId, CallContext context = default);
 
         /// <summary>
+        /// Skips the specified activity
+        /// </summary>
+        /// <param name="activityId">The workflow activity to skip</param>
+        /// <param name="context">The current server call context</param>
+        /// <returns>The skipped activity</returns>
+        [OperationContract]
+        Task<V1GrpcApiResult<V1WorkflowActivityDto>> SkipActivityAsync(string activityId, CallContext context = default);
+
+        /// <summary>
         /// Faults the specified workflow activity
         /// </summary>
         /// <param name="command">An object that describes the command to execute</param>

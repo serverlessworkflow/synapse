@@ -19,33 +19,29 @@ using Synapse.Integration.Models;
 
 namespace Synapse.Application.Commands.WorkflowActivities
 {
-
     /// <summary>
-    /// Represents the <see cref="ICommand"/> used to fault a <see cref="V1WorkflowActivity"/>
+    /// Represents the <see cref="ICommand"/> used to skip the execution of a <see cref="V1WorkflowActivity"/>
     /// </summary>
-    [DataTransferObjectType(typeof(V1FaultWorkflowActivityCommandDto))]
-    public class V1FaultWorkflowActivityCommand
+    [DataTransferObjectType(typeof(V1SkipWorkflowActivityCommandDto))]
+    public class V1SkipWorkflowActivityCommand
         : Command<V1WorkflowActivityDto>
     {
 
         /// <summary>
-        /// Initializes a new <see cref="V1FaultWorkflowActivityCommand"/>
+        /// Initializes a new <see cref="V1SkipWorkflowActivityCommand"/>
         /// </summary>
-        protected V1FaultWorkflowActivityCommand()
+        protected V1SkipWorkflowActivityCommand()
         {
             this.Id = null!;
-            this.Error = null!;
         }
 
         /// <summary>
-        /// Initializes a new <see cref="V1FaultWorkflowActivityCommand"/>
+        /// Initializes a new <see cref="V1SkipWorkflowActivityCommand"/>
         /// </summary>
         /// <param name="id">The id of the <see cref="V1WorkflowActivity"/> to fault</param>
-        /// <param name="error">The <see cref="Neuroglia.Error"/> that cause the <see cref="V1WorkflowActivity"/> to fault</param>
-        public V1FaultWorkflowActivityCommand(string id, Error error)
+        public V1SkipWorkflowActivityCommand(string id)
         {
             this.Id = id;
-            this.Error = error;
         }
 
         /// <summary>
@@ -53,23 +49,18 @@ namespace Synapse.Application.Commands.WorkflowActivities
         /// </summary>
         public virtual string Id { get; protected set; }
 
-        /// <summary>
-        /// Gets the <see cref="Neuroglia.Error"/> that cause the <see cref="V1WorkflowActivity"/> to fault
-        /// </summary>
-        public virtual Error Error { get; protected set; }
-
     }
 
     /// <summary>
-    /// Represents the service used to handle <see cref="V1FaultWorkflowActivityCommand"/>s
+    /// Represents the service used to handle <see cref="V1SkipWorkflowActivityCommand"/>s
     /// </summary>
-    public class V1FaultWorkflowActivityCommandHandler
+    public class V1SkipWorkflowActivityCommandHandler
         : CommandHandlerBase,
-        ICommandHandler<V1FaultWorkflowActivityCommand, V1WorkflowActivityDto>
+        ICommandHandler<V1SkipWorkflowActivityCommand, V1WorkflowActivityDto>
     {
 
         /// <inheritdoc/>
-        public V1FaultWorkflowActivityCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IRepository<V1WorkflowActivity> activities)
+        public V1SkipWorkflowActivityCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IRepository<V1WorkflowActivity> activities)
             : base(loggerFactory, mediator, mapper)
         {
             this.Activities = activities;
@@ -81,12 +72,12 @@ namespace Synapse.Application.Commands.WorkflowActivities
         protected IRepository<V1WorkflowActivity> Activities { get; }
 
         /// <inheritdoc/>
-        public virtual async Task<IOperationResult<V1WorkflowActivityDto>> HandleAsync(V1FaultWorkflowActivityCommand command, CancellationToken cancellationToken = default)
+        public virtual async Task<IOperationResult<V1WorkflowActivityDto>> HandleAsync(V1SkipWorkflowActivityCommand command, CancellationToken cancellationToken = default)
         {
             var activity = await this.Activities.FindAsync(command.Id, cancellationToken);
             if (activity == null)
                 throw DomainException.NullReference(typeof(V1WorkflowActivity), command.Id);
-            activity.Fault(command.Error);
+            activity.Skip();
             activity = await this.Activities.UpdateAsync(activity, cancellationToken);
             await this.Activities.SaveChangesAsync(cancellationToken);
             return this.Ok(this.Mapper.Map<V1WorkflowActivityDto>(activity));

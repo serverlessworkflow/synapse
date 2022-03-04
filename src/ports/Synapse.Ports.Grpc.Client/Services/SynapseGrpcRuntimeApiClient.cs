@@ -124,6 +124,15 @@ namespace Synapse.Ports.Grpc.Services
         }
 
         /// <inheritdoc/>
+        public virtual async Task<V1WorkflowActivityDto> SkipActivityAsync(string activityId, CancellationToken cancellationToken = default)
+        {
+            var result = await this.GrpcRuntimeApi.SkipActivityAsync(activityId, cancellationToken);
+            if (!result.Succeeded)
+                throw new SynapseApiException(result);
+            return result.Data!;
+        }
+
+        /// <inheritdoc/>
         public virtual async Task<V1WorkflowActivityDto> FaultActivityAsync(V1FaultWorkflowActivityCommandDto command, CancellationToken cancellationToken = default)
         {
             var result = await this.GrpcRuntimeApi.FaultActivityAsync(command, cancellationToken);
