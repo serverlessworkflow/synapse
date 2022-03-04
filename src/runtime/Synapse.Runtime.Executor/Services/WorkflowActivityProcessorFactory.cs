@@ -116,7 +116,7 @@ namespace Synapse.Runtime.Services
                 //case FunctionType.AsyncApi://todo
                 //    break;
                 //case FunctionType.Expression:
-                //    return ActivatorUtilities.CreateInstance<ExpressionFunctionProcessor>(this.ServiceProvider, state, activity, action, function);
+                //    return ActivatorUtilities.CreateInstance<ExpressionFunctionProcessor>(this.ServiceProvider, activity, action, function);
                 case FunctionType.GraphQL:
                     return ActivatorUtilities.CreateInstance<GraphQLFunctionProcessor>(this.ServiceProvider, activity, action, function);
                 case FunctionType.OData:
@@ -125,8 +125,8 @@ namespace Synapse.Runtime.Services
                 //    break;
                 case FunctionType.Rest:
                     return ActivatorUtilities.CreateInstance<OpenApiFunctionProcessor>(this.ServiceProvider, activity, action, function);
-                //case FunctionType.Rpc:
-                //    return ActivatorUtilities.CreateInstance<RpcFunctionProcessor>(this.ServiceProvider, state, activity, action, function);
+                case FunctionType.Rpc:
+                    return ActivatorUtilities.CreateInstance<GrpcFunctionProcessor>(this.ServiceProvider, activity, action, function);
                 default:
                     throw new NotSupportedException($"The specified {nameof(FunctionType)} '{function.Type}' is not supported");
             }
