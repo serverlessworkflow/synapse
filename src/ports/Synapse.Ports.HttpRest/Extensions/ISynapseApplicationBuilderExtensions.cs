@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.OData;
 using Microsoft.AspNetCore.OData.NewtonsoftJson;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
+using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Synapse.Application.Configuration;
 using Synapse.Application.Services;
@@ -40,6 +41,23 @@ namespace Synapse.Ports.HttpRest
                 .AddODataNewtonsoftJson()
                 .AddApplicationPart(typeof(ISynapseApplicationBuilderExtensions).Assembly)
                 .AddApplicationPart(typeof(MetadataController).Assembly);
+            synapse.Services.AddSwaggerGen(builder =>
+            {
+                builder.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
+                builder.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "Synapse API",
+                    Version = "v1",
+                    Description = "The Open API documentation for the Synapse API",
+                    Contact = new()
+                    {
+                        Name = "The Synapse Authors",
+                        Url = new Uri("https://github.com/serverlessworkflow/synapse/")
+                    }
+                });
+                builder.IncludeXmlComments(typeof(ISynapseApplicationBuilderExtensions).Assembly.Location.Replace(".dll", ".xml"));
+                builder.IncludeXmlComments(typeof(V1WorkflowDto).Assembly.Location.Replace(".dll", ".xml"));
+            });
             return synapse;
         }
 

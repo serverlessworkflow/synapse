@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.OData;
 using Neuroglia.Caching;
 using Neuroglia.Data.Expressions.JQ;
 using ProtoBuf.Grpc.Server;
+using Swashbuckle.AspNetCore.SwaggerUI;
 using Synapse.Application.Configuration;
 using Synapse.Ports.Grpc.Services;
 using Synapse.Ports.HttpRest;
@@ -36,6 +37,16 @@ app.UseODataRouteDebug();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseSwagger(builder =>
+{
+    builder.RouteTemplate = "api/{documentName}/doc/oas.{json|yaml}";
+});
+app.UseSwaggerUI(builder =>
+{
+    builder.DocExpansion(DocExpansion.None);
+    builder.SwaggerEndpoint("/api/v1/doc/oas.json", "Synapse API v1");
+    builder.RoutePrefix = "api/doc";
+});
 app.MapControllers();
 app.MapGrpcService<SynapseGrpcApi>();
 app.MapGrpcService<SynapseGrpcRuntimeApi>();

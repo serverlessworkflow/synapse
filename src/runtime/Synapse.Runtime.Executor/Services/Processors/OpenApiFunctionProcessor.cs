@@ -19,14 +19,12 @@ using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Interfaces;
 using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi.Readers;
-using Neuroglia.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Synapse.Integration.Events.WorkflowActivities;
 using System.Collections;
 using System.Dynamic;
 using System.Net;
-using System.Net.Http.Headers;
 using System.Net.Mime;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -44,6 +42,7 @@ namespace Synapse.Runtime.Executor.Services.Processors
         /// <summary>
         /// Initializes a new <see cref="OpenApiFunctionProcessor"/>
         /// </summary>
+        /// <param name="serviceProvider">The current <see cref="IServiceProvider"/></param>
         /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
         /// <param name="context">The current <see cref="IWorkflowRuntimeContext"/></param>
         /// <param name="activityProcessorFactory">The service used to create <see cref="IWorkflowActivityProcessor"/>s</param>
@@ -53,10 +52,10 @@ namespace Synapse.Runtime.Executor.Services.Processors
         /// <param name="activity">The <see cref="V1WorkflowActivityDto"/> to process</param>
         /// <param name="action">The <see cref="ActionDefinition"/> to process</param>
         /// <param name="function">The <see cref="FunctionDefinition"/> to process</param>
-        public OpenApiFunctionProcessor(ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory, 
+        public OpenApiFunctionProcessor(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory, 
             IHttpClientFactory httpClientFactory, ISerializerProvider serializerProvider, IOptions<ApplicationOptions> options, V1WorkflowActivityDto activity, 
             ActionDefinition action, FunctionDefinition function) 
-            : base(loggerFactory, context, activityProcessorFactory, options, activity, action, function)
+            : base(serviceProvider, loggerFactory, context, activityProcessorFactory, options, activity, action, function)
         {
             this.HttpClient = httpClientFactory.CreateClient();
             this.SerializerProvider = serializerProvider;
@@ -125,6 +124,8 @@ namespace Synapse.Runtime.Executor.Services.Processors
         /// <inheritdoc/>
         protected override async Task InitializeAsync(CancellationToken cancellationToken)
         {
+            await base.InitializeAsync(cancellationToken);
+            await this.HttpClient.ConfigureAuthorizationAsync(this.ServiceProvider, this.Authentication, cancellationToken);
             var operationComponents = this.Function.Operation.Split('#');
             var openApiUri = new Uri(operationComponents.First());
             var operationId = operationComponents.Last();
@@ -282,7 +283,7 @@ namespace Synapse.Runtime.Executor.Services.Processors
                         requestUri = $"https:{requestUri}";
                     if (!string.IsNullOrWhiteSpace(this.QueryString))
                         requestUri += $"?{this.QueryString}";
-                    using var request = await this.ConfigureAuthorizationAsync(new HttpRequestMessage(this.HttpMethod, requestUri), cancellationToken);
+                    using var request = new HttpRequestMessage(this.HttpMethod, requestUri);
                     foreach (var header in this.Headers)
                     {
                         request.Headers.Add(header.Key, header.Value);
@@ -329,40 +330,6 @@ namespace Synapse.Runtime.Executor.Services.Processors
             {
                 await this.OnErrorAsync(ex, cancellationToken);
             }
-        }
-
-        /// <summary>
-        /// Configures the authorization mechanism, if any, to use when performing the specified <see cref="HttpRequestMessage"/>
-        /// </summary>
-        /// <param name="request">The <see cref="HttpRequestMessage"/> to configure</param>
-        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-        /// <returns>The configured <see cref="HttpRequestMessage"/></returns>
-        protected virtual async Task<HttpRequestMessage> ConfigureAuthorizationAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-        {
-            //todo
-            if (this.Authentication == null)
-                return request;
-            var scheme = null as string;
-            var value = null as string;
-            switch (this.Authentication.Properties)
-            {
-                case BasicAuthenticationProperties basic:
-                    scheme = "Basic";
-                    value = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{basic.Username}:{basic.Password}"));
-                    break;
-                case BearerAuthenticationProperties bearer:
-                    scheme = "Bearer";
-                    value = bearer.Token;
-                    break;
-                case OAuth2AuthenticationProperties oauth:
-                    //scheme = "Bearer";
-                    //value = token;
-                    break;
-                default:
-                    throw new NotSupportedException($"The specified authentication schema '{EnumHelper.Stringify(this.Authentication.Scheme)}' is not supported");
-            }
-            request.Headers.Authorization = new AuthenticationHeaderValue(scheme, value);
-            return request;
         }
 
     }

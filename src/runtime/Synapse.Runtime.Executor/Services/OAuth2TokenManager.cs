@@ -59,26 +59,29 @@ namespace Synapse.Runtime.Services
         protected Dictionary<string, OAuth2Token> Tokens { get; } = new();
 
         /// <inheritdoc/>
-        public virtual async Task<OAuth2Token> GetTokenAsync(OAuth2AuthenticationProperties properties, CancellationToken cancellationToken = default)
+        public virtual async Task<OAuth2Token> GetTokenAsync(OAuth2AuthenticationProperties oauthProperties, CancellationToken cancellationToken = default)
         {
-            if (properties == null)
-                throw new ArgumentNullException(nameof(properties));
-            var tokenKey = $"{properties.ClientId}@{properties.Authority}";
+            if (oauthProperties == null)
+                throw new ArgumentNullException(nameof(oauthProperties));
+            var tokenKey = $"{oauthProperties.ClientId}@{oauthProperties.Authority}";
+            var properties = oauthProperties.ToDictionary();
             if(this.Tokens.TryGetValue(tokenKey, out var token)
                 && token != null)
             {
-                if (token.HasExpired)
+                if (token.HasExpired
+                    && !string.IsNullOrWhiteSpace(token.RefreshToken))
                 {
-                    //todo: refresh if possible
+                    properties["grant_type"] = "refresh_token";
+                    properties["refresh_token"] = token.RefreshToken;
                 }
                 else
                 {
                     return token;
                 }
             }
-            using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(properties.Authority, "/connect/token/"))
+            using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(oauthProperties.Authority, "/connect/token/"))
             {
-                Content = new FormUrlEncodedContent(properties.ToDictionary())
+                Content = new FormUrlEncodedContent(properties)
             };
             using var response = await this.HttpClient.SendAsync(request, cancellationToken);
             var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;

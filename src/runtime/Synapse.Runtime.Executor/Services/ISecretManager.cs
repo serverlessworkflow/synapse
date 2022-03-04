@@ -1,6 +1,4 @@
-﻿using System.Dynamic;
-
-namespace Synapse.Runtime.Executor.Services
+﻿namespace Synapse.Runtime.Executor.Services
 {
 
     /// <summary>
@@ -13,8 +11,8 @@ namespace Synapse.Runtime.Executor.Services
         /// Gets all available secrets
         /// </summary>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-        /// <returns>A new <see cref="ExpandoObject"/> that contains the key/value mappings of all available secrets</returns>
-        Task<ExpandoObject> GetSecretsAsync(CancellationToken cancellationToken);
+        /// <returns>A new <see cref="IDictionary{TKey, TValue}"/> that contains the key/value mappings of all available secrets</returns>
+        Task<IDictionary<string, object>> GetSecretsAsync(CancellationToken cancellationToken);
 
     }
 

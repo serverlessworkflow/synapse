@@ -17,6 +17,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Neuroglia.Data.Expressions;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Synapse.Integration.Services;
 using Synapse.Runtime.Executor.Services;
 using System.Text.RegularExpressions;
@@ -143,6 +144,27 @@ namespace Synapse.Runtime.Services
             return this.ExpressionEvaluator.Evaluate(runtimeExpression, data!, args);
         }
 
+        /// <inheritdoc/>
+        public virtual async Task<T> GetSecretAsync<T>(string secret, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(secret))
+                throw new ArgumentNullException(nameof(secret));
+            var secrets = await this.SecretManager.GetSecretsAsync(cancellationToken);
+            if (!secrets.TryGetValue(secret, out var secretValue))
+                throw new NullReferenceException($"Failed to find the specified secret '{secret}'");
+            switch (secretValue)
+            {
+                case T t:
+                    return t;
+                case DynamicObject dyn:
+                    return dyn.ToObject<T>();
+                case JObject jobj:
+                    return jobj.ToObject<T>()!;
+                default:
+                    throw new InvalidCastException();
+            }
+        }
+
         /// <summary>
         /// Builds the runtime expression arguments
         /// </summary>
@@ -201,7 +223,7 @@ namespace Synapse.Runtime.Services
                 secrets = new();
             return secrets;
         }
-    
+
     }
 
 }

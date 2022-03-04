@@ -50,6 +50,15 @@ namespace Synapse.Runtime.Services
         /// <returns>The evaluation result</returns>
         Task<object?> EvaluateAsync(string runtimeExpression, object? data, CancellationToken cancellationToken = default);
 
+        /// <summary>
+        /// Reads the secret with the specified name
+        /// </summary>
+        /// <typeparam name="T">The type of the secret to get</typeparam>
+        /// <param name="secret">The name of the secret to get</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The secret with the specified name</returns>
+        Task<T> GetSecretAsync<T>(string secret, CancellationToken cancellationToken = default);
+
     }
 
 }

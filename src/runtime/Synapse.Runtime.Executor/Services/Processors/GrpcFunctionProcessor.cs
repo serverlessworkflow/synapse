@@ -32,6 +32,7 @@ namespace Synapse.Runtime.Executor.Services.Processors
         /// <summary>
         /// Initializes a new <see cref="GrpcFunctionProcessor"/>
         /// </summary>
+        /// <param name="serviceProvider">The current <see cref="IServiceProvider"/></param>
         /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
         /// <param name="context">The current <see cref="IWorkflowRuntimeContext"/></param>
         /// <param name="activityProcessorFactory">The service used to create <see cref="IWorkflowActivityProcessor"/>s</param>
@@ -39,10 +40,10 @@ namespace Synapse.Runtime.Executor.Services.Processors
         /// <param name="activity">The <see cref="V1WorkflowActivityDto"/> to process</param>
         /// <param name="action">The <see cref="ActionDefinition"/> to process</param>
         /// <param name="function">The <see cref="FunctionDefinition"/> to process</param>
-        public GrpcFunctionProcessor(ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory,
+        public GrpcFunctionProcessor(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory,
             IOptions<ApplicationOptions> options, V1WorkflowActivityDto activity,
             ActionDefinition action, FunctionDefinition function)
-            : base(loggerFactory, context, activityProcessorFactory, options, activity, action, function)
+            : base(serviceProvider, loggerFactory, context, activityProcessorFactory, options, activity, action, function)
         {
 
         }

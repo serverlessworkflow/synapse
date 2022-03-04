@@ -35,7 +35,7 @@ namespace Synapse.Runtime.Executor.Services
         /// <summary>
         /// Gets an <see cref="ExpandoObject"/> containing the key/value mappings of all loaded secrets
         /// </summary>
-        protected ExpandoObject Secrets { get; } = new();
+        protected Dictionary<string, object> Secrets { get; } = new();
 
         /// <inheritdoc/>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -54,7 +54,7 @@ namespace Synapse.Runtime.Executor.Services
                 try
                 {
                     var secret = await serializer.DeserializeAsync<Neuroglia.Serialization.DynamicObject>(stream, stoppingToken);
-                    ((IDictionary<string, object>)this.Secrets!).Add(file.Name, secret);
+                    this.Secrets.Add(file.Name, secret);
                 }
                 catch(Exception ex)
                 {
@@ -65,7 +65,7 @@ namespace Synapse.Runtime.Executor.Services
         }
 
         /// <inheritdoc/>
-        public virtual async Task<ExpandoObject> GetSecretsAsync(CancellationToken cancellationToken)
+        public virtual async Task<IDictionary<string, object>> GetSecretsAsync(CancellationToken cancellationToken)
         {
             return await Task.FromResult(this.Secrets);
         }
