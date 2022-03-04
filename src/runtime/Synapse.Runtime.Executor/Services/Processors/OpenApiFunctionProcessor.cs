@@ -154,29 +154,32 @@ namespace Synapse.Runtime.Executor.Services.Processors
                 KeyValuePair<string, OpenApiPathItem> path = this.Document.Paths
                     .Single(p => p.Value.Operations.Contains(operation));
                 this.Path = path.Key;
-                this.BuildParameters();
+                await this.BuildParametersAsync(cancellationToken);
                 foreach (OpenApiParameter param in this.Operation.Parameters
                     .Where(p => p.In == ParameterLocation.Cookie)
                     .GroupBy(p => p.Name))
                 {
-                    if (this.TryGetParameter($@".""{param.Name}""", out string value) && param.Required)
-                        this.Cookies.Add(param.Name, value);
+                    var match = await this.TryGetParameterAsync($@".""{param.Name}""", cancellationToken);
+                    if (match.HasMatch)
+                        this.Cookies.Add(param.Name, match.Value);
                     else if (param.Required)
                         throw new NullReferenceException($"Failed to find the definition of the required parameter '{param.Name}' in the function definition with name '{this.Function.Name}'");
                 }
                 foreach (OpenApiParameter param in this.Operation.Parameters
                     .Where(p => p.In == ParameterLocation.Header))
                 {
-                    if (this.TryGetParameter($@".""{param.Name}""", out string value) && param.Required)
-                        this.Headers.Add(param.Name, value);
+                    var match = await this.TryGetParameterAsync($@".""{param.Name}""", cancellationToken);
+                    if (match.HasMatch)
+                        this.Headers.Add(param.Name, match.Value);
                     else if (param.Required)
                         throw new NullReferenceException($"Failed to find the definition of the required parameter '{param.Name}' in the function definition with name '{this.Function.Name}'");
                 }
                 foreach (OpenApiParameter param in this.Operation.Parameters
                     .Where(p => p.In == ParameterLocation.Path))
                 {
-                    if (this.TryGetParameter($@".""{param.Name}""", out string value) && param.Required)
-                        this.Path = this.Path.Replace($"{{{param.Name}}}", value);
+                    var match = await this.TryGetParameterAsync($@".""{param.Name}""", cancellationToken);
+                    if (match.HasMatch)
+                        this.Path = this.Path.Replace($"{{{param.Name}}}", match.Value);
                     else if (param.Required)
                         throw new NullReferenceException($"Failed to find the definition of the required parameter '{param.Name}' in the function definition with name '{this.Function.Name}'");
                 }
@@ -184,8 +187,9 @@ namespace Synapse.Runtime.Executor.Services.Processors
                 foreach (OpenApiParameter param in this.Operation.Parameters
                     .Where(p => p.In == ParameterLocation.Query))
                 {
-                    if (this.TryGetParameter($".{param.Name}", out string value) && param.Required)
-                        queryParameters.Add(param.Name, value);
+                    var match = await this.TryGetParameterAsync($@".""{param.Name}""", cancellationToken);
+                    if (match.HasMatch)
+                        queryParameters.Add(param.Name, match.Value);
                     else if (param.Required)
                         throw new NullReferenceException($"Failed to find the definition of the required parameter '{param.Name}' in the function definition with name '{this.Function.Name}'");
                 }
@@ -194,14 +198,14 @@ namespace Synapse.Runtime.Executor.Services.Processors
                 {
                     if (operation.Value.RequestBody.Extensions.TryGetValue("x-bodyName", out IOpenApiExtension? bodyNameExtension))
                     {
-                        this.Body = this.Context.ExpressionEvaluator.Evaluate($".{((OpenApiString)bodyNameExtension).Value}", this.Parameters);
+                        this.Body = await this.Context.EvaluateAsync($".{((OpenApiString)bodyNameExtension).Value}", this.Parameters, cancellationToken);
                     }
                     else
                     {
                         if (this.Parameters.Count == 1)
                             this.Body = this.Parameters.First().Value;
                         else if (this.Parameters.TryGetValue("body", out var bodyValue))
-                            this.Body = this.Context.ExpressionEvaluator.Evaluate(".body", this.Parameters);
+                            this.Body = await this.Context.EvaluateAsync(".body", this.Parameters, cancellationToken);
                     }
                     if (this.Body == null && operation.Value.RequestBody.Required)
                         throw new NullReferenceException($"Failed to determine the required body parameter for the function with name '{this.Function.Name}'");
@@ -216,7 +220,8 @@ namespace Synapse.Runtime.Executor.Services.Processors
         /// <summary>
         /// Builds the parameters to pass to the function to execute
         /// </summary>
-        protected virtual void BuildParameters()
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        protected virtual async Task BuildParametersAsync(CancellationToken cancellationToken)
         {
             if (this.Activity.Input == null)
                 this.Parameters = new Dictionary<string, object>();
@@ -226,7 +231,7 @@ namespace Synapse.Runtime.Executor.Services.Processors
             foreach (Match match in Regex.Matches(json, @"""\$\{.+?\}"""))
             {
                 var expression = match.Value[3..^2].Trim();
-                var evaluationResult = this.Context.ExpressionEvaluator.Evaluate(expression, this.Activity.Input!.ToObject()!);
+                var evaluationResult = await this.Context.EvaluateAsync(expression, this.Activity.Input!.ToObject()!, cancellationToken);
                 if(evaluationResult == null)
                 {
                     Console.WriteLine($"Evaluation result of expression {expression} on data {JsonConvert.SerializeObject(this.Activity.Input)} is NULL"); //todo: replace with better message
@@ -249,14 +254,14 @@ namespace Synapse.Runtime.Executor.Services.Processors
             this.Parameters = JsonConvert.DeserializeObject<ExpandoObject>(json)!;
         }
 
-        protected virtual bool TryGetParameter(string expression, out string value)
+        protected virtual async Task<(bool HasMatch, string Value)> TryGetParameterAsync(string expression, CancellationToken cancellationToken)
         {
-            value = null!;
-            var token = this.Context.ExpressionEvaluator.Evaluate<object>(expression, this.Parameters);
+            var value = null as string;
+            var token = await this.Context.EvaluateAsync(expression, this.Parameters, cancellationToken);
             if (token == null)
-                return false;
+                return (false, value!);
             value = token.ToString()!;
-            return true;
+            return (true, value);
         }
 
         /// <inheritdoc/>

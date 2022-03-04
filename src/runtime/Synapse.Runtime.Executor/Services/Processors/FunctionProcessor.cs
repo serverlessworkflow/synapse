@@ -67,7 +67,7 @@ namespace Synapse.Runtime.Executor.Services.Processors
             {
                 var output = completedEvent.Output.ToObject();
                 if (this.Action.ActionDataFilter != null)
-                    output = this.Context.ExpressionEvaluator.FilterOutput(this.Action, output);
+                    output = await this.Context.FilterOutputAsync(this.Action, output!, cancellationToken);
                 await base.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, output), cancellationToken);
             }
             else

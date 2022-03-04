@@ -103,7 +103,7 @@ namespace Synapse.Runtime.Services
                         {
                             { V1WorkflowActivityMetadata.State, startState.Name }
                         };
-                        await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.State, this.Context.ExpressionEvaluator.FilterInput(startState, this.Context.Workflow.Instance.Input), metadata, null, this.CancellationToken);
+                        await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.State, await this.Context.FilterInputAsync(startState, this.Context.Workflow.Instance.Input, this.CancellationToken), metadata, null, this.CancellationToken);
                         break;
                     default:
                         throw new InvalidOperationException($"The workflow instance '{this.Context.Workflow.Instance.Id}' is in an unexpected state '{this.Context.Workflow.Instance.Status}'");

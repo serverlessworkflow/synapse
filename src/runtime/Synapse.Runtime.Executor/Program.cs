@@ -14,15 +14,22 @@
  * limitations under the License.
  *
  */
+
 using GraphQL.Client.Abstractions;
 using GraphQL.Client.Abstractions.Websocket;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Neuroglia.Data.Expressions.JQ;
 using Synapse.Ports.Grpc;
+using Synapse.Runtime.Executor.Services;
 
 AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 using var host = Host.CreateDefaultBuilder(args)
+    .ConfigureAppConfiguration(config =>
+    {
+        config.AddKeyPerFile("/run/secrets", true);
+    })
     .ConfigureServices(services =>
     {
         services.AddLogging(builder =>
@@ -43,11 +50,14 @@ using var host = Host.CreateDefaultBuilder(args)
         services.AddTransient<IGraphQLJsonSerializer>(provider => provider.GetRequiredService<GraphQL.Client.Serializer.Newtonsoft.NewtonsoftJsonSerializer>());
         services.AddTransient<IGraphQLWebsocketJsonSerializer>(provider => provider.GetRequiredService<GraphQL.Client.Serializer.Newtonsoft.NewtonsoftJsonSerializer>());
 
+        services.AddSingleton<FileBasedSecretManager>();
+        services.AddSingleton<ISecretManager>(provider => provider.GetRequiredService<FileBasedSecretManager>());
+        services.AddHostedService(provider => provider.GetRequiredService<FileBasedSecretManager>());
+
         services.AddSingleton<WorkflowActivityProcessorFactory>();
         services.AddSingleton<IWorkflowActivityProcessorFactory>(provider => provider.GetRequiredService<WorkflowActivityProcessorFactory>());
 
         services.AddSingleton<WorkflowRuntimeContext>();
-
         services.AddSingleton<IWorkflowRuntimeContext>(provider => provider.GetRequiredService<WorkflowRuntimeContext>());
 
         services.AddSingleton<WorkflowRuntime>();

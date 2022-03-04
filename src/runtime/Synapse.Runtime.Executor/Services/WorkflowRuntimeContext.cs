@@ -18,6 +18,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Neuroglia.Data.Expressions;
 using Newtonsoft.Json;
 using Synapse.Integration.Services;
+using Synapse.Runtime.Executor.Services;
+using System.Text.RegularExpressions;
 
 namespace Synapse.Runtime.Services
 {
@@ -35,13 +37,15 @@ namespace Synapse.Runtime.Services
         /// <param name="serviceProvider">The current <see cref="IServiceProvider"/></param>
         /// <param name="logger">The service used to perform logging</param>
         /// <param name="expressionEvaluatorProvider">The service used to create provide <see cref="IExpressionEvaluator"/>s</param>
+        /// <param name="secretManager">The service used to manage secrets</param>
         /// <param name="synapsePublicApi">The service used to interact with the Synapse Public API</param>
         /// <param name="synapseRuntimeApi">The service used to interact with the Synapse Runtime API</param>
-        public WorkflowRuntimeContext(IServiceProvider serviceProvider, ILogger<WorkflowRuntimeContext> logger, IExpressionEvaluatorProvider expressionEvaluatorProvider, ISynapseApi synapsePublicApi, ISynapseRuntimeApi synapseRuntimeApi)
+        public WorkflowRuntimeContext(IServiceProvider serviceProvider, ILogger<WorkflowRuntimeContext> logger, IExpressionEvaluatorProvider expressionEvaluatorProvider, ISecretManager secretManager, ISynapseApi synapsePublicApi, ISynapseRuntimeApi synapseRuntimeApi)
         {
             this.ServiceProvider = serviceProvider;
             this.Logger = logger;
             this.ExpressionEvaluatorProvider = expressionEvaluatorProvider;
+            this.SecretManager = secretManager;
             this.SynapsePublicApi = synapsePublicApi;
             this.SynapseRuntimeApi = synapseRuntimeApi;
             this.ExpressionEvaluator = null!;
@@ -61,12 +65,17 @@ namespace Synapse.Runtime.Services
         /// <summary>
         /// Gets the service used to create provide <see cref="IExpressionEvaluator"/>s
         /// </summary>
-        public IExpressionEvaluatorProvider ExpressionEvaluatorProvider { get; }
+        protected IExpressionEvaluatorProvider ExpressionEvaluatorProvider { get; }
 
         /// <summary>
         /// Gets the <see cref="IExpressionEvaluator"/> used to evaluate the current workflow's runtime expressions
         /// </summary>
-        public IExpressionEvaluator ExpressionEvaluator { get; private set; }
+        protected IExpressionEvaluator ExpressionEvaluator { get; private set; }
+
+        /// <summary>
+        /// Gets the service used to manage secrets
+        /// </summary>
+        protected ISecretManager SecretManager { get; }
 
         /// <summary>
         /// Gets the service used to interact with the Synapse Public API
@@ -81,6 +90,7 @@ namespace Synapse.Runtime.Services
         /// <inheritdoc/>
         public IWorkflowFacade Workflow { get; private set; }
 
+        /// <inheritdoc/>
         public virtual async Task InitializeAsync(CancellationToken cancellationToken)
         {
             try
@@ -105,6 +115,89 @@ namespace Synapse.Runtime.Services
                 this.Logger.LogError("An error occured while initializing the workflow runtime context: {ex}", ex.ToString());
                 throw;
             }
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<object?> EvaluateAsync(string runtimeExpression, object? data, CancellationToken cancellationToken)
+        {
+            runtimeExpression = runtimeExpression.Trim();
+            if (runtimeExpression.StartsWith("${"))
+                runtimeExpression = runtimeExpression[2..^1].Trim();
+            var args = await this.BuildRuntimExpressionArgumentsAsync(cancellationToken);
+            foreach (Match functionMatch in Regex.Matches(runtimeExpression, @"(fn:\w*)"))
+            {
+                var functionName = functionMatch.Value.Trim();
+                functionName = functionName[3..];
+                if (!this.Workflow.Definition.TryGetFunction(functionName, out var function))
+                    throw new NullReferenceException($"Failed to find a function with the specified name '{functionName}' in the workflow '{this.Workflow}'");
+                if (function.Type != FunctionType.Expression)
+                    throw new InvalidOperationException($"The function with name '{function.Name}' is of type '{EnumHelper.Stringify(function.Type)}' and cannot be called in an expression");
+                var value = this.ExpressionEvaluator.Evaluate(function.Operation, data, args);
+                var serializedValue = null as string;
+                if (value != null)
+                    serializedValue = JsonConvert.SerializeObject(value, Formatting.None);
+                runtimeExpression = runtimeExpression.Replace(functionMatch.Value, serializedValue);
+            }
+            return this.ExpressionEvaluator.Evaluate(runtimeExpression, data!, args);
+        }
+
+        /// <summary>
+        /// Builds the runtime expression arguments
+        /// </summary>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new <see cref="IDictionary{TKey, TValue}"/> that represents the runtime expression arguments</returns>
+        protected virtual async Task<IDictionary<string, object>> BuildRuntimExpressionArgumentsAsync(CancellationToken cancellationToken)
+        {
+            var args = new Dictionary<string, object>
+            {
+                { "CONTEXT", await this.BuildRuntimeExpressionContextArgumentAsync(cancellationToken) },
+                { "CONST", await this.BuildRuntimeExpressionConstantsArgumentAsync(cancellationToken) },
+                { "SECRETS", await this.BuildRuntimeExpressionSecretsArgumentAsync(cancellationToken) }
+            };
+            return args;
+        }
+
+        /// <summary>
+        /// Builds the runtime expression '$CONTEXT' argument object
+        /// </summary>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The runtime expression '$CONTEXT' argument object</returns>
+        protected virtual async Task<object> BuildRuntimeExpressionContextArgumentAsync(CancellationToken cancellationToken)
+        {
+            return new
+            {
+                workflow = new
+                {
+                    id = this.Workflow.Definition.GetUniqueIdentifier(),
+                    instanceId = this.Workflow.Instance.Id
+                }
+            }; //todo
+        }
+
+        /// <summary>
+        /// Builds the runtime expression '$CONST' argument object
+        /// </summary>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The runtime expression '$CONST' argument object</returns>
+        protected virtual async Task<object> BuildRuntimeExpressionConstantsArgumentAsync(CancellationToken cancellationToken)
+        {
+            var constants = this.Workflow.Definition.Constants?.ToObject(); //todo
+            if (constants == null)
+                constants = new();
+            return constants;
+        }
+
+        /// <summary>
+        /// Builds the runtime expression '$SECRETS' argument object
+        /// </summary>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The runtime expression '$SECRETS' argument object</returns>
+        protected virtual async Task<object> BuildRuntimeExpressionSecretsArgumentAsync(CancellationToken cancellationToken)
+        {
+            var secrets = await this.SecretManager.GetSecretsAsync(cancellationToken) as object;
+            if (secrets == null)
+                secrets = new();
+            return secrets;
         }
 
     }

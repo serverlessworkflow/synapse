@@ -1,7 +1,11 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Synapse.Application.Configuration;
 using Synapse.Application.Services;
+using Synapse.Runtime.Docker.Configuration;
 using Synapse.Runtime.Services;
 
 namespace Synapse.Runtime.Docker
@@ -20,6 +24,8 @@ namespace Synapse.Runtime.Docker
         /// <returns>The configured <see cref="ISynapseApplicationBuilder"/></returns>
         public static ISynapseApplicationBuilder UseDockerRuntimeHost(this ISynapseApplicationBuilder app)
         {
+            var runtimeHostOptions = new DockerRuntimeHostOptions();
+            app.Configuration.Bind("docker", runtimeHostOptions);
             app.Services.AddSingleton<DockerRuntimeHost>();
             app.Services.AddSingleton<IWorkflowRuntimeHost>(provider => provider.GetRequiredService<DockerRuntimeHost>());
             app.Services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<DockerRuntimeHost>());
@@ -27,6 +33,7 @@ namespace Synapse.Runtime.Docker
             {
                 return new DockerClientConfiguration(new Uri("unix:///var/run/docker.sock")).CreateClient();
             });
+            app.Services.TryAddSingleton(Options.Create(runtimeHostOptions));
             return app;
         }
 

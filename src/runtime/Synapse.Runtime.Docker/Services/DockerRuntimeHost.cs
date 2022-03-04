@@ -139,9 +139,22 @@ namespace Synapse.Runtime.Services
             var containerConfig = this.Options.Runtime.Container;
             containerConfig.AddOrUpdateEnvironmentVariable(EnvironmentVariables.Api.Host.Name, EnvironmentVariables.Api.Host.Value!); //todo: instead, fetch values from options
             containerConfig.AddOrUpdateEnvironmentVariable(EnvironmentVariables.Runtime.WorkflowInstanceId.Name, workflowInstance.Id.ToString()); //todo: instead, fetch values from options
+            var name = workflowInstance.Id.Replace(":", "-");
+            var hostConfig = new HostConfig()
+            {
+                Mounts = new List<Mount>()
+            };
+            if (!string.IsNullOrWhiteSpace(this.Options.Secrets.Directory))
+                hostConfig.Mounts.Add(new()
+                    {
+                        Type = "bind",
+                        Source = this.Options.Secrets.Directory,
+                        Target = "/run/secrets"
+                    });
             var createContainerParameters = new CreateContainerParameters(containerConfig)
             {
-                Name = workflowInstance.Id.Replace(":", "-")
+                Name = name,
+                HostConfig = hostConfig
             };
             var createContainerResult = await this.Docker.Containers.CreateContainerAsync(createContainerParameters, cancellationToken);
             if (IsRunningInDocker)

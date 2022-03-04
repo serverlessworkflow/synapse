@@ -15,22 +15,20 @@
  *
  */
 
-using Google.Protobuf.Reflection;
-using Grpc.Net.Client;
-using ProtoBuf.Grpc.Client;
+using Synapse.Integration.Events.WorkflowActivities;
 
 namespace Synapse.Runtime.Executor.Services.Processors
 {
 
     /// <summary>
-    /// Represents the <see cref="IWorkflowActivityProcessor"/> used to process GRPC <see cref="FunctionDefinition"/>s
+    /// Represents the <see cref="IWorkflowActivityProcessor"/> used to process runtime expression-based <see cref="FunctionDefinition"/>s
     /// </summary>
-    public class GrpcFunctionProcessor
+    public class RuntimeExpressionFunctionProcessor
         : FunctionProcessor
     {
 
         /// <summary>
-        /// Initializes a new <see cref="GrpcFunctionProcessor"/>
+        /// Initializes a new <see cref="RuntimeExpressionFunctionProcessor"/>
         /// </summary>
         /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
         /// <param name="context">The current <see cref="IWorkflowRuntimeContext"/></param>
@@ -39,7 +37,7 @@ namespace Synapse.Runtime.Executor.Services.Processors
         /// <param name="activity">The <see cref="V1WorkflowActivityDto"/> to process</param>
         /// <param name="action">The <see cref="ActionDefinition"/> to process</param>
         /// <param name="function">The <see cref="FunctionDefinition"/> to process</param>
-        public GrpcFunctionProcessor(ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory,
+        public RuntimeExpressionFunctionProcessor(ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory,
             IOptions<ApplicationOptions> options, V1WorkflowActivityDto activity,
             ActionDefinition action, FunctionDefinition function)
             : base(loggerFactory, context, activityProcessorFactory, options, activity, action, function)
@@ -50,29 +48,6 @@ namespace Synapse.Runtime.Executor.Services.Processors
         /// <inheritdoc/>
         protected override Task InitializeAsync(CancellationToken cancellationToken)
         {
-            var proto = ""; //todo
-
-            var fileDescriptorSet = new FileDescriptorSet();
-            fileDescriptorSet.Add("" /* todo */, true, new StringReader(proto));
-            fileDescriptorSet.Process();
-            var errors = fileDescriptorSet.GetErrors();
-
-            foreach(var file in fileDescriptorSet.Files)
-            {
-                foreach(var service in file.Services)
-                {
-                    foreach(var method in service.Methods)
-                    {
-                        //todo: if method.Deprecated => display warning
-                        
-                    }
-                }
-            }
-
-            var channel = GrpcChannel.ForAddress($"{EnvironmentVariables.Api.Host.Value}:8080");
-            var serviceName = "";
-            var client = new GrpcClient(channel, serviceName);
-
             return Task.CompletedTask;
         }
 
@@ -82,18 +57,9 @@ namespace Synapse.Runtime.Executor.Services.Processors
             await base.ProcessAsync(cancellationToken);
             if (this.Activity.Status == V1WorkflowActivityStatus.Skipped)
                 return;
-
-            //await this.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, output), cancellationToken);
-            //await this.OnCompletedAsync(cancellationToken);
-        }
-
-        /// <inheritdoc/>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                
-            }
+            var output = await this.Context.EvaluateAsync(this.Function.Operation, this.Activity.Input.ToObject(), cancellationToken);
+            await this.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, output), cancellationToken);
+            await this.OnCompletedAsync(cancellationToken);
         }
 
     }

@@ -19,27 +19,16 @@ using Synapse.Runtime.Services;
 
 namespace Synapse.Runtime.Docker.Configuration
 {
-
     /// <summary>
-    /// Represents the options used to configure a <see cref="DockerRuntimeHost"/>
+    /// Represents the options used to configure how a <see cref="DockerRuntimeHost"/> should manage secrets
     /// </summary>
-    public class DockerRuntimeHostOptions
+    public class DockerSecretsOptions
     {
 
         /// <summary>
-        /// Gets/sets the Docker runtime host's network name
+        /// Gets/sets the path to the directory that containing the solution's secrets
         /// </summary>
-        public virtual string Network { get; set; } = "synapse";
-
-        /// <summary>
-        /// Gets/sets the object used to configure the workflow runtime container configuration
-        /// </summary>
-        public virtual DockerRuntimeOptions Runtime { get; set; } = new();
-
-        /// <summary>
-        /// Gets/sets the options used to configure how a <see cref="DockerRuntimeHost"/> should manage secrets
-        /// </summary>
-        public virtual DockerSecretsOptions Secrets { get; set; } = new();
+        public virtual string? Directory { get; set; }
 
     }
 

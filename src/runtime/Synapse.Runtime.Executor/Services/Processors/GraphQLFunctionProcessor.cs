@@ -93,7 +93,7 @@ namespace Synapse.Runtime.Executor.Services.Processors
         protected string? Arguments { get; private set; }
 
         /// <inheritdoc/>
-        protected override Task InitializeAsync(CancellationToken cancellationToken)
+        protected override async Task InitializeAsync(CancellationToken cancellationToken)
         {
             var operationComponents = this.Function.Operation.Split('#', StringSplitOptions.RemoveEmptyEntries);
             if(operationComponents.Length != 3)
@@ -107,19 +107,19 @@ namespace Synapse.Runtime.Executor.Services.Processors
                 && this.OperationType != "mutation")
                 throw new FormatException($"The value specified as GraphQL request type component '{operationComponents[1]}' is not supported");
             this.OperationName = operationComponents[2];
-            this.BuildArguments();
+            await this.BuildArgumentsAsync(cancellationToken);
             var options = new GraphQLHttpClientOptions()
             {
                 EndPoint = this.EndpointUri
             };
             this.GraphQLClient = new GraphQLHttpClient(options, this.Serializer, this.HttpClient);
-            return Task.CompletedTask;
         }
 
         /// <summary>
         /// Builds the GraphQL arguments string
         /// </summary>
-        protected virtual void BuildArguments()
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        protected virtual async ValueTask BuildArgumentsAsync(CancellationToken cancellationToken)
         {
             var args = null as IDictionary<string, object>;
             if (this.Activity.Input == null)
@@ -130,7 +130,7 @@ namespace Synapse.Runtime.Executor.Services.Processors
             foreach (Match match in Regex.Matches(json, @"""\$\{.+?\}"""))
             {
                 var expression = match.Value[3..^2].Trim();
-                var evaluationResult = this.Context.ExpressionEvaluator.Evaluate(expression, this.Activity.Input!.ToObject()!);
+                var evaluationResult = await this.Context.EvaluateAsync(expression, this.Activity.Input!.ToObject()!, cancellationToken);
                 if (evaluationResult == null)
                 {
                     Console.WriteLine($"Evaluation result of expression {expression} on data {JsonConvert.SerializeObject(this.Activity.Input)} is NULL"); //todo: replace with better message

@@ -34,7 +34,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "SYNAPSE_API_HOST": "http://synapse"
       },
-      "DockerfileRunArguments": "--name synapse -e \"SYNAPSE_API_HOST=http://synapse\" -v /var/run/docker.sock:/var/run/docker.sock --add-host=host.docker.internal:host-gateway -p 9600:80",
+      "DockerfileRunArguments": "--name synapse -e \"SYNAPSE_API_HOST=http://synapse\" -e \"DOCKER__SECRETS__DIRECTORY=C:\\Users\\User\\secrets\" -v /var/run/docker.sock:/var/run/docker.sock --add-host=host.docker.internal:host-gateway -p 9600:80 -v C:\\Users\\User\\secrets:/run/secrets",
       "publishAllPorts": true
     }
   }

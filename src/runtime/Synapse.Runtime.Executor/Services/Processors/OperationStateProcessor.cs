@@ -69,7 +69,7 @@ namespace Synapse.Runtime.Executor.Services.Processors
                     case ActionExecutionMode.Parallel:
                         foreach (var action in this.State.Actions)
                         {
-                            input = this.Context.ExpressionEvaluator.FilterInput(action, this.Activity.Input);
+                            input = await this.Context.FilterInputAsync(action, this.Activity.Input, cancellationToken);
                             metadata = new() 
                             {
                                 { V1WorkflowActivityMetadata.State, this.State.Name! },
@@ -80,7 +80,7 @@ namespace Synapse.Runtime.Executor.Services.Processors
                         break;
                     case ActionExecutionMode.Sequential:
                         var firstAction = this.State.Actions.First();
-                        input = this.Context.ExpressionEvaluator.FilterInput(firstAction, this.Activity.Input);
+                        input = await this.Context.FilterInputAsync(firstAction, this.Activity.Input, cancellationToken);
                         metadata = new()
                         {
                             { V1WorkflowActivityMetadata.State, this.State.Name! },
@@ -137,10 +137,10 @@ namespace Synapse.Runtime.Executor.Services.Processors
                             expression = expression[2..^1];
                         expression = $"{expression} = {json}";
                     }
-                    output = this.Context.ExpressionEvaluator.Evaluate(expression, output)!;
+                    output = await this.Context.EvaluateAsync(expression, output, cancellationToken);
                 }
             }
-            return output;
+            return output!;
         }
 
         /// <summary>
@@ -176,7 +176,7 @@ namespace Synapse.Runtime.Executor.Services.Processors
                                 if (processor.Activity.Metadata.TryGetValue(V1WorkflowActivityMetadata.Action, out var currentActionName)
                                      && this.State.TryGetNextAction(currentActionName, out ActionDefinition nextAction))
                                 {
-                                    var input = this.Context.ExpressionEvaluator.FilterInput(nextAction, output);
+                                    var input = await this.Context.FilterInputAsync(nextAction, output, cancellationToken);
                                     var metadata = new Dictionary<string, string>()
                                     {
                                         { V1WorkflowActivityMetadata.State, this.State.Name! },
@@ -192,8 +192,6 @@ namespace Synapse.Runtime.Executor.Services.Processors
                             default:
                                 throw new NotSupportedException($"The specified {nameof(ActionExecutionMode)} '{this.State.ActionMode}' is not supported");
                         }
-
-                        Console.WriteLine("EXECUTING NEXT ACTION"); //todo: remove
                     }
                     break;
             }

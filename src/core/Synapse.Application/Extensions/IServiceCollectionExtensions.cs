@@ -41,7 +41,7 @@ namespace Synapse.Application.Configuration
             var applicationOptions = new SynapseApplicationOptions();
             configuration.Bind(applicationOptions);
             services.Configure<SynapseApplicationOptions>(configuration);
-            var appBuilder = new SynapseApplicationBuilder(services);
+            var appBuilder = new SynapseApplicationBuilder(configuration, services);
             setup(appBuilder);
             appBuilder.Build();
             return services;

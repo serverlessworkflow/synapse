@@ -14,7 +14,6 @@
  * limitations under the License.
  *
  */
-using Neuroglia.Data.Expressions;
 
 namespace Synapse.Runtime.Services
 {
@@ -24,11 +23,6 @@ namespace Synapse.Runtime.Services
     /// </summary>
     public interface IWorkflowRuntimeContext
     {
-
-        /// <summary>
-        /// Gets the service used to evaluate the workflow's runtime expressions
-        /// </summary>
-        IExpressionEvaluator ExpressionEvaluator { get; }
 
         /// <summary>
         /// Gets the service used a Synapse API helper facade
@@ -41,6 +35,15 @@ namespace Synapse.Runtime.Services
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A new awaitable <see cref="Task"/></returns>
         Task InitializeAsync(CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Evaluates a runtime expression against an object
+        /// </summary>
+        /// <param name="runtimeExpression">The runtime expression to evaluate</param>
+        /// <param name="data">The data to evaluate the expression against</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The evaluation result</returns>
+        Task<object?> EvaluateAsync(string runtimeExpression, object? data, CancellationToken cancellationToken = default);
 
     }
 

@@ -22,7 +22,6 @@ builder.Services.AddCodeFirstGrpc();
 builder.Services.AddSynapse(builder.Configuration, synapse =>
 {
     synapse
-        .UseConfiguration(builder.Configuration)
         .UseDockerRuntimeHost()
         .UseHttpRestApi()
         .UseWebSocketApi();

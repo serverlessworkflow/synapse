@@ -1,14 +1,11 @@
 ﻿using CloudNative.CloudEvents.NewtonsoftJson;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Adapters;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Neuroglia.Data.Expressions;
 using Neuroglia.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using ServerlessWorkflow.Sdk;
-using System.Net.Mime;
 using System.Reflection;
 
 namespace Synapse.Application.Configuration
@@ -24,34 +21,29 @@ namespace Synapse.Application.Configuration
         /// <summary>
         /// Initializes a new <see cref="SynapseApplicationBuilder"/>
         /// </summary>
+        /// <param name="configuration">The current <see cref="IConfiguration"/></param>
         /// <param name="services">The <see cref="IServiceCollection"/> to configure</param>
-        public SynapseApplicationBuilder(IServiceCollection services)
+        public SynapseApplicationBuilder(IConfiguration configuration, IServiceCollection services)
         {
+            this.Configuration = configuration;
             this.Services = services;
         }
+
+        /// <summary>
+        /// Gets the current <see cref="IConfiguration"/>
+        /// </summary>
+        public IConfiguration Configuration { get; }
 
         /// <summary>
         /// Gets the <see cref="IServiceCollection"/> to configure
         /// </summary>
         public IServiceCollection Services { get; }
 
-        /// <summary>
-        /// Gets the current <see cref="IConfiguration"/>
-        /// </summary>
-        public IConfiguration? Configuration { get; protected set; }
-
         public Type? WriteModelRepositoryType { get; protected set; } = typeof(DistributedCacheRepository<,>);
 
         public Type? ReadModelRepositoryType { get; protected set; }= typeof(DistributedCacheRepository<,>);
 
         protected List<Assembly> MapperAssemblies { get; } = new() { typeof(SynapseApplicationBuilder).Assembly };
-
-        /// <inheritdoc/>
-        public virtual ISynapseApplicationBuilder UseConfiguration(IConfiguration configuration)
-        {
-            this.Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-            return this;
-        }
 
         /// <inheritdoc/>
         public virtual ISynapseApplicationBuilder AddMappingProfile<TProfile>() 

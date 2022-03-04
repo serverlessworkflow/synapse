@@ -115,8 +115,8 @@ namespace Synapse.Runtime.Services
             {
                 //case FunctionType.AsyncApi://todo
                 //    break;
-                //case FunctionType.Expression:
-                //    return ActivatorUtilities.CreateInstance<ExpressionFunctionProcessor>(this.ServiceProvider, activity, action, function);
+                case FunctionType.Expression:
+                    return ActivatorUtilities.CreateInstance<RuntimeExpressionFunctionProcessor>(this.ServiceProvider, activity, action, function);
                 case FunctionType.GraphQL:
                     return ActivatorUtilities.CreateInstance<GraphQLFunctionProcessor>(this.ServiceProvider, activity, action, function);
                 case FunctionType.OData:
