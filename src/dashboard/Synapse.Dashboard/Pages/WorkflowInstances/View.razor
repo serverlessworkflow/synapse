@@ -94,6 +94,7 @@
                                 <tr>
                                     <th scope="col"></th>
                                     <th scope="col">Type</th>
+                                    <th scope="col">Name</th>
                                     <th scope="col">Status</th>
                                     <th scope="col">Started At</th>
                                     <th scope="col">Executed At</th>
@@ -115,10 +116,24 @@
                                                 }
                                             </td>
                                             <td>@activity.Type</td>
+                                            <td>
+                                                @switch(activity.Type)
+                                                {
+                                                    case(V1WorkflowActivityType.State):
+                                                        @activity.Metadata[V1WorkflowActivityMetadata.State]
+                                                        break;
+                                                    case(V1WorkflowActivityType.Action):
+                                                        @activity.Metadata[V1WorkflowActivityMetadata.Action]
+                                                        break;
+                                                    case(V1WorkflowActivityType.Branch):
+                                                        @activity.Metadata[V1WorkflowActivityMetadata.Branch]
+                                                        break;
+                                                }
+                                            </td>
                                             <td>@activity.Status</td>
                                             <td>@activity.StartedAt?.ToString("MM/dd/yyyy, HH:mm")</td>
                                             <td>@activity.ExecutedAt?.ToString("MM/dd/yyyy, HH:mm")</td>
-                                            <td>@activity.Duration</td>
+                                            <td>@(activity.Duration?.ToString() ?? "")</td>
                                         </Title>
                                         <Body>
                                         <td colspan="5">
@@ -187,7 +202,7 @@
 }
 else
 {
-    <p>Loading...</p>
+    <Loader />
 }
 @code
 {

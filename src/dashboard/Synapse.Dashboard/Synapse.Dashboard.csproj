@@ -12,12 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Components\TabControl.razor.css" />
     <None Remove="Components\WorkflowStartNode - Copy.razor.css" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="Components\TabControl.razor.css" />
   </ItemGroup>
 
   <ItemGroup>

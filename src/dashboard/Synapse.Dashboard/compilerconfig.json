@@ -34,5 +34,9 @@
   {
     "outputFile": "Pages/Workflows/View.razor.css",
     "inputFile": "Pages/Workflows/View.razor.scss"
+  },
+  {
+    "outputFile": "Components/Loader.razor.css",
+    "inputFile": "Components/Loader.razor.scss"
   }
 ]

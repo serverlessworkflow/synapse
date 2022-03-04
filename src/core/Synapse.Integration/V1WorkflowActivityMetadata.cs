@@ -1,4 +1,4 @@
-﻿namespace Synapse.Runtime.Services
+﻿namespace Synapse
 {
 
     /// <summary>
