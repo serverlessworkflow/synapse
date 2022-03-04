@@ -134,7 +134,7 @@ namespace Synapse.Application.Commands.WorkflowInstances
             if(dataInputSchema != null)
             {
                 var input = command.InputData;
-                var jobj = null as JObject;
+                JObject? jobj;
                 if (input == null)
                     jobj = new JObject();
                 else

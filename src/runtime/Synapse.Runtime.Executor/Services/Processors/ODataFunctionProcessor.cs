@@ -15,8 +15,6 @@
  *
  */
 
-using Neuroglia.Serialization;
-using Newtonsoft.Json;
 using Simple.OData.Client;
 using Synapse.Integration.Events.WorkflowActivities;
 
@@ -110,10 +108,17 @@ namespace Synapse.Runtime.Executor.Services.Processors
                 await this.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, output), cancellationToken);
                 await this.OnCompletedAsync(cancellationToken);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 await this.OnErrorAsync(ex, cancellationToken);
             }
+        }
+
+        /// <inheritdoc/>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+                this.HttpClient.Dispose();
         }
 
     }

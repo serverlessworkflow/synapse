@@ -66,15 +66,8 @@ namespace Synapse.Runtime.Executor.Services.Processors
             if (e is not V1WorkflowActivityCompletedIntegrationEvent completedEvent)
                 return;
             var output = completedEvent.Output.ToObject();
-
-            Console.WriteLine($"BEFORE FILTER: {JsonConvert.SerializeObject(output)}");
-            Console.WriteLine($"FILTER EXPRESSION: {this.Action.ActionDataFilter?.Results}");
-
             if (this.Action.ActionDataFilter != null)
                 output = this.Context.ExpressionEvaluator.FilterOutput(this.Action, output);
-
-            Console.WriteLine($"AFTER FILTER: {JsonConvert.SerializeObject(output)}");
-
             await base.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, output), cancellationToken);
         }
 

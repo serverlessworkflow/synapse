@@ -14,6 +14,8 @@
  * limitations under the License.
  *
  */
+using GraphQL.Client.Abstractions;
+using GraphQL.Client.Abstractions.Websocket;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Neuroglia.Data.Expressions.JQ;
@@ -37,6 +39,9 @@ using var host = Host.CreateDefaultBuilder(args)
         services.AddNewtonsoftJsonSerializer();
         services.AddJQExpressionEvaluator();
         services.AddHttpClient();
+        services.AddTransient<GraphQL.Client.Serializer.Newtonsoft.NewtonsoftJsonSerializer>();
+        services.AddTransient<IGraphQLJsonSerializer>(provider => provider.GetRequiredService<GraphQL.Client.Serializer.Newtonsoft.NewtonsoftJsonSerializer>());
+        services.AddTransient<IGraphQLWebsocketJsonSerializer>(provider => provider.GetRequiredService<GraphQL.Client.Serializer.Newtonsoft.NewtonsoftJsonSerializer>());
 
         services.AddSingleton<WorkflowActivityProcessorFactory>();
         services.AddSingleton<IWorkflowActivityProcessorFactory>(provider => provider.GetRequiredService<WorkflowActivityProcessorFactory>());

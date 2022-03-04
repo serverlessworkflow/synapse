@@ -96,17 +96,13 @@ namespace Synapse.Runtime.Services
         {
             if(!state.TryGetAction(activity.Metadata, out var action))
                 throw new NullReferenceException($"Failed to find an action that matches the metadata specified by the activity with id '{activity.Id}'");
-            switch (action.Type)
+            return action.Type switch
             {
-                case ActionType.Function:
-                    return this.CreateFunctionActivityProcessor(state, activity);
-                case ActionType.Subflow:
-                    throw new NotImplementedException(); //todo
-                case ActionType.Trigger:
-                    throw new NotImplementedException(); //todo
-                default:
-                    throw new NotSupportedException($"The specified {typeof(ActionType).Name} '{action.Type}' is not supported");
-            }
+                ActionType.Function => this.CreateFunctionActivityProcessor(state, activity),
+                ActionType.Subflow => throw new NotImplementedException(),//todo
+                ActionType.Trigger => throw new NotImplementedException(),//todo
+                _ => throw new NotSupportedException($"The specified {typeof(ActionType).Name} '{action.Type}' is not supported"),
+            };
         }
 
         protected virtual IWorkflowActivityProcessor CreateFunctionActivityProcessor(StateDefinition state, V1WorkflowActivityDto activity)
@@ -121,8 +117,8 @@ namespace Synapse.Runtime.Services
                 //    break;
                 //case FunctionType.Expression:
                 //    return ActivatorUtilities.CreateInstance<ExpressionFunctionProcessor>(this.ServiceProvider, state, activity, action, function);
-                //case FunctionType.GraphQL:
-                //    return ActivatorUtilities.CreateInstance<GraphQLFunctionProcessor>(this.ServiceProvider, state, activity, action, function);
+                case FunctionType.GraphQL:
+                    return ActivatorUtilities.CreateInstance<GraphQLFunctionProcessor>(this.ServiceProvider, activity, action, function);
                 case FunctionType.OData:
                     return ActivatorUtilities.CreateInstance<ODataFunctionProcessor>(this.ServiceProvider, activity, action, function);
                 //case FunctionType.OpenApi://todo
