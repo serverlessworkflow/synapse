@@ -15,12 +15,12 @@
  *
  */
 
-using Newtonsoft.Json;
 using Synapse.Integration.Events;
 using Synapse.Integration.Events.WorkflowActivities;
 
 namespace Synapse.Runtime.Executor.Services.Processors
 {
+
     /// <summary>
     /// Represents the base class for all <see cref="IWorkflowActivityProcessor"/>s used to process <see cref="FunctionDefinition"/>s
     /// </summary>
@@ -43,6 +43,13 @@ namespace Synapse.Runtime.Executor.Services.Processors
             : base(loggerFactory, context, activityProcessorFactory, options, activity, action)
         {
             this.Function = function;
+            if (!string.IsNullOrWhiteSpace(this.Function.AuthRef))
+            {
+                if (this.Context.Workflow.Definition.TryGetAuthentication(this.Function.AuthRef, out var auth))
+                    this.Authentication = auth;
+                else
+                    throw new NullReferenceException($"Failed to find the authentication definition with name '{this.Function.AuthRef}'");
+            }
         }
 
         /// <summary>
@@ -60,6 +67,11 @@ namespace Synapse.Runtime.Executor.Services.Processors
                 return this.Action.Function!;
             }
         }
+
+        /// <summary>
+        /// Gets the object used to configure the authentication mechanism to use when invoking the function
+        /// </summary>
+        protected AuthenticationDefinition? Authentication { get; }
 
         protected override async Task OnNextAsync(IV1WorkflowActivityIntegrationEvent e, CancellationToken cancellationToken)
         {

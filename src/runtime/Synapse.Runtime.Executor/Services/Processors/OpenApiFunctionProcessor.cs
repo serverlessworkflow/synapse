@@ -26,6 +26,7 @@ using Synapse.Integration.Events.WorkflowActivities;
 using System.Collections;
 using System.Dynamic;
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Mime;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -281,7 +282,7 @@ namespace Synapse.Runtime.Executor.Services.Processors
                         requestUri = $"https:{requestUri}";
                     if (!string.IsNullOrWhiteSpace(this.QueryString))
                         requestUri += $"?{this.QueryString}";
-                    using var request = new HttpRequestMessage(this.HttpMethod, requestUri);
+                    using var request = await this.ConfigureAuthorizationAsync(new HttpRequestMessage(this.HttpMethod, requestUri), cancellationToken);
                     foreach (var header in this.Headers)
                     {
                         request.Headers.Add(header.Key, header.Value);
@@ -328,6 +329,40 @@ namespace Synapse.Runtime.Executor.Services.Processors
             {
                 await this.OnErrorAsync(ex, cancellationToken);
             }
+        }
+
+        /// <summary>
+        /// Configures the authorization mechanism, if any, to use when performing the specified <see cref="HttpRequestMessage"/>
+        /// </summary>
+        /// <param name="request">The <see cref="HttpRequestMessage"/> to configure</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The configured <see cref="HttpRequestMessage"/></returns>
+        protected virtual async Task<HttpRequestMessage> ConfigureAuthorizationAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            //todo
+            if (this.Authentication == null)
+                return request;
+            var scheme = null as string;
+            var value = null as string;
+            switch (this.Authentication.Properties)
+            {
+                case BasicAuthenticationProperties basic:
+                    scheme = "Basic";
+                    value = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{basic.Username}:{basic.Password}"));
+                    break;
+                case BearerAuthenticationProperties bearer:
+                    scheme = "Bearer";
+                    value = bearer.Token;
+                    break;
+                case OAuth2AuthenticationProperties oauth:
+                    //scheme = "Bearer";
+                    //value = token;
+                    break;
+                default:
+                    throw new NotSupportedException($"The specified authentication schema '{EnumHelper.Stringify(this.Authentication.Scheme)}' is not supported");
+            }
+            request.Headers.Authorization = new AuthenticationHeaderValue(scheme, value);
+            return request;
         }
 
     }

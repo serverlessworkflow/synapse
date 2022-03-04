@@ -40,7 +40,8 @@ namespace Synapse.Runtime.Services
         /// <param name="secretManager">The service used to manage secrets</param>
         /// <param name="synapsePublicApi">The service used to interact with the Synapse Public API</param>
         /// <param name="synapseRuntimeApi">The service used to interact with the Synapse Runtime API</param>
-        public WorkflowRuntimeContext(IServiceProvider serviceProvider, ILogger<WorkflowRuntimeContext> logger, IExpressionEvaluatorProvider expressionEvaluatorProvider, ISecretManager secretManager, ISynapseApi synapsePublicApi, ISynapseRuntimeApi synapseRuntimeApi)
+        public WorkflowRuntimeContext(IServiceProvider serviceProvider, ILogger<WorkflowRuntimeContext> logger, IExpressionEvaluatorProvider expressionEvaluatorProvider, 
+            ISecretManager secretManager, ISynapseApi synapsePublicApi, ISynapseRuntimeApi synapseRuntimeApi)
         {
             this.ServiceProvider = serviceProvider;
             this.Logger = logger;
@@ -48,8 +49,6 @@ namespace Synapse.Runtime.Services
             this.SecretManager = secretManager;
             this.SynapsePublicApi = synapsePublicApi;
             this.SynapseRuntimeApi = synapseRuntimeApi;
-            this.ExpressionEvaluator = null!;
-            this.Workflow = null!;
         }
 
         /// <summary>
@@ -70,7 +69,7 @@ namespace Synapse.Runtime.Services
         /// <summary>
         /// Gets the <see cref="IExpressionEvaluator"/> used to evaluate the current workflow's runtime expressions
         /// </summary>
-        protected IExpressionEvaluator ExpressionEvaluator { get; private set; }
+        protected IExpressionEvaluator ExpressionEvaluator { get; private set; } = null!;
 
         /// <summary>
         /// Gets the service used to manage secrets
@@ -88,7 +87,10 @@ namespace Synapse.Runtime.Services
         protected ISynapseRuntimeApi SynapseRuntimeApi { get; }
 
         /// <inheritdoc/>
-        public IWorkflowFacade Workflow { get; private set; }
+        public IWorkflowFacade Workflow { get; private set; } = null!;
+
+        /// <inheritdoc/>
+        public IDictionary<string, object> Data { get; } = new Dictionary<string, object>();
 
         /// <inheritdoc/>
         public virtual async Task InitializeAsync(CancellationToken cancellationToken)
@@ -199,7 +201,7 @@ namespace Synapse.Runtime.Services
                 secrets = new();
             return secrets;
         }
-
+    
     }
 
 }

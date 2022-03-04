@@ -30,6 +30,11 @@ namespace Synapse.Runtime.Services
         IWorkflowFacade Workflow { get; }
 
         /// <summary>
+        /// Gets an <see cref="IDictionary{TKey, TValue}"/> containing temporary runtime data that will not be persisted
+        /// </summary>
+        IDictionary<string, object> Data { get; }
+
+        /// <summary>
         /// Initializes the <see cref="IWorkflowRuntimeContext"/>
         /// </summary>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>

@@ -50,6 +50,9 @@ using var host = Host.CreateDefaultBuilder(args)
         services.AddTransient<IGraphQLJsonSerializer>(provider => provider.GetRequiredService<GraphQL.Client.Serializer.Newtonsoft.NewtonsoftJsonSerializer>());
         services.AddTransient<IGraphQLWebsocketJsonSerializer>(provider => provider.GetRequiredService<GraphQL.Client.Serializer.Newtonsoft.NewtonsoftJsonSerializer>());
 
+        services.AddSingleton<OAuth2TokenManager>();
+        services.AddSingleton<IOAuth2TokenManager>(provider => provider.GetRequiredService<OAuth2TokenManager>());
+
         services.AddSingleton<FileBasedSecretManager>();
         services.AddSingleton<ISecretManager>(provider => provider.GetRequiredService<FileBasedSecretManager>());
         services.AddHostedService(provider => provider.GetRequiredService<FileBasedSecretManager>());
