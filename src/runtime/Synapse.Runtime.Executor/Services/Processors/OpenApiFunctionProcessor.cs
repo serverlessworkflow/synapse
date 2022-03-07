@@ -72,7 +72,7 @@ namespace Synapse.Runtime.Executor.Services.Processors
         protected ISerializerProvider SerializerProvider { get; }
 
         /// <summary>
-        /// Gets the <see cref="Microsoft.OpenApi.Models.OpenApiDocument"/> that defines the operation to invoke
+        /// Gets the <see cref="OpenApiDocument"/> that defines the operation to invoke
         /// </summary>
         protected OpenApiDocument Document { get; private set; } = null!;
 
@@ -127,6 +127,8 @@ namespace Synapse.Runtime.Executor.Services.Processors
             await base.InitializeAsync(cancellationToken);
             await this.HttpClient.ConfigureAuthorizationAsync(this.ServiceProvider, this.Authentication, cancellationToken);
             var operationComponents = this.Function.Operation.Split('#');
+            if (operationComponents.Length != 2)
+                throw new FormatException($"The 'operation' property of the Open API function with name '{this.Function.Name}' has an invalid value '{this.Function.Operation}'. Open API functions expect a value in the following format: <url_to_openapi_endpoint>#<operation_id>");
             var openApiUri = new Uri(operationComponents.First());
             var operationId = operationComponents.Last();
             try
@@ -330,6 +332,14 @@ namespace Synapse.Runtime.Executor.Services.Processors
             {
                 await this.OnErrorAsync(ex, cancellationToken);
             }
+        }
+
+        /// <inheritdoc/>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+                this.HttpClient.Dispose();
+            base.Dispose(disposing);
         }
 
     }
