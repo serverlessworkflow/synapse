@@ -1,0 +1,36 @@
+﻿@using System.ComponentModel
+@namespace Synapse.Dashboard
+@implements IDisposable
+
+<div class="container-fluid d-flex align-items-center justify-content-between">
+    @Layout.Header?.ChildContent
+</div>
+
+
+@code
+{
+
+    [Inject]
+    public ILayoutService Layout { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        this.Layout.PropertyChanged += OnLayoutHeaderChanged;
+        await base.OnInitializedAsync();
+    }
+
+    private void OnLayoutHeaderChanged(object sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ILayoutService.Header))
+        {
+            this.StateHasChanged();
+        }
+    }
+
+    public void Dispose()
+    {
+        if (this.Layout != null)
+            this.Layout.PropertyChanged -= OnLayoutHeaderChanged;
+    }
+
+}

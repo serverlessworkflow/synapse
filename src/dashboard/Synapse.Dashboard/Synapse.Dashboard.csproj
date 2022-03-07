@@ -8,15 +8,31 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Features\Workflows\WorkflowMetrics\**" />
+    <Content Remove="Features\Workflows\WorkflowMetrics\**" />
+    <EmbeddedResource Remove="Features\Workflows\WorkflowMetrics\**" />
+    <None Remove="Features\Workflows\WorkflowMetrics\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Remove="compilerconfig.json" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Components\WorkflowStartNode - Copy.razor.css" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="compilerconfig.json" />
+    <None Include="Features\Shared\Accordion\Accordion.razor" />
+    <None Include="Features\Shared\Accordion\Collapse.razor" />
+    <None Include="Features\Shared\Accordion\ExpandableDataRow.razor" />
+    <None Include="Features\Shared\Accordion\Expander.razor" />
+    <None Include="Features\Shared\DataTable\DataColumn.razor" />
+    <None Include="Features\Shared\DataTable\DataColumnProperties.razor" />
+    <None Include="Features\Shared\DataTable\DataTable.razor" />
+    <None Include="Features\Shared\Layout\AppHeader.razor" />
+    <None Include="Features\Shared\Layout\Header.razor" />
+    <None Include="Features\Shared\Layout\MainLayout.razor" />
+    <None Include="Features\Shared\Layout\NavMenu.razor" />
+    <None Include="Features\Shared\Modal\Modal.razor" />
+    <None Include="Features\Shared\Toast\Toaster.razor" />
   </ItemGroup>
 
   <ItemGroup>
@@ -39,6 +55,19 @@
 
   <ItemGroup>
     <ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Features\WorkflowInstances\WorkflowInstanceForm\" />
+    <Folder Include="Features\WorkflowInstances\WorkflowInstancesList\" />
+    <Folder Include="Features\WorkflowInstances\WorkflowInstanceView\" />
+    <Folder Include="Features\WorkflowInstances\WorkflowInstanceView\" />
+    <Folder Include="Features\WorkflowInstances\WorkflowInstanceForm\" />
+    <Folder Include="Features\WorkflowInstances\WorkflowInstancesList\" />
+    <Folder Include="Features\Workflows\WorkflowView\" />
+    <Folder Include="Features\Workflows\WorkflowsMetrics\" />
+    <Folder Include="Features\Workflows\WorkflowsList\" />
+    <Folder Include="Features\Workflows\WorkflowsList\" />
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,407 @@
+﻿@using Newtonsoft.Json.Linq
+@using System.ComponentModel.DataAnnotations
+@using System.Linq.Expressions
+@using System.Reflection
+@using System.Collections
+@using Synapse.Services
+@namespace Synapse.Dashboard
+@inject NavigationManager Navigation
+
+<CascadingValue Value="this">
+    @Columns
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                @foreach (var column in this.columns.Where(c => c.IsVisible))
+                {
+                    <DataColumn Properties="column"
+                                OnDragStart="OnStartDragColumn"
+                                OnDragEnd="OnEndDragColumn"
+                                OnDrop="OnDropColumnOn"
+                                OnSort="OnOrderBy" />
+                }
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (elements != null
+             && string.IsNullOrEmpty(error))
+            {
+                foreach (var elem in elements)
+                {
+                    <tr>
+                        @foreach (var column in columns.Where(c => c.IsVisible))
+                        {
+                            var value = column.GetValueFor(elem);
+                            <td>
+                                <span class="cell-value" data-type="@value">@value</span>
+                            </td>
+                        }
+                        <td class="text-end"><button @onclick="() => OnViewDetailsOf(elem)" class="btn btn-outline-dark"><small class="oi oi-info"></small></button></td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="100%" class="text-center">
+                        @if (string.IsNullOrWhiteSpace(error))
+                        {
+                            <!--<b class="alert alert-warning">Loading data...</b>-->
+                            <Loader />
+                        }
+                        else
+                        {
+                            <b class="text-danger">An error occured while loading data:<br />@error</b>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</CascadingValue>
+
+<Modal @ref="modal">
+    <Title>Error</Title>
+    <Body>
+        <p>An error occured while loading data:</p>
+        <p class="border rounded bg-danger text-white text-break p-1">@error</p>
+    </Body>
+    <Footer>
+        <button @onclick="() => modal.Hide()" class="btn btn-secondary">Close</button>
+        <button @onclick="() => Navigation.NavigateTo(Navigation.Uri, true)" class="btn btn-secondary">Reload</button>
+    </Footer>
+</Modal>
+@code
+{
+
+    [Parameter]
+    public IQueryable DataSource { get; set; }
+
+    [Parameter]
+    public RenderFragment Columns { get; set; }
+
+    [Parameter]
+    public bool AutoGenerateColumns { get; set; }
+
+    [Parameter]
+    public Func<object, object> KeyProvider { get; set; } = elem =>
+    {
+        if (elem is IIdentifiable identifiable)
+            return identifiable.Id;
+        else
+            return null;
+    };
+
+    [Parameter]
+    public Func<IQueryable, IQueryable> OrderByDefault { get; set; }
+
+    public int ResultsPerPage { get; set; } = 10;
+
+    public int PageIndex { get; set; }
+
+    public int TotalResults { get; private set; }
+
+    public int TotalPages
+    {
+        get
+        {
+            int pageCount = (int)Math.Ceiling((double)this.TotalResults / this.ResultsPerPage);
+            if (pageCount == 0)
+                pageCount = 1;
+            return pageCount;
+        }
+    }
+
+    private List<DataColumnProperties> columns = new();
+    private List<LambdaExpression> filterExpressions = new();
+    private LambdaExpression filterExpression;
+    private Func<IQueryable, IQueryable> orderByDelegate;
+    private IList elements;
+    private DataColumnProperties filterByColumn;
+    private List<OperatorType> operators;
+    private string filterInputType;
+    private OperatorType filterOperator;
+    private string filterByValue;
+    private DataColumn draggedColumn;
+    private string error;
+    private Modal modal;
+
+    public void AddColumn(DataColumnProperties column)
+    {
+        this.columns.Add(column);
+        this.columns = this.columns.OrderBy(c => c.DisplayOrder).ToList();
+        this.StateHasChanged();
+    }
+
+    private string GetCurrentResultCountText()
+    {
+        if (this.TotalResults == 0)
+            return "0/0";
+        int firstResultIndex = (this.PageIndex * this.ResultsPerPage) + 1;
+        int lastResultIndex = (this.PageIndex * this.ResultsPerPage) + this.ResultsPerPage;
+        if (lastResultIndex > this.TotalResults)
+            lastResultIndex = this.TotalResults;
+        return $"{firstResultIndex}-{lastResultIndex}/{this.TotalResults}";
+    }
+
+    private void BuildFilterExpression()
+    {
+        if (!this.filterExpressions.Any())
+            return;
+        Expression expression = null;
+        foreach (var lambda in this.filterExpressions)
+        {
+            if (expression == null)
+                expression = lambda.Body;
+            else
+                expression = expression.CombineWith(lambda.Body);
+        }
+        ParameterExpression parameterExpression = Expression.Parameter(this.DataSource.ElementType);
+        expression = new ExpressionParameterReplacer(parameterExpression).Visit(expression);
+        this.filterExpression = Expression.Lambda(expression, parameterExpression);
+    }
+
+    private async Task GetFilteredCountAsync()
+    {
+        this.TotalResults = await this.DataSource.CountAsync(this.filterExpression);
+    }
+
+    private async Task FilterSourceAsync()
+    {
+        IQueryable query = this.DataSource;
+        if (this.filterExpression != null)
+            query = query.Where(this.filterExpression);
+        if (this.orderByDelegate != null)
+            query = this.orderByDelegate.Invoke(query);
+        query = query.Skip(this.PageIndex * this.ResultsPerPage)
+            .Take(this.ResultsPerPage);
+        if (this.DataSource.GetType().IsAsyncEnumerable())
+            this.elements = await query.ToListAsync();
+        else
+            this.elements = query.ToList();
+        this.StateHasChanged();
+    }
+
+    private string GetOperatorDisplayName(OperatorType operatorType)
+    {
+        typeof(OperatorType).GetField(Enum.GetName(operatorType)).TryGetCustomAttribute(out DisplayAttribute displayAttribute);
+        return displayAttribute.Name;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        try
+        {
+            if (this.AutoGenerateColumns)
+            {
+                foreach (PropertyInfo property in this.DataSource.ElementType.GetProperties().Where(p => p.PropertyType.IsPrimitiveType() || p.PropertyType == typeof(string) || p.PropertyType == typeof(DateTimeOffset)))
+                {
+                    this.columns.Add(DataColumnProperties.CreateFor(property));
+                }
+            }
+            this.columns = this.columns.OrderBy(c => c.DisplayOrder).ToList();
+            this.filterExpression = Expression.Lambda(Expression.Constant(true), Expression.Parameter(this.DataSource.ElementType));
+            if (this.OrderByDefault != null)
+                this.orderByDelegate = this.OrderByDefault;
+            await this.GetFilteredCountAsync();
+            await this.FilterSourceAsync();
+        }
+        catch (Exception ex)
+        {
+            this.error = ex.Message.ToString();
+            this.modal.Show();
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await this.FilterSourceAsync();
+    }
+
+    private void OnToggleColumnVisibility(ChangeEventArgs e)
+    {
+        var selectedColumns = ((IEnumerable)e.Value).OfType<DataColumnProperties>().ToList();
+        this.columns.ForEach(c => c.SetIsVisible(selectedColumns.Contains(c)));
+        this.StateHasChanged();
+    }
+
+    private void OnFilterByColumn(ChangeEventArgs e)
+    {
+        string columnName = (string)e.Value;
+        this.filterByColumn = this.columns.First(c => c.Name == columnName);
+        if (this.filterByColumn.Type == typeof(string))
+        {
+            filterInputType = "search";
+            this.operators = new()
+            {
+                OperatorType.Equals,
+                OperatorType.NotEquals
+            };
+        }
+        else
+        {
+            this.operators = new()
+            {
+                OperatorType.Equals,
+                OperatorType.NotEquals,
+                OperatorType.IsLowerThan,
+                OperatorType.IsLowerOrEquals,
+                OperatorType.IsHigherThan,
+                OperatorType.IsHigherThanOrEquals
+            };
+            if (this.filterByColumn.Type == typeof(DateTime))
+                filterInputType = "date";
+            else if (this.filterByColumn.Type == typeof(DateTimeOffset))
+                filterInputType = "datetime";
+            else if (this.filterByColumn.Type == typeof(byte)
+                || this.filterByColumn.Type == typeof(int)
+                || this.filterByColumn.Type == typeof(double)
+                || this.filterByColumn.Type == typeof(decimal))
+                filterInputType = "number";
+            else if(this.filterByColumn.Type == typeof(bool))
+                filterInputType = "checkbox";
+        }
+        this.StateHasChanged();
+    }
+
+    private void OnFilterOperatorChanged(ChangeEventArgs e)
+    {
+        this.filterOperator = (OperatorType)int.Parse((string)e.Value);
+        this.StateHasChanged();
+    }
+
+    private void OnFilterByValueChanged(ChangeEventArgs e)
+    {
+        this.filterByValue = (string)e.Value;
+        this.StateHasChanged();
+    }
+
+    private async Task OnFilter()
+    {
+        object value = this.filterByValue;
+        if(this.filterByColumn.Type != typeof(string))
+            value = JToken.Parse(this.filterByValue).ToObject(this.filterByColumn.Type);
+        var expressionType = (ExpressionType)(int)this.filterOperator;
+        var parameter = Expression.Parameter(this.filterByColumn.ElementType);
+        var memberExpression = this.filterByColumn.PropertyPath.ToExpression(parameter);
+        memberExpression = (MemberExpression)new ExpressionParameterReplacer(parameter).Visit(memberExpression);
+        var expression = Expression.Lambda(Expression.MakeBinary(expressionType, memberExpression, Expression.Constant(value)), parameter);
+        this.filterExpressions.Clear();
+        this.filterExpressions.Add(expression);
+        this.BuildFilterExpression();
+        await this.FilterSourceAsync();
+    }
+
+    private void OnStartDragColumn(DataColumn column)
+    {
+        this.draggedColumn = column;
+    }
+
+    private void OnEndDragColumn(DataColumn column)
+    {
+        this.draggedColumn = null;
+    }
+
+    private void OnDropColumnOn(DataColumn column)
+    {
+        if (column == null
+            || this.draggedColumn == null)
+            return;
+        int draggedIndex = this.columns.IndexOf(this.draggedColumn.Properties);
+        int droppedIndex = this.columns.IndexOf(column.Properties);
+        this.columns.Remove(this.draggedColumn.Properties);
+        int insertAt;
+        if (draggedIndex < droppedIndex)
+            insertAt = droppedIndex++;
+        else
+            insertAt = droppedIndex;
+        if (droppedIndex >= this.columns.Count)
+            droppedIndex = this.columns.Count - 1;
+        this.columns.Insert(insertAt, this.draggedColumn.Properties);
+        this.StateHasChanged();
+    }
+
+    private async Task OnResultsPerPageChanged(ChangeEventArgs e)
+    {
+        this.ResultsPerPage = int.Parse((string)e.Value);
+        await this.GetFilteredCountAsync();
+        await this.FilterSourceAsync();
+    }
+
+    private async Task OnPreviousPage()
+    {
+        this.PageIndex--;
+        await this.FilterSourceAsync();
+    }
+
+    private async Task OnNextPage()
+    {
+        this.PageIndex++;
+        await this.FilterSourceAsync();
+    }
+
+    private async Task OnOrderBy(DataColumn column)
+    {
+        try
+        {
+            this.columns.Except(new DataColumnProperties[] { column.Properties }).ToList().ForEach(c => c.SortMode = SortMode.None);
+            if (column.Properties.PropertyPath == null)
+                return;
+            switch (column.Properties.SortMode)
+            {
+                case SortMode.None:
+                    this.orderByDelegate = null;
+                    break;
+                case SortMode.Ascending:
+                    this.orderByDelegate = query => query.OrderBy(column.Properties.PropertyPath);
+                    break;
+                case SortMode.Descending:
+                    this.orderByDelegate = query => query.OrderByDescending(column.Properties.PropertyPath);
+                    break;
+                default:
+                    throw new NotSupportedException($"The specified {nameof(SortMode)} '{column.Properties.SortMode}' is not supported");
+            }
+            await this.FilterSourceAsync();
+        }
+        catch (Exception ex)
+        {
+            this.error = ex.Message;
+            this.modal.Show();
+        }
+
+    }
+
+    private async Task OnAddFilter()
+    {
+        this.BuildFilterExpression();
+        await this.GetFilteredCountAsync();
+        await this.FilterSourceAsync();
+    }
+
+    private void OnViewDetailsOf(object element)
+    {
+        object key = this.KeyProvider?.Invoke(element);
+        if (key == null)
+            return;
+        this.Navigation.NavigateTo($"{this.Navigation.Uri}/{key}");
+    }
+
+    private enum OperatorType
+    {
+        [Display(Name = "=")]
+        Equals = 13,
+        [Display(Name = "!=")]
+        NotEquals = 35,
+        [Display(Name = "<")]
+        IsLowerThan = 20,
+        [Display(Name = "<=")]
+        IsLowerOrEquals = 21,
+        [Display(Name = ">")]
+        IsHigherThan = 15,
+        [Display(Name = ">=")]
+        IsHigherThanOrEquals = 16
+    }
+
+}

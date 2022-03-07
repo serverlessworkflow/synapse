@@ -5,7 +5,6 @@
 @using Newtonsoft.Json
 @using Newtonsoft.Json.Linq
 @using Newtonsoft.Json.Schema
-@using Synapse.Dashboard.Components
 @using Synapse.Integration.Models
 @using Synapse.Integration.Services
 @using Synapse.Ports.WebSockets.Client.Models
@@ -105,7 +104,7 @@
                                 @foreach(var activity in sortedActivities)
                                 {
                                     <ExpandableDataRow @ref="rows[sortedActivities.IndexOf(activity)]">
-                                        <Title>
+                                        <Header>
                                             <td>
                                                 @if (rows[sortedActivities.IndexOf(activity)].IsExpanded)
                                                 {
@@ -134,7 +133,7 @@
                                             <td>@activity.StartedAt?.ToString("MM/dd/yyyy, HH:mm")</td>
                                             <td>@activity.ExecutedAt?.ToString("MM/dd/yyyy, HH:mm")</td>
                                             <td>@(activity.Duration?.ToString() ?? "")</td>
-                                        </Title>
+                                        </Header>
                                         <Body>
                                         <td colspan="5">
                                             <div class="row">

@@ -1,0 +1,69 @@
+﻿@namespace Synapse.Dashboard
+@implements IAccordionModel
+
+<div class="expander">
+    <div @onclick="ToggleExpandAsync" class="expander-header">
+        @HeaderTemplate(this)
+    </div>
+    <div class="collapse expander-body @(IsExpanded ? "show" : "")">
+        @Body
+    </div>
+</div>
+
+@code
+{
+
+    /// <summary>
+    /// Gets the <see cref="Expander"/>'s header <see cref="RenderFragment"/>
+    /// </summary>
+    [Parameter]
+    public RenderFragment Header { get; set; }
+
+    /// <summary>
+    /// Gets the <see cref="Expander"/>'s header template <see cref="RenderFragment"/>
+    /// </summary>
+    [Parameter]
+    public RenderFragment<Expander> HeaderTemplate { get; set; } = context =>
+    {
+        return @<div class="row align-items-center no-gutters @(context.IsExpanded ? "" : "border-bottom border-muted") pb-2">
+                    <div class="col-auto mr-auto">
+                        <div class="form-control border border-mute rounded">
+                            @context.Header
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <span class="ml-2 text-secondary oi @(context.IsExpanded ? "oi-caret-top" : "oi-caret-bottom")"></span>
+                    </div>
+    </div>
+    ;
+    };
+
+    /// <summary>
+    /// Gets the <see cref="Expander"/>'s body <see cref="RenderFragment"/>
+    /// </summary>
+    [Parameter]
+    public RenderFragment Body { get; set; }
+
+    /// <summary>
+    /// Gets a boolean indicating whether or not the <see cref="Expander"/> is expanded
+    /// </summary>
+    [Parameter]
+    public bool IsExpanded { get; set; }
+
+
+    public bool AllowsMultiple { get; set; } = true;
+
+    /// <summary>
+    /// Gets the <see cref="EventCallback"/> to invoke whenever the <see cref="Expander"/> is being expanded or collapsed
+    /// </summary>
+    [Parameter]
+    public EventCallback<bool> OnToggleExpand { get; set; }
+
+    public async Task ToggleExpandAsync()
+    {
+        this.IsExpanded = !this.IsExpanded;
+        this.StateHasChanged();
+        await this.OnToggleExpand.InvokeAsync(this.IsExpanded);
+    }
+
+}
