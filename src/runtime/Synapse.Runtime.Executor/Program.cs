@@ -20,6 +20,7 @@ using GraphQL.Client.Abstractions.Websocket;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Neuroglia.AsyncApi;
 using Neuroglia.Data.Expressions.JQ;
 using Synapse.Ports.Grpc;
 using Synapse.Runtime.Executor.Services;
@@ -39,11 +40,15 @@ using var host = Host.CreateDefaultBuilder(args)
                 options.TimestampFormat = "[HH:mm:ss] ";
             });
         });
-        services.AddServerlessWorkflow();
+        services.AddAsyncApiClientFactory(asyncApi => 
+        {
+            asyncApi.UseAllBindings();
+        });
         services.AddSynapseGrpcApiClient();
         services.AddSynapseGrpcRuntimeApiClient();
 
         services.AddNewtonsoftJsonSerializer();
+        services.AddServerlessWorkflow();
         services.AddJQExpressionEvaluator();
         services.AddHttpClient();
         services.AddTransient<GraphQL.Client.Serializer.Newtonsoft.NewtonsoftJsonSerializer>();

@@ -32,10 +32,12 @@ namespace Synapse.Runtime.Services
         /// Initializes a new <see cref="WorkflowActivityProcessorFactory"/>
         /// </summary>
         /// <param name="serviceProvider">The current <see cref="IServiceProvider"/></param>
+        /// <param name="logger">The service used to perform logging</param>
         /// <param name="context">The current <see cref="IWorkflowRuntimeContext"/></param>
-        public WorkflowActivityProcessorFactory(IServiceProvider serviceProvider, IWorkflowRuntimeContext context)
+        public WorkflowActivityProcessorFactory(IServiceProvider serviceProvider, ILogger<WorkflowActivityProcessorFactory> logger, IWorkflowRuntimeContext context)
         {
             this.ServiceProvider = serviceProvider;
+            this.Logger = logger;
             this.Context = context;
         }
 
@@ -43,6 +45,11 @@ namespace Synapse.Runtime.Services
         /// Gets the current <see cref="IServiceProvider"/>
         /// </summary>
         protected IServiceProvider ServiceProvider { get; }
+
+        /// <summary>
+        /// Gets the service used to perform logging
+        /// </summary>
+        protected ILogger Logger { get; }
 
         /// <summary>
         /// Gets the current <see cref="IWorkflowExecutionContext"/>
@@ -58,22 +65,30 @@ namespace Synapse.Runtime.Services
                 throw new ArgumentException($"The specified activity '{activity.Id}' is missing the required metadata field '{V1WorkflowActivityMetadata.State}'");
             if (!this.Context.Workflow.Definition.TryGetState(stateName, out StateDefinition state))
                 throw new NullReferenceException($"Failed to find the workflow state with the specified name '{stateName}'");
-            return activity.Type switch
+            try
             {
-                V1WorkflowActivityType.Action => this.CreateActionActivityProcessor(state, activity),
-                V1WorkflowActivityType.Branch => throw new NotImplementedException(),//todo
-                V1WorkflowActivityType.ConsumeEvent => throw new NotImplementedException(),//todo
-                V1WorkflowActivityType.End => ActivatorUtilities.CreateInstance<EndProcessor>(this.ServiceProvider, activity, state.End ?? new()),
-                V1WorkflowActivityType.Error => throw new NotImplementedException(),//todo
-                V1WorkflowActivityType.EventTrigger => throw new NotImplementedException(),//todo
-                V1WorkflowActivityType.Iteration => throw new NotImplementedException(),//todo
-                V1WorkflowActivityType.ProduceEvent => throw new NotImplementedException(),//todo
-                V1WorkflowActivityType.Start => ActivatorUtilities.CreateInstance<StartProcessor>(this.ServiceProvider, activity, this.Context.Workflow.Definition.Start ?? new()),
-                V1WorkflowActivityType.State => this.CreateStateActivityProcessor(state, activity),
-                V1WorkflowActivityType.SubFlow => throw new NotImplementedException(),//todo
-                V1WorkflowActivityType.Transition => throw new NotImplementedException(),//todo
-                _ => throw new NotSupportedException($"The specified {typeof(V1WorkflowActivityType).Name} '{activity.Type}' is not supported"),
-            };
+                return activity.Type switch
+                {
+                    V1WorkflowActivityType.Action => this.CreateActionActivityProcessor(state, activity),
+                    V1WorkflowActivityType.Branch => throw new NotImplementedException(),//todo
+                    V1WorkflowActivityType.ConsumeEvent => throw new NotImplementedException(),//todo
+                    V1WorkflowActivityType.End => ActivatorUtilities.CreateInstance<EndProcessor>(this.ServiceProvider, activity, state.End ?? new()),
+                    V1WorkflowActivityType.Error => throw new NotImplementedException(),//todo
+                    V1WorkflowActivityType.EventTrigger => throw new NotImplementedException(),//todo
+                    V1WorkflowActivityType.Iteration => throw new NotImplementedException(),//todo
+                    V1WorkflowActivityType.ProduceEvent => throw new NotImplementedException(),//todo
+                    V1WorkflowActivityType.Start => ActivatorUtilities.CreateInstance<StartProcessor>(this.ServiceProvider, activity, this.Context.Workflow.Definition.Start ?? new()),
+                    V1WorkflowActivityType.State => this.CreateStateActivityProcessor(state, activity),
+                    V1WorkflowActivityType.SubFlow => throw new NotImplementedException(),//todo
+                    V1WorkflowActivityType.Transition => throw new NotImplementedException(),//todo
+                    _ => throw new NotSupportedException($"The specified {typeof(V1WorkflowActivityType).Name} '{activity.Type}' is not supported"),
+                };
+            }
+            catch(Exception ex)
+            {
+                this.Logger.LogError("An error occured while creating a new processor for the activity with id '{activityId}': {ex}", activity.Id, ex.ToString());
+                throw;
+            }
         }
 
         protected virtual IStateProcessor CreateStateActivityProcessor(StateDefinition state, V1WorkflowActivityDto activity)
@@ -121,7 +136,7 @@ namespace Synapse.Runtime.Services
                     return ActivatorUtilities.CreateInstance<GraphQLFunctionProcessor>(this.ServiceProvider, activity, action, function);
                 case FunctionType.OData:
                     return ActivatorUtilities.CreateInstance<ODataFunctionProcessor>(this.ServiceProvider, activity, action, function);
-                //case FunctionType.OpenApi://todo
+                //case FunctionType.OpenApi://todo: move 'rest' code here, and implement basic rest type, for when the Serverless Workflow spec supports it
                 //    break;
                 case FunctionType.Rest:
                     return ActivatorUtilities.CreateInstance<OpenApiFunctionProcessor>(this.ServiceProvider, activity, action, function);

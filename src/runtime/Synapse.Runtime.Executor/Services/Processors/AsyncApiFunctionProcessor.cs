@@ -20,8 +20,12 @@ using Neuroglia.AsyncApi.Client;
 using Neuroglia.AsyncApi.Client.Services;
 using Neuroglia.AsyncApi.Models;
 using Neuroglia.AsyncApi.Services.IO;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Synapse.Integration.Events.WorkflowActivities;
+using System.Dynamic;
 using System.Reactive;
+using System.Text.RegularExpressions;
 
 namespace Synapse.Runtime.Executor.Services.Processors
 {
@@ -97,6 +101,11 @@ namespace Synapse.Runtime.Executor.Services.Processors
         protected OperationType OperationType { get; set; }
 
         /// <summary>
+        /// Gets the payload to use when invoking the remote Async API operation to process
+        /// </summary>
+        protected object? Payload { get; set; }
+
+        /// <summary>
         /// Gets the service used to interact with the remote Async API
         /// </summary>
         protected IAsyncApiClient AsyncApiClient { get; set; } = null!;
@@ -137,6 +146,7 @@ namespace Synapse.Runtime.Executor.Services.Processors
                     throw new NullReferenceException($"Failed to find an operation with id '{this.Operation}' in the specified AsyncAPI document");
                 this.Operation = this.Channel.GetOperationById(operationId);
                 this.OperationType = this.Channel.Publish == this.Operation ? OperationType.Publish : OperationType.Subscribe;
+                await this.BuildPayloadAsync(cancellationToken);
                 this.AsyncApiClient = this.AsyncApiClientFactory.CreateClient(this.Document);
             }
             catch (Exception ex)
@@ -144,6 +154,43 @@ namespace Synapse.Runtime.Executor.Services.Processors
                 await this.OnErrorAsync(ex, cancellationToken);
             }
 
+        }
+
+        /// <summary>
+        /// Builds the payload to use when invoking the remote Async API operation to process
+        /// </summary>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        protected virtual async Task BuildPayloadAsync(CancellationToken cancellationToken)
+        {
+            if (this.Activity.Input == null)
+                this.Payload = new Dictionary<string, object>();
+            if (this.FunctionReference.Arguments == null)
+                return;
+            var json = JsonConvert.SerializeObject(this.FunctionReference.Arguments);
+            foreach (Match match in Regex.Matches(json, @"""\$\{.+?\}"""))
+            {
+                var expression = match.Value[3..^2].Trim();
+                var evaluationResult = await this.Context.EvaluateAsync(expression, this.Activity.Input!.ToObject()!, cancellationToken);
+                if (evaluationResult == null)
+                {
+                    Console.WriteLine($"Evaluation result of expression {expression} on data {JsonConvert.SerializeObject(this.Activity.Input)} is NULL"); //todo: replace with better message
+                    continue;
+                }
+                var valueToken = JToken.FromObject(evaluationResult);
+                var value = null as string;
+                if (valueToken != null)
+                {
+                    value = valueToken.Type switch
+                    {
+                        JTokenType.String => @$"""{valueToken}""",
+                        _ => valueToken.ToString(),
+                    };
+                }
+                if (string.IsNullOrEmpty(value))
+                    value = "null";
+                json = json.Replace(match.Value, value);
+            }
+            this.Payload = JsonConvert.DeserializeObject<ExpandoObject>(json)!;
         }
 
         /// <inheritdoc/>
@@ -155,8 +202,10 @@ namespace Synapse.Runtime.Executor.Services.Processors
                 switch (this.OperationType)
                 {
                     case OperationType.Publish:
-                        var message = new MessageBuilder();
-                        await this.AsyncApiClient.PublishAsync(this.ChannelKey, message.Build(), cancellationToken);
+                        var message = new MessageBuilder()
+                            .WithPayload(this.Payload)
+                            .Build();
+                        await this.AsyncApiClient.PublishAsync(this.ChannelKey, message, cancellationToken);
                         await this.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, new()), cancellationToken);
                         await this.OnCompletedAsync(cancellationToken);
                         break;
