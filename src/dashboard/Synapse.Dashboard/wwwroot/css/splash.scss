@@ -46,7 +46,7 @@ body {
     animation-delay: 3s;
 }
 
-@for $i from 1 to 8 {
+@for $i from 1 through 8 {
   $duration1: 1.5;
   $duration2: 0.75;
   $duration3: 0.75;

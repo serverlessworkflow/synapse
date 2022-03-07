@@ -12183,6 +12183,15 @@ body {
   animation-delay: 1.4s, 3.4s, 2.4s;
 }
 
+.animation-phase-8 {
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: forwards;
+  animation-iteration: 1;
+  animation-name: stroke-draw-animation, stroke-fade-out-animation, fade-in-animation;
+  animation-duration: 1.5s, 0.75s, 0.75s;
+  animation-delay: 1.6s, 3.6s, 2.6s;
+}
+
 @keyframes stroke-draw-animation {
   to {
     stroke-dashOffset: 0;
