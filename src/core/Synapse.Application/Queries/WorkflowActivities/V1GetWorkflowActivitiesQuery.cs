@@ -6,11 +6,11 @@ namespace Synapse.Application.Queries.WorkflowActivities
 {
 
     /// <summary>
-    /// Represents the <see cref="IQuery"/> used to get the <see cref="V1WorkflowActivity"/> instances that belong to a specific <see cref="V1WorkflowInstance"/>
+    /// Represents the <see cref="IQuery"/> used to get the <see cref="Domain.Models.V1WorkflowActivity"/> instances that belong to a specific <see cref="V1WorkflowInstance"/>
     /// </summary>
     [DataTransferObjectType(typeof(V1GetWorkflowActivitiesQueryDto))]
     public class V1GetWorkflowActivitiesQuery
-        : Query<List<V1WorkflowActivityDto>>
+        : Query<List<Integration.Models.V1WorkflowActivity>>
     {
 
         /// <summary>
@@ -24,11 +24,11 @@ namespace Synapse.Application.Queries.WorkflowActivities
         /// <summary>
         /// Initializes a new <see cref="V1GetWorkflowActivitiesQuery"/>
         /// </summary>
-        /// <param name="workflowInstanceId">The id of the <see cref="V1WorkflowInstance"/> to get the <see cref="V1WorkflowActivity"/> instances of</param>
+        /// <param name="workflowInstanceId">The id of the <see cref="V1WorkflowInstance"/> to get the <see cref="Domain.Models.V1WorkflowActivity"/> instances of</param>
         /// <param name="includeNonOperative">A boolean indicating whether or not to include non-operative activities</param>
-        /// <param name="parentId">The id of the <see cref="V1WorkflowActivity"/> to get the child activities of</param>
+        /// <param name="parentId">The id of the <see cref="Domain.Models.V1WorkflowActivity"/> to get the child activities of</param>
         /// <param name="options">An object used to configure the <see cref="IQuery"/> to execute</param>
-        public V1GetWorkflowActivitiesQuery(string workflowInstanceId, bool includeNonOperative = false, string? parentId = null, ODataQueryOptions<V1WorkflowActivityDto>? options = null)
+        public V1GetWorkflowActivitiesQuery(string workflowInstanceId, bool includeNonOperative = false, string? parentId = null, ODataQueryOptions<Integration.Models.V1WorkflowActivity>? options = null)
         {
             this.WorkflowInstanceId = workflowInstanceId;
             this.IncludeNonOperative = includeNonOperative;
@@ -37,7 +37,7 @@ namespace Synapse.Application.Queries.WorkflowActivities
         }
 
         /// <summary>
-        /// Gets the id of the <see cref="V1WorkflowInstance"/> to get the <see cref="V1WorkflowActivity"/> instances of
+        /// Gets the id of the <see cref="V1WorkflowInstance"/> to get the <see cref="Domain.Models.V1WorkflowActivity"/> instances of
         /// </summary>
         public virtual string WorkflowInstanceId { get; protected set; }
 
@@ -47,14 +47,14 @@ namespace Synapse.Application.Queries.WorkflowActivities
         public virtual bool IncludeNonOperative { get; protected set; }
 
         /// <summary>
-        /// Gets the id of the <see cref="V1WorkflowActivity"/> to get the child activities of
+        /// Gets the id of the <see cref="Domain.Models.V1WorkflowActivity"/> to get the child activities of
         /// </summary>
         public virtual string? ParentId { get; protected set; }
 
         /// <summary>
         /// Gets an object used to configure the <see cref="IQuery"/> to execute
         /// </summary>
-        public virtual ODataQueryOptions<V1WorkflowActivityDto>? Options { get; protected set; }
+        public virtual ODataQueryOptions<Integration.Models.V1WorkflowActivity>? Options { get; protected set; }
 
     }
 
@@ -62,19 +62,19 @@ namespace Synapse.Application.Queries.WorkflowActivities
     /// Represents the service used to handle <see cref="V1GetWorkflowActivitiesQuery"/> instances
     /// </summary>
     public class V1GetWorkflowActivitiesQueryHandler
-        : QueryHandlerBase<V1WorkflowActivityDto>,
-        IQueryHandler<V1GetWorkflowActivitiesQuery, List<V1WorkflowActivityDto>>
+        : QueryHandlerBase<Integration.Models.V1WorkflowActivity>,
+        IQueryHandler<V1GetWorkflowActivitiesQuery, List<Integration.Models.V1WorkflowActivity>>
     {
 
         /// <inheritdoc/>
-        public V1GetWorkflowActivitiesQueryHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IRepository<V1WorkflowActivityDto> repository) 
+        public V1GetWorkflowActivitiesQueryHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IRepository<Integration.Models.V1WorkflowActivity> repository) 
             : base(loggerFactory, mediator, mapper, repository)
         {
 
         }
 
         /// <inheritdoc/>
-        public virtual async Task<IOperationResult<List<V1WorkflowActivityDto>>> HandleAsync(V1GetWorkflowActivitiesQuery query, CancellationToken cancellationToken = default)
+        public virtual async Task<IOperationResult<List<Integration.Models.V1WorkflowActivity>>> HandleAsync(V1GetWorkflowActivitiesQuery query, CancellationToken cancellationToken = default)
         {
             return await Task.Run(() =>
             {
@@ -85,7 +85,7 @@ namespace Synapse.Application.Queries.WorkflowActivities
                 var results = activities as IQueryable;
                 if (query.Options != null)
                     results = query.Options.ApplyTo(activities);
-                return this.Ok(results.OfType<V1WorkflowActivityDto>().ToList());
+                return this.Ok(results.OfType<Integration.Models.V1WorkflowActivity>().ToList());
             }, cancellationToken);
         }
 

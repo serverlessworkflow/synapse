@@ -7,7 +7,7 @@ namespace Synapse.Domain.Events.WorkflowActivities
     /// </summary>
     [DataTransferObjectType(typeof(V1WorkflowActivityResumedIntegrationEvent))]
     public class V1WorkflowActivityResumedDomainEvent
-        : DomainEvent<V1WorkflowActivity, string>
+        : DomainEvent<Models.V1WorkflowActivity, string>
     {
 
         /// <summary>

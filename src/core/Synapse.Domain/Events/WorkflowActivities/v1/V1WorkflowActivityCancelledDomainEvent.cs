@@ -7,7 +7,7 @@ namespace Synapse.Domain.Events.WorkflowActivities
     /// </summary>
     [DataTransferObjectType(typeof(V1WorkflowActivityCancelledIntegrationEvent))]
     public class V1WorkflowActivityCancelledDomainEvent
-        : DomainEvent<V1WorkflowActivity, string>
+        : DomainEvent<Models.V1WorkflowActivity, string>
     {
 
         /// <summary>

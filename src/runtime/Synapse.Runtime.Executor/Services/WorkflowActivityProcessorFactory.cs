@@ -57,7 +57,7 @@ namespace Synapse.Runtime.Services
         protected IWorkflowRuntimeContext Context { get; }
 
         /// <inheritdoc/>
-        public virtual IWorkflowActivityProcessor Create(V1WorkflowActivityDto activity)
+        public virtual IWorkflowActivityProcessor Create(V1WorkflowActivity activity)
         {
             if (activity == null)
                 throw new ArgumentNullException(nameof(activity));
@@ -91,7 +91,7 @@ namespace Synapse.Runtime.Services
             }
         }
 
-        protected virtual IStateProcessor CreateStateActivityProcessor(StateDefinition state, V1WorkflowActivityDto activity)
+        protected virtual IStateProcessor CreateStateActivityProcessor(StateDefinition state, V1WorkflowActivity activity)
         {
             return state switch
             {
@@ -107,7 +107,7 @@ namespace Synapse.Runtime.Services
             };
         }
 
-        protected virtual IWorkflowActivityProcessor CreateActionActivityProcessor(StateDefinition state, V1WorkflowActivityDto activity)
+        protected virtual IWorkflowActivityProcessor CreateActionActivityProcessor(StateDefinition state, V1WorkflowActivity activity)
         {
             if(!state.TryGetAction(activity.Metadata, out var action))
                 throw new NullReferenceException($"Failed to find an action that matches the metadata specified by the activity with id '{activity.Id}'");
@@ -120,7 +120,7 @@ namespace Synapse.Runtime.Services
             };
         }
 
-        protected virtual IWorkflowActivityProcessor CreateFunctionActivityProcessor(StateDefinition state, V1WorkflowActivityDto activity)
+        protected virtual IWorkflowActivityProcessor CreateFunctionActivityProcessor(StateDefinition state, V1WorkflowActivity activity)
         {
             if (!state.TryGetAction(activity.Metadata, out var action))
                 throw new NullReferenceException($"Failed to find an action that matches the metadata specified by the activity with id '{activity.Id}'");
@@ -147,7 +147,7 @@ namespace Synapse.Runtime.Services
             }
         }
 
-        IWorkflowActivityProcessor IWorkflowActivityProcessorFactory.Create(V1WorkflowActivityDto activity)
+        IWorkflowActivityProcessor IWorkflowActivityProcessorFactory.Create(V1WorkflowActivity activity)
         {
             if (activity == null)
                 throw new ArgumentNullException(nameof(activity));
@@ -161,7 +161,7 @@ namespace Synapse.Runtime.Services
             return (IWorkflowActivityProcessor<TActivity>)this.Create(activity);
         }
 
-        TProcessor IWorkflowActivityProcessorFactory.Create<TProcessor>(V1WorkflowActivityDto activity)
+        TProcessor IWorkflowActivityProcessorFactory.Create<TProcessor>(V1WorkflowActivity activity)
         {
             if (activity == null)
                 throw new ArgumentNullException(nameof(activity));

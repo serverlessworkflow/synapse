@@ -38,8 +38,8 @@ namespace Synapse.Runtime.Executor.Services
         /// <param name="context">The current <see cref="IWorkflowRuntimeContext"/></param>
         /// <param name="activityProcessorFactory">The service used to create <see cref="IWorkflowActivityProcessor"/>s</param>
         /// <param name="options">The service used to access the current <see cref="ApplicationOptions"/></param>
-        /// <param name="activity">The <see cref="V1WorkflowActivityDto"/> to process</param>
-        protected WorkflowActivityProcessor(ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory, IOptions<ApplicationOptions> options, V1WorkflowActivityDto activity)
+        /// <param name="activity">The <see cref="V1WorkflowActivity"/> to process</param>
+        protected WorkflowActivityProcessor(ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory, IOptions<ApplicationOptions> options, V1WorkflowActivity activity)
         {
             this.Logger = loggerFactory.CreateLogger(this.GetType());
             this.Context = context;
@@ -69,7 +69,7 @@ namespace Synapse.Runtime.Executor.Services
         protected ApplicationOptions Options { get; }
 
         /// <inheritdoc/>
-        public V1WorkflowActivityDto Activity { get; }
+        public V1WorkflowActivity Activity { get; }
 
         /// <summary>
         /// Gets the <see cref="Subject{T}"/> used to observe the <see cref="WorkflowActivityProcessor"/>'s execution
@@ -176,7 +176,7 @@ namespace Synapse.Runtime.Executor.Services
         /// Creates a new child <see cref="IWorkflowActivityProcessor"/> for the specified <see cref="V1WorkflowActivity"/>
         /// </summary>
         /// <param name="activity">The <see cref="V1WorkflowActivity"/> to create a child <see cref="IWorkflowActivityProcessor"/> for</param>
-        protected virtual IWorkflowActivityProcessor CreateProcessorFor(V1WorkflowActivityDto activity)
+        protected virtual IWorkflowActivityProcessor CreateProcessorFor(V1WorkflowActivity activity)
         {
             if (activity == null)
                 throw new ArgumentNullException(nameof(activity));
@@ -186,7 +186,7 @@ namespace Synapse.Runtime.Executor.Services
         }
 
         /// <summary>
-        /// Handles the <see cref="V1WorkflowActivityDto"/>'s <see cref="IWorkflowActivityEvent"/>
+        /// Handles the <see cref="V1WorkflowActivity"/>'s <see cref="IWorkflowActivityEvent"/>
         /// </summary>
         /// <param name="e">The <see cref="IWorkflowActivityEvent"/> to handle</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
@@ -207,7 +207,7 @@ namespace Synapse.Runtime.Executor.Services
         }
 
         /// <summary>
-        /// Handles the specified <see cref="Exception"/> that occured during the <see cref="V1WorkflowActivityDto"/>'s processing
+        /// Handles the specified <see cref="Exception"/> that occured during the <see cref="V1WorkflowActivity"/>'s processing
         /// </summary>
         /// <param name="ex">The <see cref="Exception"/> to handle</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
@@ -227,7 +227,7 @@ namespace Synapse.Runtime.Executor.Services
         }
 
         /// <summary>
-        /// Handles the <see cref="V1WorkflowActivityDto"/>'s completion
+        /// Handles the <see cref="V1WorkflowActivity"/>'s completion
         /// </summary>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A new awaitable <see cref="Task"/></returns>

@@ -24,7 +24,7 @@ namespace Synapse.Integration.Events.WorkflowActivities
 {
 
 	/// <summary>
-	/// Represents the IDomainEvent fired whenever a new V1WorkflowActivityDto has been skipped
+	/// Represents the IDomainEvent fired whenever a new V1WorkflowActivity has been skipped
 	/// </summary>
 	[DataContract]
 	public partial class V1WorkflowActivitySkippedIntegrationEvent

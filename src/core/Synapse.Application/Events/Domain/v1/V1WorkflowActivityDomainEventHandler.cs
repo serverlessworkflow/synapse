@@ -6,10 +6,10 @@ using Synapse.Integration.Models;
 namespace Synapse.Application.Events.Domain
 {
     /// <summary>
-    /// Represents the service used to handle <see cref="V1WorkflowActivity"/>-related <see cref="IDomainEvent"/>s
+    /// Represents the service used to handle <see cref="Synapse.Domain.Models.V1WorkflowActivity"/>-related <see cref="IDomainEvent"/>s
     /// </summary>
     public class V1WorkflowActivityDomainEventHandler
-        : DomainEventHandlerBase<V1WorkflowActivity, V1WorkflowActivityDto, string>,
+        : DomainEventHandlerBase<Synapse.Domain.Models.V1WorkflowActivity, Integration.Models.V1WorkflowActivity, string>,
         INotificationHandler<V1WorkflowActivityCreatedDomainEvent>,
         INotificationHandler<V1WorkflowActivityStartedDomainEvent>,
         INotificationHandler<V1WorkflowActivitySuspendedDomainEvent>,
@@ -22,17 +22,17 @@ namespace Synapse.Application.Events.Domain
 
         /// <inheritdoc/>
         public V1WorkflowActivityDomainEventHandler(ILoggerFactory loggerFactory, IMapper mapper, IMediator mediator, IIntegrationEventBus integrationEventBus,
-            IOptions<SynapseApplicationOptions> synapseOptions, IRepository<V1WorkflowActivity> aggregates, IRepository<V1WorkflowActivityDto> projections,
-            IRepository<V1WorkflowInstanceDto> workflowInstances)
+            IOptions<SynapseApplicationOptions> synapseOptions, IRepository<Synapse.Domain.Models.V1WorkflowActivity> aggregates, IRepository<Integration.Models.V1WorkflowActivity> projections,
+            IRepository<Integration.Models.V1WorkflowInstance> workflowInstances)
             : base(loggerFactory, mapper, mediator, integrationEventBus, synapseOptions, aggregates, projections)
         {
             this.WorkflowInstances = workflowInstances;
         }
 
         /// <summary>
-        /// Gets the <see cref="IRepository"/> used to manage <see cref="V1WorkflowInstanceDto"/>
+        /// Gets the <see cref="IRepository"/> used to manage <see cref="Integration.Models.V1WorkflowInstance"/>
         /// </summary>
-        protected IRepository<V1WorkflowInstanceDto> WorkflowInstances { get; }
+        protected IRepository<Integration.Models.V1WorkflowInstance> WorkflowInstances { get; }
 
         /// <inheritdoc/>
         public virtual async Task HandleAsync(V1WorkflowActivityCreatedDomainEvent e, CancellationToken cancellationToken = default)
@@ -86,7 +86,7 @@ namespace Synapse.Application.Events.Domain
             activity.LastModified = e.CreatedAt.UtcDateTime;
             activity.ExecutedAt = e.CreatedAt.UtcDateTime;
             activity.Status = V1WorkflowActivityStatus.Faulted;
-            activity.Error = this.Mapper.Map<ErrorDto>(e.Error);
+            activity.Error = this.Mapper.Map<Integration.Models.Error>(e.Error);
             await this.Projections.UpdateAsync(activity, cancellationToken);
             await this.Projections.SaveChangesAsync(cancellationToken);
             await this.UpdateParentWorkflowInstanceAsync(activity, cancellationToken);
@@ -139,12 +139,12 @@ namespace Synapse.Application.Events.Domain
 
 
         /// <summary>
-        /// Updates the specified <see cref="V1WorkflowActivityDto"/> parent <see cref="V1WorkflowInstance"/>
+        /// Updates the specified <see cref="Integration.Models.V1WorkflowActivity"/> parent <see cref="Synapse.Domain.Models.V1WorkflowInstance"/>
         /// </summary>
-        /// <param name="activity">The <see cref="V1WorkflowActivityDto"/> to update the parent of</param>
+        /// <param name="activity">The <see cref="Integration.Models.V1WorkflowActivity"/> to update the parent of</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A new awaitable <see cref="ValueTask"/></returns>
-        protected virtual async ValueTask UpdateParentWorkflowInstanceAsync(V1WorkflowActivityDto activity, CancellationToken cancellationToken)
+        protected virtual async ValueTask UpdateParentWorkflowInstanceAsync(Integration.Models.V1WorkflowActivity activity, CancellationToken cancellationToken)
         {
             var instance = await this.WorkflowInstances.FindAsync(activity.WorkflowInstanceId, cancellationToken);
             var existingActivity = instance.Activities.FirstOrDefault(a => a.Id == activity.Id);

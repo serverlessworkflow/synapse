@@ -20,9 +20,9 @@ using Synapse.Integration.Models;
 namespace Synapse.Application.Mapping.Configuration
 {
     internal class CloudEventMappingConfiguration
-        : IMappingConfiguration<CloudEvent, V1CloudEventDto>
+        : IMappingConfiguration<CloudEvent, Integration.Models.V1CloudEvent>
     {
-        void IMappingConfiguration<CloudEvent, V1CloudEventDto>.Configure(IMappingExpression<CloudEvent, V1CloudEventDto> mapping)
+        void IMappingConfiguration<CloudEvent, Integration.Models.V1CloudEvent>.Configure(IMappingExpression<CloudEvent, Integration.Models.V1CloudEvent> mapping)
         {
             mapping.ForMember(m => m.Data, optuions => optuions.Ignore());
         }

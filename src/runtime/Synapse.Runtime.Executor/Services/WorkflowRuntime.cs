@@ -131,10 +131,10 @@ namespace Synapse.Runtime.Services
         }
 
         /// <summary>
-        /// Creates a new child <see cref="IWorkflowActivityProcessor"/> for the specified <see cref="V1WorkflowActivityDto"/>
+        /// Creates a new child <see cref="IWorkflowActivityProcessor"/> for the specified <see cref="V1WorkflowActivity"/>
         /// </summary>
-        /// <param name="activity">The <see cref="V1WorkflowActivityDto"/> to create a child <see cref="IWorkflowActivityProcessor"/> for</param>
-        protected virtual IWorkflowActivityProcessor CreateActivityProcessor(V1WorkflowActivityDto activity)
+        /// <param name="activity">The <see cref="V1WorkflowActivity"/> to create a child <see cref="IWorkflowActivityProcessor"/> for</param>
+        protected virtual IWorkflowActivityProcessor CreateActivityProcessor(V1WorkflowActivity activity)
         {
             if (activity == null)
                 throw new ArgumentNullException(nameof(activity));

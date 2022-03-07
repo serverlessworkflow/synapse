@@ -29,7 +29,7 @@ namespace Synapse.Runtime.Executor.Services.Processors
 
         /// <inheritdoc/>
         public EndProcessor(ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory, 
-            IOptions<ApplicationOptions> options, V1WorkflowActivityDto activity, EndDefinition end) 
+            IOptions<ApplicationOptions> options, V1WorkflowActivity activity, EndDefinition end) 
             : base(loggerFactory, context, activityProcessorFactory, options, activity)
         {
             this.End = end;

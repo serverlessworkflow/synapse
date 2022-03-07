@@ -24,7 +24,7 @@ namespace Synapse.Domain.Events.WorkflowInstances
     /// </summary>
     [DataTransferObjectType(typeof(V1WorkflowInstanceSchedulingIntegrationEvent))]
     public class V1WorkflowInstanceSchedulingDomainEvent
-        : DomainEvent<V1WorkflowInstance, string>
+        : DomainEvent<Models.V1WorkflowInstance, string>
     {
 
         /// <summary>

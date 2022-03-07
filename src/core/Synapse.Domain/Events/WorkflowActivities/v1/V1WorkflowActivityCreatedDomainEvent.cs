@@ -4,11 +4,11 @@ namespace Synapse.Domain.Events.WorkflowActivities
 {
 
     /// <summary>
-    /// Represents the <see cref="IDomainEvent"/> fired whenever a new <see cref="V1WorkflowActivityDto"/> has been created
+    /// Represents the <see cref="IDomainEvent"/> fired whenever a new <see cref="Integration.Models.V1WorkflowActivity"/> has been created
     /// </summary>
     [DataTransferObjectType(typeof(V1WorkflowActivityCreatedIntegrationEvent))]
     public class V1WorkflowActivityCreatedDomainEvent
-        : DomainEvent<V1WorkflowActivity, string>
+        : DomainEvent<Models.V1WorkflowActivity, string>
     {
 
         /// <summary>

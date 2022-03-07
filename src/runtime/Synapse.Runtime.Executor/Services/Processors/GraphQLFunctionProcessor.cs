@@ -46,11 +46,11 @@ namespace Synapse.Runtime.Executor.Services.Processors
         /// <param name="serializer">The service used to serialize and deserialize GraphQL requests/responses</param>
         /// <param name="oauth2TokenManager">The service used to manahge <see cref="OAuth2Token"/>s</param>
         /// <param name="options">The service used to access the current <see cref="ApplicationOptions"/></param>
-        /// <param name="activity">The <see cref="V1WorkflowActivityDto"/> to process</param>
+        /// <param name="activity">The <see cref="V1WorkflowActivity"/> to process</param>
         /// <param name="action">The <see cref="ActionDefinition"/> to process</param>
         /// <param name="function">The <see cref="FunctionDefinition"/> to process</param>
         public GraphQLFunctionProcessor(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory,
-            IHttpClientFactory httpClientFactory, IGraphQLWebsocketJsonSerializer serializer, IOptions<ApplicationOptions> options, V1WorkflowActivityDto activity,
+            IHttpClientFactory httpClientFactory, IGraphQLWebsocketJsonSerializer serializer, IOptions<ApplicationOptions> options, V1WorkflowActivity activity,
             ActionDefinition action, FunctionDefinition function)
             : base(serviceProvider, loggerFactory, context, activityProcessorFactory, options, activity, action, function)
         {

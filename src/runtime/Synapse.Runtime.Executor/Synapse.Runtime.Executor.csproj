@@ -34,7 +34,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\core\Synapse.Integration\Synapse.Integration.csproj" />
-    <ProjectReference Include="..\..\ports\Synapse.Ports.Grpc.Client\Synapse.Ports.Grpc.Client.csproj" />
   </ItemGroup>
 
 </Project>

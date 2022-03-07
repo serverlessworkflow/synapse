@@ -47,7 +47,7 @@ ${
 
     string GetCommandName(Class c)
     {
-        return c.Name.Replace("Command", "CommandDto");
+        return c.Name;
     }
 
     string GetAggregateName(Class c)
@@ -64,7 +64,7 @@ ${
 
     string GetModelName(Class c)
     {
-        return $"{c.Name}Dto";
+        return c.Name;
     }
 
     string GetClassName(Class c)
@@ -75,7 +75,7 @@ ${
     string GetBaseClass(Class c) 
     {
         if(c.BaseClass.Name == "Command")
-            return "CommandDto";
+            return "Command";
         else
             return GetType(c.BaseClass);
         
@@ -99,7 +99,7 @@ ${
             case "JArray":
                 return "DynamicArray";
             case "Error":
-                 return "ErrorDto";
+                 return "Error";
             case "JsonPatchDocument":
                 return "JsonPatchDocument";
             case "JObject":
@@ -147,7 +147,6 @@ ${
             typeName = typeName.Substring(0, typeName.Length - 1);
         if(typeName.EndsWith("[]"))
             typeName = typeName.Substring(0, typeName.Length - 2);
-        typeName += "Dto";
         if(type.OriginalName.EndsWith("[]"))
             typeName += "[]";
         return typeName;

@@ -14,8 +14,6 @@
  * limitations under the License.
  *
  */
-using Synapse.Integration.Commands.WorkflowActivities;
-using Synapse.Integration.Models;
 
 namespace Synapse.Application.Commands.WorkflowActivities
 {
@@ -23,9 +21,9 @@ namespace Synapse.Application.Commands.WorkflowActivities
     /// <summary>
     /// Represents the <see cref="ICommand"/> used to create a new <see cref="V1WorkflowActivity"/>
     /// </summary>
-    [DataTransferObjectType(typeof(V1CreateWorkflowActivityCommandDto))]
+    [DataTransferObjectType(typeof(Integration.Commands.WorkflowActivities.V1CreateWorkflowActivityCommand))]
     public class V1CreateWorkflowActivityCommand
-        : Command<V1WorkflowActivityDto>
+        : Command<Integration.Models.V1WorkflowActivity>
     {
 
         /// <summary>
@@ -39,7 +37,7 @@ namespace Synapse.Application.Commands.WorkflowActivities
         /// <summary>
         /// Initializes a new <see cref="V1CreateWorkflowActivityCommand"/>
         /// </summary>
-        /// <param name="workflowInstanceId">The id of the <see cref="V1WorkflowInstance"/> the <see cref="V1WorkflowActivity"/> to create belongs to</param>
+        /// <param name="workflowInstanceId">The id of the <see cref="V1WorkflowInstance"/> the <see cref="Domain.Models.V1WorkflowActivity"/> to create belongs to</param>
         /// <param name="type">The type of <see cref="V1WorkflowActivity"/> to create</param>
         /// <param name="input">The input data of the <see cref="V1WorkflowActivity"/> to create</param>
         /// <param name="metadata">The metadata of the <see cref="V1WorkflowActivity"/> to create</param>
@@ -85,7 +83,7 @@ namespace Synapse.Application.Commands.WorkflowActivities
     /// </summary>
     public class V1CreateWorkflowActivityCommandHandler
         : CommandHandlerBase,
-        ICommandHandler<V1CreateWorkflowActivityCommand, V1WorkflowActivityDto>
+        ICommandHandler<V1CreateWorkflowActivityCommand, Integration.Models.V1WorkflowActivity>
     {
 
         /// <inheritdoc/>
@@ -108,7 +106,7 @@ namespace Synapse.Application.Commands.WorkflowActivities
         protected virtual IRepository<V1WorkflowActivity> WorkflowActivities { get; }
 
         /// <inheritdoc/>
-        public virtual async Task<IOperationResult<V1WorkflowActivityDto>> HandleAsync(V1CreateWorkflowActivityCommand command, CancellationToken cancellationToken = default)
+        public virtual async Task<IOperationResult<Integration.Models.V1WorkflowActivity>> HandleAsync(V1CreateWorkflowActivityCommand command, CancellationToken cancellationToken = default)
         {
             var workflowInstance = await this.WorkflowInstances.FindAsync(command.WorkflowInstanceId, cancellationToken);
             if (workflowInstance == null)
@@ -122,7 +120,7 @@ namespace Synapse.Application.Commands.WorkflowActivities
             }
             var activity = await this.WorkflowActivities.AddAsync(new(workflowInstance, command.Type, command.Input, command.Metadata, parent), cancellationToken);
             await this.WorkflowActivities.SaveChangesAsync(cancellationToken);
-            return this.Ok(this.Mapper.Map<V1WorkflowActivityDto>(activity));
+            return this.Ok(this.Mapper.Map<Integration.Models.V1WorkflowActivity>(activity));
         }
 
     }

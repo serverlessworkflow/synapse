@@ -31,8 +31,12 @@ namespace Synapse.Integration.Events.WorkflowActivities
 		: V1IntegrationEvent
 	{
 
+		/// <summary>
+		/// The Error due to which the V1WorkflowActivity has faulted
+		/// </summary>
 		[DataMember(Name = "Error", Order = 1)]
-		public virtual ErrorDto Error { get; set; }
+		[Description("The Error due to which the V1WorkflowActivity has faulted")]
+		public virtual Error Error { get; set; }
 
     }
 

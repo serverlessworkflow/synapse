@@ -18,7 +18,7 @@
 namespace Synapse.Domain.Models
 {
 
-    [DataTransferObjectType(typeof(V1CorrelationContextDto))]
+    [DataTransferObjectType(typeof(Integration.Models.V1CorrelationContext))]
     public class V1CorrelationContext
     {
 

@@ -64,7 +64,7 @@ namespace Synapse.Integration.Events.WorkflowInstances
 		/// </summary>
 		[DataMember(Name = "TriggerEvents", Order = 5)]
 		[Description("An IEnumerable`1 containing the newly created V1WorkflowInstance's trigger V1CloudEvents")]
-		public virtual IEnumerable<V1CloudEventDto> TriggerEvents { get; set; }
+		public virtual IEnumerable<V1CloudEvent> TriggerEvents { get; set; }
 
     }
 

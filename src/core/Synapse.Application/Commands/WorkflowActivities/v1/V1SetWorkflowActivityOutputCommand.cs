@@ -14,17 +14,15 @@
  * limitations under the License.
  *
  */
-using Synapse.Integration.Commands.WorkflowActivities;
-using Synapse.Integration.Models;
 
 namespace Synapse.Application.Commands.WorkflowActivities
 {
     /// <summary>
-    /// Represents the <see cref="ICommand"/> used to set the output of a <see cref="V1WorkflowActivity"/>
+    /// Represents the <see cref="ICommand"/> used to set the output of a <see cref="Domain.Models.V1WorkflowActivity"/>
     /// </summary>
-    [DataTransferObjectType(typeof(V1SetWorkflowActivityOutputCommandDto))]
+    [DataTransferObjectType(typeof(Integration.Commands.WorkflowActivities.V1SetWorkflowActivityOutputCommand))]
     public class V1SetWorkflowActivityOutputCommand
-        : Command<V1WorkflowActivityDto>
+        : Command<Integration.Models.V1WorkflowActivity>
     {
 
         /// <summary>
@@ -38,8 +36,8 @@ namespace Synapse.Application.Commands.WorkflowActivities
         /// <summary>
         /// Initializes a new <see cref="V1SetWorkflowActivityOutputCommand"/>
         /// </summary>
-        /// <param name="id">The id of the <see cref="V1WorkflowActivity"/> to suspend</param>
-        /// <param name="output">The <see cref="V1WorkflowActivity"/>'s output</param>
+        /// <param name="id">The id of the <see cref="Domain.Models.V1WorkflowActivity"/> to suspend</param>
+        /// <param name="output">The <see cref="Domain.Models.V1WorkflowActivity"/>'s output</param>
         public V1SetWorkflowActivityOutputCommand(string id, object? output)
         {
             this.Id = id;
@@ -47,12 +45,12 @@ namespace Synapse.Application.Commands.WorkflowActivities
         }
 
         /// <summary>
-        /// Gets the id of the <see cref="V1WorkflowActivity"/> to suspend
+        /// Gets the id of the <see cref="Domain.Models.V1WorkflowActivity"/> to suspend
         /// </summary>
         public virtual string Id { get; protected set; }
 
         /// <summary>
-        /// Gets the <see cref="V1WorkflowActivity"/>'s output 
+        /// Gets the <see cref="Domain.Models.V1WorkflowActivity"/>'s output 
         /// </summary>
         public virtual object? Output { get; protected set; }
 
@@ -63,31 +61,31 @@ namespace Synapse.Application.Commands.WorkflowActivities
     /// </summary>
     public class V1SetWorkflowActivityOutputCommandHandler
         : CommandHandlerBase,
-        ICommandHandler<V1SetWorkflowActivityOutputCommand, V1WorkflowActivityDto>
+        ICommandHandler<V1SetWorkflowActivityOutputCommand, Integration.Models.V1WorkflowActivity>
     {
 
         /// <inheritdoc/>
-        public V1SetWorkflowActivityOutputCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IRepository<V1WorkflowActivity> activities)
+        public V1SetWorkflowActivityOutputCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IRepository<Domain.Models.V1WorkflowActivity> activities)
             : base(loggerFactory, mediator, mapper)
         {
             this.Activities = activities;
         }
 
         /// <summary>
-        /// Gets the <see cref="IRepository"/> used to manage <see cref="V1WorkflowActivity"/> instances
+        /// Gets the <see cref="IRepository"/> used to manage <see cref="Domain.Models.V1WorkflowActivity"/> instances
         /// </summary>
-        protected IRepository<V1WorkflowActivity> Activities { get; }
+        protected IRepository<Domain.Models.V1WorkflowActivity> Activities { get; }
 
         /// <inheritdoc/>
-        public virtual async Task<IOperationResult<V1WorkflowActivityDto>> HandleAsync(V1SetWorkflowActivityOutputCommand command, CancellationToken cancellationToken = default)
+        public virtual async Task<IOperationResult<Integration.Models.V1WorkflowActivity>> HandleAsync(V1SetWorkflowActivityOutputCommand command, CancellationToken cancellationToken = default)
         {
             var activity = await this.Activities.FindAsync(command.Id, cancellationToken);
             if (activity == null)
-                throw DomainException.NullReference(typeof(V1WorkflowActivity), command.Id);
+                throw DomainException.NullReference(typeof(Domain.Models.V1WorkflowActivity), command.Id);
             activity.SetOutput(command.Output);
             activity = await this.Activities.UpdateAsync(activity, cancellationToken);
             await this.Activities.SaveChangesAsync(cancellationToken);
-            return this.Ok(this.Mapper.Map<V1WorkflowActivityDto>(activity));
+            return this.Ok(this.Mapper.Map<Integration.Models.V1WorkflowActivity>(activity));
         }
 
     }

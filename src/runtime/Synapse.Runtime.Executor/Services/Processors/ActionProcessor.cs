@@ -35,10 +35,10 @@ namespace Synapse.Runtime.Executor.Services.Processors
         /// <param name="context">The current <see cref="IWorkflowRuntimeContext"/></param>
         /// <param name="activityProcessorFactory">The service used to create <see cref="IWorkflowActivityProcessor"/>s</param>
         /// <param name="options">The service used to access the current <see cref="ApplicationOptions"/></param>
-        /// <param name="activity">The <see cref="V1WorkflowActivityDto"/> to process</param>
+        /// <param name="activity">The <see cref="V1WorkflowActivity"/> to process</param>
         /// <param name="action">The <see cref="ActionDefinition"/> to process</param>
         public ActionProcessor(ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory,
-            IOptions<ApplicationOptions> options, V1WorkflowActivityDto activity, ActionDefinition action)
+            IOptions<ApplicationOptions> options, V1WorkflowActivity activity, ActionDefinition action)
             : base(loggerFactory, context, activityProcessorFactory, options, activity)
         {
             this.Action = action;

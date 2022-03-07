@@ -7,7 +7,7 @@ namespace Synapse.Domain.Events.WorkflowActivities
     /// </summary>
     [DataTransferObjectType(typeof(V1WorkflowActivityFaultedIntegrationEvent))]
     public class V1WorkflowActivityFaultedDomainEvent
-        : DomainEvent<V1WorkflowActivity, string>
+        : DomainEvent<Models.V1WorkflowActivity, string>
     {
 
         /// <summary>
@@ -23,16 +23,16 @@ namespace Synapse.Domain.Events.WorkflowActivities
         /// </summary>
         /// <param name="id">The id of the <see cref="V1WorkflowActivity"/> which's execution has faulted</param>
         /// <param name="error">The <see cref="Neuroglia.Error"/> due to which the <see cref="V1WorkflowActivity"/> has faulted</param>
-        public V1WorkflowActivityFaultedDomainEvent(string id, Error error)
+        public V1WorkflowActivityFaultedDomainEvent(string id, Neuroglia.Error error)
             : base(id)
         {
             this.Error = error;
         }
 
         /// <summary>
-        /// Gets the <see cref="Neuroglia.Error"/> due to which the <see cref="V1WorkflowActivity"/> has faulted<
+        /// Gets the <see cref="Neuroglia.Error"/> due to which the <see cref="V1WorkflowActivity"/> has faulted
         /// </summary>
-        public virtual Error Error { get; protected set; }
+        public virtual Neuroglia.Error Error { get; protected set; }
 
     }
 

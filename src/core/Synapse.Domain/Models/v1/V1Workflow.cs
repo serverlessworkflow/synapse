@@ -23,7 +23,7 @@ namespace Synapse.Domain.Models
     /// <summary>
     /// Represents a workflow
     /// </summary>
-    [DataTransferObjectType(typeof(V1WorkflowDto))]
+    [DataTransferObjectType(typeof(Integration.Models.V1Workflow))]
     public class V1Workflow
         : AggregateRoot<string>
     {

@@ -14,18 +14,16 @@
  * limitations under the License.
  *
  */
-using Synapse.Integration.Commands.WorkflowActivities;
-using Synapse.Integration.Models;
 
 namespace Synapse.Application.Commands.WorkflowActivities
 {
 
     /// <summary>
-    /// Represents the <see cref="ICommand"/> used to suspend a <see cref="V1WorkflowActivity"/>
+    /// Represents the <see cref="ICommand"/> used to suspend a <see cref="Domain.Models.V1WorkflowActivity"/>
     /// </summary>
-    [DataTransferObjectType(typeof(V1SuspendWorkflowActivityCommandDto))]
+    [DataTransferObjectType(typeof(Integration.Commands.WorkflowActivities.V1SuspendWorkflowActivityCommand))]
     public class V1SuspendWorkflowActivityCommand
-        : Command<V1WorkflowActivityDto>
+        : Command<Integration.Models.V1WorkflowActivity>
     {
 
         /// <summary>
@@ -39,14 +37,14 @@ namespace Synapse.Application.Commands.WorkflowActivities
         /// <summary>
         /// Initializes a new <see cref="V1SuspendWorkflowActivityCommand"/>
         /// </summary>
-        /// <param name="id">The id of the <see cref="V1InitializeWorkflowActivityCommand"/> to suspend</param>
+        /// <param name="id">The id of the <see cref="V1SuspendWorkflowActivityCommand"/> to suspend</param>
         public V1SuspendWorkflowActivityCommand(string id)
         {
             this.Id = id;
         }
 
         /// <summary>
-        /// Gets the id of the <see cref="V1WorkflowActivity"/> to suspend
+        /// Gets the id of the <see cref="Domain.Models.V1WorkflowActivity"/> to suspend
         /// </summary>
         public virtual string Id { get; protected set; }
 
@@ -57,31 +55,31 @@ namespace Synapse.Application.Commands.WorkflowActivities
     /// </summary>
     public class V1SuspendWorkflowActivityCommandHandler
         : CommandHandlerBase,
-        ICommandHandler<V1SuspendWorkflowActivityCommand, V1WorkflowActivityDto>
+        ICommandHandler<V1SuspendWorkflowActivityCommand, Integration.Models.V1WorkflowActivity>
     {
 
         /// <inheritdoc/>
-        public V1SuspendWorkflowActivityCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IRepository<V1WorkflowActivity> activities)
+        public V1SuspendWorkflowActivityCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IRepository<Domain.Models.V1WorkflowActivity> activities)
             : base(loggerFactory, mediator, mapper)
         {
             this.Activities = activities;
         }
 
         /// <summary>
-        /// Gets the <see cref="IRepository"/> used to manage <see cref="V1WorkflowActivity"/> instances
+        /// Gets the <see cref="IRepository"/> used to manage <see cref="Domain.Models.V1WorkflowActivity"/> instances
         /// </summary>
-        protected IRepository<V1WorkflowActivity> Activities { get; }
+        protected IRepository<Domain.Models.V1WorkflowActivity> Activities { get; }
 
         /// <inheritdoc/>
-        public virtual async Task<IOperationResult<V1WorkflowActivityDto>> HandleAsync(V1SuspendWorkflowActivityCommand command, CancellationToken cancellationToken = default)
+        public virtual async Task<IOperationResult<Integration.Models.V1WorkflowActivity>> HandleAsync(V1SuspendWorkflowActivityCommand command, CancellationToken cancellationToken = default)
         {
             var activity = await this.Activities.FindAsync(command.Id, cancellationToken);
             if (activity == null)
-                throw DomainException.NullReference(typeof(V1WorkflowActivity), command.Id);
+                throw DomainException.NullReference(typeof(Domain.Models.V1WorkflowActivity), command.Id);
             activity.Suspend();
             activity = await this.Activities.UpdateAsync(activity, cancellationToken);
             await this.Activities.SaveChangesAsync(cancellationToken);
-            return this.Ok(this.Mapper.Map<V1WorkflowActivityDto>(activity));
+            return this.Ok(this.Mapper.Map<Integration.Models.V1WorkflowActivity>(activity));
         }
 
     }

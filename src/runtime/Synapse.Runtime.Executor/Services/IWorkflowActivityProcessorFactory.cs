@@ -12,7 +12,7 @@
         /// </summary>
         /// <param name="activity">The <see cref="V1WorkflowActivity"/> to create a new <see cref="IWorkflowActivityProcessor"/> for</param>
         /// <returns>A new <see cref="IWorkflowActivityProcessor"/></returns>
-        IWorkflowActivityProcessor Create(V1WorkflowActivityDto activity);
+        IWorkflowActivityProcessor Create(V1WorkflowActivity activity);
 
         /// <summary>
         /// Creates a new <see cref="IWorkflowActivityProcessor"/> for the specified <see cref="V1WorkflowActivity"/>
@@ -21,7 +21,7 @@
         /// <param name="activity">The <see cref="V1WorkflowActivity"/> to create a new <see cref="IWorkflowActivityProcessor"/> for</param>
         /// <returns>A new <see cref="IWorkflowActivityProcessor"/></returns>
         IWorkflowActivityProcessor<TActivity> Create<TActivity>(TActivity activity)
-            where TActivity : V1WorkflowActivityDto;
+            where TActivity : V1WorkflowActivity;
 
         /// <summary>
         /// Creates a new <see cref="IWorkflowActivityProcessor"/> for the specified <see cref="V1WorkflowActivity"/>
@@ -29,7 +29,7 @@
         /// <typeparam name="TProcessor">The type of the <see cref="IWorkflowActivityProcessor"/> to create</typeparam>
         /// <param name="activity">The <see cref="V1WorkflowActivity"/> to create a new <see cref="IWorkflowActivityProcessor"/> for</param>
         /// <returns>A new <see cref="IWorkflowActivityProcessor"/></returns>
-        TProcessor Create<TProcessor>(V1WorkflowActivityDto activity);
+        TProcessor Create<TProcessor>(V1WorkflowActivity activity);
 
         /// <summary>
         /// Creates a new <see cref="IWorkflowActivityProcessor"/> for the specified <see cref="V1WorkflowActivity"/>
@@ -40,7 +40,7 @@
         /// <returns>A new <see cref="IWorkflowActivityProcessor"/></returns>
         TProcessor Create<TProcessor, TActivity>(TActivity activity)
             where TProcessor : IWorkflowActivityProcessor<TActivity>
-            where TActivity : V1WorkflowActivityDto;
+            where TActivity : V1WorkflowActivity;
 
     }
 

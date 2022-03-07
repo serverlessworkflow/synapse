@@ -25,7 +25,7 @@ namespace Synapse.Domain.Events.WorkflowInstances
     /// </summary>
     [DataTransferObjectType(typeof(V1WorkflowInstanceCreatedIntegrationEvent))]
     public class V1WorkflowInstanceCreatedDomainEvent
-        : DomainEvent<V1WorkflowInstance, string>
+        : DomainEvent<Models.V1WorkflowInstance, string>
     {
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace Synapse.Domain.Events.WorkflowInstances
         /// <param name="activationType">The type of the <see cref="V1WorkflowInstance"/>'s activation</param>
         /// <param name="input">The newly created <see cref="V1WorkflowInstance"/>'s input data</param>
         /// <param name="triggerEvents">The newly created <see cref="V1WorkflowInstance"/>'s trigger <see cref="CloudEvent"/>s</param>
-        public V1WorkflowInstanceCreatedDomainEvent(string id, string workflowId, string key, V1WorkflowInstanceActivationType activationType, object? input, IEnumerable<V1CloudEvent>? triggerEvents)
+        public V1WorkflowInstanceCreatedDomainEvent(string id, string workflowId, string key, V1WorkflowInstanceActivationType activationType, object? input, IEnumerable<Models.V1CloudEvent>? triggerEvents)
             : base(id)
         {
             this.Key = key;
@@ -79,9 +79,9 @@ namespace Synapse.Domain.Events.WorkflowInstances
         public virtual object? Input { get; protected set; }
 
         /// <summary>
-        /// Gets an <see cref="IEnumerable{T}"/> containing the newly created <see cref="V1WorkflowInstance"/>'s trigger <see cref="V1CloudEvent"/>s
+        /// Gets an <see cref="IEnumerable{T}"/> containing the newly created <see cref="V1WorkflowInstance"/>'s trigger <see cref="Models.V1CloudEvent"/>s
         /// </summary>
-        public virtual IEnumerable<V1CloudEvent>? TriggerEvents { get; protected set; }
+        public virtual IEnumerable<Models.V1CloudEvent>? TriggerEvents { get; protected set; }
 
     }
 

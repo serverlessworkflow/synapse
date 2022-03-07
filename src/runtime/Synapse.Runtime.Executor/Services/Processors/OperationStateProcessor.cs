@@ -33,7 +33,7 @@ namespace Synapse.Runtime.Executor.Services.Processors
 
         /// <inheritdoc/>
         public OperationStateProcessor(ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory,
-            IJsonSerializer jsonSerializer, IOptions<ApplicationOptions> options, V1WorkflowActivityDto activity, OperationStateDefinition state)
+            IJsonSerializer jsonSerializer, IOptions<ApplicationOptions> options, V1WorkflowActivity activity, OperationStateDefinition state)
             : base(loggerFactory, context, activityProcessorFactory, options, activity, state)
         {
             this.JsonSerializer = jsonSerializer;
@@ -45,7 +45,7 @@ namespace Synapse.Runtime.Executor.Services.Processors
         protected IJsonSerializer JsonSerializer { get; }
 
         /// <inheritdoc/>
-        protected override IWorkflowActivityProcessor CreateProcessorFor(V1WorkflowActivityDto activity)
+        protected override IWorkflowActivityProcessor CreateProcessorFor(V1WorkflowActivity activity)
         {
             var processor = (ActionProcessor)base.CreateProcessorFor(activity);
             processor.SubscribeAsync
@@ -144,7 +144,7 @@ namespace Synapse.Runtime.Executor.Services.Processors
         }
 
         /// <summary>
-        /// Handles <see cref="V1WorkflowActivityDto"/>s <see cref="V1WorkflowActivityCompletedIntegrationEvent"/>
+        /// Handles <see cref="V1WorkflowActivity"/>s <see cref="V1WorkflowActivityCompletedIntegrationEvent"/>
         /// </summary>
         /// <param name="processor">The <see cref="IActionProcessor"/> to handle the <see cref="V1WorkflowActivityCompletedIntegrationEvent"/> for</param>
         /// <param name="e">The <see cref="V1WorkflowActivityCompletedIntegrationEvent"/> to handle</param>

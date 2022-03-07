@@ -7,10 +7,10 @@ namespace Synapse.Application.Events.Domain
 {
 
     /// <summary>
-    /// Represents the service used to handle <see cref="V1WorkflowInstance"/>-related <see cref="IDomainEvent"/>s
+    /// Represents the service used to handle <see cref="Synapse.Domain.Models.V1WorkflowInstance"/>-related <see cref="IDomainEvent"/>s
     /// </summary>
     public class V1WorkflowInstanceDomainEventHandler
-        : DomainEventHandlerBase<V1WorkflowInstance, V1WorkflowInstanceDto, string>,
+        : DomainEventHandlerBase<Synapse.Domain.Models.V1WorkflowInstance, Integration.Models.V1WorkflowInstance, string>,
         INotificationHandler<V1WorkflowInstanceCreatedDomainEvent>,
         INotificationHandler<V1WorkflowInstanceSchedulingDomainEvent>,
         INotificationHandler<V1WorkflowInstanceScheduledDomainEvent>,
@@ -29,7 +29,7 @@ namespace Synapse.Application.Events.Domain
 
         /// <inheritdoc/>
         public V1WorkflowInstanceDomainEventHandler(ILoggerFactory loggerFactory, IMapper mapper, IMediator mediator, IIntegrationEventBus integrationEventBus,
-            IOptions<SynapseApplicationOptions> synapseOptions, IRepository<V1WorkflowInstance> aggregates, IRepository<V1WorkflowInstanceDto> projections)
+            IOptions<SynapseApplicationOptions> synapseOptions, IRepository<Synapse.Domain.Models.V1WorkflowInstance> aggregates, IRepository<Integration.Models.V1WorkflowInstance> projections)
             : base(loggerFactory, mapper, mediator, integrationEventBus, synapseOptions, aggregates, projections)
         {
 
@@ -138,7 +138,7 @@ namespace Synapse.Application.Events.Domain
             instance.LastModified = e.CreatedAt.UtcDateTime;
             instance.ExecutedAt = e.CreatedAt.UtcDateTime;
             instance.Status = V1WorkflowInstanceStatus.Faulted;
-            instance.Error = this.Mapper.Map<ErrorDto>(e.Error);
+            instance.Error = this.Mapper.Map<Integration.Models.Error>(e.Error);
             await this.Projections.UpdateAsync(instance, cancellationToken);
             await this.Projections.SaveChangesAsync(cancellationToken);
             await this.PublishIntegrationEventAsync(e, cancellationToken);

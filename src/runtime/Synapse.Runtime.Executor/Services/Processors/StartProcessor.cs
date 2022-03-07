@@ -29,7 +29,7 @@ namespace Synapse.Runtime.Executor.Services.Processors
 
         /// <inheritdoc/>
         public StartProcessor(ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory,
-            IOptions<ApplicationOptions> options, V1WorkflowActivityDto activity, StartDefinition start)
+            IOptions<ApplicationOptions> options, V1WorkflowActivity activity, StartDefinition start)
             : base(loggerFactory, context, activityProcessorFactory, options, activity)
         {
             this.Start = start;

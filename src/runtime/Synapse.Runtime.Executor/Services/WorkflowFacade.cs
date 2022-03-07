@@ -33,9 +33,9 @@ namespace Synapse.Runtime.Services
         /// Initializes a new <see cref="WorkflowFacade"/>
         /// </summary>
         /// <param name="definition">The current workflow's <see cref="WorkflowDefinition"/></param>
-        /// <param name="instance">The current <see cref="V1WorkflowInstanceDto"/></param>
+        /// <param name="instance">The current <see cref="V1WorkflowInstance"/></param>
         /// <param name="synapseRuntimeApi">The service used to interact with the Synapse Runtime API</param>
-        public WorkflowFacade(WorkflowDefinition definition, V1WorkflowInstanceDto instance, ISynapseRuntimeApi synapseRuntimeApi)
+        public WorkflowFacade(WorkflowDefinition definition, V1WorkflowInstance instance, ISynapseRuntimeApi synapseRuntimeApi)
         {
             this.Definition = definition;
             this.Instance = instance;
@@ -46,7 +46,7 @@ namespace Synapse.Runtime.Services
         public WorkflowDefinition Definition { get; }
 
         /// <inheritdoc/>
-        public V1WorkflowInstanceDto Instance { get; }
+        public V1WorkflowInstance Instance { get; }
 
         /// <summary>
         /// Gets the service used to interact with the Synapse Runtime API
@@ -60,31 +60,31 @@ namespace Synapse.Runtime.Services
         }
 
         /// <inheritdoc/>
-        public virtual async Task<List<V1WorkflowActivityDto>> GetActivitiesAsync(CancellationToken cancellationToken = default)
+        public virtual async Task<List<V1WorkflowActivity>> GetActivitiesAsync(CancellationToken cancellationToken = default)
         {
             return await this.SynapseRuntimeApi.GetActivitiesAsync(this.Instance.Id, cancellationToken);
         }
 
         /// <inheritdoc/>
-        public virtual async Task<List<V1WorkflowActivityDto>> GetOperativeActivitiesAsync(CancellationToken cancellationToken)
+        public virtual async Task<List<V1WorkflowActivity>> GetOperativeActivitiesAsync(CancellationToken cancellationToken)
         {
             return await this.SynapseRuntimeApi.GetOperativeActivitiesAsync(this.Instance.Id, cancellationToken);
         }
 
         /// <inheritdoc/>
-        public virtual async Task<List<V1WorkflowActivityDto>> GetActivitiesAsync(V1WorkflowActivityDto activity, CancellationToken cancellationToken = default)
+        public virtual async Task<List<V1WorkflowActivity>> GetActivitiesAsync(V1WorkflowActivity activity, CancellationToken cancellationToken = default)
         {
             return await this.SynapseRuntimeApi.GetActivitiesAsync(this.Instance.Id, activity.Id, cancellationToken);
         }
 
         /// <inheritdoc/>
-        public virtual async Task<List<V1WorkflowActivityDto>> GetOperativeActivitiesAsync(V1WorkflowActivityDto activity, CancellationToken cancellationToken = default)
+        public virtual async Task<List<V1WorkflowActivity>> GetOperativeActivitiesAsync(V1WorkflowActivity activity, CancellationToken cancellationToken = default)
         {
             return await this.SynapseRuntimeApi.GetOperativeActivitiesAsync(this.Instance.Id, activity.Id, cancellationToken);
         }
 
         /// <inheritdoc/>
-        public virtual async Task<V1WorkflowActivityDto> CreateActivityAsync(V1WorkflowActivityType type, object? input, IDictionary<string, string>? metadata, V1WorkflowActivityDto? parent, CancellationToken cancellationToken)
+        public virtual async Task<V1WorkflowActivity> CreateActivityAsync(V1WorkflowActivityType type, object? input, IDictionary<string, string>? metadata, V1WorkflowActivity? parent, CancellationToken cancellationToken)
         {
             var inputParam = input as DynamicObject;
             if (inputParam == null && input != null)
@@ -94,7 +94,7 @@ namespace Synapse.Runtime.Services
         }
 
         /// <inheritdoc/>
-        public virtual async Task InitializeActivityAsync(V1WorkflowActivityDto activity, CancellationToken cancellationToken = default)
+        public virtual async Task InitializeActivityAsync(V1WorkflowActivity activity, CancellationToken cancellationToken = default)
         {
             if (activity == null)
                 throw new ArgumentNullException(nameof(activity));
@@ -102,7 +102,7 @@ namespace Synapse.Runtime.Services
         }
 
         /// <inheritdoc/>
-        public virtual async Task StartOrResumeActivityAsync(V1WorkflowActivityDto activity, CancellationToken cancellationToken = default)
+        public virtual async Task StartOrResumeActivityAsync(V1WorkflowActivity activity, CancellationToken cancellationToken = default)
         {
             if (activity == null)
                 throw new ArgumentNullException(nameof(activity));
@@ -110,7 +110,7 @@ namespace Synapse.Runtime.Services
         }
 
         /// <inheritdoc/>
-        public virtual async Task SuspendActivityAsync(V1WorkflowActivityDto activity, CancellationToken cancellationToken = default)
+        public virtual async Task SuspendActivityAsync(V1WorkflowActivity activity, CancellationToken cancellationToken = default)
         {
             if (activity == null)
                 throw new ArgumentNullException(nameof(activity));
@@ -118,7 +118,7 @@ namespace Synapse.Runtime.Services
         }
 
         /// <inheritdoc/>
-        public virtual async Task SkipActivityAsync(V1WorkflowActivityDto activity, CancellationToken cancellationToken = default)
+        public virtual async Task SkipActivityAsync(V1WorkflowActivity activity, CancellationToken cancellationToken = default)
         {
             if (activity == null)
                 throw new ArgumentNullException(nameof(activity));
@@ -126,17 +126,17 @@ namespace Synapse.Runtime.Services
         }
 
         /// <inheritdoc/>
-        public virtual async Task FaultActivityAsync(V1WorkflowActivityDto activity, Exception ex, CancellationToken cancellationToken = default)
+        public virtual async Task FaultActivityAsync(V1WorkflowActivity activity, Exception ex, CancellationToken cancellationToken = default)
         {
             if (activity == null)
                 throw new ArgumentNullException(nameof(activity));
             if (ex == null)
                 throw new ArgumentNullException(nameof(ex));
-            await this.FaultActivityAsync(activity, new ErrorDto() { Code = ex.GetType().Name.Replace("exception", string.Empty, StringComparison.OrdinalIgnoreCase), Message = ex.Message }, cancellationToken);
+            await this.FaultActivityAsync(activity, new Integration.Models.Error() { Code = ex.GetType().Name.Replace("exception", string.Empty, StringComparison.OrdinalIgnoreCase), Message = ex.Message }, cancellationToken);
         }
 
         /// <inheritdoc/>
-        public virtual async Task FaultActivityAsync(V1WorkflowActivityDto activity, ErrorDto error, CancellationToken cancellationToken = default)
+        public virtual async Task FaultActivityAsync(V1WorkflowActivity activity, Integration.Models.Error error, CancellationToken cancellationToken = default)
         {
             if (activity == null)
                 throw new ArgumentNullException(nameof(activity));
@@ -146,7 +146,7 @@ namespace Synapse.Runtime.Services
         }
 
         /// <inheritdoc/>
-        public virtual async Task CancelActivityAsync(V1WorkflowActivityDto activity, CancellationToken cancellationToken = default)
+        public virtual async Task CancelActivityAsync(V1WorkflowActivity activity, CancellationToken cancellationToken = default)
         {
             if (activity == null)
                 throw new ArgumentNullException(nameof(activity));
@@ -154,7 +154,7 @@ namespace Synapse.Runtime.Services
         }
 
         /// <inheritdoc/>
-        public virtual async Task SetActivityOutputAsync(V1WorkflowActivityDto activity, object? output, CancellationToken cancellationToken = default)
+        public virtual async Task SetActivityOutputAsync(V1WorkflowActivity activity, object? output, CancellationToken cancellationToken = default)
         {
             if (activity == null)
                 throw new ArgumentNullException(nameof(activity));
@@ -186,7 +186,7 @@ namespace Synapse.Runtime.Services
         }
 
         /// <inheritdoc/>
-        public virtual async Task On(V1WorkflowActivityDto activity, IV1WorkflowActivityIntegrationEvent e, CancellationToken cancellationToken = default)
+        public virtual async Task On(V1WorkflowActivity activity, IV1WorkflowActivityIntegrationEvent e, CancellationToken cancellationToken = default)
         {
             if (e == null)
                 throw new ArgumentNullException(nameof(e));

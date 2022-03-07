@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	<RootNamespace>$(MSBuildProjectName.Replace(" ", "_").Replace(".Client", ""))</RootNamespace>
+  </PropertyGroup>
+	
+  <ItemGroup>
+    <PackageReference Include="protobuf-net.Grpc" Version="1.0.152" />
+    <PackageReference Include="protobuf-net.Grpc.ClientFactory" Version="1.0.152" />
+  </ItemGroup>
+	
+  <ItemGroup>
+    <ProjectReference Include="..\Synapse.Apis.Runtime.Core\Synapse.Apis.Runtime.Core.csproj" />
+  </ItemGroup>
+
+</Project>

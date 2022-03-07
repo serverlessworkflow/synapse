@@ -18,18 +18,16 @@
 using Neuroglia.Data.Expressions;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
-using Synapse.Integration.Commands.WorkflowInstances;
-using Synapse.Integration.Models;
 
 namespace Synapse.Application.Commands.WorkflowInstances
 {
 
     /// <summary>
-    /// Represents the <see cref="ICommand"/> used to create a new <see cref="V1Workflow"/>
+    /// Represents the <see cref="ICommand"/> used to create a new <see cref="V1Workflow"/>s
     /// </summary>
-    [DataTransferObjectType(typeof(V1CreateWorkflowInstanceCommandDto))]
+    [DataTransferObjectType(typeof(Integration.Commands.WorkflowInstances.V1CreateWorkflowInstanceCommand))]
     public class V1CreateWorkflowInstanceCommand
-        : Command<V1WorkflowInstanceDto>
+        : Command<Integration.Models.V1WorkflowInstance>
     {
 
         /// <summary>
@@ -45,7 +43,7 @@ namespace Synapse.Application.Commands.WorkflowInstances
         /// </summary>
         /// <param name="workflowId">The id of the <see cref="V1Workflow"/> to instanciate</param>
         /// <param name="activationType">The <see cref="V1Workflow"/>'s activation type</param>
-        /// <param name="inputData">The input data of the <see cref="V1WorkflowInstance"/> to create</param>
+        /// <param name="inputData">The input data of the <see cref="Domain.Models.V1WorkflowInstance"/> to create</param>
         /// <param name="triggerEvents"></param>
         public V1CreateWorkflowInstanceCommand(string workflowId, V1WorkflowInstanceActivationType activationType, object? inputData, IReadOnlyCollection<V1CloudEvent>? triggerEvents)
         {
@@ -66,12 +64,12 @@ namespace Synapse.Application.Commands.WorkflowInstances
         public virtual V1WorkflowInstanceActivationType ActivationType { get; protected set; }
 
         /// <summary>
-        /// Gets the input data of the <see cref="V1WorkflowInstance"/> to create
+        /// Gets the input data of the <see cref="Domain.Models.V1WorkflowInstance"/> to create
         /// </summary>
         public virtual object? InputData { get; protected set; }
 
         /// <summary>
-        /// Gets an <see cref="IReadOnlyCollection{T}"/> containing the descriptors of the <see cref="CloudEvent"/>s that have triggered the activation of the <see cref="V1WorkflowInstance"/> to create
+        /// Gets an <see cref="IReadOnlyCollection{T}"/> containing the descriptors of the <see cref="CloudEvent"/>s that have triggered the activation of the <see cref="Domain.Models.V1WorkflowInstance"/> to create
         /// </summary>
         public virtual IReadOnlyCollection<V1CloudEvent>? TriggerEvents { get; protected set; }
 
@@ -82,12 +80,12 @@ namespace Synapse.Application.Commands.WorkflowInstances
     /// </summary>
     public class V1CreateWorkflowInstanceCommandHandler
         : CommandHandlerBase,
-        ICommandHandler<V1CreateWorkflowInstanceCommand, V1WorkflowInstanceDto>
+        ICommandHandler<V1CreateWorkflowInstanceCommand, Integration.Models.V1WorkflowInstance>
     {
 
         /// <inheritdoc/>
         public V1CreateWorkflowInstanceCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IHttpClientFactory httpClientFactory,
-            IRepository<V1Workflow> workflows, IRepository<V1WorkflowInstance> workflowInstances, IExpressionEvaluatorProvider expressionEvaluatorProvider)
+            IRepository<V1Workflow> workflows, IRepository<Domain.Models.V1WorkflowInstance> workflowInstances, IExpressionEvaluatorProvider expressionEvaluatorProvider)
             : base(loggerFactory, mediator, mapper)
         {
             this.HttpClientFactory = httpClientFactory;
@@ -107,9 +105,9 @@ namespace Synapse.Application.Commands.WorkflowInstances
         protected IRepository<V1Workflow> Workflows { get; }
 
         /// <summary>
-        /// Gets the <see cref="IRepository"/> used to manage <see cref="V1WorkflowInstance"/>s
+        /// Gets the <see cref="IRepository"/> used to manage <see cref="Domain.Models.V1WorkflowInstance"/>s
         /// </summary>
-        protected IRepository<V1WorkflowInstance> WorkflowInstances { get;}
+        protected IRepository<Domain.Models.V1WorkflowInstance> WorkflowInstances { get;}
 
         /// <summary>
         /// Gets the service used to provide <see cref="IExpressionEvaluator"/>s
@@ -117,7 +115,7 @@ namespace Synapse.Application.Commands.WorkflowInstances
         protected IExpressionEvaluatorProvider ExpressionEvaluatorProvider { get; }
 
         /// <inheritdoc/>
-        public virtual async Task<IOperationResult<V1WorkflowInstanceDto>> HandleAsync(V1CreateWorkflowInstanceCommand command, CancellationToken cancellationToken = default)
+        public virtual async Task<IOperationResult<Integration.Models.V1WorkflowInstance>> HandleAsync(V1CreateWorkflowInstanceCommand command, CancellationToken cancellationToken = default)
         {
             var workflow = await this.Workflows.FindAsync(command.WorkflowId, cancellationToken);
             if(workflow == null)
@@ -153,13 +151,13 @@ namespace Synapse.Application.Commands.WorkflowInstances
             }
             if (string.IsNullOrWhiteSpace(key))
                 key = Guid.NewGuid().ToBase64();
-            while (await this.WorkflowInstances.ContainsAsync(V1WorkflowInstance.BuildUniqueIdentifier(key, workflow), cancellationToken))
+            while (await this.WorkflowInstances.ContainsAsync(Domain.Models.V1WorkflowInstance.BuildUniqueIdentifier(key, workflow), cancellationToken))
             {
                 key = Guid.NewGuid().ToBase64();
             }
             var workflowInstance = await this.WorkflowInstances.AddAsync(new(key, workflow, command.ActivationType, command.InputData, command.TriggerEvents), cancellationToken);
             await this.WorkflowInstances.SaveChangesAsync(cancellationToken);
-            return this.Ok(this.Mapper.Map<V1WorkflowInstanceDto>(workflowInstance));
+            return this.Ok(this.Mapper.Map<Integration.Models.V1WorkflowInstance>(workflowInstance));
         }
 
     }

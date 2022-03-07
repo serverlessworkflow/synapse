@@ -21,7 +21,7 @@ namespace Synapse.Domain.Models
     /// <summary>
     /// Describes a <see cref="CloudEvent"/>
     /// </summary>
-    [DataTransferObjectType(typeof(V1CloudEventDto))]
+    [DataTransferObjectType(typeof(Integration.Models.V1CloudEvent))]
     public class V1CloudEvent
     {
 

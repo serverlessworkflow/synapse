@@ -24,7 +24,7 @@ namespace Synapse.Domain.Models
     /// <summary>
     /// Represent an instance of a <see cref="V1Workflow"/>
     /// </summary>
-    [DataTransferObjectType(typeof(V1WorkflowInstanceDto))]
+    [DataTransferObjectType(typeof(Integration.Models.V1WorkflowInstance))]
     public class V1WorkflowInstance
         : AggregateRoot<string>, IDeletable
     {
@@ -132,7 +132,7 @@ namespace Synapse.Domain.Models
         /// <summary>
         /// Gets the <see cref="Neuroglia.Error"/> that caused the <see cref="V1WorkflowInstance"/> to end prematurily
         /// </summary>
-        public virtual Error? Error { get; protected set; }
+        public virtual Neuroglia.Error? Error { get; protected set; }
 
         /// <summary>
         /// Gets the <see cref="V1WorkflowInstance"/>'s output
@@ -225,7 +225,7 @@ namespace Synapse.Domain.Models
         /// Faults the <see cref="V1WorkflowInstance"/>
         /// </summary>
         /// <param name="error">The <see cref="Error"/> that has caused the <see cref="V1WorkflowInstance"/> to fault</param>
-        public virtual void Fault(Error error)
+        public virtual void Fault(Neuroglia.Error error)
         {
             if (error == null)
                 throw new ArgumentNullException(nameof(error));

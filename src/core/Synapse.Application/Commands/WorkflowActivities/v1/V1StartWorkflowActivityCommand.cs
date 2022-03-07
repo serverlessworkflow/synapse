@@ -14,17 +14,15 @@
  * limitations under the License.
  *
  */
-using Synapse.Integration.Commands.WorkflowActivities;
-using Synapse.Integration.Models;
 
 namespace Synapse.Application.Commands.WorkflowActivities
 {
     /// <summary>
-    /// Represents the <see cref="ICommand"/> used to start a <see cref="V1WorkflowActivity"/>
+    /// Represents the <see cref="ICommand"/> used to start a <see cref="Domain.Models.V1WorkflowActivity"/>
     /// </summary>
-    [DataTransferObjectType(typeof(V1StartWorkflowActivityCommandDto))]
+    [DataTransferObjectType(typeof(Integration.Commands.WorkflowActivities.V1StartWorkflowActivityCommand))]
     public class V1StartWorkflowActivityCommand
-        : Command<V1WorkflowActivityDto>
+        : Command<Integration.Models.V1WorkflowActivity>
     {
 
         /// <summary>
@@ -38,14 +36,14 @@ namespace Synapse.Application.Commands.WorkflowActivities
         /// <summary>
         /// Initializes a new <see cref="V1StartWorkflowActivityCommand"/>
         /// </summary>
-        /// <param name="id">The id of the <see cref="V1InitializeWorkflowActivityCommand"/> to start</param>
+        /// <param name="id">The id of the <see cref="V1StartWorkflowActivityCommand"/> to start</param>
         public V1StartWorkflowActivityCommand(string id)
         {
             this.Id = id;
         }
 
         /// <summary>
-        /// Gets the id of the <see cref="V1WorkflowActivity"/> to start
+        /// Gets the id of the <see cref="Domain.Models.V1WorkflowActivity"/> to start
         /// </summary>
         public virtual string Id { get; protected set; }
 
@@ -56,31 +54,31 @@ namespace Synapse.Application.Commands.WorkflowActivities
     /// </summary>
     public class V1StartWorkflowActivityCommandHandler
         : CommandHandlerBase,
-        ICommandHandler<V1StartWorkflowActivityCommand, V1WorkflowActivityDto>
+        ICommandHandler<V1StartWorkflowActivityCommand, Integration.Models.V1WorkflowActivity>
     {
 
         /// <inheritdoc/>
-        public V1StartWorkflowActivityCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IRepository<V1WorkflowActivity> activities)
+        public V1StartWorkflowActivityCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IRepository<Domain.Models.V1WorkflowActivity> activities)
             : base(loggerFactory, mediator, mapper)
         {
             this.Activities = activities;
         }
 
         /// <summary>
-        /// Gets the <see cref="IRepository"/> used to manage <see cref="V1WorkflowActivity"/> instances
+        /// Gets the <see cref="IRepository"/> used to manage <see cref="Domain.Models.V1WorkflowActivity"/> instances
         /// </summary>
-        protected IRepository<V1WorkflowActivity> Activities { get; }
+        protected IRepository<Domain.Models.V1WorkflowActivity> Activities { get; }
 
         /// <inheritdoc/>
-        public virtual async Task<IOperationResult<V1WorkflowActivityDto>> HandleAsync(V1StartWorkflowActivityCommand command, CancellationToken cancellationToken = default)
+        public virtual async Task<IOperationResult<Integration.Models.V1WorkflowActivity>> HandleAsync(V1StartWorkflowActivityCommand command, CancellationToken cancellationToken = default)
         {
             var activity = await this.Activities.FindAsync(command.Id, cancellationToken);
             if (activity == null)
-                throw DomainException.NullReference(typeof(V1WorkflowActivity), command.Id);
+                throw DomainException.NullReference(typeof(Domain.Models.V1WorkflowActivity), command.Id);
             activity.StartOrResume();
             activity = await this.Activities.UpdateAsync(activity, cancellationToken);
             await this.Activities.SaveChangesAsync(cancellationToken);
-            return this.Ok(this.Mapper.Map<V1WorkflowActivityDto>(activity));
+            return this.Ok(this.Mapper.Map<Integration.Models.V1WorkflowActivity>(activity));
         }
 
     }

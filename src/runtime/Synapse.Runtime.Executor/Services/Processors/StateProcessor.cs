@@ -35,9 +35,9 @@ namespace Synapse.Runtime.Executor.Services.Processors
         /// <param name="context">The current <see cref="IWorkflowRuntimeContext"/></param>
         /// <param name="activityProcessorFactory">The service used to create <see cref="IWorkflowActivityProcessor"/>s</param>
         /// <param name="options">The service used to access the current <see cref="ApplicationOptions"/></param>
-        /// <param name="activity">The <see cref="V1WorkflowActivityDto"/> to process</param>
+        /// <param name="activity">The <see cref="V1WorkflowActivity"/> to process</param>
         /// <param name="state">The <see cref="StateDefinition"/> to process</param>
-        protected StateProcessor(ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory, IOptions<ApplicationOptions> options, V1WorkflowActivityDto activity, StateDefinition state)
+        protected StateProcessor(ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory, IOptions<ApplicationOptions> options, V1WorkflowActivity activity, StateDefinition state)
             : base(loggerFactory, context, activityProcessorFactory, options, activity)
         {
             this.State = state;
@@ -60,7 +60,7 @@ namespace Synapse.Runtime.Executor.Services.Processors
     {
 
         /// <inheritdoc/>
-        protected StateProcessor(ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory, IOptions<ApplicationOptions> options, V1WorkflowActivityDto activity, TState state) 
+        protected StateProcessor(ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory, IOptions<ApplicationOptions> options, V1WorkflowActivity activity, TState state) 
             : base(loggerFactory, context, activityProcessorFactory, options, activity, state)
         {
         }

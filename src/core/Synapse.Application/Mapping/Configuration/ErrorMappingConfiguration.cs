@@ -20,16 +20,16 @@ using Synapse.Integration.Models;
 namespace Synapse.Application.Mapping.Configuration
 {
     internal class ErrorMappingConfiguration
-        : IMappingConfiguration<ErrorDto, Error>,
-        IMappingConfiguration<Error, ErrorDto>
+        : IMappingConfiguration<Integration.Models.Error, Neuroglia.Error>,
+        IMappingConfiguration<Neuroglia.Error, Integration.Models.Error>
     {
 
-        void IMappingConfiguration<ErrorDto, Error>.Configure(IMappingExpression<ErrorDto, Error> mapping)
+        void IMappingConfiguration<Integration.Models.Error, Neuroglia.Error>.Configure(IMappingExpression<Integration.Models.Error, Neuroglia.Error> mapping)
         {
 
         }
 
-        void IMappingConfiguration<Error, ErrorDto>.Configure(IMappingExpression<Error, ErrorDto> mapping)
+        void IMappingConfiguration<Neuroglia.Error, Integration.Models.Error>.Configure(IMappingExpression<Neuroglia.Error, Integration.Models.Error> mapping)
         {
             
         }

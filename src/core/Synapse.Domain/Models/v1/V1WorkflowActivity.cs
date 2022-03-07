@@ -23,7 +23,7 @@ namespace Synapse.Domain.Models
     /// <summary>
     /// Describes a workflow activity
     /// </summary>
-    [DataTransferObjectType(typeof(V1WorkflowActivityDto))]
+    [DataTransferObjectType(typeof(Integration.Models.V1WorkflowActivity))]
     public class V1WorkflowActivity
         : AggregateRoot<string>
     {
@@ -82,7 +82,7 @@ namespace Synapse.Domain.Models
         /// <summary>
         /// Gets the <see cref="Neuroglia.Error"/> that caused the <see cref="V1WorkflowActivity"/> to end prematurily
         /// </summary>
-        public virtual Error? Error { get; protected set; }
+        public virtual Neuroglia.Error? Error { get; protected set; }
 
         /// <summary>
         /// Gets the <see cref="V1WorkflowActivity"/>'s input
@@ -134,14 +134,14 @@ namespace Synapse.Domain.Models
                 throw DomainException.ArgumentNull(nameof(ex));
             if (this.Status >= V1WorkflowActivityStatus.Faulted)
                 throw DomainException.UnexpectedState(typeof(V1WorkflowActivity), this.Id, this.Status);
-            this.Fault(new Error(ex.GetType().Name.Replace("exception", string.Empty, StringComparison.OrdinalIgnoreCase), ex.Message));
+            this.Fault(new Neuroglia.Error(ex.GetType().Name.Replace("exception", string.Empty, StringComparison.OrdinalIgnoreCase), ex.Message));
         }
 
         /// <summary>
         /// Faults the <see cref="V1WorkflowActivity"/>
         /// </summary>
         /// <param name="error">The unhandled <see cref="Error"/> that caused the <see cref="V1WorkflowActivity"/> to end prematurily</param>
-        public virtual void Fault(Error error)
+        public virtual void Fault(Neuroglia.Error error)
         {
             if (error == null)
                 throw DomainException.ArgumentNull(nameof(error));

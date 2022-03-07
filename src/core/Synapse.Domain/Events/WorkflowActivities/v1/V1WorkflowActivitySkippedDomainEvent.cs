@@ -3,11 +3,11 @@
 namespace Synapse.Domain.Events.WorkflowActivities
 {
     /// <summary>
-    /// Represents the <see cref="IDomainEvent"/> fired whenever a new <see cref="V1WorkflowActivityDto"/> has been skipped
+    /// Represents the <see cref="IDomainEvent"/> fired whenever a new <see cref="Integration.Models.V1WorkflowActivity"/> has been skipped
     /// </summary>
     [DataTransferObjectType(typeof(V1WorkflowActivitySkippedIntegrationEvent))]
     public class V1WorkflowActivitySkippedDomainEvent
-        : DomainEvent<V1WorkflowActivity, string>
+        : DomainEvent<Models.V1WorkflowActivity, string>
     {
 
         /// <summary>

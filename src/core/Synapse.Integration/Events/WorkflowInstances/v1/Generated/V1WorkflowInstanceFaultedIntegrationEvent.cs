@@ -36,7 +36,7 @@ namespace Synapse.Integration.Events.WorkflowInstances
 		/// </summary>
 		[DataMember(Name = "Error", Order = 1)]
 		[Description("The Error that caused the V1WorkflowInstance to fault")]
-		public virtual ErrorDto Error { get; set; }
+		public virtual Error Error { get; set; }
 
     }
 

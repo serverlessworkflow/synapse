@@ -5,16 +5,16 @@ namespace Synapse.Application.Events.Domain
 {
 
     /// <summary>
-    /// Represents the service used to handle <see cref="V1Workflow"/>-related <see cref="IDomainEvent"/>s
+    /// Represents the service used to handle <see cref="Synapse.Domain.Models.V1Workflow"/>-related <see cref="IDomainEvent"/>s
     /// </summary>
     public class V1WorkflowDomainEventHandler
-        : DomainEventHandlerBase<V1Workflow, V1WorkflowDto, string>,
+        : DomainEventHandlerBase<Synapse.Domain.Models.V1Workflow, Integration.Models.V1Workflow, string>,
         INotificationHandler<V1WorkflowCreatedDomainEvent>
     {
 
         /// <inheritdoc/>
         public V1WorkflowDomainEventHandler(ILoggerFactory loggerFactory, IMapper mapper, IMediator mediator, IIntegrationEventBus integrationEventBus, 
-            IOptions<SynapseApplicationOptions> synapseOptions, IRepository<V1Workflow> aggregates, IRepository<V1WorkflowDto> projections) 
+            IOptions<SynapseApplicationOptions> synapseOptions, IRepository<Synapse.Domain.Models.V1Workflow> aggregates, IRepository<Integration.Models.V1Workflow> projections) 
             : base(loggerFactory, mapper, mediator, integrationEventBus, synapseOptions, aggregates, projections)
         {
 

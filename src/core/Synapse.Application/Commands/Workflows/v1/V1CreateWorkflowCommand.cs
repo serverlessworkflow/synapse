@@ -17,19 +17,17 @@
 
 using ServerlessWorkflow.Sdk.Models;
 using ServerlessWorkflow.Sdk.Services.Validation;
-using Synapse.Integration.Commands.Workflows;
-using Synapse.Integration.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace Synapse.Application.Commands.Workflows
 {
 
     /// <summary>
-    /// Represents the <see cref="ICommand"/> used to create a new <see cref="V1Workflow"/>
+    /// Represents the <see cref="ICommand"/> used to create a new <see cref="Domain.Models.V1Workflow"/>
     /// </summary>
-    [DataTransferObjectType(typeof(V1CreateWorkflowCommandDto))]
+    [DataTransferObjectType(typeof(Integration.Commands.Workflows.V1CreateWorkflowCommand))]
     public class V1CreateWorkflowCommand
-        : Command<V1WorkflowDto>
+        : Command<Integration.Models.V1Workflow>
     {
 
         /// <summary>
@@ -43,14 +41,14 @@ namespace Synapse.Application.Commands.Workflows
         /// <summary>
         /// Initializes a new <see cref="V1CreateWorkflowCommand"/>
         /// </summary>
-        /// <param name="definition">The definition of the <see cref="V1Workflow"/> to create</param>
+        /// <param name="definition">The definition of the <see cref="Domain.Models.V1Workflow"/> to create</param>
         public V1CreateWorkflowCommand(WorkflowDefinition definition)
         {
             this.Definition = definition;
         }
 
         /// <summary>
-        /// Gets the definition of the <see cref="V1Workflow"/> to create
+        /// Gets the definition of the <see cref="Domain.Models.V1Workflow"/> to create
         /// </summary>
         [Required]
         public virtual WorkflowDefinition Definition { get; protected set; }
@@ -62,7 +60,7 @@ namespace Synapse.Application.Commands.Workflows
     /// </summary>
     public class V1CreateWorkflowCommandHandler
         : CommandHandlerBase,
-        ICommandHandler<V1CreateWorkflowCommand, V1WorkflowDto>
+        ICommandHandler<V1CreateWorkflowCommand, Integration.Models.V1Workflow>
     {
 
         /// <summary>
@@ -72,9 +70,9 @@ namespace Synapse.Application.Commands.Workflows
         /// <param name="mediator">The service used to mediate calls</param>
         /// <param name="mapper">The service used to map objects</param>
         /// <param name="workflowValidator">The service used to validate <see cref="WorkflowDefinition"/>s</param>
-        /// <param name="workflows">The <see cref="IRepository"/> used to manage <see cref="V1Workflow"/>s</param>
+        /// <param name="workflows">The <see cref="IRepository"/> used to manage <see cref="Domain.Models.V1Workflow"/>s</param>
         /// <param name="runtimeHost">The current <see cref="IWorkflowRuntimeHost"/></param>
-        public V1CreateWorkflowCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IWorkflowValidator workflowValidator, IRepository<V1Workflow> workflows, IWorkflowRuntimeHost runtimeHost) 
+        public V1CreateWorkflowCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IWorkflowValidator workflowValidator, IRepository<Domain.Models.V1Workflow> workflows, IWorkflowRuntimeHost runtimeHost) 
             : base(loggerFactory, mediator, mapper)
         {
             this.WorkflowValidator = workflowValidator;
@@ -88,9 +86,9 @@ namespace Synapse.Application.Commands.Workflows
         protected IWorkflowValidator WorkflowValidator { get; }
 
         /// <summary>
-        /// Gets the <see cref="IRepository"/> used to manage <see cref="V1Workflow"/>s
+        /// Gets the <see cref="IRepository"/> used to manage <see cref="Domain.Models.V1Workflow"/>s
         /// </summary>
-        protected IRepository<V1Workflow> Workflows { get; }
+        protected IRepository<Domain.Models.V1Workflow> Workflows { get; }
 
         /// <summary>
         /// Gets the current <see cref="IWorkflowRuntimeHost"/>
@@ -98,7 +96,7 @@ namespace Synapse.Application.Commands.Workflows
         protected IWorkflowRuntimeHost RuntimeHost { get; }
 
         /// <inheritdoc/>
-        public virtual async Task<IOperationResult<V1WorkflowDto>> HandleAsync(V1CreateWorkflowCommand command, CancellationToken cancellationToken = default)
+        public virtual async Task<IOperationResult<Integration.Models.V1Workflow>> HandleAsync(V1CreateWorkflowCommand command, CancellationToken cancellationToken = default)
         {
             //todo: validate
             //var validationResult = await this.WorkflowValidator.ValidateAsync(command.Definition, true, true, cancellationToken); 
@@ -120,7 +118,7 @@ namespace Synapse.Application.Commands.Workflows
                 //if (!string.IsNullOrWhiteSpace(workflow.Definition.Start.Schedule.Interval))
                 //    await this.RuntimeHost.ScheduleAsync(workflow, cancellationToken);
             }
-            return this.Ok(this.Mapper.Map<V1WorkflowDto>(workflow));
+            return this.Ok(this.Mapper.Map<Integration.Models.V1Workflow>(workflow));
         }
 
     }
