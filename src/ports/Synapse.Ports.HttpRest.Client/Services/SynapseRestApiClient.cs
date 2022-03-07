@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.OData.Query;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Neuroglia.Serialization;
 using Synapse.Integration.Commands.WorkflowInstances;
 using Synapse.Integration.Commands.Workflows;

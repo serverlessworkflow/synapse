@@ -113,8 +113,8 @@ namespace Synapse.Runtime.Services
                 throw new NullReferenceException($"Failed to find a function with the specified name '{action.Function.RefName}' in the workflow with name '{this.Context.Workflow.Definition.Id}' and version '{this.Context.Workflow.Definition.Version}'");
             switch (function.Type)
             {
-                //case FunctionType.AsyncApi://todo
-                //    break;
+                case FunctionType.AsyncApi:
+                    return ActivatorUtilities.CreateInstance<AsyncApiFunctionProcessor>(this.ServiceProvider, activity, action, function);
                 case FunctionType.Expression:
                     return ActivatorUtilities.CreateInstance<RuntimeExpressionFunctionProcessor>(this.ServiceProvider, activity, action, function);
                 case FunctionType.GraphQL:

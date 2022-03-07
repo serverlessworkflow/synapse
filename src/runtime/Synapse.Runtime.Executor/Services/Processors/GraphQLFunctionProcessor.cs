@@ -24,8 +24,6 @@ using Newtonsoft.Json.Linq;
 using Synapse.Integration.Events.WorkflowActivities;
 using System.Collections;
 using System.Dynamic;
-using System.Net.Http.Headers;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Synapse.Runtime.Executor.Services.Processors
@@ -101,7 +99,7 @@ namespace Synapse.Runtime.Executor.Services.Processors
             await base.InitializeAsync(cancellationToken);
             await this.HttpClient.ConfigureAuthorizationAsync(this.ServiceProvider, this.Authentication, cancellationToken);
             var operationComponents = this.Function.Operation.Split('#', StringSplitOptions.RemoveEmptyEntries);
-            if(operationComponents.Length != 3)
+            if (operationComponents.Length != 3)
                 throw new FormatException($"The 'operation' property of the GraphQL function with name '{this.Function.Name}' has an invalid value '{this.Function.Operation}'. GraphQL functions expect a value in the following format: <url_to_graphql_endpoint>#<literal 'mutation' or 'query'>#<mutation_or_query_field>");
             if (!Uri.TryCreate(operationComponents[0], new(), out var endpointUri)
                 || endpointUri == null)
@@ -170,7 +168,7 @@ namespace Synapse.Runtime.Executor.Services.Processors
                 && !typeof(IDictionary<string, object>).IsAssignableFrom(valueType))
             {
                 var values = new List<string>();
-                foreach(var elem in enumerable)
+                foreach (var elem in enumerable)
                 {
                     values.Add(this.SerializeToGraphQL(elem)!);
                 }
@@ -226,7 +224,7 @@ namespace Synapse.Runtime.Executor.Services.Processors
             catch (GraphQLHttpRequestException ex)
             {
                 await this.OnErrorAsync(new Exception($"An error occured while executing the GraphQL request: the server returned a non-success status code '{ex.StatusCode}'.{Environment.NewLine}Details: {ex.Content}"), cancellationToken);
-            } 
+            }
         }
 
         /// <inheritdoc/>
@@ -236,7 +234,7 @@ namespace Synapse.Runtime.Executor.Services.Processors
             {
                 this.GraphQLClient.Dispose();
                 this.HttpClient.Dispose();
-            }  
+            }
         }
 
     }
