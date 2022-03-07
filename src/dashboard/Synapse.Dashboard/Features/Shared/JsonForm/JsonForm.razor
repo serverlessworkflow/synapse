@@ -1,0 +1,66 @@
+﻿@using Newtonsoft.Json.Linq
+@using Newtonsoft.Json.Schema
+@namespace Synapse.Dashboard
+
+<CascadingValue Value="this">
+    @if(Schema != null)
+    {
+        <div>
+            @foreach(var property in Schema.Properties)
+            {
+                <JsonFormProperty Name="@property.Key" Schema="@property.Value" Value="@Get(property.Key)" />
+            }
+        </div>
+    }
+</CascadingValue>
+
+@code 
+{
+
+    [Parameter]
+    public JSchema Schema { get; set; } = null!;
+
+    [Parameter]
+    public object? Value { get; set; }
+
+    private IDictionary<string, object> modelProperties = null!;
+    private List<JsonFormProperty> formProperties = new();
+
+    internal void AddProperty(JsonFormProperty property)
+    {
+        this.formProperties.Add(property);
+    }
+
+    private object? Get(string propertyName)
+    {
+        if (this.modelProperties.TryGetValue(propertyName, out var propertyValue))
+            return propertyValue;
+        else
+            return null;
+    }
+
+    public async Task<bool> ValidateAsync(IList<ValidationError> errors)
+    {
+        var value = JObject.FromObject(this.modelProperties);
+        return await Task.FromResult(value.IsValid(this.Schema, out errors));
+    }
+
+    public async Task<object?> GetValueAsync()
+    {
+        return (dynamic)this.modelProperties;
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        if (this.Value == null)
+            this.Value = this.Schema.GenerateExample();
+        this.modelProperties = this.Value.ToExpandoObject()!;
+    }
+
+    private async Task OnPropertyValueChanged()
+    {
+        
+    }
+
+}

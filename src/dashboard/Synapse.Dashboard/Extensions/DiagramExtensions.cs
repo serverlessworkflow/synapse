@@ -1,5 +1,4 @@
 ﻿using Blazor.Diagrams.Core;
-using Synapse.Dashboard.Models;
 using Synapse.Integration.Models;
 
 namespace Synapse.Dashboard

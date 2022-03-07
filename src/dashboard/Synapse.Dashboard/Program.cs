@@ -26,6 +26,7 @@ builder.Services.AddScoped<ILayoutService, LayoutService>();
 builder.Services.AddSingleton<IToastManager, ToastManager>();
 builder.Services.AddSingleton<IAccordionManager, AccordionManager>();
 builder.Services.AddSingleton<IIntegrationEventStream, IntegrationEventStream>();
+builder.Services.AddSingleton<IMonacoEditorHelper, MonacoEditorHelper>();
 builder.Services.AddScoped<IWorkflowDiagramBuilder, WorkflowDiagramBuilder>();
 builder.Services.AddSingleton(provider =>
 {

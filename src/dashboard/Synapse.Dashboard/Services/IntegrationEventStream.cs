@@ -2,9 +2,7 @@
 using Neuroglia.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Synapse.Dashboard.Components;
 using Synapse.Ports.WebSockets.Client.Models;
-using Synapse.Ports.WebSockets.Client.Services;
 using System.Reactive.Subjects;
 
 namespace Synapse.Dashboard.Services
