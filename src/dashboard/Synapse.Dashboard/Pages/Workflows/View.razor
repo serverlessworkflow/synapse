@@ -13,6 +13,7 @@
 @inject ISynapseApi SynapseApi
 @inject IJsonSerializer JsonSerializer
 @inject IWorkflowDiagramBuilder WorkflowDiagramBuilder
+@inject IMonacoEditorHelper MonacoEditorHelper
 @inject HubConnection HubConnection
 @inject HttpClient HttpClient
 
@@ -100,7 +101,7 @@
                 <MonacoEditor
                     @ref="workflowInputEditor"
                     CssClass="monaco-small"
-                    ConstructionOptions="GetWorkflowInputEditorOptions"/>
+                    ConstructionOptions="MonacoEditorHelper.GetStandaloneEditorConstructionOptions()"/>
             }
             @if (inputValidationErrors != null)
             {
@@ -122,10 +123,11 @@
     <Modal @ref="workflowDefinitionModal">
         <Title>Workflow definition</Title>
         <Body>
-            <MonacoEditor
-                @ref="workflowDefinitionEditor"
-                CssClass="monaco-small"
-                ConstructionOptions="GetWorkflowDefinitionEditorOptions"/>
+            @if (this.workflow?.Definition != null) {
+                <MonacoEditor
+                    CssClass="monaco-small"
+                    ConstructionOptions="MonacoEditorHelper.GetStandaloneEditorConstructionOptions(JsonConvert.SerializeObject(this.workflow.Definition, Formatting.Indented), true)"/>
+            }
         </Body>
         <Footer>
             <button @onclick="() => workflowDefinitionModal.Hide()" class="btn btn-secondary">Close</button>
@@ -147,7 +149,6 @@ else
     private Modal workflowDefinitionModal = null!;
     private MonacoEditor? workflowInputEditor;
     private JsonForm? jsonForm;
-    private MonacoEditor workflowDefinitionEditor = null!;
     private V1WorkflowDto workflow = null!;
     private Diagram diagram { get; set; } = null!;
     private IQueryable<V1WorkflowInstanceDto> instances = null!;
@@ -184,28 +185,6 @@ else
             schema = JSchema.Parse(json);
         }
         this.dataInputSchema = schema;
-    }
-
-    private StandaloneEditorConstructionOptions GetWorkflowInputEditorOptions(MonacoEditor editor)
-    {
-        return new StandaloneEditorConstructionOptions 
-        {
-		    AutomaticLayout = true,
-		    Language = "json",
-            Minimap = new EditorMinimapOptions { Enabled = false }
-	    };
-    }
-
-    private StandaloneEditorConstructionOptions GetWorkflowDefinitionEditorOptions(MonacoEditor editor)
-    {
-        return new StandaloneEditorConstructionOptions 
-        {
-		    AutomaticLayout = true,
-		    Language = "json",
-            Minimap = new EditorMinimapOptions { Enabled = false },
-            ReadOnly = true,
-            Value = JsonConvert.SerializeObject(this.workflow.Definition, Formatting.Indented)
-	    };
     }
 
     private async Task<IQueryable<V1WorkflowInstanceDto>> FetchWorkflowInstancesAsync()
