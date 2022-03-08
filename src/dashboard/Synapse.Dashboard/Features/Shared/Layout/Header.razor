@@ -2,10 +2,11 @@
 @namespace Synapse.Dashboard
 @implements IDisposable
 
-<div class="container-fluid d-flex align-items-center justify-content-between">
-    @Layout.Header?.ChildContent
+<div class="header px-4">
+    <div class="container-fluid d-flex align-items-center justify-content-between">
+        @Layout.Header?.ChildContent
+    </div>
 </div>
-
 
 @code
 {
