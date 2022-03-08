@@ -11,7 +11,7 @@
         /// <summary>
         /// Gets the key of the aggregate that has produced the event
         /// </summary>
-        public virtual object AggregateId { get; set; }
+        public virtual string AggregateId { get; set; }
 
         /// <summary>
         /// Gets the date and time at which the event has occured

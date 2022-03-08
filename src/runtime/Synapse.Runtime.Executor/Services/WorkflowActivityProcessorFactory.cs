@@ -126,25 +126,17 @@ namespace Synapse.Runtime.Services
                 throw new NullReferenceException($"Failed to find an action that matches the metadata specified by the activity with id '{activity.Id}'");
             if (!this.Context.Workflow.Definition.TryGetFunction(action.Function!.RefName, out FunctionDefinition function))
                 throw new NullReferenceException($"Failed to find a function with the specified name '{action.Function.RefName}' in the workflow with name '{this.Context.Workflow.Definition.Id}' and version '{this.Context.Workflow.Definition.Version}'");
-            switch (function.Type)
+            return function.Type switch
             {
-                case FunctionType.AsyncApi:
-                    return ActivatorUtilities.CreateInstance<AsyncApiFunctionProcessor>(this.ServiceProvider, activity, action, function);
-                case FunctionType.Expression:
-                    return ActivatorUtilities.CreateInstance<RuntimeExpressionFunctionProcessor>(this.ServiceProvider, activity, action, function);
-                case FunctionType.GraphQL:
-                    return ActivatorUtilities.CreateInstance<GraphQLFunctionProcessor>(this.ServiceProvider, activity, action, function);
-                case FunctionType.OData:
-                    return ActivatorUtilities.CreateInstance<ODataFunctionProcessor>(this.ServiceProvider, activity, action, function);
-                //case FunctionType.OpenApi://todo: move 'rest' code here, and implement basic rest type, for when the Serverless Workflow spec supports it
-                //    break;
-                case FunctionType.Rest:
-                    return ActivatorUtilities.CreateInstance<OpenApiFunctionProcessor>(this.ServiceProvider, activity, action, function);
-                case FunctionType.Rpc:
-                    return ActivatorUtilities.CreateInstance<GrpcFunctionProcessor>(this.ServiceProvider, activity, action, function);
-                default:
-                    throw new NotSupportedException($"The specified {nameof(FunctionType)} '{function.Type}' is not supported");
-            }
+                FunctionType.AsyncApi => ActivatorUtilities.CreateInstance<AsyncApiFunctionProcessor>(this.ServiceProvider, activity, action, function),
+                FunctionType.Expression => ActivatorUtilities.CreateInstance<RuntimeExpressionFunctionProcessor>(this.ServiceProvider, activity, action, function),
+                FunctionType.GraphQL => ActivatorUtilities.CreateInstance<GraphQLFunctionProcessor>(this.ServiceProvider, activity, action, function),
+                FunctionType.OData => ActivatorUtilities.CreateInstance<ODataFunctionProcessor>(this.ServiceProvider, activity, action, function),
+                //FunctionType.OpenApi => //todo: move 'rest' code here, and implement basic rest type, for when the Serverless Workflow spec supports it
+                FunctionType.Rest => ActivatorUtilities.CreateInstance<OpenApiFunctionProcessor>(this.ServiceProvider, activity, action, function),
+                FunctionType.Rpc => ActivatorUtilities.CreateInstance<GrpcFunctionProcessor>(this.ServiceProvider, activity, action, function),
+                _ => throw new NotSupportedException($"The specified {nameof(FunctionType)} '{function.Type}' is not supported"),
+            };
         }
 
         IWorkflowActivityProcessor IWorkflowActivityProcessorFactory.Create(V1WorkflowActivity activity)

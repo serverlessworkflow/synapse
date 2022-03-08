@@ -15,9 +15,9 @@
  *
  */
 
+using Synapse.Apis.Runtime;
 using Synapse.Integration.Events;
 using Synapse.Integration.Events.WorkflowActivities;
-using Synapse.Integration.Services;
 
 namespace Synapse.Runtime.Services
 {

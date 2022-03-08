@@ -9,11 +9,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="6.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="6.0.3" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.14.0" />
-    <PackageReference Include="Neuroglia.Caching.InMemory" Version="2.0.1.37" />
-    <PackageReference Include="Neuroglia.Data.Expressions.JQ" Version="2.0.1.37" />
-    <PackageReference Include="Neuroglia.Serialization.Json" Version="2.0.1.37" />
+    <PackageReference Include="Neuroglia.Caching.InMemory" Version="2.0.1.39" />
+    <PackageReference Include="Neuroglia.Data.Expressions.JQ" Version="2.0.1.39" />
+    <PackageReference Include="Neuroglia.Serialization.Json" Version="2.0.1.39" />
     <PackageReference Include="protobuf-net.Grpc.AspNetCore" Version="1.0.152" />
   </ItemGroup>
 

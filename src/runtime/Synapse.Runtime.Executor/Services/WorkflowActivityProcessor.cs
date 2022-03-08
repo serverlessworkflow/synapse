@@ -186,7 +186,7 @@ namespace Synapse.Runtime.Executor.Services
         }
 
         /// <summary>
-        /// Handles the <see cref="V1WorkflowActivity"/>'s <see cref="IWorkflowActivityEvent"/>
+        /// Handles the <see cref="V1WorkflowActivity"/>'s <see cref="IV1WorkflowActivityIntegrationEvent"/>
         /// </summary>
         /// <param name="e">The <see cref="IWorkflowActivityEvent"/> to handle</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>

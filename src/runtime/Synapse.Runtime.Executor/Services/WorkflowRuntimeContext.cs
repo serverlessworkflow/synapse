@@ -18,7 +18,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Neuroglia.Data.Expressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Synapse.Integration.Services;
+using Synapse.Apis.Management;
+using Synapse.Apis.Runtime;
 using Synapse.Runtime.Executor.Services;
 using System.Text.RegularExpressions;
 
@@ -39,16 +40,16 @@ namespace Synapse.Runtime.Services
         /// <param name="logger">The service used to perform logging</param>
         /// <param name="expressionEvaluatorProvider">The service used to create provide <see cref="IExpressionEvaluator"/>s</param>
         /// <param name="secretManager">The service used to manage secrets</param>
-        /// <param name="synapsePublicApi">The service used to interact with the Synapse Public API</param>
+        /// <param name="synapseManagementApi">The service used to interact with the Synapse Public API</param>
         /// <param name="synapseRuntimeApi">The service used to interact with the Synapse Runtime API</param>
         public WorkflowRuntimeContext(IServiceProvider serviceProvider, ILogger<WorkflowRuntimeContext> logger, IExpressionEvaluatorProvider expressionEvaluatorProvider, 
-            ISecretManager secretManager, ISynapseApi synapsePublicApi, ISynapseRuntimeApi synapseRuntimeApi)
+            ISecretManager secretManager, ISynapseManagementApi synapseManagementApi, ISynapseRuntimeApi synapseRuntimeApi)
         {
             this.ServiceProvider = serviceProvider;
             this.Logger = logger;
             this.ExpressionEvaluatorProvider = expressionEvaluatorProvider;
             this.SecretManager = secretManager;
-            this.SynapsePublicApi = synapsePublicApi;
+            this.SynapseManagementApi = synapseManagementApi;
             this.SynapseRuntimeApi = synapseRuntimeApi;
         }
 
@@ -80,7 +81,7 @@ namespace Synapse.Runtime.Services
         /// <summary>
         /// Gets the service used to interact with the Synapse Public API
         /// </summary>
-        protected ISynapseApi SynapsePublicApi { get; }
+        protected ISynapseManagementApi SynapseManagementApi { get; }
 
         /// <summary>
         /// Gets the service used to interact with the Synapse Runtime API
@@ -100,11 +101,11 @@ namespace Synapse.Runtime.Services
             {
                 var workflowInstanceId = EnvironmentVariables.Runtime.WorkflowInstanceId.Value;
                 this.Logger.LogInformation("Initializing the runtime context for workflow instance with id '{workflowInstanceId}'...", workflowInstanceId);
-                var workflowInstance = await this.SynapsePublicApi.GetWorkflowInstanceByIdAsync(workflowInstanceId, cancellationToken);
+                var workflowInstance = await this.SynapseManagementApi.GetWorkflowInstanceByIdAsync(workflowInstanceId, cancellationToken);
                 if (workflowInstance == null)
                     throw new NullReferenceException($"Failed to find a workflow instance with the specified id '{workflowInstanceId}'");
                 this.Logger.LogInformation("Retrieving definition of workflow with id '{workflowInstance.WorkflowId}'...", workflowInstance.WorkflowId);
-                var workflow = await this.SynapsePublicApi.GetWorkflowByIdAsync(workflowInstance.WorkflowId, cancellationToken);
+                var workflow = await this.SynapseManagementApi.GetWorkflowByIdAsync(workflowInstance.WorkflowId, cancellationToken);
                 if (workflow == null)
                     throw new NullReferenceException($"Failed to find a workflow with the specified id '{workflowInstance.WorkflowId}'");
                 this.ExpressionEvaluator = this.ExpressionEvaluatorProvider.GetEvaluator(workflow.Definition.ExpressionLanguage)!;

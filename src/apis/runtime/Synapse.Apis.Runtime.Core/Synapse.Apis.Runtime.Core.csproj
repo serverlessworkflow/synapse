@@ -2,7 +2,7 @@
 
   <PropertyGroup>
 	<TargetFramework>net6.0</TargetFramework>
-	<RootNamespace>$(MSBuildProjectName.Replace(" ", "_").Replace(".Core", "")</RootNamespace>
+	<RootNamespace>$(MSBuildProjectName.Replace(" ", "_").Replace(".Core", ""))</RootNamespace>
 	<ImplicitUsings>enable</ImplicitUsings>
 	<Nullable>enable</Nullable>
 	<VersionPrefix>0.1.0</VersionPrefix>

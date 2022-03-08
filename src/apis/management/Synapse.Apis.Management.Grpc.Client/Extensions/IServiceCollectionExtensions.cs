@@ -33,7 +33,7 @@ namespace Synapse.Apis.Management.Grpc
         /// </summary>
         /// <param name="services">The <see cref="IServiceCollection"/> to configure</param>
         /// <returns>The configured <see cref="IServiceCollection"/></returns>
-        public static IServiceCollection AddSynapseGrpcApiClient(this IServiceCollection services)
+        public static IServiceCollection AddSynapseGrpcManagementApiClient(this IServiceCollection services)
         {
             services.TryAddSingleton(provider =>
             {

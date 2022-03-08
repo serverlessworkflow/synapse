@@ -22,7 +22,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Neuroglia.AsyncApi;
 using Neuroglia.Data.Expressions.JQ;
-using Synapse.Ports.Grpc;
+using Synapse.Apis.Management.Grpc;
+using Synapse.Apis.Runtime.Grpc;
 using Synapse.Runtime.Executor.Services;
 
 AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
@@ -44,7 +45,7 @@ using var host = Host.CreateDefaultBuilder(args)
         {
             asyncApi.UseAllBindings();
         });
-        services.AddSynapseGrpcApiClient();
+        services.AddSynapseGrpcManagementApiClient();
         services.AddSynapseGrpcRuntimeApiClient();
 
         services.AddNewtonsoftJsonSerializer();

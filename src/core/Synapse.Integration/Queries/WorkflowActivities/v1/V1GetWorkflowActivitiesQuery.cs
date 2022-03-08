@@ -5,25 +5,25 @@
     /// Describes the query used to find specific workflow activities
     /// </summary>
     [DataContract]
-    public class V1GetWorkflowActivitiesQueryDto
+    public class V1GetWorkflowActivitiesQuery
         : DataTransferObject
     {
 
         /// <summary>
-        /// Initializes a new <see cref="V1GetWorkflowActivitiesQueryDto"/>
+        /// Initializes a new <see cref="V1GetWorkflowActivitiesQuery"/>
         /// </summary>
-        public V1GetWorkflowActivitiesQueryDto()
+        public V1GetWorkflowActivitiesQuery()
         {
             
         }
 
         /// <summary>
-        /// Initializes a new <see cref="V1GetWorkflowActivitiesQueryDto"/>
+        /// Initializes a new <see cref="V1GetWorkflowActivitiesQuery"/>
         /// </summary>
         /// <param name="workflowInstanceId">The id of the workflow instance to get the workflow activity instances of</param>
         /// <param name="includeNonOperative">A boolean indicating whether or not to include non-operative activities</param>
         /// <param name="parentId">The id of the workflow activity to get the child activities of</param>
-        public V1GetWorkflowActivitiesQueryDto(string workflowInstanceId, bool includeNonOperative = false, string parentId = null)
+        public V1GetWorkflowActivitiesQuery(string workflowInstanceId, bool includeNonOperative = false, string parentId = null)
         {
             this.WorkflowInstanceId = workflowInstanceId;
             this.IncludeNonOperative = includeNonOperative;

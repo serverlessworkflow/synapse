@@ -21,42 +21,41 @@ namespace Synapse.Apis.Runtime
 {
 
     /// <summary>
-    /// Represents messages sent and consumed by the Synapse Runtime API
+    /// Represents a runtime signal
     /// </summary>
     [DataContract]
-    public class SynapseRuntimeApiMessage
+    public class RuntimeSignal
     {
 
         /// <summary>
-        /// Initializes a new <see cref="SynapseRuntimeApiMessage"/>
+        /// Initializes a new <see cref="RuntimeSignal"/>
         /// </summary>
-        protected SynapseRuntimeApiMessage()
+        protected RuntimeSignal()
         {
 
         }
 
         /// <summary>
-        /// Initializes a new <see cref="SynapseRuntimeApiMessage"/>
+        /// Initializes a new <see cref="RuntimeSignal"/>
         /// </summary>
-        public SynapseRuntimeApiMessage(string subject, Dynamic? content = null)
+        /// <param name="type">The <see cref="RuntimeSignal"/> type</param>
+        /// <param name="data">The <see cref="RuntimeSignal"/>'s data</param>
+        public RuntimeSignal(SignalType type, Dynamic? data = null)
         {
-            if(string.IsNullOrWhiteSpace(subject))
-                throw new ArgumentNullException(nameof(subject));
-            this.Subject = subject;
-            this.Content = content;
+            this.Type = type;
+            this.Data = data;
         }
 
         /// <summary>
-        /// Gets the <see cref="SynapseRuntimeApiMessage"/>'s subject
+        /// Gets the <see cref="RuntimeSignal"/> type
+        /// </summary>
+        public SignalType Type { get; protected set; }
+
+        /// <summary>
+        /// Gets the <see cref="RuntimeSignal"/>'s data
         /// </summary>
         [DataMember(Order = 1)]
-        public virtual string Subject { get; protected set; } = null!;
-
-        /// <summary>
-        /// Gets the message's content
-        /// </summary>
-        [DataMember(Order = 2)]
-        public virtual Dynamic? Content { get; protected set; } = null!;
+        public virtual Dynamic? Data { get; protected set; }
 
     }
 
