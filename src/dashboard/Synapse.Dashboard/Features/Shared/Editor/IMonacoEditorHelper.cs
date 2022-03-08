@@ -15,6 +15,9 @@ namespace Synapse.Dashboard
         /// <param name="language"></param>
         /// <param name="readOnly"></param>
         /// <returns></returns>
-        public Func<MonacoEditor, StandaloneEditorConstructionOptions> GetStandaloneEditorConstructionOptions(string value = "", string language = "json", bool readOnly = false);
+        public Func<MonacoEditor, StandaloneEditorConstructionOptions> GetStandaloneEditorConstructionOptions(string value = "", bool readOnly = false, string language = "json");
+
+        public Func<MonacoDiffEditor, DiffEditorConstructionOptions> GetDiffEditorConstructionOptions(bool readOnly = true);
+
     }
 }

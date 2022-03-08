@@ -61,8 +61,6 @@
     <Folder Include="Features\WorkflowInstances\WorkflowInstancesList\" />
     <Folder Include="Features\Workflows\WorkflowView\" />
     <Folder Include="Features\Workflows\WorkflowsMetrics\" />
-    <Folder Include="Features\Workflows\WorkflowsList\" />
-    <Folder Include="Features\Workflows\WorkflowsList\" />
   </ItemGroup>
 
 </Project>
