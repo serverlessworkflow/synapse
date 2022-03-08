@@ -6,7 +6,7 @@ namespace Synapse.Dashboard
     public static class DiagramExtensions
     {
 
-        public static void DisplayActivityStatusFor(this Diagram diagram, IEnumerable<V1WorkflowInstanceDto> instances)
+        public static void DisplayActivityStatusFor(this Diagram diagram, IEnumerable<V1WorkflowInstance> instances)
         {
             diagram.ClearActivityStatus();
             foreach (var instance in instances)
@@ -46,7 +46,7 @@ namespace Synapse.Dashboard
             }
         }
 
-        public static IWorkflowNodeModel? GetNodeFor(this Diagram diagram, V1WorkflowActivityDto activity)
+        public static IWorkflowNodeModel? GetNodeFor(this Diagram diagram, V1WorkflowActivity activity)
         {
             if (activity == null)
                 throw new ArgumentNullException(nameof(activity));
@@ -81,14 +81,14 @@ namespace Synapse.Dashboard
             }
         }
 
-        private static IWorkflowNodeModel? GetStateNodeFor(this Diagram diagram, V1WorkflowActivityDto activity)
+        private static IWorkflowNodeModel? GetStateNodeFor(this Diagram diagram, V1WorkflowActivity activity)
         {
             if (!activity.Metadata.TryGetValue("state", out var stateName))
                 throw new InvalidDataException($"The specified activity's metadata does not define a 'state' value");
             return diagram.Groups.OfType<StateNodeModel>().FirstOrDefault(g => g.State.Name == stateName);
         }
 
-        private static IWorkflowNodeModel? GetActionNodeFor(this Diagram diagram, V1WorkflowActivityDto activity)
+        private static IWorkflowNodeModel? GetActionNodeFor(this Diagram diagram, V1WorkflowActivity activity)
         {
             var stateNode = (StateNodeModel)diagram.GetStateNodeFor(activity)!;
             if (!activity.Metadata.TryGetValue("action", out var actionName))

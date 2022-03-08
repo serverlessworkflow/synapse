@@ -1,7 +1,6 @@
 ﻿@page "/workflows"
 @using Neuroglia.Data
 @using Synapse.Integration.Models
-@using Synapse.Integration.Services
 @inject IServiceProvider ServiceProvider
 @inject NavigationManager NavigationManager
 
@@ -11,7 +10,7 @@
     <button @onclick="OnNewWorkflow" class="btn btn-outline-dark" title="New workflow"><span class="oi oi-plus"></span></button>
 </AppHeader>
 
-<DataTable DataSource="new ODataQueryable<V1WorkflowDto>(this.ServiceProvider)" AutoGenerateColumns="true" OrderByDefault="(IQueryable query) => ((IQueryable<V1WorkflowDto>)query).OrderBy(c => c.Id)" />
+<DataTable DataSource="new ODataQueryable<V1Workflow>(this.ServiceProvider)" AutoGenerateColumns="true" OrderByDefault="(IQueryable query) => ((IQueryable<V1Workflow>)query).OrderBy(c => c.Id)" />
 
 @code {
 

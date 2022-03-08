@@ -1,8 +1,8 @@
 ﻿@page "/workflows/new"
 @using ServerlessWorkflow.Sdk.Models
+@using Synapse.Apis.Management
 @using Synapse.Integration.Commands.Workflows
-@using Synapse.Integration.Services
-@inject ISynapseApi SynapseApi
+@inject ISynapseManagementApi SynapseApi
 @inject NavigationManager NavigationManager
 
 <PageTitle>New workflow</PageTitle>
@@ -16,7 +16,7 @@
     async Task OnCreateWorkflow(WorkflowDefinition definition)
     {
         if (definition != null) {
-            var command = new V1CreateWorkflowCommandDto()
+            var command = new V1CreateWorkflowCommand()
             {
                 Definition = definition
             };

@@ -10,14 +10,14 @@ namespace Synapse.Dashboard
     {
 
         /// <summary>
-        /// Gets an <see cref="ObservableCollection{T}"/> containing the active <see cref="V1WorkflowInstanceDto"/>s for which the activity described by the node is active
+        /// Gets an <see cref="ObservableCollection{T}"/> containing the active <see cref="V1WorkflowInstance"/>s for which the activity described by the node is active
         /// </summary>
-        ObservableCollection<V1WorkflowInstanceDto> ActiveInstances { get; }
+        ObservableCollection<V1WorkflowInstance> ActiveInstances { get; }
 
         /// <summary>
-        /// Gets an <see cref="ObservableCollection{T}"/> containing the faulted <see cref="V1WorkflowInstanceDto"/>s for which the activity described by the node is active
+        /// Gets an <see cref="ObservableCollection{T}"/> containing the faulted <see cref="V1WorkflowInstance"/>s for which the activity described by the node is active
         /// </summary>
-        ObservableCollection<V1WorkflowInstanceDto> FaultedInstances { get; }
+        ObservableCollection<V1WorkflowInstance> FaultedInstances { get; }
 
     }
 

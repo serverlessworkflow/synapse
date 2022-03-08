@@ -5,12 +5,10 @@
 @using Newtonsoft.Json
 @using Newtonsoft.Json.Linq
 @using Newtonsoft.Json.Schema
+@using Synapse.Apis.Management
 @using Synapse.Integration.Models
-@using Synapse.Integration.Services
-@using Synapse.Ports.WebSockets.Client.Models
-@using Synapse.Ports.WebSockets.Client.Services
 @using System.Text
-@inject ISynapseApi SynapseApi
+@inject ISynapseManagementApi SynapseApi
 @inject IJsonSerializer JsonSerializer
 @inject IWorkflowDiagramBuilder WorkflowDiagramBuilder
 @inject IMonacoEditorHelper MonacoEditorHelper
@@ -214,8 +212,8 @@ else
 
     protected Modal errorModal = null!;
     protected string error = null!;
-    protected V1WorkflowInstanceDto workflowInstance = null!;
-    protected List<V1WorkflowActivityDto> sortedActivities = new List<V1WorkflowActivityDto>();
+    protected V1WorkflowInstance workflowInstance = null!;
+    protected List<V1WorkflowActivity> sortedActivities = new List<V1WorkflowActivity>();
     protected Dictionary<int, ExpandableDataRow> rows = new Dictionary<int, ExpandableDataRow>();
     protected MonacoDiffEditor diffEditor = null!;
 

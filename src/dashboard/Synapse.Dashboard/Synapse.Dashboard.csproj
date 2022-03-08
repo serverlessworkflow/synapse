@@ -63,4 +63,8 @@
     <Folder Include="Features\Workflows\WorkflowsMetrics\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\apis\management\Synapse.Apis.Management.Http.Client\Synapse.Apis.Management.Http.Client.csproj" />
+  </ItemGroup>
+
 </Project>

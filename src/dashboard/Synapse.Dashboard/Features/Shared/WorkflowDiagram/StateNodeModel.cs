@@ -32,10 +32,10 @@ namespace Synapse.Dashboard
         public StateDefinition State { get; }
 
         /// <inheritdoc/>
-        public ObservableCollection<V1WorkflowInstanceDto> ActiveInstances { get; } = new();
+        public ObservableCollection<V1WorkflowInstance> ActiveInstances { get; } = new();
 
         /// <inheritdoc/>
-        public ObservableCollection<V1WorkflowInstanceDto> FaultedInstances { get; } = new();
+        public ObservableCollection<V1WorkflowInstance> FaultedInstances { get; } = new();
 
     }
 

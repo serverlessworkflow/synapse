@@ -5,12 +5,10 @@
 @using Newtonsoft.Json
 @using Newtonsoft.Json.Linq
 @using Newtonsoft.Json.Schema
+@using Synapse.Apis.Management
 @using Synapse.Integration.Models
-@using Synapse.Integration.Services
-@using Synapse.Ports.WebSockets.Client.Models
-@using Synapse.Ports.WebSockets.Client.Services
 @using System.Text
-@inject ISynapseApi SynapseApi
+@inject ISynapseManagementApi SynapseApi
 @inject IJsonSerializer JsonSerializer
 @inject IWorkflowDiagramBuilder WorkflowDiagramBuilder
 @inject IMonacoEditorHelper MonacoEditorHelper
@@ -47,25 +45,25 @@
                         <Columns>
                             <DataColumnProperties 
                                 Name="Key"
-                                ValueProvider="source => ((V1WorkflowInstanceDto)source).Key"
-                                PropertyPath="@PropertyPath.Parse(nameof(V1WorkflowInstanceDto.Key))" />
+                                ValueProvider="source => ((V1WorkflowInstance)source).Key"
+                                PropertyPath="@PropertyPath.Parse(nameof(V1WorkflowInstance.Key))" />
                             <DataColumnProperties 
                                 Name="Status"
-                                ValueProvider="source => ((V1WorkflowInstanceDto)source).Status"
-                                PropertyPath="@PropertyPath.Parse(nameof(V1WorkflowInstanceDto.Status))" />
+                                ValueProvider="source => ((V1WorkflowInstance)source).Status"
+                                PropertyPath="@PropertyPath.Parse(nameof(V1WorkflowInstance.Status))" />
                             <DataColumnProperties 
                                 Name="Started at"
-                                ValueProvider="source => ((V1WorkflowInstanceDto)source).StartedAt"
-                                PropertyPath="@PropertyPath.Parse(nameof(V1WorkflowInstanceDto.StartedAt))"
+                                ValueProvider="source => ((V1WorkflowInstance)source).StartedAt"
+                                PropertyPath="@PropertyPath.Parse(nameof(V1WorkflowInstance.StartedAt))"
                                 Format="MM/dd/yyyy, HH:mm"/>
                             <DataColumnProperties 
                                 Name="Executed at"
-                                ValueProvider="source => ((V1WorkflowInstanceDto)source).ExecutedAt"
-                                PropertyPath="@PropertyPath.Parse(nameof(V1WorkflowInstanceDto.ExecutedAt))"
+                                ValueProvider="source => ((V1WorkflowInstance)source).ExecutedAt"
+                                PropertyPath="@PropertyPath.Parse(nameof(V1WorkflowInstance.ExecutedAt))"
                                 Format="MM/dd/yyyy, HH:mm"/>
                             <DataColumnProperties 
                                 Name="Duration"
-                                ValueProvider="source => ((V1WorkflowInstanceDto)source).Duration"
+                                ValueProvider="source => ((V1WorkflowInstance)source).Duration"
                                 IsSorteable="false"
                                 IsFilterable="false"/>
                         </Columns>
@@ -149,9 +147,9 @@ else
     private Modal workflowDefinitionModal = null!;
     private MonacoEditor? workflowInputEditor;
     private JsonForm? jsonForm;
-    private V1WorkflowDto workflow = null!;
+    private V1Workflow workflow = null!;
     private Diagram diagram { get; set; } = null!;
-    private IQueryable<V1WorkflowInstanceDto> instances = null!;
+    private IQueryable<V1WorkflowInstance> instances = null!;
     private string error = null!;
     private JSchema? dataInputSchema;
     private IList<ValidationError>? inputValidationErrors;
@@ -187,9 +185,9 @@ else
         this.dataInputSchema = schema;
     }
 
-    private async Task<IQueryable<V1WorkflowInstanceDto>> FetchWorkflowInstancesAsync()
+    private async Task<IQueryable<V1WorkflowInstance>> FetchWorkflowInstancesAsync()
     {
-        return (await this.SynapseApi.GetWorkflowInstancesAsync($"$filter={nameof(V1WorkflowInstanceDto.WorkflowId)} eq '{this.WorkflowId}'")).AsQueryable();
+        return (await this.SynapseApi.GetWorkflowInstancesAsync($"$filter={nameof(V1WorkflowInstance.WorkflowId)} eq '{this.WorkflowId}'")).AsQueryable();
     }
 
     private async Task OnIntegrationEvent(CloudEventDescriptor e)
