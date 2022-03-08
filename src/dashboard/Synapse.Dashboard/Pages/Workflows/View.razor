@@ -170,7 +170,7 @@ else
         this.StateHasChanged();
     }
 
-    protected async Task Dispose()
+    protected async Task DisposeAsync()
     {
         await this.BreadcrumbService.RemoveItem(this.breadcrumbItem);
     }
