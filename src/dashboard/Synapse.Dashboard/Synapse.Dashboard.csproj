@@ -43,8 +43,8 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.3" PrivateAssets="all" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="6.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.NewtonsoftJson" Version="6.0.3" />
-	<PackageReference Include="Neuroglia.Core" Version="2.0.1.39" />
-	<PackageReference Include="Neuroglia.Data.OData" Version="2.0.1.39" />
+	<PackageReference Include="Neuroglia.Core" Version="2.0.1.40" />
+	<PackageReference Include="Neuroglia.Data.OData" Version="2.0.1.40" />
 	<PackageReference Include="Z.Blazor.Diagrams" Version="2.1.6" />
   </ItemGroup>
 
