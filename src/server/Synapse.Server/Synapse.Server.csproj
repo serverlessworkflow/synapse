@@ -20,6 +20,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\apis\management\Synapse.Apis.Management.Grpc\Synapse.Apis.Management.Grpc.csproj" />
     <ProjectReference Include="..\..\apis\management\Synapse.Apis.Management.Http\Synapse.Apis.Management.Http.csproj" />
+    <ProjectReference Include="..\..\apis\monitoring\Synapse.Apis.Monitoring.WebSocket\Synapse.Apis.Monitoring.WebSocket.csproj" />
     <ProjectReference Include="..\..\apis\runtime\Synapse.Apis.Runtime.Grpc\Synapse.Apis.Runtime.Grpc.csproj" />
     <ProjectReference Include="..\..\dashboard\Synapse.Dashboard\Synapse.Dashboard.csproj" />
     <ProjectReference Include="..\..\runtime\Synapse.Runtime.Docker\Synapse.Runtime.Docker.csproj" />

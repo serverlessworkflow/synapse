@@ -1,9 +1,0 @@
-﻿global using Microsoft.AspNetCore.Mvc;
-global using Microsoft.AspNetCore.OData.Query;
-global using Neuroglia.Mapping;
-global using Neuroglia.Mediation;
-global using System.Net;
-global using Synapse.Application.Commands.Generic;
-global using Synapse.Application.Queries.Generic;
-global using Synapse.Domain.Models;
-global using Synapse.Integration.Models;

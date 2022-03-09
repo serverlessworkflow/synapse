@@ -14,19 +14,27 @@
  * limitations under the License.
  *
  */
-using AutoMapper;
 
-namespace Synapse.Application.Mapping.Configuration
+using Synapse.Integration.Models;
+using System.ServiceModel;
+
+namespace Synapse.Apis.Monitoring
 {
 
-    internal class CloudEventMappingConfiguration
-        : IMappingConfiguration<CloudEvent, Integration.Models.V1CloudEvent>
+    /// <summary>
+    /// Defines the fundamentals of a Synapse Monitoring API client
+    /// </summary>
+    [ServiceContract]
+    public interface ISynapseMonitoringApiClient
     {
 
-        void IMappingConfiguration<CloudEvent, Integration.Models.V1CloudEvent>.Configure(IMappingExpression<CloudEvent, Integration.Models.V1CloudEvent> mapping)
-        {
-            
-        }
+        /// <summary>
+        /// Handles the specified <see cref="V1CloudEvent"/>
+        /// </summary>
+        /// <param name="e">The <see cref="V1CloudEvent"/> to handle</param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        [OperationContract]
+        Task PublishIntegrationEvent(V1CloudEvent e);
 
     }
 

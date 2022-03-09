@@ -13,7 +13,7 @@
 	<RepositoryUrl>https://github.com/serverlessworkflow/synapse</RepositoryUrl>
 	<RepositoryType>git</RepositoryType>
 	<PackageProjectUrl>https://github.com/serverlessworkflow/synapse</PackageProjectUrl>
-	<PackageTags>synapse management api core</PackageTags>
+	<PackageTags>synapse monitoring api core</PackageTags>
 	<NeutralLanguage>en</NeutralLanguage>
 	<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
 	<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>

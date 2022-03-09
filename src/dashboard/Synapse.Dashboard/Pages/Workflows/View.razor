@@ -6,6 +6,7 @@
 @using Newtonsoft.Json.Linq
 @using Newtonsoft.Json.Schema
 @using Synapse.Apis.Management
+@using Synapse.Apis.Monitoring
 @using Synapse.Integration.Models
 @using System.Text
 @inject ISynapseManagementApi SynapseApi
@@ -161,7 +162,7 @@ else
         this.diagram = await this.WorkflowDiagramBuilder.BuildDiagram(this.workflow.Definition);
         this.instances = await this.FetchWorkflowInstancesAsync();
         this.diagram.DisplayActivityStatusFor(this.instances);
-        this.HubConnection.On<CloudEventDescriptor>(nameof(ISynapseWebSocketApiClient.PublishIntegrationEvent), this.OnIntegrationEvent);
+        this.HubConnection.On<V1CloudEvent>(nameof(ISynapseMonitoringApiClient.PublishIntegrationEvent), this.OnIntegrationEvent);
         await this.LoadDataInputSchemaAsync();
         this.StateHasChanged();
     }
@@ -190,7 +191,7 @@ else
         return (await this.SynapseApi.GetWorkflowInstancesAsync($"$filter={nameof(V1WorkflowInstance.WorkflowId)} eq '{this.WorkflowId}'")).AsQueryable();
     }
 
-    private async Task OnIntegrationEvent(CloudEventDescriptor e)
+    private async Task OnIntegrationEvent(V1CloudEvent e)
     {
         if (e.Type.Split('/')[1] != "v1workflowinstance"
             && e.Type.Split('/')[1] != "v1workflowactivity")

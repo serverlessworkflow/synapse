@@ -65,6 +65,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\apis\management\Synapse.Apis.Management.Http.Client\Synapse.Apis.Management.Http.Client.csproj" />
+    <ProjectReference Include="..\..\apis\monitoring\Synapse.Apis.Monitoring.Core\Synapse.Apis.Monitoring.Core.csproj" />
   </ItemGroup>
 
 </Project>

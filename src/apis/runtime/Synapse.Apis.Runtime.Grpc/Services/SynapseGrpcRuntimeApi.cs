@@ -24,7 +24,7 @@ using Synapse.Application.Services;
 using Synapse.Integration.Models;
 using System.Threading.Channels;
 
-namespace Synapse.Apis.Runtime.Grpc.Services
+namespace Synapse.Apis.Runtime.Grpc
 {
 
     /// <summary>
@@ -37,10 +37,10 @@ namespace Synapse.Apis.Runtime.Grpc.Services
         /// <inheritdoc/>
         public SynapseGrpcRuntimeApi(IMediator mediator, IMapper mapper, IWorkflowRuntimeProxyFactory runtimeProxyFactory, IWorkflowRuntimeProxyManager runtimeProxyManager)
         {
-            this.Mediator = mediator;
-            this.Mapper = mapper;
-            this.RuntimeProxyFactory = runtimeProxyFactory;
-            this.RuntimeProxyManager = runtimeProxyManager;
+            Mediator = mediator;
+            Mapper = mapper;
+            RuntimeProxyFactory = runtimeProxyFactory;
+            RuntimeProxyManager = runtimeProxyManager;
         }
 
         /// <summary>
@@ -68,8 +68,8 @@ namespace Synapse.Apis.Runtime.Grpc.Services
         {
             var stream = Channel.CreateUnbounded<RuntimeSignal>();
             var streamWriter = new AsyncStreamWriter<RuntimeSignal>(stream.Writer);
-            var runtime = this.RuntimeProxyManager.Register(this.RuntimeProxyFactory.CreateProxy(runtimeId, streamWriter));
-            await foreach(var message in stream.Reader.ReadAllAsync(context.CancellationToken))
+            var runtime = RuntimeProxyManager.Register(RuntimeProxyFactory.CreateProxy(runtimeId, streamWriter));
+            await foreach (var message in stream.Reader.ReadAllAsync(context.CancellationToken))
             {
                 yield return message;
             }
@@ -79,73 +79,73 @@ namespace Synapse.Apis.Runtime.Grpc.Services
         /// <inheritdoc/>
         public virtual async Task<GrpcApiResult<V1WorkflowActivity>> CreateActivityAsync(Integration.Commands.WorkflowActivities.V1CreateWorkflowActivityCommand command, CallContext context = default)
         {
-            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(this.Mapper.Map<Application.Commands.WorkflowActivities.V1CreateWorkflowActivityCommand>(command), context.CancellationToken));
+            return GrpcApiResult.CreateFor(await Mediator.ExecuteAsync(Mapper.Map<Application.Commands.WorkflowActivities.V1CreateWorkflowActivityCommand>(command), context.CancellationToken));
         }
 
         /// <inheritdoc/>
         public virtual async Task<GrpcApiResult<List<V1WorkflowActivity>>> GetActivitiesAsync(Integration.Queries.WorkflowActivities.V1GetWorkflowActivitiesQuery query, CallContext context = default)
         {
-            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(this.Mapper.Map<Application.Queries.WorkflowActivities.V1GetWorkflowActivitiesQuery>(query), context.CancellationToken));
+            return GrpcApiResult.CreateFor(await Mediator.ExecuteAsync(Mapper.Map<Application.Queries.WorkflowActivities.V1GetWorkflowActivitiesQuery>(query), context.CancellationToken));
         }
 
         /// <inheritdoc/>
         public virtual async Task<GrpcApiResult<V1WorkflowActivity>> StartActivityAsync(string activityId, CallContext context = default)
         {
-            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new Application.Commands.WorkflowActivities.V1StartWorkflowActivityCommand(activityId), context.CancellationToken));
+            return GrpcApiResult.CreateFor(await Mediator.ExecuteAsync(new Application.Commands.WorkflowActivities.V1StartWorkflowActivityCommand(activityId), context.CancellationToken));
         }
 
         /// <inheritdoc/>
         public virtual async Task<GrpcApiResult<V1WorkflowActivity>> SuspendActivityAsync(string activityId, CallContext context = default)
         {
-            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new Application.Commands.WorkflowActivities.V1SuspendWorkflowActivityCommand(activityId), context.CancellationToken));
+            return GrpcApiResult.CreateFor(await Mediator.ExecuteAsync(new Application.Commands.WorkflowActivities.V1SuspendWorkflowActivityCommand(activityId), context.CancellationToken));
         }
 
         /// <inheritdoc/>
         public virtual async Task<GrpcApiResult<V1WorkflowActivity>> SkipActivityAsync(string activityId, CallContext context = default)
         {
-            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new Application.Commands.WorkflowActivities.V1SkipWorkflowActivityCommand(activityId), context.CancellationToken));
+            return GrpcApiResult.CreateFor(await Mediator.ExecuteAsync(new Application.Commands.WorkflowActivities.V1SkipWorkflowActivityCommand(activityId), context.CancellationToken));
         }
 
         /// <inheritdoc/>
         public virtual async Task<GrpcApiResult<V1WorkflowActivity>> FaultActivityAsync(Integration.Commands.WorkflowActivities.V1FaultWorkflowActivityCommand command, CallContext context = default)
         {
-            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(this.Mapper.Map<Application.Commands.WorkflowActivities.V1FaultWorkflowActivityCommand>(command), context.CancellationToken));
+            return GrpcApiResult.CreateFor(await Mediator.ExecuteAsync(Mapper.Map<Application.Commands.WorkflowActivities.V1FaultWorkflowActivityCommand>(command), context.CancellationToken));
         }
 
         /// <inheritdoc/>
         public virtual async Task<GrpcApiResult<V1WorkflowActivity>> CancelActivityAsync(string activityId, CallContext context = default)
         {
-            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new Application.Commands.WorkflowActivities.V1CancelWorkflowActivityCommand(activityId), context.CancellationToken));
+            return GrpcApiResult.CreateFor(await Mediator.ExecuteAsync(new Application.Commands.WorkflowActivities.V1CancelWorkflowActivityCommand(activityId), context.CancellationToken));
         }
 
         /// <inheritdoc/>
         public virtual async Task<GrpcApiResult<V1WorkflowActivity>> SetActivityOutputAsync(Integration.Commands.WorkflowActivities.V1SetWorkflowActivityOutputCommand command, CallContext context = default)
         {
-            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(this.Mapper.Map<Application.Commands.WorkflowActivities.V1SetWorkflowActivityOutputCommand>(command), context.CancellationToken));
+            return GrpcApiResult.CreateFor(await Mediator.ExecuteAsync(Mapper.Map<Application.Commands.WorkflowActivities.V1SetWorkflowActivityOutputCommand>(command), context.CancellationToken));
         }
 
         /// <inheritdoc/>
         public virtual async Task<GrpcApiResult<V1WorkflowInstance>> StartAsync(string workflowInstanceId, CallContext context = default)
         {
-            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new Application.Commands.WorkflowInstances.V1SetWorkflowInstanceStartedCommand(workflowInstanceId), context.CancellationToken));
+            return GrpcApiResult.CreateFor(await Mediator.ExecuteAsync(new Application.Commands.WorkflowInstances.V1SetWorkflowInstanceStartedCommand(workflowInstanceId), context.CancellationToken));
         }
 
         /// <inheritdoc/>
         public virtual async Task<GrpcApiResult<V1WorkflowInstance>> FaultAsync(Integration.Commands.WorkflowInstances.V1FaultWorkflowInstanceCommand command, CallContext context = default)
         {
-            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(this.Mapper.Map<Application.Commands.WorkflowInstances.V1FaultWorkflowInstanceCommand>(command), context.CancellationToken));
+            return GrpcApiResult.CreateFor(await Mediator.ExecuteAsync(Mapper.Map<Application.Commands.WorkflowInstances.V1FaultWorkflowInstanceCommand>(command), context.CancellationToken));
         }
 
         /// <inheritdoc/>
         public virtual async Task<GrpcApiResult<V1WorkflowInstance>> CancelAsync(string workflowInstanceId, CallContext context = default)
         {
-            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new Application.Commands.WorkflowInstances.V1CancelWorkflowInstanceCommand(workflowInstanceId), context.CancellationToken));
+            return GrpcApiResult.CreateFor(await Mediator.ExecuteAsync(new Application.Commands.WorkflowInstances.V1CancelWorkflowInstanceCommand(workflowInstanceId), context.CancellationToken));
         }
 
         /// <inheritdoc/>
         public virtual async Task<GrpcApiResult<V1WorkflowInstance>> SetOutputAsync(Integration.Commands.WorkflowInstances.V1SetWorkflowInstanceOutputCommand command, CallContext context = default)
         {
-            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(this.Mapper.Map<Application.Commands.WorkflowInstances.V1SetWorkflowInstanceOutputCommand>(command), context.CancellationToken));
+            return GrpcApiResult.CreateFor(await Mediator.ExecuteAsync(Mapper.Map<Application.Commands.WorkflowInstances.V1SetWorkflowInstanceOutputCommand>(command), context.CancellationToken));
         }
 
     }

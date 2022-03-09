@@ -24,25 +24,80 @@ namespace Synapse.Integration.Models
 {
 
 	/// <summary>
-	/// Describes a CloudEvent
+	/// Represents a CloudEvent
 	/// </summary>
 	[DataContract]
 	public partial class V1CloudEvent
 	{
 
-		[DataMember(Name = "Source", Order = 1)]
+		/// <summary>
+		/// The cloud event's id
+		/// </summary>
+		[DataMember(Name = "Id", Order = 1)]
+		[Description("The cloud event's id")]
+		public virtual string Id { get; set; }
+
+		/// <summary>
+		/// The cloud event's sourceUri
+		/// </summary>
+		[DataMember(Name = "Source", Order = 2)]
+		[Description("The cloud event's sourceUri")]
 		public virtual Uri Source { get; set; }
 
-		[DataMember(Name = "Type", Order = 2)]
+		/// <summary>
+		/// The cloud event's spec version
+		/// </summary>
+		[DataMember(Name = "SpecVersion", Order = 3)]
+		[Description("The cloud event's spec version")]
+		public virtual string SpecVersion { get; set; }
+
+		/// <summary>
+		/// The cloud event's type
+		/// </summary>
+		[DataMember(Name = "Type", Order = 4)]
+		[Description("The cloud event's type")]
 		public virtual string Type { get; set; }
 
-		[DataMember(Name = "DataSchema", Order = 3)]
+		/// <summary>
+		/// The cloud event's data content type
+		/// </summary>
+		[DataMember(Name = "DataContentType", Order = 5)]
+		[Description("The cloud event's data content type")]
+		public virtual string DataContentType { get; set; }
+
+		/// <summary>
+		/// The cloud event's data schema Uri, if any
+		/// </summary>
+		[DataMember(Name = "DataSchema", Order = 6)]
+		[Description("The cloud event's data schema Uri, if any")]
 		public virtual Uri DataSchema { get; set; }
 
-		[DataMember(Name = "Data", Order = 4)]
+		/// <summary>
+		/// The cloud event's subject
+		/// </summary>
+		[DataMember(Name = "Subject", Order = 7)]
+		[Description("The cloud event's subject")]
+		public virtual string Subject { get; set; }
+
+		/// <summary>
+		/// The cloud event's type
+		/// </summary>
+		[DataMember(Name = "Time", Order = 8)]
+		[Description("The cloud event's type")]
+		public virtual DateTime Time { get; set; }
+
+		/// <summary>
+		/// The cloud event's data
+		/// </summary>
+		[DataMember(Name = "Data", Order = 9)]
+		[Description("The cloud event's data")]
 		public virtual Dynamic Data { get; set; }
 
-		[DataMember(Name = "Extensions", Order = 5)]
+		/// <summary>
+		/// An IDictionary`2 that contains the cloud event's extensions
+		/// </summary>
+		[DataMember(Name = "Extensions", Order = 10)]
+		[Description("An IDictionary`2 that contains the cloud event's extensions")]
 		public virtual NameValueCollection<Dynamic> Extensions { get; set; }
 
     }

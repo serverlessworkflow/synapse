@@ -2,6 +2,7 @@
 using Neuroglia.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Synapse.Integration.Models;
 using System.Reactive.Subjects;
 
 namespace Synapse.Dashboard.Services
@@ -23,7 +24,7 @@ namespace Synapse.Dashboard.Services
         {
             this.Logger = logger;
             this.HubConnection = hubConnection;
-            //this.Subscription = this.HubConnection.On<CloudEventDescriptor>(nameof(ISynapseWebSocketApiClient.PublishIntegrationEvent), On); //We probably don't want to create a toast for each single event. If have to notify, do it in a more subtle way
+            //this.Subscription = this.HubConnection.On<V1CloudEvent>(nameof(ISynapseMonitoringApiClient.PublishIntegrationEvent), On); //We probably don't want to create a toast for each single event. If have to notify, do it in a more subtle way
             this.ToastManager = toastManager;
             this.JsonSerializer = jsonSerializer;
         }
@@ -53,25 +54,25 @@ namespace Synapse.Dashboard.Services
         /// <summary>
         /// Gets the <see cref="Subject{T}"/> used to observe <see cref=""/>s consumed by the <see cref="IntegrationEventStream"/>
         /// </summary>
-        protected Subject<CloudEventDescriptor> Stream { get; } = new();
+        protected Subject<V1CloudEvent> Stream { get; } = new();
 
         /// <inheritdoc/>
-        public virtual IDisposable Subscribe(IObserver<CloudEventDescriptor> observer)
+        public virtual IDisposable Subscribe(IObserver<V1CloudEvent> observer)
         {
             return this.Stream.Subscribe(observer);
         }
 
         /// <summary>
-        /// Handles the specified <see cref="CloudEventDescriptor"/>
+        /// Handles the specified <see cref="V1CloudEvent"/>
         /// </summary>
-        /// <param name="e">The <see cref="CloudEventDescriptor"/> to handle</param>
-        protected virtual async void On(CloudEventDescriptor e)
+        /// <param name="e">The <see cref="V1CloudEvent"/> to handle</param>
+        protected virtual async void On(V1CloudEvent e)
         {
             try
             {
                 var body = string.Empty;
-                if (e.Data is JObject jobject)
-                    body = $"<pre><code>{jobject.ToString(Formatting.Indented)}</code></pre>";
+                if (e.Data != null)
+                    body = $"<pre><code>{JsonConvert.SerializeObject(e.Data)}</code></pre>";
                 this.ToastManager.ShowToast(toast => toast
                     .WithLevel(LogLevel.Information)
                     .WithHeader(e.Type)
