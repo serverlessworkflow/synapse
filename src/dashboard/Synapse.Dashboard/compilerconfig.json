@@ -4,12 +4,20 @@
     "inputFile": "wwwroot/css/app.scss"
   },
   {
+    "outputFile": "Features/Shared/Breadcrumb/Breadcrumb.razor.css",
+    "inputFile": "Features/Shared/Breadcrumb/Breadcrumb.razor.scss"
+  },
+  {
     "outputFile": "Features/Shared/Layout/MainLayout.razor.css",
     "inputFile": "Features/Shared/Layout/MainLayout.razor.scss"
   },
   {
     "outputFile": "Features/Shared/Layout/NavMenu.razor.css",
     "inputFile": "Features/Shared/Layout/NavMenu.razor.scss"
+  },
+  {
+    "outputFile": "Features/Shared/Loader/Loader.razor.css",
+    "inputFile": "Features/Shared/Loader/Loader.razor.scss"
   },
   {
     "outputFile": "Features/Shared/Toast/Toaster.razor.css",
@@ -30,5 +38,9 @@
   {
     "outputFile": "Pages/Workflows/View.razor.css",
     "inputFile": "Pages/Workflows/View.razor.scss"
+  },
+  {
+    "outputFile": "Features/Shared/Layout/Header.razor.css",
+    "inputFile": "Features/Shared/Layout/Header.razor.scss"
   }
 ]

@@ -31,5 +31,18 @@
         /// <param name="breadcrumbItem"></param>
         /// <returns></returns>
         Task RemoveItem(IBreadcrumbItem breadcrumbItem);
+
+        /// <summary>
+        /// Clears the <see cref="IBreadcrumbItem"/>'s list
+        /// </summary>
+        /// <returns></returns>
+        Task Clear();
+
+        /// <summary>
+        /// Replaces the current <see cref="IBreadcrumbItem"/>'s list with the provided one
+        /// </summary>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        Task Use(IEnumerable<IBreadcrumbItem> list);
     }
 }

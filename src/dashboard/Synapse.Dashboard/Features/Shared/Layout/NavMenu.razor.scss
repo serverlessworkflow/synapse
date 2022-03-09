@@ -56,6 +56,13 @@
 }
 
 @media (min-width: 641px) {
+    .sidebar {
+        width: 250px;
+        height: 100vh;
+        position: sticky;
+        top: 0;
+    }
+
     .navbar-toggler {
         display: none;
     }
@@ -64,4 +71,11 @@
         /* Never collapse the sidebar for wide screens */
         display: block;
     }
+
+    .top-row {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
 }
+

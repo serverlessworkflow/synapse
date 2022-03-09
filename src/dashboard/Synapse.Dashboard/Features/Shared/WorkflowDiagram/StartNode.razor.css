@@ -7,3 +7,10 @@
   height: 35px;
   margin: auto;
 }
+
+.instance-counter {
+  width: 30px;
+  height: 30px;
+  bottom: -10px;
+  right: -10px;
+}

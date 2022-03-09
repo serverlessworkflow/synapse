@@ -25,10 +25,7 @@ namespace Synapse.Dashboard
         public BreadcrumbService(NavigationManager navigationManager)
         {
             this.NavigationManager = navigationManager;
-            this.Items = new List<IBreadcrumbItem>()
-            {
-                new BreadcrumbItem("Home", "/", "oi-clipboard")
-        };
+            this.Items = new List<IBreadcrumbItem>(KnownBreadcrumbs.Home);
         }
 
         /// <summary>
@@ -70,6 +67,30 @@ namespace Synapse.Dashboard
                 this.Items.Remove(breadcrumbItem);
             }
             await Task.CompletedTask;
+        }
+    
+        /// <summary>
+        /// Clears the <see cref="IBreadcrumbItem"/>'s list
+        /// </summary>
+        /// <returns></returns>
+        public async Task Clear()
+        {
+            this.Items?.Clear();
+            await Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Replaces the current <see cref="IBreadcrumbItem"/>'s list with the provided one
+        /// </summary>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        public async Task Use(IEnumerable<IBreadcrumbItem> list)
+        {
+            await this.Clear();
+            foreach (var item in list)
+            {
+                await this.AddItem(item);
+            }
         }
     }
 }

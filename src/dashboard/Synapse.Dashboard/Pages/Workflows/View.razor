@@ -161,7 +161,7 @@ else
     {
         await base.OnInitializedAsync();
         this.workflow = await this.SynapseApi.GetWorkflowByIdAsync(this.WorkflowId);
-        this.breadcrumbItem = await this.BreadcrumbService.AddCurrentUri(this.workflow.Name);
+        this.breadcrumbItem = await this.BreadcrumbService.AddCurrentUri(this.workflow.Definition.Name);
         this.diagram = await this.WorkflowDiagramBuilder.BuildDiagram(this.workflow.Definition);
         this.instances = await this.FetchWorkflowInstancesAsync();
         this.diagram.DisplayActivityStatusFor(this.instances);

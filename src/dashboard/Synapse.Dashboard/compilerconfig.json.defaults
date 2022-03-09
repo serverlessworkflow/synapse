@@ -2,11 +2,10 @@
   "compilers": {
     "sass": {
       "autoPrefix": "",
-      "loadPaths": [],
-      "style": 0,
-      "precision": 10,
-      "quiet": true,
-      "quietDeps": true,
+      "loadPaths": "",
+      "style": "expanded",
+      "sourceMapUrls": "relative",
+      "relativeUrls": true,
       "sourceMap": false
     }
   },
