@@ -1,4 +1,5 @@
 ﻿@page "/"
+@inject IBreadcrumbService BreadcrumbService
 
 <PageTitle>Overview</PageTitle>
 <AppHeader>
@@ -6,3 +7,10 @@
 </AppHeader>
 
 Welcome to Synapse - Serverless Workflow Management System
+
+@code{
+    protected override async Task OnInitializedAsync()
+    {
+        await this.BreadcrumbService.Use(KnownBreadcrumbs.Home);
+    }
+}

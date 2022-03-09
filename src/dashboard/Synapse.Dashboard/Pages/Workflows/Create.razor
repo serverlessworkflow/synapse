@@ -3,6 +3,7 @@
 @using Synapse.Apis.Management
 @using Synapse.Integration.Commands.Workflows
 @inject ISynapseManagementApi SynapseApi
+@inject IBreadcrumbService BreadcrumbService
 @inject NavigationManager NavigationManager
 
 <PageTitle>New workflow</PageTitle>
@@ -12,6 +13,11 @@
 <WorkflowForm OnSubmitWorkflowDefinition="OnCreateWorkflow" />
 
 @code {
+
+    protected override async Task OnInitializedAsync()
+    {
+        await this.BreadcrumbService.Use(KnownBreadcrumbs.CreateWorkflow);
+    }
 
     async Task OnCreateWorkflow(WorkflowDefinition definition)
     {

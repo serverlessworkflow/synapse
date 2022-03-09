@@ -16,7 +16,6 @@
 @inject IBreadcrumbService BreadcrumbService
 @inject HubConnection HubConnection
 @inject HttpClient HttpClient
-@implements IAsyncDisposable
 
 <PageTitle>@workflow?.Id</PageTitle>
 <AppHeader>
@@ -155,24 +154,19 @@ else
     private string error = null!;
     private JSchema? dataInputSchema;
     private IList<ValidationError>? inputValidationErrors;
-    protected IBreadcrumbItem breadcrumbItem;
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
         this.workflow = await this.SynapseApi.GetWorkflowByIdAsync(this.WorkflowId);
-        this.breadcrumbItem = await this.BreadcrumbService.AddCurrentUri(this.workflow.Definition.Name);
+        await this.BreadcrumbService.Use(KnownBreadcrumbs.Workflows);
+        await this.BreadcrumbService.AddCurrentUri(this.workflow.Definition.Name);
         this.diagram = await this.WorkflowDiagramBuilder.BuildDiagram(this.workflow.Definition);
         this.instances = await this.FetchWorkflowInstancesAsync();
         this.diagram.DisplayActivityStatusFor(this.instances);
         this.HubConnection.On<V1CloudEvent>(nameof(ISynapseMonitoringApiClient.PublishIntegrationEvent), this.OnIntegrationEvent);
         await this.LoadDataInputSchemaAsync();
         this.StateHasChanged();
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        await this.BreadcrumbService.RemoveItem(this.breadcrumbItem);
     }
 
     protected override async Task OnParametersSetAsync()

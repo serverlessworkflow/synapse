@@ -1,6 +1,7 @@
 ﻿@namespace Synapse.Dashboard
+@using System.ComponentModel
 @inject IBreadcrumbService BreadcrumbService
-<nav aria-label="breadcrumb">
+<nav class="p-4" aria-label="breadcrumb">
     <ul class="breadcrumb">
         @foreach(var item in BreadcrumbService.Items) {
             <li class="breadcrumb-item">
@@ -15,3 +16,15 @@
         }
     </ul>
 </nav>
+
+@code {
+    protected override void OnInitialized()
+    {
+        this.BreadcrumbService.PropertyChanged += this.OnBreadcrumbChanged;
+    }
+
+    protected void OnBreadcrumbChanged(object sender, PropertyChangedEventArgs args)
+    {
+        this.StateHasChanged();
+    }
+}

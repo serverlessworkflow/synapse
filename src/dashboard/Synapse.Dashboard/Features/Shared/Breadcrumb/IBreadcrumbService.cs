@@ -1,10 +1,17 @@
-﻿namespace Synapse.Dashboard
+﻿using System.ComponentModel;
+
+namespace Synapse.Dashboard
 {
     /// <summary>
     /// The service used to manage the breadcrumb
     /// </summary>
     public interface IBreadcrumbService
     {
+        /// <summary>
+        /// Notifies when the list has changed
+        /// </summary>
+        event PropertyChangedEventHandler PropertyChanged;
+
         /// <summary>
         /// The list of displayed <see cref="IBreadcrumbItem"/>
         /// </summary>

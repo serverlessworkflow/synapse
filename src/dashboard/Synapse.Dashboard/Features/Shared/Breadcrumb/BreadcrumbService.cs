@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace Synapse.Dashboard
 {
@@ -6,8 +8,13 @@ namespace Synapse.Dashboard
     /// The service used to manage the breadcrumb
     /// </summary>
     public class BreadcrumbService
-        : IBreadcrumbService
+        : IBreadcrumbService, INotifyPropertyChanged
     {
+        /// <summary>
+        /// Notifies when the list has changed
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged;
+
         /// <summary>
         /// The list of displayed <see cref="IBreadcrumbItem"/>
         /// </summary>
@@ -39,7 +46,7 @@ namespace Synapse.Dashboard
             {
                 this.Items.Add(breadcrumbItem);
             }
-            await Task.CompletedTask;
+            await this.NotifyChange();
         }
 
         /// <summary>
@@ -52,6 +59,7 @@ namespace Synapse.Dashboard
         {
             IBreadcrumbItem item = new BreadcrumbItem(label, this.NavigationManager.Uri, icon);
             this.Items.Add(item);
+            await this.NotifyChange();
             return await Task.FromResult(item);
         }
 
@@ -66,7 +74,7 @@ namespace Synapse.Dashboard
             {
                 this.Items.Remove(breadcrumbItem);
             }
-            await Task.CompletedTask;
+            await this.NotifyChange();
         }
     
         /// <summary>
@@ -76,7 +84,7 @@ namespace Synapse.Dashboard
         public async Task Clear()
         {
             this.Items?.Clear();
-            await Task.CompletedTask;
+            await this.NotifyChange();
         }
 
         /// <summary>
@@ -91,6 +99,19 @@ namespace Synapse.Dashboard
             {
                 await this.AddItem(item);
             }
+        }
+
+        /// <summary>
+        /// Notifies a change
+        /// </summary>
+        /// <returns></returns>
+        protected async Task NotifyChange([CallerMemberName] String propertyName = "Items")
+        {
+            if (this.PropertyChanged != null)
+            {
+                this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+            await Task.CompletedTask;
         }
     }
 }

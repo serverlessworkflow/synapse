@@ -22,10 +22,6 @@
 
 @media (max-width: 640.98px) {
 
-    .header:not(.auth) {
-        display: none;
-    }
-
     .header.auth {
         justify-content: space-between;
     }
