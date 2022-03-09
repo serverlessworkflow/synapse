@@ -1,0 +1,17 @@
+﻿@namespace Synapse.Dashboard
+@inject IBreadcrumbService BreadcrumbService
+<nav aria-label="breadcrumb">
+    <ul class="breadcrumb">
+        @foreach(var item in BreadcrumbService.Items) {
+            <li class="breadcrumb-item">
+                <a href="@item.Link">
+                    @if (!String.IsNullOrWhiteSpace(item.Icon))
+                    {
+                        <span class="oi @item.Icon" aria-hidden="true"></span>
+                    }
+                    @item.Label
+                </a>
+            </li>
+        }
+    </ul>
+</nav>
