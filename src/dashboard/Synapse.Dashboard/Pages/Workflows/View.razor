@@ -15,7 +15,7 @@
 @inject IBreadcrumbService BreadcrumbService
 @inject HubConnection HubConnection
 @inject HttpClient HttpClient
-@implements IDisposable
+@implements IAsyncDisposable
 
 <PageTitle>@workflow?.Id</PageTitle>
 <AppHeader>
@@ -30,8 +30,7 @@
     <div>
         <button @onclick="OnShowWorkflowInputModal" class="btn btn-outline-dark" title="Start workflow"><span class="oi oi-media-play"></span></button>
         <button type="button" @onclick="OnShowWorkflowDefinitionModal" class="btn btn-outline-dark" title="Detailed definition"><span class="oi oi-info"></span></button>
-    </div>
-    
+    </div>    
 </AppHeader>
 
 @if (workflow != null)
@@ -170,7 +169,7 @@ else
         this.StateHasChanged();
     }
 
-    protected async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await this.BreadcrumbService.RemoveItem(this.breadcrumbItem);
     }
