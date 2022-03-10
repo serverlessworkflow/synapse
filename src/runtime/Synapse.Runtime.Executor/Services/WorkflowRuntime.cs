@@ -116,13 +116,14 @@ namespace Synapse.Runtime.Services
             }
             catch (Exception ex)
             {
+                this.Logger.LogError("A critical exception occured while executing the workflow instance with id '{instanceId}': {ex}", EnvironmentVariables.Runtime.WorkflowInstanceId.Value, ex.ToString());
                 try
                 {
                     await this.Context.Workflow.FaultAsync(ex, this.CancellationToken);
                 }
                 catch (Exception iex)
                 {
-                    this.Logger.LogError("A critical exception occured while faulting the execution of workflow instance '{instanceId}': {ex}", ""/*todo: EnvironmentVariables.Workflows.Instance.Value*/, iex.ToString());
+                    this.Logger.LogError("A critical exception occured while faulting the execution of workflow instance with id '{instanceId}': {ex}", EnvironmentVariables.Runtime.WorkflowInstanceId.Value, iex.ToString());
                     throw;
                 }
                 this.HostApplicationLifetime.StopApplication();
