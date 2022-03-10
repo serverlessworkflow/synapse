@@ -1,7 +1,7 @@
 ﻿@namespace Synapse.Dashboard
-@using System.ComponentModel
 @inject IBreadcrumbService BreadcrumbService
-<nav class="p-4" aria-label="breadcrumb">
+@implements IDisposable
+<nav class="pb-4" aria-label="breadcrumb">
     <ul class="breadcrumb">
         @foreach(var item in BreadcrumbService.Items) {
             <li class="breadcrumb-item">
@@ -20,11 +20,19 @@
 @code {
     protected override void OnInitialized()
     {
+        base.OnInitialized();
         this.BreadcrumbService.PropertyChanged += this.OnBreadcrumbChanged;
     }
 
-    protected void OnBreadcrumbChanged(object sender, PropertyChangedEventArgs args)
+    protected void OnBreadcrumbChanged(object? sender, PropertyChangedEventArgs args)
     {
         this.StateHasChanged();
+    }
+    
+
+    public void Dispose()
+    {
+        if (this.BreadcrumbService != null)
+            this.BreadcrumbService.PropertyChanged -= this.OnBreadcrumbChanged;
     }
 }

@@ -1,0 +1,12 @@
+﻿@namespace Synapse.Dashboard
+@if (Workflow != null) 
+{
+    <div>
+        Some metrics
+    </div>
+}
+
+@code {
+    [Parameter]
+    public V1Workflow Workflow { get; set; } = null!;
+}

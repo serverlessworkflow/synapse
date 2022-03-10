@@ -6,17 +6,18 @@
 @inject NavigationManager NavigationManager
 
 <PageTitle>Workflows</PageTitle>
-<AppHeader>
-    <span class="h5 m-0 p-0">Workflows</span>
-    <button @onclick="OnNewWorkflow" class="btn btn-outline-dark" title="New workflow"><span class="oi oi-plus"></span></button>
-</AppHeader>
-
+<AppRightSidebar>
+    <Toolbar>
+        <button @onclick="OnNewWorkflow" class="btn btn-outline-dark" title="New workflow"><span class="oi oi-plus"></span></button>
+    </Toolbar>
+</AppRightSidebar>
 <DataTable DataSource="new ODataQueryable<V1Workflow>(this.ServiceProvider)" AutoGenerateColumns="true" OrderByDefault="(IQueryable query) => ((IQueryable<V1Workflow>)query).OrderBy(c => c.Id)" />
 
 @code {
 
     protected override async Task OnInitializedAsync()
     {
+        await base.OnInitializedAsync();
         await this.BreadcrumbService.Use(KnownBreadcrumbs.Workflows);
     }
 

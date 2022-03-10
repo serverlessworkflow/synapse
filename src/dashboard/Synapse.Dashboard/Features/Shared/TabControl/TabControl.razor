@@ -1,6 +1,6 @@
 ﻿@namespace Synapse.Dashboard
 
-<div class="container">    
+<div class="container d-flex flex-column">    
     <div class="row">
         <ul class="nav nav-tabs">
             @foreach (TabPage tabPage in Pages)
@@ -11,7 +11,7 @@
             }
         </ul>
     </div>
-    <div class="row">
+    <div class="row flex-grow-1 d-block">
         <CascadingValue Value="this">
             @ChildContent
         </CascadingValue>
@@ -44,6 +44,7 @@
     void ActivatePage(TabPage page)
     {
         this.ActivePage = page;
+        this.StateHasChanged();
     }
 
 }

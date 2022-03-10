@@ -27,7 +27,7 @@
         /// <param name="label"></param>
         /// <param name="link"></param>
         /// <param name="icon"></param>
-        public BreadcrumbItem(string label, string link, string icon = null)
+        public BreadcrumbItem(string label, string link, string? icon = null)
         {
             this.Label = label;
             this.Link = link;

@@ -7,9 +7,15 @@ namespace Synapse.Dashboard
         : INotifyPropertyChanged
     {
 
-        AppHeader Header { get; set; }
+        AppHeader? Header { get; set; }
+        AppRightSidebar? RightSidebar { get; set; }
+        AppLeftSidebar? LeftSidebar { get; set; }
 
         void UpdateHeader();
+
+        void UpdateRightSidebar();
+
+        void UpdateLeftSidebar();
 
     }
 

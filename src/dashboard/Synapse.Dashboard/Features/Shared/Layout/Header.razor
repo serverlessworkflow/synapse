@@ -1,5 +1,6 @@
 ﻿@using System.ComponentModel
 @namespace Synapse.Dashboard
+@inject ILayoutService Layout;
 @implements IDisposable
 
 <div class="header px-4">
@@ -10,17 +11,13 @@
 
 @code
 {
-
-    [Inject]
-    public ILayoutService Layout { get; set; }
-
     protected override async Task OnInitializedAsync()
     {
-        this.Layout.PropertyChanged += OnLayoutHeaderChanged;
         await base.OnInitializedAsync();
+        this.Layout.PropertyChanged += OnLayoutHeaderChanged;
     }
 
-    private void OnLayoutHeaderChanged(object sender, PropertyChangedEventArgs e)
+    private void OnLayoutHeaderChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(ILayoutService.Header))
         {

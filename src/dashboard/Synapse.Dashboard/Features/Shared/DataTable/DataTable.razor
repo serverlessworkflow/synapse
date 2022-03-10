@@ -94,6 +94,9 @@
     };
 
     [Parameter]
+    public Func<object?, string?>? ViewDetailsUriProvider { get; set; } = null!;
+
+    [Parameter]
     public Func<IQueryable, IQueryable> OrderByDefault { get; set; }
 
     public int ResultsPerPage { get; set; } = 10;
@@ -126,6 +129,37 @@
     private DataColumn draggedColumn;
     private string error;
     private Modal modal;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        try
+        {
+            if (this.AutoGenerateColumns)
+            {
+                foreach (PropertyInfo property in this.DataSource.ElementType.GetProperties().Where(p => p.PropertyType.IsPrimitiveType() || p.PropertyType == typeof(string) || p.PropertyType == typeof(DateTimeOffset)))
+                {
+                    this.columns.Add(DataColumnProperties.CreateFor(property));
+                }
+            }
+            this.columns = this.columns.OrderBy(c => c.DisplayOrder).ToList();
+            this.filterExpression = Expression.Lambda(Expression.Constant(true), Expression.Parameter(this.DataSource.ElementType));
+            if (this.OrderByDefault != null)
+                this.orderByDelegate = this.OrderByDefault;
+            await this.GetFilteredCountAsync();
+            await this.FilterSourceAsync();
+        }
+        catch (Exception ex)
+        {
+            this.error = ex.Message.ToString();
+            this.modal.Show();
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await this.FilterSourceAsync();
+    }
 
     public void AddColumn(DataColumnProperties column)
     {
@@ -187,37 +221,6 @@
     {
         typeof(OperatorType).GetField(Enum.GetName(operatorType)).TryGetCustomAttribute(out DisplayAttribute displayAttribute);
         return displayAttribute.Name;
-    }
-
-    protected override async Task OnInitializedAsync()
-    {
-        await base.OnInitializedAsync();
-        try
-        {
-            if (this.AutoGenerateColumns)
-            {
-                foreach (PropertyInfo property in this.DataSource.ElementType.GetProperties().Where(p => p.PropertyType.IsPrimitiveType() || p.PropertyType == typeof(string) || p.PropertyType == typeof(DateTimeOffset)))
-                {
-                    this.columns.Add(DataColumnProperties.CreateFor(property));
-                }
-            }
-            this.columns = this.columns.OrderBy(c => c.DisplayOrder).ToList();
-            this.filterExpression = Expression.Lambda(Expression.Constant(true), Expression.Parameter(this.DataSource.ElementType));
-            if (this.OrderByDefault != null)
-                this.orderByDelegate = this.OrderByDefault;
-            await this.GetFilteredCountAsync();
-            await this.FilterSourceAsync();
-        }
-        catch (Exception ex)
-        {
-            this.error = ex.Message.ToString();
-            this.modal.Show();
-        }
-    }
-
-    protected override async Task OnParametersSetAsync()
-    {
-        await this.FilterSourceAsync();
     }
 
     private void OnToggleColumnVisibility(ChangeEventArgs e)
@@ -382,10 +385,11 @@
 
     private void OnViewDetailsOf(object element)
     {
-        object key = this.KeyProvider?.Invoke(element);
+        object? key = this.KeyProvider?.Invoke(element);
         if (key == null)
             return;
-        this.Navigation.NavigateTo($"{this.Navigation.Uri}/{key}");
+        string uri = this.ViewDetailsUriProvider?.Invoke(key) ?? $"{this.Navigation.Uri}/{key}";
+        this.Navigation.NavigateTo(uri);
     }
 
     private enum OperatorType

@@ -36,7 +36,7 @@
     public async Task ToggleExpandAsync()
     {
         this.IsExpanded = !this.IsExpanded;
-        this.StateHasChanged();
+        //this.StateHasChanged();
         await this.OnToggleExpand.InvokeAsync(new() { Value = this.IsExpanded });
     }
 

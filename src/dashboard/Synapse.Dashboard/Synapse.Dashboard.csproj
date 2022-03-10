@@ -8,9 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Features\WorkflowInstances\WorkflowInstanceView\**" />
     <Compile Remove="Features\Workflows\WorkflowMetrics\**" />
+    <Content Remove="Features\WorkflowInstances\WorkflowInstanceView\**" />
     <Content Remove="Features\Workflows\WorkflowMetrics\**" />
+    <EmbeddedResource Remove="Features\WorkflowInstances\WorkflowInstanceView\**" />
     <EmbeddedResource Remove="Features\Workflows\WorkflowMetrics\**" />
+    <None Remove="Features\WorkflowInstances\WorkflowInstanceView\**" />
     <None Remove="Features\Workflows\WorkflowMetrics\**" />
   </ItemGroup>
 
@@ -44,23 +48,13 @@
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="6.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.NewtonsoftJson" Version="6.0.3" />
 	<PackageReference Include="Neuroglia.Core" Version="2.0.1.40" />
+	<PackageReference Include="Neuroglia.Data.Flux" Version="2.0.1.40" />
 	<PackageReference Include="Neuroglia.Data.OData" Version="2.0.1.40" />
 	<PackageReference Include="Z.Blazor.Diagrams" Version="2.1.6" />
   </ItemGroup>
 
   <ItemGroup>
     <ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Features\WorkflowInstances\WorkflowInstanceForm\" />
-    <Folder Include="Features\WorkflowInstances\WorkflowInstancesList\" />
-    <Folder Include="Features\WorkflowInstances\WorkflowInstanceView\" />
-    <Folder Include="Features\WorkflowInstances\WorkflowInstanceView\" />
-    <Folder Include="Features\WorkflowInstances\WorkflowInstanceForm\" />
-    <Folder Include="Features\WorkflowInstances\WorkflowInstancesList\" />
-    <Folder Include="Features\Workflows\WorkflowView\" />
-    <Folder Include="Features\Workflows\WorkflowsMetrics\" />
   </ItemGroup>
 
   <ItemGroup>

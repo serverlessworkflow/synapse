@@ -1,0 +1,19 @@
+﻿@namespace Synapse.Dashboard
+@inject NavigationManager NavigationManager
+
+@if (WorkflowInstance != null)
+{
+    <Toolbar>
+        <button @onclick="OnNavigateToWorkflow" class="btn btn-outline-dark" title="Start workflow"><span class="oi oi-arrow-left"></span></button>
+    </Toolbar>
+}
+
+@code {
+    [Parameter]
+    public V1WorkflowInstance WorkflowInstance { get; set; } = null!;
+
+    protected void OnNavigateToWorkflow()
+    {
+        this.NavigationManager.NavigateTo($"/workflows/{this.WorkflowInstance.WorkflowId}");
+    }
+}

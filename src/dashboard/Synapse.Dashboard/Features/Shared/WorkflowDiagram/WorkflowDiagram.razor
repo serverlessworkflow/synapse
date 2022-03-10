@@ -12,11 +12,13 @@
 
 @namespace Synapse.Dashboard
 
-<div class="diagram-container h-100">
-  <CascadingValue Value="Diagram">
-    <DiagramCanvas></DiagramCanvas>
-  </CascadingValue>
-</div>
+@if (Diagram != null) {
+    <div class="diagram-container h-100">
+      <CascadingValue Value="Diagram">
+        <DiagramCanvas></DiagramCanvas>
+      </CascadingValue>
+    </div>
+}
 
 @implements IDisposable
 @code {

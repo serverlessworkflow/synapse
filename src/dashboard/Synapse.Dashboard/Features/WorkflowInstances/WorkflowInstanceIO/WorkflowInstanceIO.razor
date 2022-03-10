@@ -1,0 +1,45 @@
+﻿@namespace Synapse.Dashboard
+@using Newtonsoft.Json
+@inject IMonacoEditorHelper MonacoEditorHelper
+
+@if (WorkflowInstance != null)
+{
+    <MonacoDiffEditor 
+        CssClass="monaco-normal" 
+        @ref="diffEditor" 
+        ConstructionOptions="MonacoEditorHelper.GetDiffEditorConstructionOptions()"
+        OnDidInit="OnEditorDidInitAsync"
+    ></MonacoDiffEditor>
+}
+
+@code {
+    [Parameter]
+    public V1WorkflowInstance WorkflowInstance { get; set; } = null!;
+
+    protected MonacoDiffEditor diffEditor = null!;
+
+    protected async Task OnEditorDidInitAsync()
+    {
+        var input = string.Empty;
+        var output = string.Empty;        
+        TextModel inputModel = await MonacoEditorBase.CreateModel("", "json");
+        TextModel outputModel = await MonacoEditorBase.CreateModel("", "json");
+        if (this.WorkflowInstance.Input != null) {
+            input = JsonConvert.SerializeObject(this.WorkflowInstance.Input, Formatting.Indented);
+            inputModel = await MonacoEditorBase.CreateModel(input, "json");
+        }
+        if (this.WorkflowInstance.Output != null) {
+            output = JsonConvert.SerializeObject(this.WorkflowInstance.Output, Formatting.Indented);
+            outputModel = await MonacoEditorBase.CreateModel(output, "json");
+        }
+        if (this.WorkflowInstance.Error != null) {
+            output = JsonConvert.SerializeObject(this.WorkflowInstance.Error, Formatting.Indented);
+            outputModel = await MonacoEditorBase.CreateModel(output, "json");
+        }
+        await this.diffEditor.SetModel(new DiffEditorModel
+        {
+            Original = inputModel,
+            Modified = outputModel
+        });
+    }
+}

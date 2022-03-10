@@ -1,81 +1,59 @@
-.navbar-toggler {
-    background-color: rgba(var(--bs-white-rgb), 0.1);
-}
+.header {
+    padding: 0 !important;
+    flex-direction: column;
 
-.top-row {
-    height: 3.5rem;
-    background-color: rgba(var(--bs-black-rgb),0.4);
-}
-
-.navbar-img {
-    width: 2.5rem;
-}
-
-.navbar-brand {
-    font-size: 1.1rem;
-}
-
-.oi {
-    margin-right:0.5rem;
-}
-
-.nav-item {
-    font-size: 0.9rem;
-    padding-bottom: 0.5rem;
-}
-
-.nav-item:first-of-type {
-    padding-top: 1rem;
-}
-
-.nav-item:last-of-type {
-    padding-bottom: 1rem;
-}
-
-.nav-item ::deep a {
-    color: var(--bs-gray-100);
-    border-radius: 4px;
-    height: 3rem;
-    display: flex;
-    align-items: center;
-    line-height: 3rem;
-}
-
-.nav-item ::deep a.active {
-    background-color: rgba(var(--bs-white-rgb),0.25);
-    color: white;
-}
-
-.nav-item ::deep a:hover {
-    background-color: rgba(var(--bs-white-rgb),0.1);
-    color: white;
-}
-
-.navbar-brand img{
-    height:30px;
-}
-
-@media (min-width: 641px) {
-    .sidebar {
+    .navbar-brand {
+        background-color: rgba(var(--bs-black-rgb),0.4);
+        height: 3rem;
         width: 250px;
-        height: 100vh;
-        position: sticky;
-        top: 0;
+        margin-right: 0 !important;
+
+        .logo-container {
+            margin: auto;
+            width: 200px;
+        }
     }
 
-    .navbar-toggler {
-        display: none;
+    .white {
+        fill: var(--bs-white);
+        stroke: var(--bs-white);
     }
 
-    .collapse {
-        /* Never collapse the sidebar for wide screens */
-        display: block;
+    .logo {
+        height: 100%;
     }
 
-    .top-row {
-        position: sticky;
-        top: 0;
-        z-index: 1;
+    .logotype {
+        height: 100%;
+    }
+
+
+    .nav-item ::deep a {
+        color: var(--bs-gray-100);
+        height: 3rem;
+        display: flex;
+        align-items: center;
+        line-height: 3rem;
+
+        &.active {
+            background-color: var(--bs-white);
+            color: var(--bs-black);
+        }
+
+        &:hover {
+            background-color: rgba(var(--bs-white-rgb),0.1);
+            color: white;
+        }
+    }
+
+    .oi {
+        margin-right: 0.5rem;
     }
 }
 
+
+@media (min-width: 992px) {
+    .header {
+        flex-direction: row;
+    }
+}

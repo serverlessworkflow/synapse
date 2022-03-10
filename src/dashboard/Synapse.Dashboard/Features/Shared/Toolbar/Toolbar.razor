@@ -1,0 +1,10 @@
+﻿@namespace Synapse.Dashboard
+<div class="card h-100">
+    <div class="card-body d-flex flex-column">
+        @ChildContent
+    </div>
+</div>
+@code {
+  [Parameter]
+  public RenderFragment ChildContent { get; set; }
+}

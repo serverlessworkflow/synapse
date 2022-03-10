@@ -1,37 +1,34 @@
 ﻿@page "/workflows/{workflowId}"
+@page "/workflows/{workflowId}/instance/{workflowInstanceId}"
 @using Blazor.Diagrams.Core
 @using Microsoft.AspNetCore.SignalR.Client
-@using Neuroglia.Serialization
 @using Newtonsoft.Json
-@using Newtonsoft.Json.Linq
-@using Newtonsoft.Json.Schema
-@using Synapse.Apis.Management
-@using Synapse.Apis.Monitoring
-@using Synapse.Integration.Models
 @using System.Text
 @inject ISynapseManagementApi SynapseApi
-@inject IJsonSerializer JsonSerializer
 @inject IWorkflowDiagramBuilder WorkflowDiagramBuilder
 @inject IMonacoEditorHelper MonacoEditorHelper
 @inject IBreadcrumbService BreadcrumbService
 @inject HubConnection HubConnection
-@inject HttpClient HttpClient
 
 <PageTitle>@workflow?.Id</PageTitle>
-<AppHeader>
-    <div>
-        <div class="border rounded-pill border-dark px-3 py-1 d-inline">
-            <span class="h5 m-0 p-0">@workflow?.Definition.Id</span>
-        </div>
-        <div class="border rounded-pill bg-dark border-dark text-white px-3 py-1 d-inline">
-            <span class="h5 m-0 p-0">@workflow?.Definition.Version</span>
-        </div>
-    </div>
-    <div>
-        <button @onclick="OnShowWorkflowInputModal" class="btn btn-outline-dark" title="Start workflow"><span class="oi oi-media-play"></span></button>
-        <button type="button" @onclick="OnShowWorkflowDefinitionModal" class="btn btn-outline-dark" title="Detailed definition"><span class="oi oi-info"></span></button>
-    </div>    
-</AppHeader>
+<AppRightSidebar>
+    @if (workflow != null && workflowInstance == null) {
+        <WorkflowToolbar Workflow="workflow" />
+    }
+    else if (workflow != null && workflowInstance != null)
+    {
+        <WorkflowInstanceToolbar WorkflowInstance="workflowInstance" />
+    }
+</AppRightSidebar>
+<AppLeftSidebar>
+    @if (workflow != null && workflowInstance == null) {
+        <WorkflowDetails Workflow="workflow" />
+    }
+    else if (workflow != null && workflowInstance != null)
+    {
+        <WorkflowInstanceDetails WorkflowInstance="workflowInstance" Workflow="workflow" />
+    }
+</AppLeftSidebar>
 
 @if (workflow != null)
 {
@@ -39,99 +36,66 @@
         <div class="row h-50 position-relative">
             <WorkflowDiagram Diagram="diagram" />
         </div>
-        <div class="row h-50">
-            <TabControl>
-                <TabPage Header="Instances">
-                    <DataTable DataSource="instances">
-                        <Columns>
-                            <DataColumnProperties 
+        <div class="row h-50">            
+            @if (workflowInstance == null)
+            {
+                <TabControl>
+                    <TabPage Header="Instances">
+                        <DataTable DataSource="instances" ViewDetailsUriProvider="InstanceDetailsUriProvider">
+                            <Columns>
+                                <DataColumnProperties 
                                 Name="Key"
                                 ValueProvider="source => ((V1WorkflowInstance)source).Key"
                                 PropertyPath="@PropertyPath.Parse(nameof(V1WorkflowInstance.Key))" />
-                            <DataColumnProperties 
+                                <DataColumnProperties 
                                 Name="Status"
                                 ValueProvider="source => ((V1WorkflowInstance)source).Status"
                                 PropertyPath="@PropertyPath.Parse(nameof(V1WorkflowInstance.Status))" />
-                            <DataColumnProperties 
+                                <DataColumnProperties 
                                 Name="Started at"
                                 ValueProvider="source => ((V1WorkflowInstance)source).StartedAt"
                                 PropertyPath="@PropertyPath.Parse(nameof(V1WorkflowInstance.StartedAt))"
                                 Format="MM/dd/yyyy, HH:mm"/>
-                            <DataColumnProperties 
+                                <DataColumnProperties 
                                 Name="Executed at"
                                 ValueProvider="source => ((V1WorkflowInstance)source).ExecutedAt"
                                 PropertyPath="@PropertyPath.Parse(nameof(V1WorkflowInstance.ExecutedAt))"
                                 Format="MM/dd/yyyy, HH:mm"/>
-                            <DataColumnProperties 
+                                <DataColumnProperties 
                                 Name="Duration"
                                 ValueProvider="source => ((V1WorkflowInstance)source).Duration"
                                 IsSorteable="false"
                                 IsFilterable="false"/>
-                        </Columns>
-                    </DataTable>
-                </TabPage>
-                <TabPage Header="Metrics">
-                    <div>
-                        Some metrics
-                    </div>
-                </TabPage>
-            </TabControl>
+                            </Columns>
+                        </DataTable>
+                    </TabPage>
+                    <TabPage Header="Definition">
+                        @if (workflow?.Definition != null)
+                        {
+                            <MonacoEditor
+                            CssClass="h-100 flex-grow"
+                            ConstructionOptions="MonacoEditorHelper.GetStandaloneEditorConstructionOptions(JsonConvert.SerializeObject(workflow.Definition, Formatting.Indented), true)"/>
+                        }
+                    </TabPage>
+                    <TabPage Header="Metrics">
+                        <WorkflowsMetrics Workflow="workflow" />
+                    </TabPage>
+                </TabControl>
+            }
+            else if(workflowInstance != null)
+            {
+                
+                <TabControl>
+                    <TabPage Header="Input/Output">
+                        <WorkflowInstanceIO WorkflowInstance="workflowInstance" />
+                    </TabPage>
+                    <TabPage Header="Activities">
+                        <WorkflowInstanceActivitiesList Activities="sortedActivities" />
+                    </TabPage>
+                </TabControl>
+            }
         </div>
     </div>
-    <Modal @ref="errorModal">
-        <Title>Error</Title>
-        <Body>
-            <p>An error occured:</p>
-            <div class="border rounded bg-danger text-white text-break p-1">@((MarkupString)error)</div>
-        </Body>
-        <Footer>
-            <button @onclick="() => errorModal.Hide()" class="btn btn-secondary">Close</button>
-        </Footer>
-    </Modal>
-    <Modal @ref="workflowInputModal">
-        <Title>Start new instance</Title>
-        <Body>
-            @if (dataInputSchema != null)
-            {
-                <JsonForm @ref="jsonForm" Schema="dataInputSchema" />
-            }
-            else
-            {
-                <MonacoEditor
-                    @ref="workflowInputEditor"
-                    CssClass="monaco-small"
-                    ConstructionOptions="MonacoEditorHelper.GetStandaloneEditorConstructionOptions()"/>
-            }
-            @if (inputValidationErrors != null)
-            {
-                <div class="alert alert-danger">
-                    <ul>
-                        @foreach (var error in inputValidationErrors)
-                        {
-                            <li>Line @error.LineNumber, Position @error.LinePosition: @error.Message</li>
-                        }
-                    </ul>
-                </div>
-            }
-        </Body>
-        <Footer>
-            <button @onclick="() => workflowInputModal.Hide()" class="btn btn-secondary">Cancel</button>
-            <button @onclick="OnStartWorkflowAsync" class="btn btn-primary">Start</button>
-        </Footer>
-    </Modal>
-    <Modal @ref="workflowDefinitionModal">
-        <Title>Workflow definition</Title>
-        <Body>
-            @if (this.workflow?.Definition != null) {
-                <MonacoEditor
-                    CssClass="monaco-small"
-                    ConstructionOptions="MonacoEditorHelper.GetStandaloneEditorConstructionOptions(JsonConvert.SerializeObject(this.workflow.Definition, Formatting.Indented), true)"/>
-            }
-        </Body>
-        <Footer>
-            <button @onclick="() => workflowDefinitionModal.Hide()" class="btn btn-secondary">Close</button>
-        </Footer>
-    </Modal>
 }
 else
 {
@@ -142,135 +106,75 @@ else
 
     [Parameter]
     public string WorkflowId { get; set; } = null!;
+    [Parameter]
+    public string? WorkflowInstanceId { get; set; } = null!;
 
-    private Modal errorModal = null!;
-    private Modal workflowInputModal = null!;
-    private Modal workflowDefinitionModal = null!;
-    private MonacoEditor? workflowInputEditor;
-    private JsonForm? jsonForm;
-    private V1Workflow workflow = null!;
-    private Diagram diagram { get; set; } = null!;
-    private IQueryable<V1WorkflowInstance> instances = null!;
-    private string error = null!;
-    private JSchema? dataInputSchema;
-    private IList<ValidationError>? inputValidationErrors;
+    protected V1Workflow workflow = null!;
+    protected V1WorkflowInstance workflowInstance = null!;
+    protected List<V1WorkflowActivity> sortedActivities = new List<V1WorkflowActivity>();
+    protected Diagram diagram { get; set; } = null!;
+    protected IQueryable<V1WorkflowInstance> instances = null!;
+    protected IEnumerable<IBreadcrumbItem> workflowBreadCrumbBase = null!;
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
         this.workflow = await this.SynapseApi.GetWorkflowByIdAsync(this.WorkflowId);
-        await this.BreadcrumbService.Use(KnownBreadcrumbs.Workflows);
-        await this.BreadcrumbService.AddCurrentUri(this.workflow.Definition.Name);
         this.diagram = await this.WorkflowDiagramBuilder.BuildDiagram(this.workflow.Definition);
         this.instances = await this.FetchWorkflowInstancesAsync();
         this.diagram.DisplayActivityStatusFor(this.instances);
         this.HubConnection.On<V1CloudEvent>(nameof(ISynapseMonitoringApiClient.PublishIntegrationEvent), this.OnIntegrationEvent);
-        await this.LoadDataInputSchemaAsync();
-        this.StateHasChanged();
+        await this.BreadcrumbService.Use(KnownBreadcrumbs.Workflows);
+        await this.BreadcrumbService.AddCurrentUri(this.WorkflowId);
+        this.workflowBreadCrumbBase = new List<IBreadcrumbItem>(this.BreadcrumbService.Items);
     }
 
     protected override async Task OnParametersSetAsync()
     {
-        await base.OnParametersSetAsync();
-        if(this.workflowInputEditor != null)
-            await this.workflowInputEditor.SetValue(string.Empty);
-    }
-
-    private async Task LoadDataInputSchemaAsync()
-    {
-        var schema = this.workflow.Definition.DataInputSchema?.Schema;
-        if(schema == null
-            && this.workflow.Definition.DataInputSchemaUri != null)
+        await this.BreadcrumbService.Use(this.workflowBreadCrumbBase);
+        if (this.WorkflowInstanceId == null)
         {
-            var json = await this.HttpClient.GetStringAsync(this.workflow.Definition.DataInputSchemaUri);
-            schema = JSchema.Parse(json);
+            this.workflowInstance = null!;
+            this.sortedActivities = new List<V1WorkflowActivity>();
+            this.diagram.DisplayActivityStatusFor(this.instances);
         }
-        this.dataInputSchema = schema;
+        else
+        {
+            await this.BreadcrumbService.AddCurrentUri($"Instance {this.WorkflowInstanceId}");
+            this.workflowInstance = await this.SynapseApi.GetWorkflowInstanceByIdAsync(this.WorkflowInstanceId);
+            this.sortedActivities = this.workflowInstance.Activities.OrderBy(a => a.StartedAt).ToList();
+            this.diagram.DisplayActivityStatusFor(this.instances.Where(i => i.Id == this.WorkflowInstanceId));
+        }
+        this.StateHasChanged();
     }
 
-    private async Task<IQueryable<V1WorkflowInstance>> FetchWorkflowInstancesAsync()
+    public string? InstanceDetailsUriProvider(object? key)
+    {
+        if (key == null) 
+            return null;
+        return $"/workflows/{this.WorkflowId}/instance/{key}";
+    }
+
+    protected async Task<IQueryable<V1WorkflowInstance>> FetchWorkflowInstancesAsync()
     {
         return (await this.SynapseApi.GetWorkflowInstancesAsync($"$filter={nameof(V1WorkflowInstance.WorkflowId)} eq '{this.WorkflowId}'")).AsQueryable();
     }
 
-    private async Task OnIntegrationEvent(V1CloudEvent e)
+    protected async Task OnIntegrationEvent(V1CloudEvent e)
     {
         if (e.Type.Split('/')[1] != "v1workflowinstance"
             && e.Type.Split('/')[1] != "v1workflowactivity")
             return;
         this.instances = await this.FetchWorkflowInstancesAsync();
-        this.diagram.DisplayActivityStatusFor(this.instances);
-        this.StateHasChanged();
-    }
-
-    private void OnShowWorkflowDefinitionModal()
-    {
-        this.workflowDefinitionModal.Show();
-    }
-
-    private async Task OnShowWorkflowInputModal()
-    {
-        this.inputValidationErrors = null;
-        if(this.workflowInputEditor != null)
-            await this.workflowInputEditor.SetValue(string.Empty);
-        if(this.dataInputSchema != null
-            && this.workflowInputEditor != null)
+        if (this.WorkflowInstanceId == null)
         {
-            var example = this.dataInputSchema.GenerateExample();
-            if(example != null)
-            {
-                var json = JObject.FromObject(example).ToString(Formatting.Indented);
-                await this.workflowInputEditor.SetValue(json);
-            }  
-        }
-        this.workflowInputModal.Show();
-    }
-
-    private async Task OnStartWorkflowAsync()
-    {
-        var json = string.Empty;
-        if(this.workflowInputEditor != null)
-        {
-            json = await this.workflowInputEditor.GetValue();
-            if(this.dataInputSchema != null)
-            {
-                var jobj = null as JObject;
-                if (string.IsNullOrWhiteSpace(json))
-                    jobj = new();
-                else
-                    jobj = JObject.Parse(json);
-                if(!jobj.IsValid(this.dataInputSchema, out IList<ValidationError> errors))
-                {
-                    this.inputValidationErrors = errors;
-                    return;
-                }
-            }
+            this.diagram.DisplayActivityStatusFor(this.instances);
         }
         else
         {
-            var value = await this.jsonForm.GetValueAsync();
-            json = await this.JsonSerializer.SerializeAsync(value);
+            this.diagram.DisplayActivityStatusFor(this.instances.Where(i => i.Id == this.WorkflowInstanceId));
         }
-        this.workflowInputModal.Hide();
-        this.inputValidationErrors = null;
-        if(this.workflowInputEditor != null)
-            await this.workflowInputEditor.SetValue(string.Empty);
-        var inputData = await this.JsonSerializer.DeserializeAsync<DynamicObject>(json);
-        try
-        {
-            var workflowInstance = await this.SynapseApi.CreateWorkflowInstanceAsync(new()
-            {
-                WorkflowId = this.WorkflowId,
-                ActivationType = V1WorkflowInstanceActivationType.Manual,
-                InputData = inputData
-            });
-            await this.SynapseApi.StartWorkflowInstanceAsync(workflowInstance.Id);
-        }
-        catch(Exception ex)
-        {
-            this.error = ex.ToString();
-            this.errorModal.Show();
-        } 
+        this.StateHasChanged();
     }
 
 }

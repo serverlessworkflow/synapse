@@ -1,4 +1,4 @@
-﻿@page "/workflows/{workflowId}/{workflowInstanceId}"
+﻿
 @using Blazor.Diagrams.Core
 @using Microsoft.AspNetCore.SignalR.Client
 @using Neuroglia.Serialization
@@ -269,11 +269,12 @@ else
         await base.OnInitializedAsync();
         this.workflowInstance = await this.SynapseApi.GetWorkflowInstanceByIdAsync(this.WorkflowInstanceId);
         this.sortedActivities = this.workflowInstance.Activities.OrderBy(a => a.StartedAt).ToList();
-        this.StateHasChanged();
+        //this.StateHasChanged();
     }
 
     protected override async Task OnParametersSetAsync()
     {
+        await base.OnParametersSetAsync();
         var input = string.Empty;
         var output = string.Empty;        
         TextModel inputModel = await MonacoEditorBase.CreateModel("", "json");
@@ -295,8 +296,7 @@ else
             Original = inputModel,
             Modified = outputModel
         });
-        await base.OnParametersSetAsync();
-        this.StateHasChanged();
+        //this.StateHasChanged();
     }
 
 }

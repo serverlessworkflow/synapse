@@ -11,21 +11,21 @@
     {
         base.OnInitialized();
         if (this.Layout != null)
-            this.Layout.Header = this;
+            this.Layout.RightSidebar = this;
     }
 
     protected override bool ShouldRender()
     {
         var shouldRender = base.ShouldRender();
         if (shouldRender)
-            this.Layout.UpdateHeader();
+            this.Layout.UpdateRightSidebar();
         return shouldRender;
     }
 
     public void Dispose()
     {
         if (this.Layout != null)
-            this.Layout.Header = null;
+            this.Layout.RightSidebar = null;
     }
 
 }

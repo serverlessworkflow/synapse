@@ -1,0 +1,159 @@
+﻿@namespace Synapse.Dashboard
+@using Neuroglia.Serialization
+@using Newtonsoft.Json
+@using Newtonsoft.Json.Linq
+@using Newtonsoft.Json.Schema
+@using Synapse.Apis.Management
+@inject ISynapseManagementApi SynapseApi
+@inject IJsonSerializer JsonSerializer
+@inject IMonacoEditorHelper MonacoEditorHelper
+@inject HttpClient HttpClient
+
+@if (Workflow != null) 
+{
+    <Toolbar>
+        <button @onclick="OnShowWorkflowInputModal" class="btn btn-outline-dark" title="Start workflow"><span class="oi oi-media-play"></span></button>
+    </Toolbar>
+    
+    <Modal @ref="errorModal">
+        <Title>Error</Title>
+        <Body>
+            <p>An error occured:</p>
+            <div class="border rounded bg-danger text-white text-break p-1">@((MarkupString)error)</div>
+        </Body>
+        <Footer>
+            <button @onclick="() => errorModal.Hide()" class="btn btn-secondary">Close</button>
+        </Footer>
+    </Modal>
+    <Modal @ref="workflowInputModal">
+        <Title>Start new instance</Title>
+        <Body>
+            @if (dataInputSchema != null)
+            {
+                <JsonForm @ref="jsonForm" Schema="dataInputSchema" />
+            }
+            else
+            {
+                <MonacoEditor
+                    @ref="workflowInputEditor"
+                    CssClass="monaco-small"
+                    ConstructionOptions="MonacoEditorHelper.GetStandaloneEditorConstructionOptions()"/>
+            }
+            @if (inputValidationErrors != null)
+            {
+                <div class="alert alert-danger">
+                    <ul>
+                        @foreach (var error in inputValidationErrors)
+                        {
+                            <li>Line @error.LineNumber, Position @error.LinePosition: @error.Message</li>
+                        }
+                    </ul>
+                </div>
+            }
+        </Body>
+        <Footer>
+            <button @onclick="() => workflowInputModal.Hide()" class="btn btn-secondary">Cancel</button>
+            <button @onclick="OnStartWorkflowAsync" class="btn btn-primary">Start</button>
+        </Footer>
+    </Modal>
+}
+
+@code {
+    [Parameter]
+    public V1Workflow Workflow { get; set; } = null!;
+
+    protected Modal errorModal = null!;
+    protected Modal workflowInputModal = null!;
+    protected MonacoEditor? workflowInputEditor;
+    protected JsonForm? jsonForm;
+    protected string error = null!;
+    protected JSchema? dataInputSchema;
+    protected IList<ValidationError>? inputValidationErrors;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if(this.workflowInputEditor != null)
+            await this.workflowInputEditor.SetValue(string.Empty);
+        if (this.Workflow != null)
+        {
+            await this.LoadDataInputSchemaAsync();
+        }
+    }
+
+    protected async Task LoadDataInputSchemaAsync()
+    {
+        var schema = this.Workflow.Definition.DataInputSchema?.Schema;
+        if(schema == null
+            && this.Workflow.Definition.DataInputSchemaUri != null)
+        {
+            var json = await this.HttpClient.GetStringAsync(this.Workflow.Definition.DataInputSchemaUri);
+            schema = JSchema.Parse(json);
+        }
+        this.dataInputSchema = schema;
+    }
+
+    protected async Task OnShowWorkflowInputModal()
+    {
+        this.inputValidationErrors = null;
+        if(this.workflowInputEditor != null)
+            await this.workflowInputEditor.SetValue(string.Empty);
+        if(this.dataInputSchema != null
+            && this.workflowInputEditor != null)
+        {
+            var example = this.dataInputSchema.GenerateExample();
+            if(example != null)
+            {
+                var json = JObject.FromObject(example).ToString(Formatting.Indented);
+                await this.workflowInputEditor.SetValue(json);
+            }  
+        }
+        this.workflowInputModal.Show();
+    }
+
+    protected async Task OnStartWorkflowAsync()
+    {
+        var json = string.Empty;
+        if(this.workflowInputEditor != null)
+        {
+            json = await this.workflowInputEditor.GetValue();
+            if(this.dataInputSchema != null)
+            {
+                var jobj = null as JObject;
+                if (string.IsNullOrWhiteSpace(json))
+                    jobj = new();
+                else
+                    jobj = JObject.Parse(json);
+                if(!jobj.IsValid(this.dataInputSchema, out IList<ValidationError> errors))
+                {
+                    this.inputValidationErrors = errors;
+                    return;
+                }
+            }
+        }
+        else
+        {
+            var value = await this.jsonForm.GetValueAsync();
+            json = await this.JsonSerializer.SerializeAsync(value);
+        }
+        this.workflowInputModal.Hide();
+        this.inputValidationErrors = null;
+        if(this.workflowInputEditor != null)
+            await this.workflowInputEditor.SetValue(string.Empty);
+        var inputData = await this.JsonSerializer.DeserializeAsync<DynamicObject>(json);
+        try
+        {
+            var workflowInstance = await this.SynapseApi.CreateWorkflowInstanceAsync(new()
+            {
+                WorkflowId = this.Workflow.Id,
+                ActivationType = V1WorkflowInstanceActivationType.Manual,
+                InputData = inputData
+            });
+            await this.SynapseApi.StartWorkflowInstanceAsync(workflowInstance.Id);
+        }
+        catch(Exception ex)
+        {
+            this.error = ex.ToString();
+            this.errorModal.Show();
+        } 
+    }
+}

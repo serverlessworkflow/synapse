@@ -19,18 +19,17 @@
 </div>
 
 @code {
-
     /// <summary>
     /// Gets/sets the title of the accordion
     /// </summary>
     [Parameter]
-    public RenderFragment Header { get; set; }
+    public RenderFragment? Header { get; set; }
 
     /// <summary>
     /// Gets/sets the content of the accordion
     /// </summary>
     [Parameter]
-    public RenderFragment Body { get; set; }
+    public RenderFragment? Body { get; set; }
 
     /// <summary>
     /// Gets/sets if the accordion is opened
@@ -51,6 +50,7 @@
     protected override async Task OnInitializedAsync()
     {
         await this.AccordionManager.Register(this);
+        await base.OnInitializedAsync();
     }
 
     /// <summary>

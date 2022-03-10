@@ -3,11 +3,15 @@
 
 <div class="page h-100">
     <NavMenu />
-    <div class="main d-flex flex-column">
-        <Header />
+    <div class="main p-4 d-flex flex-column">
+        <!--<Header />-->
         <Breadcrumb />
-        <div class="content p-4">
-            @Body
+        <div class="w-100 flex-grow flex-lg-row flex-column d-flex">
+            <RightSidebar />
+            <div class="content flex-grow">
+                @Body
+            </div>
+            <LeftSidebar />
         </div>
     </div>
 </div>

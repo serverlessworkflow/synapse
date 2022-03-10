@@ -74,7 +74,7 @@
     public async Task ToggleExpand()
     {
         this.IsExpanded = !this.IsExpanded;
-        this.StateHasChanged();
+        //this.StateHasChanged();
         await this.OnToggleExpand.InvokeAsync(this.IsExpanded);
     }
 
@@ -84,7 +84,7 @@
         this.SelectedValue = this.ValueProvider(this.SelectedItem);
         if (this.IsExpanded)
             this.IsExpanded = false;
-        this.StateHasChanged();
+        //this.StateHasChanged();
         await this.OnSelectItem.InvokeAsync(this.SelectedItem);
         await this.OnChange.InvokeAsync(new() { Value = this.SelectedValue });
     }

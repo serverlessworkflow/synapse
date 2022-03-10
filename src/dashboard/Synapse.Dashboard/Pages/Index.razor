@@ -11,6 +11,7 @@ Welcome to Synapse - Serverless Workflow Management System
 @code{
     protected override async Task OnInitializedAsync()
     {
+        await base.OnInitializedAsync();
         await this.BreadcrumbService.Use(KnownBreadcrumbs.Home);
     }
 }

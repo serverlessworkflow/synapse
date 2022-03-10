@@ -7,19 +7,3 @@
 .main {
   flex: 1;
 }
-
-.content {
-  width: 100%;
-  height: calc(100% - 3.5rem);
-}
-
-@media (min-width: 641px) {
-  .page {
-    flex-direction: row;
-  }
-
-  .main > div {
-    padding-left: 2rem !important;
-    padding-right: 1.5rem !important;
-  }
-}

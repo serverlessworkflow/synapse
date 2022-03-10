@@ -12273,3 +12273,7 @@ input[type=time]::-webkit-clear-button {
 .monaco-extra-small {
   height: 100px !important;
 }
+
+.oi {
+  width: 16px;
+}

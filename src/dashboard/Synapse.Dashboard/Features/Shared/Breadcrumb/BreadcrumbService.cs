@@ -13,7 +13,7 @@ namespace Synapse.Dashboard
         /// <summary>
         /// Notifies when the list has changed
         /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
         /// The list of displayed <see cref="IBreadcrumbItem"/>

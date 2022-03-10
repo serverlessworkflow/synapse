@@ -1,0 +1,25 @@
+﻿@namespace Synapse.Dashboard
+@if (Workflow != null) 
+{
+    <div class="card h-100">
+        <div class="card-body">
+            <div class="mb-4">
+                <div class="border rounded-pill border-dark px-3 py-1 d-inline">
+                    <span class="h5 m-0 p-0">@Workflow.Definition.Id</span>
+                </div>
+                <div class="border rounded-pill bg-dark border-dark text-white px-3 py-1 d-inline">
+                    <span class="h5 m-0 p-0">@Workflow.Definition.Version</span>
+            </div>
+            </div>
+            <div>
+                <label class="form-label">Created at</label>
+                <input type="text" class="form-control" readonly value="@Workflow.CreatedAt" />
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public V1Workflow Workflow { get; set; } = null!;
+}

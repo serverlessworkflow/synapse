@@ -7,7 +7,7 @@
 @inject IWorkflowReader WorkflowReader
 @inject IWorkflowValidator WorkflowValidator
 
-<div class="h-100 mh-100 d-flex flex-column justify-content-between align-items-start">
+<div class="h-100 mh-100 flex-grow d-flex flex-column justify-content-between align-items-start">
     <label class="form-form-label">Definition</label>
     <div class="flex-grow d-flex flex-row w-100 h-100">
         <div class="w-75 h-100 mh-100">
@@ -83,6 +83,7 @@
     protected async Task OnMonacoEditorDidInit(MonacoEditorBase editorBase)
     {
         var model = await this.editor.GetModel();
+        await this.editor.SetValue("");
         await model.jsRuntime.InvokeVoidAsync("enableJsonValidation08" , model.Uri);
     }
 
