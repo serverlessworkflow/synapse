@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.AspNetCore.SignalR.Client;
 using Neuroglia.Data;
+using Neuroglia.Data.Flux;
 using ServerlessWorkflow.Sdk;
 using Simple.OData.Client;
 using Synapse;
@@ -21,7 +22,6 @@ builder.Services.AddSingleton<IODataClient>(new ODataClient(new ODataClientSetti
     BaseUri = new($"http://localhost:9600/api/odata"),
     PayloadFormat = ODataPayloadFormat.Json
 }));
-//builder.Services.AddNewtonsoftJsonSerializer(); //todo: include this in the add synapse rest api client call
 builder.Services.AddScoped<ILayoutService, LayoutService>();
 builder.Services.AddSingleton<IToastManager, ToastManager>();
 builder.Services.AddSingleton<IAccordionManager, AccordionManager>();
@@ -29,6 +29,12 @@ builder.Services.AddSingleton<IIntegrationEventStream, IntegrationEventStream>()
 builder.Services.AddSingleton<IMonacoEditorHelper, MonacoEditorHelper>();
 builder.Services.AddSingleton<IBreadcrumbService, BreadcrumbService>();
 builder.Services.AddScoped<IWorkflowDiagramBuilder, WorkflowDiagramBuilder>();
+builder.Services.AddFlux(flux =>
+{
+    flux
+        .ScanMarkupTypeAssembly<App>()
+        .UseReduxDevTools();
+});
 builder.Services.AddSingleton(provider =>
 {
     return new HubConnectionBuilder()

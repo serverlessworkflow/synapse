@@ -1,7 +1,9 @@
 ﻿@using Microsoft.AspNetCore.SignalR.Client
+@using Neuroglia.Data.Flux.Components
 @inject HubConnection HubConnection
 @inject IIntegrationEventStream integrationEventStream
 
+<FluxStore />
 <Router AppAssembly="@typeof(App).Assembly">
     <Found Context="routeData">
         <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />

@@ -1,4 +1,6 @@
-﻿@page "/"
+﻿@namespace Synapse.Dashboard
+@page "/"
+@using Synapse.Dashboard.Features.Test
 @inject IBreadcrumbService BreadcrumbService
 
 <PageTitle>Overview</PageTitle>
@@ -7,6 +9,8 @@
 </AppHeader>
 
 Welcome to Synapse - Serverless Workflow Management System
+
+<Counter />
 
 @code{
     protected override async Task OnInitializedAsync()

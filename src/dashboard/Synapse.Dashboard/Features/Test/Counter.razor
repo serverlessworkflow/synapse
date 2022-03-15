@@ -1,0 +1,45 @@
+﻿@using Neuroglia.Data.Flux
+@using Synapse.Dashboard.Features.Test
+@using System.Reactive.Linq
+
+<div>
+    <label>Count: </label>
+    <input type="number" value="@count" readonly class="form-control" />
+</div>
+<button @onclick="OnIncrement" class="btn btn-block btn-primary">Increment</button>
+<button @onclick="OnDecrement" class="btn btn-block btn-primary">Decrement</button>
+
+@code{
+
+    [Inject]
+    private IDispatcher dispatcher { get; set; }
+
+    [Inject]
+    private IStore store { get; set; }
+
+    private int count;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        this.store
+            .GetFeature<CounterState>()
+            .Select(f => f.Count)
+            .Subscribe(value =>
+            {
+                this.count = value;
+                this.StateHasChanged();
+            });
+    }
+
+    private void OnIncrement()
+    {
+        this.dispatcher.Dispatch(new IncrementAction(1));
+    }
+
+    private void OnDecrement()
+    {
+         this.dispatcher.Dispatch(new DecrementAction(1));
+    }
+
+}

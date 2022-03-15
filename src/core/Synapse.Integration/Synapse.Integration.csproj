@@ -22,10 +22,10 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="6.0.3" />
-    <PackageReference Include="Neuroglia.Serialization.Dynamic" Version="2.0.1.40" />
-    <PackageReference Include="Neuroglia.Serialization.Json" Version="2.0.1.40" />
-    <PackageReference Include="Neuroglia.Serialization.NewtonsoftJson" Version="2.0.1.40" />
-    <PackageReference Include="Neuroglia.Serialization.Protobuf" Version="2.0.1.40" />
+    <PackageReference Include="Neuroglia.Serialization.Dynamic" Version="2.0.1.45" />
+    <PackageReference Include="Neuroglia.Serialization.Json" Version="2.0.1.45" />
+    <PackageReference Include="Neuroglia.Serialization.NewtonsoftJson" Version="2.0.1.45" />
+    <PackageReference Include="Neuroglia.Serialization.Protobuf" Version="2.0.1.45" />
     <PackageReference Include="ServerlessWorkflow.Sdk" Version="0.8.0.15" />
     <PackageReference Include="System.ServiceModel.Primitives" Version="4.9.0" />
   </ItemGroup>

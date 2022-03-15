@@ -91,6 +91,8 @@ namespace Synapse.Application.Configuration
             this.Services.AddScoped<IObjectAdapter, AggregateObjectAdapter>();
             this.Services.AddTransient<IEdmModelBuilder, EdmModelBuilder>();
             this.Services.AddTransient<IODataQueryOptionsParser, ODataQueryOptionsParser>();
+            this.Services.AddSingleton<IWorkflowRuntimeProxyFactory, WorkflowRuntimeProxyFactory>();
+            this.Services.AddSingleton<IWorkflowRuntimeProxyManager, WorkflowRuntimeProxyManager>();
             this.Services.AddTransient(provider => provider.GetRequiredService<IEdmModelBuilder>().Build());
             this.Services.AddNewtonsoftJsonSerializer(options =>
             {

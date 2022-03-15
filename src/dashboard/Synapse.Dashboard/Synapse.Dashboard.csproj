@@ -41,15 +41,16 @@
 
   <ItemGroup>
 	<PackageReference Include="BlazorMonaco" Version="2.1.0" />
-	<PackageReference Include="BuildWebCompiler2022" Version="1.14.5" />
+	<PackageReference Include="BuildWebCompiler2022" Version="1.14.7" />
 	<PackageReference Include="GraphShape" Version="1.2.1" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.3" PrivateAssets="all" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="6.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.NewtonsoftJson" Version="6.0.3" />
-	<PackageReference Include="Neuroglia.Core" Version="2.0.1.40" />
-	<PackageReference Include="Neuroglia.Data.Flux" Version="2.0.1.40" />
-	<PackageReference Include="Neuroglia.Data.OData" Version="2.0.1.40" />
+	<PackageReference Include="Neuroglia.Core" Version="2.0.1.45" />
+	<PackageReference Include="Neuroglia.Data.Flux" Version="2.0.1.45" />
+	<PackageReference Include="Neuroglia.Data.Flux.ReduxDevTools" Version="2.0.1.45" />
+	<PackageReference Include="Neuroglia.Data.OData" Version="2.0.1.45" />
 	<PackageReference Include="Z.Blazor.Diagrams" Version="2.1.6" />
   </ItemGroup>
 
