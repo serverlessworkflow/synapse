@@ -123,7 +123,7 @@ else
         this.diagram = await this.WorkflowDiagramBuilder.BuildDiagram(this.workflow.Definition);
         this.instances = await this.FetchWorkflowInstancesAsync();
         this.diagram.DisplayActivityStatusFor(this.instances);
-        this.HubConnection.On<V1CloudEvent>(nameof(ISynapseMonitoringApiClient.PublishIntegrationEvent), this.OnIntegrationEvent);
+        this.HubConnection.On<V1Event>(nameof(ISynapseMonitoringApiClient.PublishIntegrationEvent), this.OnIntegrationEvent);
         await this.BreadcrumbService.Use(KnownBreadcrumbs.Workflows);
         await this.BreadcrumbService.AddCurrentUri(this.WorkflowId);
         this.workflowBreadCrumbBase = new List<IBreadcrumbItem>(this.BreadcrumbService.Items);
@@ -160,7 +160,7 @@ else
         return (await this.SynapseApi.GetWorkflowInstancesAsync($"$filter={nameof(V1WorkflowInstance.WorkflowId)} eq '{this.WorkflowId}'")).AsQueryable();
     }
 
-    protected async Task OnIntegrationEvent(V1CloudEvent e)
+    protected async Task OnIntegrationEvent(V1Event e)
     {
         if (e.Type.Split('/')[1] != "v1workflowinstance"
             && e.Type.Split('/')[1] != "v1workflowactivity")

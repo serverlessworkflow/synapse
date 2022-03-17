@@ -53,11 +53,18 @@ namespace Synapse.Integration.Commands.WorkflowInstances
 		public virtual Dynamic InputData { get; set; }
 
 		/// <summary>
-		/// An IReadOnlyCollection`1 containing the descriptors of the CloudEvents that have triggered the activation of the V1WorkflowInstance to create
+		/// V1CorrelationContext of the V1WorkflowInstance to create
 		/// </summary>
-		[DataMember(Name = "TriggerEvents", Order = 4)]
-		[Description("An IReadOnlyCollection`1 containing the descriptors of the CloudEvents that have triggered the activation of the V1WorkflowInstance to create")]
-		public virtual ICollection<V1CloudEvent> TriggerEvents { get; set; }
+		[DataMember(Name = "CorrelationContext", Order = 4)]
+		[Description("V1CorrelationContext of the V1WorkflowInstance to create")]
+		public virtual V1CorrelationContext CorrelationContext { get; set; }
+
+		/// <summary>
+		/// A boolean indicating whether or not to automatically start the V1WorkflowInstance once it has been created
+		/// </summary>
+		[DataMember(Name = "AutoStart", Order = 5)]
+		[Description("A boolean indicating whether or not to automatically start the V1WorkflowInstance once it has been created")]
+		public virtual bool AutoStart { get; set; }
 
     }
 

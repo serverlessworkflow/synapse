@@ -60,11 +60,11 @@ namespace Synapse.Integration.Events.WorkflowInstances
 		public virtual Dynamic Input { get; set; }
 
 		/// <summary>
-		/// An IEnumerable`1 containing the newly created V1WorkflowInstance's trigger V1CloudEvents
+		/// The newly created V1WorkflowInstance's V1CorrelationContext
 		/// </summary>
-		[DataMember(Name = "TriggerEvents", Order = 5)]
-		[Description("An IEnumerable`1 containing the newly created V1WorkflowInstance's trigger V1CloudEvents")]
-		public virtual IEnumerable<V1CloudEvent> TriggerEvents { get; set; }
+		[DataMember(Name = "CorrelationContext", Order = 5)]
+		[Description("The newly created V1WorkflowInstance's V1CorrelationContext")]
+		public virtual V1CorrelationContext CorrelationContext { get; set; }
 
     }
 

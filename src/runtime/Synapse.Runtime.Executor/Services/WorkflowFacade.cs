@@ -56,7 +56,7 @@ namespace Synapse.Runtime.Services
         /// <inheritdoc/>
         public virtual async Task StartAsync(CancellationToken cancellationToken)
         {
-           await this.SynapseRuntimeApi.StartAsync(this.Instance.Id, cancellationToken);
+            await this.SynapseRuntimeApi.StartAsync(this.Instance.Id, cancellationToken);
         }
 
         /// <inheritdoc/>
@@ -215,7 +215,7 @@ namespace Synapse.Runtime.Services
                     throw new NotSupportedException($"The specified workflow activity integration event type '{e.GetType().Name}' is not supported in this context");
             }
         }
-
+    
     }
 
 }

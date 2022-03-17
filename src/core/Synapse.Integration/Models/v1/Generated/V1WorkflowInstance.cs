@@ -65,7 +65,7 @@ namespace Synapse.Integration.Models
 		/// </summary>
 		[DataMember(Name = "TriggerEvents", Order = 5)]
 		[Description("An IReadOnlyCollection`1 containing descriptors of the CloudEvents that have triggered the V1WorkflowInstance")]
-		public virtual ICollection<V1CloudEvent> TriggerEvents { get; set; }
+		public virtual ICollection<V1Event> TriggerEvents { get; set; }
 
 		/// <summary>
 		/// The V1WorkflowInstance's status
@@ -89,11 +89,11 @@ namespace Synapse.Integration.Models
 		public virtual DateTime? ExecutedAt { get; set; }
 
 		/// <summary>
-		/// An IReadOnlyDictionary`2 containing the key/value mappings of the V1WorkflowInstance's correlations
+		/// The V1WorkflowInstance's V1CorrelationContext
 		/// </summary>
-		[DataMember(Name = "Correlations", Order = 9)]
-		[Description("An IReadOnlyDictionary`2 containing the key/value mappings of the V1WorkflowInstance's correlations")]
-		public virtual NameValueCollection<string> Correlations { get; set; }
+		[DataMember(Name = "CorrelationContext", Order = 9)]
+		[Description("The V1WorkflowInstance's V1CorrelationContext")]
+		public virtual V1CorrelationContext CorrelationContext { get; set; }
 
 		/// <summary>
 		/// An IReadOnlyCollection`1 containing the activities the V1WorkflowInstance is made out of

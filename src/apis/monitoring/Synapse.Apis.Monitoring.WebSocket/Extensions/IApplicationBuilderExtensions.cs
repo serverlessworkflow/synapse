@@ -50,7 +50,7 @@ namespace Synapse.Apis.Monitoring.WebSocket
             {
                 var mapper = provider.GetRequiredService<IMapper>();
                 var hub = provider.GetRequiredService<IHubContext<SynapseWebSocketMonitoringApi, ISynapseMonitoringApiClient>>();
-                await hub.Clients.All.PublishIntegrationEvent(mapper.Map<V1CloudEvent>(e));
+                await hub.Clients.All.PublishIntegrationEvent(mapper.Map<V1Event>(e));
             });
             return synapse;
         }

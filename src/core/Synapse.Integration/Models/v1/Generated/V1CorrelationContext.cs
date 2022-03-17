@@ -23,12 +23,27 @@
 namespace Synapse.Integration.Models
 {
 
+	/// <summary>
+	/// Represents the context of an event correlation
+	/// </summary>
 	[DataContract]
 	public partial class V1CorrelationContext
+		: Entity
 	{
 
-		[DataMember(Name = "Keys", Order = 1)]
-		public virtual NameValueCollection<string> Keys { get; set; }
+		/// <summary>
+		/// An IReadOnlyDictionary`2 containing the correlations' value by key mappings
+		/// </summary>
+		[DataMember(Name = "Mappings", Order = 1)]
+		[Description("An IReadOnlyDictionary`2 containing the correlations' value by key mappings")]
+		public virtual NameValueCollection<string> Mappings { get; set; }
+
+		/// <summary>
+		/// An IReadOnlyCollection`1 containing all correlated V1Events pending processing
+		/// </summary>
+		[DataMember(Name = "EventsQueue", Order = 2)]
+		[Description("An IReadOnlyCollection`1 containing all correlated V1Events pending processing")]
+		public virtual ICollection<V1Event> EventsQueue { get; set; }
 
     }
 

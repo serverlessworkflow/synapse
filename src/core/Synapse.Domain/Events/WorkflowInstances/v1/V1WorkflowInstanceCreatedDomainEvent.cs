@@ -36,7 +36,7 @@ namespace Synapse.Domain.Events.WorkflowInstances
             this.Key = null!;
             this.WorkflowId = null!;
             this.Input = null!;
-            this.TriggerEvents = null!;
+            this.CorrelationContext = null!;
         }
 
         /// <summary>
@@ -47,15 +47,15 @@ namespace Synapse.Domain.Events.WorkflowInstances
         /// <param name="key">The key of the newly created <see cref="V1WorkflowInstance"/></param>
         /// <param name="activationType">The type of the <see cref="V1WorkflowInstance"/>'s activation</param>
         /// <param name="input">The newly created <see cref="V1WorkflowInstance"/>'s input data</param>
-        /// <param name="triggerEvents">The newly created <see cref="V1WorkflowInstance"/>'s trigger <see cref="CloudEvent"/>s</param>
-        public V1WorkflowInstanceCreatedDomainEvent(string id, string workflowId, string key, V1WorkflowInstanceActivationType activationType, object? input, IEnumerable<Models.V1CloudEvent>? triggerEvents)
+        /// <param name="correlationContext">The newly created <see cref="V1WorkflowInstance"/>'s <see cref="V1CorrelationContext"/></param>
+        public V1WorkflowInstanceCreatedDomainEvent(string id, string workflowId, string key, V1WorkflowInstanceActivationType activationType, object? input, Models.V1CorrelationContext correlationContext)
             : base(id)
         {
             this.Key = key;
             this.WorkflowId = workflowId;
             this.ActivationType = activationType;
             this.Input = input;
-            this.TriggerEvents = triggerEvents;
+            this.CorrelationContext = correlationContext;
         }
 
         /// <summary>
@@ -79,9 +79,9 @@ namespace Synapse.Domain.Events.WorkflowInstances
         public virtual object? Input { get; protected set; }
 
         /// <summary>
-        /// Gets an <see cref="IEnumerable{T}"/> containing the newly created <see cref="V1WorkflowInstance"/>'s trigger <see cref="Models.V1CloudEvent"/>s
+        /// Gets the newly created <see cref="V1WorkflowInstance"/>'s <see cref="V1CorrelationContext"/>
         /// </summary>
-        public virtual IEnumerable<Models.V1CloudEvent>? TriggerEvents { get; protected set; }
+        public virtual Models.V1CorrelationContext CorrelationContext { get; protected set; }
 
     }
 

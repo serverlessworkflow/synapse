@@ -65,6 +65,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Commands\Correlations\v1\Generated\V1CorrelateEventCommand.cs">
+      <CustomToolNamespace>..\Synapse.Application\Commands\Correlations\v1\V1CorrelateEventCommand.cs</CustomToolNamespace>
+    </Compile>
     <Compile Update="Commands\Generic\v1\Generated\V1DeleteCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\Generic\v1\V1DeleteCommand.cs</CustomToolNamespace>
     </Compile>
@@ -95,6 +98,9 @@
     <Compile Update="Commands\WorkflowInstances\v1\Generated\V1CancelWorkflowInstanceCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\WorkflowInstances\v1\V1CancelWorkflowInstanceCommand.cs</CustomToolNamespace>
     </Compile>
+    <Compile Update="Commands\WorkflowInstances\v1\Generated\V1CorrelateWorkflowInstanceCommand.cs">
+      <CustomToolNamespace>..\Synapse.Application\Commands\WorkflowInstances\v1\V1CorrelateWorkflowInstanceCommand.cs</CustomToolNamespace>
+    </Compile>
     <Compile Update="Commands\WorkflowInstances\v1\Generated\V1CreateWorkflowInstanceCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\WorkflowInstances\v1\V1CreateWorkflowInstanceCommand.cs</CustomToolNamespace>
     </Compile>
@@ -115,6 +121,12 @@
     </Compile>
     <Compile Update="Commands\Workflows\v1\Generated\V1CreateWorkflowCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\Workflows\v1\V1CreateWorkflowCommand.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\Correlations\v1\Generated\V1CorrelationContextReleasedIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\Correlations\v1\V1CorrelationContextReleasedDomainEvent.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\Correlations\v1\Generated\V1EventCorrelatedIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\Correlations\v1\V1EventCorrelatedDomainEvent.cs</CustomToolNamespace>
     </Compile>
     <Compile Update="Events\WorkflowActivities\v1\Generated\V1WorkflowActivityCancelledIntegrationEvent.cs">
       <CustomToolNamespace>..\Synapse.Domain\Events\WorkflowActivities\v1\V1WorkflowActivityCancelledDomainEvent.cs</CustomToolNamespace>
@@ -161,6 +173,9 @@
     <Compile Update="Events\WorkflowActivities\v1\V1WorkflowActivitySuspendedIntegrationEvent.cs">
       <CustomToolNamespace>..\Synapse.Domain\Events\WorkflowActivities\v1\V1WorkflowActivitySuspendedDomainEvent.cs</CustomToolNamespace>
     </Compile>
+    <Compile Update="Events\WorkflowInstances\v1\Generated\V1WorkflowCorrelationContextChangedIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\WorkflowInstances\v1\V1WorkflowCorrelationContextChangedDomainEvent.cs</CustomToolNamespace>
+    </Compile>
     <Compile Update="Events\WorkflowInstances\v1\Generated\V1WorkflowInstanceCancelledIntegrationEvent.cs">
       <CustomToolNamespace>..\Synapse.Domain\Events\WorkflowInstances\v1\V1WorkflowInstanceCancelledDomainEvent.cs</CustomToolNamespace>
     </Compile>
@@ -206,11 +221,23 @@
     <Compile Update="Events\Workflows\v1\Generated\V1WorkflowCreatedIntegrationEvent.cs">
       <CustomToolNamespace>..\Synapse.Domain\Events\Workflows\v1\V1WorkflowCreatedDomainEvent.cs</CustomToolNamespace>
     </Compile>
-    <Compile Update="Models\v1\Generated\V1CloudEvent.cs">
-      <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1CloudEvent.cs</CustomToolNamespace>
+    <Compile Update="Models\v1\Generated\V1Correlation.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1Correlation.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Models\v1\Generated\V1CorrelationCondition.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1CorrelationCondition.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Models\v1\Generated\V1CorrelationOutcome.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1CorrelationOutcome.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Models\v1\Generated\V1Event.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1Event.cs</CustomToolNamespace>
     </Compile>
     <Compile Update="Models\v1\Generated\V1CorrelationContext.cs">
       <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1CorrelationContext.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Models\v1\Generated\V1EventFilter.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1EventFilter.cs</CustomToolNamespace>
     </Compile>
     <Compile Update="Models\v1\Generated\V1WorkflowActivity.cs">
       <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1WorkflowActivity.cs</CustomToolNamespace>

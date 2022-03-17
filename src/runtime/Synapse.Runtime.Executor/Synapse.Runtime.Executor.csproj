@@ -30,6 +30,7 @@
     <PackageReference Include="protobuf-net.Grpc" Version="1.0.152" />
     <PackageReference Include="protobuf-net.Grpc.ClientFactory" Version="1.0.152" />
     <PackageReference Include="Simple.OData.Client" Version="5.26.0" />
+    <PackageReference Include="System.Linq.Async" Version="6.0.1" />
   </ItemGroup>
 
   <ItemGroup>

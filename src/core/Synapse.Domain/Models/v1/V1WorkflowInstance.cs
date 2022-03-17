@@ -37,6 +37,7 @@ namespace Synapse.Domain.Models
         {
             this.WorkflowId = null!;
             this.Key = null!;
+            this.CorrelationContext = null!;
         }
 
         /// <summary>
@@ -46,13 +47,15 @@ namespace Synapse.Domain.Models
         /// <param name="workflow">The <see cref="V1WorkflowInstance"/>'s <see cref="V1Workflow"/></param>
         /// <param name="activationType">The <see cref="V1WorkflowInstance"/>'s activation type</param>
         /// <param name="input">The <see cref="V1WorkflowInstance"/>'s input data</param>
-        /// <param name="triggerEvents">An <see cref="IEnumerable{T}"/> containing the <see cref="CloudEvent"/>s that have triggered the creation of the <see cref="V1WorkflowInstance"/></param>
-        public V1WorkflowInstance(string key, V1Workflow workflow, V1WorkflowInstanceActivationType activationType, object? input = null, IEnumerable<V1CloudEvent>? triggerEvents = null)
+        /// <param name="correlationContext">An <see cref="IEnumerable{T}"/> containing the <see cref="CloudEvent"/>s that have triggered the creation of the <see cref="V1WorkflowInstance"/></param>
+        public V1WorkflowInstance(string key, V1Workflow workflow, V1WorkflowInstanceActivationType activationType, object? input = null, V1CorrelationContext? correlationContext = null)
             : this()
         {
             if(workflow == null)
                 throw DomainException.ArgumentNull(nameof(workflow));
-            this.On(this.RegisterEvent(new V1WorkflowInstanceCreatedDomainEvent(BuildUniqueIdentifier(key, workflow), workflow.Id, key, activationType, input, triggerEvents)));
+            if (correlationContext == null)
+                correlationContext = new();
+            this.On(this.RegisterEvent(new V1WorkflowInstanceCreatedDomainEvent(BuildUniqueIdentifier(key, workflow), workflow.Id, key, activationType, input, correlationContext)));
         }
 
         /// <summary>
@@ -77,11 +80,11 @@ namespace Synapse.Domain.Models
         /// </summary>
         public virtual object? Input { get; protected set; }
 
-        private List<V1CloudEvent>? _TriggerEvents;
+        private List<V1Event>? _TriggerEvents;
         /// <summary>
         /// Gets an <see cref="IReadOnlyCollection{T}"/> containing descriptors of the <see cref="CloudEvent"/>s that have triggered the <see cref="V1WorkflowInstance"/>
         /// </summary>
-        public virtual IReadOnlyCollection<V1CloudEvent>? TriggerEvents
+        public virtual IReadOnlyCollection<V1Event>? TriggerEvents
         {
             get
             {
@@ -105,17 +108,10 @@ namespace Synapse.Domain.Models
         /// </summary>
         public virtual DateTimeOffset? ExecutedAt { get; protected set; }
 
-        private readonly Dictionary<string, string> _Correlations = new();
         /// <summary>
-        /// Gets an <see cref="IReadOnlyDictionary{TKey, TValue}"/> containing the key/value mappings of the <see cref="V1WorkflowInstance"/>'s correlations
+        /// Gets the <see cref="V1WorkflowInstance"/>'s <see cref="V1CorrelationContext"/>
         /// </summary>
-        public virtual IReadOnlyDictionary<string, string> Correlations
-        {
-            get
-            {
-                return new ReadOnlyDictionary<string, string>(this._Correlations);
-            }
-        }
+        public virtual V1CorrelationContext CorrelationContext { get; protected set; }
         
         private readonly List<V1WorkflowActivity> _Activities = new();
         /// <summary>
@@ -222,6 +218,19 @@ namespace Synapse.Domain.Models
         }
 
         /// <summary>
+        /// Sets the <see cref="V1Workflow"/>'s <see cref="V1CorrelationContext"/>
+        /// </summary>
+        /// <param name="correlationContext">The <see cref="V1CorrelationContext"/> to set</param>
+        public virtual void SetCorrelationContext(V1CorrelationContext correlationContext)
+        {
+            if (correlationContext == null)
+                throw DomainException.ArgumentNull(nameof(correlationContext));
+            if (this.Status >= V1WorkflowInstanceStatus.Faulted)
+                throw DomainException.UnexpectedState(typeof(V1WorkflowInstance), this.Id, this.Status);
+            this.On(this.RegisterEvent(new V1WorkflowCorrelationContextChangedDomainEvent(this.Id, correlationContext)));
+        }
+
+        /// <summary>
         /// Faults the <see cref="V1WorkflowInstance"/>
         /// </summary>
         /// <param name="error">The <see cref="Error"/> that has caused the <see cref="V1WorkflowInstance"/> to fault</param>
@@ -292,7 +301,8 @@ namespace Synapse.Domain.Models
             this.Key = e.Key;
             this.ActivationType = e.ActivationType;
             this.Input = e.Input;
-            this._TriggerEvents = e.TriggerEvents?.ToList();
+            this._TriggerEvents = e.CorrelationContext.EventsQueue.ToList();
+            this.CorrelationContext = e.CorrelationContext;
         }
 
         /// <summary>
@@ -373,6 +383,16 @@ namespace Synapse.Domain.Models
         {
             this.LastModified = e.CreatedAt;
             this.Status = V1WorkflowInstanceStatus.Running; //todo: keep track of runtime sessions
+        }
+
+        /// <summary>
+        /// Handles the specified <see cref="V1WorkflowCorrelationContextChangedDomainEvent"/>
+        /// </summary>
+        /// <param name="e">The <see cref="V1WorkflowCorrelationContextChangedDomainEvent"/> to handle</param>
+        protected virtual void On(V1WorkflowCorrelationContextChangedDomainEvent e)
+        {
+            this.LastModified = e.CreatedAt;
+            this.CorrelationContext = e.CorrelationContext;
         }
 
         /// <summary>

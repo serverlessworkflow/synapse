@@ -44,13 +44,15 @@ namespace Synapse.Application.Commands.WorkflowInstances
         /// <param name="workflowId">The id of the <see cref="V1Workflow"/> to instanciate</param>
         /// <param name="activationType">The <see cref="V1Workflow"/>'s activation type</param>
         /// <param name="inputData">The input data of the <see cref="Domain.Models.V1WorkflowInstance"/> to create</param>
-        /// <param name="triggerEvents"></param>
-        public V1CreateWorkflowInstanceCommand(string workflowId, V1WorkflowInstanceActivationType activationType, object? inputData, IReadOnlyCollection<V1CloudEvent>? triggerEvents)
+        /// <param name="correlationContext">The <see cref="V1CorrelationContext"/> of the <see cref="V1WorkflowInstance"/> to create</param>
+        /// <param name="autoStart">A boolean indicating whether or not to start the <see cref="Domain.Models.V1WorkflowInstance"/> once it has been created</param>
+        public V1CreateWorkflowInstanceCommand(string workflowId, V1WorkflowInstanceActivationType activationType, object? inputData, V1CorrelationContext? correlationContext, bool autoStart)
         {
             this.WorkflowId = workflowId;
             this.ActivationType = activationType;
             this.InputData = inputData;
-            this.TriggerEvents = triggerEvents;
+            this.CorrelationContext = correlationContext;
+            this.AutoStart = autoStart;
         }
 
         /// <summary>
@@ -69,9 +71,14 @@ namespace Synapse.Application.Commands.WorkflowInstances
         public virtual object? InputData { get; protected set; }
 
         /// <summary>
-        /// Gets an <see cref="IReadOnlyCollection{T}"/> containing the descriptors of the <see cref="CloudEvent"/>s that have triggered the activation of the <see cref="Domain.Models.V1WorkflowInstance"/> to create
+        /// Gets <see cref="V1CorrelationContext"/> of the <see cref="V1WorkflowInstance"/> to create
         /// </summary>
-        public virtual IReadOnlyCollection<V1CloudEvent>? TriggerEvents { get; protected set; }
+        public virtual V1CorrelationContext? CorrelationContext { get; protected set; }
+
+        /// <summary>
+        /// Gets a boolean indicating whether or not to automatically start the <see cref="Domain.Models.V1WorkflowInstance"/> once it has been created
+        /// </summary>
+        public virtual bool AutoStart { get; protected set; }
 
     }
 
@@ -155,8 +162,10 @@ namespace Synapse.Application.Commands.WorkflowInstances
             {
                 key = Guid.NewGuid().ToBase64();
             }
-            var workflowInstance = await this.WorkflowInstances.AddAsync(new(key, workflow, command.ActivationType, command.InputData, command.TriggerEvents), cancellationToken);
+            var workflowInstance = await this.WorkflowInstances.AddAsync(new(key, workflow, command.ActivationType, command.InputData, command.CorrelationContext), cancellationToken);
             await this.WorkflowInstances.SaveChangesAsync(cancellationToken);
+            if (command.AutoStart)
+                await this.Mediator.ExecuteAndUnwrapAsync(new V1StartWorkflowInstanceCommand(workflowInstance.Id), cancellationToken);
             return this.Ok(this.Mapper.Map<Integration.Models.V1WorkflowInstance>(workflowInstance));
         }
 

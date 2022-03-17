@@ -29,12 +29,12 @@ namespace Synapse.Apis.Monitoring
     {
 
         /// <summary>
-        /// Handles the specified <see cref="V1CloudEvent"/>
+        /// Handles the specified <see cref="V1Event"/>
         /// </summary>
-        /// <param name="e">The <see cref="V1CloudEvent"/> to handle</param>
+        /// <param name="e">The <see cref="V1Event"/> to handle</param>
         /// <returns>A new awaitable <see cref="Task"/></returns>
         [OperationContract]
-        Task PublishIntegrationEvent(V1CloudEvent e);
+        Task PublishIntegrationEvent(V1Event e);
 
     }
 

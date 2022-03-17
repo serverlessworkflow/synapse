@@ -46,7 +46,7 @@ namespace Synapse.Application.Services
         }
 
         /// <inheritdoc/>
-        public virtual IWorkflowRuntimeProxy Get(string id)
+        public virtual IWorkflowRuntimeProxy GetProxy(string id)
         {
             if(string.IsNullOrWhiteSpace(id))
                 throw new ArgumentNullException(nameof(id));

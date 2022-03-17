@@ -24,13 +24,17 @@ namespace Synapse.Apis.Runtime
     public enum SignalType
     {
         /// <summary>
+        /// Indicates that the server requested the runtime to correlate the workflow instance to inbound events
+        /// </summary>
+        Correlate,
+        /// <summary>
         /// Indicates that the server requested the runtime to suspend its execution
         /// </summary>
         Suspend,
         /// <summary>
         /// Indicates that the server requested the runtime to cancel its execution
         /// </summary>
-        Cancel
+        Cancel,
     }
 
 }

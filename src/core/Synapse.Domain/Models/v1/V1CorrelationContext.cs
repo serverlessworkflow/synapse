@@ -15,17 +15,111 @@
  *
  */
 
+using System.Collections.ObjectModel;
+
 namespace Synapse.Domain.Models
 {
 
+    /// <summary>
+    /// Represents the context of an event correlation
+    /// </summary>
     [DataTransferObjectType(typeof(Integration.Models.V1CorrelationContext))]
     public class V1CorrelationContext
+        : Entity<string>
     {
 
-        public virtual IDictionary<string, string> Keys { get; protected set; }
+        /// <summary>
+        /// Initializes a new <see cref="V1CorrelationContext"/>
+        /// </summary>
+        public V1CorrelationContext()
+            : base(Guid.NewGuid().ToString())
+        {
+
+        }
+
+        [Newtonsoft.Json.JsonProperty(nameof(Mappings))]
+        [System.Text.Json.Serialization.JsonPropertyName(nameof(Mappings))]
+        private Dictionary<string, string> _Mappings = new();
+        /// <summary>
+        /// Gets an <see cref="IReadOnlyDictionary{TKey, TValue}"/> containing the correlations' value by key mappings
+        /// </summary>
+        public virtual IReadOnlyDictionary<string, string> Mappings => new ReadOnlyDictionary<string, string>(this._Mappings);
+
+        [Newtonsoft.Json.JsonProperty(nameof(EventsQueue))]
+        [System.Text.Json.Serialization.JsonPropertyName(nameof(EventsQueue))]
+        private List<V1Event> _Events = new();
+        /// <summary>
+        /// Gets an <see cref="IReadOnlyCollection{T}"/> containing all correlated <see cref="V1Event"/>s pending processing
+        /// </summary>
+        public virtual IReadOnlyCollection<V1Event> EventsQueue => this._Events.AsReadOnly();
+
+        /// <summary>
+        /// Determines whether or not the specified <see cref="V1Event"/> correlates to the <see cref="V1CorrelationContext"/>
+        /// </summary>
+        /// <param name="e">The <see cref="V1Event"/> to correlate</param>
+        /// <returns>A boolean indicating whether or not the specified <see cref="V1Event"/> correlates to the <see cref="V1CorrelationContext"/></returns>
+        public virtual bool CorrelatesTo(V1Event e)
+        {
+            if (e == null)
+                throw DomainException.ArgumentNull(nameof(e));
+            if (this.EventsQueue.Any(be => be.Type == e.Type && be.Source == e.Source)) 
+                return false; //the specified event type/source has already been correlated
+            foreach (var mapping in this.Mappings)
+            {
+                if (!e.TryGetAttribute(mapping.Key, out var attributeValue)
+                    || attributeValue != mapping.Value)
+                    return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Correlates the specified <see cref="V1Event"/>
+        /// </summary>
+        /// <param name="e">The <see cref="V1Event"/> to correlate</param>
+        /// <param name="mappings">An <see cref="IEnumerable{T}"/> containing the context attributes used to correlate the specified <see cref="V1Event"/></param>
+        /// <param name="enqueue">A boolean indicating whether or not to enqueue the specified <see cref="V1Event"/> for processing. Defaults to false.</param>
+        public virtual void Correlate(V1Event e, IEnumerable<string> mappings, bool enqueue = false)
+        {
+            if (e == null)
+                throw DomainException.ArgumentNull(nameof(e));
+            if (mappings == null)
+                mappings = Array.Empty<string>();
+            if (enqueue)
+                this._Events.Add(e);
+            foreach (var key in mappings)
+            {
+                if (this.Mappings.ContainsKey(key))
+                    continue;
+                if (!e.TryGetAttribute(key, out var attributeValue))
+                    throw new InvalidOperationException($"The event with id '{e.Id}' does not define the required mapping '{key}'");
+                this._Mappings.Add(key, attributeValue);
+            }
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="V1CorrelationContext"/> for the specified bootstrap <see cref="CloudEvent"/>
+        /// </summary>
+        /// <param name="e">The <see cref="CloudEvent"/> that has bootstrapped the <see cref="V1CorrelationContext"/></param>
+        /// <param name="mappings">An <see cref="IEnumerable{T}"/> containing the context attributes used to correlate <see cref="CloudEvent"/>s</param>
+        /// <returns>A new <see cref="V1CorrelationContext"/></returns>
+        public static V1CorrelationContext CreateFor(CloudEvent e, IEnumerable<string> mappings)
+        {
+            if (e == null)
+                throw new ArgumentNullException(nameof(e));
+            if (mappings == null)
+                throw new ArgumentNullException(nameof(mappings));
+            var correlationContext = new V1CorrelationContext();
+            correlationContext._Events.Add(V1Event.CreateFrom(e));
+            foreach (string key in mappings)
+            {
+                if (!e.TryGetAttribute(key, out var attributeValue))
+                    throw new InvalidOperationException($"The cloud event with id '{e.Id}' does not define the required context attribute '{key}'");
+                correlationContext._Mappings.Add(key, attributeValue);
+            }
+            return correlationContext;
+        }
 
     }
-
-
 
 }

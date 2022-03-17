@@ -37,9 +37,10 @@ namespace Synapse.Application.Services
             ODataConventionModelBuilder builder = new();
             builder.EnableLowerCamelCase();
 
-            builder.EntitySet<Integration.Models.V1Workflow>("V1Workflows"); //todo: fix name?
-            builder.EntitySet<Integration.Models.V1WorkflowInstance>("V1WorkflowInstances"); //todo: fix name?
-            builder.EntitySet<Integration.Models.V1WorkflowActivity>("V1WorkflowActivities"); //todo: fix name?
+            builder.EntitySet<Integration.Models.V1Workflow>("V1Workflows");
+            builder.EntitySet<Integration.Models.V1WorkflowInstance>("V1WorkflowInstances");
+            builder.EntitySet<Integration.Models.V1WorkflowActivity>("V1WorkflowActivities");
+            builder.EntitySet<Integration.Models.V1Correlation>("V1Correlations");
 
             builder.AddComplexType(typeof(Dynamic));
             builder.AddComplexType(typeof(Neuroglia.Serialization.DynamicObject));

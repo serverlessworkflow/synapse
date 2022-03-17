@@ -25,6 +25,7 @@ using Neuroglia.Data.Expressions.JQ;
 using Synapse.Apis.Management.Grpc;
 using Synapse.Apis.Runtime.Grpc;
 using Synapse.Runtime.Executor.Services;
+using System.Reactive.Subjects;
 
 AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 using var host = Host.CreateDefaultBuilder(args)
@@ -72,6 +73,8 @@ using var host = Host.CreateDefaultBuilder(args)
         services.AddSingleton<WorkflowRuntime>();
         services.AddSingleton<IWorkflowRuntime>(provider => provider.GetRequiredService<WorkflowRuntime>());
         services.AddHostedService(provider => provider.GetRequiredService<IWorkflowRuntime>());
+
+        services.AddSingleton<IIntegrationEventBus, IntegrationEventBus>();
     })
     .Build();
 await host.RunAsync();

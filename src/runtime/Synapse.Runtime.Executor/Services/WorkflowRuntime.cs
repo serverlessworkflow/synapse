@@ -16,8 +16,9 @@
  */
 using ConcurrentCollections;
 using Microsoft.Extensions.Hosting;
-using Newtonsoft.Json;
+using Synapse.Apis.Runtime;
 using Synapse.Integration.Events.WorkflowActivities;
+using Synapse.Runtime.Executor.Services;
 using System.Reactive.Linq;
 
 namespace Synapse.Runtime.Services
@@ -30,19 +31,26 @@ namespace Synapse.Runtime.Services
         : BackgroundService, IWorkflowRuntime
     {
 
+        private IDisposable? _ServerSignalStreamSubscription;
+        private IDisposable? _OutboundEventStreamSubscription;
+
         /// <summary>
         /// Initializes a new <see cref="WorkflowRuntime"/>
         /// </summary>
         /// <param name="logger">The service used to perform logging</param>
         /// <param name="hostApplicationLifetime">The service used to handle the lifetime of the <see cref="WorkflowRuntime"/>'s host application</param>
+        /// <param name="integrationEventBus">The service used to publish and subscribe to integration events</param>
         /// <param name="activityProcessorFactory">The service used to create <see cref="IWorkflowActivityProcessor"/>s</param>
+        /// <param name="synapseRuntimeApi">The service used to interact with the Synapse Runtime API</param>
         /// <param name="context">The current <see cref="IWorkflowRuntimeContext"/></param>
-        public WorkflowRuntime(ILogger<WorkflowRuntime> logger, IHostApplicationLifetime hostApplicationLifetime,
-            IWorkflowActivityProcessorFactory activityProcessorFactory, IWorkflowRuntimeContext context)
+        public WorkflowRuntime(ILogger<WorkflowRuntime> logger, IHostApplicationLifetime hostApplicationLifetime, IIntegrationEventBus integrationEventBus,
+            IWorkflowActivityProcessorFactory activityProcessorFactory, ISynapseRuntimeApi synapseRuntimeApi, IWorkflowRuntimeContext context)
         {
             this.Logger = logger;
             this.HostApplicationLifetime = hostApplicationLifetime;
+            this.IntegrationEventBus = integrationEventBus;
             this.ActivityProcessorFactory = activityProcessorFactory;
+            this.RuntimeApi = synapseRuntimeApi;
             this.Context = context;
             this.CancellationTokenSource = null!;
         }
@@ -68,6 +76,11 @@ namespace Synapse.Runtime.Services
         protected IWorkflowRuntimeContext Context { get; }
 
         /// <summary>
+        /// Gets the service used to interact with the Synapse Runtime API
+        /// </summary>
+        protected ISynapseRuntimeApi RuntimeApi { get; }
+
+        /// <summary>
         /// Gets the <see cref="WorkflowRuntime"/>'s <see cref="System.Threading.CancellationTokenSource"/>
         /// </summary>
         protected CancellationTokenSource CancellationTokenSource { get; private set; }
@@ -82,6 +95,16 @@ namespace Synapse.Runtime.Services
         /// </summary>
         protected ConcurrentHashSet<IWorkflowActivityProcessor> Processors { get; } = new ConcurrentHashSet<IWorkflowActivityProcessor>();
 
+        /// <summary>
+        /// Gets the service used to publish and subscribe to integration events
+        /// </summary>
+        protected IIntegrationEventBus IntegrationEventBus { get; }
+
+        /// <summary>
+        /// Gets an <see cref="IObservable{T}"/> that represents the inbound, server <see cref="RuntimeSignal"/> stream
+        /// </summary>
+        protected IObservable<RuntimeSignal> ServerStream { get; private set; } = null!;
+
         /// <inheritdoc/>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -89,6 +112,9 @@ namespace Synapse.Runtime.Services
             try
             {
                 await this.Context.InitializeAsync(this.CancellationToken);
+                this.ServerStream = this.RuntimeApi.Connect(this.Context.Workflow.Instance.Id).ToObservable();
+                this._ServerSignalStreamSubscription = this.ServerStream.SubscribeAsync(this.OnServerSignalAsync);
+                this._OutboundEventStreamSubscription = this.IntegrationEventBus.OutboundStream.SubscribeAsync(this.OnPublishEventAsync);
                 switch (this.Context.Workflow.Instance.Status)
                 {
                     case V1WorkflowInstanceStatus.Pending:
@@ -132,6 +158,34 @@ namespace Synapse.Runtime.Services
         }
 
         /// <summary>
+        /// Suspends the <see cref="WorkflowRuntime"/>'s execution
+        /// </summary>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        protected virtual async Task SuspendAsync()
+        {
+            foreach (var processor in this.Processors.ToList())
+            {
+                await processor.SuspendAsync(this.CancellationToken);
+            }
+            //todo:
+            //await this.Context.Workflow.MarkAsSuspendAsync(this.CancellationToken);
+        }
+
+        /// <summary>
+        /// Cancels the <see cref="WorkflowRuntime"/>'s execution
+        /// </summary>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        protected virtual async Task CancelAsync()
+        {
+            foreach (var processor in this.Processors.ToList())
+            {
+                await processor.TerminateAsync(this.CancellationToken);
+            }
+            //todo:
+            //await this.Context.Workflow.MarkAsCancelledAsync(this.CancellationToken);
+        }
+
+        /// <summary>
         /// Creates a new child <see cref="IWorkflowActivityProcessor"/> for the specified <see cref="V1WorkflowActivity"/>
         /// </summary>
         /// <param name="activity">The <see cref="V1WorkflowActivity"/> to create a child <see cref="IWorkflowActivityProcessor"/> for</param>
@@ -139,32 +193,31 @@ namespace Synapse.Runtime.Services
         {
             if (activity == null)
                 throw new ArgumentNullException(nameof(activity));
-            CancellationToken cancellationToken = this.CancellationTokenSource.Token;
             IWorkflowActivityProcessor processor = this.ActivityProcessorFactory.Create(activity);
             switch (processor)
             {
                 case IStateProcessor stateProcessor:
                     processor.OfType<V1WorkflowActivityCompletedIntegrationEvent>().SubscribeAsync
                     (
-                        async e => await this.OnStateCompletedAsync(stateProcessor, e, cancellationToken),
-                        async ex => await this.OnProcessErrorAsync(stateProcessor, ex, cancellationToken),
-                        async () => await this.OnProcessCompletedAsync(stateProcessor, cancellationToken)
+                        async e => await this.OnStateCompletedAsync(stateProcessor, e),
+                        async ex => await this.OnActivityProcessingErrorAsync(stateProcessor, ex),
+                        async () => await this.OnActivityProcessingCompletedAsync(stateProcessor)
                     );
                     break;
                 case ITransitionProcessor transitionProcessor:
                     processor.OfType<V1WorkflowActivityCompletedIntegrationEvent>().SubscribeAsync
                     (
-                        async e => await this.OnTransitionCompletedAsync(transitionProcessor, e, cancellationToken),
-                        async ex => await this.OnProcessErrorAsync(transitionProcessor, ex, cancellationToken),
-                        async () => await this.OnProcessCompletedAsync(transitionProcessor, cancellationToken)
+                        async e => await this.OnTransitionCompletedAsync(transitionProcessor, e),
+                        async ex => await this.OnActivityProcessingErrorAsync(transitionProcessor, ex),
+                        async () => await this.OnActivityProcessingCompletedAsync(transitionProcessor)
                     );
                     break;
                 case IEndProcessor endProcessor:
                     processor.OfType<V1WorkflowActivityCompletedIntegrationEvent>().SubscribeAsync
                     (
-                        async e => await this.OnEndCompletedAsync(endProcessor, e, cancellationToken),
-                        async ex => await this.OnProcessErrorAsync(endProcessor, ex, cancellationToken),
-                        async () => await this.OnCompletedAsync(endProcessor, cancellationToken)
+                        async e => await this.OnEndCompletedAsync(endProcessor, e),
+                        async ex => await this.OnActivityProcessingErrorAsync(endProcessor, ex),
+                        async () => await this.OnCompletedAsync(endProcessor)
                     );
                     break;
             }
@@ -172,7 +225,67 @@ namespace Synapse.Runtime.Services
             return processor;
         }
 
-        protected virtual async Task OnStateCompletedAsync(IStateProcessor processor, V1WorkflowActivityCompletedIntegrationEvent e, CancellationToken cancellationToken)
+        /// <summary>
+        /// Handles the specified <see cref="RuntimeSignal"/>
+        /// </summary>
+        /// <param name="signal">The <see cref="RuntimeSignal"/> to handle</param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        protected virtual async Task OnServerSignalAsync(RuntimeSignal signal)
+        {
+            if (signal == null)
+                return;
+            try
+            {
+                switch (signal.Type)
+                {
+                    case SignalType.Correlate:
+                        var correlationContext = signal.Data!.ToObject<V1CorrelationContext>();
+                        foreach (var e in correlationContext.EventsQueue)
+                        {
+                            this.IntegrationEventBus.InboundStream.OnNext(e);
+                        }
+                        break;
+                    case SignalType.Suspend:
+                        await this.SuspendAsync();
+                        break;
+                    case SignalType.Cancel:
+                        await this.CancelAsync();
+                        break;
+                    default:
+                        this.Logger.LogWarning("The specified server signal type '{signal.Type}' is not supported", signal.Type);
+                        break;
+                }
+            }
+            catch(Exception ex)
+            {
+                this.Logger.LogError("An error occured while handling a server runtime signal: {ex}", ex.ToString());
+            }
+        }
+
+        /// <summary>
+        /// Publishes the specified <see cref="V1Event"/>
+        /// </summary>
+        /// <param name="e">The <see cref="V1Event"/> to publish</param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        protected virtual async Task OnPublishEventAsync(V1Event e)
+        {
+            try
+            {
+                //todo: publish the event to the server
+            }
+            catch(Exception ex)
+            {
+                this.Logger.LogError("An error occured while publishing the specified event: {ex}", ex.ToString());
+            }
+        }
+
+        /// <summary>
+        /// Handles the completion of a state
+        /// </summary>
+        /// <param name="processor">The <see cref="IStateProcessor"/> that has finished processing the state</param>
+        /// <param name="e">The <see cref="V1WorkflowActivityCompletedIntegrationEvent"/> that describes the processed state's output</param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        protected virtual async Task OnStateCompletedAsync(IStateProcessor processor, V1WorkflowActivityCompletedIntegrationEvent e)
         {
             var metadata = new Dictionary<string, string>() { { V1WorkflowActivityMetadata.State, processor.State.Name } };
             if (processor.State is SwitchStateDefinition switchState)
@@ -185,10 +298,10 @@ namespace Synapse.Runtime.Services
                 switch (switchCase.Type)
                 {
                     case ConditionType.End:
-                        await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.End, e.Output, metadata, null, cancellationToken);
+                        await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.End, e.Output, metadata, null, this.CancellationToken);
                         break;
                     case ConditionType.Transition:
-                        await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Transition, e.Output, metadata, null, cancellationToken);
+                        await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Transition, e.Output, metadata, null, this.CancellationToken);
                         break;
                     default:
                         throw new NotSupportedException($"The specified condition type '{switchCase.Type}' is not supported in this context");
@@ -198,15 +311,17 @@ namespace Synapse.Runtime.Services
             {
                 if (processor.State.Transition != null
                     && string.IsNullOrWhiteSpace(processor.State.TransitionToStateName))
-                    await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Transition, e.Output, metadata, null, cancellationToken);
+                    await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Transition, e.Output, metadata, null, this.CancellationToken);
                 else if (processor.State.End != null
                     || processor.State.IsEnd)
-                    await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.End, e.Output, metadata, null, cancellationToken);
+                    await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.End, e.Output, metadata, null, this.CancellationToken);
                 else
                     throw new InvalidOperationException($"The state '{processor.State.Name}' must declare a transition definition or an end definition for it is part of the main execution logic of the workflow '{this.Context.Workflow.Definition.Id}'");
-                foreach (var activity in await this.Context.Workflow.GetOperativeActivitiesAsync(cancellationToken))
+                foreach (var activity in await this.Context.Workflow.GetOperativeActivitiesAsync(this.CancellationToken))
                 {
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                     this.CreateActivityProcessor(activity);
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                 }
             }
         }
@@ -218,27 +333,29 @@ namespace Synapse.Runtime.Services
         /// <param name="result">The <see cref="V1WorkflowExecutionResult"/> to process</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A new awaitable <see cref="Task"/></returns>
-        protected virtual async Task OnTransitionCompletedAsync(ITransitionProcessor processor, V1WorkflowActivityCompletedIntegrationEvent e, CancellationToken cancellationToken)
+        protected virtual async Task OnTransitionCompletedAsync(ITransitionProcessor processor, V1WorkflowActivityCompletedIntegrationEvent e)
         {
             if (!this.Context.Workflow.Definition.TryGetState(processor.Transition.NextState, out StateDefinition nextState))
                 throw new NullReferenceException($"Failed to find a state with name '{processor.Transition.NextState}' in workflow '{this.Context.Workflow.Definition.Id} {this.Context.Workflow.Definition.Version}'");
-            await this.Context.Workflow.TransitionToAsync(nextState, cancellationToken);
+            await this.Context.Workflow.TransitionToAsync(nextState, this.CancellationToken);
             var metadata = new Dictionary<string, string>() { { V1WorkflowActivityMetadata.State, nextState.Name } };
-            var activity = await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.State, e.Output, metadata, null, cancellationToken);
+            var activity = await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.State, e.Output, metadata, null, this.CancellationToken);
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             this.CreateActivityProcessor(activity);
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
 
-        protected virtual async Task OnEndCompletedAsync(IEndProcessor processor, V1WorkflowActivityCompletedIntegrationEvent e, CancellationToken cancellationToken)
+        protected virtual async Task OnEndCompletedAsync(IEndProcessor processor, V1WorkflowActivityCompletedIntegrationEvent e)
         {
-            await this.Context.Workflow.SetOutputAsync(e.Output, cancellationToken);
+            await this.Context.Workflow.SetOutputAsync(e.Output, this.CancellationToken);
         }
 
-        protected virtual async Task OnProcessErrorAsync(IWorkflowActivityProcessor processor, Exception ex, CancellationToken cancellationToken)
+        protected virtual async Task OnActivityProcessingErrorAsync(IWorkflowActivityProcessor processor, Exception ex)
         {
             try
             {
                 this.Logger.LogWarning("An error occured while executing the workflow instance: {ex}", ex.ToString());
-                await this.Context.Workflow.FaultAsync(ex, cancellationToken);
+                await this.Context.Workflow.FaultAsync(ex, this.CancellationToken);
                 this.HostApplicationLifetime.StopApplication();
             }
             catch (Exception cex)
@@ -248,21 +365,29 @@ namespace Synapse.Runtime.Services
             }
         }
 
-        protected virtual async Task OnProcessCompletedAsync(IWorkflowActivityProcessor processor, CancellationToken cancellationToken)
+        protected virtual async Task OnActivityProcessingCompletedAsync(IWorkflowActivityProcessor processor)
         {
             this.Processors.TryRemove(processor);
             processor.Dispose();
             foreach (IWorkflowActivityProcessor childProcessor in this.Processors)
             {
-                await childProcessor.ProcessAsync(cancellationToken);
+                await childProcessor.ProcessAsync(this.CancellationToken);
             }
         }
 
-        protected virtual async Task OnCompletedAsync(IEndProcessor processor, CancellationToken cancellationToken)
+        protected virtual async Task OnCompletedAsync(IEndProcessor processor)
         {
-            await this.OnProcessCompletedAsync(processor, cancellationToken);
+            await this.OnActivityProcessingCompletedAsync(processor);
             this.Logger.LogInformation("Workflow executed");
             this.HostApplicationLifetime.StopApplication();
+        }
+
+        /// <inheritdoc/>
+        public override void Dispose()
+        {
+            this._ServerSignalStreamSubscription?.Dispose();
+            this._OutboundEventStreamSubscription?.Dispose();
+            base.Dispose();
         }
 
     }

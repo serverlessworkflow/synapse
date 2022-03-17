@@ -36,6 +36,14 @@ namespace Synapse.Application.Services
         string Id { get; }
 
         /// <summary>
+        /// Peforms runtime correlation in the specified <see cref="V1CorrelationContext"/>
+        /// </summary>
+        /// <param name="context">The <see cref="V1CorrelationContext"/> in which to perform the correlation</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        Task CorrelateAsync(V1CorrelationContext context, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Suspends the <see cref="IWorkflowRuntimeProxy"/>'s execution
         /// </summary>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>

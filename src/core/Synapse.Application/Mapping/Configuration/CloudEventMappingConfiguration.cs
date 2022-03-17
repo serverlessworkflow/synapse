@@ -20,10 +20,10 @@ namespace Synapse.Application.Mapping.Configuration
 {
 
     internal class CloudEventMappingConfiguration
-        : IMappingConfiguration<CloudEvent, Integration.Models.V1CloudEvent>
+        : IMappingConfiguration<CloudEvent, Integration.Models.V1Event>
     {
 
-        void IMappingConfiguration<CloudEvent, Integration.Models.V1CloudEvent>.Configure(IMappingExpression<CloudEvent, Integration.Models.V1CloudEvent> mapping)
+        void IMappingConfiguration<CloudEvent, Integration.Models.V1Event>.Configure(IMappingExpression<CloudEvent, Integration.Models.V1Event> mapping)
         {
             
         }

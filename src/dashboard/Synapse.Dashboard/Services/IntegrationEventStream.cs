@@ -24,7 +24,7 @@ namespace Synapse.Dashboard.Services
         {
             this.Logger = logger;
             this.HubConnection = hubConnection;
-            //this.Subscription = this.HubConnection.On<V1CloudEvent>(nameof(ISynapseMonitoringApiClient.PublishIntegrationEvent), On); //We probably don't want to create a toast for each single event. If have to notify, do it in a more subtle way
+            //this.Subscription = this.HubConnection.On<V1Event>(nameof(ISynapseMonitoringApiClient.PublishIntegrationEvent), On); //We probably don't want to create a toast for each single event. If have to notify, do it in a more subtle way
             this.ToastManager = toastManager;
             this.JsonSerializer = jsonSerializer;
         }
@@ -54,19 +54,19 @@ namespace Synapse.Dashboard.Services
         /// <summary>
         /// Gets the <see cref="Subject{T}"/> used to observe <see cref=""/>s consumed by the <see cref="IntegrationEventStream"/>
         /// </summary>
-        protected Subject<V1CloudEvent> Stream { get; } = new();
+        protected Subject<V1Event> Stream { get; } = new();
 
         /// <inheritdoc/>
-        public virtual IDisposable Subscribe(IObserver<V1CloudEvent> observer)
+        public virtual IDisposable Subscribe(IObserver<V1Event> observer)
         {
             return this.Stream.Subscribe(observer);
         }
 
         /// <summary>
-        /// Handles the specified <see cref="V1CloudEvent"/>
+        /// Handles the specified <see cref="V1Event"/>
         /// </summary>
-        /// <param name="e">The <see cref="V1CloudEvent"/> to handle</param>
-        protected virtual async void On(V1CloudEvent e)
+        /// <param name="e">The <see cref="V1Event"/> to handle</param>
+        protected virtual async void On(V1Event e)
         {
             try
             {

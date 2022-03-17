@@ -52,4 +52,5 @@ namespace Synapse.Domain.Events.WorkflowInstances
         public virtual Neuroglia.Error Error { get; protected set; }
 
     }
+
 }

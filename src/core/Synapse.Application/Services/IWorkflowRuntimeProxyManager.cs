@@ -36,7 +36,7 @@ namespace Synapse.Application.Services
         /// </summary>
         /// <param name="id">The id of the <see cref="IWorkflowRuntimeProxy"/> to get</param>
         /// <returns>The <see cref="IWorkflowRuntimeProxy"/> with the specified id</returns>
-        IWorkflowRuntimeProxy Get(string id);
+        IWorkflowRuntimeProxy GetProxy(string id);
 
         /// <summary>
         /// Unregisters the specified <see cref="IWorkflowRuntimeProxy"/>

@@ -15,6 +15,7 @@
  *
  */
 
+using Neuroglia.Serialization;
 using Synapse.Apis.Runtime;
 
 namespace Synapse.Application.Services
@@ -75,6 +76,14 @@ namespace Synapse.Application.Services
         protected IAsyncStreamWriter<RuntimeSignal> SignalStream { get; }
 
         /// <inheritdoc/>
+        public virtual async Task CorrelateAsync(V1CorrelationContext context, CancellationToken cancellationToken = default)
+        {
+            if (context == null)
+                throw new ArgumentNullException(nameof(context));
+            await this.SignalStream.WriteAsync(new(SignalType.Correlate, Dynamic.FromObject(context)), cancellationToken);
+        }
+
+        /// <inheritdoc/>
         public virtual async Task SuspendAsync(CancellationToken cancellationToken = default)
         {
             await this.SignalStream.WriteAsync(new(SignalType.Suspend), cancellationToken);
@@ -106,6 +115,7 @@ namespace Synapse.Application.Services
             this.Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
+
     }
 
 }
