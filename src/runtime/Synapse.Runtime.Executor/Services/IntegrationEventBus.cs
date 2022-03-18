@@ -15,6 +15,7 @@
  *
  */
 
+using CloudNative.CloudEvents;
 using System.Reactive.Subjects;
 
 namespace Synapse.Runtime.Executor.Services
@@ -29,18 +30,18 @@ namespace Synapse.Runtime.Executor.Services
         private bool _Disposed;
 
         /// <summary>
-        /// Gets the <see cref="Subject"/> used to stream produced <see cref="V1Event"/>s
+        /// Gets the <see cref="Subject"/> used to stream produced <see cref="CloudEvent"/>s
         /// </summary>
-        public Subject<V1Event> OutboundStream { get; } = new();
+        public Subject<CloudEvent> OutboundStream { get; } = new();
 
-        ISubject<V1Event> IIntegrationEventBus.OutboundStream => this.OutboundStream;
+        ISubject<CloudEvent> IIntegrationEventBus.OutboundStream => this.OutboundStream;
 
         /// <summary>
-        /// Gets the <see cref="Subject"/> used to stream consumed <see cref="V1Event"/>s
+        /// Gets the <see cref="Subject"/> used to stream consumed <see cref="CloudEvent"/>s
         /// </summary>
-        public Subject<V1Event> InboundStream { get; } = new();
+        public Subject<CloudEvent> InboundStream { get; } = new();
 
-        ISubject<V1Event> IIntegrationEventBus.InboundStream => this.InboundStream;
+        ISubject<CloudEvent> IIntegrationEventBus.InboundStream => this.InboundStream;
 
         protected virtual void Dispose(bool disposing)
         {

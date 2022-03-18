@@ -115,7 +115,7 @@ namespace Synapse.Runtime.Services
             {
                 ActionType.Function => this.CreateFunctionActivityProcessor(state, activity),
                 ActionType.Subflow => throw new NotImplementedException(),//todo
-                ActionType.Trigger => throw new NotImplementedException(),//todo
+                ActionType.Trigger => this.CreateAsyncFunctionActivityProcessor(state, activity),
                 _ => throw new NotSupportedException($"The specified {typeof(ActionType).Name} '{action.Type}' is not supported"),
             };
         }
@@ -124,7 +124,7 @@ namespace Synapse.Runtime.Services
         {
             if (!state.TryGetAction(activity.Metadata, out var action))
                 throw new NullReferenceException($"Failed to find an action that matches the metadata specified by the activity with id '{activity.Id}'");
-            if (!this.Context.Workflow.Definition.TryGetFunction(action.Function!.RefName, out FunctionDefinition function))
+            if (!this.Context.Workflow.Definition.TryGetFunction(action.Function!.RefName, out var function))
                 throw new NullReferenceException($"Failed to find a function with the specified name '{action.Function.RefName}' in the workflow with name '{this.Context.Workflow.Definition.Id}' and version '{this.Context.Workflow.Definition.Version}'");
             return function.Type switch
             {
@@ -137,6 +137,21 @@ namespace Synapse.Runtime.Services
                 FunctionType.Rpc => ActivatorUtilities.CreateInstance<GrpcFunctionProcessor>(this.ServiceProvider, activity, action, function),
                 _ => throw new NotSupportedException($"The specified {nameof(FunctionType)} '{function.Type}' is not supported"),
             };
+        }
+
+        protected virtual IWorkflowActivityProcessor CreateAsyncFunctionActivityProcessor(StateDefinition state, V1WorkflowActivity activity)
+        {
+            if (!state.TryGetAction(activity.Metadata, out var action))
+                throw new NullReferenceException($"Failed to find an action that matches the metadata specified by the activity with id '{activity.Id}'");
+            if (!this.Context.Workflow.Definition.TryGetEvent(action.Event!.ResultEvent, out var triggerEvent))
+                throw new NullReferenceException($"Failed to find a produced event with the specified name '{action.Event!.ProduceEvent}' in the workflow with name '{this.Context.Workflow.Definition.Id}' and version '{this.Context.Workflow.Definition.Version}'");
+            if (triggerEvent.Kind != EventKind.Produced)
+                throw new Exception($"The event '{action.Event!.ResultEvent}' is referenced as a produced event, but is defined as a consumed one");
+            if (!this.Context.Workflow.Definition.TryGetEvent(action.Event!.ResultEvent, out var resultEvent))
+                throw new NullReferenceException($"Failed to find a consumed event with the specified name '{action.Event!.ResultEvent}' in the workflow with name '{this.Context.Workflow.Definition.Id}' and version '{this.Context.Workflow.Definition.Version}'");
+            if (resultEvent.Kind != EventKind.Consumed)
+                throw new Exception($"The event '{action.Event!.ResultEvent}' is referenced as a consumed event, but is defined as a produced one");
+            return ActivatorUtilities.CreateInstance<AsyncFunctionProcessor>(this.ServiceProvider, state, activity, action, triggerEvent, resultEvent);
         }
 
         IWorkflowActivityProcessor IWorkflowActivityProcessorFactory.Create(V1WorkflowActivity activity)

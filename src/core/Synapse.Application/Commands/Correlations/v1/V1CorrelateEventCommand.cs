@@ -72,32 +72,69 @@ namespace Synapse.Application.Commands.Correlations
         /// <inheritdoc/>
         public virtual async Task<IOperationResult> HandleAsync(V1CorrelateEventCommand command, CancellationToken cancellationToken = default)
         {
-            foreach(var correlation in (await this.Correlations.ToListAsync(cancellationToken))
-                .Where(t => t.AppliesTo(command.Event)))
+            this.Logger.LogInformation("Processing event with id '{eventId}', type '{eventType}' and source '{eventSource}'...", command.Event.Id, command.Event.Type, command.Event.Source);
+            IEnumerable<V1Correlation> correlations = await this.Correlations.ToListAsync(cancellationToken);
+            int totalTriggerCount = correlations.Count();
+            correlations = correlations.Where(c => c.AppliesTo(command.Event));
+            int matchingTriggerCount = correlations.Count();
+            this.Logger.LogInformation("Matched the event against {matchingCorrelationCount} out of {totalCorrelationCount} correlations.", matchingTriggerCount, totalTriggerCount);
+            foreach (var correlation in correlations)
             {
-                //todo: log
+                this.Logger.LogInformation("Processing correlation with id '{correlationId}'...", correlation.Id);
                 var matchingCondition = correlation.GetMatchingConditionFor(command.Event)!;
                 var matchingFilter = matchingCondition.GetMatchingFilterFor(command.Event)!;
-                switch (correlation.Mode)
+                var matchingContexts = correlation.Contexts
+                    .Where(c => c.CorrelatesTo(command.Event));
+                switch (correlation.Lifetime)
                 {
-                    case V1CorrelationMode.Exclusive:
-                        if (correlation.Contexts == null
-                            || correlation.Contexts.Count != 1)
-                            throw new Exception($"Failed to find the required exclusive context of the correlation with id '{correlation.Id}'");
-                        await this.CorrelateAsync(correlation, correlation.Contexts.Single(), command.Event, matchingFilter, cancellationToken);
-                        break;
-                    case V1CorrelationMode.Parallel:
-                        foreach (var context in correlation.Contexts.Where(c => c.CorrelatesTo(command.Event)))
+                    case V1CorrelationLifetime.Singleton:
+                        var matchingContext = matchingContexts.FirstOrDefault();
+                        if (matchingContext == null)
                         {
-                            await this.CorrelateAsync(correlation, context, command.Event, matchingFilter, cancellationToken);
+                            this.Logger.LogInformation("Failed to find a matching correlation context");
+                            if (correlation.Contexts.Any())
+                                throw new Exception("Failed to correlate event"); //should not happen
+                            this.Logger.LogInformation("Creating a new correlation context...");
+                            matchingContext = V1CorrelationContext.CreateFor(command.Event, matchingFilter.Mappings.Keys);
+                            correlation.AddContext(matchingContext);
+                            await this.Correlations.UpdateAsync(correlation, cancellationToken);
+                            await this.Correlations.SaveChangesAsync(cancellationToken);
+                            this.Logger.LogInformation("Correlation context with id '{contextId}' successfully created", matchingContext.Id);
+                            this.Logger.LogInformation("Event successfully correlated to context with id '{contextId}'", matchingContext.Id);
+                        }
+                        else
+                        {
+                            await this.CorrelateAsync(correlation, matchingContext, command.Event, matchingFilter, cancellationToken);
+                        }
+                        break;
+                    case V1CorrelationLifetime.Transient:
+                        matchingContext = matchingContexts.FirstOrDefault();
+                        if(matchingContext == null)
+                        {
+                            this.Logger.LogInformation("Failed to find a matching correlation context");
+                            if (correlation.Contexts.Any())
+                                throw new Exception("Failed to correlate event"); //should not happen
+                            this.Logger.LogInformation("Creating a new correlation context...");
+                            matchingContext = V1CorrelationContext.CreateFor(command.Event, matchingFilter.Mappings.Keys);
+                            correlation.AddContext(matchingContext);
+                            await this.Correlations.UpdateAsync(correlation, cancellationToken);
+                            await this.Correlations.SaveChangesAsync(cancellationToken);
+                            this.Logger.LogInformation("Correlation context with id '{contextId}' successfully created", matchingContext.Id);
+                            this.Logger.LogInformation("Event successfully correlated to context with id '{contextId}'", matchingContext.Id);
+                        }
+                        else
+                        {
+                            this.Logger.LogInformation("Found {matchingContextCount} matching correlation contexts", matchingContexts.Count());
+                            foreach (var context in matchingContexts)
+                            {
+  
+                                await this.CorrelateAsync(correlation, context, command.Event, matchingFilter, cancellationToken);
+                            }
                         }
                         break;
                     default:
-                        throw new NotSupportedException($"The specified {nameof(V1CorrelationMode)} '{correlation.Mode}' is not supported");
+                        throw new NotSupportedException($"The specified {nameof(V1CorrelationLifetime)} '{correlation.Lifetime}' is not supported");
                 }
-                await this.Correlations.UpdateAsync(correlation, cancellationToken);
-                await this.Correlations.SaveChangesAsync(cancellationToken);
-                //todo: log
             }
             return this.Ok();
         }
@@ -113,22 +150,24 @@ namespace Synapse.Application.Commands.Correlations
         /// <returns>A new awaitable <see cref="Task"/></returns>
         protected virtual async Task CorrelateAsync(V1Correlation correlation, V1CorrelationContext correlationContext, V1Event e, V1EventFilter filter, CancellationToken cancellationToken = default)
         {
+            this.Logger.LogInformation("Correlating event to context with id '{contextId}'...", correlationContext.Id);
             correlationContext.Correlate(e, filter.Mappings.Keys);
             correlation = await this.Correlations.UpdateAsync(correlation, cancellationToken);
             await this.Correlations.SaveChangesAsync(cancellationToken);
-            //todo: log
+            this.Logger.LogInformation("Event successfully correlated to context with id '{contextId}'", correlationContext.Id);
+            this.Logger.LogInformation("Attempting to complete the correlation with id '{correlationId}' in context with id '{contextId}'...", correlation.Id, correlationContext.Id);
             if (!correlation.TryComplete(correlationContext))
             {
-                //todo: log
+                this.Logger.LogInformation("Correlations conditions are not met in the specified correlation context");
                 return;
             }
-            //todo: log
+            this.Logger.LogInformation("Correlation with id '{correlationId}' has been completed in context with id '{contextId}. Computing outcome...", correlation.Id, correlationContext.Id);
             switch (correlation.Outcome.Type)
             {
                 case V1CorrelationOutcomeType.Start:
                     await this.Mediator.ExecuteAndUnwrapAsync(new V1CreateWorkflowInstanceCommand(correlation.Outcome.Target, V1WorkflowInstanceActivationType.Trigger, new(), correlationContext, true), cancellationToken);
                     break;
-                case V1CorrelationOutcomeType.Resume:
+                case V1CorrelationOutcomeType.Correlate:
                     await this.Mediator.ExecuteAndUnwrapAsync(new V1CorrelateWorkflowInstanceCommand(correlation.Outcome.Target, correlationContext), cancellationToken);
                     break;
                 default:
@@ -137,6 +176,14 @@ namespace Synapse.Application.Commands.Correlations
             correlation.ReleaseContext(correlationContext);
             correlation = await this.Correlations.UpdateAsync(correlation, cancellationToken);
             await this.Correlations.SaveChangesAsync(cancellationToken);
+            if(correlation.Lifetime == V1CorrelationLifetime.Singleton)
+            {
+                this.Logger.LogInformation("The correlation with id '{correlationId}' is a singleton and its context has been released. Disposing of it...", correlation.Id);
+                await this.Correlations.RemoveAsync(correlation, cancellationToken);
+                await this.Correlations.SaveChangesAsync(cancellationToken);
+                this.Logger.LogInformation("The correlation with id '{correlationId}' has been successfully disposed of", correlation.Id);
+            }
+            this.Logger.LogInformation("Correlation outcome successfully computed");
         }
 
     }

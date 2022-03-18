@@ -40,8 +40,8 @@ namespace Synapse.Application.Services
         /// <param name="mediator">The service used to mediate calls</param>
         /// <param name="mapper">The service used to map objects</param>
         /// <param name="id">The <see cref="WorkflowRuntimeProxy"/>'s id, which is the same than the id of the executed workflow instance </param>
-        /// <param name="signalStream">The <see cref="WorkflowRuntimeProxy"/>'s <see cref="RuntimeSignal"/> stream</param>
-        public WorkflowRuntimeProxy(ILogger<WorkflowRuntimeProxy> logger, IMediator mediator, IMapper mapper, string id, IAsyncStreamWriter<RuntimeSignal> signalStream)
+        /// <param name="signalStream">The <see cref="WorkflowRuntimeProxy"/>'s <see cref="V1RuntimeSignal"/> stream</param>
+        public WorkflowRuntimeProxy(ILogger<WorkflowRuntimeProxy> logger, IMediator mediator, IMapper mapper, string id, IAsyncStreamWriter<V1RuntimeSignal> signalStream)
         {
             this.Logger = logger;
             this.Mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
@@ -73,26 +73,26 @@ namespace Synapse.Application.Services
         /// <summary>
         /// Gets the <see cref="WorkflowRuntimeProxy"/>'s connection
         /// </summary>
-        protected IAsyncStreamWriter<RuntimeSignal> SignalStream { get; }
+        protected IAsyncStreamWriter<V1RuntimeSignal> SignalStream { get; }
 
         /// <inheritdoc/>
         public virtual async Task CorrelateAsync(V1CorrelationContext context, CancellationToken cancellationToken = default)
         {
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
-            await this.SignalStream.WriteAsync(new(SignalType.Correlate, Dynamic.FromObject(context)), cancellationToken);
+            await this.SignalStream.WriteAsync(new(V1RuntimeSignalType.Correlate, Dynamic.FromObject(context)), cancellationToken);
         }
 
         /// <inheritdoc/>
         public virtual async Task SuspendAsync(CancellationToken cancellationToken = default)
         {
-            await this.SignalStream.WriteAsync(new(SignalType.Suspend), cancellationToken);
+            await this.SignalStream.WriteAsync(new(V1RuntimeSignalType.Suspend), cancellationToken);
         }
 
         /// <inheritdoc/>
         public virtual async Task CancelAsync(CancellationToken cancellationToken = default)
         {
-            await this.SignalStream.WriteAsync(new(SignalType.Cancel), cancellationToken);
+            await this.SignalStream.WriteAsync(new(V1RuntimeSignalType.Cancel), cancellationToken);
         }
 
         /// <summary>

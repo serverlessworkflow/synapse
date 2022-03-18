@@ -30,9 +30,9 @@ namespace Synapse.Application.Services
         /// Creates a new <see cref="IWorkflowRuntimeProxy"/>
         /// </summary>
         /// <param name="id">The id of the workflow instance to create a new <see cref="IWorkflowRuntimeProxy"/> for</param>
-        /// <param name="signalStream">The service used to write <see cref="RuntimeSignal"/>s to the stream</param>
+        /// <param name="signalStream">The service used to write <see cref="V1RuntimeSignal"/>s to the stream</param>
         /// <returns>A new <see cref="IWorkflowRuntimeProxy"/></returns>
-        IWorkflowRuntimeProxy CreateProxy(string id, IAsyncStreamWriter<RuntimeSignal> signalStream);
+        IWorkflowRuntimeProxy CreateProxy(string id, IAsyncStreamWriter<V1RuntimeSignal> signalStream);
 
     }
 

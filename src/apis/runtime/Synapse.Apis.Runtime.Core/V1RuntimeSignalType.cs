@@ -21,7 +21,7 @@ namespace Synapse.Apis.Runtime
     /// <summary>
     /// Enumerates all supported signal types
     /// </summary>
-    public enum SignalType
+    public enum V1RuntimeSignalType
     {
         /// <summary>
         /// Indicates that the server requested the runtime to correlate the workflow instance to inbound events

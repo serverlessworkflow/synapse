@@ -7,7 +7,10 @@
     public class ApplicationOptions
     {
 
-
+        /// <summary>
+        /// Gets/sets the options used to configure the runtime's event correlation feature
+        /// </summary>
+        public CorrelationOptions Correlation { get; set; } = new();
 
     }
 

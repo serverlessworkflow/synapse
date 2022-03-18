@@ -17,60 +17,73 @@
 
 namespace Synapse.Application.Commands.WorkflowInstances
 {
-
     /// <summary>
-    /// Represents the <see cref="ICommand"/> used to start the execution of an existing <see cref="V1WorkflowInstance"/>
+    /// Represents the <see cref="ICommand"/> used to set a correlation mapping for a <see cref="V1WorkflowActivity"/>
     /// </summary>
-    [DataTransferObjectType(typeof(Integration.Commands.WorkflowInstances.V1StartWorkflowInstanceCommand))]
-    public class V1StartWorkflowInstanceCommand
+    [DataTransferObjectType(typeof(Integration.Commands.WorkflowInstances.V1SetWorkflowInstanceCorrelationMappingCommand))]
+    public class V1SetWorkflowInstanceCorrelationMappingCommand
         : Command<Integration.Models.V1WorkflowInstance>
     {
 
         /// <summary>
-        /// Initializes a new <see cref="V1StartWorkflowInstanceCommand"/>
+        /// Initializes a new <see cref="V1SetWorkflowInstanceCorrelationMappingCommand"/>
         /// </summary>
-        protected V1StartWorkflowInstanceCommand()
+        protected V1SetWorkflowInstanceCorrelationMappingCommand()
         {
             this.Id = null!;
+            this.Key = null!;
+            this.Value = null!;
         }
 
         /// <summary>
-        /// Initializes a new <see cref="V1StartWorkflowInstanceCommand"/>
+        /// Initializes a new <see cref="V1SetWorkflowInstanceCorrelationMappingCommand"/>
         /// </summary>
-        /// <param name="id">The id of the <see cref="V1WorkflowInstance"/> to start</param>
-        public V1StartWorkflowInstanceCommand(string id)
+        /// <param name="id">The id of the <see cref="V1WorkflowActivity"/> to set the correlation mapping for</param>
+        /// <param name="key">The key of the correlation mapping to set</param>
+        /// <param name="value">The value of the correlation mapping to set</param>
+        public V1SetWorkflowInstanceCorrelationMappingCommand(string id, string key, string value)
         {
             this.Id = id;
+            this.Key = key;
+            this.Value = value;
         }
 
         /// <summary>
-        /// Gets the id of the <see cref="V1WorkflowInstance"/> to start
+        /// Gets the id of the <see cref="V1WorkflowActivity"/> to cancel
         /// </summary>
         public virtual string Id { get; protected set; }
+
+        /// <summary>
+        /// Gets the key of the correlation mapping to set
+        /// </summary>
+        public virtual string Key { get; protected set; }
+
+        /// <summary>
+        /// Gets the value of the correlation mapping to set
+        /// </summary>
+        public virtual string Value { get; protected set; }
 
     }
 
     /// <summary>
-    /// Represents the service used to handle <see cref="V1StartWorkflowInstanceCommand"/>s
+    /// Represents the service used to handle <see cref="V1SetWorkflowInstanceCorrelationMappingCommand"/>s
     /// </summary>
-    public class V1StartWorkflowInstanceCommandHandler
+    public class V1SetWorkflowInstanceCorrelationMappingCommandHandler
         : CommandHandlerBase,
-        ICommandHandler<V1StartWorkflowInstanceCommand, Integration.Models.V1WorkflowInstance>
+        ICommandHandler<V1SetWorkflowInstanceCorrelationMappingCommand, Integration.Models.V1WorkflowInstance>
     {
 
         /// <summary>
-        /// Initializes a new <see cref="V1StartWorkflowInstanceCommandHandler"/>
+        /// Initializes a new <see cref="V1SetWorkflowInstanceCorrelationMappingCommandHandler"/>
         /// </summary>
         /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
         /// <param name="mediator">The service used to mediate calls</param>
         /// <param name="mapper">The service used to map objects</param>
         /// <param name="workflowInstances">The <see cref="IRepository"/> used to manage <see cref="V1WorkflowInstance"/>s</param>
-        /// <param name="runtimeHost">The current <see cref="IWorkflowRuntimeHost"/></param>
-        public V1StartWorkflowInstanceCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IRepository<V1WorkflowInstance> workflowInstances, IWorkflowRuntimeHost runtimeHost)
+        public V1SetWorkflowInstanceCorrelationMappingCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IRepository<V1WorkflowInstance> workflowInstances)
             : base(loggerFactory, mediator, mapper)
         {
             this.WorkflowInstances = workflowInstances;
-            this.RuntimeHost = runtimeHost;
         }
 
         /// <summary>
@@ -78,19 +91,13 @@ namespace Synapse.Application.Commands.WorkflowInstances
         /// </summary>
         protected IRepository<V1WorkflowInstance> WorkflowInstances { get; }
 
-        /// <summary>
-        /// Gets the current <see cref="IWorkflowRuntimeHost"/>
-        /// </summary>
-        protected IWorkflowRuntimeHost RuntimeHost { get; }
-
         /// <inheritdoc/>
-        public virtual async Task<IOperationResult<Integration.Models.V1WorkflowInstance>> HandleAsync(V1StartWorkflowInstanceCommand command, CancellationToken cancellationToken = default)
+        public virtual async Task<IOperationResult<Integration.Models.V1WorkflowInstance>> HandleAsync(V1SetWorkflowInstanceCorrelationMappingCommand command, CancellationToken cancellationToken = default)
         {
             var workflowInstance = await this.WorkflowInstances.FindAsync(command.Id, cancellationToken);
             if (workflowInstance == null)
                 throw DomainException.NullReference(typeof(V1WorkflowInstance), command.Id);
-            var runtimeId = await this.RuntimeHost.StartAsync(workflowInstance, cancellationToken); //todo
-            workflowInstance.Start();
+            workflowInstance.SetCorrelationMapping(command.Key, command.Value);
             workflowInstance = await this.WorkflowInstances.UpdateAsync(workflowInstance, cancellationToken);
             await this.WorkflowInstances.SaveChangesAsync(cancellationToken);
             return this.Ok(this.Mapper.Map<Integration.Models.V1WorkflowInstance>(workflowInstance));

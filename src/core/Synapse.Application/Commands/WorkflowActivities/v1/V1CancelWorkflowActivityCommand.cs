@@ -59,23 +59,23 @@ namespace Synapse.Application.Commands.WorkflowActivities
     {
 
         /// <inheritdoc/>
-        public V1CancelWorkflowActivityCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IRepository<Domain.Models.V1WorkflowActivity> activities) 
+        public V1CancelWorkflowActivityCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IRepository<V1WorkflowActivity> activities) 
             : base(loggerFactory, mediator, mapper)
         {
             this.Activities = activities;
         }
 
         /// <summary>
-        /// Gets the <see cref="IRepository"/> used to manage <see cref="Domain.Models.V1WorkflowActivity"/> instances
+        /// Gets the <see cref="IRepository"/> used to manage <see cref="V1WorkflowActivity"/> instances
         /// </summary>
-        protected IRepository<Domain.Models.V1WorkflowActivity> Activities { get; }
+        protected IRepository<V1WorkflowActivity> Activities { get; }
 
         /// <inheritdoc/>
         public virtual async Task<IOperationResult<Integration.Models.V1WorkflowActivity>> HandleAsync(V1CancelWorkflowActivityCommand command, CancellationToken cancellationToken = default)
         {
             var activity = await this.Activities.FindAsync(command.Id, cancellationToken);
             if (activity == null)
-                throw DomainException.NullReference(typeof(Domain.Models.V1WorkflowActivity), command.Id);
+                throw DomainException.NullReference(typeof(V1WorkflowActivity), command.Id);
             activity.Cancel();
             activity = await this.Activities.UpdateAsync(activity, cancellationToken);
             await this.Activities.SaveChangesAsync(cancellationToken);

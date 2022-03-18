@@ -40,10 +40,10 @@ namespace Synapse.Domain.Models
         /// <summary>
         /// Initializes a new <see cref="V1Correlation"/>
         /// </summary>
-        /// <param name="mode">The <see cref="V1Correlation"/>'s mode</param>
+        /// <param name="lifetime">The <see cref="V1Correlation"/>'s lifetime</param>
         /// <param name="conditions">An <see cref="IReadOnlyCollection{T}"/> containing the <see cref="V1Correlation"/>'s conditions</param>
         /// <param name="outcome">The outcome of the <see cref="V1Correlation"/></param>
-        public V1Correlation(V1CorrelationMode mode, IEnumerable<V1CorrelationCondition> conditions, V1CorrelationOutcome outcome)
+        public V1Correlation(V1CorrelationLifetime lifetime, IEnumerable<V1CorrelationCondition> conditions, V1CorrelationOutcome outcome)
             : base(Guid.NewGuid().ToString())
         {
             if(conditions == null 
@@ -51,15 +51,15 @@ namespace Synapse.Domain.Models
                 throw DomainException.ArgumentNull(nameof(conditions));
             if(outcome == null)
                 throw DomainException.ArgumentNull(nameof(outcome));
-            this.Mode = mode;
+            this.Lifetime = lifetime;
             this._Conditions = conditions.ToList();
             this.Outcome = outcome;
         }
 
         /// <summary>
-        /// Gets the <see cref="V1Correlation"/>'s mode
+        /// Gets the <see cref="V1Correlation"/>'s lifetime
         /// </summary>
-        public virtual V1CorrelationMode Mode { get; protected set; }
+        public virtual V1CorrelationLifetime Lifetime { get; protected set; }
 
         /// <summary>
         /// Gets a value determining the type of the <see cref="V1Correlation"/>'s <see cref="V1CorrelationCondition"/> evaluation
@@ -133,15 +133,15 @@ namespace Synapse.Domain.Models
                 throw DomainException.ArgumentNull(nameof(e));
             if (mappings == null)
                 throw DomainException.ArgumentNull(nameof(mappings));
-            switch (this.Mode)
+            switch (this.Lifetime)
             {
-                case V1CorrelationMode.Exclusive:
+                case V1CorrelationLifetime.Singleton:
                     var exclusiveContext = this.Contexts.Single();
                     if (exclusiveContext == null || !exclusiveContext.CorrelatesTo(e))
                         throw new DomainNullReferenceException($"Failed to find the exclusive correlation's context");
                     this.On(this.RegisterEvent(new V1EventCorrelatedDomainEvent(this.Id, exclusiveContext.Id, e, mappings)));
                     break;
-                case V1CorrelationMode.Parallel:
+                case V1CorrelationLifetime.Transient:
                     foreach(var context in this.Contexts
                         .Where(c => c.CorrelatesTo(e)))
                     {
@@ -149,7 +149,7 @@ namespace Synapse.Domain.Models
                     }
                     break;
                 default:
-                    throw new NotSupportedException($"The specified {nameof(V1CorrelationMode)} '{this.Mode}' is not supported");
+                    throw new NotSupportedException($"The specified {nameof(V1CorrelationLifetime)} '{this.Lifetime}' is not supported");
             }
         }
 

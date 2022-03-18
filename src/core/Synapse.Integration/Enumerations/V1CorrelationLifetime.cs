@@ -22,18 +22,18 @@ namespace Synapse
     /// </summary>
     [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
     [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.StringEnumConverterFactory))]
-    public enum V1CorrelationMode
+    public enum V1CorrelationLifetime
     {
         /// <summary>
-        /// Indicates that the correlation is exclusive to a single context
+        /// Indicates that the correlation is a singleton, and will be disposed of upon release of the single context it is bound to
         /// </summary>
-        [EnumMember(Value = "exclusive")]
-        Exclusive,
+        [EnumMember(Value = "singleton")]
+        Singleton,
         /// <summary>
-        /// Indicates that the correlation is performed on multiple contexts in parallel
+        /// Indicates that the correlation is transient, and a new context instance is expected to be created for each event matching any of its conditions
         /// </summary>
-        [EnumMember(Value = "parallel")]
-        Parallel
+        [EnumMember(Value = "transient")]
+        Transient
     }
 
 }

@@ -14,6 +14,8 @@
  * limitations under the License.
  *
  */
+using Neuroglia.Serialization;
+using ServerlessWorkflow.Sdk.Models;
 using Synapse.Integration.Commands.WorkflowActivities;
 using Synapse.Integration.Commands.WorkflowInstances;
 using Synapse.Integration.Models;
@@ -35,7 +37,7 @@ namespace Synapse.Apis.Runtime
         /// <param name="runtimeId">The id of the runtime to connect</param>
         /// <returns>A new <see cref="IAsyncEnumerable{T}"/></returns>
         [OperationContract]
-        IAsyncEnumerable<RuntimeSignal> Connect(string runtimeId);
+        IAsyncEnumerable<V1RuntimeSignal> Connect(string runtimeId);
 
         /// <summary>
         /// Starts the specified workflow instance
@@ -45,6 +47,33 @@ namespace Synapse.Apis.Runtime
         /// <returns>The started workflow instance</returns>
         [OperationContract]
         Task<V1WorkflowInstance> StartAsync(string workflowInstanceId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Attempts to consume a pending event
+        /// </summary>
+        /// <param name="command">The object that describes the command to execute</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The consumed <see cref="V1Event"/>, if any</returns>
+        [OperationContract]
+        Task<V1Event?> ConsumePendingEventAsync(V1ConsumeWorkflowInstancePendingEventCommand command, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Attempts to correlate an event to a workflow instance
+        /// </summary>
+        /// <param name="command">The object that describes the command to execute</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A boolean indicating whether or not the specified event could be correlated to the workflow instance</returns>
+        [OperationContract]
+        Task<bool> TryCorrelateAsync(V1TryCorrelateWorkflowInstanceCommand command, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Sets a correlation mapping for the specified workflow instance
+        /// </summary>
+        /// <param name="command">The object that describes the command to execute</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        [OperationContract]
+        Task SetCorrelationMappingAsync(V1SetWorkflowInstanceCorrelationMappingCommand command, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Gets all the activities (including non-operative ones) of the specified workflow instance
@@ -148,6 +177,33 @@ namespace Synapse.Apis.Runtime
         Task<V1WorkflowActivity> SetActivityOutputAsync(V1SetWorkflowActivityOutputCommand command, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Gets the data of the <see cref="StateDefinition"/> the specified <see cref="V1WorkflowActivity"/> belongs to
+        /// </summary>
+        /// <param name="activityId">The id of the activity to get the parent state's data for</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The data of the <see cref="StateDefinition"/> the specified <see cref="V1WorkflowActivity"/> belongs to</returns>
+        [OperationContract]
+        Task<Dynamic> GetActivityStateDataAsync(string activityId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Marks the <see cref="V1WorkflowInstance"/> as suspended
+        /// </summary>
+        /// <param name="workflowInstanceId">The id of the <see cref="V1WorkflowInstance"/> to mark as suspended</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The updated <see cref="V1WorkflowInstance"/></returns>
+        [OperationContract]
+        Task<V1WorkflowInstance> SuspendAsync(string workflowInstanceId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Marks the <see cref="V1WorkflowInstance"/> as cancelled
+        /// </summary>
+        /// <param name="workflowInstanceId">The id of the <see cref="V1WorkflowInstance"/> to mark as cancelled</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The updated <see cref="V1WorkflowInstance"/></returns>
+        [OperationContract]
+        Task<V1WorkflowInstance> CancelAsync(string workflowInstanceId, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Faults the specified workflow instance
         /// </summary>
         /// <param name="command">The object that describes the command to execute</param>
@@ -155,15 +211,6 @@ namespace Synapse.Apis.Runtime
         /// <returns>The faulted activity</returns>
         [OperationContract]
         Task<V1WorkflowInstance> FaultAsync(V1FaultWorkflowInstanceCommand command, CancellationToken cancellationToken = default);
-
-        /// <summary>
-        /// Cancels the specified workflow instance
-        /// </summary>
-        /// <param name="workflowInstanceId">The id of the workflow instance that has been cancelled</param>
-        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-        /// <returns>The cancelled workflow instance</returns>
-        [OperationContract]
-        Task<V1WorkflowInstance> CancelAsync(string workflowInstanceId, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Sets the output of the specified workflow instance

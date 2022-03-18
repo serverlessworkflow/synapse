@@ -42,7 +42,7 @@ namespace Synapse.Application.Services
         protected IServiceProvider ServiceProvider { get; }
 
         /// <inheritdoc/>
-        public virtual IWorkflowRuntimeProxy CreateProxy(string id, IAsyncStreamWriter<RuntimeSignal> signalStream)
+        public virtual IWorkflowRuntimeProxy CreateProxy(string id, IAsyncStreamWriter<V1RuntimeSignal> signalStream)
         {
             if(string.IsNullOrWhiteSpace(id))
                 throw new ArgumentNullException(nameof(id));

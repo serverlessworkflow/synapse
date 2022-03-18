@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+using CloudNative.CloudEvents;
 using Synapse.Integration.Events;
 
 namespace Synapse.Runtime.Services
@@ -60,6 +61,32 @@ namespace Synapse.Runtime.Services
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>The newly created activity</returns>
         Task<V1WorkflowActivity> CreateActivityAsync(V1WorkflowActivityType type, object? input, IDictionary<string, string>? metadata, V1WorkflowActivity? parent, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Attempts to consume a pending <see cref="CloudEvent"/>
+        /// </summary>
+        /// <param name="eventDefinition">The <see cref="EventDefinition"/> of the <see cref="CloudEvent"/> to consume</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The consumed <see cref="CloudEvent"/>, if any</returns>
+        Task<CloudEvent?> ConsumePendingEventAsync(EventDefinition eventDefinition, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Sets the specified correlation mapping
+        /// </summary>
+        /// <param name="key">The correlation key to set</param>
+        /// <param name="value">The value of the correlation key to set</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        Task SetCorrelationMappingAsync(string key, string value, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Attempts to correlate the specified <see cref="V1Event"/>
+        /// </summary>
+        /// <param name="e">The <see cref="V1Event"/> to correlate</param>
+        /// <param name="contextAttributes">An <see cref="IEnumerable{T}"/> containing the context attributes used to correlate the specified <see cref="V1Event"/></param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A boolean indicating whether or not the specified <see cref="V1Event"/> could be correlated</returns>
+        Task<bool> TryCorrelateAsync(V1Event e, IEnumerable<string> contextAttributes, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Gets all the activities (including non-operative ones) of the current workflow
@@ -148,6 +175,28 @@ namespace Synapse.Runtime.Services
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A new awaitable <see cref="Task"/></returns>
         Task FaultActivityAsync(V1WorkflowActivity activity, Integration.Models.Error error, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Gets the data of the <see cref="StateDefinition"/> the specified <see cref="V1WorkflowActivity"/> belongs to
+        /// </summary>
+        /// <param name="activity">The <see cref="V1WorkflowActivity"/> to get the <see cref="StateDefinition"/> data for</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The data of the <see cref="StateDefinition"/> the specified <see cref="V1WorkflowActivity"/> belongs to</returns>
+        Task<object> GetActivityStateDataAsync(V1WorkflowActivity activity, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Marks the <see cref="V1WorkflowInstance"/> as suspended
+        /// </summary>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        Task SuspendAsync(CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Marks the <see cref="V1WorkflowInstance"/> as cancelled
+        /// </summary>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        Task CancelAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Faults the execution of the current workflow instance

@@ -18,22 +18,27 @@
 namespace Synapse
 {
     /// <summary>
-    /// Enumerates all supported correlation outcome types
+    /// Enumerates all supported runtime correlation modes
     /// </summary>
     [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
     [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.StringEnumConverterFactory))]
-    public enum V1CorrelationOutcomeType
+    public enum RuntimeCorrelationMode
     {
         /// <summary>
-        /// Indicates that the correlation should start a new workflow instance
+        /// Indicates that the runtime actibvely for inbound events for a specified amount of time before shutting down and waiting for a Synapse Correlator to restart it upon consumption of correlated events
         /// </summary>
-        [EnumMember(Value = "start")]
-        Start,
+        [EnumMember(Value = "dual")]
+        Dual,
         /// <summary>
-        /// Indicates that the correlation should be performed against an existing workflow instance, possibly waking it up
+        /// Indicates that the runtime actively listens for inbound events
         /// </summary>
-        [EnumMember(Value = "correlate")]
-        Correlate
+        [EnumMember(Value = "active")]
+        Active,
+        /// <summary>
+        /// Indicates that when requested to consume events, the runtime shuts down and waits for a Synapse Correlator to restart it upon consumption of correlated events
+        /// </summary>
+        [EnumMember(Value = "passive")]
+        Passive
     }
 
 }

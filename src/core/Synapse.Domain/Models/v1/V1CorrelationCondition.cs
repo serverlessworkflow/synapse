@@ -59,7 +59,7 @@ namespace Synapse.Domain.Models
         {
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
-            return context.EventsQueue.Any(e => this.Filters.Any(f => f.Filters(e)));
+            return context.PendingEvents.Any(e => this.Filters.Any(f => f.Filters(e)));
         }
 
         /// <summary>

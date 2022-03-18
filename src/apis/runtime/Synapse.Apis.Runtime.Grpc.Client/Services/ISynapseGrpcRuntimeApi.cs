@@ -15,7 +15,9 @@
  *
  */
 
+using Neuroglia.Serialization;
 using ProtoBuf.Grpc;
+using ServerlessWorkflow.Sdk.Models;
 using Synapse.Apis.Runtime.Grpc.Models;
 using Synapse.Integration.Commands.WorkflowActivities;
 using Synapse.Integration.Commands.WorkflowInstances;
@@ -37,9 +39,10 @@ namespace Synapse.Apis.Runtime.Grpc
         /// Connects to the Synapse Runtime API
         /// </summary>
         /// <param name="workflowInstanceId">The id of the workflow instance id the client runtime executes</param>
+        /// <param name="context">The current <see cref="CallContext"/></param>
         /// <returns>A new <see cref="IAsyncEnumerable{T}"/></returns>
         [OperationContract]
-        IAsyncEnumerable<RuntimeSignal> Connect(string workflowInstanceId, CallContext context = default);
+        IAsyncEnumerable<V1RuntimeSignal> Connect(string workflowInstanceId, CallContext context = default);
 
         /// <summary>
         /// Starts the specified workflow instance
@@ -51,9 +54,36 @@ namespace Synapse.Apis.Runtime.Grpc
         Task<GrpcApiResult<V1WorkflowInstance>> StartAsync(string workflowInstanceId, CallContext context = default);
 
         /// <summary>
+        /// Attempts to consume a pending event
+        /// </summary>
+        /// <param name="command">The object that describes the command to execute</param>
+        /// <param name="context">The current <see cref="CallContext"/></param>
+        /// <returns>A new object that describes the result of the operation</returns>
+        [OperationContract]
+        Task<GrpcApiResult<V1Event?>> ConsumePendingEventAsync(V1ConsumeWorkflowInstancePendingEventCommand command, CallContext context = default);
+
+        /// <summary>
+        /// Attempts to correlate an event to a workflow instance
+        /// </summary>
+        /// <param name="command">The object that describes the command to execute</param>
+        /// <param name="context">The current <see cref="CallContext"/></param>
+        /// <returns>A new object that describes the result of the operation</returns>
+        [OperationContract]
+        Task<GrpcApiResult<bool>> TryCorrelateAsync(V1TryCorrelateWorkflowInstanceCommand command, CallContext context = default);
+
+        /// <summary>
+        /// Sets a correlation mapping for the specified workflow instance
+        /// </summary>
+        /// <param name="command">The object that describes the command to execute</param>
+        /// <param name="context">The current <see cref="CallContext"/></param>
+        /// <returns>A new object that describes the result of the operation</returns>
+        [OperationContract]
+        Task<GrpcApiResult> SetCorrelationMappingAsync(V1SetWorkflowInstanceCorrelationMappingCommand command, CallContext context = default);
+
+        /// <summary>
         /// Gets the activities (including non-operative ones) of the specified workflow instance
         /// </summary>
-        /// <param name="workflowInstanceId">The id of the workflow instance to get the activities of</param>
+        /// <param name="query">The id of the workflow instance to get the activities of</param>
         /// <param name="context">The current server call context</param>
         /// <returns>A new object that describes the result of the operation</returns>
         [OperationContract]
@@ -123,6 +153,15 @@ namespace Synapse.Apis.Runtime.Grpc
         Task<GrpcApiResult<V1WorkflowActivity>> SetActivityOutputAsync(V1SetWorkflowActivityOutputCommand command, CallContext context = default);
 
         /// <summary>
+        /// Gets the data of the <see cref="StateDefinition"/> the specified <see cref="V1WorkflowActivity"/> belongs to
+        /// </summary>
+        /// <param name="activityId">The id of the activity to get the parent state's data for</param>
+        /// <param name="context">The current server call context</param>
+        /// <returns>The data of the <see cref="StateDefinition"/> the specified <see cref="V1WorkflowActivity"/> belongs to</returns>
+        [OperationContract]
+        Task<GrpcApiResult<Dynamic>> GetActivityStateDataAsync(string activityId, CallContext context = default);
+
+        /// <summary>
         /// Faults the specified workflow instance
         /// </summary>
         /// <param name="command">An object that describes the command to execute</param>
@@ -130,6 +169,15 @@ namespace Synapse.Apis.Runtime.Grpc
         /// <returns>A new object that describes the result of the operation</returns>
         [OperationContract]
         Task<GrpcApiResult<V1WorkflowInstance>> FaultAsync(V1FaultWorkflowInstanceCommand command, CallContext context = default);
+
+        /// <summary>
+        /// Suspends the execution of the specified workflow instance
+        /// </summary>
+        /// <param name="workflowInstanceId">The id of the workflow instance to suspend the execution of</param>
+        /// <param name="context">The current server call context</param>
+        /// <returns>A new object that describes the result of the operation</returns>
+        [OperationContract]
+        Task<GrpcApiResult<V1WorkflowInstance>> SuspendAsync(string workflowInstanceId, CallContext context = default);
 
         /// <summary>
         /// Cancels the execution of the specified workflow instance

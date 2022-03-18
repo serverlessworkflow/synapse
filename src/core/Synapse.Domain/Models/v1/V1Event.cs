@@ -15,13 +15,15 @@
  *
  */
 
+using System.Text.RegularExpressions;
+
 namespace Synapse.Domain.Models
 {
 
     /// <summary>
     /// Represents an event
     /// </summary>
-    [DataTransferObjectType(typeof(V1Event))]
+    [DataTransferObjectType(typeof(Integration.Models.V1Event))]
     public class V1Event
     {
 
@@ -106,7 +108,9 @@ namespace Synapse.Domain.Models
         /// <summary>
         /// Gets an <see cref="IDictionary{TKey, TValue}"/> that contains the event's extension key/value mappings
         /// </summary>
-        public virtual IDictionary<string, string> Extensions { get; protected set; } = new Dictionary<string, string>();
+        [Newtonsoft.Json.JsonExtensionData]
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public virtual IDictionary<string, object> Extensions { get; protected set; } = new Dictionary<string, object>();
 
         /// <summary>
         /// Gets an <see cref="IReadOnlyDictionary{TKey, TValue}"/> containing all the <see cref="V1Event"/> attributes
@@ -117,7 +121,7 @@ namespace Synapse.Domain.Models
         {
             get
             {
-                return this.AttributesEnumerator.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+                return this.AttributesEnumerator.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToString());
             }
         }
 
@@ -140,7 +144,7 @@ namespace Synapse.Domain.Models
                 if (this.Time.HasValue)
                     yield return new KeyValuePair<string, string>(nameof(Time).ToLower(), this.Time.ToString()!);
                 foreach (var extension in this.Extensions)
-                    yield return extension;
+                    yield return new(extension.Key, extension.Value.ToString()!);
             }
         }
 
@@ -155,6 +159,36 @@ namespace Synapse.Domain.Models
             if (string.IsNullOrEmpty(name))
                 throw new ArgumentNullException(nameof(name));
             return this.Attributes.TryGetValue(name, out value!);
+        }
+
+        /// <summary>
+        /// Determines whether or not the <see cref="V1Event"/> matches the specified <see cref="EventDefinition"/>
+        /// </summary>
+        /// <param name="eventDefinition">The <see cref="EventDefinition"/> to match</param>
+        /// <returns>A boolean indicating whether or not the <see cref="V1Event"/> matches the specified <see cref="EventDefinition"/></returns>
+        public virtual bool Matches(EventDefinition eventDefinition)
+        {
+            if (eventDefinition == null)
+                throw new ArgumentNullException(nameof(eventDefinition));
+            if (!string.IsNullOrWhiteSpace(eventDefinition.Source) 
+                && !Regex.IsMatch(this.Source.ToString(), eventDefinition.Source))
+                return false;
+            if (!string.IsNullOrWhiteSpace(eventDefinition.Type) 
+                && !Regex.IsMatch(this.Type, eventDefinition.Type))
+                return false;
+            if (eventDefinition.Correlations != null)
+            {
+                foreach (EventCorrelationDefinition correlationDefinition in eventDefinition.Correlations)
+                {
+                    if (!this.TryGetAttribute(correlationDefinition.ContextAttributeName, out string value))
+                        return false;
+                    if (string.IsNullOrWhiteSpace(correlationDefinition.ContextAttributeValue))
+                        continue;
+                    if (!Regex.IsMatch(value, correlationDefinition.ContextAttributeValue))
+                        return false;
+                }
+            }
+            return true;
         }
 
         /// <summary>

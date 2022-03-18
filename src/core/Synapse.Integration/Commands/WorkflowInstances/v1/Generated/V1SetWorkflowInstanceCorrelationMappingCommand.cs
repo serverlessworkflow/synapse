@@ -20,30 +20,37 @@
  * -----------------------------------------------------------------------
  */
 
-namespace Synapse.Integration.Models
+namespace Synapse.Integration.Commands.WorkflowInstances
 {
 
 	/// <summary>
-	/// Represents the context of an event correlation
+	/// Represents the ICommand used to set a correlation mapping for a V1WorkflowActivity
 	/// </summary>
 	[DataContract]
-	public partial class V1CorrelationContext
-		: Entity
+	public partial class V1SetWorkflowInstanceCorrelationMappingCommand
+		: Command
 	{
 
 		/// <summary>
-		/// An IReadOnlyDictionary`2 containing the correlations' value by key mappings
+		/// The id of the V1WorkflowActivity to cancel
 		/// </summary>
-		[DataMember(Name = "Mappings", Order = 1)]
-		[Description("An IReadOnlyDictionary`2 containing the correlations' value by key mappings")]
-		public virtual NameValueCollection<string> Mappings { get; set; }
+		[DataMember(Name = "Id", Order = 1)]
+		[Description("The id of the V1WorkflowActivity to cancel")]
+		public virtual string Id { get; set; }
 
 		/// <summary>
-		/// An IReadOnlyCollection`1 containing all correlated V1Events pending processing
+		/// The key of the correlation mapping to set
 		/// </summary>
-		[DataMember(Name = "PendingEvents", Order = 2)]
-		[Description("An IReadOnlyCollection`1 containing all correlated V1Events pending processing")]
-		public virtual ICollection<V1Event> PendingEvents { get; set; }
+		[DataMember(Name = "Key", Order = 2)]
+		[Description("The key of the correlation mapping to set")]
+		public virtual string Key { get; set; }
+
+		/// <summary>
+		/// The value of the correlation mapping to set
+		/// </summary>
+		[DataMember(Name = "Value", Order = 3)]
+		[Description("The value of the correlation mapping to set")]
+		public virtual string Value { get; set; }
 
     }
 

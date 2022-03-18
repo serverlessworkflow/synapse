@@ -37,7 +37,7 @@ namespace Synapse.Runtime.Executor.Services.Processors
         /// <param name="options">The service used to access the current <see cref="ApplicationOptions"/></param>
         /// <param name="activity">The <see cref="V1WorkflowActivity"/> to process</param>
         /// <param name="action">The <see cref="ActionDefinition"/> to process</param>
-        public ActionProcessor(ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory,
+        protected ActionProcessor(ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory,
             IOptions<ApplicationOptions> options, V1WorkflowActivity activity, ActionDefinition action)
             : base(loggerFactory, context, activityProcessorFactory, options, activity)
         {

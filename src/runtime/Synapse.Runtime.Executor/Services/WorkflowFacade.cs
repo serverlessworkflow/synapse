@@ -15,6 +15,7 @@
  *
  */
 
+using CloudNative.CloudEvents;
 using Synapse.Apis.Runtime;
 using Synapse.Integration.Events;
 using Synapse.Integration.Events.WorkflowActivities;
@@ -46,7 +47,7 @@ namespace Synapse.Runtime.Services
         public WorkflowDefinition Definition { get; }
 
         /// <inheritdoc/>
-        public V1WorkflowInstance Instance { get; }
+        public V1WorkflowInstance Instance { get; private set; }
 
         /// <summary>
         /// Gets the service used to interact with the Synapse Runtime API
@@ -56,7 +57,39 @@ namespace Synapse.Runtime.Services
         /// <inheritdoc/>
         public virtual async Task StartAsync(CancellationToken cancellationToken)
         {
-            await this.SynapseRuntimeApi.StartAsync(this.Instance.Id, cancellationToken);
+            this.Instance = await this.SynapseRuntimeApi.StartAsync(this.Instance.Id, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<CloudEvent?> ConsumePendingEventAsync(EventDefinition eventDefinition, CancellationToken cancellationToken = default)
+        {
+            if(eventDefinition == null)
+                throw new ArgumentNullException(nameof(eventDefinition));
+            var e = await this.SynapseRuntimeApi.ConsumePendingEventAsync(new() { WorkflowInstanceId = this.Instance.Id, EventDefinition = eventDefinition }, cancellationToken);
+            if (e == null)
+                return null;
+            else
+                return e.ToCloudEvent();
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task SetCorrelationMappingAsync(string key, string value, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+                throw new ArgumentNullException(nameof(key));
+            if (string.IsNullOrWhiteSpace(value))
+                throw new ArgumentNullException(nameof(value));
+            await this.SynapseRuntimeApi.SetCorrelationMappingAsync(new() { Id = this.Instance.Id, Key = key, Value = value }, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<bool> TryCorrelateAsync(V1Event e, IEnumerable<string> mappingKeys, CancellationToken cancellationToken = default)
+        {
+            if (e == null)
+                throw new ArgumentNullException(nameof(e));
+            if (mappingKeys == null)
+                mappingKeys = Array.Empty<string>();
+            return await this.SynapseRuntimeApi.TryCorrelateAsync(new() { WorkflowInstanceId = this.Instance.Id, Event = e, MappingKeys = mappingKeys }, cancellationToken);
         }
 
         /// <inheritdoc/>
@@ -165,6 +198,25 @@ namespace Synapse.Runtime.Services
         }
 
         /// <inheritdoc/>
+        public virtual async Task<object> GetActivityStateDataAsync(V1WorkflowActivity activity, CancellationToken cancellationToken = default)
+        {
+            var result = await this.SynapseRuntimeApi.GetActivityStateDataAsync(activity.Id, cancellationToken);
+            return result.ToObject()!;
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task SuspendAsync(CancellationToken cancellationToken = default)
+        {
+            this.Instance = await this.SynapseRuntimeApi.SuspendAsync(this.Instance.Id, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task CancelAsync(CancellationToken cancellationToken = default)
+        {
+            this.Instance = await this.SynapseRuntimeApi.CancelAsync(this.Instance.Id, cancellationToken);
+        }
+
+        /// <inheritdoc/>
         public virtual async Task TransitionToAsync(StateDefinition state, CancellationToken cancellationToken = default)
         {
             //await this.Synapse.TransitionWorkflowInstanceToAsync(this.Instance.Id, state.Name, cancellationToken); //todo
@@ -173,7 +225,7 @@ namespace Synapse.Runtime.Services
         /// <inheritdoc/>
         public virtual async Task FaultAsync(Exception ex, CancellationToken cancellationToken)
         {
-            await this.SynapseRuntimeApi.FaultAsync(new() { Id = this.Instance.Id, Error = new() { Code = ex.GetType().Name.Replace("exception", string.Empty, StringComparison.InvariantCultureIgnoreCase), Message = ex.Message } }, cancellationToken);
+            this.Instance = await this.SynapseRuntimeApi.FaultAsync(new() { Id = this.Instance.Id, Error = new() { Code = ex.GetType().Name.Replace("exception", string.Empty, StringComparison.InvariantCultureIgnoreCase), Message = ex.Message } }, cancellationToken);
         }
 
         /// <inheritdoc/>
@@ -182,7 +234,7 @@ namespace Synapse.Runtime.Services
             var outputParam = output as Dynamic;
             if (outputParam == null && output != null)
                 outputParam = Dynamic.FromObject(output);
-            await this.SynapseRuntimeApi.SetOutputAsync(new() { Id = this.Instance.Id, Output = outputParam }, cancellationToken);
+            this.Instance = await this.SynapseRuntimeApi.SetOutputAsync(new() { Id = this.Instance.Id, Output = outputParam }, cancellationToken);
         }
 
         /// <inheritdoc/>
@@ -215,7 +267,7 @@ namespace Synapse.Runtime.Services
                     throw new NotSupportedException($"The specified workflow activity integration event type '{e.GetType().Name}' is not supported in this context");
             }
         }
-    
+
     }
 
 }

@@ -98,6 +98,9 @@
     <Compile Update="Commands\WorkflowInstances\v1\Generated\V1CancelWorkflowInstanceCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\WorkflowInstances\v1\V1CancelWorkflowInstanceCommand.cs</CustomToolNamespace>
     </Compile>
+    <Compile Update="Commands\WorkflowInstances\v1\Generated\V1ConsumeWorkflowInstancePendingEventCommand.cs">
+      <CustomToolNamespace>..\Synapse.Application\Commands\WorkflowInstances\v1\V1ConsumeWorkflowInstancePendingEventCommand.cs</CustomToolNamespace>
+    </Compile>
     <Compile Update="Commands\WorkflowInstances\v1\Generated\V1CorrelateWorkflowInstanceCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\WorkflowInstances\v1\V1CorrelateWorkflowInstanceCommand.cs</CustomToolNamespace>
     </Compile>
@@ -107,8 +110,20 @@
     <Compile Update="Commands\WorkflowInstances\v1\Generated\V1FaultWorkflowInstanceCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\WorkflowInstances\v1\V1FaultWorkflowInstanceCommand.cs</CustomToolNamespace>
     </Compile>
+    <Compile Update="Commands\WorkflowInstances\v1\Generated\V1MarkWorkflowInstanceAsCancelledCommand.cs">
+      <CustomToolNamespace>..\Synapse.Application\Commands\WorkflowInstances\v1\V1MarkWorkflowInstanceAsCancelledCommand.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Commands\WorkflowInstances\v1\Generated\V1MarkWorkflowInstanceAsStartedCommand.cs">
+      <CustomToolNamespace>..\Synapse.Application\Commands\WorkflowInstances\v1\V1MarkWorkflowInstanceAsStartedCommand.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Commands\WorkflowInstances\v1\Generated\V1MarkWorkflowInstanceAsSuspendedCommand.cs">
+      <CustomToolNamespace>..\Synapse.Application\Commands\WorkflowInstances\v1\V1MarkWorkflowInstanceAsSuspendedCommand.cs</CustomToolNamespace>
+    </Compile>
     <Compile Update="Commands\WorkflowInstances\v1\Generated\V1ScheduleWorkflowInstanceCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\WorkflowInstances\v1\V1ScheduleWorkflowInstanceCommand.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Commands\WorkflowInstances\v1\Generated\V1SetWorkflowInstanceCorrelationMappingCommand.cs">
+      <CustomToolNamespace>..\Synapse.Application\Commands\WorkflowInstances\v1\V1SetWorkflowInstanceCorrelationMappingCommand.cs</CustomToolNamespace>
     </Compile>
     <Compile Update="Commands\WorkflowInstances\v1\Generated\V1SetWorkflowInstanceOutputCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\WorkflowInstances\v1\V1SetWorkflowInstanceOutputCommand.cs</CustomToolNamespace>
@@ -118,6 +133,9 @@
     </Compile>
     <Compile Update="Commands\WorkflowInstances\v1\Generated\V1StartWorkflowInstanceCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\WorkflowInstances\v1\V1StartWorkflowInstanceCommand.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Commands\WorkflowInstances\v1\Generated\V1TryCorrelateWorkflowInstanceCommand.cs">
+      <CustomToolNamespace>..\Synapse.Application\Commands\WorkflowInstances\v1\V1TryCorrelateWorkflowInstanceCommand.cs</CustomToolNamespace>
     </Compile>
     <Compile Update="Commands\Workflows\v1\Generated\V1CreateWorkflowCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\Workflows\v1\V1CreateWorkflowCommand.cs</CustomToolNamespace>
@@ -175,6 +193,9 @@
     </Compile>
     <Compile Update="Events\WorkflowInstances\v1\Generated\V1WorkflowCorrelationContextChangedIntegrationEvent.cs">
       <CustomToolNamespace>..\Synapse.Domain\Events\WorkflowInstances\v1\V1WorkflowCorrelationContextChangedDomainEvent.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\WorkflowInstances\v1\Generated\V1WorkflowCorrelationMappingSetIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\WorkflowInstances\v1\V1WorkflowCorrelationMappingSetDomainEvent.cs</CustomToolNamespace>
     </Compile>
     <Compile Update="Events\WorkflowInstances\v1\Generated\V1WorkflowInstanceCancelledIntegrationEvent.cs">
       <CustomToolNamespace>..\Synapse.Domain\Events\WorkflowInstances\v1\V1WorkflowInstanceCancelledDomainEvent.cs</CustomToolNamespace>

@@ -17,6 +17,8 @@
 
 using Microsoft.Extensions.Logging;
 using Neuroglia;
+using Neuroglia.Serialization;
+using ServerlessWorkflow.Sdk.Models;
 using Synapse.Integration.Commands.WorkflowActivities;
 using Synapse.Integration.Commands.WorkflowInstances;
 using Synapse.Integration.Models;
@@ -53,9 +55,27 @@ namespace Synapse.Apis.Runtime.Grpc
         protected ISynapseGrpcRuntimeApi RuntimeApi { get; }
 
         /// <inheritdoc/>
-        public virtual IAsyncEnumerable<RuntimeSignal> Connect(string workflowInstanceId)
+        public virtual IAsyncEnumerable<V1RuntimeSignal> Connect(string workflowInstanceId)
         {
             return this.RuntimeApi.Connect(workflowInstanceId);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<V1WorkflowInstance> StartAsync(string workflowInstanceId, CancellationToken cancellationToken = default)
+        {
+            var result = await this.RuntimeApi.StartAsync(workflowInstanceId, cancellationToken);
+            if (!result.Succeeded)
+                throw new OperationResultException(new OperationResult(result.Code, result.Errors?.Select(e => new Neuroglia.Error(e.Code, e.Message))?.ToArray()));
+            return result.Data!;
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<V1Event?> ConsumePendingEventAsync(V1ConsumeWorkflowInstancePendingEventCommand command, CancellationToken cancellationToken = default)
+        {
+            var result = await this.RuntimeApi.ConsumePendingEventAsync(command, cancellationToken);
+            if (!result.Succeeded)
+                throw new OperationResultException(new OperationResult(result.Code, result.Errors?.Select(e => new Neuroglia.Error(e.Code, e.Message))?.ToArray()));
+            return result.Data!;
         }
 
         /// <inheritdoc/>
@@ -92,15 +112,6 @@ namespace Synapse.Apis.Runtime.Grpc
             if (!result.Succeeded)
                 throw new OperationResultException(new OperationResult(result.Code, result.Errors?.Select(e => new Neuroglia.Error(e.Code, e.Message))?.ToArray()));
             return result.Data ?? (new());
-        }
-
-        /// <inheritdoc/>
-        public virtual async Task<V1WorkflowInstance> StartAsync(string workflowInstanceId, CancellationToken cancellationToken = default)
-        {
-            var result = await this.RuntimeApi.StartAsync(workflowInstanceId, cancellationToken);
-            if (!result.Succeeded)
-                throw new OperationResultException(new OperationResult(result.Code, result.Errors?.Select(e => new Neuroglia.Error(e.Code, e.Message))?.ToArray()));
-            return result.Data!;
         }
 
         /// <inheritdoc/>
@@ -167,9 +178,44 @@ namespace Synapse.Apis.Runtime.Grpc
         }
 
         /// <inheritdoc/>
+        public virtual async Task<Dynamic> GetActivityStateDataAsync(string activityId, CancellationToken cancellationToken = default)
+        {
+            var result = await this.RuntimeApi.GetActivityStateDataAsync(activityId, cancellationToken);
+            if (!result.Succeeded)
+                throw new OperationResultException(new OperationResult(result.Code, result.Errors?.Select(e => new Neuroglia.Error(e.Code, e.Message))?.ToArray()));
+            return result.Data!;
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<bool> TryCorrelateAsync(V1TryCorrelateWorkflowInstanceCommand command, CancellationToken cancellationToken = default)
+        {
+            var result = await this.RuntimeApi.TryCorrelateAsync(command, cancellationToken);
+            if (!result.Succeeded)
+                throw new OperationResultException(new OperationResult(result.Code, result.Errors?.Select(e => new Neuroglia.Error(e.Code, e.Message))?.ToArray()));
+            return result.Data!;
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task SetCorrelationMappingAsync(V1SetWorkflowInstanceCorrelationMappingCommand command, CancellationToken cancellationToken = default)
+        {
+            var result = await this.RuntimeApi.SetCorrelationMappingAsync(command, cancellationToken);
+            if (!result.Succeeded)
+                throw new OperationResultException(new OperationResult(result.Code, result.Errors?.Select(e => new Neuroglia.Error(e.Code, e.Message))?.ToArray()));
+        }
+
+        /// <inheritdoc/>
         public virtual async Task<V1WorkflowInstance> FaultAsync(V1FaultWorkflowInstanceCommand command, CancellationToken cancellationToken = default)
         {
             var result = await this.RuntimeApi.FaultAsync(command, cancellationToken);
+            if (!result.Succeeded)
+                throw new OperationResultException(new OperationResult(result.Code, result.Errors?.Select(e => new Neuroglia.Error(e.Code, e.Message))?.ToArray()));
+            return result.Data!;
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<V1WorkflowInstance> SuspendAsync(string workflowInstanceId, CancellationToken cancellationToken = default)
+        {
+            var result = await this.RuntimeApi.SuspendAsync(workflowInstanceId, cancellationToken);
             if (!result.Succeeded)
                 throw new OperationResultException(new OperationResult(result.Code, result.Errors?.Select(e => new Neuroglia.Error(e.Code, e.Message))?.ToArray()));
             return result.Data!;

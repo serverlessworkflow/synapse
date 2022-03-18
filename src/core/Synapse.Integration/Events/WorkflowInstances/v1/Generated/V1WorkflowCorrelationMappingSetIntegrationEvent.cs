@@ -20,30 +20,30 @@
  * -----------------------------------------------------------------------
  */
 
-namespace Synapse.Integration.Models
+namespace Synapse.Integration.Events.WorkflowInstances
 {
 
 	/// <summary>
-	/// Represents the context of an event correlation
+	/// Represents the IDomainEvent fired whenever a V1WorkflowInstance's correlation mapping has been set
 	/// </summary>
 	[DataContract]
-	public partial class V1CorrelationContext
-		: Entity
+	public partial class V1WorkflowCorrelationMappingSetIntegrationEvent
+		: V1IntegrationEvent
 	{
 
 		/// <summary>
-		/// An IReadOnlyDictionary`2 containing the correlations' value by key mappings
+		/// The key of the V1WorkflowInstance's correlation mapping that has been set
 		/// </summary>
-		[DataMember(Name = "Mappings", Order = 1)]
-		[Description("An IReadOnlyDictionary`2 containing the correlations' value by key mappings")]
-		public virtual NameValueCollection<string> Mappings { get; set; }
+		[DataMember(Name = "Key", Order = 1)]
+		[Description("The key of the V1WorkflowInstance's correlation mapping that has been set")]
+		public virtual string Key { get; set; }
 
 		/// <summary>
-		/// An IReadOnlyCollection`1 containing all correlated V1Events pending processing
+		/// The value of the V1WorkflowInstance's correlation mapping that has been set
 		/// </summary>
-		[DataMember(Name = "PendingEvents", Order = 2)]
-		[Description("An IReadOnlyCollection`1 containing all correlated V1Events pending processing")]
-		public virtual ICollection<V1Event> PendingEvents { get; set; }
+		[DataMember(Name = "Value", Order = 2)]
+		[Description("The value of the V1WorkflowInstance's correlation mapping that has been set")]
+		public virtual string Value { get; set; }
 
     }
 

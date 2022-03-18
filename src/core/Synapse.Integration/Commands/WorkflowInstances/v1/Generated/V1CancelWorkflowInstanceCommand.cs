@@ -34,9 +34,9 @@ namespace Synapse.Integration.Commands.WorkflowInstances
 		/// <summary>
 		/// The id of the V1WorkflowInstance to cancel
 		/// </summary>
-		[DataMember(Name = "Id", Order = 1)]
+		[DataMember(Name = "WorkflowInstanceId", Order = 1)]
 		[Description("The id of the V1WorkflowInstance to cancel")]
-		public virtual string Id { get; set; }
+		public virtual string WorkflowInstanceId { get; set; }
 
     }
 

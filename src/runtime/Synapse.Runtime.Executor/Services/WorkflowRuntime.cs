@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+using CloudNative.CloudEvents;
 using ConcurrentCollections;
 using Microsoft.Extensions.Hosting;
 using Synapse.Apis.Runtime;
@@ -101,9 +102,9 @@ namespace Synapse.Runtime.Services
         protected IIntegrationEventBus IntegrationEventBus { get; }
 
         /// <summary>
-        /// Gets an <see cref="IObservable{T}"/> that represents the inbound, server <see cref="RuntimeSignal"/> stream
+        /// Gets an <see cref="IObservable{T}"/> that represents the inbound, server <see cref="V1RuntimeSignal"/> stream
         /// </summary>
-        protected IObservable<RuntimeSignal> ServerStream { get; private set; } = null!;
+        protected IObservable<V1RuntimeSignal> ServerStream { get; private set; } = null!;
 
         /// <inheritdoc/>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -163,12 +164,14 @@ namespace Synapse.Runtime.Services
         /// <returns>A new awaitable <see cref="Task"/></returns>
         protected virtual async Task SuspendAsync()
         {
+            this.Logger.LogInformation("Suspending execution...");
             foreach (var processor in this.Processors.ToList())
             {
                 await processor.SuspendAsync(this.CancellationToken);
             }
-            //todo:
-            //await this.Context.Workflow.MarkAsSuspendAsync(this.CancellationToken);
+            await this.Context.Workflow.SuspendAsync(this.CancellationToken);
+            this.Logger.LogInformation("Execution has been successfully suspended. The application will now shutdown....");
+            this.HostApplicationLifetime.StopApplication();
         }
 
         /// <summary>
@@ -177,12 +180,14 @@ namespace Synapse.Runtime.Services
         /// <returns>A new awaitable <see cref="Task"/></returns>
         protected virtual async Task CancelAsync()
         {
+            this.Logger.LogInformation("Cancelling execution...");
             foreach (var processor in this.Processors.ToList())
             {
                 await processor.TerminateAsync(this.CancellationToken);
             }
-            //todo:
-            //await this.Context.Workflow.MarkAsCancelledAsync(this.CancellationToken);
+            await this.Context.Workflow.CancelAsync(this.CancellationToken);
+            this.Logger.LogInformation("Execution has been successfully cancelled. The application will now shutdown....");
+            this.HostApplicationLifetime.StopApplication();
         }
 
         /// <summary>
@@ -226,11 +231,11 @@ namespace Synapse.Runtime.Services
         }
 
         /// <summary>
-        /// Handles the specified <see cref="RuntimeSignal"/>
+        /// Handles the specified <see cref="V1RuntimeSignal"/>
         /// </summary>
-        /// <param name="signal">The <see cref="RuntimeSignal"/> to handle</param>
+        /// <param name="signal">The <see cref="V1RuntimeSignal"/> to handle</param>
         /// <returns>A new awaitable <see cref="Task"/></returns>
-        protected virtual async Task OnServerSignalAsync(RuntimeSignal signal)
+        protected virtual async Task OnServerSignalAsync(V1RuntimeSignal signal)
         {
             if (signal == null)
                 return;
@@ -238,17 +243,17 @@ namespace Synapse.Runtime.Services
             {
                 switch (signal.Type)
                 {
-                    case SignalType.Correlate:
+                    case V1RuntimeSignalType.Correlate:
                         var correlationContext = signal.Data!.ToObject<V1CorrelationContext>();
-                        foreach (var e in correlationContext.EventsQueue)
+                        foreach (var e in correlationContext.PendingEvents)
                         {
-                            this.IntegrationEventBus.InboundStream.OnNext(e);
+                            this.IntegrationEventBus.InboundStream.OnNext(e.ToCloudEvent());
                         }
                         break;
-                    case SignalType.Suspend:
+                    case V1RuntimeSignalType.Suspend:
                         await this.SuspendAsync();
                         break;
-                    case SignalType.Cancel:
+                    case V1RuntimeSignalType.Cancel:
                         await this.CancelAsync();
                         break;
                     default:
@@ -267,7 +272,7 @@ namespace Synapse.Runtime.Services
         /// </summary>
         /// <param name="e">The <see cref="V1Event"/> to publish</param>
         /// <returns>A new awaitable <see cref="Task"/></returns>
-        protected virtual async Task OnPublishEventAsync(V1Event e)
+        protected virtual async Task OnPublishEventAsync(CloudEvent e)
         {
             try
             {

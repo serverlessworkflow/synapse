@@ -24,7 +24,7 @@ namespace Synapse.Application.Queries.WorkflowActivities
         /// <summary>
         /// Initializes a new <see cref="V1GetWorkflowActivitiesQuery"/>
         /// </summary>
-        /// <param name="workflowInstanceId">The id of the <see cref="V1WorkflowInstance"/> to get the <see cref="Domain.Models.V1WorkflowActivity"/> instances of</param>
+        /// <param name="workflowInstanceId">The id of the <see cref="Domain.Models.V1WorkflowInstance"/> to get the <see cref="Domain.Models.V1WorkflowActivity"/> instances of</param>
         /// <param name="includeNonOperative">A boolean indicating whether or not to include non-operative activities</param>
         /// <param name="parentId">The id of the <see cref="Domain.Models.V1WorkflowActivity"/> to get the child activities of</param>
         /// <param name="options">An object used to configure the <see cref="IQuery"/> to execute</param>
@@ -37,7 +37,7 @@ namespace Synapse.Application.Queries.WorkflowActivities
         }
 
         /// <summary>
-        /// Gets the id of the <see cref="V1WorkflowInstance"/> to get the <see cref="Domain.Models.V1WorkflowActivity"/> instances of
+        /// Gets the id of the <see cref="Domain.Models.V1WorkflowInstance"/> to get the <see cref="Domain.Models.V1WorkflowActivity"/> instances of
         /// </summary>
         public virtual string WorkflowInstanceId { get; protected set; }
 

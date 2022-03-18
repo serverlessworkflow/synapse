@@ -15,28 +15,25 @@
  *
  */
 
-using CloudNative.CloudEvents;
-using System.Reactive.Subjects;
-
-namespace Synapse.Runtime.Executor.Services
+namespace Synapse
 {
-
     /// <summary>
-    /// Defines the fundamentals of a service used to publish and subscribe to events
+    /// Defines extensions for strings
     /// </summary>
-    public interface IIntegrationEventBus
-        : IDisposable
+    public static class StringExtensions
     {
 
         /// <summary>
-        /// Gets the outbound <see cref="CloudEvent"/> stream
+        /// Determines whether or not the string is a workflow expression
         /// </summary>
-        ISubject<CloudEvent> OutboundStream { get; }
-
-        /// <summary>
-        /// Gets the inbound <see cref="CloudEvent"/> stream
-        /// </summary>
-        ISubject<CloudEvent> InboundStream { get; }
+        /// <param name="text">The string to test</param>
+        /// <returns>A boolean indicating whether or not the string is a workflow expression</returns>
+        public static bool IsWorkflowExpression(this string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                return false;
+            return text.StartsWith("${") && text.EndsWith("}");
+        }
 
     }
 

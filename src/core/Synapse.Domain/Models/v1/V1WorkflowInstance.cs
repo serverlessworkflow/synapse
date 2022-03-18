@@ -231,6 +231,22 @@ namespace Synapse.Domain.Models
         }
 
         /// <summary>
+        /// Sets the specified correlation mapping
+        /// </summary>
+        /// <param name="key">The key of the mapping to set</param>
+        /// <param name="value">The value of the mapping to set</param>
+        public virtual void SetCorrelationMapping(string key, string value)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+                throw DomainException.ArgumentNull(nameof(key));
+            if (string.IsNullOrWhiteSpace(value))
+                throw DomainException.ArgumentNull(nameof(value));
+            if (this.Status >= V1WorkflowInstanceStatus.Faulted)
+                throw DomainException.UnexpectedState(typeof(V1WorkflowInstance), this.Id, this.Status);
+            this.On(this.RegisterEvent(new V1WorkflowCorrelationMappingSetDomainEvent(this.Id, key, value)));
+        }
+
+        /// <summary>
         /// Faults the <see cref="V1WorkflowInstance"/>
         /// </summary>
         /// <param name="error">The <see cref="Error"/> that has caused the <see cref="V1WorkflowInstance"/> to fault</param>
@@ -301,7 +317,7 @@ namespace Synapse.Domain.Models
             this.Key = e.Key;
             this.ActivationType = e.ActivationType;
             this.Input = e.Input;
-            this._TriggerEvents = e.CorrelationContext.EventsQueue.ToList();
+            this._TriggerEvents = e.CorrelationContext.PendingEvents.ToList();
             this.CorrelationContext = e.CorrelationContext;
         }
 
@@ -393,6 +409,16 @@ namespace Synapse.Domain.Models
         {
             this.LastModified = e.CreatedAt;
             this.CorrelationContext = e.CorrelationContext;
+        }
+
+        /// <summary>
+        /// Handles the specified <see cref="V1WorkflowCorrelationMappingSetDomainEvent"/>
+        /// </summary>
+        /// <param name="e">The <see cref="V1WorkflowCorrelationMappingSetDomainEvent"/> to handle</param>
+        protected virtual void On(V1WorkflowCorrelationMappingSetDomainEvent e)
+        {
+            this.LastModified = e.CreatedAt;
+            this.CorrelationContext.SetMapping(e.Key, e.Value);
         }
 
         /// <summary>

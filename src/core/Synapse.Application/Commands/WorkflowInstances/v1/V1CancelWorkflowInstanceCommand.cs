@@ -17,6 +17,7 @@
 
 namespace Synapse.Application.Commands.WorkflowInstances
 {
+
     /// <summary>
     /// Represents the <see cref="ICommand"/> used to cancel the execution of an existing <see cref="Domain.Models.V1WorkflowInstance"/>
     /// </summary>
@@ -30,7 +31,7 @@ namespace Synapse.Application.Commands.WorkflowInstances
         /// </summary>
         protected V1CancelWorkflowInstanceCommand()
         {
-            this.Id = null!;
+            this.WorkflowInstanceId = null!;
         }
 
         /// <summary>
@@ -39,13 +40,13 @@ namespace Synapse.Application.Commands.WorkflowInstances
         /// <param name="id">The id of the <see cref="Domain.Models.V1WorkflowInstance"/> to cancel</param>
         public V1CancelWorkflowInstanceCommand(string id)
         {
-            this.Id = id;
+            this.WorkflowInstanceId = id;
         }
 
         /// <summary>
         /// Gets the id of the <see cref="Domain.Models.V1WorkflowInstance"/> to cancel
         /// </summary>
-        public virtual string Id { get; protected set; }
+        public virtual string WorkflowInstanceId { get; protected set; }
 
     }
 
@@ -57,27 +58,43 @@ namespace Synapse.Application.Commands.WorkflowInstances
         ICommandHandler<V1CancelWorkflowInstanceCommand, Integration.Models.V1WorkflowInstance>
     {
 
-        /// <inheritdoc/>
-        public V1CancelWorkflowInstanceCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IRepository<Domain.Models.V1WorkflowInstance> workflowInstances)
+        /// <summary>
+        /// Initializes a new <see cref="V1CancelWorkflowInstanceCommandHandler"/>
+        /// </summary>
+        /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
+        /// <param name="mediator">The service used to mediate calls</param>
+        /// <param name="mapper">The service used to map objects</param>
+        /// <param name="workflowInstances">The <see cref="IRepository"/> used to manage <see cref="V1WorkflowInstance"/>s</param>
+        /// <param name="runtimeProxyManager">The service used to manage runtime proxies</param>
+        public V1CancelWorkflowInstanceCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, 
+            IRepository<V1WorkflowInstance> workflowInstances, IWorkflowRuntimeProxyManager runtimeProxyManager)
             : base(loggerFactory, mediator, mapper)
         {
             this.WorkflowInstances = workflowInstances;
+            this.RuntimeHostManager = runtimeProxyManager;
         }
 
         /// <summary>
-        /// Gets the <see cref="IRepository"/> used to manage <see cref="Domain.Models.V1WorkflowInstance"/>s
+        /// Gets the <see cref="IRepository"/> used to manage <see cref="V1WorkflowInstance"/>s
         /// </summary>
-        protected IRepository<Domain.Models.V1WorkflowInstance> WorkflowInstances { get; }
+        protected IRepository<V1WorkflowInstance> WorkflowInstances { get; }
+
+        /// <summary>
+        /// Gets the service used to manage runtime proxies
+        /// </summary>
+        protected IWorkflowRuntimeProxyManager RuntimeHostManager { get; }
 
         /// <inheritdoc/>
         public virtual async Task<IOperationResult<Integration.Models.V1WorkflowInstance>> HandleAsync(V1CancelWorkflowInstanceCommand command, CancellationToken cancellationToken = default)
         {
-            var workflowInstance = await this.WorkflowInstances.FindAsync(command.Id, cancellationToken);
+            var workflowInstance = await this.WorkflowInstances.FindAsync(command.WorkflowInstanceId, cancellationToken);
             if (workflowInstance == null)
-                throw DomainException.NullReference(typeof(Domain.Models.V1WorkflowInstance), command.Id);
+                throw DomainException.NullReference(typeof(V1WorkflowInstance), command.WorkflowInstanceId);
             workflowInstance.Cancel();
             workflowInstance = await this.WorkflowInstances.UpdateAsync(workflowInstance, cancellationToken);
             await this.WorkflowInstances.SaveChangesAsync(cancellationToken);
+            if(this.RuntimeHostManager.TryGetProxy(command.WorkflowInstanceId, out var proxy))
+                await proxy.CancelAsync(cancellationToken);
             return this.Ok(this.Mapper.Map<Integration.Models.V1WorkflowInstance>(workflowInstance));
         }
 

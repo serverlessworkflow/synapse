@@ -20,30 +20,37 @@
  * -----------------------------------------------------------------------
  */
 
-namespace Synapse.Integration.Models
+namespace Synapse.Integration.Commands.WorkflowInstances
 {
 
 	/// <summary>
-	/// Represents the context of an event correlation
+	/// Represents the ICommand used to attempt correlating a V1Event to an existing V1WorkflowInstance
 	/// </summary>
 	[DataContract]
-	public partial class V1CorrelationContext
-		: Entity
+	public partial class V1TryCorrelateWorkflowInstanceCommand
+		: Command
 	{
 
 		/// <summary>
-		/// An IReadOnlyDictionary`2 containing the correlations' value by key mappings
+		/// The id of the V1WorkflowInstance to correlate
 		/// </summary>
-		[DataMember(Name = "Mappings", Order = 1)]
-		[Description("An IReadOnlyDictionary`2 containing the correlations' value by key mappings")]
-		public virtual NameValueCollection<string> Mappings { get; set; }
+		[DataMember(Name = "WorkflowInstanceId", Order = 1)]
+		[Description("The id of the V1WorkflowInstance to correlate")]
+		public virtual string WorkflowInstanceId { get; set; }
 
 		/// <summary>
-		/// An IReadOnlyCollection`1 containing all correlated V1Events pending processing
+		/// The V1Event to correlate
 		/// </summary>
-		[DataMember(Name = "PendingEvents", Order = 2)]
-		[Description("An IReadOnlyCollection`1 containing all correlated V1Events pending processing")]
-		public virtual ICollection<V1Event> PendingEvents { get; set; }
+		[DataMember(Name = "Event", Order = 2)]
+		[Description("The V1Event to correlate")]
+		public virtual V1Event Event { get; set; }
+
+		/// <summary>
+		/// An IEnumerable`1 containing the mapping keys to use to correlate the V1WorkflowInstance
+		/// </summary>
+		[DataMember(Name = "MappingKeys", Order = 3)]
+		[Description("An IEnumerable`1 containing the mapping keys to use to correlate the V1WorkflowInstance")]
+		public virtual IEnumerable<string> MappingKeys { get; set; }
 
     }
 

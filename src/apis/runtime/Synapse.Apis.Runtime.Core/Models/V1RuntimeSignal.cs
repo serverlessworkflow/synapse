@@ -24,35 +24,35 @@ namespace Synapse.Apis.Runtime
     /// Represents a runtime signal
     /// </summary>
     [DataContract]
-    public class RuntimeSignal
+    public class V1RuntimeSignal
     {
 
         /// <summary>
-        /// Initializes a new <see cref="RuntimeSignal"/>
+        /// Initializes a new <see cref="V1RuntimeSignal"/>
         /// </summary>
-        protected RuntimeSignal()
+        protected V1RuntimeSignal()
         {
 
         }
 
         /// <summary>
-        /// Initializes a new <see cref="RuntimeSignal"/>
+        /// Initializes a new <see cref="V1RuntimeSignal"/>
         /// </summary>
-        /// <param name="type">The <see cref="RuntimeSignal"/> type</param>
-        /// <param name="data">The <see cref="RuntimeSignal"/>'s data</param>
-        public RuntimeSignal(SignalType type, Dynamic? data = null)
+        /// <param name="type">The <see cref="V1RuntimeSignal"/> type</param>
+        /// <param name="data">The <see cref="V1RuntimeSignal"/>'s data</param>
+        public V1RuntimeSignal(V1RuntimeSignalType type, Dynamic? data = null)
         {
             this.Type = type;
             this.Data = data;
         }
 
         /// <summary>
-        /// Gets the <see cref="RuntimeSignal"/> type
+        /// Gets the <see cref="V1RuntimeSignal"/> type
         /// </summary>
-        public SignalType Type { get; protected set; }
+        public V1RuntimeSignalType Type { get; protected set; }
 
         /// <summary>
-        /// Gets the <see cref="RuntimeSignal"/>'s data
+        /// Gets the <see cref="V1RuntimeSignal"/>'s data
         /// </summary>
         [DataMember(Order = 1)]
         public virtual Dynamic? Data { get; protected set; }

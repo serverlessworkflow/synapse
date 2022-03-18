@@ -153,6 +153,55 @@ namespace Synapse
 
             }
 
+            /// <summary>
+            /// Exposes constants about correlation related environment variables
+            /// </summary>
+            public static class Correlation
+            {
+
+                /// <summary>
+                /// Gets the prefix for all correlation related environment variables
+                /// </summary>
+                public const string Prefix = Runtime.Prefix + "CORRELATION_";
+
+                /// <summary>
+                /// Exposes constants about the Synapse runtime correlation mode environment variable
+                /// </summary>
+                public static class Mode
+                {
+
+                    /// <summary>
+                    /// Gets the name of the Synapse runtime correlation mode environment variable
+                    /// </summary>
+                    public const string Name = Prefix + "MODE";
+
+                    /// <summary>
+                    /// Gets the value of the Synapse runtime correlation mode environment variable
+                    /// </summary>
+                    public static string Value = Environment.GetEnvironmentVariable(Name);
+
+                }
+
+                /// <summary>
+                /// Exposes constants about the environment variable that regulates the maximum amount of time an active correlation can be running before going to sleep
+                /// </summary>
+                public static class MaxActiveDuration
+                {
+
+                    /// <summary>
+                    /// Gets the name of the workflow instance id environment variable
+                    /// </summary>
+                    public const string Name = Prefix + "MAX_ACTIVE_DURATION";
+
+                    /// <summary>
+                    /// Gets the value of the workflow instance id environment variable
+                    /// </summary>
+                    public static string Value = Environment.GetEnvironmentVariable(Name);
+
+                }
+
+            }
+
         }
 
     }

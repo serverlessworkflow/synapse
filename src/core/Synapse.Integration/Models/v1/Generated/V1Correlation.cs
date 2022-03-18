@@ -33,11 +33,11 @@ namespace Synapse.Integration.Models
 	{
 
 		/// <summary>
-		/// The V1Correlation's mode
+		/// The V1Correlation's lifetime
 		/// </summary>
-		[DataMember(Name = "Mode", Order = 1)]
-		[Description("The V1Correlation's mode")]
-		public virtual V1CorrelationMode Mode { get; set; }
+		[DataMember(Name = "Lifetime", Order = 1)]
+		[Description("The V1Correlation's lifetime")]
+		public virtual V1CorrelationLifetime Lifetime { get; set; }
 
 		/// <summary>
 		/// A value determining the type of the V1Correlation's V1CorrelationCondition evaluation

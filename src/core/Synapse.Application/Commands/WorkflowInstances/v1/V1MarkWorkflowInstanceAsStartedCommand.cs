@@ -19,63 +19,63 @@ namespace Synapse.Application.Commands.WorkflowInstances
 {
 
     /// <summary>
-    /// Represents the <see cref="ICommand"/> used to mark the execution of a <see cref="Domain.Models.V1WorkflowInstance"/> as started
+    /// Represents the <see cref="ICommand"/> used to mark the execution of a <see cref="V1WorkflowInstance"/> as started
     /// </summary>
     [DataTransferObjectType(typeof(Integration.Commands.WorkflowInstances.V1SetWorkflowInstanceStartedCommand))]
-    public class V1SetWorkflowInstanceStartedCommand
+    public class V1MarkWorkflowInstanceAsStartedCommand
         : Command<Integration.Models.V1WorkflowInstance>
     {
 
         /// <summary>
-        /// Initializes a new <see cref="V1SetWorkflowInstanceStartedCommand"/>
+        /// Initializes a new <see cref="V1MarkWorkflowInstanceAsStartedCommand"/>
         /// </summary>
-        protected V1SetWorkflowInstanceStartedCommand()
+        protected V1MarkWorkflowInstanceAsStartedCommand()
         {
             this.Id = null!;
         }
 
         /// <summary>
-        /// Initializes a new <see cref="V1SetWorkflowInstanceStartedCommand"/>
+        /// Initializes a new <see cref="V1MarkWorkflowInstanceAsStartedCommand"/>
         /// </summary>
-        /// <param name="id">The id of the <see cref="Domain.Models.V1WorkflowInstance"/> to mark as started</param>
-        public V1SetWorkflowInstanceStartedCommand(string id)
+        /// <param name="id">The id of the <see cref="V1WorkflowInstance"/> to mark as started</param>
+        public V1MarkWorkflowInstanceAsStartedCommand(string id)
         {
             this.Id = id;
         }
 
         /// <summary>
-        /// Gets the id of the <see cref="Domain.Models.V1WorkflowInstance"/> to mark as started
+        /// Gets the id of the <see cref="V1WorkflowInstance"/> to mark as started
         /// </summary>
         public virtual string Id { get; protected set; }
 
     }
 
     /// <summary>
-    /// Represents the service used to handle <see cref="V1SetWorkflowInstanceStartedCommand"/>s
+    /// Represents the service used to handle <see cref="V1MarkWorkflowInstanceAsStartedCommand"/>s
     /// </summary>
-    public class V1SetWorkflowInstanceStartedCommandHandler
+    public class V1MarkWorkflowInstanceAsStartedCommandHandler
         : CommandHandlerBase,
-        ICommandHandler<V1SetWorkflowInstanceStartedCommand, Integration.Models.V1WorkflowInstance>
+        ICommandHandler<V1MarkWorkflowInstanceAsStartedCommand, Integration.Models.V1WorkflowInstance>
     {
 
         /// <inheritdoc/>
-        public V1SetWorkflowInstanceStartedCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IRepository<Domain.Models.V1WorkflowInstance> workflowInstances) 
+        public V1MarkWorkflowInstanceAsStartedCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IRepository<V1WorkflowInstance> workflowInstances) 
             : base(loggerFactory, mediator, mapper)
         {
             this.WorkflowInstances = workflowInstances;
         }
 
         /// <summary>
-        /// Gets the <see cref="IRepository"/> used to manage <see cref="Domain.Models.V1WorkflowInstance"/>s
+        /// Gets the <see cref="IRepository"/> used to manage <see cref="V1WorkflowInstance"/>s
         /// </summary>
-        protected IRepository<Domain.Models.V1WorkflowInstance> WorkflowInstances { get; }
+        protected IRepository<V1WorkflowInstance> WorkflowInstances { get; }
 
         /// <inheritdoc/>
-        public virtual async Task<IOperationResult<Integration.Models.V1WorkflowInstance>> HandleAsync(V1SetWorkflowInstanceStartedCommand command, CancellationToken cancellationToken = default)
+        public virtual async Task<IOperationResult<Integration.Models.V1WorkflowInstance>> HandleAsync(V1MarkWorkflowInstanceAsStartedCommand command, CancellationToken cancellationToken = default)
         {
             var instance = await this.WorkflowInstances.FindAsync(command.Id, cancellationToken);
             if (instance == null)
-                throw DomainException.NullReference(typeof(Domain.Models.V1WorkflowInstance), command.Id);
+                throw DomainException.NullReference(typeof(V1WorkflowInstance), command.Id);
             instance.MarkAsRunning();
             instance = await this.WorkflowInstances.UpdateAsync(instance, cancellationToken);
             await this.WorkflowInstances.SaveChangesAsync(cancellationToken);
