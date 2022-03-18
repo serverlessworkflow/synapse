@@ -90,6 +90,14 @@ namespace Synapse.Application.Commands.WorkflowInstances
         public virtual async Task<IOperationResult<bool>> HandleAsync(V1TryCorrelateWorkflowInstanceCommand command, CancellationToken cancellationToken = default)
         {
             var workflowInstance = await this.WorkflowInstances.FindAsync(command.WorkflowInstanceId, cancellationToken);
+            if(workflowInstance == null)
+                throw DomainException.NullReference(typeof(V1WorkflowInstance), command.WorkflowInstanceId);
+            if (!workflowInstance.CorrelationContext.CorrelatesTo(command.Event))
+                return this.Ok(false);
+            workflowInstance.CorrelationContext.Correlate(command.Event, command.MappingKeys);
+            await this.WorkflowInstances.UpdateAsync(workflowInstance, cancellationToken);
+            await this.WorkflowInstances.SaveChangesAsync(cancellationToken);
+            return this.Ok(true);
         }
 
     }
