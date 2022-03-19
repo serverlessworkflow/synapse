@@ -41,7 +41,7 @@
             {
                 <TabControl>
                     <TabPage Header="Instances">
-                        <DataTable DataSource="instances" ViewDetailsUriProvider="InstanceDetailsUriProvider">
+                        @*<DataTable DataSource="instances" ViewDetailsUriProvider="InstanceDetailsUriProvider">
                             <Columns>
                                 <DataColumnProperties 
                                 Name="Key"
@@ -67,7 +67,7 @@
                                 IsSorteable="false"
                                 IsFilterable="false"/>
                             </Columns>
-                        </DataTable>
+                        </DataTable>*@
                     </TabPage>
                     <TabPage Header="Definition">
                         @if (workflow?.Definition != null)

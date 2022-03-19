@@ -28,9 +28,6 @@
     <None Include="Features\Shared\Accordion\Collapse.razor" />
     <None Include="Features\Shared\Accordion\ExpandableDataRow.razor" />
     <None Include="Features\Shared\Accordion\Expander.razor" />
-    <None Include="Features\Shared\DataTable\DataColumn.razor" />
-    <None Include="Features\Shared\DataTable\DataColumnProperties.razor" />
-    <None Include="Features\Shared\DataTable\DataTable.razor" />
     <None Include="Features\Shared\Layout\AppHeader.razor" />
     <None Include="Features\Shared\Layout\Header.razor" />
     <None Include="Features\Shared\Layout\MainLayout.razor" />
