@@ -6,10 +6,10 @@ namespace Synapse.Dashboard.Features.Test
     {
 
         [Reducer]
-        public static CounterState Increment(CounterState state, IncrementAction action) => new(state.Count + action.Amount);
+        public static CounterState Increment(CounterState state, Increment action) => new(state.Count + action.Amount);
 
         [Reducer]
-        public static CounterState Decrement(CounterState state, DecrementAction action) => new(state.Count - action.Amount);
+        public static CounterState Decrement(CounterState state, Decrement action) => new(state.Count - action.Amount);
 
     }
 

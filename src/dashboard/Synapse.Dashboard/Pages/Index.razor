@@ -12,11 +12,30 @@ Welcome to Synapse - Serverless Workflow Management System
 
 <Counter />
 
-<DataTable ItemsSource="@users" />
+<Table Items="@users">
+    <RowTemplate Context="row">
+        <Expander HeaderContainerTagName="tr" BodyContainerTagName="tr">
+            <HeaderTemplate Context="header">@header.Header</HeaderTemplate>
+            <Header>
+                <ColumnHeaderCollectionPresenter T="TestUserState" />
+            </Header>
+            <Body>
+                <td colspan="100%">Some exapandable content</td>
+            </Body>
+        </Expander>
+    </RowTemplate>
+    <Columns>
+        <Column T="TestUserState" Name="Test">
+            <CellTemplate Context="context">
+                <div class="badge rounded-pill bg-primary">Some value</div>
+            </CellTemplate>
+        </Column>
+    </Columns>
+</Table>
 
 @code{
 
-    private List<TestUserState> users = new() { new("FakeFirstName", "Fake Last Name", "fake@email.com") };
+    private List<TestUserState> users = new() { new("FakeFirstName", "Fake Last Name", "fake@email.com"), new("FakeFirstName", "Fake Last Name", "fake@email.com") };
 
     protected override async Task OnInitializedAsync()
     {

@@ -1,40 +1,32 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
-using Neuroglia.Serialization;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using Synapse.Apis.Monitoring;
 using Synapse.Integration.Models;
 using System.Reactive.Subjects;
 
 namespace Synapse.Dashboard.Services
 {
+
     /// <summary>
     /// Represents the default implementation of the <see cref="IIntegrationEventStream"/> interface
     /// </summary>
     public class IntegrationEventStream
-        : IIntegrationEventStream
+        : IIntegrationEventStream, IDisposable
     {
+
+        private bool _Disposed;
 
         /// <summary>
         /// Initializes a new <see cref="IntegrationEventStream"/>
         /// </summary>
         /// <param name="hubConnection">The current <see cref="Microsoft.AspNetCore.SignalR.Client.HubConnection"/></param>
-        /// <param name="toastManager">The service used to manage <see cref="Toast"/>s</param>
-        /// <param name="jsonSerializer">The service used to serialize/deserialize to/from JSON</param>
-        public IntegrationEventStream(ILogger<IntegrationEventStream> logger, HubConnection hubConnection, IToastManager toastManager, IJsonSerializer jsonSerializer)
+        public IntegrationEventStream(ILogger<IntegrationEventStream> logger, HubConnection hubConnection)
         {
             this.Logger = logger;
             this.HubConnection = hubConnection;
-            //this.Subscription = this.HubConnection.On<V1Event>(nameof(ISynapseMonitoringApiClient.PublishIntegrationEvent), On); //We probably don't want to create a toast for each single event. If have to notify, do it in a more subtle way
-            this.ToastManager = toastManager;
-            this.JsonSerializer = jsonSerializer;
+            this.Subscription = this.HubConnection.On<V1Event>(nameof(ISynapseMonitoringApiClient.PublishIntegrationEvent), this.OnEvent);
         }
 
         protected ILogger Logger { get; }
-
-        /// <summary>
-        /// Gets the <see cref="IntegrationEventStream"/>'s subscription
-        /// </summary>
-        protected IDisposable Subscription { get; }
 
         /// <summary>
         /// Gets the current <see cref="Microsoft.AspNetCore.SignalR.Client.HubConnection"/>
@@ -42,14 +34,9 @@ namespace Synapse.Dashboard.Services
         protected HubConnection HubConnection { get; }
 
         /// <summary>
-        /// Gets the service used to manage <see cref="Toast"/>s
+        /// Gets the <see cref="IntegrationEventStream"/>'s subscription
         /// </summary>
-        protected IToastManager ToastManager { get; }
-
-        /// <summary>
-        /// Gets the service used to serialize/deserialize to/from JSON
-        /// </summary>
-        protected IJsonSerializer JsonSerializer { get; }
+        protected IDisposable? Subscription { get; private set; }
 
         /// <summary>
         /// Gets the <see cref="Subject{T}"/> used to observe <see cref=""/>s consumed by the <see cref="IntegrationEventStream"/>
@@ -66,27 +53,30 @@ namespace Synapse.Dashboard.Services
         /// Handles the specified <see cref="V1Event"/>
         /// </summary>
         /// <param name="e">The <see cref="V1Event"/> to handle</param>
-        protected virtual async void On(V1Event e)
+        protected virtual void OnEvent(V1Event e)
         {
-            try
-            {
-                var body = string.Empty;
-                if (e.Data != null)
-                    body = $"<pre><code>{JsonConvert.SerializeObject(e.Data)}</code></pre>";
-                this.ToastManager.ShowToast(toast => toast
-                    .WithLevel(LogLevel.Information)
-                    .WithHeader(e.Type)
-                    .WithBody(body));
-                this.Stream.OnNext(e);
-                await Task.CompletedTask;
-            }
-            catch (Exception ex)
-            {
-                this.Logger.LogError(ex.ToString());
-            }
-
+            this.Stream.OnNext(e);
         }
 
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!this._Disposed)
+            {
+                if (disposing)
+                {
+                    this.Subscription?.Dispose();
+                    this.Subscription = null;
+                }
+                this._Disposed = true;
+            }
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            this.Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
     }
 
 }

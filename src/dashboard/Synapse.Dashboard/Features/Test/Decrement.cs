@@ -1,9 +1,9 @@
 ﻿namespace Synapse.Dashboard.Features.Test
 {
-    public class DecrementAction
+    public class Decrement
     {
 
-        public DecrementAction(int amount)
+        public Decrement(int amount)
         {
             this.Amount = amount;
         }

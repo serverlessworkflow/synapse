@@ -1,6 +1,9 @@
 ﻿@page "/workflows"
 @using Neuroglia.Data
+@using Neuroglia.Data.Flux
 @using Synapse.Integration.Models
+@using System.Reactive.Linq
+@inherits StatefulComponent<V1WorkflowCollectionState>
 @inject IServiceProvider ServiceProvider
 @inject IBreadcrumbService BreadcrumbService
 @inject NavigationManager NavigationManager
@@ -11,19 +14,66 @@
         <button @onclick="OnNewWorkflow" class="btn btn-outline-dark" title="New workflow"><span class="oi oi-plus"></span></button>
     </Toolbar>
 </AppRightSidebar>
-@*<DataTable DataSource="new ODataQueryable<V1Workflow>(this.ServiceProvider)" AutoGenerateColumns="true" OrderByDefault="(IQueryable query) => ((IQueryable<V1Workflow>)query).OrderBy(c => c.Id)" />*@
+<Table Items="workflows" AutoGenerateColumns="false">
+    <Columns>
+        <Column T="KeyValuePair<string, List<V1Workflow>>" 
+            Name="Name"
+            ValueProvider="g => g.Key" />
+        <Column T="KeyValuePair<string, List<V1Workflow>>" 
+            Name="Versions"
+            ValueProvider="g => g.Value.Count()" />
+        <Column T="KeyValuePair<string, List<V1Workflow>>" 
+            Name="Latest version"
+            ValueProvider="g => g.Value.Max(w => w.Definition.Version)" />
+        <ViewDetailsColumn T="KeyValuePair<string, List<V1Workflow>>" OnViewDetails="kvp => OnViewWorkflow(kvp.Value.OrderBy(w => w.Definition.Version).Last())" />
+    </Columns>
+</Table>
 
 @code {
+
+    private IDisposable? _Subscription;
+    private Dictionary<string, List<V1Workflow>> workflows = new();
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
         await this.BreadcrumbService.Use(KnownBreadcrumbs.Workflows);
+        this.workflows = this.State.GroupBy(w => w.Definition.Id!).ToDictionary(g => g.Key, g => g.ToList())!;
+        this._Subscription = this.Feature
+            .SelectMany(collection => collection)
+            .GroupBy(workflow => workflow.Definition.Id)
+            .Subscribe(group =>
+            {
+                this.workflows[group.Key!] = new();
+                group.Subscribe(w =>
+                {
+                    if (this.workflows.TryGetValue(group.Key!, out var workflows))
+                        workflows.Add(w);
+                    else
+                        this.workflows[group.Key!] = new() { w };
+                    this.StateHasChanged();
+                });
+            });
     }
 
     void OnNewWorkflow()
     {
         this.NavigationManager.NavigateTo("/workflows/new");
+    }
+
+    void OnViewWorkflow(V1Workflow workflow)
+    {
+        this.NavigationManager.NavigateTo($"/workflows/{workflow.Id}");
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        base.Dispose(disposing);
+        if (disposing)
+        {
+            this._Subscription?.Dispose();
+            this._Subscription = null;
+        }
     }
 
 }

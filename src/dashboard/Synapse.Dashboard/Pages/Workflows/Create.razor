@@ -1,7 +1,9 @@
 ﻿@page "/workflows/new"
+@using Neuroglia.Data.Flux
 @using ServerlessWorkflow.Sdk.Models
 @using Synapse.Apis.Management
 @using Synapse.Integration.Commands.Workflows
+@inject IDispatcher Dispatcher
 @inject ISynapseManagementApi SynapseApi
 @inject IBreadcrumbService BreadcrumbService
 @inject NavigationManager NavigationManager
@@ -22,7 +24,8 @@
 
     async Task OnCreateWorkflow(WorkflowDefinition definition)
     {
-        if (definition != null) {
+        if (definition != null) 
+        {
             var command = new V1CreateWorkflowCommand()
             {
                 Definition = definition
@@ -30,6 +33,7 @@
             var workflow = await this.SynapseApi.CreateWorkflowAsync(command);
             if (workflow != null)
             {
+                this.Dispatcher.Dispatch(new AddV1Workflow(workflow));
                 this.NavigationManager.NavigateTo("workflows");
             }
         }

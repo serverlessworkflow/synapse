@@ -1,0 +1,22 @@
+﻿@namespace Synapse.Dashboard
+@typeparam T
+
+ @foreach(var column in Table.columns.Where(c => c.IsVisible))
+{
+    <td class="@Table.CellClass">
+        @if(column.CellTemplate == null)
+            @Table.DefaultCellTemplate(new(Table, column, Item))
+        else
+            @column.CellTemplate(new(Table, column, Item))
+    </td>
+}
+
+@code {
+
+    [CascadingParameter]
+    public Table<T> Table { get; set; }
+
+    [Parameter]
+    public T Item { get; set; }
+
+}

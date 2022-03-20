@@ -1,7 +1,11 @@
 ﻿@using Microsoft.AspNetCore.SignalR.Client
+@using Neuroglia.Data.Flux
 @using Neuroglia.Data.Flux.Components
+@using System.Reactive.Linq
+@using Synapse.Integration.Events.Workflows
 @inject HubConnection HubConnection
-@inject IIntegrationEventStream integrationEventStream
+@inject IIntegrationEventStream IntegrationEventStream
+@inject IDispatcher Dispatcher;
 
 <FluxStore />
 <Router AppAssembly="@typeof(App).Assembly">
@@ -18,12 +22,26 @@
 </Router>
 
 @code
-{ 
+{
 
     protected override async Task OnInitializedAsync()
     {
-        //await this.HubConnection.StartAsync();
         await base.OnInitializedAsync();
+        this.IntegrationEventStream
+            .Where(e => e.Type == "io.synapse/v1workflow/created/v1")
+            .Subscribe(e =>
+            {
+                try
+                {
+                    var data = e.Data.ToObject<V1WorkflowCreatedIntegrationEvent>();
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine("ERROR: " + ex.ToString());
+                }
+                //this.Dispatcher.Dispatch(new AddV1Workflow(new() { Id = e.AggregateId, CreatedAt = e.CreatedAt.DateTime, LastModified = e.CreatedAt.DateTime, Definition = e.Definition }));
+            });
+        await this.HubConnection.StartAsync();
     }
 
 }

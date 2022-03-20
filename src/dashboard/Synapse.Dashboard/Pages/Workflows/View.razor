@@ -9,6 +9,7 @@
 @inject IMonacoEditorHelper MonacoEditorHelper
 @inject IBreadcrumbService BreadcrumbService
 @inject HubConnection HubConnection
+@inject NavigationManager NavigationManager
 
 <PageTitle>@workflow?.Id</PageTitle>
 <AppRightSidebar>
@@ -41,33 +42,43 @@
             {
                 <TabControl>
                     <TabPage Header="Instances">
-                        @*<DataTable DataSource="instances" ViewDetailsUriProvider="InstanceDetailsUriProvider">
+                        <Table Items="instances" AutoGenerateColumns="false">
                             <Columns>
-                                <DataColumnProperties 
-                                Name="Key"
-                                ValueProvider="source => ((V1WorkflowInstance)source).Key"
-                                PropertyPath="@PropertyPath.Parse(nameof(V1WorkflowInstance.Key))" />
-                                <DataColumnProperties 
-                                Name="Status"
-                                ValueProvider="source => ((V1WorkflowInstance)source).Status"
-                                PropertyPath="@PropertyPath.Parse(nameof(V1WorkflowInstance.Status))" />
-                                <DataColumnProperties 
-                                Name="Started at"
-                                ValueProvider="source => ((V1WorkflowInstance)source).StartedAt"
-                                PropertyPath="@PropertyPath.Parse(nameof(V1WorkflowInstance.StartedAt))"
-                                Format="MM/dd/yyyy, HH:mm"/>
-                                <DataColumnProperties 
-                                Name="Executed at"
-                                ValueProvider="source => ((V1WorkflowInstance)source).ExecutedAt"
-                                PropertyPath="@PropertyPath.Parse(nameof(V1WorkflowInstance.ExecutedAt))"
-                                Format="MM/dd/yyyy, HH:mm"/>
-                                <DataColumnProperties 
-                                Name="Duration"
-                                ValueProvider="source => ((V1WorkflowInstance)source).Duration"
-                                IsSorteable="false"
-                                IsFilterable="false"/>
+                                <Column
+                                    T="V1WorkflowInstance"
+                                    Name="Key"
+                                    ValueProvider="source => source.Key"
+                                    PropertyPath="@PropertyPath.Parse(nameof(V1WorkflowInstance.Key))" />
+                                <Column
+                                    T="V1WorkflowInstance"    
+                                    Name="Status"
+                                    ValueProvider="source => source.Status"
+                                    PropertyPath="@PropertyPath.Parse(nameof(V1WorkflowInstance.Status))">
+                                    <CellTemplate Context="context">
+                                        <span class="badge rounded-pill @GetCssClassFor((V1WorkflowInstanceStatus)context.Value!)">@(EnumHelper.Stringify((V1WorkflowInstanceStatus)context.Value))</span>
+                                    </CellTemplate>
+                                </Column>
+                                <Column
+                                    T="V1WorkflowInstance"   
+                                    Name="Started at"
+                                    ValueProvider="source => source.StartedAt"
+                                    PropertyPath="@PropertyPath.Parse(nameof(V1WorkflowInstance.StartedAt))"
+                                    Format="MM/dd/yyyy, HH:mm"/>
+                                <Column
+                                    T="V1WorkflowInstance"   
+                                    Name="Executed at"
+                                    ValueProvider="source => source.ExecutedAt"
+                                    PropertyPath="@PropertyPath.Parse(nameof(V1WorkflowInstance.ExecutedAt))"
+                                    Format="MM/dd/yyyy, HH:mm"/>
+                                <Column
+                                    T="V1WorkflowInstance"   
+                                    Name="Duration"
+                                    ValueProvider="source => ((V1WorkflowInstance)source).Duration"
+                                    IsSorteable="false"
+                                    IsFilterable="false"/>
+                                <ViewDetailsColumn T="V1WorkflowInstance" OnViewDetails="OnViewWorkflowInstance" />
                             </Columns>
-                        </DataTable>*@
+                        </Table>
                     </TabPage>
                     <TabPage Header="Definition">
                         @if (workflow?.Definition != null)
@@ -160,6 +171,22 @@ else
         return (await this.SynapseApi.GetWorkflowInstancesAsync($"$filter={nameof(V1WorkflowInstance.WorkflowId)} eq '{this.WorkflowId}'")).AsQueryable();
     }
 
+    protected string GetCssClassFor(V1WorkflowInstanceStatus workflowInstanceStatus)
+    {
+        return workflowInstanceStatus switch
+        {
+            V1WorkflowInstanceStatus.Pending => "bg-secondary", 
+            V1WorkflowInstanceStatus.Scheduling => "border-primary",
+            V1WorkflowInstanceStatus.Scheduled => "bg-primary",
+            V1WorkflowInstanceStatus.Starting or V1WorkflowInstanceStatus.Resuming => "border-primary text-primary",
+            V1WorkflowInstanceStatus.Running => "bg-primary",
+            V1WorkflowInstanceStatus.Suspended => "bg-warning",
+            V1WorkflowInstanceStatus.Faulted => "bg-danger",
+            V1WorkflowInstanceStatus.Completed => "bg-success",
+            _ => string.Empty
+        };
+    }
+
     protected async Task OnIntegrationEvent(V1Event e)
     {
         if (e.Type.Split('/')[1] != "v1workflowinstance"
@@ -175,6 +202,11 @@ else
             this.diagram.DisplayActivityStatusFor(this.instances.Where(i => i.Id == this.WorkflowInstanceId));
         }
         this.StateHasChanged();
+    }
+
+    private void OnViewWorkflowInstance(V1WorkflowInstance workflowInstance)
+    {
+        this.NavigationManager.NavigateTo($"/workflows/{workflow.Id}");
     }
 
 }
