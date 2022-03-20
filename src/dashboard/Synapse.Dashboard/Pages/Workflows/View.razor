@@ -159,13 +159,6 @@ else
         this.StateHasChanged();
     }
 
-    public string? InstanceDetailsUriProvider(object? key)
-    {
-        if (key == null) 
-            return null;
-        return $"/workflows/{this.WorkflowId}/instance/{key}";
-    }
-
     protected async Task<IQueryable<V1WorkflowInstance>> FetchWorkflowInstancesAsync()
     {
         return (await this.SynapseApi.GetWorkflowInstancesAsync($"$filter={nameof(V1WorkflowInstance.WorkflowId)} eq '{this.WorkflowId}'")).AsQueryable();
@@ -206,7 +199,7 @@ else
 
     private void OnViewWorkflowInstance(V1WorkflowInstance workflowInstance)
     {
-        this.NavigationManager.NavigateTo($"/workflows/{workflow.Id}");
+        this.NavigationManager.NavigateTo($"/workflows/{this.WorkflowId}/instance/{workflowInstance.Id}");
     }
 
 }

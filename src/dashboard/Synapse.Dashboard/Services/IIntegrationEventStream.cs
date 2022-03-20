@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Hosting;
-using Synapse.Integration.Models;
+﻿using Synapse.Integration.Models;
 
 namespace Synapse.Dashboard.Services
 {
