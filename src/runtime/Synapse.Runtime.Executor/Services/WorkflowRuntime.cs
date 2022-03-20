@@ -264,6 +264,8 @@ namespace Synapse.Runtime.Services
             catch(Exception ex)
             {
                 this.Logger.LogError("An error occured while handling a server runtime signal: {ex}", ex.ToString());
+                await this.Context.Workflow.FaultAsync(ex, this.CancellationToken);
+                this.HostApplicationLifetime.StopApplication();
             }
         }
 

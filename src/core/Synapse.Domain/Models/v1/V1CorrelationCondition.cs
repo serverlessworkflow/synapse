@@ -21,15 +21,28 @@ namespace Synapse.Domain.Models
     /// <summary>
     /// Represents a condition of an event correlation
     /// </summary>
+    [DataTransferObjectType(typeof(Integration.Models.V1CorrelationCondition))]
     public class V1CorrelationCondition
     {
 
         /// <summary>
         /// Initializes a new <see cref="V1CorrelationCondition"/>
         /// </summary>
-        public V1CorrelationCondition()
+        protected V1CorrelationCondition()
         {
 
+        }
+
+        /// <summary>
+        /// Initializes a new <see cref="V1CorrelationCondition"/>
+        /// </summary>
+        public V1CorrelationCondition(params V1EventFilter[] filters)
+        {
+            if (filters == null)
+                throw DomainException.ArgumentNull(nameof(filters));
+            if (!filters.Any())
+                throw DomainException.ArgumentMustHaveMinimumLengthOf(nameof(filters), 1);
+            this._Filters = filters.ToList();
         }
 
         private List<V1EventFilter> _Filters = new();
@@ -72,6 +85,24 @@ namespace Synapse.Domain.Models
             if (e == null)
                 throw new ArgumentNullException(nameof(e));
             return this.Filters.FirstOrDefault(f => f.Filters(e));
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="V1CorrelationCondition"/> used to match events defined by the specified <see cref="EventDefinition"/>
+        /// </summary>
+        /// <param name="eventDefinition">The <see cref="EventDefinition"/> for which to build a new <see cref="V1CorrelationCondition"/></param>
+        /// <returns>A new <see cref="V1CorrelationCondition"/></returns>
+        public static V1CorrelationCondition Match(EventDefinition eventDefinition)
+        {
+            if(eventDefinition == null)
+                throw new ArgumentNullException(nameof(eventDefinition));
+            var mappings = new Dictionary<string, string>();
+            if(!string.IsNullOrWhiteSpace(eventDefinition.Source))
+                mappings.Add(nameof(CloudEvent.Source).ToLower(), eventDefinition.Source);
+            if (!string.IsNullOrWhiteSpace(eventDefinition.Type))
+                mappings.Add(nameof(CloudEvent.Type).ToLower(), eventDefinition.Type);
+            var filter = new V1EventFilter(mappings);
+            return new(filter);
         }
 
     }

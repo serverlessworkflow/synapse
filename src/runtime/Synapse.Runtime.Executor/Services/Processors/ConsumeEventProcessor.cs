@@ -16,6 +16,7 @@
  */
 
 using CloudNative.CloudEvents;
+using Newtonsoft.Json;
 using Synapse.Integration.Events.WorkflowActivities;
 using System.Text.RegularExpressions;
 
@@ -77,7 +78,7 @@ namespace Synapse.Runtime.Executor.Services.Processors
         protected override async Task ProcessAsync(CancellationToken cancellationToken)
         {
             this.Subscription = this.IntegrationEventBus.InboundStream.SubscribeAsync(this.OnEventAsync);
-            var e = await this.Context.Workflow.ConsumePendingEventAsync(this.EventDefinition, cancellationToken);
+            var e = await this.Context.Workflow.ConsumeOrBeginCorrelateEventAsync(this.EventDefinition, cancellationToken);
             if (e != null)
             {
                 await this.OnEventAsync(e);
@@ -136,11 +137,14 @@ namespace Synapse.Runtime.Executor.Services.Processors
                     this.IdleTimer.Dispose();
                     this.IdleTimer = null!;
                 }
-                if (!string.IsNullOrWhiteSpace(this.EventDefinition.Source) && !Regex.IsMatch(e.Source!.ToString(), this.EventDefinition.Source)
-                    || !string.IsNullOrWhiteSpace(this.EventDefinition.Type) && !Regex.IsMatch(e.Type!, this.EventDefinition.Type))
+                if ((!string.IsNullOrWhiteSpace(this.EventDefinition.Source) && !Regex.IsMatch(e.Source!.ToString(), this.EventDefinition.Source, RegexOptions.IgnoreCase))
+                    || (!string.IsNullOrWhiteSpace(this.EventDefinition.Type) && !Regex.IsMatch(e.Type!, this.EventDefinition.Type, RegexOptions.IgnoreCase)))
                     return;
                 if (!await this.Context.Workflow.TryCorrelateAsync(V1Event.CreateFrom(e), this.EventDefinition.Correlations?.Select(c => c.ContextAttributeName)!, this.CancellationTokenSource.Token))
                     return;
+
+                Console.WriteLine($"EVENT CONSUMED:{Environment.NewLine}{JsonConvert.SerializeObject(e.Data)}"); //todo: remove
+
                 await this.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, e.Data), this.CancellationTokenSource.Token);
                 await this.OnCompletedAsync(this.CancellationTokenSource.Token);
             }

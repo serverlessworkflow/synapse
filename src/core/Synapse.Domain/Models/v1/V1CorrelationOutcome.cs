@@ -21,6 +21,7 @@ namespace Synapse.Domain.Models
     /// <summary>
     /// Represents the outcome of an event correlation
     /// </summary>
+    [DataTransferObjectType(typeof(Integration.Models.V1CorrelationOutcome))]
     public class V1CorrelationOutcome
     {
 

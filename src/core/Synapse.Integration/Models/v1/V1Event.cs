@@ -53,8 +53,11 @@ namespace Synapse.Integration.Models
                     yield return new KeyValuePair<string, string>(nameof(Subject).ToLower(), this.Subject);
                 if (this.Time.HasValue)
                     yield return new KeyValuePair<string, string>(nameof(Time).ToLower(), this.Time.ToString()!);
-                foreach (var extension in this.Extensions)
-                    yield return new(extension.Key, extension.Value.ToString()!);
+                if(this.Extensions != null)
+                {
+                    foreach (var extension in this.Extensions)
+                        yield return new(extension.Key, extension.Value.ToString()!);
+                }
             }
         }
 
@@ -92,8 +95,18 @@ namespace Synapse.Integration.Models
         /// <returns>A new <see cref="CloudEvent"/></returns>
         public CloudEvent ToCloudEvent()
         {
-            var e = new CloudEvent();
-            foreach(var attribute in this.Attributes)
+            var e = new CloudEvent()
+            {
+                Id = this.Id,
+                Source = this.Source,
+                Type = this.Type,
+                Subject = this.Subject,
+                Time = this.Time,
+                DataContentType = this.DataContentType,
+                DataSchema = this.DataSchema,
+                Data = this.Data.ToObject()
+            };
+            foreach(var attribute in this.Extensions)
             {
                 e[attribute.Key] = attribute.Value;
             }

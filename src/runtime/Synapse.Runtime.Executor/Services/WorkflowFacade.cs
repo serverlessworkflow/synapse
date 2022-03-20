@@ -61,11 +61,11 @@ namespace Synapse.Runtime.Services
         }
 
         /// <inheritdoc/>
-        public virtual async Task<CloudEvent?> ConsumePendingEventAsync(EventDefinition eventDefinition, CancellationToken cancellationToken = default)
+        public virtual async Task<CloudEvent?> ConsumeOrBeginCorrelateEventAsync(EventDefinition eventDefinition, CancellationToken cancellationToken = default)
         {
             if(eventDefinition == null)
                 throw new ArgumentNullException(nameof(eventDefinition));
-            var e = await this.SynapseRuntimeApi.ConsumePendingEventAsync(new() { WorkflowInstanceId = this.Instance.Id, EventDefinition = eventDefinition }, cancellationToken);
+            var e = await this.SynapseRuntimeApi.ConsumeOrBeginCorrelateEventAsync(new() { WorkflowInstanceId = this.Instance.Id, EventDefinition = eventDefinition }, cancellationToken);
             if (e == null)
                 return null;
             else

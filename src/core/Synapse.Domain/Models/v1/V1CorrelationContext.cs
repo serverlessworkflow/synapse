@@ -62,6 +62,8 @@ namespace Synapse.Domain.Models
         {
             if (e == null)
                 throw DomainException.ArgumentNull(nameof(e));
+            if (this.PendingEvents.Any(ev => ev.Id == e.Id))
+                return true;
             if (this.PendingEvents.Any(be => be.Type == e.Type && be.Source == e.Source)) 
                 return false; //the specified event type/source has already been correlated
             foreach (var mapping in this.Mappings)
@@ -95,6 +97,18 @@ namespace Synapse.Domain.Models
                     throw new InvalidOperationException($"The event with id '{e.Id}' does not define the required mapping '{key}'");
                 this._Mappings.Add(key, attributeValue);
             }
+        }
+
+        /// <summary>
+        /// Removes the specified <see cref="V1Event"/> from the pending queue
+        /// </summary>
+        /// <param name="e">The <see cref="V1Event"/> to remove from the pending queue</param>
+        /// <returns>A boolean indicating whether or not the <see cref="V1Event"/> could be removed</returns>
+        public virtual bool RemoveEvent(V1Event e)
+        {
+            if (e == null)
+                throw DomainException.ArgumentNull(nameof(e));
+            return this._PendingEvents.Remove(e);
         }
 
         /// <summary>

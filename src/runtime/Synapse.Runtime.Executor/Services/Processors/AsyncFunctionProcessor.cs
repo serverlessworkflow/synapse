@@ -16,6 +16,7 @@
  */
 
 using CloudNative.CloudEvents;
+using Newtonsoft.Json;
 using Synapse.Integration.Events;
 using Synapse.Integration.Events.WorkflowActivities;
 using System.Reactive.Linq;
@@ -102,7 +103,12 @@ namespace Synapse.Runtime.Executor.Services.Processors
             if (this.Activity.Status == V1WorkflowActivityStatus.Pending)
             {
                 var input = await this.Context.FilterInputAsync(this.Action, this.Activity.Input.ToObject()!, cancellationToken);
-                var metadata = new Dictionary<string, string>() { };
+                var metadata = new Dictionary<string, string>() 
+                {
+                    {  V1WorkflowActivityMetadata.State, this.State.Name },
+                    {  V1WorkflowActivityMetadata.Action, this.Action.Name! },
+                    {  V1WorkflowActivityMetadata.Event, this.Action.Event!.ProduceEvent }
+                };
                 await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.ProduceEvent, input, metadata, this.Activity, cancellationToken);
             }
             foreach (var activity in await this.Context.Workflow.GetOperativeActivitiesAsync(this.Activity, cancellationToken))
@@ -170,6 +176,8 @@ namespace Synapse.Runtime.Executor.Services.Processors
             if (e is V1WorkflowActivityCompletedIntegrationEvent completedEvent)
             {
                 var output = await this.Context.FilterOutputAsync(this.Action, completedEvent.Output);
+                if (output == null)
+                    output = new();
                 await this.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, output), cancellationToken);
             }
         }

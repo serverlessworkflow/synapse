@@ -151,7 +151,7 @@ namespace Synapse.Application.Commands.Correlations
         protected virtual async Task CorrelateAsync(V1Correlation correlation, V1CorrelationContext correlationContext, V1Event e, V1EventFilter filter, CancellationToken cancellationToken = default)
         {
             this.Logger.LogInformation("Correlating event to context with id '{contextId}'...", correlationContext.Id);
-            correlationContext.Correlate(e, filter.Mappings.Keys);
+            correlationContext.Correlate(e, filter.Mappings.Keys, true);
             correlation = await this.Correlations.UpdateAsync(correlation, cancellationToken);
             await this.Correlations.SaveChangesAsync(cancellationToken);
             this.Logger.LogInformation("Event successfully correlated to context with id '{contextId}'", correlationContext.Id);

@@ -70,9 +70,9 @@ namespace Synapse.Apis.Runtime.Grpc
         }
 
         /// <inheritdoc/>
-        public virtual async Task<V1Event?> ConsumePendingEventAsync(V1ConsumeWorkflowInstancePendingEventCommand command, CancellationToken cancellationToken = default)
+        public virtual async Task<V1Event?> ConsumeOrBeginCorrelateEventAsync(V1ConsumeWorkflowInstancePendingEventCommand command, CancellationToken cancellationToken = default)
         {
-            var result = await this.RuntimeApi.ConsumePendingEventAsync(command, cancellationToken);
+            var result = await this.RuntimeApi.ConsumeOrBeginCorrelateEventAsync(command, cancellationToken);
             if (!result.Succeeded)
                 throw new OperationResultException(new OperationResult(result.Code, result.Errors?.Select(e => new Neuroglia.Error(e.Code, e.Message))?.ToArray()));
             return result.Data!;
