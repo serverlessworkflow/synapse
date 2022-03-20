@@ -19,11 +19,17 @@ using AutoMapper;
 namespace Synapse.Application.Mapping.Configuration
 {
 
-    internal class CloudEventMappingConfiguration
-        : IMappingConfiguration<CloudEvent, Integration.Models.V1Event>
+    internal class V1EventMappingConfiguration
+        : IMappingConfiguration<CloudEvent, Integration.Models.V1Event>,
+        IMappingConfiguration<Integration.Models.V1Event, V1Event>
     {
 
         void IMappingConfiguration<CloudEvent, Integration.Models.V1Event>.Configure(IMappingExpression<CloudEvent, Integration.Models.V1Event> mapping)
+        {
+            
+        }
+
+        void IMappingConfiguration<Integration.Models.V1Event, V1Event>.Configure(IMappingExpression<Integration.Models.V1Event, Domain.Models.V1Event> mapping)
         {
             
         }

@@ -68,7 +68,7 @@ namespace Synapse.Runtime.Services
         /// <param name="eventDefinition">The <see cref="EventDefinition"/> of the <see cref="CloudEvent"/> to consume</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>The consumed <see cref="CloudEvent"/>, if any</returns>
-        Task<CloudEvent?> ConsumePendingEventAsync(EventDefinition eventDefinition, CancellationToken cancellationToken = default);
+        Task<CloudEvent?> ConsumeOrBeginCorrelateEventAsync(EventDefinition eventDefinition, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Sets the specified correlation mapping

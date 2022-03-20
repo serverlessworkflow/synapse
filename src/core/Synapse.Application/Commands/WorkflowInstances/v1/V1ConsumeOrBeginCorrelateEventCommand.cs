@@ -16,6 +16,7 @@
  */
 
 using ServerlessWorkflow.Sdk.Models;
+using Synapse.Application.Commands.Correlations;
 
 namespace Synapse.Application.Commands.WorkflowInstances
 {
@@ -24,34 +25,34 @@ namespace Synapse.Application.Commands.WorkflowInstances
     /// Represents the <see cref="ICommand"/> used to consume a pending event of an existing <see cref="Domain.Models.V1WorkflowInstance"/>
     /// </summary>
     [DataTransferObjectType(typeof(Integration.Commands.WorkflowInstances.V1ConsumeWorkflowInstancePendingEventCommand))]
-    public class V1ConsumeWorkflowInstancePendingEventCommand
+    public class V1ConsumeOrBeginCorrelateEventCommand
         : Command<Integration.Models.V1Event?>
     {
 
         /// <summary>
-        /// Initializes a new <see cref="V1ConsumeWorkflowInstancePendingEventCommand"/>
+        /// Initializes a new <see cref="V1ConsumeOrBeginCorrelateEventCommand"/>
         /// </summary>
-        protected V1ConsumeWorkflowInstancePendingEventCommand()
+        protected V1ConsumeOrBeginCorrelateEventCommand()
         {
-            this.Id = null!;
+            this.WorkflowInstanceId = null!;
             this.EventDefinition = null!;
         }
 
         /// <summary>
-        /// Initializes a new <see cref="V1ConsumeWorkflowInstancePendingEventCommand"/>
+        /// Initializes a new <see cref="V1ConsumeOrBeginCorrelateEventCommand"/>
         /// </summary>
-        /// <param name="id">The id of the <see cref="Domain.Models.V1WorkflowInstance"/> to consume a pending event of</param>
+        /// <param name="id">The id of the <see cref="V1WorkflowInstance"/> to consume a pending event of</param>
         /// <param name="eventDefinition">The <see cref="ServerlessWorkflow.Sdk.Models.EventDefinition"/> that describes the event to consume</param>
-        public V1ConsumeWorkflowInstancePendingEventCommand(string id, EventDefinition eventDefinition)
+        public V1ConsumeOrBeginCorrelateEventCommand(string id, EventDefinition eventDefinition)
         {
-            this.Id = id;
+            this.WorkflowInstanceId = id;
             this.EventDefinition = eventDefinition;
         }
 
         /// <summary>
-        /// Gets the id of the <see cref="Domain.Models.V1WorkflowInstance"/> to consume a pending event of
+        /// Gets the id of the <see cref="V1WorkflowInstance"/> to consume a pending event of
         /// </summary>
-        public virtual string Id { get; protected set; }
+        public virtual string WorkflowInstanceId { get; protected set; }
 
         /// <summary>
         /// Gets the <see cref="ServerlessWorkflow.Sdk.Models.EventDefinition"/> that describes the event to consume
@@ -61,11 +62,11 @@ namespace Synapse.Application.Commands.WorkflowInstances
     }
 
     /// <summary>
-    /// Represents the service used to handle <see cref="V1ConsumeWorkflowInstancePendingEventCommand"/>s
+    /// Represents the service used to handle <see cref="V1ConsumeOrBeginCorrelateEventCommand"/>s
     /// </summary>
     public class V1ConsumeWorkflowInstancePendingEventCommandHandler
         : CommandHandlerBase,
-        ICommandHandler<V1ConsumeWorkflowInstancePendingEventCommand, Integration.Models.V1Event?>
+        ICommandHandler<V1ConsumeOrBeginCorrelateEventCommand, Integration.Models.V1Event?>
     {
 
         /// <summary>
@@ -87,13 +88,25 @@ namespace Synapse.Application.Commands.WorkflowInstances
         protected IRepository<V1WorkflowInstance> WorkflowInstances { get; }
 
         /// <inheritdoc/>
-        public virtual async Task<IOperationResult<Integration.Models.V1Event?>> HandleAsync(V1ConsumeWorkflowInstancePendingEventCommand command, CancellationToken cancellationToken = default)
+        public virtual async Task<IOperationResult<Integration.Models.V1Event?>> HandleAsync(V1ConsumeOrBeginCorrelateEventCommand command, CancellationToken cancellationToken = default)
         {
-            var workflowInstance = await this.WorkflowInstances.FindAsync(command.Id, cancellationToken);
+            var workflowInstance = await this.WorkflowInstances.FindAsync(command.WorkflowInstanceId, cancellationToken);
             if (workflowInstance == null)
-                throw DomainException.NullReference(typeof(V1WorkflowInstance), command.Id);
+                throw DomainException.NullReference(typeof(V1WorkflowInstance), command.WorkflowInstanceId);
             var e = workflowInstance.CorrelationContext.PendingEvents
                 .FirstOrDefault(e => e.Matches(command.EventDefinition));
+            if (e == null)
+            {
+                var conditions = new List<V1CorrelationCondition>() { V1CorrelationCondition.Match(command.EventDefinition) };
+                var outcome = new V1CorrelationOutcome(V1CorrelationOutcomeType.Correlate, command.WorkflowInstanceId);
+                await this.Mediator.ExecuteAndUnwrapAsync(new V1CreateCorrelationCommand(V1CorrelationLifetime.Singleton, V1CorrelationConditionType.AnyOf, conditions, outcome, workflowInstance.CorrelationContext), cancellationToken);
+            }
+            else
+            {
+                workflowInstance.CorrelationContext.RemoveEvent(e);
+                await this.WorkflowInstances.UpdateAsync(workflowInstance, cancellationToken);
+                await this.WorkflowInstances.SaveChangesAsync(cancellationToken);
+            }
             return this.Ok(e == null ? null : this.Mapper.Map<Integration.Models.V1Event>(e));
         }
 

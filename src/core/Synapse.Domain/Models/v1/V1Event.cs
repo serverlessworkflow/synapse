@@ -15,6 +15,8 @@
  *
  */
 
+using Newtonsoft.Json.Linq;
+using System.Dynamic;
 using System.Text.RegularExpressions;
 
 namespace Synapse.Domain.Models
@@ -44,7 +46,7 @@ namespace Synapse.Domain.Models
         /// <param name="source">The event's source <see cref="Uri"/></param>
         /// <param name="type">event's type</param>
         /// <param name="specVersion">The event's spec version</param>
-        public V1Event(string id, Uri source, string type, CloudEventsSpecVersion? specVersion = null)
+        public V1Event(string id, Uri source, string type, string? specVersion)
         {
             if (string.IsNullOrEmpty(id))
                 throw new ArgumentNullException(nameof(id));
@@ -53,10 +55,10 @@ namespace Synapse.Domain.Models
             if (string.IsNullOrEmpty(type))
                 throw new ArgumentNullException(nameof(type));
             if (specVersion == null)
-                specVersion = CloudEventsSpecVersion.V1_0;
+                specVersion = CloudEventsSpecVersion.V1_0.VersionId;
             this.Id = id;
             this.Source = source;
-            this.SpecVersion = specVersion.VersionId;
+            this.SpecVersion = specVersion;
             this.Type = type;
         }
 
@@ -103,7 +105,7 @@ namespace Synapse.Domain.Models
         /// <summary>
         /// Gets the event's data
         /// </summary>
-        public virtual object? Data { get; protected set; }
+        public virtual Neuroglia.Serialization.Dynamic? Data { get; protected set; }
 
         /// <summary>
         /// Gets an <see cref="IDictionary{TKey, TValue}"/> that contains the event's extension key/value mappings
@@ -200,14 +202,17 @@ namespace Synapse.Domain.Models
         {
             if (cloudEvent == null)
                 throw new ArgumentNullException(nameof(cloudEvent));
-            var e = new V1Event(cloudEvent.Id!, cloudEvent.Source!, cloudEvent.Type!, cloudEvent.SpecVersion)
+            var e = new V1Event(cloudEvent.Id!, cloudEvent.Source!, cloudEvent.Type!, cloudEvent.SpecVersion.VersionId)
             {
                 DataContentType = cloudEvent.DataContentType,
                 DataSchema = cloudEvent.DataSchema,
                 Subject = cloudEvent.Subject,
-                Time = cloudEvent.Time,
-                Data = cloudEvent.Data
+                Time = cloudEvent.Time
             };
+            var data = cloudEvent.Data;
+            if (data is JObject jobject)
+                data = jobject.ToObject<ExpandoObject>();
+            e.Data = Neuroglia.Serialization.Dynamic.FromObject(data);
             foreach(var extensionsAttribute in cloudEvent.ExtensionAttributes)
             {
                 e.Extensions.Add(extensionsAttribute.Name, extensionsAttribute.Format(cloudEvent[extensionsAttribute]!));

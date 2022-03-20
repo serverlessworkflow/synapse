@@ -18,6 +18,7 @@
 using Microsoft.AspNetCore.OData;
 using Neuroglia.Caching;
 using Neuroglia.Data.Expressions.JQ;
+using Neuroglia.Eventing;
 using ProtoBuf.Grpc.Server;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using Synapse.Apis.Management.Grpc;
@@ -48,6 +49,7 @@ builder.Services.AddJQExpressionEvaluator();
 using var app = builder.Build();
 if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/error");
+app.UseCloudEvents();
 app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
 app.UseODataRouteDebug();

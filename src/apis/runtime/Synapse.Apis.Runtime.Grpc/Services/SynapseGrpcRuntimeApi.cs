@@ -85,9 +85,9 @@ namespace Synapse.Apis.Runtime.Grpc
         }
 
         /// <inheritdoc/>
-        public virtual async Task<GrpcApiResult<V1Event?>> ConsumePendingEventAsync(V1ConsumeWorkflowInstancePendingEventCommand command, CallContext context = default)
+        public virtual async Task<GrpcApiResult<V1Event?>> ConsumeOrBeginCorrelateEventAsync(V1ConsumeWorkflowInstancePendingEventCommand command, CallContext context = default)
         {
-            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(Mapper.Map<Application.Commands.WorkflowInstances.V1ConsumeWorkflowInstancePendingEventCommand>(command), context.CancellationToken));
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(Mapper.Map<Application.Commands.WorkflowInstances.V1ConsumeOrBeginCorrelateEventCommand>(command), context.CancellationToken));
         }
 
         /// <inheritdoc/>

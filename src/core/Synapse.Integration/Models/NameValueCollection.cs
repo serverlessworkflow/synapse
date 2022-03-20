@@ -11,7 +11,7 @@ namespace Synapse.Integration.Models
     /// <remarks>Taken from <see href="https://github.com/OData/WebApi/issues/438#issuecomment-129258269">Casimodo72's answer</see> on Github</remarks>
     [DataContract]
     public class NameValueCollection<TValue>
-        : IDictionary<string, TValue>
+        : IDictionary<string, TValue>, ICollection
     {
 
         /// <summary>
@@ -80,6 +80,10 @@ namespace Synapse.Integration.Models
         /// </summary>
         /// <inheritdoc/>
         public virtual ICollection<TValue> Values => new ReadOnlyCollection<TValue>(Items.Values.Cast<TValue>().ToList());
+
+        bool ICollection.IsSynchronized => ((ICollection)this.Items).IsSynchronized;
+
+        object ICollection.SyncRoot => ((ICollection)this.Items).SyncRoot;
 
         /// <inheritdoc/>
         public virtual void Add(KeyValuePair<string, TValue> item)
@@ -174,6 +178,11 @@ namespace Synapse.Integration.Models
         static KeyValuePair<string, TValue> Convert(KeyValuePair<string, object> item)
         {
             return new KeyValuePair<string, TValue>(item.Key, (TValue)item.Value);
+        }
+
+        public void CopyTo(Array array, int index)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>

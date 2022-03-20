@@ -107,6 +107,8 @@ namespace Synapse.Application.Configuration
                 builder.WithBrokerUri(options.CloudEvents.Broker.Uri);
             });
             this.Services.AddServerlessWorkflow();
+            this.Services.AddSingleton<CloudEventCorrelator>();
+            this.Services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<CloudEventCorrelator>());
             //todo: re-establish
             //this.Services.AddIntegrationEventBus(async (provider, e, cancellationToken) =>
             //{

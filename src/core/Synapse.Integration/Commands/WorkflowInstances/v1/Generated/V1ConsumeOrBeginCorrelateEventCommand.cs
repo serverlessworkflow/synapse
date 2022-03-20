@@ -27,7 +27,7 @@ namespace Synapse.Integration.Commands.WorkflowInstances
 	/// Represents the ICommand used to consume a pending event of an existing V1WorkflowInstance
 	/// </summary>
 	[DataContract]
-	public partial class V1ConsumeWorkflowInstancePendingEventCommand
+	public partial class V1ConsumeOrBeginCorrelateEventCommand
 		: Command
 	{
 

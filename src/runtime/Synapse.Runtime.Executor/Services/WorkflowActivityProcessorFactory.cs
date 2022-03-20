@@ -71,12 +71,12 @@ namespace Synapse.Runtime.Services
                 {
                     V1WorkflowActivityType.Action => this.CreateActionActivityProcessor(state, activity),
                     V1WorkflowActivityType.Branch => throw new NotImplementedException(),//todo
-                    V1WorkflowActivityType.ConsumeEvent => throw new NotImplementedException(),//todo
+                    V1WorkflowActivityType.ConsumeEvent => this.CreateConsumeEventActivityProcessor(activity),
                     V1WorkflowActivityType.End => ActivatorUtilities.CreateInstance<EndProcessor>(this.ServiceProvider, activity, state.End ?? new()),
                     V1WorkflowActivityType.Error => throw new NotImplementedException(),//todo
                     V1WorkflowActivityType.EventTrigger => throw new NotImplementedException(),//todo
                     V1WorkflowActivityType.Iteration => throw new NotImplementedException(),//todo
-                    V1WorkflowActivityType.ProduceEvent => throw new NotImplementedException(),//todo
+                    V1WorkflowActivityType.ProduceEvent => this.CreateProduceEventActivityProcessor(activity),
                     V1WorkflowActivityType.Start => ActivatorUtilities.CreateInstance<StartProcessor>(this.ServiceProvider, activity, this.Context.Workflow.Definition.Start ?? new()),
                     V1WorkflowActivityType.State => this.CreateStateActivityProcessor(state, activity),
                     V1WorkflowActivityType.SubFlow => throw new NotImplementedException(),//todo
@@ -143,7 +143,7 @@ namespace Synapse.Runtime.Services
         {
             if (!state.TryGetAction(activity.Metadata, out var action))
                 throw new NullReferenceException($"Failed to find an action that matches the metadata specified by the activity with id '{activity.Id}'");
-            if (!this.Context.Workflow.Definition.TryGetEvent(action.Event!.ResultEvent, out var triggerEvent))
+            if (!this.Context.Workflow.Definition.TryGetEvent(action.Event!.ProduceEvent, out var triggerEvent))
                 throw new NullReferenceException($"Failed to find a produced event with the specified name '{action.Event!.ProduceEvent}' in the workflow with name '{this.Context.Workflow.Definition.Id}' and version '{this.Context.Workflow.Definition.Version}'");
             if (triggerEvent.Kind != EventKind.Produced)
                 throw new Exception($"The event '{action.Event!.ResultEvent}' is referenced as a produced event, but is defined as a consumed one");
@@ -152,6 +152,24 @@ namespace Synapse.Runtime.Services
             if (resultEvent.Kind != EventKind.Consumed)
                 throw new Exception($"The event '{action.Event!.ResultEvent}' is referenced as a consumed event, but is defined as a produced one");
             return ActivatorUtilities.CreateInstance<AsyncFunctionProcessor>(this.ServiceProvider, state, activity, action, triggerEvent, resultEvent);
+        }
+
+        protected virtual IWorkflowActivityProcessor CreateProduceEventActivityProcessor(V1WorkflowActivity activity)
+        {
+            if (!activity.Metadata.TryGetValue(V1WorkflowActivityMetadata.Event, out var eventName))
+                throw new NullReferenceException($"Failed to find the required '{V1WorkflowActivityMetadata.Event}' metadata");
+            if (!this.Context.Workflow.Definition.TryGetEvent(eventName, out var e))
+                throw new NullReferenceException($"Failed to find an action that matches the metadata specified by the activity with id '{activity.Id}'");
+            return ActivatorUtilities.CreateInstance<ProduceEventProcessor>(this.ServiceProvider, activity, e);
+        }
+
+        protected virtual IWorkflowActivityProcessor CreateConsumeEventActivityProcessor(V1WorkflowActivity activity)
+        {
+            if (!activity.Metadata.TryGetValue(V1WorkflowActivityMetadata.Event, out var eventName))
+                throw new NullReferenceException($"Failed to find the required '{V1WorkflowActivityMetadata.Event}' metadata");
+            if (!this.Context.Workflow.Definition.TryGetEvent(eventName, out var e))
+                throw new NullReferenceException($"Failed to find an action that matches the metadata specified by the activity with id '{activity.Id}'");
+            return ActivatorUtilities.CreateInstance<ConsumeEventProcessor>(this.ServiceProvider, activity, e);
         }
 
         IWorkflowActivityProcessor IWorkflowActivityProcessorFactory.Create(V1WorkflowActivity activity)

@@ -60,7 +60,7 @@ namespace Synapse.Apis.Runtime.Grpc
         /// <param name="context">The current <see cref="CallContext"/></param>
         /// <returns>A new object that describes the result of the operation</returns>
         [OperationContract]
-        Task<GrpcApiResult<V1Event?>> ConsumePendingEventAsync(V1ConsumeWorkflowInstancePendingEventCommand command, CallContext context = default);
+        Task<GrpcApiResult<V1Event?>> ConsumeOrBeginCorrelateEventAsync(V1ConsumeWorkflowInstancePendingEventCommand command, CallContext context = default);
 
         /// <summary>
         /// Attempts to correlate an event to a workflow instance

@@ -41,9 +41,11 @@ namespace Synapse.Domain.Models
         /// Initializes a new <see cref="V1Correlation"/>
         /// </summary>
         /// <param name="lifetime">The <see cref="V1Correlation"/>'s lifetime</param>
+        /// <param name="conditionType">A value determining the type of the <see cref="V1Correlation"/>'s <see cref="V1CorrelationCondition"/> evaluation</param>
         /// <param name="conditions">An <see cref="IReadOnlyCollection{T}"/> containing the <see cref="V1Correlation"/>'s conditions</param>
         /// <param name="outcome">The outcome of the <see cref="V1Correlation"/></param>
-        public V1Correlation(V1CorrelationLifetime lifetime, IEnumerable<V1CorrelationCondition> conditions, V1CorrelationOutcome outcome)
+        /// <param name="context">The initial <see cref="V1CorrelationContext"/></param>
+        public V1Correlation(V1CorrelationLifetime lifetime, V1CorrelationConditionType conditionType, IEnumerable<V1CorrelationCondition> conditions, V1CorrelationOutcome outcome, V1CorrelationContext? context = null)
             : base(Guid.NewGuid().ToString())
         {
             if(conditions == null 
@@ -52,8 +54,11 @@ namespace Synapse.Domain.Models
             if(outcome == null)
                 throw DomainException.ArgumentNull(nameof(outcome));
             this.Lifetime = lifetime;
+            this.ConditionType = conditionType;
             this._Conditions = conditions.ToList();
             this.Outcome = outcome;
+            if (context != null)
+                this._Contexts.Add(context);
         }
 
         /// <summary>

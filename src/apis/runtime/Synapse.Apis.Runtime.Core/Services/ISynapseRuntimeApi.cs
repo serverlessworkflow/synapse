@@ -55,7 +55,7 @@ namespace Synapse.Apis.Runtime
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>The consumed <see cref="V1Event"/>, if any</returns>
         [OperationContract]
-        Task<V1Event?> ConsumePendingEventAsync(V1ConsumeWorkflowInstancePendingEventCommand command, CancellationToken cancellationToken = default);
+        Task<V1Event?> ConsumeOrBeginCorrelateEventAsync(V1ConsumeWorkflowInstancePendingEventCommand command, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Attempts to correlate an event to a workflow instance

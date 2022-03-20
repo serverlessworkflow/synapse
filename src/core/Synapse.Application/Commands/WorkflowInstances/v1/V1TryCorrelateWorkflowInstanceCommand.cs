@@ -92,13 +92,22 @@ namespace Synapse.Application.Commands.WorkflowInstances
             var workflowInstance = await this.WorkflowInstances.FindAsync(command.WorkflowInstanceId, cancellationToken);
             if(workflowInstance == null)
                 throw DomainException.NullReference(typeof(V1WorkflowInstance), command.WorkflowInstanceId);
-            if (!workflowInstance.CorrelationContext.CorrelatesTo(command.Event))
-                return this.Ok(false);
-            workflowInstance.CorrelationContext.Correlate(command.Event, command.MappingKeys);
+            var e = workflowInstance.CorrelationContext.PendingEvents.FirstOrDefault(e => e.Id == command.Event.Id);
+            if (e == null)
+            {
+                if (!workflowInstance.CorrelationContext.CorrelatesTo(command.Event))
+                    return this.Ok(false);
+                workflowInstance.CorrelationContext.Correlate(command.Event, command.MappingKeys);
+            }
+            else
+            {
+                workflowInstance.CorrelationContext.RemoveEvent(command.Event);
+            }
             await this.WorkflowInstances.UpdateAsync(workflowInstance, cancellationToken);
             await this.WorkflowInstances.SaveChangesAsync(cancellationToken);
             return this.Ok(true);
         }
 
     }
+
 }

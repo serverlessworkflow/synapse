@@ -15,18 +15,21 @@
  *
  */
 
+using System.Text.RegularExpressions;
+
 namespace Synapse.Domain.Models
 {
     /// <summary>
     /// Represents an object used to filter events
     /// </summary>
+    [DataTransferObjectType(typeof(Integration.Models.V1EventFilter))]
     public class V1EventFilter
     {
 
         /// <summary>
         /// Initializes a new <see cref="V1EventFilter"/>
         /// </summary>
-        public V1EventFilter()
+        protected V1EventFilter()
         {
 
         }
@@ -60,7 +63,7 @@ namespace Synapse.Domain.Models
             {
                 if (!e.TryGetAttribute(attribute.Key, out var value))
                     return false;
-                if (attribute.Value != value)
+                if (!Regex.IsMatch(attribute.Value, value, RegexOptions.IgnoreCase))
                     return false;
             }
             return true;
