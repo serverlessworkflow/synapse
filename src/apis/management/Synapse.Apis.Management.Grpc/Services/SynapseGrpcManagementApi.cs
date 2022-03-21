@@ -29,7 +29,7 @@ namespace Synapse.Apis.Management.Grpc
 {
 
     /// <summary>
-    /// Represents the default implementation of the <see cref="ISynapseGrpcManagementApi"/>, which acts as a GRPC adapter of the <see cref="ISynapseApi"/>
+    /// Represents the default implementation of the <see cref="ISynapseGrpcManagementApi"/>, which acts as a GRPC adapter of the Synapse API
     /// </summary>
     public class SynapseGrpcManagementApi
         : ISynapseGrpcManagementApi
@@ -132,6 +132,35 @@ namespace Synapse.Apis.Management.Grpc
 
 
         #endregion
+
+        #region Correlations
+
+        /// <inheritdoc/>
+        public virtual async Task<GrpcApiResult<V1Correlation>> CreateCorrelationAsync(Integration.Commands.Correlations.V1CreateCorrelationCommand command, CallContext context = default)
+        {
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(this.Mapper.Map<Application.Commands.Correlations.V1CreateCorrelationCommand>(command), context.CancellationToken));
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<GrpcApiResult<V1Correlation>> GetCorrelationByIdAsync(string id, CallContext context = default)
+        {
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new V1FindByIdQuery<V1Correlation, string>(id), context.CancellationToken));
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<GrpcApiResult<List<V1Correlation>>> GetCorrelationsAsync(string? query = null, CallContext context = default)
+        {
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new V1FilterQuery<V1Correlation>(this.QueryOptionsParser.Parse<V1Correlation>(query)), context.CancellationToken));
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<GrpcApiResult> DeleteCorrelationAsync(string id, CallContext context = default)
+        {
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(this.Mapper.Map<V1DeleteCommand<V1Correlation, string>>(id), context.CancellationToken));
+        }
+
+        #endregion
+
     }
 
 }

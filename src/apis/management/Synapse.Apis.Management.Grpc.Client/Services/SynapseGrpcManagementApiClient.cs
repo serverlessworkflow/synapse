@@ -15,6 +15,7 @@
  *
  */
 using Microsoft.Extensions.Logging;
+using Synapse.Integration.Commands.Correlations;
 using Synapse.Integration.Commands.WorkflowInstances;
 using Synapse.Integration.Commands.Workflows;
 
@@ -138,6 +139,49 @@ namespace Synapse.Apis.Management.Grpc
 
 
         #endregion
+
+        #region Correlations
+
+        /// <inheritdoc/>
+        public virtual async Task<V1Correlation> CreateCorrelationAsync(V1CreateCorrelationCommand command, CancellationToken cancellationToken = default)
+        {
+            var result = await this.Adapter.CreateCorrelationAsync(command, cancellationToken);
+            if (!result.Succeeded)
+                throw new SynapseApiException(result);
+            return result.Data!;
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<List<V1Correlation>> GetCorrelationsAsync(string query, CancellationToken cancellationToken = default)
+        {
+            var result = await this.Adapter.GetCorrelationsAsync(query, cancellationToken);
+            if (!result.Succeeded)
+                throw new SynapseApiException(result);
+            return result.Data!;
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<List<V1Correlation>> GetCorrelationsAsync(CancellationToken cancellationToken = default)
+        {
+            return await this.GetCorrelationsAsync(null!, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<V1Correlation> GetCorrelationByIdAsync(string id, CancellationToken cancellationToken = default)
+        {
+            var result = await this.Adapter.GetCorrelationByIdAsync(id, cancellationToken);
+            if (!result.Succeeded)
+                throw new SynapseApiException(result);
+            return result.Data!;
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task DeleteCorrelationAsync(string id, CancellationToken cancellationToken = default)
+        {
+            await this.Adapter.DeleteCorrelationAsync(id, cancellationToken);
+        }
+
+        #endregion region
 
     }
 

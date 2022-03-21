@@ -20,29 +20,23 @@
  * -----------------------------------------------------------------------
  */
 
-namespace Synapse.Integration.Models
+namespace Synapse.Integration.Events.Correlations
 {
 
 	/// <summary>
-	/// Represents an object used to filter events
+	/// Represents the IDomainEvent fired whenever a new V1CorrelationContext has been added to an existing V1Correlation
 	/// </summary>
 	[DataContract]
-	public partial class V1EventFilter
+	public partial class V1ContextAddedToCorrelationIntegrationEvent
+		: V1IntegrationEvent
 	{
 
 		/// <summary>
-		/// An IDictionary`2 containing the attributes to filter V1Events by
+		/// The V1CorrelationContext that has been added to the V1Correlation
 		/// </summary>
-		[DataMember(Name = "Attributes", Order = 1)]
-		[Description("An IDictionary`2 containing the attributes to filter V1Events by")]
-		public virtual NameValueCollection<string> Attributes { get; set; }
-
-		/// <summary>
-		/// An IReadOnlyDictionary`2 containing the attributes key/value to use when correlating an incoming event to the V1Correlation
-		/// </summary>
-		[DataMember(Name = "CorrelationMappings", Order = 2)]
-		[Description("An IReadOnlyDictionary`2 containing the attributes key/value to use when correlating an incoming event to the V1Correlation")]
-		public virtual NameValueCollection<string> CorrelationMappings { get; set; }
+		[DataMember(Name = "Context", Order = 1)]
+		[Description("The V1CorrelationContext that has been added to the V1Correlation")]
+		public virtual V1CorrelationContext Context { get; set; }
 
     }
 

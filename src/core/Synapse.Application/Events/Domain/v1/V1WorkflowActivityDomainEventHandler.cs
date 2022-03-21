@@ -1,15 +1,29 @@
-﻿using Neuroglia.Serialization;
-using ServerlessWorkflow.Sdk.Models;
+﻿/*
+ * Copyright © 2022-Present The Synapse Authors
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+using Neuroglia.Serialization;
 using Synapse.Domain.Events.WorkflowActivities;
-using Synapse.Integration.Models;
 
 namespace Synapse.Application.Events.Domain
 {
     /// <summary>
-    /// Represents the service used to handle <see cref="Synapse.Domain.Models.V1WorkflowActivity"/>-related <see cref="IDomainEvent"/>s
+    /// Represents the service used to handle <see cref="V1WorkflowActivity"/>-related <see cref="IDomainEvent"/>s
     /// </summary>
     public class V1WorkflowActivityDomainEventHandler
-        : DomainEventHandlerBase<Synapse.Domain.Models.V1WorkflowActivity, Integration.Models.V1WorkflowActivity, string>,
+        : DomainEventHandlerBase<V1WorkflowActivity, Integration.Models.V1WorkflowActivity, string>,
         INotificationHandler<V1WorkflowActivityCreatedDomainEvent>,
         INotificationHandler<V1WorkflowActivityStartedDomainEvent>,
         INotificationHandler<V1WorkflowActivitySuspendedDomainEvent>,
@@ -22,7 +36,7 @@ namespace Synapse.Application.Events.Domain
 
         /// <inheritdoc/>
         public V1WorkflowActivityDomainEventHandler(ILoggerFactory loggerFactory, IMapper mapper, IMediator mediator, IIntegrationEventBus integrationEventBus,
-            IOptions<SynapseApplicationOptions> synapseOptions, IRepository<Synapse.Domain.Models.V1WorkflowActivity> aggregates, IRepository<Integration.Models.V1WorkflowActivity> projections,
+            IOptions<SynapseApplicationOptions> synapseOptions, IRepository<V1WorkflowActivity> aggregates, IRepository<Integration.Models.V1WorkflowActivity> projections,
             IRepository<Integration.Models.V1WorkflowInstance> workflowInstances)
             : base(loggerFactory, mapper, mediator, integrationEventBus, synapseOptions, aggregates, projections)
         {
@@ -139,7 +153,7 @@ namespace Synapse.Application.Events.Domain
 
 
         /// <summary>
-        /// Updates the specified <see cref="Integration.Models.V1WorkflowActivity"/> parent <see cref="Synapse.Domain.Models.V1WorkflowInstance"/>
+        /// Updates the specified <see cref="Integration.Models.V1WorkflowActivity"/> parent <see cref="V1WorkflowInstance"/>
         /// </summary>
         /// <param name="activity">The <see cref="Integration.Models.V1WorkflowActivity"/> to update the parent of</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>

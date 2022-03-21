@@ -38,18 +38,26 @@ namespace Synapse.Domain.Models
         /// <summary>
         /// Initializes a new <see cref="V1EventFilter"/>
         /// </summary>
-        /// <param name="mappings">A <see cref="Dictionary{TKey, TValue}"/> containing the context attributes to filter events by</param>
-        public V1EventFilter(Dictionary<string, string> mappings)
+        /// <param name="attributes">A <see cref="Dictionary{TKey, TValue}"/> containing the attributes to filter <see cref="V1Event"/>s by</param>
+        /// <param name="correlationMappings">A <see cref="Dictionary{TKey, TValue}"/> containing the attributes key/value to use when correlating an incoming event to the <see cref="V1Correlation"/></param>
+        public V1EventFilter(Dictionary<string, string> attributes, Dictionary<string, string> correlationMappings)
             : this()
         {
-            this._Mappings = mappings ?? throw new ArgumentNullException(nameof(mappings));
+            this._Attributes = attributes ?? throw new ArgumentNullException(nameof(attributes));
+            this._CorrelationMappings = correlationMappings ?? throw new ArgumentNullException(nameof(correlationMappings));
         }
 
-        private Dictionary<string, string> _Mappings = new();
+        private Dictionary<string, string> _Attributes = new();
+        /// <summary>
+        /// Gets an <see cref="IDictionary{TKey, TValue}"/> containing the attributes to filter <see cref="V1Event"/>s by
+        /// </summary>
+        public IReadOnlyDictionary<string, string> Attributes => this._Attributes;
+
+        private Dictionary<string, string> _CorrelationMappings = new();
         /// <summary>
         /// Gets an <see cref="IReadOnlyDictionary{TKey, TValue}"/> containing the attributes key/value to use when correlating an incoming event to the <see cref="V1Correlation"/>
         /// </summary>
-        public IReadOnlyDictionary<string, string> Mappings => this._Mappings;
+        public IReadOnlyDictionary<string, string> CorrelationMappings => this._CorrelationMappings;
 
         /// <summary>
         /// Determines whether or not the <see cref="V1EventFilter"/> filters the specified <see cref="V1Event"/>
@@ -60,7 +68,7 @@ namespace Synapse.Domain.Models
         {
             if (e == null)
                 throw new ArgumentNullException(nameof(e));
-            foreach (var attribute in this.Mappings.Where(m => !string.IsNullOrWhiteSpace(m.Value)))
+            foreach (var attribute in this.Attributes)
             {
                 if (!e.TryGetAttribute(attribute.Key, out var value))
                     return false;
@@ -79,12 +87,13 @@ namespace Synapse.Domain.Models
         {
             if (eventDefinition == null)
                 throw new ArgumentNullException(nameof(eventDefinition));
-            var mappings = new Dictionary<string, string>();
+            var attributes = new Dictionary<string, string>();
             if (!string.IsNullOrWhiteSpace(eventDefinition.Source))
-                mappings.Add(nameof(CloudEvent.Source).ToLower(), eventDefinition.Source);
+                attributes.Add(nameof(CloudEvent.Source).ToLower(), eventDefinition.Source);
             if (!string.IsNullOrWhiteSpace(eventDefinition.Type))
-                mappings.Add(nameof(CloudEvent.Type).ToLower(), eventDefinition.Type);
-            if(eventDefinition.Correlations != null)
+                attributes.Add(nameof(CloudEvent.Type).ToLower(), eventDefinition.Type);
+            var correlationMappings = new Dictionary<string, string>();
+            if (eventDefinition.Correlations != null)
             {
                 foreach (var mapping in eventDefinition.Correlations)
                 {
@@ -92,10 +101,10 @@ namespace Synapse.Domain.Models
                     if (!string.IsNullOrWhiteSpace(mapping.ContextAttributeValue)
                         && !mapping.ContextAttributeValue.IsWorkflowExpression())
                         value = mapping.ContextAttributeValue;
-                    mappings.Add(mapping.ContextAttributeName, value!);
+                    correlationMappings.Add(mapping.ContextAttributeName, value!);
                 }
             }
-            return new(mappings);
+            return new(attributes, correlationMappings);
         }
 
     }

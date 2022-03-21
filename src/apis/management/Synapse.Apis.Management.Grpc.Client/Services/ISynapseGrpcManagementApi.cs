@@ -15,6 +15,7 @@
  *
  */
 using ProtoBuf.Grpc;
+using Synapse.Integration.Commands.Correlations;
 using Synapse.Integration.Commands.WorkflowInstances;
 using Synapse.Integration.Commands.Workflows;
 
@@ -22,7 +23,7 @@ namespace Synapse.Apis.Management.Grpc
 {
 
     /// <summary>
-    /// Defines the GRPC port of the <see cref="ISynapseApiClient"/>
+    /// Defines the GRPC port of the Synapse API client
     /// </summary>
     [ServiceContract]
     public interface ISynapseGrpcManagementApi
@@ -43,7 +44,7 @@ namespace Synapse.Apis.Management.Grpc
         /// Gets the workflow with the specified id
         /// </summary>
         /// <param name="id">The id of the <see cref="V1Workflow"/> to get</param>
-        /// <param name="cancellationToken">The current <see cref="CallContext" /></param>
+        /// <param name="context">The current <see cref="CallContext" /></param>
         /// <returns>A new object that describes the result of the operation</returns>
         [OperationContract]
         Task<GrpcApiResult<V1Workflow>> GetWorkflowByIdAsync(string id, CallContext context = default);
@@ -116,6 +117,47 @@ namespace Synapse.Apis.Management.Grpc
         /// <returns>A new object that describes the result of the operation</returns>
         [OperationContract]
         Task<GrpcApiResult> DeleteWorkflowInstanceAsync(string id, CallContext context = default);
+
+        #endregion
+
+        #region Correlations
+
+        /// <summary>
+        /// Creates a new <see cref="V1Correlation"/>
+        /// </summary>
+        /// <param name="command">The object that describes the command to execute</param>
+        /// <param name="context">A <see cref="CallContext"/></param>
+        /// <returns>A new object that describes the result of the operation</returns>
+        [OperationContract]
+        Task<GrpcApiResult<V1Correlation>> CreateCorrelationAsync(V1CreateCorrelationCommand command, CallContext context = default);
+
+        /// <summary>
+        /// Gets the <see cref="V1Correlation"/> with the specified id
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1Correlation"/> to get</param>
+        /// <param name="context">A <see cref="CallContext"/></param>
+        /// <returns>A new object that describes the result of the operation</returns>
+
+        [OperationContract]
+        Task<GrpcApiResult<V1Correlation>> GetCorrelationByIdAsync(string id, CallContext context = default);
+
+        /// <summary>
+        /// Lists existing <see cref="V1Correlation"/>s
+        /// </summary>
+        /// <param name="query">The OData query string</param>
+        /// <param name="context">A <see cref="CallContext"/></param>
+        /// <returns>A new object that describes the result of the operation</returns>
+        [OperationContract]
+        Task<GrpcApiResult<List<V1Correlation>>> GetCorrelationsAsync(string query, CallContext context = default);
+
+        /// <summary>
+        /// Deletes the <see cref="V1Correlation"/> with the specified id
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1Correlation"/> to delete</param>
+        /// <param name="context">A <see cref="CallContext"/></param>
+        /// <returns>A new object that describes the result of the operation</returns>
+        [OperationContract]
+        Task<GrpcApiResult> DeleteCorrelationAsync(string id, CallContext context = default);
 
         #endregion
 

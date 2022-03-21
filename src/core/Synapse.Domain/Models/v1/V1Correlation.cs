@@ -53,12 +53,7 @@ namespace Synapse.Domain.Models
                 throw DomainException.ArgumentNull(nameof(conditions));
             if(outcome == null)
                 throw DomainException.ArgumentNull(nameof(outcome));
-            this.Lifetime = lifetime;
-            this.ConditionType = conditionType;
-            this._Conditions = conditions.ToList();
-            this.Outcome = outcome;
-            if (context != null)
-                this._Contexts.Add(context);
+            this.On(this.RegisterEvent(new V1CorrelationCreatedDomainEvent(this.Id, lifetime, conditionType, conditions, outcome, context)));
         }
 
         /// <summary>
@@ -100,6 +95,7 @@ namespace Synapse.Domain.Models
         {
             if (context == null)
                 throw DomainException.ArgumentNull(nameof(context));
+            this.On(this.RegisterEvent(new V1ContextAddedToCorrelationDomainEvent(this.Id, context)));
             this._Contexts.Add(context);
         }
 
@@ -183,11 +179,38 @@ namespace Synapse.Domain.Models
             var isCompleted = false;
             isCompleted = this.ConditionType switch
             {
-                V1CorrelationConditionType.AnyOf => this.Conditions.Any(c => c.Matches(context)),
-                V1CorrelationConditionType.AllOf => this.Conditions.All(c => c.Matches(context)),
+                V1CorrelationConditionType.AnyOf => this.Conditions.Any(c => c.MatchesAny(context)),
+                V1CorrelationConditionType.AllOf => this.Conditions.All(c => c.MatchesAll(context)),
                 _ => throw new NotSupportedException($"The specified {nameof(V1CorrelationConditionType)} '{this.ConditionType}' is not supported"),
             };
             return isCompleted;
+        }
+
+        /// <summary>
+        /// Handles the specified <see cref="V1CorrelationCreatedDomainEvent"/>
+        /// </summary>
+        /// <param name="e">The <see cref="V1CorrelationCreatedDomainEvent"/> to handle</param>
+        protected virtual void On(V1CorrelationCreatedDomainEvent e)
+        {
+            this.Id = e.AggregateId;
+            this.CreatedAt = e.CreatedAt;
+            this.LastModified = e.CreatedAt;
+            this.Lifetime = e.Lifetime;
+            this.ConditionType = e.ConditionType;
+            this._Conditions = e.Conditions.ToList();
+            this.Outcome = e.Outcome;
+            if (e.Context != null)
+                this._Contexts.Add(e.Context);
+        }
+
+        /// <summary>
+        /// Handles the specified <see cref="V1ContextAddedToCorrelationDomainEvent"/>
+        /// </summary>
+        /// <param name="e">The <see cref="V1ContextAddedToCorrelationDomainEvent"/> to handle</param>
+        protected virtual void On(V1ContextAddedToCorrelationDomainEvent e)
+        {
+            this.LastModified = e.CreatedAt;
+            this._Contexts.Add(e.Context);
         }
 
         /// <summary>

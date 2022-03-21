@@ -96,7 +96,7 @@ namespace Synapse.Application.Commands.Correlations
                             if (correlation.Contexts.Any())
                                 throw new Exception("Failed to correlate event"); //should not happen
                             this.Logger.LogInformation("Creating a new correlation context...");
-                            matchingContext = V1CorrelationContext.CreateFor(command.Event, matchingFilter.Mappings.Keys);
+                            matchingContext = V1CorrelationContext.CreateFor(command.Event, matchingFilter.CorrelationMappings.Keys);
                             correlation.AddContext(matchingContext);
                             await this.Correlations.UpdateAsync(correlation, cancellationToken);
                             await this.Correlations.SaveChangesAsync(cancellationToken);
@@ -113,10 +113,8 @@ namespace Synapse.Application.Commands.Correlations
                         if(matchingContext == null)
                         {
                             this.Logger.LogInformation("Failed to find a matching correlation context");
-                            if (correlation.Contexts.Any())
-                                throw new Exception("Failed to correlate event"); //should not happen
                             this.Logger.LogInformation("Creating a new correlation context...");
-                            matchingContext = V1CorrelationContext.CreateFor(command.Event, matchingFilter.Mappings.Keys);
+                            matchingContext = V1CorrelationContext.CreateFor(command.Event, matchingFilter.CorrelationMappings.Keys);
                             correlation.AddContext(matchingContext);
                             await this.Correlations.UpdateAsync(correlation, cancellationToken);
                             await this.Correlations.SaveChangesAsync(cancellationToken);
@@ -127,7 +125,6 @@ namespace Synapse.Application.Commands.Correlations
                         this.Logger.LogInformation("Found {matchingContextCount} matching correlation contexts", matchingContexts.Count());
                         foreach (var context in matchingContexts)
                         {
-
                             await this.CorrelateAsync(correlation, context, command.Event, matchingFilter, cancellationToken);
                         }
                         break;
@@ -150,7 +147,7 @@ namespace Synapse.Application.Commands.Correlations
         protected virtual async Task CorrelateAsync(V1Correlation correlation, V1CorrelationContext correlationContext, V1Event e, V1EventFilter filter, CancellationToken cancellationToken = default)
         {
             this.Logger.LogInformation("Correlating event to context with id '{contextId}'...", correlationContext.Id);
-            correlationContext.Correlate(e, filter.Mappings.Keys, true);
+            correlationContext.Correlate(e, filter.CorrelationMappings.Keys, true);
             correlation = await this.Correlations.UpdateAsync(correlation, cancellationToken);
             await this.Correlations.SaveChangesAsync(cancellationToken);
             this.Logger.LogInformation("Event successfully correlated to context with id '{contextId}'", correlationContext.Id);

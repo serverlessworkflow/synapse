@@ -17,6 +17,7 @@
 
 using Microsoft.Extensions.Logging;
 using Neuroglia.Serialization;
+using Synapse.Integration.Commands.Correlations;
 using Synapse.Integration.Commands.WorkflowInstances;
 using Synapse.Integration.Commands.Workflows;
 using Synapse.Integration.Models;
@@ -194,6 +195,69 @@ namespace Synapse.Apis.Management.Http
         }
 
         #endregion
+
+        #region Correlations
+
+        /// <inheritdoc/>
+        public virtual async Task<V1Correlation> CreateCorrelationAsync(V1CreateCorrelationCommand command, CancellationToken cancellationToken = default)
+        {
+            var requestUri = "/api/v1/correlations";
+            using var request = this.CreateRequest(HttpMethod.Post, requestUri);
+            var json = await this.Serializer.SerializeAsync(command, cancellationToken);
+            request.Content = new StringContent(json, Encoding.UTF8, MediaTypeNames.Application.Json);
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while creating a new correlation: {details}", json);
+            response.EnsureSuccessStatusCode();
+            return await this.Serializer.DeserializeAsync<V1Correlation>(json, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<List<V1Correlation>> GetCorrelationsAsync(string? query, CancellationToken cancellationToken = default)
+        {
+            var requestUri = "/api/v1/correlations";
+            if (!string.IsNullOrWhiteSpace(query))
+                requestUri += $"?{query}";
+            using var request = this.CreateRequest(HttpMethod.Get, requestUri);
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while querying correlations: {details}", json);
+            response.EnsureSuccessStatusCode();
+            return await this.Serializer.DeserializeAsync<List<V1Correlation>>(json, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<List<V1Correlation>> GetCorrelationsAsync(CancellationToken cancellationToken = default)
+        {
+            return await this.GetCorrelationsAsync(null!, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<V1Correlation> GetCorrelationByIdAsync(string id, CancellationToken cancellationToken = default)
+        {
+            using var request = this.CreateRequest(HttpMethod.Get, $"/api/v1/correlations/{id}");
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while querying correlations: {details}", json);
+            response.EnsureSuccessStatusCode();
+            return await this.Serializer.DeserializeAsync<V1Correlation>(json, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task DeleteCorrelationAsync(string id, CancellationToken cancellationToken = default)
+        {
+            using var request = this.CreateRequest(HttpMethod.Delete, $"/api/v1/correlations/{id}");
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while querying correlations: {details}", json);
+            response.EnsureSuccessStatusCode();
+        }
+
+        #endregion region
 
     }
 

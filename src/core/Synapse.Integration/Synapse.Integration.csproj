@@ -140,8 +140,20 @@
     <Compile Update="Commands\Workflows\v1\Generated\V1CreateWorkflowCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\Workflows\v1\V1CreateWorkflowCommand.cs</CustomToolNamespace>
     </Compile>
+    <Compile Update="Events\Correlations\v1\Generated\V1ContextAddedToCorrelationIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\Correlations\v1\V1ContextAddedToCorrelationDomainEvent.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\Correlations\v1\Generated\V1ContextRemovedFromCorrelationIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\Correlations\v1\V1ContextRemovedFromCorrelationDomainEvent.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\Correlations\v1\Generated\V1CorrelatedCreatedIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\Correlations\v1\V1CorrelatedCreatedDomainEvent.cs</CustomToolNamespace>
+    </Compile>
     <Compile Update="Events\Correlations\v1\Generated\V1CorrelationContextReleasedIntegrationEvent.cs">
       <CustomToolNamespace>..\Synapse.Domain\Events\Correlations\v1\V1CorrelationContextReleasedDomainEvent.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\Correlations\v1\Generated\V1CorrelationCreatedIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\Correlations\v1\V1CorrelationCreatedDomainEvent.cs</CustomToolNamespace>
     </Compile>
     <Compile Update="Events\Correlations\v1\Generated\V1EventCorrelatedIntegrationEvent.cs">
       <CustomToolNamespace>..\Synapse.Domain\Events\Correlations\v1\V1EventCorrelatedDomainEvent.cs</CustomToolNamespace>

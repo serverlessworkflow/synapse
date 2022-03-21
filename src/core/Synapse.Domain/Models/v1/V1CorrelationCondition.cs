@@ -68,11 +68,23 @@ namespace Synapse.Domain.Models
         /// </summary>
         /// <param name="context">The <see cref="V1CorrelationContext"/> to match</param>
         /// <returns>A boolean indicating whether or not the <see cref="V1CorrelationCondition"/> matches the specified <see cref="V1CorrelationContext"/></returns>
-        public virtual bool Matches(V1CorrelationContext context)
+        public virtual bool MatchesAny(V1CorrelationContext context)
         {
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
             return context.PendingEvents.Any(e => this.Filters.Any(f => f.Filters(e)));
+        }
+
+        /// <summary>
+        /// Determines whether or not the <see cref="V1CorrelationCondition"/> matches the specified <see cref="V1CorrelationContext"/>
+        /// </summary>
+        /// <param name="context">The <see cref="V1CorrelationContext"/> to match</param>
+        /// <returns>A boolean indicating whether or not the <see cref="V1CorrelationCondition"/> matches the specified <see cref="V1CorrelationContext"/></returns>
+        public virtual bool MatchesAll(V1CorrelationContext context)
+        {
+            if (context == null)
+                throw new ArgumentNullException(nameof(context));
+            return this.Filters.All(f => context.PendingEvents.Any(e => f.Filters(e)));
         }
 
         /// <summary>

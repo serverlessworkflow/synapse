@@ -15,6 +15,7 @@
  *
  */
 
+using Synapse.Integration.Commands.Correlations;
 using Synapse.Integration.Commands.WorkflowInstances;
 using Synapse.Integration.Commands.Workflows;
 using Synapse.Integration.Models;
@@ -124,6 +125,55 @@ namespace Synapse.Apis.Management
         /// <returns>A new <see cref="List{T}"/> containing all existing workflow instances</returns>
         [OperationContract]
         Task<List<V1WorkflowInstance>> GetWorkflowInstancesAsync(string query, CancellationToken cancellationToken = default);
+
+        #endregion
+
+        #region Correlations
+
+        /// <summary>
+        /// Creates a new <see cref="V1Correlation"/>
+        /// </summary>
+        /// <param name="command">The object that describes the command to execute</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The newly created <see cref="V1Correlation"/></returns>
+        [OperationContract]
+        Task<V1Correlation> CreateCorrelationAsync(V1CreateCorrelationCommand command, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Gets the <see cref="V1Correlation"/> with the specified id
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1Correlation"/> to get</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The <see cref="V1Correlation"/> with the specified id</returns>
+
+        [OperationContract]
+        Task<V1Correlation> GetCorrelationByIdAsync(string id, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Lists existing <see cref="V1Correlation"/>s
+        /// </summary>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new <see cref="List{T}"/> containing all existing <see cref="V1Correlation"/>s</returns>
+        [OperationContract]
+        Task<List<V1Correlation>> GetCorrelationsAsync(CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Lists existing <see cref="V1Correlation"/>s
+        /// </summary>
+        /// <param name="query">The OData query string</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new <see cref="List{T}"/> containing all existing <see cref="V1Correlation"/>s</returns>
+        [OperationContract]
+        Task<List<V1Correlation>> GetCorrelationsAsync(string query, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Deletes the <see cref="V1Correlation"/> with the specified id
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1Correlation"/> to delete</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        [OperationContract]
+        Task DeleteCorrelationAsync(string id, CancellationToken cancellationToken = default);
 
         #endregion
 
