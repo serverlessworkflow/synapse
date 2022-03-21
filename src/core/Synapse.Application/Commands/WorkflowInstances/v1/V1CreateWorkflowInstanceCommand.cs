@@ -158,7 +158,7 @@ namespace Synapse.Application.Commands.WorkflowInstances
             }
             if (string.IsNullOrWhiteSpace(key))
                 key = Guid.NewGuid().ToBase64();
-            while (await this.WorkflowInstances.ContainsAsync(Domain.Models.V1WorkflowInstance.BuildUniqueIdentifier(key, workflow), cancellationToken))
+            while (await this.WorkflowInstances.ContainsAsync(V1WorkflowInstance.BuildUniqueIdentifier(key, workflow), cancellationToken))
             {
                 key = Guid.NewGuid().ToBase64();
             }

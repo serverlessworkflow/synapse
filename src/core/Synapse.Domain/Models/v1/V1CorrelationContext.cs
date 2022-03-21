@@ -85,6 +85,8 @@ namespace Synapse.Domain.Models
         {
             if (e == null)
                 throw DomainException.ArgumentNull(nameof(e));
+            if (this._PendingEvents.Any(pe => pe.Id == e.Id))
+                return;
             if (mappings == null)
                 mappings = Array.Empty<string>();
             if (enqueue)

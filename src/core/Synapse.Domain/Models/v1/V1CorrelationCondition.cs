@@ -88,21 +88,20 @@ namespace Synapse.Domain.Models
         }
 
         /// <summary>
-        /// Creates a new <see cref="V1CorrelationCondition"/> used to match events defined by the specified <see cref="EventDefinition"/>
+        /// Creates a new <see cref="V1CorrelationCondition"/> used to match events defined by the specified <see cref="EventDefinition"/>s
         /// </summary>
-        /// <param name="eventDefinition">The <see cref="EventDefinition"/> for which to build a new <see cref="V1CorrelationCondition"/></param>
+        /// <param name="eventDefinitions">An array containing the <see cref="EventDefinition"/>s for which to build a new <see cref="V1CorrelationCondition"/></param>
         /// <returns>A new <see cref="V1CorrelationCondition"/></returns>
-        public static V1CorrelationCondition Match(EventDefinition eventDefinition)
+        public static V1CorrelationCondition Match(params EventDefinition[] eventDefinitions)
         {
-            if(eventDefinition == null)
-                throw new ArgumentNullException(nameof(eventDefinition));
-            var mappings = new Dictionary<string, string>();
-            if(!string.IsNullOrWhiteSpace(eventDefinition.Source))
-                mappings.Add(nameof(CloudEvent.Source).ToLower(), eventDefinition.Source);
-            if (!string.IsNullOrWhiteSpace(eventDefinition.Type))
-                mappings.Add(nameof(CloudEvent.Type).ToLower(), eventDefinition.Type);
-            var filter = new V1EventFilter(mappings);
-            return new(filter);
+            if(eventDefinitions == null)
+                throw new ArgumentNullException(nameof(eventDefinitions));
+            var filters = new List<V1EventFilter>(eventDefinitions.Length);
+            foreach(var eventDefinition in eventDefinitions)
+            {
+                filters.Add(V1EventFilter.Match(eventDefinition));
+            }
+            return new(filters.ToArray());
         }
 
     }

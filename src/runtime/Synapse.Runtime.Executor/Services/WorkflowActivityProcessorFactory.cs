@@ -63,7 +63,7 @@ namespace Synapse.Runtime.Services
                 throw new ArgumentNullException(nameof(activity));
             if (!activity.Metadata.TryGetValue(V1WorkflowActivityMetadata.State, out var stateName))
                 throw new ArgumentException($"The specified activity '{activity.Id}' is missing the required metadata field '{V1WorkflowActivityMetadata.State}'");
-            if (!this.Context.Workflow.Definition.TryGetState(stateName, out StateDefinition state))
+            if (!this.Context.Workflow.Definition.TryGetState(stateName, out var state))
                 throw new NullReferenceException($"Failed to find the workflow state with the specified name '{stateName}'");
             try
             {
@@ -74,7 +74,7 @@ namespace Synapse.Runtime.Services
                     V1WorkflowActivityType.ConsumeEvent => this.CreateConsumeEventActivityProcessor(activity),
                     V1WorkflowActivityType.End => ActivatorUtilities.CreateInstance<EndProcessor>(this.ServiceProvider, activity, state.End ?? new()),
                     V1WorkflowActivityType.Error => throw new NotImplementedException(),//todo
-                    V1WorkflowActivityType.EventTrigger => throw new NotImplementedException(),//todo
+                    V1WorkflowActivityType.EventTrigger => this.CreateEventStateTriggerProcessor(state, activity),
                     V1WorkflowActivityType.Iteration => throw new NotImplementedException(),//todo
                     V1WorkflowActivityType.ProduceEvent => this.CreateProduceEventActivityProcessor(activity),
                     V1WorkflowActivityType.Start => ActivatorUtilities.CreateInstance<StartProcessor>(this.ServiceProvider, activity, this.Context.Workflow.Definition.Start ?? new()),
@@ -96,7 +96,7 @@ namespace Synapse.Runtime.Services
             return state switch
             {
                 //CallbackStateDefinition callbackState => ActivatorUtilities.CreateInstance<CallbackStateProcessor>(this.ServiceProvider, state, activity), //todo
-                //EventStateDefinition eventState => ActivatorUtilities.CreateInstance<EventStateProcessor>(this.ServiceProvider, state, activity),
+                EventStateDefinition eventState => ActivatorUtilities.CreateInstance<EventStateProcessor>(this.ServiceProvider, state, activity),
                 //ForEachStateDefinition forEachState => ActivatorUtilities.CreateInstance<ForEachStateProcessor>(this.ServiceProvider, state, activity),//todo
                 InjectStateDefinition injectState => ActivatorUtilities.CreateInstance<InjectStateProcessor>(this.ServiceProvider, state, activity),
                 OperationStateDefinition operationState => ActivatorUtilities.CreateInstance<OperationStateProcessor>(this.ServiceProvider, state, activity),
@@ -152,6 +152,19 @@ namespace Synapse.Runtime.Services
             if (resultEvent.Kind != EventKind.Consumed)
                 throw new Exception($"The event '{action.Event!.ResultEvent}' is referenced as a consumed event, but is defined as a produced one");
             return ActivatorUtilities.CreateInstance<AsyncFunctionProcessor>(this.ServiceProvider, state, activity, action, triggerEvent, resultEvent);
+        }
+
+        protected virtual IWorkflowActivityProcessor CreateEventStateTriggerProcessor(StateDefinition state, V1WorkflowActivity activity)
+        {
+            if (state is not EventStateDefinition eventState)
+                throw new ArgumentException($"The specified state definition with name '{state.Name}' is not the definition of an event state");
+            if (!activity.Metadata.TryGetValue(V1WorkflowActivityMetadata.Trigger, out var rawTriggerId))
+                throw new ArgumentException($"The specified activity '{activity.Id}' is missing the required metadata field '{V1WorkflowActivityMetadata.Trigger}'");
+            if (!int.TryParse(rawTriggerId, out var triggerId))
+                throw new ArgumentException($"The '{V1WorkflowActivityMetadata.Trigger}' metadata field of activity '{activity.Id}' is not a valid integer");
+            if (!eventState.TryGetTrigger(triggerId, out var trigger))
+                throw new NullReferenceException($"Failed to find a trigger ath the specified index '{triggerId}' in the event state with name '{eventState.Name}'");
+            return ActivatorUtilities.CreateInstance<EventStateTriggerProcessor>(this.ServiceProvider, activity, state, trigger);
         }
 
         protected virtual IWorkflowActivityProcessor CreateProduceEventActivityProcessor(V1WorkflowActivity activity)

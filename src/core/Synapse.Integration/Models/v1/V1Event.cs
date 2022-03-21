@@ -106,9 +106,12 @@ namespace Synapse.Integration.Models
                 DataSchema = this.DataSchema,
                 Data = this.Data.ToObject()
             };
-            foreach(var attribute in this.Extensions)
+            if(this.Extensions != null)
             {
-                e[attribute.Key] = attribute.Value;
+                foreach (var attribute in this.Extensions)
+                {
+                    e[attribute.Key] = attribute.Value;
+                }
             }
             return e;
         }

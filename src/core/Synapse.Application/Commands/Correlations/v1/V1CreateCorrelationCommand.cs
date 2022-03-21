@@ -30,7 +30,7 @@ namespace Synapse.Application.Commands.Correlations
         /// <param name="outcome">The <see cref="V1CorrelationOutcome"/> of the <see cref="V1Correlation"/> to create</param>
         /// <param name="context">The initial <see cref="V1CorrelationContext"/> of the <see cref="V1Correlation"/> to create</param>
         public V1CreateCorrelationCommand(V1CorrelationLifetime lifetime, V1CorrelationConditionType conditionType, 
-            IEnumerable<V1CorrelationCondition> conditions, V1CorrelationOutcome outcome, V1CorrelationContext context)
+            IEnumerable<V1CorrelationCondition> conditions, V1CorrelationOutcome outcome, V1CorrelationContext? context)
         {
             this.Lifetime = lifetime;
             this.ConditionType = conditionType;

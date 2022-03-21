@@ -145,8 +145,11 @@ namespace Synapse.Domain.Models
                     yield return new KeyValuePair<string, string>(nameof(Subject).ToLower(), this.Subject);
                 if (this.Time.HasValue)
                     yield return new KeyValuePair<string, string>(nameof(Time).ToLower(), this.Time.ToString()!);
-                foreach (var extension in this.Extensions)
-                    yield return new(extension.Key, extension.Value.ToString()!);
+                if(this.Extensions != null)
+                {
+                    foreach (var extension in this.Extensions)
+                        yield return new(extension.Key, extension.Value.ToString()!);
+                }
             }
         }
 
@@ -173,10 +176,10 @@ namespace Synapse.Domain.Models
             if (eventDefinition == null)
                 throw new ArgumentNullException(nameof(eventDefinition));
             if (!string.IsNullOrWhiteSpace(eventDefinition.Source) 
-                && !Regex.IsMatch(this.Source.ToString(), eventDefinition.Source))
+                && !Regex.IsMatch(this.Source.ToString(), eventDefinition.Source, RegexOptions.IgnoreCase))
                 return false;
             if (!string.IsNullOrWhiteSpace(eventDefinition.Type) 
-                && !Regex.IsMatch(this.Type, eventDefinition.Type))
+                && !Regex.IsMatch(this.Type, eventDefinition.Type, RegexOptions.IgnoreCase))
                 return false;
             if (eventDefinition.Correlations != null)
             {
@@ -186,7 +189,7 @@ namespace Synapse.Domain.Models
                         return false;
                     if (string.IsNullOrWhiteSpace(correlationDefinition.ContextAttributeValue))
                         continue;
-                    if (!Regex.IsMatch(value, correlationDefinition.ContextAttributeValue))
+                    if (!Regex.IsMatch(value, correlationDefinition.ContextAttributeValue, RegexOptions.IgnoreCase))
                         return false;
                 }
             }

@@ -86,7 +86,7 @@ namespace Synapse.Runtime
                 action = state.GetAction(metadata);
                 return action != null;
             }
-            catch
+            catch(Exception ex)
             {
                 return false;
             }

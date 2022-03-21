@@ -19,6 +19,7 @@ using System.Text.RegularExpressions;
 
 namespace Synapse.Domain.Models
 {
+
     /// <summary>
     /// Represents an object used to filter events
     /// </summary>
@@ -59,7 +60,7 @@ namespace Synapse.Domain.Models
         {
             if (e == null)
                 throw new ArgumentNullException(nameof(e));
-            foreach (var attribute in this.Mappings)
+            foreach (var attribute in this.Mappings.Where(m => !string.IsNullOrWhiteSpace(m.Value)))
             {
                 if (!e.TryGetAttribute(attribute.Key, out var value))
                     return false;
@@ -67,6 +68,34 @@ namespace Synapse.Domain.Models
                     return false;
             }
             return true;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="V1CorrelationCondition"/> used to match events defined by the specified <see cref="V1EventFilter"/>
+        /// </summary>
+        /// <param name="eventDefinition">The <see cref="EventDefinition"/> for which to build a new <see cref="V1EventFilter"/></param>
+        /// <returns>A new <see cref="V1EventFilter"/></returns>
+        public static V1EventFilter Match(EventDefinition eventDefinition)
+        {
+            if (eventDefinition == null)
+                throw new ArgumentNullException(nameof(eventDefinition));
+            var mappings = new Dictionary<string, string>();
+            if (!string.IsNullOrWhiteSpace(eventDefinition.Source))
+                mappings.Add(nameof(CloudEvent.Source).ToLower(), eventDefinition.Source);
+            if (!string.IsNullOrWhiteSpace(eventDefinition.Type))
+                mappings.Add(nameof(CloudEvent.Type).ToLower(), eventDefinition.Type);
+            if(eventDefinition.Correlations != null)
+            {
+                foreach (var mapping in eventDefinition.Correlations)
+                {
+                    var value = null as string;
+                    if (!string.IsNullOrWhiteSpace(mapping.ContextAttributeValue)
+                        && !mapping.ContextAttributeValue.IsWorkflowExpression())
+                        value = mapping.ContextAttributeValue;
+                    mappings.Add(mapping.ContextAttributeName, value!);
+                }
+            }
+            return new(mappings);
         }
 
     }

@@ -17,6 +17,7 @@
 
 using ServerlessWorkflow.Sdk.Models;
 using ServerlessWorkflow.Sdk.Services.Validation;
+using Synapse.Application.Commands.Correlations;
 using System.ComponentModel.DataAnnotations;
 
 namespace Synapse.Application.Commands.Workflows
@@ -70,9 +71,9 @@ namespace Synapse.Application.Commands.Workflows
         /// <param name="mediator">The service used to mediate calls</param>
         /// <param name="mapper">The service used to map objects</param>
         /// <param name="workflowValidator">The service used to validate <see cref="WorkflowDefinition"/>s</param>
-        /// <param name="workflows">The <see cref="IRepository"/> used to manage <see cref="Domain.Models.V1Workflow"/>s</param>
+        /// <param name="workflows">The <see cref="IRepository"/> used to manage <see cref="V1Workflow"/>s</param>
         /// <param name="runtimeHost">The current <see cref="IWorkflowRuntimeHost"/></param>
-        public V1CreateWorkflowCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IWorkflowValidator workflowValidator, IRepository<Domain.Models.V1Workflow> workflows, IWorkflowRuntimeHost runtimeHost) 
+        public V1CreateWorkflowCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IWorkflowValidator workflowValidator, IRepository<V1Workflow> workflows, IWorkflowRuntimeHost runtimeHost) 
             : base(loggerFactory, mediator, mapper)
         {
             this.WorkflowValidator = workflowValidator;
@@ -86,9 +87,9 @@ namespace Synapse.Application.Commands.Workflows
         protected IWorkflowValidator WorkflowValidator { get; }
 
         /// <summary>
-        /// Gets the <see cref="IRepository"/> used to manage <see cref="Domain.Models.V1Workflow"/>s
+        /// Gets the <see cref="IRepository"/> used to manage <see cref="V1Workflow"/>s
         /// </summary>
-        protected IRepository<Domain.Models.V1Workflow> Workflows { get; }
+        protected IRepository<V1Workflow> Workflows { get; }
 
         /// <summary>
         /// Gets the current <see cref="IWorkflowRuntimeHost"/>
@@ -98,7 +99,7 @@ namespace Synapse.Application.Commands.Workflows
         /// <inheritdoc/>
         public virtual async Task<IOperationResult<Integration.Models.V1Workflow>> HandleAsync(V1CreateWorkflowCommand command, CancellationToken cancellationToken = default)
         {
-            //todo: validate
+            //todo: validate. ignored so far because of minor bugs in the current state of the spec (not allowing object-based dataInputSchema, for one)
             //var validationResult = await this.WorkflowValidator.ValidateAsync(command.Definition, true, true, cancellationToken); 
             //if (!validationResult.IsValid)
             //    return this.Invalid(validationResult.AsErrors().ToArray());
@@ -110,7 +111,27 @@ namespace Synapse.Application.Commands.Workflows
             }
             var workflow = await this.Workflows.AddAsync(new(command.Definition), cancellationToken);
             await this.Workflows.SaveChangesAsync(cancellationToken);
-            if(command.Definition.Start != null)
+            var startState = workflow.Definition.GetStartState();
+            if (startState is EventStateDefinition eventState)
+            {
+                var lifetime = V1CorrelationLifetime.Transient;
+                var conditionType = eventState.Exclusive ? V1CorrelationConditionType.AnyOf : V1CorrelationConditionType.AllOf;
+                var conditions = new List<V1CorrelationCondition>();
+                foreach(var trigger in eventState.Triggers)
+                {
+                    var filters = new List<V1EventFilter>(trigger.Events.Count);
+                    foreach(var eventRef in trigger.Events)
+                    {
+                        if (!workflow.Definition.TryGetEvent(eventRef, out var e))
+                            throw DomainException.NullReference(typeof(EventDefinition), eventRef, nameof(EventDefinition.Name));
+                        filters.Add(V1EventFilter.Match(e));
+                    }
+                    conditions.Add(new(filters.ToArray()));
+                }
+                var outcome = new V1CorrelationOutcome(V1CorrelationOutcomeType.Start, workflow.Id);
+                await this.Mediator.ExecuteAndUnwrapAsync(new V1CreateCorrelationCommand(lifetime, conditionType, conditions, outcome, null));
+            }
+            else if(command.Definition.Start != null)
             {
                 //todo: schedule or deploy trigger if needed
                 //if (!string.IsNullOrWhiteSpace(workflow.Definition.Start.Schedule.Cron?.Expression))

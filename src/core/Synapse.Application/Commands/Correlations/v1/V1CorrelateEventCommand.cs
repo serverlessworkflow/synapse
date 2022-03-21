@@ -84,7 +84,8 @@ namespace Synapse.Application.Commands.Correlations
                 var matchingCondition = correlation.GetMatchingConditionFor(command.Event)!;
                 var matchingFilter = matchingCondition.GetMatchingFilterFor(command.Event)!;
                 var matchingContexts = correlation.Contexts
-                    .Where(c => c.CorrelatesTo(command.Event));
+                    .Where(c => c.CorrelatesTo(command.Event))
+                    .ToList();
                 switch (correlation.Lifetime)
                 {
                     case V1CorrelationLifetime.Singleton:
@@ -121,15 +122,13 @@ namespace Synapse.Application.Commands.Correlations
                             await this.Correlations.SaveChangesAsync(cancellationToken);
                             this.Logger.LogInformation("Correlation context with id '{contextId}' successfully created", matchingContext.Id);
                             this.Logger.LogInformation("Event successfully correlated to context with id '{contextId}'", matchingContext.Id);
+                            matchingContexts.Add(matchingContext);
                         }
-                        else
+                        this.Logger.LogInformation("Found {matchingContextCount} matching correlation contexts", matchingContexts.Count());
+                        foreach (var context in matchingContexts)
                         {
-                            this.Logger.LogInformation("Found {matchingContextCount} matching correlation contexts", matchingContexts.Count());
-                            foreach (var context in matchingContexts)
-                            {
-  
-                                await this.CorrelateAsync(correlation, context, command.Event, matchingFilter, cancellationToken);
-                            }
+
+                            await this.CorrelateAsync(correlation, context, command.Event, matchingFilter, cancellationToken);
                         }
                         break;
                     default:

@@ -142,9 +142,6 @@ namespace Synapse.Runtime.Executor.Services.Processors
                     return;
                 if (!await this.Context.Workflow.TryCorrelateAsync(V1Event.CreateFrom(e), this.EventDefinition.Correlations?.Select(c => c.ContextAttributeName)!, this.CancellationTokenSource.Token))
                     return;
-
-                Console.WriteLine($"EVENT CONSUMED:{Environment.NewLine}{JsonConvert.SerializeObject(e.Data)}"); //todo: remove
-
                 await this.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, e.Data), this.CancellationTokenSource.Token);
                 await this.OnCompletedAsync(this.CancellationTokenSource.Token);
             }
