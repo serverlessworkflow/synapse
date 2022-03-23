@@ -15,8 +15,9 @@
  *
  */
 
-namespace Synapse.Application.Configuration
+namespace Synapse
 {
+
     /// <summary>
     /// Defines extensions for <see cref="IMediator"/>s
     /// </summary>
@@ -28,14 +29,14 @@ namespace Synapse.Application.Configuration
         /// </summary>
         /// <typeparam name="TResult">The expected type of result returned by the <see cref="ICommand"/> to process</typeparam>
         /// <param name="mediator">The <see cref="IMediator"/> to use to execute the <see cref="ICommand"/></param>
-        /// <param name="command">The <see cref="ICommand"/> to execute</param>
+        /// <param name="request">The <see cref="ICommand"/> to execute</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A new awaitable <see cref="Task"/></returns>
-        /// <exception cref="OperationResultException">A new <see cref="OperationResultException"/> in case errors occured during the <see cref="ICommand"/>'s execution</exception>
-        public static async Task ExecuteAndUnwrapAsync<TResult>(this IMediator mediator, ICommand<TResult> command, CancellationToken cancellationToken = default)
+        /// <exception cref="OperationResultException">A new <see cref="OperationResultException"/> in case errors occured during the <see cref="IRequest"/>'s execution</exception>
+        public static async Task ExecuteAndUnwrapAsync<TResult>(this IMediator mediator, ICommand<TResult> request, CancellationToken cancellationToken = default)
             where TResult : IOperationResult
         {
-            var result = await mediator.ExecuteAsync(command, cancellationToken);
+            var result = await mediator.ExecuteAsync(request, cancellationToken);
             if (!result.Succeeded)
                 throw new OperationResultException(result);
         }
@@ -46,14 +47,33 @@ namespace Synapse.Application.Configuration
         /// <typeparam name="TResult">The expected type of result returned by the <see cref="ICommand"/> to process</typeparam>
         /// <typeparam name="T">The type of data wrapped by the result returned by the <see cref="ICommand"/> to process</typeparam>
         /// <param name="mediator">The <see cref="IMediator"/> to use to execute the <see cref="ICommand"/></param>
-        /// <param name="command">The <see cref="ICommand"/> to execute</param>
+        /// <param name="request">The <see cref="ICommand"/> to execute</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A new awaitable <see cref="Task"/></returns>
         /// <exception cref="OperationResultException">A new <see cref="OperationResultException"/> in case errors occured during the <see cref="ICommand"/>'s execution</exception>
-        public static async Task<T> ExecuteAndUnwrapAsync<TResult, T>(this IMediator mediator, ICommand<TResult, T> command, CancellationToken cancellationToken = default)
+        public static async Task<T> ExecuteAndUnwrapAsync<TResult, T>(this IMediator mediator, ICommand<TResult, T> request, CancellationToken cancellationToken = default)
             where TResult : IOperationResult<T>
         {
-            var result = await mediator.ExecuteAsync(command, cancellationToken);
+            var result = await mediator.ExecuteAsync(request, cancellationToken);
+            if (!result.Succeeded)
+                throw new OperationResultException(result);
+            return result.Data;
+        }
+
+        /// <summary>
+        /// Executes and unwraps the result of the specified <see cref="IQuery"/>
+        /// </summary>
+        /// <typeparam name="TResult">The expected type of result returned by the <see cref="IQuery"/> to process</typeparam>
+        /// <typeparam name="T">The type of data wrapped by the result returned by the <see cref="IQuery"/> to process</typeparam>
+        /// <param name="mediator">The <see cref="IMediator"/> to use to execute the <see cref="IQuery"/></param>
+        /// <param name="request">The <see cref="IQuery"/> to execute</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        /// <exception cref="OperationResultException">A new <see cref="OperationResultException"/> in case errors occured during the <see cref="IQuery"/>'s execution</exception>
+        public static async Task<T> ExecuteAndUnwrapAsync<TResult, T>(this IMediator mediator, IQuery<TResult, T> request, CancellationToken cancellationToken = default)
+            where TResult : IOperationResult<T>
+        {
+            var result = await mediator.ExecuteAsync(request, cancellationToken);
             if (!result.Succeeded)
                 throw new OperationResultException(result);
             return result.Data;

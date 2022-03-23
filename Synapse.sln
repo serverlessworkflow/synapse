@@ -75,6 +75,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "websocket", "websocket", "{
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Apis.Monitoring.WebSocket", "src\apis\monitoring\Synapse.Apis.Monitoring.WebSocket\Synapse.Apis.Monitoring.WebSocket.csproj", "{4184709F-DB1A-4A27-ABC2-AE9696E40195}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ipc", "ipc", "{50840147-E3CD-42AB-955C-1070F21E81DE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synapse.Apis.Management.Ipc.Client", "src\apis\management\Synapse.Apis.Management.Ipc.Client\Synapse.Apis.Management.Ipc.Client.csproj", "{66F0739D-790F-4349-BB52-C86086C4D5EB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ipc", "ipc", "{02C8E23B-EDCE-4373-96CA-F633AEAD17F6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synapse.Apis.Runtime.Ipc.Client", "src\apis\runtime\Synapse.Apis.Runtime.Ipc.Client\Synapse.Apis.Runtime.Ipc.Client.csproj", "{CA50AABD-3B15-460B-8B50-E30815DE0A1D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -161,6 +169,14 @@ Global
 		{4184709F-DB1A-4A27-ABC2-AE9696E40195}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4184709F-DB1A-4A27-ABC2-AE9696E40195}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4184709F-DB1A-4A27-ABC2-AE9696E40195}.Release|Any CPU.Build.0 = Release|Any CPU
+		{66F0739D-790F-4349-BB52-C86086C4D5EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{66F0739D-790F-4349-BB52-C86086C4D5EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{66F0739D-790F-4349-BB52-C86086C4D5EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{66F0739D-790F-4349-BB52-C86086C4D5EB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CA50AABD-3B15-460B-8B50-E30815DE0A1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA50AABD-3B15-460B-8B50-E30815DE0A1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA50AABD-3B15-460B-8B50-E30815DE0A1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA50AABD-3B15-460B-8B50-E30815DE0A1D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -201,6 +217,10 @@ Global
 		{018CFFE3-A56E-496A-B288-E37B7F78EAF1} = {A8B7D153-AB02-40EF-9C7F-529BE98357E1}
 		{3706E8C4-D534-4709-AD43-2F60E4F02609} = {0FF3E199-BA7A-4EA4-92B4-8910FF58A103}
 		{4184709F-DB1A-4A27-ABC2-AE9696E40195} = {3706E8C4-D534-4709-AD43-2F60E4F02609}
+		{50840147-E3CD-42AB-955C-1070F21E81DE} = {6DC4553F-E522-4BC3-83C2-EAFD6E2B6852}
+		{66F0739D-790F-4349-BB52-C86086C4D5EB} = {50840147-E3CD-42AB-955C-1070F21E81DE}
+		{02C8E23B-EDCE-4373-96CA-F633AEAD17F6} = {E19B66DC-F575-4A18-B8AA-E9D3519EB885}
+		{CA50AABD-3B15-460B-8B50-E30815DE0A1D} = {02C8E23B-EDCE-4373-96CA-F633AEAD17F6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1FCD70A-A848-4567-B59C-D7B076BC2F2E}

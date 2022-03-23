@@ -135,6 +135,8 @@ namespace Synapse.Runtime.Services
         /// <inheritdoc/>
         public override async Task<string> StartAsync(V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default)
         {
+            if (workflowInstance == null)
+                throw new ArgumentNullException(nameof(workflowInstance));
             await this.PullRuntimeExecutorImageAsync(cancellationToken);
             var containerConfig = this.Options.Runtime.Container;
             containerConfig.AddOrUpdateEnvironmentVariable(EnvironmentVariables.Api.Host.Name, EnvironmentVariables.Api.Host.Value!); //todo: instead, fetch values from options

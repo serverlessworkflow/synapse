@@ -70,7 +70,7 @@ namespace Synapse.Apis.Runtime.Grpc
         {
             var stream = Channel.CreateUnbounded<V1RuntimeSignal>();
             var streamWriter = new AsyncStreamWriter<V1RuntimeSignal>(stream.Writer);
-            var runtime = RuntimeProxyManager.Register(RuntimeProxyFactory.CreateProxy(runtimeId, streamWriter));
+            var runtime = RuntimeProxyManager.Register(this.RuntimeProxyFactory.CreateProxy(runtimeId, streamWriter));
             await foreach (var message in stream.Reader.ReadAllAsync(context.CancellationToken))
             {
                 yield return message;
