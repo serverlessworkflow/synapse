@@ -96,7 +96,6 @@ namespace Synapse.Domain.Models
             if (context == null)
                 throw DomainException.ArgumentNull(nameof(context));
             this.On(this.RegisterEvent(new V1ContextAddedToCorrelationDomainEvent(this.Id, context)));
-            this._Contexts.Add(context);
         }
 
         /// <summary>
@@ -164,7 +163,7 @@ namespace Synapse.Domain.Models
                 throw DomainException.ArgumentNull(nameof(context));
             if (!this.Contexts.Any(c => c.Id == context.Id))
                 throw DomainException.NullReference(typeof(V1CorrelationContext), context.Id);
-            this.On(new V1CorrelationContextReleasedDomainEvent(this.Id, context.Id));
+            this.On(this.RegisterEvent(new V1CorrelationContextReleasedDomainEvent(this.Id, context.Id)));
         }
 
         /// <summary>
