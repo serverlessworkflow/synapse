@@ -77,11 +77,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Apis.Monitoring.Web
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ipc", "ipc", "{50840147-E3CD-42AB-955C-1070F21E81DE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synapse.Apis.Management.Ipc.Client", "src\apis\management\Synapse.Apis.Management.Ipc.Client\Synapse.Apis.Management.Ipc.Client.csproj", "{66F0739D-790F-4349-BB52-C86086C4D5EB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Apis.Management.Ipc.Client", "src\apis\management\Synapse.Apis.Management.Ipc.Client\Synapse.Apis.Management.Ipc.Client.csproj", "{66F0739D-790F-4349-BB52-C86086C4D5EB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ipc", "ipc", "{02C8E23B-EDCE-4373-96CA-F633AEAD17F6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synapse.Apis.Runtime.Ipc.Client", "src\apis\runtime\Synapse.Apis.Runtime.Ipc.Client\Synapse.Apis.Runtime.Ipc.Client.csproj", "{CA50AABD-3B15-460B-8B50-E30815DE0A1D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Apis.Runtime.Ipc.Client", "src\apis\runtime\Synapse.Apis.Runtime.Ipc.Client\Synapse.Apis.Runtime.Ipc.Client.csproj", "{CA50AABD-3B15-460B-8B50-E30815DE0A1D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Neuroglia.BlazorDagre", "Neuroglia.BlazorDagre\Neuroglia.BlazorDagre.csproj", "{241FFABD-B3DF-4298-A3C5-F557969A59ED}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -177,6 +179,10 @@ Global
 		{CA50AABD-3B15-460B-8B50-E30815DE0A1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CA50AABD-3B15-460B-8B50-E30815DE0A1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CA50AABD-3B15-460B-8B50-E30815DE0A1D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{241FFABD-B3DF-4298-A3C5-F557969A59ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{241FFABD-B3DF-4298-A3C5-F557969A59ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{241FFABD-B3DF-4298-A3C5-F557969A59ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{241FFABD-B3DF-4298-A3C5-F557969A59ED}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -221,6 +227,7 @@ Global
 		{66F0739D-790F-4349-BB52-C86086C4D5EB} = {50840147-E3CD-42AB-955C-1070F21E81DE}
 		{02C8E23B-EDCE-4373-96CA-F633AEAD17F6} = {E19B66DC-F575-4A18-B8AA-E9D3519EB885}
 		{CA50AABD-3B15-460B-8B50-E30815DE0A1D} = {02C8E23B-EDCE-4373-96CA-F633AEAD17F6}
+		{241FFABD-B3DF-4298-A3C5-F557969A59ED} = {19826311-054C-4E93-8B79-080145851939}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1FCD70A-A848-4567-B59C-D7B076BC2F2E}
