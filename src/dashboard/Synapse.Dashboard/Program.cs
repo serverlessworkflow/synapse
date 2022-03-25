@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.AspNetCore.SignalR.Client;
+using Neuroglia.Blazor.Dagre;
 using Neuroglia.Data;
 using Neuroglia.Data.Flux;
 using ServerlessWorkflow.Sdk;
@@ -29,6 +30,7 @@ builder.Services.AddSingleton<IIntegrationEventStream, IntegrationEventStream>()
 builder.Services.AddSingleton<IMonacoEditorHelper, MonacoEditorHelper>();
 builder.Services.AddSingleton<IBreadcrumbService, BreadcrumbService>();
 builder.Services.AddScoped<IWorkflowDiagramBuilder, WorkflowDiagramBuilder>();
+builder.Services.AddScoped<Dagre>();
 builder.Services.AddFlux(flux =>
 {
     flux

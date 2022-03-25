@@ -53,14 +53,14 @@
     <div id="app" class="h-100">
         <div id="logo-container">
             <svg class="logo-viewbox" viewBox="0 0 612 567" xml:space="preserve">
-                <use xlink:href="#brain" class="orange animation-phase-1" />
-                <use xlink:href="#s1-definition" class="blue animation-phase-2" />
-                <use xlink:href="#y-definition" class="blue animation-phase-3" />
-                <use xlink:href="#n-definition" class="blue animation-phase-4" />
-                <use xlink:href="#a-definition" class="blue animation-phase-5" />
-                <use xlink:href="#p-definition" class="blue animation-phase-6" />
-                <use xlink:href="#s2-definition" class="blue animation-phase-7" />
-                <use xlink:href="#e-definition" class="blue animation-phase-8" />
+            <use xlink:href="#brain" class="orange animation-phase-1" />
+            <use xlink:href="#s1-definition" class="blue animation-phase-2" />
+            <use xlink:href="#y-definition" class="blue animation-phase-3" />
+            <use xlink:href="#n-definition" class="blue animation-phase-4" />
+            <use xlink:href="#a-definition" class="blue animation-phase-5" />
+            <use xlink:href="#p-definition" class="blue animation-phase-6" />
+            <use xlink:href="#s2-definition" class="blue animation-phase-7" />
+            <use xlink:href="#e-definition" class="blue animation-phase-8" />
             </svg>
             <div class="spinner-border" role="status">
                 <span class="visually-hidden">Loading...</span>
@@ -70,14 +70,14 @@
 
     <div id="animation-container" class="fade-out">
         <svg id="splash-viewbox" class="logo-viewbox" viewBox="0 0 612 567" xml:space="preserve">
-            <use xlink:href="#brain" class="orange animation-phase-1" />
-            <use xlink:href="#s1-definition" class="blue animation-phase-2" />
-            <use xlink:href="#y-definition" class="blue animation-phase-3" />
-            <use xlink:href="#n-definition" class="blue animation-phase-4" />
-            <use xlink:href="#a-definition" class="blue animation-phase-5" />
-            <use xlink:href="#p-definition" class="blue animation-phase-6" />
-            <use xlink:href="#s2-definition" class="blue animation-phase-7" />
-            <use xlink:href="#e-definition" class="blue animation-phase-8" />
+        <use xlink:href="#brain" class="orange animation-phase-1" />
+        <use xlink:href="#s1-definition" class="blue animation-phase-2" />
+        <use xlink:href="#y-definition" class="blue animation-phase-3" />
+        <use xlink:href="#n-definition" class="blue animation-phase-4" />
+        <use xlink:href="#a-definition" class="blue animation-phase-5" />
+        <use xlink:href="#p-definition" class="blue animation-phase-6" />
+        <use xlink:href="#s2-definition" class="blue animation-phase-7" />
+        <use xlink:href="#e-definition" class="blue animation-phase-8" />
         </svg>
     </div>
 
@@ -89,8 +89,10 @@
     <script src="js/splash.js"></script>
     <script src="_framework/blazor.webassembly.js"></script>
     <script>navigator.serviceWorker.register('service-worker.js');</script>
-    <script src="js/monaco-editor-extensions.js"></script>
     <script src="_content/Z.Blazor.Diagrams/script.min.js"></script>
+    <script src="_content/Neuroglia.Blazor.Dagre/lib/dagre/dagre.js"></script>
+    <script src="_content/Neuroglia.Blazor.Dagre/neuroglia-blazor-dagre-interop.js"></script>
+    <script src="js/monaco-editor-extensions.js"></script>
     <script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/loader.js"></script>
     <script>require.config({ paths: { 'vs': '_content/BlazorMonaco/lib/monaco-editor/min/vs' } });</script>
     <script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/editor/editor.main.js"></script>

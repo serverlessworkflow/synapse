@@ -1,7 +1,10 @@
 ﻿@namespace Synapse.Dashboard
 @page "/"
+@using Neuroglia.Blazor.Dagre
 @using Synapse.Dashboard.Features.Test
+@using System.Dynamic
 @inject IBreadcrumbService BreadcrumbService
+@inject Dagre Dagre
 
 <PageTitle>Overview</PageTitle>
 <AppHeader>
@@ -41,6 +44,10 @@ Welcome to Synapse - Serverless Workflow Management System
     {
         await base.OnInitializedAsync();
         await this.BreadcrumbService.Use(KnownBreadcrumbs.Home);
+        var graph = await this.Dagre.Graph();
+        await graph.SetGraph("Hello");
+        var name = await graph.Graph();
+        Console.Write("Graphname is " + name);
     }
 
     public class TestUserState
