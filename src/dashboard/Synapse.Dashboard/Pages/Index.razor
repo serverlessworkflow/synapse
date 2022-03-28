@@ -1,10 +1,11 @@
 ﻿@namespace Synapse.Dashboard
 @page "/"
 @using Neuroglia.Blazor.Dagre
+@using Neuroglia.Blazor.Dagre.Models
 @using Synapse.Dashboard.Features.Test
 @using System.Dynamic
 @inject IBreadcrumbService BreadcrumbService
-@inject Dagre Dagre
+@inject DagreService Dagre
 
 <PageTitle>Overview</PageTitle>
 <AppHeader>
@@ -46,7 +47,7 @@ Welcome to Synapse - Serverless Workflow Management System
         await this.BreadcrumbService.Use(KnownBreadcrumbs.Home);
         var graph = await this.Dagre.Graph();
         var graph2 = await this.Dagre.Graph();
-        await graph.SetGraph("Hello");
+        await graph.SetGraph(new { Label = "Hello" });
         await graph2.SetGraph("World");
         var name = await graph.Graph();
         var name2 = await graph2.Graph();

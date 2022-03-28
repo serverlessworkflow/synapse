@@ -63,12 +63,12 @@
         Task<IGraphLib> FilterNodes(Func<string, bool> filter);
 
         /// <summary>
-        /// Gets the graph label.
+        /// Gets the graph metadata.
         /// </summary>
         /// <returns>
         /// currently assigned label for the graph or undefined if no label assigned.
         /// </returns>
-        Task<string?> Graph();
+        Task<object?> Graph();
 
         /// <summary>
         /// Detects whether the graph contains specified edge or not. No subgraphs are considered.
@@ -303,12 +303,12 @@
         Task<IGraphLib> SetEdge(IGraphLibEdge edge, object label);
 
         /// <summary>
-        /// Sets the label of the graph.
+        /// Sets the metadata of the graph.
         /// </summary>
         /// <returns>
         /// the graph, allowing this to be chained with other functions.
         /// </returns>
-        Task<IGraphLib> SetGraph(string label);
+        Task<IGraphLib> SetGraph(object label);
 
         /// <summary>
         /// Creates or updates the value for the node v in the graph. If label is supplied
