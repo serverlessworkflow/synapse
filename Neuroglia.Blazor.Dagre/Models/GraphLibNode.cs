@@ -1,15 +1,27 @@
 ﻿namespace Neuroglia.Blazor.Dagre.Models
 {
-    public class NodeViewModel
-        : GraphElement, INodeViewModel
+    public class GraphLibNode
+        : GraphElement, IGraphLibNode
     {
         [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public virtual double? X { get; set; }
+        public virtual string? Class { get; set; }
 
         [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public virtual double? Y { get; set; }
+        public virtual double? Padding { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public virtual double? Rx { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public virtual double? Ry { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public virtual string? Shape { get; set; }
 
         [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
@@ -21,7 +33,11 @@
 
         [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public virtual double? Radius { get; set; }
+        public virtual double? X { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public virtual double? Y { get; set; }
 
         [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
@@ -31,24 +47,8 @@
         [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public virtual double? PaddingY { get; set; }
 
-        public NodeViewModel(
-            double width = Consts.NodeWidth, 
-            double height = Consts.NodeHeight, 
-            double x = 0, 
-            double y = 0, 
-            double radius = Consts.NodeRadius, 
-            double paddingX = Consts.NodePadding, 
-            double paddingY = Consts.NodePadding
-        )
+        public GraphLibNode()
             : base()
-        {
-            this.Width = width;
-            this.Height = height;
-            this.X = x;
-            this.Y = y;
-            this.Radius = radius;
-            this.PaddingX = paddingX;
-            this.PaddingY = paddingY;
-        }
+        { }
     }
 }

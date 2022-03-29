@@ -2,6 +2,6 @@
 {
     public interface IRadius
     {
-        double Radius { get; set; }
+        double? Radius { get; set; }
     }
 }

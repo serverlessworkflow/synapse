@@ -1,5 +1,6 @@
 ﻿using Microsoft.JSInterop;
 using Neuroglia.Blazor.Dagre.Models;
+using System.Dynamic;
 
 namespace Neuroglia.Blazor.Dagre
 {
@@ -24,17 +25,22 @@ namespace Neuroglia.Blazor.Dagre
         }
 
         /// <inheritdoc/>
-        public virtual async Task<IGraphLib> Deserialize(string json) => await this.jsRuntime.InvokeAsync<IGraphLib>("dagre.graphlib.json.read", json);
+        public virtual async Task<IGraphLib> Deserialize(string json) => await this.jsRuntime.InvokeAsync<IGraphLib>("neuroglia.blazor.dagre.read", json);
 
         /// <summary>
         /// Returns a new <see cref="IGraphLib"/> instance
         /// </summary>
         /// <param name="options"></param>
         /// <returns></returns>
-        public virtual async Task<IGraphLib> Graph(IGraphLibOptions? options = null)
+        public virtual async Task<IGraphLib> Graph(IDagreGraphOptions? options = null)
         {
-            var jsGraph = await this.jsRuntime.InvokeAsync<IJSObjectReference>("neuroglia.blazor.dagre.graph", options);
-            return new GraphLib(jsGraph);
+            var graphLibOptions = new GraphLibOptions(options);
+            if (graphLibOptions.Multigraph == null) graphLibOptions.Multigraph = true;
+            if (graphLibOptions.Compound == null) graphLibOptions.Compound = true;
+            var jsIntance = await this.jsRuntime.InvokeAsync<IJSObjectReference>("neuroglia.blazor.dagre.graph", graphLibOptions);
+            var graphLib = new GraphLib(jsIntance);
+            await graphLib.SetGraph(new DagreGraphConfig(options));
+            return graphLib;
         }
 
         /// <summary>
@@ -42,9 +48,9 @@ namespace Neuroglia.Blazor.Dagre
         /// </summary>
         /// <param name="graph"></param>
         /// <returns></returns>
-        public virtual async Task<IGraphLib> Layout(IGraphLib graph) => await this.jsRuntime.InvokeAsync<IGraphLib>("neuroglia.blazor.dagre.layout", graph);
+        public virtual async Task<IGraphLib> Layout(IGraphLib graph) => await this.jsRuntime.InvokeAsync<IJSObjectReference>("neuroglia.blazor.dagre.layout", await graph.Instance()) as IGraphLib;
         
         /// <inheritdoc/>
-        public virtual async Task<string> Serialize(IGraphLib graph) => await this.jsRuntime.InvokeAsync<string>("dagre.graphlib.json.write", graph);
+        public virtual async Task<string> Serialize(IGraphLib graph) => await this.jsRuntime.InvokeAsync<string>("neuroglia.blazor.dagre.write", await graph.Instance());
     }
 }

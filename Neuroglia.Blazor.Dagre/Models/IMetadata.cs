@@ -2,6 +2,9 @@
 {
     public interface IMetadata
     {
-        object? Metadata { get; set; }
+        /// <summary>
+        /// The metadata payload
+        /// </summary>
+        IDictionary<string, object>? Metadata { get; set; }
     }
 }

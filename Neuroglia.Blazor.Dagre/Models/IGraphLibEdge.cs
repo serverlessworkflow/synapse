@@ -4,7 +4,8 @@
     /// Represents a <see cref="IGraphLib"/> edge
     /// </summary>
     public interface IGraphLibEdge
-    {        
+        : IMetadata
+    {
         /// <summary>
         /// The name that uniquely identifies a multi-edge.
         /// </summary>

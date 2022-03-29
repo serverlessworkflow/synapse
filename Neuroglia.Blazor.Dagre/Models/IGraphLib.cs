@@ -1,4 +1,6 @@
-﻿namespace Neuroglia.Blazor.Dagre.Models
+﻿using Microsoft.JSInterop;
+
+namespace Neuroglia.Blazor.Dagre.Models
 {
     /// <summary>
     /// Provides data structures for undirected and directed multi-graphs
@@ -31,7 +33,7 @@
         /// <returns>
         /// value associated with specified edge.
         /// </returns>
-        Task<object> Edge(IGraphLibEdge e);
+        Task<object> Edge(GraphLibEdge e);
 
         /// <summary>
         /// Gets the number of edges in the graph.
@@ -49,7 +51,7 @@
         /// <returns>
         /// graph edges list.
         /// </returns>
-        Task<IGraphLibEdge[]> Edges();
+        Task<GraphLibEdge[]> Edges();
 
         /// <summary>
         /// Creates new graph with nodes filtered via filter. Edges incident to rejected node
@@ -68,7 +70,7 @@
         /// <returns>
         /// currently assigned label for the graph or undefined if no label assigned.
         /// </returns>
-        Task<object?> Graph();
+        Task<IDagreGraphConfig?> Graph();
 
         /// <summary>
         /// Detects whether the graph contains specified edge or not. No subgraphs are considered.
@@ -86,7 +88,7 @@
         /// <returns>
         /// whether the graph contains the specified edge or not.
         /// </returns>
-        Task<bool> HasEdge(IGraphLibEdge edge);
+        Task<bool> HasEdge(GraphLibEdge edge);
 
         /// <summary>
         /// Detects whether graph has a node with specified name or not.
@@ -104,7 +106,7 @@
         /// <returns>
         /// edges descriptors list if v is in the graph, or undefined otherwise.
         /// </returns>
-        Task<IGraphLibEdge[]?> InEdges(string v, string w);
+        Task<GraphLibEdge[]?> InEdges(string v, string w);
 
         /// <summary>
         /// Whether graph was created with 'compound' flag set to true or not.
@@ -131,6 +133,12 @@
         Task<bool> IsMultigraph();
 
         /// <summary>
+        /// Gets the underlying <see cref="IJSObjectReference"/> instance
+        /// </summary>
+        /// <returns></returns>
+        Task<IJSObjectReference> Instance();
+
+        /// <summary>
         /// Return all nodes that are predecessors or successors of the specified node or undefined if
         /// node v is not in the graph.
         /// Complexity: O(|V|).
@@ -147,7 +155,7 @@
         /// <returns>
         /// label value of the node.
         /// </returns>
-        Task<object> Node(string name);
+        Task<GraphLibNode> Node(string name);
 
         /// <summary>
         /// Gets the number of nodes in the graph.
@@ -166,7 +174,7 @@
         /// <returns>
         /// edges descriptors list if v is in the graph, or undefined otherwise.
         /// </returns>
-        Task<IGraphLibEdge[]?> NodeEdges(string v, string w);
+        Task<GraphLibEdge[]?> NodeEdges(string v, string w);
 
         /// <summary>
         /// Gets all nodes of the graph. Note, the in case of compound graph subnodes are
@@ -186,7 +194,7 @@
         /// <returns>
         /// edges descriptors list if v is in the graph, or undefined otherwise.
         /// </returns>
-        Task<IGraphLibEdge[]?> OutEdges(string v, string w);
+        Task<GraphLibEdge[]?> OutEdges(string v, string w);
 
         /// <summary>
         /// Gets parent node for node v.
@@ -214,7 +222,7 @@
         /// <returns>
         /// the graph, allowing this to be chained with other functions.
         /// </returns>
-        Task<IGraphLib> RemoveEdge(IGraphLibEdge edge);
+        Task<IGraphLib> RemoveEdge(GraphLibEdge edge);
 
         /// <summary>
         /// Removes the specified edge from the graph. No subgraphs are considered.
@@ -288,6 +296,8 @@
         /// <returns>
         /// the graph, allowing this to be chained with other functions.
         /// </returns>
+        Task<IGraphLib> SetEdge(string v, string w);
+        Task<IGraphLib> SetEdge(string v, string w, object label);
         Task<IGraphLib> SetEdge(string v, string w, object label, string name);
 
         /// <summary>
@@ -300,7 +310,7 @@
         /// <returns>
         /// the graph, allowing this to be chained with other functions.
         /// </returns>
-        Task<IGraphLib> SetEdge(IGraphLibEdge edge, object label);
+        Task<IGraphLib> SetEdge(GraphLibEdge edge, object label);
 
         /// <summary>
         /// Sets the metadata of the graph.
@@ -308,7 +318,7 @@
         /// <returns>
         /// the graph, allowing this to be chained with other functions.
         /// </returns>
-        Task<IGraphLib> SetGraph(object label);
+        Task<IGraphLib> SetGraph(IDagreGraphConfig label);
 
         /// <summary>
         /// Creates or updates the value for the node v in the graph. If label is supplied

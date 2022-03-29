@@ -21,23 +21,23 @@ namespace Neuroglia.Blazor.Dagre
         /// <inheritdoc/>
         public virtual async Task<IGraphLib> FilterNodes(Func<string, bool> filter) => await this.jsInstance.InvokeAsync<IJSObjectReference>("filterNodes", filter) as IGraphLib;
         /// <inheritdoc/>
-        public virtual async Task<object?> Graph() => await this.jsInstance.InvokeAsync<object?>("graph");
+        public virtual async Task<IDagreGraphConfig?> Graph() => await this.jsInstance.InvokeAsync<DagreGraphOptions?>("graph");
         /// <inheritdoc/>
         public virtual async Task<bool> HasEdge(string v, string w, string name) => await this.jsInstance.InvokeAsync<bool>("hasEdge", v, w, name);
         /// <inheritdoc/>
-        public virtual async Task<bool> HasEdge(IGraphLibEdge edge) => await this.jsInstance.InvokeAsync<bool>("hasEdge", edge);
+        public virtual async Task<bool> HasEdge(GraphLibEdge edge) => await this.jsInstance.InvokeAsync<bool>("hasEdge", edge);
         /// <inheritdoc/>
         public virtual async Task<bool> HasNode(string name) => await this.jsInstance.InvokeAsync<bool>("hasNode", name);
         /// <inheritdoc/>
         public virtual async Task<object> Edge(string v, string w, string name) => await this.jsInstance.InvokeAsync<object>("edge", v, w, name);
         /// <inheritdoc/>
-        public virtual async Task<object> Edge(IGraphLibEdge e) => await this.jsInstance.InvokeAsync<object>("edge", e);
+        public virtual async Task<object> Edge(GraphLibEdge e) => await this.jsInstance.InvokeAsync<object>("edge", e);
         /// <inheritdoc/>
         public virtual async Task<double> EdgeCount() => await this.jsInstance.InvokeAsync<double>("edgeCount");
         /// <inheritdoc/>
-        public virtual async Task<IGraphLibEdge[]> Edges() => await this.jsInstance.InvokeAsync<IJSObjectReference[]>("edges") as IGraphLibEdge[];
+        public virtual async Task<GraphLibEdge[]> Edges() => await this.jsInstance.InvokeAsync<GraphLibEdge[]>("edges");
         /// <inheritdoc/>
-        public virtual async Task<IGraphLibEdge[]?> InEdges(string v, string w) => await this.jsInstance.InvokeAsync<IJSObjectReference[]?>("inEdges", v, w) as IGraphLibEdge[];
+        public virtual async Task<GraphLibEdge[]?> InEdges(string v, string w) => await this.jsInstance.InvokeAsync<GraphLibEdge[]?>("inEdges", v, w);
         /// <inheritdoc/>
         public virtual async Task<bool> IsCompound() => await this.jsInstance.InvokeAsync<bool>("isCompound");
         /// <inheritdoc/>
@@ -45,23 +45,25 @@ namespace Neuroglia.Blazor.Dagre
         /// <inheritdoc/>
         public virtual async Task<bool> IsMultigraph() => await this.jsInstance.InvokeAsync<bool>("isMultigraph");
         /// <inheritdoc/>
+        public virtual async Task<IJSObjectReference> Instance() => await Task.FromResult(this.jsInstance);
+        /// <inheritdoc/>
         public virtual async Task<string[]?> Neighbors(string v) => await this.jsInstance.InvokeAsync<string[]?>("neighbors", v);
         /// <inheritdoc/>
-        public virtual async Task<object> Node(string name) => await this.jsInstance.InvokeAsync<object>("node", name);
+        public virtual async Task<GraphLibNode> Node(string name) => await this.jsInstance.InvokeAsync<GraphLibNode>("node", name);
         /// <inheritdoc/>
         public virtual async Task<double> NodeCount() => await this.jsInstance.InvokeAsync<double>("nodeCount");
         /// <inheritdoc/>
-        public virtual async Task<IGraphLibEdge[]?> NodeEdges(string v, string w) => await this.jsInstance.InvokeAsync<IJSObjectReference[]?>("nodeEdges", v, w) as IGraphLibEdge[];
+        public virtual async Task<GraphLibEdge[]?> NodeEdges(string v, string w) => await this.jsInstance.InvokeAsync<GraphLibEdge[]?>("nodeEdges", v, w);
         /// <inheritdoc/>
         public virtual async Task<string[]> Nodes() => await this.jsInstance.InvokeAsync<string[]>("nodes");
         /// <inheritdoc/>
-        public virtual async Task<IGraphLibEdge[]?> OutEdges(string v, string w) => await this.jsInstance.InvokeAsync<IJSObjectReference[]?>("outEdges", v, w) as IGraphLibEdge[];
+        public virtual async Task<GraphLibEdge[]?> OutEdges(string v, string w) => await this.jsInstance.InvokeAsync<GraphLibEdge[]?>("outEdges", v, w);
         /// <inheritdoc/>
         public virtual async Task<string[]?> Parent(string v) => await this.jsInstance.InvokeAsync<string[]?>("parent", v);
         /// <inheritdoc/>
         public virtual async Task<string[]?> Predecessors(string v) => await this.jsInstance.InvokeAsync<string[]?>("predecessors", v);
         /// <inheritdoc/>
-        public virtual async Task<IGraphLib> RemoveEdge(IGraphLibEdge edge) => await this.jsInstance.InvokeAsync<IJSObjectReference>("removeEdge", edge) as IGraphLib;
+        public virtual async Task<IGraphLib> RemoveEdge(GraphLibEdge edge) => await this.jsInstance.InvokeAsync<IJSObjectReference>("removeEdge", edge) as IGraphLib;
         /// <inheritdoc/>
         public virtual async Task<IGraphLib> RemoveEdge(string v, string w, string name) => await this.jsInstance.InvokeAsync<IJSObjectReference>("removeEdge", v, w, name) as IGraphLib;
         /// <inheritdoc/>
@@ -75,11 +77,15 @@ namespace Neuroglia.Blazor.Dagre
         /// <inheritdoc/>
         public virtual async Task<IGraphLib> SetDefaultNodeLabel(Func<string, object> labelFn) => await this.jsInstance.InvokeAsync<IJSObjectReference>("setDefaultNodeLabel", labelFn) as IGraphLib;
         /// <inheritdoc/>
-        public virtual async Task<IGraphLib> SetGraph(object label) => await this.jsInstance.InvokeAsync<IJSObjectReference>("setGraph", label) as IGraphLib;
+        public virtual async Task<IGraphLib> SetGraph(IDagreGraphConfig label) => await this.jsInstance.InvokeAsync<IJSObjectReference>("setGraph", label) as IGraphLib;
+        /// <inheritdoc/>
+        public virtual async Task<IGraphLib> SetEdge(string v, string w) => await this.jsInstance.InvokeAsync<IJSObjectReference>("setEdge", v, w) as IGraphLib;
+        /// <inheritdoc/>
+        public virtual async Task<IGraphLib> SetEdge(string v, string w, object label) => await this.jsInstance.InvokeAsync<IJSObjectReference>("setEdge", v, w, label) as IGraphLib;
         /// <inheritdoc/>
         public virtual async Task<IGraphLib> SetEdge(string v, string w, object label, string name) => await this.jsInstance.InvokeAsync<IJSObjectReference>("setEdge", v, w, label, name) as IGraphLib;
         /// <inheritdoc/>
-        public virtual async Task<IGraphLib> SetEdge(IGraphLibEdge edge, object label) => await this.jsInstance.InvokeAsync<IJSObjectReference>("setEdge", edge, label) as IGraphLib;
+        public virtual async Task<IGraphLib> SetEdge(GraphLibEdge edge, object label) => await this.jsInstance.InvokeAsync<IJSObjectReference>("setEdge", edge, label) as IGraphLib;
         /// <inheritdoc/>
         public virtual async Task<IGraphLib> SetNode(string name, object label) => await this.jsInstance.InvokeAsync<IJSObjectReference>("setNode", name, label) as IGraphLib;
         /// <inheritdoc/>

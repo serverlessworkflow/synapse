@@ -2,7 +2,8 @@
 {
     public interface IPadding
     {
-        double PaddingX { get; set; }
-        double PaddingY { get; set; }
+        double? PaddingX { get; set; }
+
+        double? PaddingY { get; set; }
     }
 }

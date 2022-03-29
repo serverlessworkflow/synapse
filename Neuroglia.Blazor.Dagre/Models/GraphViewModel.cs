@@ -1,13 +1,19 @@
 ﻿namespace Neuroglia.Blazor.Dagre.Models
 {
     public class GraphViewModel
-        : BaseViewModel, IGraphViewModel
+        : GraphElement, IGraphViewModel
     {
         public virtual ICollection<INodeViewModel> Nodes { get; set; }
         public virtual ICollection<IEdgeViewModel> Edges { get; set; }
         public virtual ICollection<IClusterViewModel> Clusters { get; set; }
-        public virtual double Width { get; set; }
-        public virtual double Height { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public virtual double? Width { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public virtual double? Height { get; set; }
 
         public GraphViewModel(
             ICollection<INodeViewModel> nodes,

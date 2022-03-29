@@ -2,7 +2,8 @@
 {
     public interface IDimension
     {
-        double Width { get; set; }
-        double Height { get; set; }
+        double? Width { get; set; }
+
+        double? Height { get; set; }
     }
 }

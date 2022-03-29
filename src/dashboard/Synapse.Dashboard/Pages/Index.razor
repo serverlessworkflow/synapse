@@ -45,14 +45,33 @@ Welcome to Synapse - Serverless Workflow Management System
     {
         await base.OnInitializedAsync();
         await this.BreadcrumbService.Use(KnownBreadcrumbs.Home);
-        var graph = await this.Dagre.Graph();
-        var graph2 = await this.Dagre.Graph();
-        await graph.SetGraph(new { Label = "Hello" });
-        await graph2.SetGraph("World");
-        var name = await graph.Graph();
-        var name2 = await graph2.Graph();
-        Console.WriteLine("Graphname is " + name);
-        Console.WriteLine("Graphname2 is " + name2);
+        IDagreGraphOptions options = new DagreGraphOptions() { Direction = DagreGraphDirection.TopToBottom };
+        var graph = await this.Dagre.Graph(options);
+        var start = new GraphLibNode()
+        {
+            Label = "",
+            Metadata = new Dictionary<string, object>()
+            {
+                { "Type", "Start" },
+                { "Foo", "Bar" },
+            }
+        };
+        await graph.SetNode(start.Id.ToString(), start);
+        var state1 = new GraphLibNode()
+        {
+            Label = "State 1",
+            Rx = 5,
+            Ry = 5,
+            Metadata = new Dictionary<string, object>()
+            {
+                { "Type", "State" },                
+                { "Fizz", "Buzz" },
+            }
+        };
+        await graph.SetNode(state1.Id.ToString(), state1);
+        await graph.SetEdge(start.Id.ToString(), state1.Id.ToString());
+        await this.Dagre.Layout(graph);
+        Console.WriteLine(await this.Dagre.Serialize(graph));
     }
 
     public class TestUserState
