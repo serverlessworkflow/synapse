@@ -2,6 +2,7 @@
 @using Neuroglia.Data.Flux
 @using Neuroglia.Data.Flux.Components
 @using System.Reactive.Linq
+@using Newtonsoft.Json.Linq
 @using Synapse.Integration.Events.Workflows
 @inject HubConnection HubConnection
 @inject IIntegrationEventStream IntegrationEventStream
@@ -31,15 +32,9 @@
             .Where(e => e.Type == "io.synapse/v1workflow/created/v1")
             .Subscribe(e =>
             {
-                try
-                {
-                    var data = e.Data.ToObject<V1WorkflowCreatedIntegrationEvent>();
-                }
-                catch(Exception ex)
-                {
-                    Console.WriteLine("ERROR: " + ex.ToString());
-                }
-                //this.Dispatcher.Dispatch(new AddV1Workflow(new() { Id = e.AggregateId, CreatedAt = e.CreatedAt.DateTime, LastModified = e.CreatedAt.DateTime, Definition = e.Definition }));
+                var json = JObject.FromObject(e.Data).ToString();
+                var data = e.Data.ToObject<V1WorkflowCreatedIntegrationEvent>();
+                this.Dispatcher.Dispatch(new AddV1Workflow(new() { Id = data.AggregateId, CreatedAt = data.CreatedAt.DateTime, LastModified = data.CreatedAt.DateTime, Definition = data.Definition }));
             });
         await this.HubConnection.StartAsync();
     }
