@@ -6,6 +6,7 @@ namespace Neuroglia.Blazor.Dagre.Models
     /// Provides data structures for undirected and directed multi-graphs
     /// </summary>
     public interface IGraphLib
+        : IMetadata
     {
 
         /// <summary>
@@ -24,7 +25,8 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// value associated with specified edge.
         /// </returns>
-        Task<object> Edge(string v, string w, string name);
+        Task<GraphLibEdge> Edge(string v, string w);
+        Task<GraphLibEdge> Edge(string v, string w, string name);
 
         /// <summary>
         /// Gets the label for the specified edge.
@@ -33,7 +35,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// value associated with specified edge.
         /// </returns>
-        Task<object> Edge(GraphLibEdge e);
+        Task<GraphLibEdge> Edge(GraphLibEdge e);
 
         /// <summary>
         /// Gets the number of edges in the graph.

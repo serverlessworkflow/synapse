@@ -3,8 +3,9 @@
     public interface IGraphViewModel
         : IIdentifiable, ILabeled, IDimension, IMetadata
     {
-        ICollection<INodeViewModel> Nodes { get; set; }
-        ICollection<IEdgeViewModel> Edges { get; set; }
-        ICollection<IClusterViewModel> Clusters { get; set; }
+        IDictionary<Guid, INodeViewModel> Nodes { get; set; }
+        IDictionary<Guid, IEdgeViewModel> Edges { get; set; }
+        IDictionary<Guid, IClusterViewModel> Clusters { get; set; }
+        IGraphLib? DagreGraph {  get; set; }
     }
 }

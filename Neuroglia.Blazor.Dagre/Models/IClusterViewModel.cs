@@ -3,6 +3,6 @@
     public interface IClusterViewModel
         : INodeViewModel
     {
-        ICollection<INodeViewModel> Children { get; set; }
+        IDictionary<Guid, INodeViewModel> Children { get; set; }
     }
 }

@@ -4,6 +4,7 @@
 @using Neuroglia.Blazor.Dagre.Models
 @using Synapse.Dashboard.Features.Test
 @using System.Dynamic
+@using System.Collections.ObjectModel
 @inject IBreadcrumbService BreadcrumbService
 @inject DagreService Dagre
 
@@ -37,41 +38,87 @@ Welcome to Synapse - Serverless Workflow Management System
     </Columns>
 </Table>
 
+<DagreGraph Graph="graph" />
+
 @code{
 
     private List<TestUserState> users = new() { new("FakeFirstName", "Fake Last Name", "fake@email.com"), new("FakeFirstName", "Fake Last Name", "fake@email.com") };
+
+    protected IGraphViewModel graph;
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
         await this.BreadcrumbService.Use(KnownBreadcrumbs.Home);
-        IDagreGraphOptions options = new DagreGraphOptions() { Direction = DagreGraphDirection.TopToBottom };
-        var graph = await this.Dagre.Graph(options);
-        var start = new GraphLibNode()
+        var start = new NodeViewModel()
         {
             Label = "",
+            RadiusX = 50,
+            RadiusY = 50,
             Metadata = new Dictionary<string, object>()
             {
                 { "Type", "Start" },
-                { "Foo", "Bar" },
             }
         };
-        await graph.SetNode(start.Id.ToString(), start);
-        var state1 = new GraphLibNode()
+        var state1 = new NodeViewModel()
         {
             Label = "State 1",
-            Rx = 5,
-            Ry = 5,
             Metadata = new Dictionary<string, object>()
             {
-                { "Type", "State" },                
-                { "Fizz", "Buzz" },
+                { "Type", "State" },
             }
         };
-        await graph.SetNode(state1.Id.ToString(), state1);
-        await graph.SetEdge(start.Id.ToString(), state1.Id.ToString());
-        await this.Dagre.Layout(graph);
-        Console.WriteLine(await this.Dagre.Serialize(graph));
+        var state2 = new NodeViewModel()
+        {
+            Label = "State 2",
+            Metadata = new Dictionary<string, object>()
+            {
+                { "Type", "State" },
+            }
+        };
+        var state3 = new NodeViewModel()
+        {
+            Label = "State 3",
+            Metadata = new Dictionary<string, object>()
+            {
+                { "Type", "State" },
+            }
+        };
+        var end = new NodeViewModel()
+        {
+            Label = "",
+            RadiusX = 50,
+            RadiusY = 50,
+            Metadata = new Dictionary<string, object>()
+            {
+                { "Type", "End" },
+            }
+        };
+        var edge1 = new EdgeViewModel(start.Id, state1.Id);
+        var edge2 = new EdgeViewModel(start.Id, state2.Id);
+        var edge3 = new EdgeViewModel(start.Id, state3.Id);
+        var edge4 = new EdgeViewModel(state1.Id, end.Id);
+        var edge5 = new EdgeViewModel(state2.Id, end.Id);
+        var edge6 = new EdgeViewModel(state3.Id, end.Id);
+        var nodes = new Dictionary<Guid, INodeViewModel>()
+        {
+            { start.Id, start },
+            { state1.Id, state1 },
+            { state2.Id, state2 },
+            { state3.Id, state3 },
+            { end.Id, end }
+        };
+        var edges = new Dictionary<Guid, IEdgeViewModel>()
+        {
+            { edge1.Id, edge1 },
+            { edge2.Id, edge2 },
+            { edge3.Id, edge3 },
+            { edge4.Id, edge4 },
+            { edge5.Id, edge5 },
+            { edge6.Id, edge6 }
+        };
+        var graph = new GraphViewModel(nodes, edges);
+        this.graph = graph;
     }
 
     public class TestUserState

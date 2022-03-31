@@ -3,10 +3,19 @@ using Neuroglia.Blazor.Dagre.Models;
 
 namespace Neuroglia.Blazor.Dagre
 {
-    /// <inheritdoc/>
+    /// <summary>
+    /// Represents a <see cref="IGraphLib"/> graph instance, with a dagre layout
+    /// </summary>
     public class GraphLib
-        : IGraphLib
+        : IGraphLib, IAsyncDisposable, IDisposable
     {
+        /// <inheritdoc />
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        [System.Text.Json.Serialization.JsonExtensionData]
+        [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonExtensionData]
+        public virtual IDictionary<string, object>? Metadata { get; set; }
+
         /// <summary>
         /// The Graph js instance
         /// </summary>
@@ -28,10 +37,12 @@ namespace Neuroglia.Blazor.Dagre
         public virtual async Task<bool> HasEdge(GraphLibEdge edge) => await this.jsInstance.InvokeAsync<bool>("hasEdge", edge);
         /// <inheritdoc/>
         public virtual async Task<bool> HasNode(string name) => await this.jsInstance.InvokeAsync<bool>("hasNode", name);
+
         /// <inheritdoc/>
-        public virtual async Task<object> Edge(string v, string w, string name) => await this.jsInstance.InvokeAsync<object>("edge", v, w, name);
+        public virtual async Task<GraphLibEdge> Edge(string v, string w) => await this.jsInstance.InvokeAsync<GraphLibEdge>("edge", v, w);
+        public virtual async Task<GraphLibEdge> Edge(string v, string w, string name) => await this.jsInstance.InvokeAsync<GraphLibEdge>("edge", v, w, name);
         /// <inheritdoc/>
-        public virtual async Task<object> Edge(GraphLibEdge e) => await this.jsInstance.InvokeAsync<object>("edge", e);
+        public virtual async Task<GraphLibEdge> Edge(GraphLibEdge e) => await this.jsInstance.InvokeAsync<GraphLibEdge>("edge", e);
         /// <inheritdoc/>
         public virtual async Task<double> EdgeCount() => await this.jsInstance.InvokeAsync<double>("edgeCount");
         /// <inheritdoc/>
@@ -100,5 +111,36 @@ namespace Neuroglia.Blazor.Dagre
         public virtual async Task<string[]> Sources() => await this.jsInstance.InvokeAsync<string[]>("sources");
         /// <inheritdoc/>
         public virtual async Task<string[]?> Successors(string v) => await this.jsInstance.InvokeAsync<string[]?>("successors", v);
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            await DisposeAsyncCore().ConfigureAwait(false);
+#pragma warning disable CA1816 // Dispose methods should call SuppressFinalize
+            GC.SuppressFinalize(this);
+#pragma warning restore CA1816 // Dispose methods should call SuppressFinalize
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                (this.jsInstance as IDisposable)?.Dispose();
+            }
+        }
+
+        protected virtual async ValueTask DisposeAsyncCore()
+        {
+            if (this.jsInstance is not null)
+            {
+                await this.jsInstance.DisposeAsync().ConfigureAwait(false);
+            }
+        }
+
     }
 }

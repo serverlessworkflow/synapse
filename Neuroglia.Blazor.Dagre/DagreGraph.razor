@@ -1,0 +1,67 @@
+﻿@inject DagreService DagreService
+
+@if (Graph != null) {
+    <svg width="@(Graph.Width?.ToString() ?? "100%")" height="@(Graph.Height?.ToString() ?? "100%")">
+        <g class="edges">
+            @foreach(var edge in Graph.Edges.Values)
+            {
+                <g>
+                    <path d="@GetPath(edge)" stroke-width="1" stroke="black" fill="transparent">
+                    </path>
+                </g>
+            }
+        </g>
+        <g class="nodes">
+            @foreach(var node in Graph.Nodes.Values)
+            {
+                <g>
+                    <rect 
+                        x="@(node.X - node.Width / 2)" 
+                        y="@(node.Y - node.Height / 2)" 
+                        width="@node.Width" 
+                        height="@node.Height"
+                        rx="@node.RadiusX"
+                        ry="@node.RadiusX"
+                    ></rect>
+                </g>
+            }
+        </g>
+    </svg>
+}
+
+@code {
+    [Parameter]
+    public IDagreGraphOptions? DagreGraphOptions { get; set; }
+
+    [Parameter]
+    public IGraphViewModel? Graph { get; set; }
+    //protected IGraphViewModel? _graph;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (this.Graph != null)
+        {
+            await this.DagreService.ComputePositions(this.Graph, this.DagreGraphOptions);
+            //Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(this.Graph));
+            this.StateHasChanged();
+        }
+    }
+
+    protected virtual string GetPath(IEdgeViewModel edge)
+    {
+        string path = "";
+        foreach(var point in edge.Points)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                path += $"M{point.X},{point.Y}";
+            }
+            else
+            {                
+                path += $"L{point.X},{point.Y}";
+            }
+        }
+        return path;
+    }
+
+}

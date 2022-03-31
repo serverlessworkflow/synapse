@@ -5,10 +5,11 @@ namespace Neuroglia.Blazor.Dagre.Models
     public class ClusterViewModel
         : NodeViewModel, IClusterViewModel
     {
-        public virtual ICollection<INodeViewModel> Children { get; set; }
+        public virtual IDictionary<Guid, INodeViewModel> Children { get; set; }
 
         public ClusterViewModel(
-            ICollection<INodeViewModel>? children,
+            IDictionary<Guid, INodeViewModel>? children,
+            string label = "",
             double width = Consts.ClusterWidth,
             double height = Consts.ClusterHeight,
             double x = 0,
@@ -17,9 +18,9 @@ namespace Neuroglia.Blazor.Dagre.Models
             double paddingX = Consts.ClusterPadding,
             double paddingY = Consts.ClusterPadding
         )
-            : base(width, height, x, y, radius, paddingX, paddingY)
+            : base(label, width, height, x, y, radius, paddingX, paddingY)
         {
-            this.Children = children ?? new Collection<INodeViewModel>();
+            this.Children = children ?? new Dictionary<Guid, INodeViewModel>();
         }
     }
 }

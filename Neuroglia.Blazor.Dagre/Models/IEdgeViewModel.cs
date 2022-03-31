@@ -5,5 +5,6 @@
     {
         Guid SourceId { get; set; }
         Guid TargetId { get; set; }
+        ICollection<IPosition> Points { get; set; }
     }
 }

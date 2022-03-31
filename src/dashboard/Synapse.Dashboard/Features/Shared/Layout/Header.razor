@@ -29,6 +29,7 @@
     {
         if (this.Layout != null)
             this.Layout.PropertyChanged -= OnLayoutHeaderChanged;
+        GC.SuppressFinalize(this);
     }
 
 }

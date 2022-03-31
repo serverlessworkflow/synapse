@@ -35,6 +35,7 @@
     public void Dispose()
     {
         this.Diagram.SelectionChanged -= this.OnNodeSelectionChanged;
+        GC.SuppressFinalize(this);
     }
 
     private void OnNodeSelectionChanged(SelectableModel elem)

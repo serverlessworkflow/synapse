@@ -20,5 +20,11 @@
         /// The id of the other node
         /// </summary>
         string W { get; set; }
+
+        /// <summary>
+        /// The edge points
+        /// </summary>
+        IPosition[]? Points { get; set; }
+
     }
 }
