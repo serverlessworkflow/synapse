@@ -15,6 +15,26 @@
     </Toolbar>
 </AppRightSidebar>
 <Table Items="workflows" AutoGenerateColumns="false">
+    <RowTemplate Context="RenderContext">
+        <ExpandableDataRow>
+            <Header>
+                <CellCollectionPresenter Item="@RenderContext.Item" />
+            </Header>
+            <Body>
+                <table class="table">
+                    <tbody>
+                        @foreach (var workflow in RenderContext.Item.Value)
+                        {
+                            <tr>
+                                <td>@workflow.Definition.Version</td>
+                                <td>@workflow.CreatedAt</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </Body>
+        </ExpandableDataRow>
+    </RowTemplate>
     <Columns>
         <Column T="KeyValuePair<string, List<V1Workflow>>" 
             Name="Name"
@@ -38,22 +58,15 @@
     {
         await base.OnInitializedAsync();
         await this.BreadcrumbService.Use(KnownBreadcrumbs.Workflows);
-        this.workflows = this.State.GroupBy(w => w.Definition.Id!).ToDictionary(g => g.Key, g => g.ToList())!;
         this._Subscription = this.Feature
-            .SelectMany(collection => collection)
-            .GroupBy(workflow => workflow.Definition.Id)
-            .Subscribe(group =>
+            .Subscribe(workflows =>
             {
-                this.workflows[group.Key!] = new();
-                group.Subscribe(w =>
-                {
-                    if (this.workflows.TryGetValue(group.Key!, out var workflows))
-                        workflows.Add(w);
-                    else
-                        this.workflows[group.Key!] = new() { w };
-                    this.StateHasChanged();
-                });
+                this.workflows = workflows
+                    .GroupBy(w => w.Definition.Id!)
+                    .ToDictionary(g => g.Key, g => g.ToList())!;
+                this.StateHasChanged();;
             });
+        this.Dispatcher.Dispatch(new ListV1Workflows());
     }
 
     void OnNewWorkflow()

@@ -32,37 +32,51 @@ namespace Synapse.Integration.Events.WorkflowInstances
 	{
 
 		/// <summary>
+		/// Gets the id of the aggregate that has produced the event
+		/// </summary>
+		[DataMember(Name = "AggregateId", Order = 1)]
+		[Description("Gets the id of the aggregate that has produced the event")]
+		public virtual string AggregateId { get; set; }
+
+		/// <summary>
+		/// Gets the date and time at which the event has been produced
+		/// </summary>
+		[DataMember(Name = "CreatedAt", Order = 2)]
+		[Description("Gets the date and time at which the event has been produced")]
+		public virtual DateTime CreatedAt { get; set; }
+
+		/// <summary>
 		/// The id of the instanciated V1Workflow
 		/// </summary>
-		[DataMember(Name = "WorkflowId", Order = 1)]
+		[DataMember(Name = "WorkflowId", Order = 3)]
 		[Description("The id of the instanciated V1Workflow")]
 		public virtual string WorkflowId { get; set; }
 
 		/// <summary>
 		/// The key of the newly created V1WorkflowInstance
 		/// </summary>
-		[DataMember(Name = "Key", Order = 2)]
+		[DataMember(Name = "Key", Order = 4)]
 		[Description("The key of the newly created V1WorkflowInstance")]
 		public virtual string Key { get; set; }
 
 		/// <summary>
 		/// The type of the V1WorkflowInstance's activation
 		/// </summary>
-		[DataMember(Name = "ActivationType", Order = 3)]
+		[DataMember(Name = "ActivationType", Order = 5)]
 		[Description("The type of the V1WorkflowInstance's activation")]
 		public virtual V1WorkflowInstanceActivationType ActivationType { get; set; }
 
 		/// <summary>
 		/// The newly created V1WorkflowInstance's input data
 		/// </summary>
-		[DataMember(Name = "Input", Order = 4)]
+		[DataMember(Name = "Input", Order = 6)]
 		[Description("The newly created V1WorkflowInstance's input data")]
 		public virtual Dynamic Input { get; set; }
 
 		/// <summary>
 		/// The newly created V1WorkflowInstance's V1CorrelationContext
 		/// </summary>
-		[DataMember(Name = "CorrelationContext", Order = 5)]
+		[DataMember(Name = "CorrelationContext", Order = 7)]
 		[Description("The newly created V1WorkflowInstance's V1CorrelationContext")]
 		public virtual V1CorrelationContext CorrelationContext { get; set; }
 

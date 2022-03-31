@@ -8,15 +8,7 @@
         : IIntegrationEvent, IDataTransferObject
     {
 
-        /// <summary>
-        /// Gets the key of the aggregate that has produced the event
-        /// </summary>
-        public virtual string AggregateId { get; set; }
 
-        /// <summary>
-        /// Gets the date and time at which the event has occured
-        /// </summary>
-        public virtual DateTimeOffset CreatedAt { get; set; }
 
     }
 

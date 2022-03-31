@@ -22,10 +22,10 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="6.0.3" />
-    <PackageReference Include="Neuroglia.Serialization.Dynamic" Version="2.0.1.56" />
-    <PackageReference Include="Neuroglia.Serialization.Json" Version="2.0.1.56" />
-    <PackageReference Include="Neuroglia.Serialization.NewtonsoftJson" Version="2.0.1.56" />
-    <PackageReference Include="Neuroglia.Serialization.Protobuf" Version="2.0.1.56" />
+    <PackageReference Include="Neuroglia.Serialization.Dynamic" Version="2.0.1.57" />
+    <PackageReference Include="Neuroglia.Serialization.Json" Version="2.0.1.57" />
+    <PackageReference Include="Neuroglia.Serialization.NewtonsoftJson" Version="2.0.1.57" />
+    <PackageReference Include="Neuroglia.Serialization.Protobuf" Version="2.0.1.57" />
     <PackageReference Include="ServerlessWorkflow.Sdk" Version="0.8.0.15" />
     <PackageReference Include="System.ServiceModel.Primitives" Version="4.9.0" />
   </ItemGroup>
@@ -142,12 +142,6 @@
     </Compile>
     <Compile Update="Events\Correlations\v1\Generated\V1ContextAddedToCorrelationIntegrationEvent.cs">
       <CustomToolNamespace>..\Synapse.Domain\Events\Correlations\v1\V1ContextAddedToCorrelationDomainEvent.cs</CustomToolNamespace>
-    </Compile>
-    <Compile Update="Events\Correlations\v1\Generated\V1ContextRemovedFromCorrelationIntegrationEvent.cs">
-      <CustomToolNamespace>..\Synapse.Domain\Events\Correlations\v1\V1ContextRemovedFromCorrelationDomainEvent.cs</CustomToolNamespace>
-    </Compile>
-    <Compile Update="Events\Correlations\v1\Generated\V1CorrelatedCreatedIntegrationEvent.cs">
-      <CustomToolNamespace>..\Synapse.Domain\Events\Correlations\v1\V1CorrelatedCreatedDomainEvent.cs</CustomToolNamespace>
     </Compile>
     <Compile Update="Events\Correlations\v1\Generated\V1CorrelationContextReleasedIntegrationEvent.cs">
       <CustomToolNamespace>..\Synapse.Domain\Events\Correlations\v1\V1CorrelationContextReleasedDomainEvent.cs</CustomToolNamespace>

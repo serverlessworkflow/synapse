@@ -62,6 +62,7 @@ namespace Synapse.Application.Configuration
             {
                 var settings = new JsonSerializerSettings()
                 {
+                    ContractResolver = new NonPublicSetterContractResolver(),
                     NullValueHandling = NullValueHandling.Ignore
                 };
                 return settings;

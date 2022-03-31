@@ -327,6 +327,27 @@ ${
     {
         StringBuilder output = new StringBuilder();
         var order = 1;
+<#+ switch(templateType) {
+    case "event": #>
+        var description = "Gets the id of the aggregate that has produced the event";
+        output.AppendLine();
+        output.AppendLine(Indent(2, "/// <summary>"));
+        output.AppendLine(Indent(2, $"/// {description}"));
+        output.AppendLine(Indent(2, "/// </summary>"));
+        output.AppendLine(Indent(2, $"[DataMember(Name = \"AggregateId\", Order = {order})]"));
+        output.AppendLine(Indent(2, $@"[Description(""{description}"")]"));
+        output.AppendLine(Indent(2, $"public virtual string AggregateId {{ get; set; }}"));
+        order++;
+        description = "Gets the date and time at which the event has been produced";
+        output.AppendLine();
+        output.AppendLine(Indent(2, "/// <summary>"));
+        output.AppendLine(Indent(2, $"/// {description}"));
+        output.AppendLine(Indent(2, "/// </summary>"));
+        output.AppendLine(Indent(2, $"[DataMember(Name = \"CreatedAt\", Order = {order})]"));
+        output.AppendLine(Indent(2, $@"[Description(""{description}"")]"));
+        output.AppendLine(Indent(2, $"public virtual DateTime CreatedAt {{ get; set; }}"));
+        order++;
+<#+ break; }#>
         foreach(Property property in c.Properties.Where(p => !p.Attributes.Any(a => a.Name == "JsonIgnore") && !p.Attributes.Any(a => a.Name == "ProjectNever") || p.Attributes.Any(a => a.Name == "Map")))
         {
             output.AppendLine();

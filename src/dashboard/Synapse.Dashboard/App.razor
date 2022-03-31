@@ -32,9 +32,16 @@
             .Where(e => e.Type == "io.synapse/v1workflow/created/v1")
             .Subscribe(e =>
             {
-                var json = JObject.FromObject(e.Data).ToString();
-                var data = e.Data.ToObject<V1WorkflowCreatedIntegrationEvent>();
-                this.Dispatcher.Dispatch(new AddV1Workflow(new() { Id = data.AggregateId, CreatedAt = data.CreatedAt.DateTime, LastModified = data.CreatedAt.DateTime, Definition = data.Definition }));
+                try
+                {
+                    var data = e.Data.ToObject<V1WorkflowCreatedIntegrationEvent>();
+                    this.Dispatcher.Dispatch(new AddV1Workflow(new() { Id = data.AggregateId, CreatedAt = data.CreatedAt, LastModified = data.CreatedAt, Definition = data.Definition }));
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }
+    
             });
         await this.HubConnection.StartAsync();
     }

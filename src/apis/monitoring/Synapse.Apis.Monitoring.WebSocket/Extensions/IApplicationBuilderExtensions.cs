@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Neuroglia.Mapping;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using Synapse.Application.Configuration;
 using Synapse.Integration.Models;
 
@@ -43,6 +44,7 @@ namespace Synapse.Apis.Monitoring.WebSocket
                 {
                     options.PayloadSerializerSettings = new()
                     {
+                        ContractResolver = new NonPublicSetterContractResolver(),
                         NullValueHandling = NullValueHandling.Ignore
                     };
                 });

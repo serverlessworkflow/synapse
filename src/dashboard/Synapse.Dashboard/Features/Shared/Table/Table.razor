@@ -110,7 +110,11 @@
                 this.AddColumn(Column<T>.CreateFor(property));
             }
         }
-        if(this.Items is IAsyncEnumerable<T> asyncEnumerable)
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+         if(this.Items is IAsyncEnumerable<T> asyncEnumerable)
             this.items = await asyncEnumerable.ToListAsync();
         else
             this.items = this.Items; 
