@@ -5,7 +5,7 @@
         <ul class="nav nav-tabs">
             @foreach (TabPage tabPage in Pages)
             {
-                <li class="nav-item">
+                <li class="nav-item cursor-pointer">
                     <a class="nav-link @GetButtonClass(tabPage)" @onclick=@( () => ActivatePage(tabPage) )>@tabPage.Header</a>
                 </li>
             }

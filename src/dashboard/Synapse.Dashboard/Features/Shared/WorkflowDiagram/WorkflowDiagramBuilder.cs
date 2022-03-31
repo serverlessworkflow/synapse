@@ -67,7 +67,18 @@ namespace Synapse.Dashboard
                     this.BuildLinkBetween(diagram, firstNode, lastNode);
                     break;
                 case EventStateDefinition eventState:
+                    var completionType = eventState.Exclusive ? ParallelCompletionType.Xor : ParallelCompletionType.And;
+                    firstNode = this.BuildGatewayNode(state, completionType);
+                    childNodes.Add(firstNode);
+                    lastNode = this.BuildGatewayNode(state, completionType);
+                    childNodes.Add(lastNode);
+                    eventState.Triggers.ForEach(trigger =>
+                    {
+                        var refName = string.Join(" | ", trigger.Events);
+                        var eventNode = this.BuildConsumeEventNode(eventState, refName);
+                        //this.BuildLinkBetween(diagram, firstNode, eventNode);
 
+                    });
                     break;
                 case ForEachStateDefinition foreachState:
 
@@ -302,4 +313,5 @@ namespace Synapse.Dashboard
             GC.SuppressFinalize(this);
         }
     }
+
 }
