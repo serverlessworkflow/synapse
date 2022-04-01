@@ -1,0 +1,50 @@
+﻿<g class="node" transform="translate(@Node.X, @Node.Y)">
+    <g class="node-shape">
+        @if (Node.Shape == NodeShape.Circle)
+        {
+            <circle 
+                cx="0" 
+                cy="0"
+                r="@((Node.Width / 2).ToInvariantString())"
+            ></circle>
+        }
+        else if (Node.Shape == NodeShape.Ellipse)
+        {
+            <ellipse 
+                cx="0" 
+                cy="0"
+                rx="@((Node.Width / 2).ToInvariantString())"
+                ry="@((Node.Height / 2).ToInvariantString())"
+            ></ellipse>
+        }
+        else
+        {        
+            <rect 
+                x="@((0 - Node.Width / 2).ToInvariantString())" 
+                y="@((0 - Node.Height / 2).ToInvariantString())" 
+                width="@Node.Width.ToInvariantString()" 
+                height="@Node.Height.ToInvariantString()"
+                rx="@Node.RadiusX.ToInvariantString()"
+                ry="@Node.RadiusY.ToInvariantString()"
+            ></rect>
+        }
+    </g>
+    @if (!string.IsNullOrWhiteSpace(Node.Label)) {
+        <g class="label">
+            <foreignObject 
+                x="@((0 - Node.Width / 2).ToInvariantString())"
+                y="@((0 - Consts.LabelHeight / 2).ToInvariantString())" 
+                width="@Node.Width.ToInvariantString()" 
+                height="@Consts.LabelHeight"
+            >
+                <div>@Node.Label</div>
+            </foreignObject>
+        </g>
+    }
+</g>
+@code {
+    [Parameter]
+    public virtual IGraphElement Element { get; set; } = null!;
+
+    protected INodeViewModel Node => (INodeViewModel)this.Element;
+}

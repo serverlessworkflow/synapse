@@ -1,8 +1,10 @@
 ﻿namespace Neuroglia.Blazor.Dagre.Models
 {
     public interface IClusterViewModel
-        : INodeViewModel
+        : IGraphElement, INodeViewModel
     {
-        IDictionary<Guid, INodeViewModel> Children { get; set; }
+        IReadOnlyDictionary<Guid, INodeViewModel> Children { get; }
+        IReadOnlyDictionary<Guid, INodeViewModel> AllNodes { get; }
+        IReadOnlyDictionary<Guid, IClusterViewModel> AllClusters { get; }
     }
 }

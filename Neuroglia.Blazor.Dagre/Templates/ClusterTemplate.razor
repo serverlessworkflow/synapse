@@ -1,0 +1,51 @@
+﻿<g class="cluster" transform="translate(@Cluster.X, @Cluster.Y)">
+    <g class="cluster-shape">
+        @if (Cluster.Shape == NodeShape.Circle)
+        {
+            <circle 
+                cx="0" 
+                cy="0"
+                r="@((Cluster.Width / 2).ToInvariantString())"
+            ></circle>
+        }
+        else if (Cluster.Shape == NodeShape.Ellipse)
+        {
+            <ellipse 
+                cx="0" 
+                cy="0"
+                rx="@((Cluster.Width / 2).ToInvariantString())"
+                ry="@((Cluster.Height / 2).ToInvariantString())"
+            ></ellipse>
+        }
+        else
+        {        
+            <rect 
+                x="@((0 - Cluster.Width / 2).ToInvariantString())" 
+                y="@((0 - Cluster.Height / 2).ToInvariantString())" 
+                width="@Cluster.Width.ToInvariantString()" 
+                height="@Cluster.Height.ToInvariantString()"
+                rx="@Cluster.RadiusX.ToInvariantString()"
+                ry="@Cluster.RadiusY.ToInvariantString()"
+            ></rect>
+        }
+    </g>
+    @if (!string.IsNullOrWhiteSpace(Cluster.Label))
+    {
+        <g class="label">
+            <foreignObject 
+            x="@((0 - Cluster.Width / 2).ToInvariantString())"
+            y="@((Cluster.Height / 2).ToInvariantString())" 
+            width="@Cluster.Width.ToInvariantString()" 
+            height="@Consts.LabelHeight"
+        >
+                <div>@Cluster.Label</div>
+            </foreignObject>
+        </g>
+    }
+</g>
+@code {
+    [Parameter]
+    public virtual IGraphElement Element { get; set; } = null!;
+
+    protected IClusterViewModel Cluster => (IClusterViewModel)this.Element;
+}

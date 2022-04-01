@@ -1,8 +1,23 @@
 ﻿namespace Neuroglia.Blazor.Dagre.Models
 {
     public class GraphLibNode
-        : GraphElement, IGraphLibNode
+        : IGraphLibNode
     {
+        /// <inheritdoc />
+        public virtual Guid Id { get; set; } = Guid.NewGuid();
+
+        /// <inheritdoc />
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public virtual string? Label { get; set; }
+
+        /// <inheritdoc />
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        [System.Text.Json.Serialization.JsonExtensionData]
+        [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonExtensionData]
+        public virtual IDictionary<string, object>? Metadata { get; set; }
+
         [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public virtual string? Class { get; set; }

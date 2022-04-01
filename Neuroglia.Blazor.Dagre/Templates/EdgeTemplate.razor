@@ -1,0 +1,41 @@
+﻿<g class="edge-path">
+    <path 
+        d="@GetPath(Edge)"
+        marker-start="@GetDefUrl(Edge.StartMarkerId)"
+        marker-end="@GetDefUrl(Edge.EndMarkerId)"
+    ></path>
+</g>
+
+@code {
+    [Parameter]
+    public virtual IGraphElement Element { get; set; } = null!;
+
+    protected IEdgeViewModel Edge => (IEdgeViewModel)this.Element;
+
+    protected virtual string GetPath(IEdgeViewModel edge)
+    {
+        string path = "";
+        foreach(var point in edge.Points)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                path += $"M{point.X},{point.Y}";
+            }
+            else
+            {                
+                path += $"L{point.X},{point.Y}";
+            }
+        }
+        return path;
+    }
+
+    protected virtual string? GetDefUrl(string? marker)
+    {
+        if (string.IsNullOrWhiteSpace(marker))
+        {
+            return null;
+        }
+        return $"url(#{marker})";
+    }
+
+}

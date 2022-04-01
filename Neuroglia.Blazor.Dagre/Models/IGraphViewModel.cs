@@ -1,11 +1,23 @@
-﻿namespace Neuroglia.Blazor.Dagre.Models
+﻿using Microsoft.AspNetCore.Components;
+
+namespace Neuroglia.Blazor.Dagre.Models
 {
     public interface IGraphViewModel
         : IIdentifiable, ILabeled, IDimension, IMetadata
     {
-        IDictionary<Guid, INodeViewModel> Nodes { get; set; }
-        IDictionary<Guid, IEdgeViewModel> Edges { get; set; }
-        IDictionary<Guid, IClusterViewModel> Clusters { get; set; }
+        IReadOnlyDictionary<Guid, INodeViewModel> Nodes { get; }
+        IReadOnlyDictionary<Guid, INodeViewModel> AllNodes { get; }
+        IReadOnlyDictionary<Guid, IEdgeViewModel> Edges { get; }
+        IReadOnlyDictionary<Guid, IClusterViewModel> Clusters { get; }
+        IReadOnlyDictionary<Guid, IClusterViewModel> AllClusters { get; }
+        IReadOnlyCollection<Type> SvgDefinitionComponents { get; }
         IGraphLib? DagreGraph {  get; set; }
+
+        Task RegisterComponentType<TElement, TComponent>()
+            where TElement : IGraphElement
+            where TComponent : ComponentBase;
+
+        Type GetComponentType<TElement>(TElement node)
+            where TElement : IGraphElement;
     }
 }

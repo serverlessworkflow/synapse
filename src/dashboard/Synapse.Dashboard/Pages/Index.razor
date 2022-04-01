@@ -50,62 +50,71 @@ Welcome to Synapse - Serverless Workflow Management System
     {
         await base.OnInitializedAsync();
         await this.BreadcrumbService.Use(KnownBreadcrumbs.Home);
-        var start = new NodeViewModel()
+        var start = new NodeViewModel("", NodeShape.Circle)
         {
-            Label = "",
-            RadiusX = 50,
-            RadiusY = 50,
+            Width = 30,
             Metadata = new Dictionary<string, object>()
             {
                 { "Type", "Start" },
             }
         };
-        var state1 = new NodeViewModel()
+        var action1 = new NodeViewModel("Action 1")
         {
-            Label = "State 1",
             Metadata = new Dictionary<string, object>()
             {
-                { "Type", "State" },
+                { "Type", "Action" },
             }
         };
-        var state2 = new NodeViewModel()
+        var state1 = new StateVM(
+            new Dictionary<Guid, INodeViewModel>() { 
+                { action1.Id, action1 }
+            }, 
+            "State 1"
+        );
+        var action2 = new NodeViewModel("Action 2")
         {
-            Label = "State 2",
             Metadata = new Dictionary<string, object>()
             {
-                { "Type", "State" },
+                { "Type", "Action" },
             }
         };
-        var state3 = new NodeViewModel()
+        var action3 = new NodeViewModel("Action 3")
         {
-            Label = "State 3",
             Metadata = new Dictionary<string, object>()
             {
-                { "Type", "State" },
+                { "Type", "Action" },
             }
         };
-        var end = new NodeViewModel()
+        var state2 = new StateVM(
+            new Dictionary<Guid, INodeViewModel>() { 
+                { action2.Id, action2 },
+                { action3.Id, action3 },
+            }, 
+            "State 2"
+        );
+        var end = new NodeViewModel("", NodeShape.Circle)
         {
-            Label = "",
-            RadiusX = 50,
-            RadiusY = 50,
+            Width = 30,
             Metadata = new Dictionary<string, object>()
             {
                 { "Type", "End" },
             }
         };
-        var edge1 = new EdgeViewModel(start.Id, state1.Id);
-        var edge2 = new EdgeViewModel(start.Id, state2.Id);
-        var edge3 = new EdgeViewModel(start.Id, state3.Id);
-        var edge4 = new EdgeViewModel(state1.Id, end.Id);
-        var edge5 = new EdgeViewModel(state2.Id, end.Id);
-        var edge6 = new EdgeViewModel(state3.Id, end.Id);
+        var edge1 = new EdgeViewModel(start.Id, action1.Id)
+        {
+            Label = "Test"
+        };
+        var edge2 = new EdgeViewModel(start.Id, action2.Id);
+        var edge3 = new EdgeViewModel(start.Id, action3.Id);
+        var edge4 = new EdgeViewModel(action1.Id, end.Id);
+        var edge5 = new EdgeViewModel(action2.Id, end.Id);
+        var edge6 = new EdgeViewModel(action3.Id, end.Id);
         var nodes = new Dictionary<Guid, INodeViewModel>()
         {
             { start.Id, start },
-            { state1.Id, state1 },
-            { state2.Id, state2 },
-            { state3.Id, state3 },
+            //{ action1.Id, action1 },
+            //{ action2.Id, action2 },
+            //{ action3.Id, action3 },
             { end.Id, end }
         };
         var edges = new Dictionary<Guid, IEdgeViewModel>()
@@ -117,7 +126,13 @@ Welcome to Synapse - Serverless Workflow Management System
             { edge5.Id, edge5 },
             { edge6.Id, edge6 }
         };
-        var graph = new GraphViewModel(nodes, edges);
+        var clusters = new Dictionary<Guid, IClusterViewModel>()
+        {
+            { state1.Id, state1 },
+            { state2.Id, state2 }
+        };
+        var graph = new GraphViewModel(nodes, edges, clusters);
+        await graph.RegisterComponentType<StateVM, Pages.StateTemplate>();
         this.graph = graph;
     }
 

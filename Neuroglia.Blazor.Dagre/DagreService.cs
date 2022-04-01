@@ -1,6 +1,5 @@
 ﻿using Microsoft.JSInterop;
 using Neuroglia.Blazor.Dagre.Models;
-using System.Dynamic;
 
 namespace Neuroglia.Blazor.Dagre
 {
@@ -34,8 +33,8 @@ namespace Neuroglia.Blazor.Dagre
         {
             // build the dagre/graphlib graph
             var graph = await this.Graph(options);
-            var nodes = graphViewModel.Nodes.Values.Concat(
-                graphViewModel.Clusters.Values.SelectMany(cluster => this.FlattenNodes(cluster))
+            var nodes = graphViewModel.AllNodes.Values.Concat(
+                graphViewModel.AllClusters.Values
             );
             foreach (var node in nodes)
             {

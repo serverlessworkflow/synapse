@@ -1,30 +1,41 @@
 ﻿@inject DagreService DagreService
 
 @if (Graph != null) {
-    <svg width="@(Graph.Width?.ToString() ?? "100%")" height="@(Graph.Height?.ToString() ?? "100%")">
-        <g class="edges">
-            @foreach(var edge in Graph.Edges.Values)
+    <svg class="dagre-graph" width="@(Graph.Width?.ToString() ?? "100%")" height="@(Graph.Height?.ToString() ?? "100%")">
+        <defs>
+            @foreach(var def in Graph.SvgDefinitionComponents)
             {
-                <g>
-                    <path d="@GetPath(edge)" stroke-width="1" stroke="black" fill="transparent">
-                    </path>
-                </g>
+                <DynamicComponent Type="def" />
             }
-        </g>
-        <g class="nodes">
-            @foreach(var node in Graph.Nodes.Values)
-            {
-                <g>
-                    <rect 
-                        x="@(node.X - node.Width / 2)" 
-                        y="@(node.Y - node.Height / 2)" 
-                        width="@node.Width" 
-                        height="@node.Height"
-                        rx="@node.RadiusX"
-                        ry="@node.RadiusX"
-                    ></rect>
-                </g>
-            }
+        </defs>
+        <g class="graph">
+            <g class="clusters">
+                @foreach(var cluster in Graph.AllClusters.Values)
+                {
+                    if (cluster != null)
+                    {
+                        <DynamicComponent Type="Graph.GetComponentType(cluster)" Parameters="GetComponentParameter(cluster)" />
+                    }
+                }
+            </g>
+            <g class="edges">
+                @foreach(var edge in Graph.Edges.Values)
+                {
+                    if (edge != null)
+                    {
+                        <DynamicComponent Type="Graph.GetComponentType(edge)" Parameters="GetComponentParameter(edge)" />
+                    }
+                }
+            </g>
+            <g class="nodes">
+                @foreach(var node in Graph.AllNodes.Values)
+                {
+                    if (node != null)
+                    {
+                        <DynamicComponent Type="Graph.GetComponentType(node)" Parameters="GetComponentParameter(node)" />
+                    }
+                }
+            </g>
         </g>
     </svg>
 }
@@ -35,33 +46,24 @@
 
     [Parameter]
     public IGraphViewModel? Graph { get; set; }
-    //protected IGraphViewModel? _graph;
 
     protected override async Task OnInitializedAsync()
     {
         if (this.Graph != null)
         {
             await this.DagreService.ComputePositions(this.Graph, this.DagreGraphOptions);
-            //Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(this.Graph));
-            this.StateHasChanged();
+            Console.WriteLine(await this.DagreService.Serialize(this.Graph.DagreGraph));
+            Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(this.Graph));
         }
     }
 
-    protected virtual string GetPath(IEdgeViewModel edge)
+    protected virtual Dictionary<string, object> GetComponentParameter(IGraphElement element)
     {
-        string path = "";
-        foreach(var point in edge.Points)
+        var parameters = new Dictionary<string, object>()
         {
-            if (string.IsNullOrEmpty(path))
-            {
-                path += $"M{point.X},{point.Y}";
-            }
-            else
-            {                
-                path += $"L{point.X},{point.Y}";
-            }
-        }
-        return path;
+            { "Element", element }
+        };
+        return parameters;
     }
 
 }
