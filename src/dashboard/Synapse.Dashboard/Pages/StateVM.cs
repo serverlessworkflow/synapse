@@ -10,7 +10,6 @@ namespace Synapse.Dashboard
             Dictionary<Guid, INodeViewModel>? children = null,
             string? label = "",
             string? shape = null,
-            Guid? parentId = null,
             double? width = Consts.ClusterWidth,
             double? height = Consts.ClusterHeight,
             double? x = 0,
@@ -18,9 +17,10 @@ namespace Synapse.Dashboard
             double? radiusX = Consts.ClusterRadius,
             double? radiusY = Consts.ClusterRadius,
             double? paddingX = Consts.ClusterPadding,
-            double? paddingY = Consts.ClusterPadding
+            double? paddingY = Consts.ClusterPadding,
+            Guid? parentId = null
         )
-            : base(children, label, shape, parentId, width, height, x, y, radiusX, radiusY, paddingX, paddingY) //, typeof(Pages.StateTemplate)) // todo: not supported? Serialization and deserialization of 'System.Type' instances are not supported.
+            : base(children, label, shape, width, height, x, y, radiusX, radiusY, paddingX, paddingY, typeof(Pages.StateTemplate), parentId)
         { 
         
         }

@@ -6,6 +6,7 @@
         Guid SourceId { get; set; }
         Guid TargetId { get; set; }
         ICollection<IPosition> Points { get; set; }
+        string Shape { get; set; }
         string? StartMarkerId { get; set; }
         string? EndMarkerId { get; set; }
     }

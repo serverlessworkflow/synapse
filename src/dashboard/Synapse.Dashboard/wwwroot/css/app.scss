@@ -2,6 +2,11 @@
 @import "./theme";
 @import "./splash";
 
+* {
+    padding: 0;
+    margin: 0;
+}
+
 #blazor-error-ui {
     background: $warning;
     bottom: 0;

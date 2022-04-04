@@ -2,8 +2,8 @@
 {
     public static class NodeShape
     {
-        public static readonly string Circle = "circle";
-        public static readonly string Ellipse = "ellipse";
-        public static readonly string Rectangle = "rectangle";
+        public const string Circle = "circle";
+        public const string Ellipse = "ellipse";
+        public const string Rectangle = "rectangle";
     }
 }

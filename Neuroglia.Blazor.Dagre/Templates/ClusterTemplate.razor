@@ -33,17 +33,21 @@
     {
         <g class="label">
             <foreignObject 
-            x="@((0 - Cluster.Width / 2).ToInvariantString())"
-            y="@((Cluster.Height / 2).ToInvariantString())" 
-            width="@Cluster.Width.ToInvariantString()" 
-            height="@Consts.LabelHeight"
-        >
+                x="@((0 - Cluster.Width / 2).ToInvariantString())"
+                y="@((Cluster.Height / 2).ToInvariantString())" 
+                width="@Cluster.Width.ToInvariantString()" 
+                height="@Consts.LabelHeight"
+            >
                 <div>@Cluster.Label</div>
             </foreignObject>
         </g>
     }
 </g>
+
 @code {
+    [CascadingParameter]
+    public virtual IGraphViewModel Graph { get; set; } = null!;
+
     [Parameter]
     public virtual IGraphElement Element { get; set; } = null!;
 

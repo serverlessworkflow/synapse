@@ -18,7 +18,6 @@ namespace Neuroglia.Blazor.Dagre.Models
             Dictionary<Guid, INodeViewModel>? children = null,
             string? label = "",
             string? shape = null,
-            Guid? parentId = null,
             double? width = Consts.ClusterWidth,
             double? height = Consts.ClusterHeight,
             double? x = 0,
@@ -27,9 +26,10 @@ namespace Neuroglia.Blazor.Dagre.Models
             double? radiusY = Consts.ClusterRadius,
             double? paddingX = Consts.ClusterPadding,
             double? paddingY = Consts.ClusterPadding,
-            Type? componentType = null
+            Type? componentType = null,
+            Guid? parentId = null
         )
-            : base(label, shape, parentId, width, height, x, y, radiusX, radiusY, paddingX, paddingY, componentType)
+            : base(label, shape, width, height, x, y, radiusX, radiusY, paddingX, paddingY, componentType, parentId)
         {
             this._children = children ?? new Dictionary<Guid, INodeViewModel>();
             this._allNodes = new Dictionary<Guid, INodeViewModel>();

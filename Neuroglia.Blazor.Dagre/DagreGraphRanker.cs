@@ -2,8 +2,8 @@
 {
     public static class DagreGraphRanker
     {
-        public static readonly string NetworkSimplex = "network-simplex";
-        public static readonly string TightTree = "tight-tree";
-        public static readonly string LongestPath = "longest-path";
+        public const string NetworkSimplex = "network-simplex";
+        public const string TightTree = "tight-tree";
+        public const string LongestPath = "longest-path";
     }
 }

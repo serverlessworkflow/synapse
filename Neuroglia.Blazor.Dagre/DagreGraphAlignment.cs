@@ -2,9 +2,9 @@
 {
     public static class DagreGraphAlignment
     {
-        public static readonly string UpLeft = "UL";
-        public static readonly string UpRight = "UR";
-        public static readonly string DownLeft = "DL";
-        public static readonly string DownRight = "DR";
+        public const string UpLeft = "UL";
+        public const string UpRight = "UR";
+        public const string DownLeft = "DL";
+        public const string DownRight = "DR";
     }
 }

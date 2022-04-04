@@ -1,48 +1,58 @@
-﻿@inject DagreService DagreService
+﻿@using Microsoft.AspNetCore.Components.Web
+@inject DagreService DagreService
 
 @if (Graph != null) {
-    <svg class="dagre-graph" width="@(Graph.Width?.ToString() ?? "100%")" height="@(Graph.Height?.ToString() ?? "100%")">
-        <defs>
-            @foreach(var def in Graph.SvgDefinitionComponents)
-            {
-                <DynamicComponent Type="def" />
-            }
-        </defs>
-        <g class="graph">
-            <g class="clusters">
-                @foreach(var cluster in Graph.AllClusters.Values)
+    <CascadingValue Value="Graph">
+        <svg 
+            class="dagre-graph" 
+            width="@(Graph.Width?.ToString() ?? "100%")" 
+            height="@(Graph.Height?.ToString() ?? "100%")"
+            @onmousedown="OnMouseDown"
+            @onmouseup="OnMouseUp"
+            @onmousemove="OnMouseMove"
+        >
+            <defs>
+                @foreach(var def in Graph.SvgDefinitionComponents)
                 {
-                    if (cluster != null)
-                    {
-                        <DynamicComponent Type="Graph.GetComponentType(cluster)" Parameters="GetComponentParameter(cluster)" />
-                    }
+                    <DynamicComponent @key="def" Type="def" />
                 }
-            </g>
-            <g class="edges">
-                @foreach(var edge in Graph.Edges.Values)
-                {
-                    if (edge != null)
+            </defs>
+            <g class="graph">
+                <g class="clusters">
+                    @foreach(var cluster in Graph.AllClusters.Values)
                     {
-                        <DynamicComponent Type="Graph.GetComponentType(edge)" Parameters="GetComponentParameter(edge)" />
+                        if (cluster != null)
+                        {
+                            <InteractiveDynamicComponent @key="cluster" Type="Graph.GetComponentType(cluster)" Parameters="GetComponentParameter(cluster)" />
+                        }
                     }
-                }
-            </g>
-            <g class="nodes">
-                @foreach(var node in Graph.AllNodes.Values)
-                {
-                    if (node != null)
+                </g>
+                <g class="edges">
+                    @foreach(var edge in Graph.Edges.Values)
                     {
-                        <DynamicComponent Type="Graph.GetComponentType(node)" Parameters="GetComponentParameter(node)" />
+                        if (edge != null)
+                        {
+                            <DynamicComponent @key="edge" Type="Graph.GetComponentType(edge)" Parameters="GetComponentParameter(edge)" />
+                        }
                     }
-                }
+                </g>
+                <g class="nodes">
+                    @foreach(var node in Graph.AllNodes.Values)
+                    {
+                        if (node != null)
+                        {
+                            <InteractiveDynamicComponent @key="node" Type="Graph.GetComponentType(node)" Parameters="GetComponentParameter(node)" />
+                        }
+                    }
+                </g>
             </g>
-        </g>
-    </svg>
+        </svg>
+    </CascadingValue>
 }
 
 @code {
     [Parameter]
-    public IDagreGraphOptions? DagreGraphOptions { get; set; }
+    public IDagreGraphOptions? Options { get; set; }
 
     [Parameter]
     public IGraphViewModel? Graph { get; set; }
@@ -51,9 +61,9 @@
     {
         if (this.Graph != null)
         {
-            await this.DagreService.ComputePositions(this.Graph, this.DagreGraphOptions);
+            await this.DagreService.ComputePositions(this.Graph, this.Options);
             Console.WriteLine(await this.DagreService.Serialize(this.Graph.DagreGraph));
-            Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(this.Graph));
+            //Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(this.Graph));
         }
     }
 
@@ -66,4 +76,9 @@
         return parameters;
     }
 
+    private void OnMouseDown(MouseEventArgs e) => this.Graph?.OnMouseDown(null, e);
+
+    private void OnMouseMove(MouseEventArgs e) => this.Graph?.OnMouseMove(null, e);
+
+    private void OnMouseUp(MouseEventArgs e) => this.Graph?.OnMouseUp(null, e);
 }

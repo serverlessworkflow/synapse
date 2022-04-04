@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
+using Neuroglia.Blazor.Dagre.Behaviors;
 using Neuroglia.Blazor.Dagre.Templates;
 using System.Collections.ObjectModel;
 
@@ -37,7 +39,6 @@ namespace Neuroglia.Blazor.Dagre.Models
         protected readonly Dictionary<Guid, IClusterViewModel> _allClusters;
         public virtual IReadOnlyDictionary<Guid, IClusterViewModel> AllClusters => this._allClusters;
 
-
         protected readonly Collection<Type> _svgDefinitionComponents;
         public virtual IReadOnlyCollection<Type> SvgDefinitionComponents => this._svgDefinitionComponents;
 
@@ -67,6 +68,12 @@ namespace Neuroglia.Blazor.Dagre.Models
         private Type _defaultEdgeComponentType = typeof(EdgeTemplate);
         protected virtual Type DefaultEdgeComponentType => this._defaultEdgeComponentType;
 
+        private readonly Dictionary<Type, GraphBehavior> _behaviors;
+
+        public event Action<IGraphElement?, MouseEventArgs>? MouseMove;
+        public event Action<IGraphElement?, MouseEventArgs>? MouseDown;
+        public event Action<IGraphElement?, MouseEventArgs>? MouseUp;
+
         public GraphViewModel(
             Dictionary<Guid, INodeViewModel>? nodes = null,
             Dictionary<Guid, IEdgeViewModel>? edges = null,
@@ -90,6 +97,8 @@ namespace Neuroglia.Blazor.Dagre.Models
             this._components = new Dictionary<Type, Type>();
             this._allNodes = new Dictionary<Guid, INodeViewModel>();
             this._allClusters = new Dictionary<Guid, IClusterViewModel>();
+            this._behaviors = new Dictionary<Type, GraphBehavior>();
+            this.RegisterBehavior(new DebugEventsBehavior(this));
             foreach(var node in this._nodes.Values)
             {
                 if (node == null)
@@ -230,5 +239,30 @@ namespace Neuroglia.Blazor.Dagre.Models
                 this._allNodes.Add(subNode.Id, subNode);
             }
         }
+
+        public virtual void RegisterBehavior(GraphBehavior graphBehavior)
+        {
+            var behaviorType = graphBehavior.GetType();
+            if (this._behaviors.ContainsKey(behaviorType))
+            {
+                throw new ArgumentException($"A behavior of type '{behaviorType.ToString()}' already exists", nameof(graphBehavior));
+            }
+            this._behaviors.Add(behaviorType, graphBehavior);
+        }
+
+        public virtual void UnregisterBehavior(GraphBehavior graphBehavior)
+        {
+            var behaviorType = graphBehavior.GetType();
+            if (!this._behaviors.ContainsKey(behaviorType))
+                return;
+            this._behaviors[behaviorType].Dispose();
+            this._behaviors.Remove(behaviorType);
+        }
+
+        public virtual void OnMouseMove(IGraphElement? element, MouseEventArgs e) => this.MouseMove?.Invoke(element, e);
+
+        public virtual void OnMouseDown(IGraphElement? element, MouseEventArgs e) => this.MouseDown?.Invoke(element, e);
+
+        public virtual void OnMouseUp(IGraphElement? element, MouseEventArgs e) => this.MouseUp?.Invoke(element, e);
     }
 }

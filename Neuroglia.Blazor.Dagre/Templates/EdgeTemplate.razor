@@ -1,12 +1,15 @@
 ﻿<g class="edge-path">
     <path 
         d="@GetPath(Edge)"
-        marker-start="@GetDefUrl(Edge.StartMarkerId)"
-        marker-end="@GetDefUrl(Edge.EndMarkerId)"
+        marker-start="@GetDefinitionUrl(Edge.StartMarkerId)"
+        marker-end="@GetDefinitionUrl(Edge.EndMarkerId)"
     ></path>
 </g>
 
 @code {
+    [CascadingParameter]
+    public virtual IGraphViewModel Graph { get; set; } = null!;
+
     [Parameter]
     public virtual IGraphElement Element { get; set; } = null!;
 
@@ -14,22 +17,16 @@
 
     protected virtual string GetPath(IEdgeViewModel edge)
     {
-        string path = "";
-        foreach(var point in edge.Points)
+        switch(edge.Shape)
         {
-            if (string.IsNullOrEmpty(path))
-            {
-                path += $"M{point.X},{point.Y}";
-            }
-            else
-            {                
-                path += $"L{point.X},{point.Y}";
-            }
+            case EdgeShape.BSpline:
+                //return PathBuilder.GetBSplinePath(edge.Points);                
+            default:
+                return PathBuilder.GetLinearPath(edge.Points);
         }
-        return path;
     }
 
-    protected virtual string? GetDefUrl(string? marker)
+    protected virtual string? GetDefinitionUrl(string? marker)
     {
         if (string.IsNullOrWhiteSpace(marker))
         {

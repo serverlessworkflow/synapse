@@ -2,9 +2,9 @@
 {
     public static class DagreGraphDirection
     {
-        public static readonly string TopToBottom = "TB";
-        public static readonly string BottomToTop = "BT";
-        public static readonly string LeftToRight = "LR";
-        public static readonly string RightToLeft = "RL";
+        public const string TopToBottom = "TB";
+        public const string BottomToTop = "BT";
+        public const string LeftToRight = "LR";
+        public const string RightToLeft = "RL";
     }
 }
