@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerfileContext>..\..\..</DockerfileContext>
+	<DockerfileTag>synapse/worker</DockerfileTag>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ConcurrentHashSet" Version="1.3.0" />
+    <PackageReference Include="GraphQL.Client" Version="4.0.2" />
+    <PackageReference Include="GraphQL.Client.Serializer.Newtonsoft" Version="4.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.KeyPerFile" Version="6.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
+    <PackageReference Include="Microsoft.OpenApi" Version="1.2.3" />
+    <PackageReference Include="Microsoft.OpenApi.Readers" Version="1.2.3" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.15.0" />
+    <PackageReference Include="MimeTypes" Version="2.4.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Neuroglia.AsyncApi.Client.All" Version="2.1.0.6" />
+    <PackageReference Include="Neuroglia.Data.Expressions.JQ" Version="2.0.1.57" />
+    <PackageReference Include="Neuroglia.Eventing.CloudEvents" Version="2.0.1.57" />
+    <PackageReference Include="Neuroglia.Serialization.NewtonsoftJson" Version="2.0.1.57" />
+    <PackageReference Include="protobuf-net.Grpc" Version="1.0.152" />
+    <PackageReference Include="protobuf-net.Grpc.ClientFactory" Version="1.0.152" />
+    <PackageReference Include="Simple.OData.Client" Version="5.26.0" />
+    <PackageReference Include="System.Linq.Async" Version="6.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\apis\management\Synapse.Apis.Management.Grpc.Client\Synapse.Apis.Management.Grpc.Client.csproj" />
+    <ProjectReference Include="..\..\apis\runtime\Synapse.Apis.Runtime.Grpc.Client\Synapse.Apis.Runtime.Grpc.Client.csproj" />
+    <ProjectReference Include="..\..\core\Synapse.Integration\Synapse.Integration.csproj" />
+  </ItemGroup>
+
+</Project>

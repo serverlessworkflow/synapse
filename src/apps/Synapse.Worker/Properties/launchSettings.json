@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Synapse.Worker.Executor": {
+      "commandName": "Project"
+    },
+    "Docker": {
+      "commandName": "Docker"
+    }
+  }
+}
