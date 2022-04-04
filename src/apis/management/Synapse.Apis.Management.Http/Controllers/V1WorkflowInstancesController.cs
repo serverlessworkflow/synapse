@@ -81,22 +81,6 @@ namespace Synapse.Apis.Management.Http.Controllers
         }
 
         /// <summary>
-        /// Schedules the workflow instance with the specified id
-        /// </summary>
-        /// <param name="id">The id of the workflow instance to schedule</param>
-        /// <param name="at">The date and time at which to schedule the specified workflow instance</param>
-        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-        /// <returns>A new <see cref="IActionResult"/></returns>
-        [HttpPut("byid/{id}/schedule")]
-        [ProducesResponseType((int)HttpStatusCode.NoContent)]
-        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
-        [ProducesResponseType((int)HttpStatusCode.Forbidden)]
-        public async Task<IActionResult> Schedule(string id, DateTimeOffset at, CancellationToken cancellationToken)
-        {
-            return this.Process(await this.Mediator.ExecuteAsync(new Application.Commands.WorkflowInstances.V1ScheduleWorkflowInstanceCommand(id, at), cancellationToken));
-        }
-
-        /// <summary>
         /// Starts the workflow instance with the specified id
         /// </summary>
         /// <param name="id">The id of the workflow instance to start</param>

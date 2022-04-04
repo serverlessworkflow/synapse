@@ -39,10 +39,19 @@ namespace Synapse.Application.Configuration
         /// </summary>
         public IServiceCollection Services { get; }
 
-        public Type? WriteModelRepositoryType { get; protected set; } = typeof(DistributedCacheRepository<,>);
+        /// <summary>
+        /// Gets the type of <see cref="IRepository"/> to use for write models
+        /// </summary>
+        protected Type WriteModelRepositoryType { get; set; } = typeof(DistributedCacheRepository<,>);
 
-        public Type? ReadModelRepositoryType { get; protected set; }= typeof(DistributedCacheRepository<,>);
+        /// <summary>
+        /// Gets the type of <see cref="IRepository"/> to use for read models
+        /// </summary>
+        protected Type ReadModelRepositoryType { get; set; }= typeof(DistributedCacheRepository<,>);
 
+        /// <summary>
+        /// Gets a <see cref="List{T}"/> containing the assemblies to scan to automatically register mapping-related services
+        /// </summary>
         protected List<Assembly> MapperAssemblies { get; } = new() { typeof(SynapseApplicationBuilder).Assembly };
 
         /// <inheritdoc/>
@@ -94,6 +103,8 @@ namespace Synapse.Application.Configuration
             this.Services.AddTransient<IODataQueryOptionsParser, ODataQueryOptionsParser>();
             this.Services.AddSingleton<IWorkflowRuntimeProxyFactory, WorkflowRuntimeProxyFactory>();
             this.Services.AddSingleton<IWorkflowRuntimeProxyManager, WorkflowRuntimeProxyManager>();
+            this.Services.AddSingleton<ICronJobScheduler, CronJobScheduler>();
+            this.Services.AddHostedService<WorkflowScheduler>();
             this.Services.AddTransient(provider => provider.GetRequiredService<IEdmModelBuilder>().Build());
             this.Services.AddNewtonsoftJsonSerializer(options =>
             {

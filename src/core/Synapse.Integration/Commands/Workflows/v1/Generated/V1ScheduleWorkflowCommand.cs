@@ -20,30 +20,31 @@
  * -----------------------------------------------------------------------
  */
 
-namespace Synapse.Integration.Commands.WorkflowInstances
+namespace Synapse.Integration.Commands.Workflows
 {
 
 	/// <summary>
-	/// Represents the ICommand used to schedule the execution of an existing V1WorkflowInstance
+	/// Represents the ICommand used to schedule a V1Workflow
 	/// </summary>
 	[DataContract]
-	public partial class V1ScheduleWorkflowInstanceCommand
+	public partial class V1ScheduleWorkflowCommand
 		: Command
 	{
 
 		/// <summary>
-		/// The id of the V1WorkflowInstance to schedule
+		/// The id of the V1Workflow to schedule
 		/// </summary>
-		[DataMember(Name = "Id", Order = 1)]
-		[Description("The id of the V1WorkflowInstance to schedule")]
-		public virtual string Id { get; set; }
+		[DataMember(Name = "WorkflowId", Order = 1)]
+		[Description("The id of the V1Workflow to schedule")]
+		[Required, MinLength(1)]
+		public virtual string WorkflowId { get; set; }
 
 		/// <summary>
-		/// The date and time at which to schedule the V1WorkflowInstance
+		/// A boolean indicating whether or not to catch up missed CRON occurences
 		/// </summary>
-		[DataMember(Name = "At", Order = 2)]
-		[Description("The date and time at which to schedule the V1WorkflowInstance")]
-		public virtual DateTime At { get; set; }
+		[DataMember(Name = "CatchUpMissedOccurences", Order = 2)]
+		[Description("A boolean indicating whether or not to catch up missed CRON occurences")]
+		public virtual bool CatchUpMissedOccurences { get; set; }
 
     }
 

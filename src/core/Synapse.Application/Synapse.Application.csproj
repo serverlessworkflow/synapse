@@ -28,6 +28,7 @@
 
   <ItemGroup>
 	<PackageReference Include="CloudNative.CloudEvents.NewtonsoftJson" Version="2.2.0" />
+	<PackageReference Include="Cronos" Version="0.7.1" />
 	<PackageReference Include="Microsoft.AspNetCore.OData" Version="8.0.8" />
 	<PackageReference Include="Microsoft.OData.ModelBuilder" Version="1.0.8" />
 	<PackageReference Include="Neuroglia.AspNetCore.JsonPatch" Version="2.0.1.57" />

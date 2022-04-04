@@ -25,7 +25,8 @@ namespace Synapse.Application.Events.Domain
     /// </summary>
     public class V1WorkflowDomainEventHandler
         : DomainEventHandlerBase<V1Workflow, Integration.Models.V1Workflow, string>,
-        INotificationHandler<V1WorkflowCreatedDomainEvent>
+        INotificationHandler<V1WorkflowCreatedDomainEvent>,
+        INotificationHandler<V1WorkflowInstanciatedDomainEvent>
     {
 
         /// <inheritdoc/>
@@ -40,6 +41,17 @@ namespace Synapse.Application.Events.Domain
         public virtual async Task HandleAsync(V1WorkflowCreatedDomainEvent e, CancellationToken cancellationToken = default)
         {
             await this.GetOrReconcileProjectionAsync(e.AggregateId, cancellationToken);
+            await this.PublishIntegrationEventAsync(e, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task HandleAsync(V1WorkflowInstanciatedDomainEvent e, CancellationToken cancellationToken = default)
+        {
+            var workflow = await this.GetOrReconcileProjectionAsync(e.AggregateId, cancellationToken);
+            workflow.LastModified = e.CreatedAt.UtcDateTime;
+            workflow.LastInstanciated = e.CreatedAt.UtcDateTime;
+            await this.Projections.UpdateAsync(workflow, cancellationToken);
+            await this.Projections.SaveChangesAsync(cancellationToken);
             await this.PublishIntegrationEventAsync(e, cancellationToken);
         }
 

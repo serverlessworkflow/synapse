@@ -131,13 +131,9 @@ namespace Synapse.Application.Commands.Workflows
                 var outcome = new V1CorrelationOutcome(V1CorrelationOutcomeType.Start, workflow.Id);
                 await this.Mediator.ExecuteAndUnwrapAsync(new V1CreateCorrelationCommand(lifetime, conditionType, conditions, outcome, null));
             }
-            else if(command.Definition.Start != null)
+            else if (!string.IsNullOrWhiteSpace(workflow.Definition.Start?.Schedule?.Cron?.Expression)) 
             {
-                //todo: schedule or deploy trigger if needed
-                //if (!string.IsNullOrWhiteSpace(workflow.Definition.Start.Schedule.Cron?.Expression))
-                //    await this.RuntimeHost.ScheduleAsync(workflow, cancellationToken);
-                //if (!string.IsNullOrWhiteSpace(workflow.Definition.Start.Schedule.Interval))
-                //    await this.RuntimeHost.ScheduleAsync(workflow, cancellationToken);
+                await this.Mediator.ExecuteAndUnwrapAsync(new V1ScheduleWorkflowCommand(workflow.Id, false), cancellationToken);
             }
             return this.Ok(this.Mapper.Map<Integration.Models.V1Workflow>(workflow));
         }

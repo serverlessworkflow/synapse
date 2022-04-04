@@ -19,19 +19,28 @@ namespace Synapse.Application.Services
 {
 
     /// <summary>
-    /// Defines the fundamentals of a service used to host workflow runtimes
+    /// Defines the fundamentals of a CRON-based job
     /// </summary>
-    public interface IWorkflowRuntimeHost
+    public interface ICronJob
         : IDisposable, IAsyncDisposable
     {
 
         /// <summary>
-        /// Starts the execution of the specified <see cref="V1WorkflowInstance"/>
+        /// Gets the event fired whenever the <see cref="CronJob"/> expires
         /// </summary>
-        /// <param name="workflowInstance">The <see cref="V1WorkflowInstance"/> to start the execution of</param>
+        event EventHandler Expired;
+
+        /// <summary>
+        /// Gets the <see cref="ICronJob"/>'s id
+        /// </summary>
+        string Id { get; }
+
+        /// <summary>
+        /// Schedules the <see cref="ICronJob"/>
+        /// </summary>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-        /// <returns>An id used to identify the <see cref="V1WorkflowInstance"/>'s runtime</returns>
-        Task<string> StartAsync(V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default);
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        Task ScheduleAsync(CancellationToken cancellationToken = default);
 
     }
 

@@ -119,9 +119,6 @@
     <Compile Update="Commands\WorkflowInstances\v1\Generated\V1MarkWorkflowInstanceAsSuspendedCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\WorkflowInstances\v1\V1MarkWorkflowInstanceAsSuspendedCommand.cs</CustomToolNamespace>
     </Compile>
-    <Compile Update="Commands\WorkflowInstances\v1\Generated\V1ScheduleWorkflowInstanceCommand.cs">
-      <CustomToolNamespace>..\Synapse.Application\Commands\WorkflowInstances\v1\V1ScheduleWorkflowInstanceCommand.cs</CustomToolNamespace>
-    </Compile>
     <Compile Update="Commands\WorkflowInstances\v1\Generated\V1SetWorkflowInstanceCorrelationMappingCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\WorkflowInstances\v1\V1SetWorkflowInstanceCorrelationMappingCommand.cs</CustomToolNamespace>
     </Compile>
@@ -139,6 +136,9 @@
     </Compile>
     <Compile Update="Commands\Workflows\v1\Generated\V1CreateWorkflowCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\Workflows\v1\V1CreateWorkflowCommand.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Commands\Workflows\v1\Generated\V1ScheduleWorkflowCommand.cs">
+      <CustomToolNamespace>..\Synapse.Application\Commands\Workflows\v1\V1ScheduleWorkflowCommand.cs</CustomToolNamespace>
     </Compile>
     <Compile Update="Events\Correlations\v1\Generated\V1ContextAddedToCorrelationIntegrationEvent.cs">
       <CustomToolNamespace>..\Synapse.Domain\Events\Correlations\v1\V1ContextAddedToCorrelationDomainEvent.cs</CustomToolNamespace>
@@ -247,6 +247,9 @@
     </Compile>
     <Compile Update="Events\Workflows\v1\Generated\V1WorkflowCreatedIntegrationEvent.cs">
       <CustomToolNamespace>..\Synapse.Domain\Events\Workflows\v1\V1WorkflowCreatedDomainEvent.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\Workflows\v1\Generated\V1WorkflowInstanciatedIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\Workflows\v1\V1WorkflowInstanciatedDomainEvent.cs</CustomToolNamespace>
     </Compile>
     <Compile Update="Models\v1\Generated\V1Correlation.cs">
       <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1Correlation.cs</CustomToolNamespace>

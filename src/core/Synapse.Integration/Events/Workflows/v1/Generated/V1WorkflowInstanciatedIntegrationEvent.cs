@@ -20,31 +20,30 @@
  * -----------------------------------------------------------------------
  */
 
-namespace Synapse.Integration.Models
+namespace Synapse.Integration.Events.Workflows
 {
 
 	/// <summary>
-	/// Represents a workflow
+	/// Represents the IDomainEvent fired whenever a V1Workflow has been instanciated
 	/// </summary>
 	[DataContract]
-	[Queryable]
-	public partial class V1Workflow
-		: Entity
+	public partial class V1WorkflowInstanciatedIntegrationEvent
+		: V1IntegrationEvent
 	{
 
 		/// <summary>
-		/// The V1Workflow's definition
+		/// Gets the id of the aggregate that has produced the event
 		/// </summary>
-		[DataMember(Name = "Definition", Order = 1)]
-		[Description("The V1Workflow's definition")]
-		public virtual WorkflowDefinition Definition { get; set; }
+		[DataMember(Name = "AggregateId", Order = 1)]
+		[Description("Gets the id of the aggregate that has produced the event")]
+		public virtual string AggregateId { get; set; }
 
 		/// <summary>
-		/// The date and time at which the V1Workflow was last instanciated
+		/// Gets the date and time at which the event has been produced
 		/// </summary>
-		[DataMember(Name = "LastInstanciated", Order = 2)]
-		[Description("The date and time at which the V1Workflow was last instanciated")]
-		public virtual DateTime? LastInstanciated { get; set; }
+		[DataMember(Name = "CreatedAt", Order = 2)]
+		[Description("Gets the date and time at which the event has been produced")]
+		public virtual DateTime CreatedAt { get; set; }
 
     }
 

@@ -34,6 +34,11 @@ namespace Synapse.Runtime.Services
     {
 
         /// <summary>
+        /// Gets boolean indicating whether or not the <see cref="DockerRuntimeHost"/> is running in Docker
+        /// </summary>
+        protected static readonly bool IsRunningInDocker = File.Exists("/.dockerenv");
+
+        /// <summary>
         /// Initializes a new <see cref="DockerRuntimeHost"/>
         /// </summary>
         /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
@@ -57,11 +62,6 @@ namespace Synapse.Runtime.Services
         /// </summary>
         protected IDockerClient Docker { get; }
 
-        /// <summary>
-        /// Gets boolean indicating whether or not the <see cref="DockerRuntimeHost"/> is running in Docker
-        /// </summary>
-        protected static readonly bool IsRunningInDocker = File.Exists("/.dockerenv");
-
         /// <inheritdoc/>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -77,6 +77,46 @@ namespace Synapse.Runtime.Services
             {
                 await this.Docker.Networks.CreateNetworkAsync(new() { Name = this.Options.Network }, stoppingToken);
             }
+        }
+
+        /// <inheritdoc/>
+        public override async Task<string> StartAsync(V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default)
+        {
+            if (workflowInstance == null)
+                throw new ArgumentNullException(nameof(workflowInstance));
+            await this.PullRuntimeExecutorImageAsync(cancellationToken);
+            var containerConfig = this.Options.Runtime.Container;
+            containerConfig.AddOrUpdateEnvironmentVariable(EnvironmentVariables.Api.Host.Name, EnvironmentVariables.Api.Host.Value!); //todo: instead, fetch values from options
+            containerConfig.AddOrUpdateEnvironmentVariable(EnvironmentVariables.Runtime.WorkflowInstanceId.Name, workflowInstance.Id.ToString()); //todo: instead, fetch values from options
+            var name = workflowInstance.Id.Replace(":", "-");
+            var hostConfig = new HostConfig()
+            {
+                Mounts = new List<Mount>()
+            };
+            if (!string.IsNullOrWhiteSpace(this.Options.Secrets.Directory))
+            {
+                hostConfig.Mounts.Add(new()
+                {
+                    Type = "bind",
+                    Source = this.Options.Secrets.Directory,
+                    Target = "/run/secrets"
+                });
+            }
+            var createContainerParameters = new CreateContainerParameters(containerConfig)
+            {
+                Name = name,
+                HostConfig = hostConfig
+            };
+            var createContainerResult = await this.Docker.Containers.CreateContainerAsync(createContainerParameters, cancellationToken);
+            if (IsRunningInDocker)
+                await this.Docker.Networks.ConnectNetworkAsync(this.Options.Network, new NetworkConnectParameters() { Container = createContainerResult.ID }, cancellationToken);
+            foreach (var warning in createContainerResult.Warnings)
+            {
+                this.Logger.LogWarning(warning);
+            }
+            var startContainerParameters = new ContainerStartParameters();
+            await this.Docker.Containers.StartContainerAsync(createContainerResult.ID, startContainerParameters, cancellationToken);
+            return createContainerResult.ID;
         }
 
         /// <summary>
@@ -100,74 +140,7 @@ namespace Synapse.Runtime.Services
                 {
                     await this.Docker.Images.CreateImageAsync(new() { FromImage = this.Options.Runtime.Container.Image, Repo = this.Options.Runtime.ImageRepository }, new(), new Progress<JSONMessage>(), cancellationToken);
                 }
-                finally
-                {
-                    await this.Docker.Images.InspectImageAsync(this.Options.Runtime.Container.Image, cancellationToken);
-                }
             }
-        }
-
-        /// <inheritdoc/>
-        public override async Task<string> ScheduleAsync(V1WorkflowInstance workflowInstance, DateTimeOffset at, CancellationToken cancellationToken = default)
-        {
-            if (workflowInstance == null)
-                throw new ArgumentNullException(nameof(workflowInstance));
-            await this.PullRuntimeExecutorImageAsync(cancellationToken);
-            var containerConfig = this.Options.Runtime.Container;
-            containerConfig.AddOrUpdateEnvironmentVariable(EnvironmentVariables.Api.Host.Name, EnvironmentVariables.Api.Host.Value!); //todo: instead, fetch values from options
-            containerConfig.AddOrUpdateEnvironmentVariable(EnvironmentVariables.Runtime.WorkflowInstanceId.Name, workflowInstance.Id.ToString()); //todo: instead, fetch values from options
-            var createContainerParameters = new CreateContainerParameters(containerConfig)
-            {
-                Name = workflowInstance.Id.Replace(":", "-")
-            };
-            var createContainerResult = await this.Docker.Containers.CreateContainerAsync(createContainerParameters, cancellationToken);
-            if (IsRunningInDocker)
-                await this.Docker.Networks.ConnectNetworkAsync(this.Options.Network, new NetworkConnectParameters() { Container = createContainerResult.ID }, cancellationToken);
-            foreach (var warning in createContainerResult.Warnings)
-            {
-                this.Logger.LogWarning(warning);
-            }
-            var startContainerParameters = new ContainerStartParameters();
-            await this.Docker.Containers.StartContainerAsync(createContainerResult.ID, startContainerParameters, cancellationToken);
-            return createContainerResult.ID;
-        }
-
-        /// <inheritdoc/>
-        public override async Task<string> StartAsync(V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default)
-        {
-            if (workflowInstance == null)
-                throw new ArgumentNullException(nameof(workflowInstance));
-            await this.PullRuntimeExecutorImageAsync(cancellationToken);
-            var containerConfig = this.Options.Runtime.Container;
-            containerConfig.AddOrUpdateEnvironmentVariable(EnvironmentVariables.Api.Host.Name, EnvironmentVariables.Api.Host.Value!); //todo: instead, fetch values from options
-            containerConfig.AddOrUpdateEnvironmentVariable(EnvironmentVariables.Runtime.WorkflowInstanceId.Name, workflowInstance.Id.ToString()); //todo: instead, fetch values from options
-            var name = workflowInstance.Id.Replace(":", "-");
-            var hostConfig = new HostConfig()
-            {
-                Mounts = new List<Mount>()
-            };
-            if (!string.IsNullOrWhiteSpace(this.Options.Secrets.Directory))
-                hostConfig.Mounts.Add(new()
-                    {
-                        Type = "bind",
-                        Source = this.Options.Secrets.Directory,
-                        Target = "/run/secrets"
-                    });
-            var createContainerParameters = new CreateContainerParameters(containerConfig)
-            {
-                Name = name,
-                HostConfig = hostConfig
-            };
-            var createContainerResult = await this.Docker.Containers.CreateContainerAsync(createContainerParameters, cancellationToken);
-            if (IsRunningInDocker)
-                await this.Docker.Networks.ConnectNetworkAsync(this.Options.Network, new NetworkConnectParameters() { Container = createContainerResult.ID }, cancellationToken);
-            foreach (var warning in createContainerResult.Warnings)
-            {
-                this.Logger.LogWarning(warning);
-            }
-            var startContainerParameters = new ContainerStartParameters();
-            await this.Docker.Containers.StartContainerAsync(createContainerResult.ID, startContainerParameters, cancellationToken);
-            return createContainerResult.ID;
         }
 
         /// <summary>
