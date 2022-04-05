@@ -5,12 +5,6 @@
   fill: #fff;
   stroke-width: 1px;
 }
-.node .label div {
-  text-align: center;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
-}
 
 .edge-path path {
   fill: none;
@@ -18,14 +12,15 @@
   stroke-width: 1.5px;
 }
 
-.cluster .label div {
+.cluster rect {
+  fill: rgba(0, 0, 0, 0.2);
+}
+
+.label div {
   text-align: center;
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
-}
-.cluster rect {
-  fill: rgba(0, 0, 0, 0.2);
 }
 
 rect.selected {

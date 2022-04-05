@@ -98,12 +98,9 @@ Welcome to Synapse - Serverless Workflow Management System
                 { "Type", "End" },
             }
         };
-        var edge1 = new EdgeViewModel(start.Id, action1.Id)
-        {
-            Label = "Test"
-        };
-        var edge2 = new EdgeViewModel(start.Id, action2.Id);
-        var edge3 = new EdgeViewModel(start.Id, action3.Id);
+        var edge1 = new EdgeViewModel(start.Id, action1.Id, "Test 1");
+        var edge2 = new EdgeViewModel(start.Id, action2.Id, "Test 2");
+        var edge3 = new EdgeViewModel(start.Id, action3.Id, "Test 3");
         var edge4 = new EdgeViewModel(action1.Id, end.Id);
         var edge5 = new EdgeViewModel(action2.Id, end.Id);
         var edge6 = new EdgeViewModel(action3.Id, end.Id);

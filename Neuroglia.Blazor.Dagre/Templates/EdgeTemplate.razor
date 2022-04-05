@@ -4,6 +4,16 @@
         marker-start="@GetDefinitionUrl(Edge.StartMarkerId)"
         marker-end="@GetDefinitionUrl(Edge.EndMarkerId)"
     ></path>
+    <g class="edge-label label">
+        <foreignObject 
+            x="@((Edge.BBox.X - Edge.BBox.Width / 2).ToInvariantString())"
+            y="@(Edge.BBox.Y.ToInvariantString())" 
+            width="@Edge.BBox.Width.ToInvariantString()" 
+            height="@Consts.LabelHeight"
+        >
+            <div>@Edge.Label</div>
+        </foreignObject>
+    </g>
 </g>
 
 @code {

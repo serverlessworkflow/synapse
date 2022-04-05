@@ -6,13 +6,6 @@
         fill: #fff;
         stroke-width: 1px;
     }
-
-    .label div {
-        text-align: center;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        overflow: hidden;
-    }
 }
 
 .edge-path {
@@ -24,16 +17,16 @@
 }
 
 .cluster {
-    .label div {
-        text-align: center;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        overflow: hidden;
-    }
-
     rect {
         fill: rgba(0,0,0,0.2);
     }
+}
+
+.label div {
+    text-align: center;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 rect {
