@@ -32,7 +32,7 @@ namespace Synapse.Cli.Commands.WorkflowInstances
         /// <summary>
         /// Gets the <see cref="ListWorkflowInstancesCommand"/>'s description
         /// </summary>
-        public const string CommandDescription = "Lists all workflow instances";
+        public const string CommandDescription = "Lists/filters workflow instances";
 
         /// <inheritdoc/>
         public ListWorkflowInstancesCommand(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, ISynapseManagementApi synapseManagementApi)
