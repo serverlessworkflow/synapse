@@ -59,6 +59,7 @@ namespace Synapse.Cli.Commands.WorkflowInstances
             table.AddColumn("Workflow");
             table.AddColumn("Key");
             table.AddColumn("Status");
+            table.AddColumn("Activation type");
             table.AddColumn("Created at");
             table.AddColumn("Started at");
             table.AddColumn("Executed at");
@@ -82,6 +83,7 @@ namespace Synapse.Cli.Commands.WorkflowInstances
                     workflowInstance.WorkflowId, 
                     workflowInstance.Key, 
                     status, 
+                    workflowInstance.ActivationType.ToString(),
                     workflowInstance.CreatedAt.ToString(), 
                     (workflowInstance.StartedAt.HasValue ? workflowInstance.StartedAt.ToString() : "-")!, 
                     (workflowInstance.ExecutedAt.HasValue ? workflowInstance.ExecutedAt.ToString() : "-")!
