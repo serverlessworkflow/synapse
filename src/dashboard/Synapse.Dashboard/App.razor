@@ -140,6 +140,20 @@
                     Console.WriteLine(ex.ToString());
                 }   
             });
+        this.IntegrationEventStream
+            .Where(e => e.Type == "io.synapse/v1workflowinstance/deleted/v1")
+            .Subscribe(e =>
+            {
+                try
+                {
+                    var data = e.Data.ToObject<V1WorkflowInstanceDeletedIntegrationEvent>();
+                    this.Dispatcher.Dispatch(new RemoveV1WorkflowInstance(data.AggregateId));
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }   
+            });
 
         await this.HubConnection.StartAsync();
     }

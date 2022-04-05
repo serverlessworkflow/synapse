@@ -27,18 +27,18 @@ namespace Synapse.Dashboard
     public static class V1WorkflowCollectionReducers
     {
 
-        public static V1WorkflowCollectionState GetWorkflowsFromApiSucceeded(V1WorkflowCollectionState state, SetV1WorkflowCollection action)
+        public static V1WorkflowCollectionState OnGetWorkflowsFromApiSucceeded(V1WorkflowCollectionState state, SetV1WorkflowCollection action)
         {
             return new(action.Workflows);
         }
 
-        public static V1WorkflowCollectionState AddV1Workflow(V1WorkflowCollectionState state, AddV1Workflow action)
+        public static V1WorkflowCollectionState OnAddV1Workflow(V1WorkflowCollectionState state, AddV1Workflow action)
         {
             state.Add(action.Workflow);
             return state;
         }
 
-        public static V1WorkflowCollectionState RemoveV1Workflow(V1WorkflowCollectionState state, RemoveV1Workflow action)
+        public static V1WorkflowCollectionState OnRemoveV1Workflow(V1WorkflowCollectionState state, RemoveV1Workflow action)
         {
             var workflow = state.FirstOrDefault(w => w.Id == action.WorkflowId);
             if(workflow != null)

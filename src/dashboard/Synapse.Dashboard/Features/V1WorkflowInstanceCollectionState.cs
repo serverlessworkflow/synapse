@@ -87,6 +87,14 @@ namespace Synapse.Dashboard
             return state;
         }
 
+        public static V1WorkflowInstanceCollectionState OnRemoveV1WorkflowInstance(V1WorkflowInstanceCollectionState state, RemoveV1WorkflowInstance action)
+        {
+            var instance = state.FirstOrDefault(i => i.Id == action.Id);
+            if (instance != null)
+                state.Remove(instance);
+            return state;
+        }
+
     }
 
     [Effect]
@@ -195,12 +203,12 @@ namespace Synapse.Dashboard
     public class RemoveV1WorkflowInstance
     {
 
-        public RemoveV1WorkflowInstance(V1WorkflowInstance workflowInstance)
+        public RemoveV1WorkflowInstance(string id)
         {
-            this.WorkflowInstance = workflowInstance;
+            this.Id = id;
         }
 
-        public V1WorkflowInstance WorkflowInstance { get; }
+        public string Id { get; }
 
     }
 
