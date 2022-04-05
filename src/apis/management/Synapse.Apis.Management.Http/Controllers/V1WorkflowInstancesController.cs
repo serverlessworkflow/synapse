@@ -114,19 +114,67 @@ namespace Synapse.Apis.Management.Http.Controllers
         }
 
         /// <summary>
+        /// Suspends the execution of an existing workflow instance
+        /// </summary>
+        /// <param name="id">The id of the workflow definition to suspend the execution of</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new <see cref="IActionResult"/></returns>
+        [HttpPut("{id}/suspend")]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.Forbidden)]
+        public async Task<IActionResult> Suspend(string id, CancellationToken cancellationToken)
+        {
+            return this.Process(await this.Mediator.ExecuteAsync(new Application.Commands.WorkflowInstances.V1SuspendWorkflowInstanceCommand(id), cancellationToken), (int)HttpStatusCode.Created);
+        }
+
+        /// <summary>
+        /// Resumes the execution of an existing workflow instance
+        /// </summary>
+        /// <param name="id">The id of the workflow definition to resume the execution of</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new <see cref="IActionResult"/></returns>
+        [HttpPut("{id}/resume")]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.Forbidden)]
+        public async Task<IActionResult> Resume(string id, CancellationToken cancellationToken)
+        {
+            return this.Process(await this.Mediator.ExecuteAsync(new Application.Commands.WorkflowInstances.V1ResumeWorkflowInstanceCommand(id), cancellationToken), (int)HttpStatusCode.Created);
+        }
+
+        /// <summary>
+        /// Cancels the execution of an existing workflow instance
+        /// </summary>
+        /// <param name="id">The id of the workflow definition to cancel the execution of</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new <see cref="IActionResult"/></returns>
+        [HttpPut("{id}/cancel")]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.Forbidden)]
+        public async Task<IActionResult> Cancel(string id, CancellationToken cancellationToken)
+        {
+            return this.Process(await this.Mediator.ExecuteAsync(new Application.Commands.WorkflowInstances.V1CancelWorkflowInstanceCommand(id), cancellationToken), (int)HttpStatusCode.Created);
+        }
+
+        /// <summary>
         /// Deletes an existing workflow instance
         /// </summary>
         /// <param name="id">The id of the workflow definition to delete</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A new <see cref="IActionResult"/></returns>
-        [HttpDelete("byid/{id}")]
+        [HttpDelete("{id}")]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.Forbidden)]
         public async Task<IActionResult> Delete(string id, CancellationToken cancellationToken)
         {
-            return this.Process(await this.Mediator.ExecuteAsync(new Application.Commands.Generic.V1DeleteCommand<Domain.Models.V1WorkflowInstance, string>(id), cancellationToken), (int)HttpStatusCode.Created);
+            return this.Process(await this.Mediator.ExecuteAsync(new Application.Commands.WorkflowInstances.V1DeleteWorkflowInstanceCommand(id), cancellationToken), (int)HttpStatusCode.Created);
         }
 
     }

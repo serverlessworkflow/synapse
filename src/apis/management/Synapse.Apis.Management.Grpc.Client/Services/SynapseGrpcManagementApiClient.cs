@@ -137,6 +137,35 @@ namespace Synapse.Apis.Management.Grpc
             return await this.GetWorkflowInstancesAsync(null!, cancellationToken);
         }
 
+        /// <inheritdoc/>
+        public virtual async Task SuspendWorkflowInstanceAsync(string id, CancellationToken cancellationToken = default)
+        {
+            var result = await this.Adapter.SuspendWorkflowInstanceAsync(id, cancellationToken);
+            if (!result.Succeeded)
+                throw new SynapseApiException(result);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task ResumeWorkflowInstanceAsync(string id, CancellationToken cancellationToken = default)
+        {
+            var result = await this.Adapter.ResumeWorkflowInstanceAsync(id, cancellationToken);
+            if (!result.Succeeded)
+                throw new SynapseApiException(result);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task CancelWorkflowInstanceAsync(string id, CancellationToken cancellationToken = default)
+        {
+            var result = await this.Adapter.CancelWorkflowInstanceAsync(id, cancellationToken);
+            if (!result.Succeeded)
+                throw new SynapseApiException(result);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task DeleteWorkflowInstanceAsync(string id, CancellationToken cancellationToken = default)
+        {
+            await this.DeleteWorkflowInstanceAsync(id, cancellationToken);
+        }
 
         #endregion
 

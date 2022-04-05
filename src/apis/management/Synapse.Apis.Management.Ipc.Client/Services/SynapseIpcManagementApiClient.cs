@@ -148,6 +148,38 @@ namespace Synapse.Apis.Management.Ipc
             return await this.GetWorkflowInstancesAsync(null, cancellationToken);
         }
 
+        /// <inheritdoc/>
+        public virtual async Task SuspendWorkflowInstanceAsync(string id, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                throw new ArgumentNullException(nameof(id));
+            await this.Mediator.ExecuteAndUnwrapAsync(new Application.Commands.WorkflowInstances.V1SuspendWorkflowInstanceCommand(id), cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task ResumeWorkflowInstanceAsync(string id, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                throw new ArgumentNullException(nameof(id));
+            await this.Mediator.ExecuteAndUnwrapAsync(new Application.Commands.WorkflowInstances.V1ResumeWorkflowInstanceCommand(id), cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task CancelWorkflowInstanceAsync(string id, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                throw new ArgumentNullException(nameof(id));
+            await this.Mediator.ExecuteAndUnwrapAsync(new Application.Commands.WorkflowInstances.V1CancelWorkflowInstanceCommand(id), cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task DeleteWorkflowInstanceAsync(string id, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                throw new ArgumentNullException(nameof(id));
+            await this.Mediator.ExecuteAndUnwrapAsync(new Application.Commands.WorkflowInstances.V1DeleteWorkflowInstanceCommand(id), cancellationToken);
+        }
+
         #endregion
 
         #region Correlations

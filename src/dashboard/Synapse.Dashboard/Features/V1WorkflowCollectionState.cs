@@ -38,6 +38,14 @@ namespace Synapse.Dashboard
             return state;
         }
 
+        public static V1WorkflowCollectionState RemoveV1Workflow(V1WorkflowCollectionState state, RemoveV1Workflow action)
+        {
+            var workflow = state.FirstOrDefault(w => w.Id == action.WorkflowId);
+            if(workflow != null)
+                state.Remove(workflow);
+            return state;
+        }
+
     }
 
     [Effect]
@@ -80,12 +88,12 @@ namespace Synapse.Dashboard
     public class RemoveV1Workflow
     {
 
-        public RemoveV1Workflow(V1Workflow workflow)
+        public RemoveV1Workflow(string workflowId)
         {
-            this.Workflow = workflow;
+            this.WorkflowId = workflowId;
         }
 
-        public V1Workflow Workflow { get; }
+        public string WorkflowId { get; }
 
     }
 

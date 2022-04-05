@@ -110,6 +110,33 @@ namespace Synapse.Apis.Management.Grpc
         Task<GrpcApiResult<List<V1WorkflowInstance>>> GetWorkflowInstancesAsync(string? query = null, CallContext context = default);
 
         /// <summary>
+        /// Suspends the execution of the <see cref="V1WorkflowInstance"/> with the specified id
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1WorkflowInstance"/> to suspend the exection of</param>
+        /// <param name="context">The current <see cref="CallContext" /></param>
+        /// <returns>A new object that describes the result of the operation</returns>
+        [OperationContract]
+        Task<GrpcApiResult> SuspendWorkflowInstanceAsync(string id, CallContext context = default);
+
+        /// <summary>
+        /// Resumes the execution of the <see cref="V1WorkflowInstance"/> with the specified id
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1WorkflowInstance"/> to resume the execution of</param>
+        /// <param name="context">The current <see cref="CallContext" /></param>
+        /// <returns>A new object that describes the result of the operation</returns>
+        [OperationContract]
+        Task<GrpcApiResult> ResumeWorkflowInstanceAsync(string id, CallContext context = default);
+
+        /// <summary>
+        /// Cancels the execution of the <see cref="V1WorkflowInstance"/> with the specified id
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1WorkflowInstance"/> to cancel the execution of</param>
+        /// <param name="context">The current <see cref="CallContext" /></param>
+        /// <returns>A new object that describes the result of the operation</returns>
+        [OperationContract]
+        Task<GrpcApiResult> CancelWorkflowInstanceAsync(string id, CallContext context = default);
+
+        /// <summary>
         /// Deletes the workflow instance with the specified id
         /// </summary>
         /// <param name="id">The id of the workflow instance to delete</param>

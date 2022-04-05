@@ -62,6 +62,13 @@ namespace Synapse.Apis.Management.Http
         /// </summary>
         protected IJsonSerializer Serializer { get; }
 
+        /// <summary>
+        /// Creates a new <see cref="HttpRequestMessage"/>
+        /// </summary>
+        /// <param name="method">The <see cref="HttpMethod"/> of the <see cref="HttpRequestMessage"/> to create</param>
+        /// <param name="requestUri">The request <see cref="Uri"/> of the <see cref="HttpRequestMessage"/> to create</param>
+        /// <param name="content">The <see cref="HttpContent"/> of the <see cref="HttpRequestMessage"/> to create</param>
+        /// <returns>A new <see cref="HttpRequestMessage"/></returns>
         protected virtual HttpRequestMessage CreateRequest(HttpMethod method, string requestUri, HttpContent? content = null)
         {
             var request = new HttpRequestMessage(method, requestUri) { Content = content };
@@ -125,7 +132,7 @@ namespace Synapse.Apis.Management.Http
             using var response = await this.HttpClient.SendAsync(request, cancellationToken);
             var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
             if (!response.IsSuccessStatusCode)
-                this.Logger.LogError("An error occured while querying workflows: {details}", json);
+                this.Logger.LogError("An error occured while deleting the specified workflow with the specified id '{id}': {details}", id, json);
             response.EnsureSuccessStatusCode();
         }
 
@@ -194,6 +201,53 @@ namespace Synapse.Apis.Management.Http
             return await this.GetWorkflowInstancesAsync(null, cancellationToken);
         }
 
+        /// <inheritdoc/>
+        public virtual async Task SuspendWorkflowInstanceAsync(string id, CancellationToken cancellationToken = default)
+        {
+            var requestUri = $"/api/v1/workflow-instances/{id}/suspend";
+            using var request = this.CreateRequest(HttpMethod.Put, requestUri);
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while suspending the execution of the workflow with the specified id '{id}': {details}", id, json);
+            response.EnsureSuccessStatusCode();
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task ResumeWorkflowInstanceAsync(string id, CancellationToken cancellationToken = default)
+        {
+            var requestUri = $"/api/v1/workflow-instances/{id}/resume";
+            using var request = this.CreateRequest(HttpMethod.Put, requestUri);
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while resuming the execution of the workflow with the specified id '{id}': {details}", id, json);
+            response.EnsureSuccessStatusCode();
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task CancelWorkflowInstanceAsync(string id, CancellationToken cancellationToken = default)
+        {
+            var requestUri = $"/api/v1/workflow-instances/{id}/cancel";
+            using var request = this.CreateRequest(HttpMethod.Put, requestUri);
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while cancelling the execution of the workflow with the specified id '{id}': {details}", id, json);
+            response.EnsureSuccessStatusCode();
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task DeleteWorkflowInstanceAsync(string id, CancellationToken cancellationToken = default)
+        {
+            using var request = this.CreateRequest(HttpMethod.Delete, $"/api/v1/workflow-instances/{id}");
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while querying deleting the specified workflow instance with the specified id '{id}': {details}", id, json);
+            response.EnsureSuccessStatusCode();
+        }
+
         #endregion
 
         #region Correlations
@@ -253,7 +307,7 @@ namespace Synapse.Apis.Management.Http
             using var response = await this.HttpClient.SendAsync(request, cancellationToken);
             var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
             if (!response.IsSuccessStatusCode)
-                this.Logger.LogError("An error occured while querying correlations: {details}", json);
+                this.Logger.LogError("An error occured while deleting the specified correlation with the specified id '{id}': {details}", id, json);
             response.EnsureSuccessStatusCode();
         }
 

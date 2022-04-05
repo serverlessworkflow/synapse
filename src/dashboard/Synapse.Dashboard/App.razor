@@ -45,6 +45,20 @@
                     Console.WriteLine(ex.ToString());
                 }   
             });
+        this.IntegrationEventStream
+            .Where(e => e.Type == "io.synapse/v1workflow/deleted/v1")
+            .Subscribe(e =>
+            {
+                try
+                {
+                    var data = e.Data.ToObject<V1WorkflowCreatedIntegrationEvent>();
+                    this.Dispatcher.Dispatch(new RemoveV1Workflow(data.AggregateId));
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }   
+            });
 
         this.IntegrationEventStream
             .Where(e => e.Type == "io.synapse/v1workflowinstance/created/v1")

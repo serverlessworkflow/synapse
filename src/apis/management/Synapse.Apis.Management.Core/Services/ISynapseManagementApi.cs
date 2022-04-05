@@ -126,6 +126,42 @@ namespace Synapse.Apis.Management
         [OperationContract]
         Task<List<V1WorkflowInstance>> GetWorkflowInstancesAsync(string query, CancellationToken cancellationToken = default);
 
+        /// <summary>
+        /// Suspends the execution of the <see cref="V1WorkflowInstance"/> with the specified id
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1WorkflowInstance"/> to suspend the exection of</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        [OperationContract]
+        Task SuspendWorkflowInstanceAsync(string id, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Resumes the execution of the <see cref="V1WorkflowInstance"/> with the specified id
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1WorkflowInstance"/> to resume the execution of</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        [OperationContract]
+        Task ResumeWorkflowInstanceAsync(string id, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Cancels the execution of the <see cref="V1WorkflowInstance"/> with the specified id
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1WorkflowInstance"/> to cancel the execution of</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        [OperationContract]
+        Task CancelWorkflowInstanceAsync(string id, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Deletes the <see cref="V1WorkflowInstance"/> with the specified id
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1WorkflowInstance"/> to delete</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        [OperationContract]
+        Task DeleteWorkflowInstanceAsync(string id, CancellationToken cancellationToken = default);
+
         #endregion
 
         #region Correlations

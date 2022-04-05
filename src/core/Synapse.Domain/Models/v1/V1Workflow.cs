@@ -68,6 +68,14 @@ namespace Synapse.Domain.Models
         }
 
         /// <summary>
+        /// Deletes the <see cref="V1Workflow"/>
+        /// </summary>
+        public virtual void Delete()
+        {
+            this.On(this.RegisterEvent(new V1WorkflowDeletedDomainEvent(this.Id)));
+        }
+
+        /// <summary>
         /// Handles the specified <see cref="V1WorkflowCreatedDomainEvent"/>
         /// </summary>
         /// <param name="e">The <see cref="V1WorkflowCreatedDomainEvent"/> to handle</param>
@@ -87,6 +95,15 @@ namespace Synapse.Domain.Models
         {
             this.LastModified = e.CreatedAt;
             this.LastInstanciated = e.CreatedAt;
+        }
+
+        /// <summary>
+        /// Handles the specified <see cref="V1WorkflowDeletedDomainEvent"/>
+        /// </summary>
+        /// <param name="e">The <see cref="V1WorkflowDeletedDomainEvent"/> to handle</param>
+        protected virtual void On(V1WorkflowDeletedDomainEvent e)
+        {
+
         }
 
         /// <inheritdoc/>

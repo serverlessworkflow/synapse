@@ -124,7 +124,7 @@ namespace Synapse.Application.Commands.Workflows
                     await this.Mediator.ExecuteAndUnwrapAsync(new V1CreateWorkflowInstanceCommand(workflow.Id, V1WorkflowInstanceActivationType.Cron, new(), null, true), cancellationToken);
                 }
             }
-            await this.CronJobScheduler.ScheduleJobAsync(workflow.Id, cronExpression, timeZone, job, workflow.Definition.Start.Schedule.Cron?.ValidUntil, cancellationToken);
+            await this.CronJobScheduler.ScheduleJobAsync(workflow.Definition.Id!, cronExpression, timeZone, job, workflow.Definition.Start.Schedule.Cron?.ValidUntil, cancellationToken);
             return this.Ok();
         }
 

@@ -26,7 +26,7 @@ namespace Synapse.Domain.Models
     /// </summary>
     [DataTransferObjectType(typeof(Integration.Models.V1WorkflowInstance))]
     public class V1WorkflowInstance
-        : AggregateRoot<string>, IDeletable
+        : AggregateRoot<string>
     {
 
         /// <summary>

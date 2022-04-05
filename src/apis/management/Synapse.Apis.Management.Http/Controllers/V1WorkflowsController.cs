@@ -120,14 +120,14 @@ namespace Synapse.Apis.Management.Http.Controllers
         /// <param name="id">The id of the workflow to delete</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A new <see cref="IActionResult"/></returns>
-        [HttpDelete("byid/{id}")]
+        [HttpDelete("{id}")]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.Forbidden)]
         public async Task<IActionResult> Delete(string id, CancellationToken cancellationToken)
         {
-            return this.Process(await this.Mediator.ExecuteAsync(new Application.Commands.Generic.V1DeleteCommand<Domain.Models.V1Workflow, string>(id), cancellationToken), (int)HttpStatusCode.Created);
+            return this.Process(await this.Mediator.ExecuteAsync(new Application.Commands.Workflows.V1DeleteWorkflowCommand(id), cancellationToken));
         }
 
     }

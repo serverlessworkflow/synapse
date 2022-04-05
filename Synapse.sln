@@ -83,6 +83,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Server", "src\apps\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Worker", "src\apps\Synapse.Worker\Synapse.Worker.csproj", "{DDDFF6AC-8237-4A59-A834-CF959419E316}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synapse.Cli", "src\apps\Synapse.Cli\Synapse.Cli.csproj", "{D4BEDBC3-47F8-4F4C-A644-995F10EE1C18}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -177,6 +179,10 @@ Global
 		{DDDFF6AC-8237-4A59-A834-CF959419E316}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DDDFF6AC-8237-4A59-A834-CF959419E316}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DDDFF6AC-8237-4A59-A834-CF959419E316}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D4BEDBC3-47F8-4F4C-A644-995F10EE1C18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4BEDBC3-47F8-4F4C-A644-995F10EE1C18}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4BEDBC3-47F8-4F4C-A644-995F10EE1C18}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4BEDBC3-47F8-4F4C-A644-995F10EE1C18}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -221,6 +227,7 @@ Global
 		{43E4163F-489D-4F58-BDB9-12813207FC49} = {D789B1B2-073B-4609-948F-25C70148CDFB}
 		{957782C5-7A45-4D16-9539-607C0F397471} = {43E4163F-489D-4F58-BDB9-12813207FC49}
 		{DDDFF6AC-8237-4A59-A834-CF959419E316} = {43E4163F-489D-4F58-BDB9-12813207FC49}
+		{D4BEDBC3-47F8-4F4C-A644-995F10EE1C18} = {43E4163F-489D-4F58-BDB9-12813207FC49}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1FCD70A-A848-4567-B59C-D7B076BC2F2E}

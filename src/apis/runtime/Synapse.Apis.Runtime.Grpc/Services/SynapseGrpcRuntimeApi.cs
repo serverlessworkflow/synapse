@@ -157,7 +157,7 @@ namespace Synapse.Apis.Runtime.Grpc
         }
 
         /// <inheritdoc/>
-        public virtual async Task<GrpcApiResult<V1WorkflowInstance>> FaultAsync(Integration.Commands.WorkflowInstances.V1FaultWorkflowInstanceCommand command, CallContext context = default)
+        public virtual async Task<GrpcApiResult<V1WorkflowInstance>> FaultAsync(V1FaultWorkflowInstanceCommand command, CallContext context = default)
         {
             return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(Mapper.Map<Application.Commands.WorkflowInstances.V1FaultWorkflowInstanceCommand>(command), context.CancellationToken));
         }
@@ -169,14 +169,14 @@ namespace Synapse.Apis.Runtime.Grpc
         }
 
         /// <inheritdoc/>
-        public virtual async Task<GrpcApiResult<V1WorkflowInstance>> SetOutputAsync(Integration.Commands.WorkflowInstances.V1SetWorkflowInstanceOutputCommand command, CallContext context = default)
+        public virtual async Task<GrpcApiResult<V1WorkflowInstance>> SetOutputAsync(V1SetWorkflowInstanceOutputCommand command, CallContext context = default)
         {
             return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(Mapper.Map<Application.Commands.WorkflowInstances.V1SetWorkflowInstanceOutputCommand>(command), context.CancellationToken));
         }
 
         public Task<GrpcApiResult<V1WorkflowInstance>> SuspendAsync(string workflowInstanceId, CallContext context = default)
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException(); //todo: implement (URGENT)
         }
 
     }

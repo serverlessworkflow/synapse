@@ -49,12 +49,13 @@ namespace Synapse.Apis.Runtime
         /// <summary>
         /// Gets the <see cref="V1RuntimeSignal"/> type
         /// </summary>
+        [DataMember(Order = 1)]
         public V1RuntimeSignalType Type { get; protected set; }
 
         /// <summary>
         /// Gets the <see cref="V1RuntimeSignal"/>'s data
         /// </summary>
-        [DataMember(Order = 1)]
+        [DataMember(Order = 2)]
         public virtual Dynamic? Data { get; protected set; }
 
     }
