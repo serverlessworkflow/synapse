@@ -12,8 +12,8 @@ namespace Neuroglia.Blazor.Dagre.Models
         public virtual string? StartMarkerId { get; set; }
         public virtual string? EndMarkerId { get; set; }
 
-        public EdgeViewModel(Guid sourceId, Guid targetId, string? shape = null, ICollection<IPosition>? points = null, string? label = null, Type? componentType = null)
-            : base(label, componentType)
+        public EdgeViewModel(Guid sourceId, Guid targetId, string? cssClass = null, string? shape = null, ICollection<IPosition>? points = null, string? label = null, Type? componentType = null)
+            : base(label, cssClass, componentType)
         {
             this.SourceId = sourceId;
             this.TargetId = targetId;

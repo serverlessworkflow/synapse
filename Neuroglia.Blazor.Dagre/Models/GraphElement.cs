@@ -21,6 +21,11 @@
 
         /// <inheritdoc />
         [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public virtual string? CssClass { get; set; }
+
+        /// <inheritdoc />
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         [System.Text.Json.Serialization.JsonExtensionData]
         [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [Newtonsoft.Json.JsonExtensionData]
@@ -29,8 +34,9 @@
         protected GraphElement() 
         { }
 
-        protected GraphElement(string? label = "", Type? componentType = null) {
+        protected GraphElement(string? label = "", string? cssClass = null, Type? componentType = null) {
             this.Label = label;
+            this.CssClass = cssClass;
             this.ComponentType = componentType;
         }
 

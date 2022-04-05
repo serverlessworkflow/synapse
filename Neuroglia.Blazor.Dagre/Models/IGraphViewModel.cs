@@ -4,8 +4,9 @@ using Microsoft.AspNetCore.Components.Web;
 namespace Neuroglia.Blazor.Dagre.Models
 {
     public interface IGraphViewModel
-        : IIdentifiable, ILabeled, IDimension, IMetadata
+        : IIdentifiable, ILabeled, IDimension, IPosition, ICssClass, IMetadata
     {
+        decimal Scale { get; set; }
         IReadOnlyDictionary<Guid, INodeViewModel> Nodes { get; }
         IReadOnlyDictionary<Guid, INodeViewModel> AllNodes { get; }
         IReadOnlyDictionary<Guid, IEdgeViewModel> Edges { get; }
@@ -17,6 +18,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         event Action<IGraphElement?, MouseEventArgs>? MouseMove;
         event Action<IGraphElement?, MouseEventArgs>? MouseDown;
         event Action<IGraphElement?, MouseEventArgs>? MouseUp;
+        event Action<IGraphElement?, WheelEventArgs>? Wheel;
 
         Task RegisterComponentType<TElement, TComponent>()
             where TElement : IGraphElement
@@ -30,6 +32,8 @@ namespace Neuroglia.Blazor.Dagre.Models
         void OnMouseDown(IGraphElement? element, MouseEventArgs e);
 
         void OnMouseUp(IGraphElement? element, MouseEventArgs e);
+
+        void OnWheel(IGraphElement? element, WheelEventArgs e);
 
     }
 }

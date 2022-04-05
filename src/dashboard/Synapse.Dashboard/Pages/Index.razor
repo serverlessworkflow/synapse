@@ -44,15 +44,18 @@ Welcome to Synapse - Serverless Workflow Management System
 
     private List<TestUserState> users = new() { new("FakeFirstName", "Fake Last Name", "fake@email.com"), new("FakeFirstName", "Fake Last Name", "fake@email.com") };
 
-    protected IGraphViewModel graph;
+    protected IGraphViewModel graph = null!;
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
         await this.BreadcrumbService.Use(KnownBreadcrumbs.Home);
-        var start = new NodeViewModel("", NodeShape.Circle)
+        var start = new NodeViewModel("", "start-node", NodeShape.Circle)
         {
-            Width = 30,
+            Width = 20,
+            Height = 20,
+            PaddingX = 0,
+            PaddingY = 0,
             Metadata = new Dictionary<string, object>()
             {
                 { "Type", "Start" },
@@ -92,9 +95,12 @@ Welcome to Synapse - Serverless Workflow Management System
             }, 
             "State 2"
         );
-        var end = new NodeViewModel("", NodeShape.Circle)
+        var end = new NodeViewModel("", "end-node", NodeShape.Circle)
         {
-            Width = 30,
+            Width = 20,
+            Height = 20,
+            PaddingX = 0,
+            PaddingY = 0,
             Metadata = new Dictionary<string, object>()
             {
                 { "Type", "End" },

@@ -9,6 +9,8 @@ namespace Neuroglia.Blazor.Dagre.Models
     public class GraphViewModel
         : GraphElement, IGraphViewModel
     {
+        public virtual decimal Scale { get; set; }
+
         /// <summary>
         /// The first level graph nodes (direct children)
         /// </summary>
@@ -53,6 +55,14 @@ namespace Neuroglia.Blazor.Dagre.Models
 
         [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public virtual double? X { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public virtual double? Y { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public virtual double? Width { get; set; }
 
         [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
@@ -73,18 +83,20 @@ namespace Neuroglia.Blazor.Dagre.Models
         public event Action<IGraphElement?, MouseEventArgs>? MouseMove;
         public event Action<IGraphElement?, MouseEventArgs>? MouseDown;
         public event Action<IGraphElement?, MouseEventArgs>? MouseUp;
+        public event Action<IGraphElement?, WheelEventArgs>? Wheel;
 
         public GraphViewModel(
             Dictionary<Guid, INodeViewModel>? nodes = null,
             Dictionary<Guid, IEdgeViewModel>? edges = null,
             Dictionary<Guid, IClusterViewModel>? clusters = null,
             Collection<Type>? svgDefinitions = null,
+            string? cssClass = null,
             double? width = null,
             double? height = null,
             string? label = null,
             Type? componentType = null
         )
-            : base(label, componentType)
+            : base(label, cssClass, componentType)
         {
             this._nodes = nodes ?? new Dictionary<Guid, INodeViewModel>();
             this._edges = edges ?? new Dictionary<Guid, IEdgeViewModel>(); ;
@@ -92,6 +104,9 @@ namespace Neuroglia.Blazor.Dagre.Models
             this._svgDefinitionComponents = svgDefinitions ?? new Collection<Type>() { 
                 typeof(ArrowDefinitionTemplate)
             };
+            this.Scale = 1;
+            this.X = 0;
+            this.Y = 0;
             this.Width = width;
             this.Height = height;
             this._components = new Dictionary<Type, Type>();
@@ -99,7 +114,10 @@ namespace Neuroglia.Blazor.Dagre.Models
             this._allClusters = new Dictionary<Guid, IClusterViewModel>();
             this._behaviors = new Dictionary<Type, GraphBehavior>();
             this.RegisterBehavior(new DebugEventsBehavior(this));
-            foreach(var node in this._nodes.Values)
+            this.RegisterBehavior(new ZoomBahavior(this));
+            this.RegisterBehavior(new PanBahavior(this));
+            this.RegisterBehavior(new MoveNodeBehavior(this));
+            foreach (var node in this._nodes.Values)
             {
                 if (node == null)
                 {
@@ -264,5 +282,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         public virtual void OnMouseDown(IGraphElement? element, MouseEventArgs e) => this.MouseDown?.Invoke(element, e);
 
         public virtual void OnMouseUp(IGraphElement? element, MouseEventArgs e) => this.MouseUp?.Invoke(element, e);
+
+        public virtual void OnWheel(IGraphElement? element, WheelEventArgs e) => this.Wheel?.Invoke(element, e);
     }
 }

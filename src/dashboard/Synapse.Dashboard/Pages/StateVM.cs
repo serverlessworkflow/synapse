@@ -9,6 +9,7 @@ namespace Synapse.Dashboard
         public StateVM(
             Dictionary<Guid, INodeViewModel>? children = null,
             string? label = "",
+            string? cssClass = null,
             string? shape = null,
             double? width = Consts.ClusterWidth,
             double? height = Consts.ClusterHeight,
@@ -20,7 +21,7 @@ namespace Synapse.Dashboard
             double? paddingY = Consts.ClusterPadding,
             Guid? parentId = null
         )
-            : base(children, label, shape, width, height, x, y, radiusX, radiusY, paddingX, paddingY, typeof(Pages.StateTemplate), parentId)
+            : base(children, label, cssClass, shape, width, height, x, y, radiusX, radiusY, paddingX, paddingY, typeof(Pages.StateTemplate), parentId)
         { 
         
         }

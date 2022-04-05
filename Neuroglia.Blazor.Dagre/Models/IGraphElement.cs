@@ -2,7 +2,7 @@
 namespace Neuroglia.Blazor.Dagre.Models
 {
     public interface IGraphElement
-        : IIdentifiable, ILabeled, IMetadata
+        : IIdentifiable, ILabeled, ICssClass, IMetadata
     {
         Type? ComponentType { get; set; }
     }

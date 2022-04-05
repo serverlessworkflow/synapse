@@ -4,12 +4,13 @@
 @if (Graph != null) {
     <CascadingValue Value="Graph">
         <svg 
-            class="dagre-graph" 
+            class="dagre-graph @Graph.CssClass"
             width="@(Graph.Width?.ToString() ?? "100%")" 
             height="@(Graph.Height?.ToString() ?? "100%")"
             @onmousedown="OnMouseDown"
             @onmouseup="OnMouseUp"
             @onmousemove="OnMouseMove"
+            @onwheel="OnWheel"
         >
             <defs>
                 @foreach(var def in Graph.SvgDefinitionComponents)
@@ -17,7 +18,10 @@
                     <DynamicComponent @key="def" Type="def" />
                 }
             </defs>
-            <g class="graph">
+            <g 
+                class="graph"
+                transform="scale(@Graph.Scale) translate(@Graph.X, @Graph.Y)"
+            >
                 <g class="clusters">
                     @foreach(var cluster in Graph.AllClusters.Values)
                     {
@@ -62,8 +66,8 @@
         if (this.Graph != null)
         {
             await this.DagreService.ComputePositions(this.Graph, this.Options);
-            Console.WriteLine(await this.DagreService.Serialize(this.Graph.DagreGraph));
-            //Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(this.Graph));
+            // Console.WriteLine(await this.DagreService.Serialize(this.Graph.DagreGraph!));
+            // Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(this.Graph));
         }
     }
 
@@ -76,9 +80,11 @@
         return parameters;
     }
 
-    private void OnMouseDown(MouseEventArgs e) => this.Graph?.OnMouseDown(null, e);
+    protected virtual void OnMouseDown(MouseEventArgs e) => this.Graph?.OnMouseDown(null, e);
 
-    private void OnMouseMove(MouseEventArgs e) => this.Graph?.OnMouseMove(null, e);
+    protected virtual void OnMouseMove(MouseEventArgs e) => this.Graph?.OnMouseMove(null, e);
 
-    private void OnMouseUp(MouseEventArgs e) => this.Graph?.OnMouseUp(null, e);
+    protected virtual void OnMouseUp(MouseEventArgs e) => this.Graph?.OnMouseUp(null, e);
+
+    protected virtual void OnWheel(WheelEventArgs e) => this.Graph?.OnWheel(null, e);
 }

@@ -12,21 +12,34 @@ namespace Neuroglia.Blazor.Dagre.Behaviors
             //this.Graph.MouseMove += this.OnMouseMove;
             this.Graph.MouseDown += this.OnMouseDown;
             this.Graph.MouseUp += this.OnMouseUp;
+            this.Graph.Wheel += this.OnWheel;
         }
 
         protected virtual void OnMouseMove(IGraphElement? element, MouseEventArgs e)
         {
-            Console.WriteLine("Mouse move - " + Newtonsoft.Json.JsonConvert.SerializeObject(element));
+            this.Print("Mouse move", element, e);
         }
 
         protected virtual void OnMouseDown(IGraphElement? element, MouseEventArgs e)
         {
-            Console.WriteLine("Mouse down - " + Newtonsoft.Json.JsonConvert.SerializeObject(element));
+            this.Print("Mouse down", element, e);
         }
 
         protected virtual void OnMouseUp(IGraphElement? element, MouseEventArgs e)
         {
-            Console.WriteLine("Mouse up - " + Newtonsoft.Json.JsonConvert.SerializeObject(element));
+            this.Print("Mouse up", element, e);
+        }
+
+        protected virtual void OnWheel(IGraphElement? element, WheelEventArgs e)
+        {
+            this.Print("Wheel", element, e);
+        }
+
+        protected virtual void Print(string type, IGraphElement? element, EventArgs e)
+        {
+            Console.WriteLine(type);
+            Console.WriteLine(type + " - element - " + Newtonsoft.Json.JsonConvert.SerializeObject(element));
+            Console.WriteLine(type + " - event - " + Newtonsoft.Json.JsonConvert.SerializeObject(e));
         }
 
         public override void Dispose()
@@ -34,6 +47,7 @@ namespace Neuroglia.Blazor.Dagre.Behaviors
             //this.Graph.MouseMove -= this.OnMouseMove;
             this.Graph.MouseDown -= this.OnMouseDown;
             this.Graph.MouseUp -= this.OnMouseUp;
+            this.Graph.Wheel -= this.OnWheel;
         }
     }
 }

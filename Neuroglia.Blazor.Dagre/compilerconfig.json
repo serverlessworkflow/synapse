@@ -2,5 +2,9 @@
   {
     "outputFile": "wwwroot/neuroglia-blazor-dagre.css",
     "inputFile": "wwwroot/neuroglia-blazor-dagre.scss"
+  },
+  {
+    "outputFile": "DagreGraph.razor.css",
+    "inputFile": "DagreGraph.razor.scss"
   }
 ]

@@ -85,11 +85,12 @@
         public virtual IBoundingBox? BBox => this._bbox;
 
         public NodeViewModel()
-            : this("", null, Consts.NodeWidth, Consts.NodeHeight, 0 , 0, Consts.NodeRadius, Consts.NodeRadius, Consts.NodePadding, Consts.NodePadding, null, null)
+            : this("", null, null, Consts.NodeWidth, Consts.NodeHeight, 0 , 0, Consts.NodeRadius, Consts.NodeRadius, Consts.NodePadding, Consts.NodePadding, null, null)
         { }
 
         public NodeViewModel(
             string? label = "",
+            string? cssClass = null,
             string? shape = null,
             double? width = Consts.NodeWidth, 
             double? height = Consts.NodeHeight,
@@ -102,9 +103,10 @@
             Type? componentType = null,
             Guid? parentId = null
         )
-            : base(label, componentType)
+            : base(label, cssClass, componentType)
         {
             this.Label = label;
+            this.CssClass = cssClass;
             this.Shape = shape;
             this.Width = width ?? 0;
             this.Height = height ?? 0;
@@ -114,6 +116,7 @@
             this.RadiusY = radiusY ?? 0;
             this.PaddingX = paddingX ?? 0;
             this.PaddingY = paddingY ?? 0;
+            this._bbox = new BoundingBox();
             this.ParentId = parentId;
             this.UpdateBBox();
         }

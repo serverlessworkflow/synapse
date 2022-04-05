@@ -1,4 +1,4 @@
-﻿<g class="node" transform="translate(@(Node.BBox?.X ?? 0), @(Node.BBox?.Y ?? 0))">
+﻿<g class="node @Node.CssClass" transform="translate(@(Node.X ?? 0), @(Node.Y ?? 0))">
     <g class="node-shape">
         @if (Node.Shape == NodeShape.Circle)
         {
@@ -24,10 +24,4 @@
     public virtual IGraphElement Element { get; set; } = null!;
 
     protected INodeViewModel Node => (INodeViewModel)this.Element;
-
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-        Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(this.Node.BBox));
-    }
 }
