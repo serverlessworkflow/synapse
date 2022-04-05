@@ -52,8 +52,6 @@ Welcome to Synapse - Serverless Workflow Management System
         await this.BreadcrumbService.Use(KnownBreadcrumbs.Home);
         var start = new NodeViewModel("", "start-node", NodeShape.Circle, 20, 20)
         {
-            PaddingX = 0,
-            PaddingY = 0,
             Metadata = new Dictionary<string, object>()
             {
                 { "Type", "Start" },
@@ -95,8 +93,6 @@ Welcome to Synapse - Serverless Workflow Management System
         );
         var end = new NodeViewModel("", "end-node", NodeShape.Circle, 20, 20)
         {
-            PaddingX = 0,
-            PaddingY = 0,
             Metadata = new Dictionary<string, object>()
             {
                 { "Type", "End" },

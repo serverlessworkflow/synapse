@@ -13,15 +13,13 @@ namespace Synapse.Dashboard
             string? shape = null,
             double? width = Consts.ClusterWidth,
             double? height = Consts.ClusterHeight,
-            double? x = 0,
-            double? y = 0,
             double? radiusX = Consts.ClusterRadius,
             double? radiusY = Consts.ClusterRadius,
-            double? paddingX = Consts.ClusterPadding,
-            double? paddingY = Consts.ClusterPadding,
+            double? x = 0,
+            double? y = 0,
             Guid? parentId = null
         )
-            : base(children, label, cssClass, shape, width, height, x, y, radiusX, radiusY, paddingX, paddingY, typeof(Pages.StateTemplate), parentId)
+            : base(children, label, cssClass, shape, width, height, radiusX, radiusY, x, y, typeof(Pages.StateTemplate), parentId)
         { 
         
         }

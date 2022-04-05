@@ -21,16 +21,14 @@ namespace Neuroglia.Blazor.Dagre.Models
             string? shape = null,
             double? width = Consts.ClusterWidth,
             double? height = Consts.ClusterHeight,
-            double? x = 0,
-            double? y = 0,
             double? radiusX = Consts.ClusterRadius,
             double? radiusY = Consts.ClusterRadius,
-            double? paddingX = Consts.ClusterPadding,
-            double? paddingY = Consts.ClusterPadding,
+            double? x = 0,
+            double? y = 0,
             Type? componentType = null,
             Guid? parentId = null
         )
-            : base(label, cssClass, shape, width, height, x, y, radiusX, radiusY, paddingX, paddingY, componentType, parentId)
+            : base(label, cssClass, shape, width, height, radiusX, radiusY, x, y, componentType, parentId)
         {
             this._children = children ?? new Dictionary<Guid, INodeViewModel>();
             this._allNodes = new Dictionary<Guid, INodeViewModel>();
@@ -134,17 +132,16 @@ namespace Neuroglia.Blazor.Dagre.Models
    
         protected virtual void OnChildChanged()
         {
-            var minX = this._allNodes.Values.Select(node => node.X - node.BBox?.Width ?? 0 / 2).Min();
-            var maxX = this._allNodes.Values.Select(node => node.X + node.BBox?.Width ?? 0 / 2).Max();
-            var minY = this._allNodes.Values.Select(node => node.Y - node.BBox?.Height ?? 0 / 2).Min();
-            var maxY = this._allNodes.Values.Select(node => node.Y + node.BBox?.Height ?? 0 / 2).Max();
-            var width = maxX - minX;
-            var height = maxY - minY;
-            this.X = minX + width / 2;
-            this.Y = minY + height / 2;
-            this.Width = width;
-            this.Height = height;
-            //Console.WriteLine($"{minX} {maxX} {minY} {maxY} {this.Width} {this.Height}");
+            var minX = this._allNodes.Values.Select(node => node.X - (node.Width ?? 0) / 2).Min();
+            var maxX = this._allNodes.Values.Select(node => node.X + (node.Width ?? 0) / 2).Max();
+            var minY = this._allNodes.Values.Select(node => node.Y - (node.Height ?? 0) / 2).Min();
+            var maxY = this._allNodes.Values.Select(node => node.Y + (node.Height ?? 0) / 2).Max();
+            var centerX = this.Children.Values.Average(child => child.X);
+            var centerY = this.Children.Values.Average(child => child.Y);
+            this.X = centerX;
+            this.Y = centerY;
+            this.Width = maxX - minX + Consts.ClusterPaddingX;
+            this.Height = maxY - minY + Consts.ClusterPaddingY;
         }
     }
 }

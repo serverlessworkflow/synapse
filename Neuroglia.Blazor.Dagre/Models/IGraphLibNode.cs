@@ -1,11 +1,9 @@
 ﻿namespace Neuroglia.Blazor.Dagre.Models
 {
     public interface IGraphLibNode
-        : IIdentifiable, IDimension, IPosition, IPadding, ILabeled, IMetadata
+        : IIdentifiable, IDimension, IPosition, ILabeled, IMetadata
     {
         string? Class { get; set; }
-
-        double? Padding { get; set; }
 
         double? Rx { get; set; }
 

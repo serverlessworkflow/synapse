@@ -1,59 +1,40 @@
-﻿@using Neuroglia.Blazor.Dagre.Templates
-if (Cluster != null)
-    <g class="cluster" transform="translate(@State.X, @State.Y)">
-        <g class="cluster-shape">
-            @if (State.Shape == NodeShape.Circle)
-            {
-                <circle 
-                    cx="0" 
-                    cy="0"
-                    r="@((State.Width / 2).ToInvariantString())"
-                ></circle>
-            }
-            else if (State.Shape == NodeShape.Ellipse)
-            {
-                <ellipse 
-                    cx="0" 
-                    cy="0"
-                    rx="@((State.Width / 2).ToInvariantString())"
-                    ry="@((State.Height / 2).ToInvariantString())"
-                ></ellipse>
-            }
-            else
-            {        
-                <rect 
-                    x="@((0 - State.Width / 2).ToInvariantString())" 
-                    y="@((0 - State.Height / 2).ToInvariantString())" 
-                    width="@State.Width.ToInvariantString()" 
-                    height="@State.Height.ToInvariantString()"
-                    rx="@State.RadiusX.ToInvariantString()"
-                    ry="@State.RadiusY.ToInvariantString()"
-                ></rect>
-            }
-        </g>        
-        @if (!string.IsNullOrWhiteSpace(State.Label))
+﻿<g class="cluster" transform="translate(@State.X, @State.Y)">
+    <g class="cluster-shape">
+        @if (Cluster.Shape == NodeShape.Circle)
         {
-            <g class="label">
-                <foreignObject 
-                    x="@((0 - State.Width / 2).ToInvariantString())"
-                    y="@((State.Height / 2).ToInvariantString())" 
-                    width="@State.Width.ToInvariantString()" 
-                    height="@Consts.LabelHeight"
-                >
-                    <div>@State.Label</div>
-                </foreignObject>
-                <foreignObject 
-                    x="@((0 - State.Width / 2).ToInvariantString())"
-                    y="@((State.Height / 2 + 10).ToInvariantString())" 
-                    width="@State.Width.ToInvariantString()" 
-                    height="@Consts.LabelHeight"
-                >
-                    <div>Custom template</div>
-                </foreignObject>
-            </g>
+            <Circle BBox="Cluster.BBox" />
         }
-    </g>
-}
+        else if (Cluster.Shape == NodeShape.Ellipse)
+        {
+            <Ellipse BBox="Cluster.BBox" />
+        }
+        else
+        {        
+            <Rectangle BBox="Cluster.BBox" RadiusX="Cluster.RadiusX" RadiusY="Cluster.RadiusY" />
+        }
+    </g>        
+    @if (!string.IsNullOrWhiteSpace(State.Label))
+    {
+        <g class="label">
+            <foreignObject 
+                x="@((0 - State.Width / 2).ToInvariantString())"
+                y="@((State.Height / 2).ToInvariantString())" 
+                width="@State.Width.ToInvariantString()" 
+                height="@Consts.LabelHeight"
+            >
+                <div>@State.Label</div>
+            </foreignObject>
+            <foreignObject 
+                x="@((0 - State.Width / 2).ToInvariantString())"
+                y="@((State.Height / 2 + 10).ToInvariantString())" 
+                width="@State.Width.ToInvariantString()" 
+                height="@Consts.LabelHeight"
+            >
+                <div>Custom template</div>
+            </foreignObject>
+        </g>
+    }
+</g>
 @inherits ClusterTemplate
 @code {
     protected IClusterViewModel State => (IClusterViewModel)this.Element;

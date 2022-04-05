@@ -1,7 +1,7 @@
 ﻿namespace Neuroglia.Blazor.Dagre.Models
 {
     public interface INodeViewModel
-        : IGraphElement, IPosition, IDimension, IRadius, IPadding
+        : IGraphElement, IPosition, IDimension, IRadius
     {
         Guid? ParentId { get; set; }
         string? Shape { get; set; }

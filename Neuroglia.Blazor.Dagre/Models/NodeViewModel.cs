@@ -45,32 +45,6 @@
         [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public virtual double? RadiusY { get; set; }
 
-        protected double? _paddingX { get; set; }
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-        [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public virtual double? PaddingX
-        {
-            get => this._paddingX;
-            set
-            {
-                this._paddingX = value;
-                this.UpdateBBox();
-            }
-        }
-
-        protected double? _paddingY { get; set; }
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-        [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public virtual double? PaddingY
-        {
-            get => this._paddingY;
-            set
-            {
-                this._paddingY = value;
-                this.UpdateBBox();
-            }
-        }
-
         [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public virtual Guid? ParentId { get; set; }
@@ -87,7 +61,7 @@
         public virtual event Action? Changed;
 
         public NodeViewModel()
-            : this("", null, null, Consts.NodeWidth, Consts.NodeHeight, 0 , 0, Consts.NodeRadius, Consts.NodeRadius, Consts.NodePadding, Consts.NodePadding, null, null)
+            : this("", null, null, Consts.NodeWidth, Consts.NodeHeight, Consts.NodeRadius, Consts.NodeRadius, 0, 0, null, null)
         { }
 
         public NodeViewModel(
@@ -96,12 +70,10 @@
             string? shape = null,
             double? width = Consts.NodeWidth, 
             double? height = Consts.NodeHeight,
-            double? x = 0, 
-            double? y = 0, 
             double? radiusX = Consts.NodeRadius,
             double? radiusY = Consts.NodeRadius,
-            double? paddingX = Consts.NodePadding, 
-            double? paddingY = Consts.NodePadding,
+            double? x = 0,
+            double? y = 0,
             Type? componentType = null,
             Guid? parentId = null
         )
@@ -116,8 +88,6 @@
             this.Y = y;
             this.RadiusX = radiusX ?? 0;
             this.RadiusY = radiusY ?? 0;
-            this.PaddingX = paddingX ?? 0;
-            this.PaddingY = paddingY ?? 0;
             this._bbox = new BoundingBox();
             this.ParentId = parentId;
             this.UpdateBBox();
@@ -139,12 +109,10 @@
             {
                 case NodeShape.Circle:
                 case NodeShape.Ellipse:
-                    this._bbox = new BoundingBox((this.Width + this.PaddingX + this.PaddingY) / 2, (this.Height + this.PaddingX + this.PaddingY) / 2, 0, 0);
+                    this._bbox = new BoundingBox(this.Width / 2, this.Height / 2, 0, 0);
                     break;
                 default:
-                    var rectWidth = this.Width + this.PaddingX * 2;
-                    var rectHeight = this.Height + this.PaddingY * 2;
-                    this._bbox = new BoundingBox(rectWidth, rectHeight, 0 - rectWidth / 2, 0 - rectHeight / 2);
+                    this._bbox = new BoundingBox(this.Width, this.Height, 0 - this.Width / 2, 0 - this.Height / 2);
                     break;
 
             }
