@@ -26,6 +26,7 @@
     {
         if (this.Layout != null)
             this.Layout.RightSidebar = null;
+        GC.SuppressFinalize(this);
     }
 
 }

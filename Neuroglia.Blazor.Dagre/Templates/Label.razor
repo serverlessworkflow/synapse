@@ -1,0 +1,20 @@
+﻿@if (!string.IsNullOrWhiteSpace(Text)) {
+<g class="label">
+    <foreignObject 
+        x="@((BBox.X).ToInvariantString())"
+        y="@((0 - Consts.LabelHeight / 2).ToInvariantString())" 
+        width="@BBox.Width.ToInvariantString()" 
+        height="@Consts.LabelHeight"
+    >
+        <div>@Text</div>
+    </foreignObject>
+</g>
+}
+
+@code {
+    [Parameter]
+    public virtual string Text { get; set; } = null!;
+
+    [Parameter]
+    public virtual IBoundingBox BBox { get; set; } = null!;
+}

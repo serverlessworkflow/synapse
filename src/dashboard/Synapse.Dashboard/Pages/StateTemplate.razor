@@ -1,0 +1,41 @@
+﻿<g class="cluster" transform="translate(@State.X, @State.Y)">
+    <g class="cluster-shape">
+        @if (Cluster.Shape == NodeShape.Circle)
+        {
+            <Circle BBox="Cluster.BBox" />
+        }
+        else if (Cluster.Shape == NodeShape.Ellipse)
+        {
+            <Ellipse BBox="Cluster.BBox" />
+        }
+        else
+        {        
+            <Rectangle BBox="Cluster.BBox" RadiusX="Cluster.RadiusX" RadiusY="Cluster.RadiusY" />
+        }
+    </g>        
+    @if (!string.IsNullOrWhiteSpace(State.Label))
+    {
+        <g class="label">
+            <foreignObject 
+                x="@((0 - State.Width / 2).ToInvariantString())"
+                y="@((State.Height / 2).ToInvariantString())" 
+                width="@State.Width.ToInvariantString()" 
+                height="@Consts.LabelHeight"
+            >
+                <div>@State.Label</div>
+            </foreignObject>
+            <foreignObject 
+                x="@((0 - State.Width / 2).ToInvariantString())"
+                y="@((State.Height / 2 + 10).ToInvariantString())" 
+                width="@State.Width.ToInvariantString()" 
+                height="@Consts.LabelHeight"
+            >
+                <div>Custom template</div>
+            </foreignObject>
+        </g>
+    }
+</g>
+@inherits ClusterTemplate
+@code {
+    protected IClusterViewModel State => (IClusterViewModel)this.Element;
+}

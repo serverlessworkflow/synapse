@@ -30,5 +30,6 @@
     {
         if (this.Layout != null)
             this.Layout.PropertyChanged -= this.OnLayoutChanged;
+        GC.SuppressFinalize(this);
     }
 }

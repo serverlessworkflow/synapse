@@ -1,0 +1,27 @@
+﻿<g class="cluster @Cluster.CssClass" transform="translate(@Cluster.X, @Cluster.Y)">
+    <g class="cluster-shape">
+        @if (Cluster.Shape == NodeShape.Circle)
+        {
+            <Circle BBox="Cluster.BBox" />
+        }
+        else if (Cluster.Shape == NodeShape.Ellipse)
+        {
+            <Ellipse BBox="Cluster.BBox" />
+        }
+        else
+        {        
+            <Rectangle BBox="Cluster.BBox" RadiusX="Cluster.RadiusX" RadiusY="Cluster.RadiusY" />
+        }
+    </g>
+    <Label Text="@Cluster.Label" BBox="Cluster.BBox" />
+</g>
+
+@code {
+    [CascadingParameter]
+    public virtual IGraphViewModel Graph { get; set; } = null!;
+
+    [Parameter]
+    public virtual IGraphElement Element { get; set; } = null!;
+
+    protected IClusterViewModel Cluster => (IClusterViewModel)this.Element;
+}

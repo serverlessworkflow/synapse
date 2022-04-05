@@ -1,0 +1,48 @@
+﻿<g class="edge-path @Edge.CssClass">
+    <path 
+        d="@GetPath(Edge)"
+        marker-start="@GetDefinitionUrl(Edge.StartMarkerId)"
+        marker-end="@GetDefinitionUrl(Edge.EndMarkerId)"
+    ></path>
+    <g class="edge-label label">
+        <foreignObject 
+            x="@((Edge.BBox.X - Edge.BBox.Width / 2).ToInvariantString())"
+            y="@(Edge.BBox.Y.ToInvariantString())" 
+            width="@Edge.BBox.Width.ToInvariantString()" 
+            height="@Consts.LabelHeight"
+        >
+            <div>@Edge.Label</div>
+        </foreignObject>
+    </g>
+</g>
+
+@code {
+    [CascadingParameter]
+    public virtual IGraphViewModel Graph { get; set; } = null!;
+
+    [Parameter]
+    public virtual IGraphElement Element { get; set; } = null!;
+
+    protected IEdgeViewModel Edge => (IEdgeViewModel)this.Element;
+
+    protected virtual string GetPath(IEdgeViewModel edge)
+    {
+        switch(edge.Shape)
+        {
+            case EdgeShape.BSpline:
+                //return PathBuilder.GetBSplinePath(edge.Points);                
+            default:
+                return PathBuilder.GetLinearPath(edge.Points);
+        }
+    }
+
+    protected virtual string? GetDefinitionUrl(string? marker)
+    {
+        if (string.IsNullOrWhiteSpace(marker))
+        {
+            return null;
+        }
+        return $"url(#{marker})";
+    }
+
+}

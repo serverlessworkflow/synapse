@@ -34,5 +34,6 @@
     {
         if (this.BreadcrumbService != null)
             this.BreadcrumbService.PropertyChanged -= this.OnBreadcrumbChanged;
+        GC.SuppressFinalize(this);
     }
 }

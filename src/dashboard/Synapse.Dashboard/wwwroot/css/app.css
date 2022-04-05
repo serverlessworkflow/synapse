@@ -12212,6 +12212,11 @@ body {
     opacity: 0;
   }
 }
+* {
+  padding: 0;
+  margin: 0;
+}
+
 #blazor-error-ui {
   background: #F29325;
   bottom: 0;
