@@ -15,6 +15,8 @@
  *
  */
 
+using Synapse.Domain;
+
 namespace Synapse.Application.Commands.Generic
 {
 
@@ -61,16 +63,26 @@ namespace Synapse.Application.Commands.Generic
     public class DeleteCommandHandler<TAggregate, TKey>
         : CommandHandlerBase,
         ICommandHandler<V1DeleteCommand<TAggregate, TKey>>
-        where TAggregate : class, IIdentifiable<TKey>
+        where TAggregate : class, IIdentifiable<TKey>, IDeletable
         where TKey : IEquatable<TKey>
     {
 
+        /// <summary>
+        /// Initializes a new <see cref="DeleteCommandHandler{TAggregate, TKey}"/>
+        /// </summary>
+        /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
+        /// <param name="mediator">The service used to mediate calls</param>
+        /// <param name="mapper">The service used to map objects</param>
+        /// <param name="repository">The <see cref="IRepository"/> used to manage the entity to delete</param>
         public DeleteCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IRepository<TAggregate, TKey> repository) 
             : base(loggerFactory, mediator, mapper)
         {
             this.Repository = repository;
         }
 
+        /// <summary>
+        /// Gets the <see cref="IRepository"/> used to manage the entity to delete
+        /// </summary>
         protected IRepository<TAggregate, TKey> Repository { get; }
 
         /// <inheritdoc/>
@@ -78,7 +90,12 @@ namespace Synapse.Application.Commands.Generic
         {
             if (!await this.Repository.ContainsAsync(command.Id, cancellationToken))
                 throw DomainException.NullReference(typeof(TAggregate), command.Id);
-            await this.Repository.RemoveAsync(command.Id, cancellationToken);
+            var aggregate = await this.Repository.FindAsync(command.Id, cancellationToken);
+            if (aggregate == null)
+                throw DomainException.NullReference(typeof(TAggregate), command.Id);
+            aggregate.Delete();
+            await this.Repository.UpdateAsync(aggregate, cancellationToken);
+            await this.Repository.RemoveAsync(aggregate, cancellationToken);
             await this.Repository.SaveChangesAsync(cancellationToken);
             return this.Ok();
         }

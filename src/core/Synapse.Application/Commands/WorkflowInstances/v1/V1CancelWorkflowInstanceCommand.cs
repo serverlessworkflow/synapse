@@ -19,7 +19,7 @@ namespace Synapse.Application.Commands.WorkflowInstances
 {
 
     /// <summary>
-    /// Represents the <see cref="ICommand"/> used to cancel the execution of an existing <see cref="Domain.Models.V1WorkflowInstance"/>
+    /// Represents the <see cref="ICommand"/> used to cancel the execution of an existing <see cref="V1WorkflowInstance"/>
     /// </summary>
     [DataTransferObjectType(typeof(Integration.Commands.WorkflowInstances.V1CancelWorkflowInstanceCommand))]
     public class V1CancelWorkflowInstanceCommand
@@ -37,14 +37,14 @@ namespace Synapse.Application.Commands.WorkflowInstances
         /// <summary>
         /// Initializes a new <see cref="V1CancelWorkflowInstanceCommand"/>
         /// </summary>
-        /// <param name="id">The id of the <see cref="Domain.Models.V1WorkflowInstance"/> to cancel</param>
+        /// <param name="id">The id of the <see cref="V1WorkflowInstance"/> to cancel</param>
         public V1CancelWorkflowInstanceCommand(string id)
         {
             this.WorkflowInstanceId = id;
         }
 
         /// <summary>
-        /// Gets the id of the <see cref="Domain.Models.V1WorkflowInstance"/> to cancel
+        /// Gets the id of the <see cref="V1WorkflowInstance"/> to cancel
         /// </summary>
         public virtual string WorkflowInstanceId { get; protected set; }
 

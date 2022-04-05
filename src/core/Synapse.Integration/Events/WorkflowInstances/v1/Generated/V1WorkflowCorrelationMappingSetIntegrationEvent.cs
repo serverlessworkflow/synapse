@@ -32,16 +32,30 @@ namespace Synapse.Integration.Events.WorkflowInstances
 	{
 
 		/// <summary>
+		/// Gets the id of the aggregate that has produced the event
+		/// </summary>
+		[DataMember(Name = "AggregateId", Order = 1)]
+		[Description("Gets the id of the aggregate that has produced the event")]
+		public virtual string AggregateId { get; set; }
+
+		/// <summary>
+		/// Gets the date and time at which the event has been produced
+		/// </summary>
+		[DataMember(Name = "CreatedAt", Order = 2)]
+		[Description("Gets the date and time at which the event has been produced")]
+		public virtual DateTime CreatedAt { get; set; }
+
+		/// <summary>
 		/// The key of the V1WorkflowInstance's correlation mapping that has been set
 		/// </summary>
-		[DataMember(Name = "Key", Order = 1)]
+		[DataMember(Name = "Key", Order = 3)]
 		[Description("The key of the V1WorkflowInstance's correlation mapping that has been set")]
 		public virtual string Key { get; set; }
 
 		/// <summary>
 		/// The value of the V1WorkflowInstance's correlation mapping that has been set
 		/// </summary>
-		[DataMember(Name = "Value", Order = 2)]
+		[DataMember(Name = "Value", Order = 4)]
 		[Description("The value of the V1WorkflowInstance's correlation mapping that has been set")]
 		public virtual string Value { get; set; }
 

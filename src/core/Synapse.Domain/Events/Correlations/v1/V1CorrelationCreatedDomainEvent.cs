@@ -23,7 +23,7 @@ namespace Synapse.Domain.Events.Correlations
     /// <summary>
     /// Represents the <see cref="IDomainEvent"/> fired whenever a new <see cref="V1Correlation"/> has been created
     /// </summary>
-    [DataTransferObjectType(typeof(V1CorrelatedCreatedIntegrationEvent))]
+    [DataTransferObjectType(typeof(V1CorrelationCreatedIntegrationEvent))]
     public class V1CorrelationCreatedDomainEvent
         : DomainEvent<Models.V1Correlation, string>
     {

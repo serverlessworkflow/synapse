@@ -92,7 +92,7 @@ namespace Synapse.Application.Commands.WorkflowInstances
 
         /// <inheritdoc/>
         public V1CreateWorkflowInstanceCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IHttpClientFactory httpClientFactory,
-            IRepository<V1Workflow> workflows, IRepository<Domain.Models.V1WorkflowInstance> workflowInstances, IExpressionEvaluatorProvider expressionEvaluatorProvider)
+            IRepository<V1Workflow> workflows, IRepository<V1WorkflowInstance> workflowInstances, IExpressionEvaluatorProvider expressionEvaluatorProvider)
             : base(loggerFactory, mediator, mapper)
         {
             this.HttpClientFactory = httpClientFactory;
@@ -114,7 +114,7 @@ namespace Synapse.Application.Commands.WorkflowInstances
         /// <summary>
         /// Gets the <see cref="IRepository"/> used to manage <see cref="Domain.Models.V1WorkflowInstance"/>s
         /// </summary>
-        protected IRepository<Domain.Models.V1WorkflowInstance> WorkflowInstances { get;}
+        protected IRepository<V1WorkflowInstance> WorkflowInstances { get;}
 
         /// <summary>
         /// Gets the service used to provide <see cref="IExpressionEvaluator"/>s
@@ -164,6 +164,9 @@ namespace Synapse.Application.Commands.WorkflowInstances
             }
             var workflowInstance = await this.WorkflowInstances.AddAsync(new(key, workflow, command.ActivationType, command.InputData, command.CorrelationContext), cancellationToken);
             await this.WorkflowInstances.SaveChangesAsync(cancellationToken);
+            workflow.Instanciate();
+            await this.Workflows.UpdateAsync(workflow, cancellationToken);
+            await this.Workflows.SaveChangesAsync(cancellationToken);
             if (command.AutoStart)
                 await this.Mediator.ExecuteAndUnwrapAsync(new V1StartWorkflowInstanceCommand(workflowInstance.Id), cancellationToken);
             return this.Ok(this.Mapper.Map<Integration.Models.V1WorkflowInstance>(workflowInstance));

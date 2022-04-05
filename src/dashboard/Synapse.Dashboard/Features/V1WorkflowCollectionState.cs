@@ -1,4 +1,5 @@
 ﻿using Neuroglia.Data.Flux;
+using Synapse.Apis.Management;
 using Synapse.Integration.Models;
 
 namespace Synapse.Dashboard
@@ -11,9 +12,13 @@ namespace Synapse.Dashboard
 
         public V1WorkflowCollectionState()
         {
-            this.Add(new() { Id = "hello:0.1.0-alpha1", Definition = new() { Id= "hello", Name = "Hello", Version = "0.1.0" } });
-            this.Add(new() { Id = "hello:0.2.0-alpha1", Definition = new() { Id = "hello", Name = "Hello", Version = "0.2.0" } });
-            this.Add(new() { Id = "hello:0.3.0-alpha1", Definition = new() { Id = "hello", Name = "Hello", Version = "0.3.0" } });
+
+        }
+
+        public V1WorkflowCollectionState(IEnumerable<V1Workflow> workflows)
+            : base(workflows)
+        {
+
         }
 
     }
@@ -22,11 +27,49 @@ namespace Synapse.Dashboard
     public static class V1WorkflowCollectionReducers
     {
 
+        public static V1WorkflowCollectionState GetWorkflowsFromApiSucceeded(V1WorkflowCollectionState state, SetV1WorkflowCollection action)
+        {
+            return new(action.Workflows);
+        }
+
         public static V1WorkflowCollectionState AddV1Workflow(V1WorkflowCollectionState state, AddV1Workflow action)
         {
             state.Add(action.Workflow);
             return state;
         }
+
+        public static V1WorkflowCollectionState RemoveV1Workflow(V1WorkflowCollectionState state, RemoveV1Workflow action)
+        {
+            var workflow = state.FirstOrDefault(w => w.Id == action.WorkflowId);
+            if(workflow != null)
+                state.Remove(workflow);
+            return state;
+        }
+
+    }
+
+    [Effect]
+    public static class V1WorkflowCollectionEffects
+    {
+
+        public static async Task OnListV1Workflows(ListV1Workflows action, IEffectContext context)
+        {
+            var api = context.Services.GetRequiredService<ISynapseManagementApi>();
+            var workflows = await api.GetWorkflowsAsync();
+            context.Dispatcher.Dispatch(new SetV1WorkflowCollection(workflows));
+        }
+
+    }
+
+    public class SetV1WorkflowCollection
+    {
+
+        public SetV1WorkflowCollection(IEnumerable<V1Workflow> workflows)
+        {
+            this.Workflows = workflows;
+        }
+
+        public IEnumerable<V1Workflow> Workflows { get; }
 
     }
 
@@ -45,12 +88,19 @@ namespace Synapse.Dashboard
     public class RemoveV1Workflow
     {
 
-        public RemoveV1Workflow(V1Workflow workflow)
+        public RemoveV1Workflow(string workflowId)
         {
-            this.Workflow = workflow;
+            this.WorkflowId = workflowId;
         }
 
-        public V1Workflow Workflow { get; }
+        public string WorkflowId { get; }
+
+    }
+
+    public class ListV1Workflows
+    {
+
+
 
     }
 

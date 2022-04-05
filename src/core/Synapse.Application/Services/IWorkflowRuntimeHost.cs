@@ -26,15 +26,6 @@ namespace Synapse.Application.Services
     {
 
         /// <summary>
-        /// Schedules the execution of the specified <see cref="V1WorkflowInstance"/>
-        /// </summary>
-        /// <param name="workflowInstance">The <see cref="V1WorkflowInstance"/> to schedule the execution of</param>
-        /// <param name="at">The date and time for which to schedule the <see cref="V1WorkflowInstance"/></param>
-        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-        /// <returns>An id used to identify the <see cref="V1WorkflowInstance"/>'s runtime</returns>
-        Task<string> ScheduleAsync(V1WorkflowInstance workflowInstance, DateTimeOffset at, CancellationToken cancellationToken = default);
-
-        /// <summary>
         /// Starts the execution of the specified <see cref="V1WorkflowInstance"/>
         /// </summary>
         /// <param name="workflowInstance">The <see cref="V1WorkflowInstance"/> to start the execution of</param>

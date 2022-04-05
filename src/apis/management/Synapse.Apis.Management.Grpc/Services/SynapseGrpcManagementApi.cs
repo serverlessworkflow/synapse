@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+
 using Microsoft.Extensions.Logging;
 using Neuroglia.Mapping;
 using Neuroglia.Mediation;
@@ -93,7 +94,7 @@ namespace Synapse.Apis.Management.Grpc
         /// <inheritdoc/>
         public virtual async Task<GrpcApiResult> DeleteWorkflowAsync(string id, CallContext context = default)
         {
-            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(this.Mapper.Map<V1DeleteCommand<V1Workflow, string>>(id), context.CancellationToken));
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new Application.Commands.Workflows.V1DeleteWorkflowCommand(id), context.CancellationToken));
         }
 
         #endregion
@@ -125,11 +126,28 @@ namespace Synapse.Apis.Management.Grpc
         }
 
         /// <inheritdoc/>
-        public virtual async Task<GrpcApiResult> DeleteWorkflowInstanceAsync(string id, CallContext context = default)
+        public virtual async Task<GrpcApiResult> SuspendWorkflowInstanceAsync(string id, CallContext context = default)
         {
-            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(this.Mapper.Map<V1DeleteCommand<V1WorkflowInstance, string>>(id), context.CancellationToken));
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new Application.Commands.WorkflowInstances.V1SuspendWorkflowInstanceCommand(id), context.CancellationToken));
         }
 
+        /// <inheritdoc/>
+        public virtual async Task<GrpcApiResult> ResumeWorkflowInstanceAsync(string id, CallContext context = default)
+        {
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new Application.Commands.WorkflowInstances.V1ResumeWorkflowInstanceCommand(id), context.CancellationToken));
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<GrpcApiResult> CancelWorkflowInstanceAsync(string id, CallContext context = default)
+        {
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new Application.Commands.WorkflowInstances.V1CancelWorkflowInstanceCommand(id), context.CancellationToken));
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<GrpcApiResult> DeleteWorkflowInstanceAsync(string id, CallContext context = default)
+        {
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new Application.Commands.WorkflowInstances.V1DeleteWorkflowInstanceCommand(id), context.CancellationToken));
+        }
 
         #endregion
 
@@ -156,7 +174,7 @@ namespace Synapse.Apis.Management.Grpc
         /// <inheritdoc/>
         public virtual async Task<GrpcApiResult> DeleteCorrelationAsync(string id, CallContext context = default)
         {
-            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(this.Mapper.Map<V1DeleteCommand<V1Correlation, string>>(id), context.CancellationToken));
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new V1DeleteCommand<V1Correlation, string>(id), context.CancellationToken));
         }
 
         #endregion

@@ -4,7 +4,7 @@
 <Column T="T">
     <HeaderTemplate />
     <CellTemplate Context="context">
-        <button @onclick="async () => await OnViewDetails.InvokeAsync(context.Item)" class="btn btn-outline-dark"><small class="oi oi-info"></small></button>
+        <button @onclick="async () => await OnViewDetails.InvokeAsync(context.Item)" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-info"></small></button>
     </CellTemplate>
 </Column>
 

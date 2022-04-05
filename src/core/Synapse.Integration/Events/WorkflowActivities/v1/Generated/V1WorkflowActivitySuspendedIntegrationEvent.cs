@@ -31,6 +31,20 @@ namespace Synapse.Integration.Events.WorkflowActivities
 		: V1IntegrationEvent
 	{
 
+		/// <summary>
+		/// Gets the id of the aggregate that has produced the event
+		/// </summary>
+		[DataMember(Name = "AggregateId", Order = 1)]
+		[Description("Gets the id of the aggregate that has produced the event")]
+		public virtual string AggregateId { get; set; }
+
+		/// <summary>
+		/// Gets the date and time at which the event has been produced
+		/// </summary>
+		[DataMember(Name = "CreatedAt", Order = 2)]
+		[Description("Gets the date and time at which the event has been produced")]
+		public virtual DateTime CreatedAt { get; set; }
+
     }
 
 }

@@ -171,6 +171,15 @@ ${
                 value = value.Substring(0, index);
             comments = comments.Replace(match.Value, value);
         }
+        foreach(Match match in Regex.Matches(comments, @"<see href="".*"">[^.]*<\/see>"))
+        {
+            Match innerMatch = Regex.Match(match.Value, @"(?<=<see href="")(?:[^""]*"">)(.*)(?=<\/see>)");
+            string value = innerMatch.Groups[1].Value;
+            var index = value.IndexOf("<");
+            if(index > -1)
+                value = value.Substring(0, index);
+            comments = comments.Replace(match.Value, value);
+        }
         if(comments.StartsWith("Gets "))
             comments = comments.Substring(5);
         comments = char.ToUpper(comments[0]) + comments.Substring(1);
@@ -241,6 +250,24 @@ ${
     {
         StringBuilder output = new StringBuilder();
         var order = 1;
+        var description = "Gets the id of the aggregate that has produced the event";
+        output.AppendLine();
+        output.AppendLine(Indent(2, "/// <summary>"));
+        output.AppendLine(Indent(2, $"/// {description}"));
+        output.AppendLine(Indent(2, "/// </summary>"));
+        output.AppendLine(Indent(2, $"[DataMember(Name = \"AggregateId\", Order = {order})]"));
+        output.AppendLine(Indent(2, $@"[Description(""{description}"")]"));
+        output.AppendLine(Indent(2, $"public virtual string AggregateId {{ get; set; }}"));
+        order++;
+        description = "Gets the date and time at which the event has been produced";
+        output.AppendLine();
+        output.AppendLine(Indent(2, "/// <summary>"));
+        output.AppendLine(Indent(2, $"/// {description}"));
+        output.AppendLine(Indent(2, "/// </summary>"));
+        output.AppendLine(Indent(2, $"[DataMember(Name = \"CreatedAt\", Order = {order})]"));
+        output.AppendLine(Indent(2, $@"[Description(""{description}"")]"));
+        output.AppendLine(Indent(2, $"public virtual DateTime CreatedAt {{ get; set; }}"));
+        order++;
         foreach(Property property in c.Properties.Where(p => !p.Attributes.Any(a => a.Name == "JsonIgnore") && !p.Attributes.Any(a => a.Name == "ProjectNever") || p.Attributes.Any(a => a.Name == "Map")))
         {
             output.AppendLine();

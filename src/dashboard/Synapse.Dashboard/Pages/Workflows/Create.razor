@@ -32,10 +32,7 @@
             };
             var workflow = await this.SynapseApi.CreateWorkflowAsync(command);
             if (workflow != null)
-            {
-                this.Dispatcher.Dispatch(new AddV1Workflow(workflow));
                 this.NavigationManager.NavigateTo("workflows");
-            }
         }
     }
 

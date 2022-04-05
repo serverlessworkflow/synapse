@@ -39,6 +39,13 @@ namespace Synapse.Integration.Models
 		[Description("The V1Workflow's definition")]
 		public virtual WorkflowDefinition Definition { get; set; }
 
+		/// <summary>
+		/// The date and time at which the V1Workflow was last instanciated
+		/// </summary>
+		[DataMember(Name = "LastInstanciated", Order = 2)]
+		[Description("The date and time at which the V1Workflow was last instanciated")]
+		public virtual DateTime? LastInstanciated { get; set; }
+
     }
 
 }

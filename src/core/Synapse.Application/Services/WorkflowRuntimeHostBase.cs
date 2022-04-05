@@ -15,8 +15,6 @@
  *
  */
 
-using Microsoft.Extensions.Hosting;
-
 namespace Synapse.Application.Services
 {
 
@@ -40,9 +38,6 @@ namespace Synapse.Application.Services
         /// Gets the service used to perform logging
         /// </summary>
         protected ILogger Logger { get; }
-
-        /// <inheritdoc/>
-        public abstract Task<string> ScheduleAsync(V1WorkflowInstance workflowInstance, DateTimeOffset at, CancellationToken cancellationToken = default);
 
         /// <inheritdoc/>
         public abstract Task<string> StartAsync(V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default);

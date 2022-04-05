@@ -2,8 +2,12 @@
 @page "/workflows/{workflowId}/instance/{workflowInstanceId}"
 @using Blazor.Diagrams.Core
 @using Microsoft.AspNetCore.SignalR.Client
+@using Neuroglia.Data.Flux
 @using Newtonsoft.Json
 @using System.Text
+@implements IDisposable
+@inject IStore Store
+@inject IDispatcher Dispatcher
 @inject ISynapseManagementApi SynapseApi
 @inject IWorkflowDiagramBuilder WorkflowDiagramBuilder
 @inject IMonacoEditorHelper MonacoEditorHelper
@@ -84,8 +88,8 @@
                         @if (workflow?.Definition != null)
                         {
                             <MonacoEditor
-                            CssClass="h-100 flex-grow"
-                            ConstructionOptions="MonacoEditorHelper.GetStandaloneEditorConstructionOptions(JsonConvert.SerializeObject(workflow.Definition, Formatting.Indented), true)"/>
+                                CssClass="h-100 flex-grow"
+                                ConstructionOptions="MonacoEditorHelper.GetStandaloneEditorConstructionOptions(JsonConvert.SerializeObject(workflow.Definition, Formatting.Indented), true)"/>
                         }
                     </TabPage>
                     <TabPage Header="Metrics">
@@ -120,11 +124,13 @@ else
     [Parameter]
     public string? WorkflowInstanceId { get; set; } = null!;
 
+    private IDisposable? _WorkflowInstanceSubscription;
+    protected IFeature<V1WorkflowInstanceCollectionState> _WorkflowInstanceFeature = null!;
     protected V1Workflow workflow = null!;
     protected V1WorkflowInstance workflowInstance = null!;
     protected List<V1WorkflowActivity> sortedActivities = new List<V1WorkflowActivity>();
     protected Diagram diagram { get; set; } = null!;
-    protected IQueryable<V1WorkflowInstance> instances = null!;
+    protected List<V1WorkflowInstance> instances = new();
     protected IEnumerable<IBreadcrumbItem> workflowBreadCrumbBase = null!;
 
     protected override async Task OnInitializedAsync()
@@ -132,9 +138,15 @@ else
         await base.OnInitializedAsync();
         this.workflow = await this.SynapseApi.GetWorkflowByIdAsync(this.WorkflowId);
         this.diagram = await this.WorkflowDiagramBuilder.BuildDiagram(this.workflow.Definition);
-        this.instances = await this.FetchWorkflowInstancesAsync();
+        this._WorkflowInstanceFeature = this.Store.GetFeature<V1WorkflowInstanceCollectionState>();
+        this._WorkflowInstanceSubscription = this._WorkflowInstanceFeature
+            .Subscribe(instances =>
+            {
+                this.instances = instances;
+                this.StateHasChanged();;
+            });
+        this.Dispatcher.Dispatch(new ListV1WorkflowInstancesByDefinition(this.WorkflowId));
         this.diagram.DisplayActivityStatusFor(this.instances);
-        this.HubConnection.On<V1Event>(nameof(ISynapseMonitoringApiClient.PublishIntegrationEvent), this.OnIntegrationEvent);
         await this.BreadcrumbService.Use(KnownBreadcrumbs.Workflows);
         await this.BreadcrumbService.AddCurrentUri(this.WorkflowId);
         this.workflowBreadCrumbBase = new List<IBreadcrumbItem>(this.BreadcrumbService.Items);
@@ -159,11 +171,6 @@ else
         this.StateHasChanged();
     }
 
-    protected async Task<IQueryable<V1WorkflowInstance>> FetchWorkflowInstancesAsync()
-    {
-        return (await this.SynapseApi.GetWorkflowInstancesAsync($"$filter={nameof(V1WorkflowInstance.WorkflowId)} eq '{this.WorkflowId}'")).AsQueryable();
-    }
-
     protected string GetCssClassFor(V1WorkflowInstanceStatus workflowInstanceStatus)
     {
         return workflowInstanceStatus switch
@@ -180,26 +187,15 @@ else
         };
     }
 
-    protected async Task OnIntegrationEvent(V1Event e)
-    {
-        if (e.Type.Split('/')[1] != "v1workflowinstance"
-            && e.Type.Split('/')[1] != "v1workflowactivity")
-            return;
-        this.instances = await this.FetchWorkflowInstancesAsync();
-        if (this.WorkflowInstanceId == null)
-        {
-            this.diagram.DisplayActivityStatusFor(this.instances);
-        }
-        else
-        {
-            this.diagram.DisplayActivityStatusFor(this.instances.Where(i => i.Id == this.WorkflowInstanceId));
-        }
-        this.StateHasChanged();
-    }
-
     private void OnViewWorkflowInstance(V1WorkflowInstance workflowInstance)
     {
         this.NavigationManager.NavigateTo($"/workflows/{this.WorkflowId}/instance/{workflowInstance.Id}");
+    }
+
+    public void Dispose()
+    {
+        this._WorkflowInstanceSubscription?.Dispose();
+        this._WorkflowInstanceSubscription = null;
     }
 
 }

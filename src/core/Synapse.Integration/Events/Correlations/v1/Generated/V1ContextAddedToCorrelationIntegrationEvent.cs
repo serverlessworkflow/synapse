@@ -32,9 +32,23 @@ namespace Synapse.Integration.Events.Correlations
 	{
 
 		/// <summary>
+		/// Gets the id of the aggregate that has produced the event
+		/// </summary>
+		[DataMember(Name = "AggregateId", Order = 1)]
+		[Description("Gets the id of the aggregate that has produced the event")]
+		public virtual string AggregateId { get; set; }
+
+		/// <summary>
+		/// Gets the date and time at which the event has been produced
+		/// </summary>
+		[DataMember(Name = "CreatedAt", Order = 2)]
+		[Description("Gets the date and time at which the event has been produced")]
+		public virtual DateTime CreatedAt { get; set; }
+
+		/// <summary>
 		/// The V1CorrelationContext that has been added to the V1Correlation
 		/// </summary>
-		[DataMember(Name = "Context", Order = 1)]
+		[DataMember(Name = "Context", Order = 3)]
 		[Description("The V1CorrelationContext that has been added to the V1Correlation")]
 		public virtual V1CorrelationContext Context { get; set; }
 

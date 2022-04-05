@@ -54,10 +54,25 @@ namespace Synapse.Domain.Models
         /// </summary>
         public virtual WorkflowDefinition Definition { get; protected set; }
 
-        /// <inheritdoc/>
-        public override string ToString()
+        /// <summary>
+        /// Gets the date and time at which the <see cref="V1Workflow"/> was last instanciated
+        /// </summary>
+        public virtual DateTimeOffset? LastInstanciated { get; protected set; }
+
+        /// <summary>
+        /// Instanciates the <see cref="V1Workflow"/>
+        /// </summary>
+        public virtual void Instanciate()
         {
-            return this.Id;
+            this.On(this.RegisterEvent(new V1WorkflowInstanciatedDomainEvent(this.Id)));
+        }
+
+        /// <summary>
+        /// Deletes the <see cref="V1Workflow"/>
+        /// </summary>
+        public virtual void Delete()
+        {
+            this.On(this.RegisterEvent(new V1WorkflowDeletedDomainEvent(this.Id)));
         }
 
         /// <summary>
@@ -70,6 +85,31 @@ namespace Synapse.Domain.Models
             this.CreatedAt = e.CreatedAt;
             this.LastModified = e.CreatedAt;
             this.Definition = e.Definition;
+        }
+
+        /// <summary>
+        /// Handles the specified <see cref="V1WorkflowInstanciatedDomainEvent"/>
+        /// </summary>
+        /// <param name="e">The <see cref="V1WorkflowInstanciatedDomainEvent"/> to handle</param>
+        protected virtual void On(V1WorkflowInstanciatedDomainEvent e)
+        {
+            this.LastModified = e.CreatedAt;
+            this.LastInstanciated = e.CreatedAt;
+        }
+
+        /// <summary>
+        /// Handles the specified <see cref="V1WorkflowDeletedDomainEvent"/>
+        /// </summary>
+        /// <param name="e">The <see cref="V1WorkflowDeletedDomainEvent"/> to handle</param>
+        protected virtual void On(V1WorkflowDeletedDomainEvent e)
+        {
+
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return this.Id;
         }
 
     }
