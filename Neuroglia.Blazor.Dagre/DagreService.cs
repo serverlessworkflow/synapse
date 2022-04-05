@@ -174,7 +174,7 @@ namespace Neuroglia.Blazor.Dagre
         /// </summary>
         /// <param name="graph"></param>
         /// <returns></returns>
-        public virtual async Task<IGraphLib> Layout(IGraphLib graph) => await this.jsRuntime.InvokeAsync<IJSObjectReference>("neuroglia.blazor.dagre.layout", await graph.Instance()) as IGraphLib;
+        public virtual async Task<IGraphLib?> Layout(IGraphLib graph) => await this.jsRuntime.InvokeAsync<IJSObjectReference>("neuroglia.blazor.dagre.layout", await graph.Instance()) as IGraphLib;
         
         /// <inheritdoc/>
         public virtual async Task<string> Serialize(IGraphLib graph) => await this.jsRuntime.InvokeAsync<string>("neuroglia.blazor.dagre.write", await graph.Instance());

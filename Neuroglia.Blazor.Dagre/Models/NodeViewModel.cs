@@ -84,6 +84,8 @@
         [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public virtual IBoundingBox? BBox => this._bbox;
 
+        public virtual event Action? Changed;
+
         public NodeViewModel()
             : this("", null, null, Consts.NodeWidth, Consts.NodeHeight, 0 , 0, Consts.NodeRadius, Consts.NodeRadius, Consts.NodePadding, Consts.NodePadding, null, null)
         { }
@@ -121,6 +123,16 @@
             this.UpdateBBox();
         }
 
+
+        public virtual void Move(double deltaX, double deltaY)
+        {
+            if (deltaX == 0 && deltaY == 0) 
+                return;
+            this.X += deltaX;
+            this.Y += deltaY;
+            this.Changed?.Invoke();
+        }
+
         protected virtual void UpdateBBox()
         {
             switch (this.Shape)
@@ -136,6 +148,8 @@
                     break;
 
             }
+            this.Changed?.Invoke();
         }
+    
     }
 }

@@ -50,10 +50,8 @@ Welcome to Synapse - Serverless Workflow Management System
     {
         await base.OnInitializedAsync();
         await this.BreadcrumbService.Use(KnownBreadcrumbs.Home);
-        var start = new NodeViewModel("", "start-node", NodeShape.Circle)
+        var start = new NodeViewModel("", "start-node", NodeShape.Circle, 20, 20)
         {
-            Width = 20,
-            Height = 20,
             PaddingX = 0,
             PaddingY = 0,
             Metadata = new Dictionary<string, object>()
@@ -95,10 +93,8 @@ Welcome to Synapse - Serverless Workflow Management System
             }, 
             "State 2"
         );
-        var end = new NodeViewModel("", "end-node", NodeShape.Circle)
+        var end = new NodeViewModel("", "end-node", NodeShape.Circle, 20, 20)
         {
-            Width = 20,
-            Height = 20,
             PaddingX = 0,
             PaddingY = 0,
             Metadata = new Dictionary<string, object>()

@@ -9,6 +9,25 @@ namespace Neuroglia.Blazor.Dagre.Models
     public class GraphViewModel
         : GraphElement, IGraphViewModel
     {
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public virtual IGraphLib? DagreGraph { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public virtual double? X { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public virtual double? Y { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public virtual double? Width { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public virtual double? Height { get; set; }
         public virtual decimal Scale { get; set; }
 
         /// <summary>
@@ -48,26 +67,6 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// The map of node type and their component type
         /// </summary>
         protected readonly Dictionary<Type, Type> _components;
-
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-        [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public virtual IGraphLib? DagreGraph { get; set; }
-
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-        [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public virtual double? X { get; set; }
-
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-        [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public virtual double? Y { get; set; }
-
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-        [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public virtual double? Width { get; set; }
-
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-        [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public virtual double? Height { get; set; }
 
         private Type _defaultNodeComponentType = typeof(NodeTemplate);
         protected virtual Type DefaultNodeComponentType => this._defaultNodeComponentType;
@@ -258,6 +257,11 @@ namespace Neuroglia.Blazor.Dagre.Models
             }
         }
 
+        /// <summary>
+        /// Adds the provided <see cref="GraphBehavior"/>
+        /// </summary>
+        /// <param name="graphBehavior"></param>
+        /// <exception cref="ArgumentException"></exception>
         public virtual void RegisterBehavior(GraphBehavior graphBehavior)
         {
             var behaviorType = graphBehavior.GetType();
@@ -268,6 +272,11 @@ namespace Neuroglia.Blazor.Dagre.Models
             this._behaviors.Add(behaviorType, graphBehavior);
         }
 
+        /// <summary>
+        /// Removes the provided <see cref="GraphBehavior"/>
+        /// </summary>
+        /// <param name="graphBehavior"></param>
+        /// <exception cref="ArgumentException"></exception>
         public virtual void UnregisterBehavior(GraphBehavior graphBehavior)
         {
             var behaviorType = graphBehavior.GetType();

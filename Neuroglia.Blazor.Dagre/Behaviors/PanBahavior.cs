@@ -49,8 +49,8 @@ namespace Neuroglia.Blazor.Dagre.Behaviors
         protected virtual void UpdatedPosition()
         {
             if (this._movementX != 0 || this._movementY != 0) { 
-                this.Graph.X += this._movementX;
-                this.Graph.Y += this._movementY;
+                this.Graph.X += this._movementX / (double)this.Graph.Scale;
+                this.Graph.Y += this._movementY / (double)this.Graph.Scale;
                 this._previousX += this._movementX;
                 this._previousY += this._movementY;
                 this._movementX = 0;

@@ -50,8 +50,7 @@ namespace Neuroglia.Blazor.Dagre.Behaviors
                 return;
             if (this._movementX == 0 && this._movementY == 0)
                 return;
-            this._target.X += this._movementX;
-            this._target.Y += this._movementY;
+            this._target.Move(this._movementX / (double)this.Graph.Scale, this._movementY / (double)this.Graph.Scale);
             this._previousX += this._movementX;
             this._previousY += this._movementY;
             this._movementX = 0;

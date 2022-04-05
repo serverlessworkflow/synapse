@@ -1,9 +1,10 @@
 ﻿@using Microsoft.AspNetCore.Components.Web
 @inject DagreService DagreService
+@inject IJSRuntime JSRuntime
 
 @if (Graph != null) {
     <CascadingValue Value="Graph">
-        <svg 
+        <svg @ref="_graphReference"
             class="dagre-graph @Graph.CssClass"
             width="@(Graph.Width?.ToString() ?? "100%")" 
             height="@(Graph.Height?.ToString() ?? "100%")"
@@ -25,7 +26,7 @@
                 <g class="clusters">
                     @foreach(var cluster in Graph.AllClusters.Values)
                     {
-                        if (cluster != null)
+                        @if (cluster != null)
                         {
                             <InteractiveDynamicComponent @key="cluster" Type="Graph.GetComponentType(cluster)" Parameters="GetComponentParameter(cluster)" />
                         }
@@ -34,7 +35,7 @@
                 <g class="edges">
                     @foreach(var edge in Graph.Edges.Values)
                     {
-                        if (edge != null)
+                        @if (edge != null)
                         {
                             <DynamicComponent @key="edge" Type="Graph.GetComponentType(edge)" Parameters="GetComponentParameter(edge)" />
                         }
@@ -43,7 +44,7 @@
                 <g class="nodes">
                     @foreach(var node in Graph.AllNodes.Values)
                     {
-                        if (node != null)
+                        @if (node != null)
                         {
                             <InteractiveDynamicComponent @key="node" Type="Graph.GetComponentType(node)" Parameters="GetComponentParameter(node)" />
                         }
@@ -61,6 +62,8 @@
     [Parameter]
     public IGraphViewModel? Graph { get; set; }
 
+    protected ElementReference _graphReference;
+
     protected override async Task OnInitializedAsync()
     {
         if (this.Graph != null)
@@ -69,6 +72,12 @@
             // Console.WriteLine(await this.DagreService.Serialize(this.Graph.DagreGraph!));
             // Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(this.Graph));
         }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await this.JSRuntime.InvokeVoidAsync("neuroglia.blazor.preventScroll", this._graphReference);
     }
 
     protected virtual Dictionary<string, object> GetComponentParameter(IGraphElement element)

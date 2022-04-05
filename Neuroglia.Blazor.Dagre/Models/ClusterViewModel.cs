@@ -42,6 +42,7 @@ namespace Neuroglia.Blazor.Dagre.Models
                     continue;
                 }
                 child.ParentId = this.Id;
+                child.Changed += OnChildChanged;
                 if (child is IClusterViewModel cluster)
                 {
                     this._allClusters.Add(cluster.Id, cluster);
@@ -51,6 +52,17 @@ namespace Neuroglia.Blazor.Dagre.Models
                 {
                     this._allNodes.Add(node.Id, node);
                 }
+            }
+        }
+
+        public override void Move (double deltaX, double deltaY)
+        {
+            if (deltaX == 0 && deltaY == 0)
+                return;
+            base.Move(deltaX, deltaY);
+            foreach(var child in this._children.Values)
+            {
+                child.Move(deltaX, deltaY);
             }
         }
 
@@ -100,7 +112,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// Adds nested nodes/clusters to allNodes/Clusters
         /// </summary>
         /// <param name="cluster"></param>
-        public virtual void Flatten(IClusterViewModel cluster)
+        protected virtual void Flatten(IClusterViewModel cluster)
         {
             foreach (var subClusters in cluster.AllClusters.Values)
             {
@@ -118,6 +130,21 @@ namespace Neuroglia.Blazor.Dagre.Models
                 }
                 this._allNodes.Add(subNode.Id, subNode);
             }
+        }
+   
+        protected virtual void OnChildChanged()
+        {
+            var minX = this._allNodes.Values.Select(node => node.X - node.BBox?.Width ?? 0 / 2).Min();
+            var maxX = this._allNodes.Values.Select(node => node.X + node.BBox?.Width ?? 0 / 2).Max();
+            var minY = this._allNodes.Values.Select(node => node.Y - node.BBox?.Height ?? 0 / 2).Min();
+            var maxY = this._allNodes.Values.Select(node => node.Y + node.BBox?.Height ?? 0 / 2).Max();
+            var width = maxX - minX;
+            var height = maxY - minY;
+            this.X = minX + width / 2;
+            this.Y = minY + height / 2;
+            this.Width = width;
+            this.Height = height;
+            //Console.WriteLine($"{minX} {maxX} {minY} {maxY} {this.Width} {this.Height}");
         }
     }
 }

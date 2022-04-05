@@ -19,4 +19,7 @@
     window.neuroglia.blazor.dagre.read = (str) => {
         return dagre.graphlib.json.read(JSON.parse(str));
     };
+    window.neuroglia.blazor.preventScroll = (element) => {
+        element.addEventListener("wheel", e => e.preventDefault(), { passive: false });
+    }
 })();
