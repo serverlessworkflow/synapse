@@ -21,7 +21,7 @@
             </defs>
             <g 
                 class="graph"
-                transform="scale(@Graph.Scale) translate(@Graph.X, @Graph.Y)"
+                transform="scale(@(Graph.Scale.ToInvariantString())) translate(@Graph.X.ToInvariantString(), @Graph.Y.ToInvariantString())"
             >
                 <g class="clusters">
                     @foreach(var cluster in Graph.AllClusters.Values)

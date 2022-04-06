@@ -3,13 +3,30 @@
     public class NodeViewModel
         : GraphElement, INodeViewModel
     {
+        protected double? _x { get; set; }
         [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public virtual double? X { get; set; }
+        public virtual double? X { 
+            get => this._x;
+            set
+            {
+                this._x = value;
+                this.Changed?.Invoke();
+            }
+        }
 
+        protected double? _y { get; set; }
         [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public virtual double? Y { get; set; }
+        public virtual double? Y
+        {
+            get => this._y;
+            set
+            {
+                this._y = value;
+                this.Changed?.Invoke();
+            }
+        }
 
         protected double? _width { get; set; }
         [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
@@ -82,10 +99,10 @@
             this.Label = label;
             this.CssClass = cssClass;
             this.Shape = shape;
-            this.Width = width ?? 0;
-            this.Height = height ?? 0;
-            this.X = x;
-            this.Y = y;
+            this._width = width ?? 0;
+            this._height = height ?? 0;
+            this._x = x;
+            this._y = y;
             this.RadiusX = radiusX ?? 0;
             this.RadiusY = radiusY ?? 0;
             this._bbox = new BoundingBox();
@@ -93,13 +110,41 @@
             this.UpdateBBox();
         }
 
+        public virtual void SetGeometry(double? x = null, double? y = null, double? width = null, double? height = null)
+        {
+            bool changed = false;
+            if (x.HasValue && this._x != x)
+            {
+                this._x = x;
+                changed = true;
+            }
+            if (y.HasValue && this._y != y)
+            {
+                this._y = y;
+                changed = true;
+            }
+            if (width.HasValue && this._width != width)
+            {
+                this._width = width;
+                changed = true;
+            }
+            if (height.HasValue && this._height != height)
+            {
+                this._height = height;
+                changed = true;
+            }
+            if (changed)
+            {
+                this.UpdateBBox();
+            }
+        }
 
         public virtual void Move(double deltaX, double deltaY)
         {
             if (deltaX == 0 && deltaY == 0) 
                 return;
-            this.X += deltaX;
-            this.Y += deltaY;
+            this._x += deltaX;
+            this._y += deltaY;
             this.Changed?.Invoke();
         }
 

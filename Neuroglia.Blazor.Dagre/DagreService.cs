@@ -59,10 +59,7 @@ namespace Neuroglia.Blazor.Dagre
             foreach (var node in nodes)
             {
                 var graphNode = await graph.Node(node.Id.ToString());
-                node.Width = graphNode.Width;
-                node.Height = graphNode.Height;
-                node.X = graphNode.X;
-                node.Y = graphNode.Y;
+                node.SetGeometry(graphNode.X, graphNode.Y, graphNode.Width, graphNode.Height);
             }
             foreach (var edge in graphViewModel.Edges.Values)
             {

@@ -112,7 +112,7 @@ namespace Neuroglia.Blazor.Dagre.Models
             this._allNodes = new Dictionary<Guid, INodeViewModel>();
             this._allClusters = new Dictionary<Guid, IClusterViewModel>();
             this._behaviors = new Dictionary<Type, GraphBehavior>();
-            // this.RegisterBehavior(new DebugEventsBehavior(this));
+            //this.RegisterBehavior(new DebugEventsBehavior(this));
             this.RegisterBehavior(new ZoomBahavior(this));
             this.RegisterBehavior(new PanBahavior(this));
             this.RegisterBehavior(new MoveNodeBehavior(this));

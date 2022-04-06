@@ -132,16 +132,15 @@ namespace Neuroglia.Blazor.Dagre.Models
    
         protected virtual void OnChildChanged()
         {
-            var minX = this._allNodes.Values.Select(node => node.X - (node.Width ?? 0) / 2).Min();
-            var maxX = this._allNodes.Values.Select(node => node.X + (node.Width ?? 0) / 2).Max();
-            var minY = this._allNodes.Values.Select(node => node.Y - (node.Height ?? 0) / 2).Min();
-            var maxY = this._allNodes.Values.Select(node => node.Y + (node.Height ?? 0) / 2).Max();
-            var centerX = this.Children.Values.Average(child => child.X);
-            var centerY = this.Children.Values.Average(child => child.Y);
-            this.X = centerX;
-            this.Y = centerY;
-            this.Width = maxX - minX + Consts.ClusterPaddingX;
-            this.Height = maxY - minY + Consts.ClusterPaddingY;
+            var minX = this.Children.Values.Select(node => node.X - (node.Width ?? 0) / 2).Min();
+            var maxX = this.Children.Values.Select(node => node.X + (node.Width ?? 0) / 2).Max();
+            var minY = this.Children.Values.Select(node => node.Y - (node.Height ?? 0) / 2).Min();
+            var maxY = this.Children.Values.Select(node => node.Y + (node.Height ?? 0) / 2).Max();
+            var x = (minX + maxX) / 2;
+            var y = (minY + maxY) / 2;
+            var width = maxX - minX + Consts.ClusterPaddingX;
+            var height = maxY - minY + Consts.ClusterPaddingY;
+            this.SetGeometry(x, y, width, height);
         }
     }
 }
