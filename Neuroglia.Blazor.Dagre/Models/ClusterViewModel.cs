@@ -65,31 +65,12 @@ namespace Neuroglia.Blazor.Dagre.Models
         }
 
         /// <summary>
-        /// Adds the provided cluster to the graph
-        /// </summary>
-        /// <param name="cluster"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException"></exception>
-        public virtual async Task AddCluster(IClusterViewModel cluster)
-        {
-            if (cluster == null)
-            {
-                throw new ArgumentNullException(nameof(cluster));
-            }
-            cluster.ParentId = this.Id;
-            this._children.Add(cluster.Id, cluster);
-            this._allClusters.Add(cluster.Id, cluster);
-            this.Flatten(cluster);
-            await Task.CompletedTask;
-        }
-
-        /// <summary>
-        /// Adds the provided node to the graph
+        /// Adds the provided <see cref="INodeViewModel"/> to the cluster
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public virtual async Task AddNode(INodeViewModel node)
+        public virtual async Task AddChild(INodeViewModel node)
         {
             if (node == null)
             {
@@ -103,6 +84,25 @@ namespace Neuroglia.Blazor.Dagre.Models
             node.ParentId = this.Id;
             this._children.Add(node.Id, node);
             this._allNodes.Add(node.Id, node);
+            await Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Adds the provided <see cref="IClusterViewModel"/> to the cluster
+        /// </summary>
+        /// <param name="cluster"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        protected virtual async Task AddCluster(IClusterViewModel cluster)
+        {
+            if (cluster == null)
+            {
+                throw new ArgumentNullException(nameof(cluster));
+            }
+            cluster.ParentId = this.Id;
+            this._children.Add(cluster.Id, cluster);
+            this._allClusters.Add(cluster.Id, cluster);
+            this.Flatten(cluster);
             await Task.CompletedTask;
         }
 

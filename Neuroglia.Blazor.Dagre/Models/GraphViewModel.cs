@@ -136,12 +136,42 @@ namespace Neuroglia.Blazor.Dagre.Models
         }
 
         /// <summary>
-        /// Adds the provided cluster to the graph
+        /// Adds the provided <see cref="IGraphElement"/> to the graph
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public virtual async Task AddElement(IGraphElement element)
+        {
+            if (element == null)
+            {
+                throw new ArgumentNullException(nameof(element));
+            }
+            if (element is IEdgeViewModel edge)
+            {
+                await this.AddEdge(edge);
+                return;
+            }
+            if (element is IClusterViewModel cluster)
+            {
+                await this.AddCluster(cluster);
+                return;
+            }
+            if (element is INodeViewModel node)
+            {
+                await this.AddNode(node);
+                return;
+            }
+            throw new Exception("Unknown element type");
+        }
+
+        /// <summary>
+        /// Adds the provided <see cref="IClusterViewModel"/> to the graph
         /// </summary>
         /// <param name="cluster"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public virtual async Task AddCluster(IClusterViewModel cluster)
+        protected virtual async Task AddCluster(IClusterViewModel cluster)
         {
             if  (cluster == null) { 
                 throw new ArgumentNullException(nameof(cluster)); 
@@ -153,12 +183,12 @@ namespace Neuroglia.Blazor.Dagre.Models
         }
 
         /// <summary>
-        /// Adds the provided node to the graph
+        /// Adds the provided <see cref="INodeViewModel"/> to the graph
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public virtual async Task AddNode(INodeViewModel node)
+        protected virtual async Task AddNode(INodeViewModel node)
         {
             if (node == null)
             {
@@ -171,6 +201,22 @@ namespace Neuroglia.Blazor.Dagre.Models
             }
             this._nodes.Add(node.Id, node);
             this._allNodes.Add(node.Id, node);
+            await Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Adds the provided <see cref="IEdgeViewModel"/> to the graph
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        protected virtual async Task AddEdge(IEdgeViewModel edge)
+        {
+            if (edge == null)
+            {
+                throw new ArgumentNullException(nameof(edge));
+            }
+            this._edges.Add(edge.Id, edge);
             await Task.CompletedTask;
         }
 

@@ -27,6 +27,8 @@ namespace Neuroglia.Blazor.Dagre.Models
         Type GetComponentType<TElement>(TElement node)
             where TElement : IGraphElement;
 
+        Task AddElement(IGraphElement element);
+
         void OnMouseMove(IGraphElement? element, MouseEventArgs e);
 
         void OnMouseDown(IGraphElement? element, MouseEventArgs e);

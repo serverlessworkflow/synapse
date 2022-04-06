@@ -16,10 +16,6 @@
             </foreignObject>
         </g>
     }
-    @foreach(var point in Edge.Points)
-    {
-        <circle cx="@point.X.ToInvariantString()" cy="@point.Y.ToInvariantString()" r="1" stroke="red" style="stroke: red!important;"></circle>
-    }
 </g>
 
 @code {

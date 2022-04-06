@@ -49,6 +49,7 @@ builder.Services.AddSingleton<IIntegrationEventStream, IntegrationEventStream>()
 builder.Services.AddSingleton<IMonacoEditorHelper, MonacoEditorHelper>();
 builder.Services.AddSingleton<IBreadcrumbService, BreadcrumbService>();
 builder.Services.AddScoped<IWorkflowDiagramBuilder, WorkflowDiagramBuilder>();
+builder.Services.AddScoped<WorkflowGraphBuilder>();
 builder.Services.AddScoped<DagreService>();
 builder.Services.AddFlux(flux =>
 {

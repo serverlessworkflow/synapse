@@ -1,0 +1,39 @@
+﻿
+@using ServerlessWorkflow.Sdk
+@using ServerlessWorkflow.Sdk.Models
+
+@namespace Synapse.Dashboard
+
+@if (Graph != null) {
+    <DagreGraph Graph="Graph" />
+}
+
+@implements IDisposable
+@code {
+
+    [Parameter]
+    public IGraphViewModel Graph { get; set; } = null!;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        //this.Diagram.SelectionChanged += this.OnNodeSelectionChanged;
+    }
+
+    public void Dispose()
+    {
+        //this.Diagram.SelectionChanged -= this.OnNodeSelectionChanged;
+        GC.SuppressFinalize(this);
+    }
+
+    /*
+    private void OnNodeSelectionChanged(SelectableModel elem)
+    {
+        if (!elem.Selected
+         || elem is not NodeModel node)
+            return;
+
+    }
+    */
+
+}
