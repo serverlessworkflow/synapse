@@ -139,9 +139,9 @@ documents:
 | File/Directory | Description | 
 | --- | --- | 
 | [LICENSE](LICENSE) | Specification License doc | 
-| [OWNERS](OWNERS) | Defines the current maintainers and approvers | 
+| [OWNERS](OWNERS.md) | Defines the current maintainers and approvers | 
 | [MAINTAINERS](MAINTAINERS.md) | Project Maintainers Info | 
 | [GOVERNANCE](GOVERNANCE.md) | Project Governance Info | 
 | [CONTRIBUTING](CONTRIBUTING.md) | Documentation on how to contribute to the project | 
-| [CODE-OF-CONDUCT](CODE-OF-CONDUCT.md) | Defines the project's Code of Conduct | 
+| [CODE-OF-CONDUCT](code-of-conduct.md) | Defines the project's Code of Conduct | 
 | [roadmap](roadmap/README.md) | Project Roadmap |
