@@ -1,0 +1,78 @@
+﻿@namespace Synapse.Dashboard
+@using Newtonsoft.Json
+
+@if (Workflow != null && WorkflowInstance != null)
+{    
+    <div class="card h-100">
+        <div class="card-body">
+            <div class="mb-4">            
+                <div class="border rounded-pill border-dark px-3 py-1 d-inline">
+                    <span class="h5 m-0 p-0">@Workflow.Definition.Id</span>
+                </div>
+                <div class="border rounded-pill bg-dark border-dark text-white px-3 py-1 d-inline">
+                    <span class="h5 m-0 p-0">@Workflow.Definition.Version</span>
+                </div>
+            </div>
+            <div class="mb-4">
+                <div class="border rounded-pill bg-dark border-dark text-white px-3 py-1 d-inline">
+                    <span class="m-0 p-0">@WorkflowInstance.Key</span>
+                </div>
+            </div>
+            <div>
+                <label class="form-label">Activation Type</label>
+                <div class="border border-dark rounded-pill p-1 text-center">@WorkflowInstance.ActivationType</div>
+            </div>
+            <div >
+                <label class="form-label">Status</label>
+                <div class="border border-dark rounded-pill p-1 text-center @GetStatusClass()">@WorkflowInstance.Status</div>
+            </div>
+            <div>
+                <label class="form-label">Created at</label>
+                <input type="text" class="form-control" readonly value="@WorkflowInstance.CreatedAt" />
+            </div>
+            <div>
+                <label class="form-label">Started at</label>
+                <input type="text" class="form-control" readonly value="@WorkflowInstance.StartedAt" />
+            </div>
+            <div>
+                <label class="form-label">Executed at</label>
+                <input type="text" class="form-control" readonly value="@WorkflowInstance.ExecutedAt" />
+            </div>
+            <div>
+                <label class="form-label">Duration</label>
+                <input type="text" class="form-control" readonly value="@WorkflowInstance.Duration?.ToString()" />
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public V1Workflow Workflow { get; set; } = null!;
+    [Parameter]
+    public V1WorkflowInstance WorkflowInstance { get; set; } = null!;
+    
+    protected string GetStatusClass()
+    {
+        switch (this.WorkflowInstance.Status)
+        {
+            case V1WorkflowInstanceStatus.Pending:
+                return "bg-secondary";
+            case V1WorkflowInstanceStatus.Starting:
+            case V1WorkflowInstanceStatus.Resuming:
+            case V1WorkflowInstanceStatus.Running:
+                return "bg-primary text-white";
+            case V1WorkflowInstanceStatus.Suspending:
+            case V1WorkflowInstanceStatus.Suspended:
+                return "bg-warning text-white";
+            case V1WorkflowInstanceStatus.Faulted:
+            case V1WorkflowInstanceStatus.Cancelling:
+            case V1WorkflowInstanceStatus.Cancelled:
+                return "bg-danger text-white";
+            case  V1WorkflowInstanceStatus.Completed:
+                return "bg-success text-white";
+            default:
+                return string.Empty;
+        }
+    }
+}

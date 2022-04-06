@@ -1,0 +1,17 @@
+﻿@page "/workflow-instances"
+@using Neuroglia.Data
+@using Synapse.Integration.Models
+@inject IServiceProvider ServiceProvider
+
+<PageTitle>Workflow Instances</PageTitle>
+<AppHeader>
+    <span class="h5 m-0 p-0">Workflow instances</span>
+</AppHeader>
+
+<Table Items="new ODataQueryable<V1WorkflowInstance>(this.ServiceProvider)" />
+
+@code {
+
+   
+
+}

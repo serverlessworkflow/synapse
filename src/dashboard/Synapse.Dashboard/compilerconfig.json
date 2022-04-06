@@ -1,0 +1,50 @@
+﻿[
+  {
+    "outputFile": "wwwroot/css/app.css",
+    "inputFile": "wwwroot/css/app.scss"
+  },
+  {
+    "outputFile": "Features/Shared/Breadcrumb/Breadcrumb.razor.css",
+    "inputFile": "Features/Shared/Breadcrumb/Breadcrumb.razor.scss"
+  },
+  {
+    "outputFile": "Features/Shared/Layout/MainLayout.razor.css",
+    "inputFile": "Features/Shared/Layout/MainLayout.razor.scss"
+  },
+  {
+    "outputFile": "Features/Shared/Layout/NavMenu.razor.css",
+    "inputFile": "Features/Shared/Layout/NavMenu.razor.scss"
+  },
+  {
+    "outputFile": "Features/Shared/Loader/Loader.razor.css",
+    "inputFile": "Features/Shared/Loader/Loader.razor.scss"
+  },
+  {
+    "outputFile": "Features/Shared/Toast/Toaster.razor.css",
+    "inputFile": "Features/Shared/Toast/Toaster.razor.scss"
+  },
+  {
+    "outputFile": "Features/Shared/WorkflowDiagram/EndNode.razor.css",
+    "inputFile": "Features/Shared/WorkflowDiagram/EndNode.razor.scss"
+  },
+  {
+    "outputFile": "Features/Shared/WorkflowDiagram/FunctionRefNode.razor.css",
+    "inputFile": "Features/Shared/WorkflowDiagram/FunctionRefNode.razor.scss"
+  },
+  {
+    "outputFile": "Features/Shared/WorkflowDiagram/StartNode.razor.css",
+    "inputFile": "Features/Shared/WorkflowDiagram/StartNode.razor.scss"
+  },
+  {
+    "outputFile": "Pages/Workflows/View.razor.css",
+    "inputFile": "Pages/Workflows/View.razor.scss"
+  },
+  {
+    "outputFile": "Features/Shared/Layout/Header.razor.css",
+    "inputFile": "Features/Shared/Layout/Header.razor.scss"
+  },
+  {
+    "outputFile": "Features/Shared/Toolbar/Toolbar.razor.css",
+    "inputFile": "Features/Shared/Toolbar/Toolbar.razor.scss"
+  }
+]

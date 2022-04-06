@@ -1,0 +1,35 @@
+﻿@using System.ComponentModel
+@namespace Synapse.Dashboard
+@inject ILayoutService Layout;
+@implements IDisposable
+
+@if (Layout.LeftSidebar != null)
+{
+    <div class="left-sidebar ms-4">
+        @Layout.LeftSidebar?.ChildContent
+    </div>
+}
+
+@code
+{
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        this.Layout.PropertyChanged += OnLayoutChanged;
+    }
+
+    private void OnLayoutChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ILayoutService.LeftSidebar))
+        {
+            this.StateHasChanged();
+        }
+    }
+
+    public void Dispose()
+    {
+        if (this.Layout != null)
+            this.Layout.PropertyChanged -= this.OnLayoutChanged;
+        GC.SuppressFinalize(this);
+    }
+}

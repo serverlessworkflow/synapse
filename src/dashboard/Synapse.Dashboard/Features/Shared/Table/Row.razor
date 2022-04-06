@@ -1,0 +1,12 @@
+﻿@namespace Synapse.Dashboard
+@typeparam T
+
+<tr class="@RenderContext.Table.RowClass">
+    <CellCollectionPresenter Item="@RenderContext.Item" />
+</tr>
+@code {
+
+    [Parameter]
+    public RowRenderingContext<T> RenderContext { get; set; }
+
+}

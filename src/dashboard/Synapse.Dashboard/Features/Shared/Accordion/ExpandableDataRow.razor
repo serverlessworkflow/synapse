@@ -1,0 +1,11 @@
+﻿@namespace Synapse.Dashboard
+@inject IAccordionManager AccordionManager
+@implements IDisposable
+@inherits Accordion
+
+<tr class="cursor-pointer" @onclick="Toggle">
+    @Header
+</tr>
+<tr class="@(IsExpanded ? "" : "d-none")">
+    @Body
+</tr>

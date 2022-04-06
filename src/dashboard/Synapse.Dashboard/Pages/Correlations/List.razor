@@ -1,0 +1,43 @@
+﻿@page "/correlations"
+@using Neuroglia.Data
+@using Neuroglia.Data.Flux
+@using Synapse.Integration.Models
+@using System.Reactive.Linq
+@inherits StatefulComponent<V1WorkflowCollectionState>
+@inject IServiceProvider ServiceProvider
+@inject IBreadcrumbService BreadcrumbService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Correlations</PageTitle>
+<AppRightSidebar>
+    <Toolbar>
+        
+    </Toolbar>
+</AppRightSidebar>
+<Table Items="correlations">
+    <Columns>
+        <Column T="V1Correlation" 
+            Name="Contexts"
+            ValueProvider="g => g.Contexts.Count" />
+        <ViewDetailsColumn T="V1Correlation" />
+    </Columns>
+</Table>
+
+@code {
+
+    private IDisposable? _Subscription;
+    private ODataQueryable<V1Correlation> correlations;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        this.correlations = new(this.ServiceProvider);
+        await this.BreadcrumbService.Use(KnownBreadcrumbs.Correlations);
+    }
+
+    void OnViewCorrelation(V1Correlation correlation)
+    {
+        this.NavigationManager.NavigateTo($"/correlations/{correlation.Id}");
+    }
+
+}

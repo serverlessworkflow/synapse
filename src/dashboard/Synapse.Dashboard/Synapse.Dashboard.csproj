@@ -1,0 +1,64 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Features\WorkflowInstances\WorkflowInstanceView\**" />
+    <Compile Remove="Features\Workflows\WorkflowMetrics\**" />
+    <Content Remove="Features\WorkflowInstances\WorkflowInstanceView\**" />
+    <Content Remove="Features\Workflows\WorkflowMetrics\**" />
+    <EmbeddedResource Remove="Features\WorkflowInstances\WorkflowInstanceView\**" />
+    <EmbeddedResource Remove="Features\Workflows\WorkflowMetrics\**" />
+    <None Remove="Features\WorkflowInstances\WorkflowInstanceView\**" />
+    <None Remove="Features\Workflows\WorkflowMetrics\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="compilerconfig.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="compilerconfig.json" />
+    <None Include="Features\Shared\Accordion\Accordion.razor" />
+    <None Include="Features\Shared\Accordion\Collapse.razor" />
+    <None Include="Features\Shared\Accordion\ExpandableDataRow.razor" />
+    <None Include="Features\Shared\Accordion\Expander.razor" />
+    <None Include="Features\Shared\Layout\AppHeader.razor" />
+    <None Include="Features\Shared\Layout\Header.razor" />
+    <None Include="Features\Shared\Layout\MainLayout.razor" />
+    <None Include="Features\Shared\Layout\NavMenu.razor" />
+    <None Include="Features\Shared\Modal\Modal.razor" />
+    <None Include="Features\Shared\Toast\Toaster.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+	<PackageReference Include="BlazorMonaco" Version="2.1.0" />
+	<PackageReference Include="BuildWebCompiler2022" Version="1.14.7" />
+	<PackageReference Include="GraphShape" Version="1.2.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.3" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="6.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.NewtonsoftJson" Version="6.0.3" />
+	<PackageReference Include="Neuroglia.Core" Version="2.0.1.57" />
+	<PackageReference Include="Neuroglia.Data.Flux" Version="2.0.1.57" />
+	<PackageReference Include="Neuroglia.Data.Flux.ReduxDevTools" Version="2.0.1.57" />
+	<PackageReference Include="Neuroglia.Data.OData" Version="2.0.1.57" />
+	<PackageReference Include="Z.Blazor.Diagrams" Version="2.1.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Neuroglia.Blazor.Dagre\Neuroglia.Blazor.Dagre.csproj" />
+    <ProjectReference Include="..\..\apis\management\Synapse.Apis.Management.Http.Client\Synapse.Apis.Management.Http.Client.csproj" />
+    <ProjectReference Include="..\..\apis\monitoring\Synapse.Apis.Monitoring.Core\Synapse.Apis.Monitoring.Core.csproj" />
+  </ItemGroup>
+
+</Project>

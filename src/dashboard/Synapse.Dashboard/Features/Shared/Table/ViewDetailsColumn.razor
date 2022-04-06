@@ -1,0 +1,16 @@
+﻿@namespace Synapse.Dashboard
+@typeparam T
+
+<Column T="T">
+    <HeaderTemplate />
+    <CellTemplate Context="context">
+        <button @onclick="async () => await OnViewDetails.InvokeAsync(context.Item)" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-info"></small></button>
+    </CellTemplate>
+</Column>
+
+@code {
+
+    [Parameter]
+    public EventCallback<T> OnViewDetails { get; set; }
+
+}

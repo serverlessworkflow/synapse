@@ -1,0 +1,41 @@
+{
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:17947",
+      "sslPort": 0
+    }
+  },
+  "profiles": {
+    "Synapse.Server": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "SYNAPSE_API_HOST": "http://Synapse.Server"
+      },
+      "applicationUrl": "http://localhost:5078",
+      "dotnetRunMessages": true
+    },
+    "IIS Express": {
+      "commandName": "IISExpress",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "SYNAPSE_API_HOST": "http://localhost:17947"
+      }
+    },
+    "Docker": {
+      "commandName": "Docker",
+      "launchBrowser": true,
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "SYNAPSE_API_HOST": "http://synapse"
+      },
+      "DockerfileRunArguments": "--name synapse -e \"SYNAPSE_API_HOST=http://synapse\" -e \"DOCKER__SECRETS__DIRECTORY=C:\\Users\\Public\\secrets\" -v /var/run/docker.sock:/var/run/docker.sock --add-host=host.docker.internal:host-gateway -p 9600:80 -v C:\\Users\\Public\\Secrets:/run/secrets",
+      "publishAllPorts": true
+    }
+  }
+}

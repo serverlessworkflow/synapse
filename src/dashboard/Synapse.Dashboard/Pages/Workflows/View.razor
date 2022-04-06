@@ -1,0 +1,201 @@
+﻿@page "/workflows/{workflowId}"
+@page "/workflows/{workflowId}/instance/{workflowInstanceId}"
+@using Blazor.Diagrams.Core
+@using Microsoft.AspNetCore.SignalR.Client
+@using Neuroglia.Data.Flux
+@using Newtonsoft.Json
+@using System.Text
+@implements IDisposable
+@inject IStore Store
+@inject IDispatcher Dispatcher
+@inject ISynapseManagementApi SynapseApi
+@inject IWorkflowDiagramBuilder WorkflowDiagramBuilder
+@inject IMonacoEditorHelper MonacoEditorHelper
+@inject IBreadcrumbService BreadcrumbService
+@inject HubConnection HubConnection
+@inject NavigationManager NavigationManager
+
+<PageTitle>@workflow?.Id</PageTitle>
+<AppRightSidebar>
+    @if (workflow != null && workflowInstance == null) {
+        <WorkflowToolbar Workflow="workflow" />
+    }
+    else if (workflow != null && workflowInstance != null)
+    {
+        <WorkflowInstanceToolbar WorkflowInstance="workflowInstance" />
+    }
+</AppRightSidebar>
+<AppLeftSidebar>
+    @if (workflow != null && workflowInstance == null) {
+        <WorkflowDetails Workflow="workflow" />
+    }
+    else if (workflow != null && workflowInstance != null)
+    {
+        <WorkflowInstanceDetails WorkflowInstance="workflowInstance" Workflow="workflow" />
+    }
+</AppLeftSidebar>
+
+@if (workflow != null)
+{
+    <div class="container-fluid h-100">
+        <div class="row h-50 position-relative">
+            <WorkflowDiagram Diagram="diagram" />
+        </div>
+        <div class="row h-50">            
+            @if (workflowInstance == null)
+            {
+                <TabControl>
+                    <TabPage Header="Instances">
+                        <Table Items="instances" AutoGenerateColumns="false">
+                            <Columns>
+                                <Column
+                                    T="V1WorkflowInstance"
+                                    Name="Key"
+                                    ValueProvider="source => source.Key"
+                                    PropertyPath="@PropertyPath.Parse(nameof(V1WorkflowInstance.Key))" />
+                                <Column
+                                    T="V1WorkflowInstance"    
+                                    Name="Status"
+                                    ValueProvider="source => source.Status"
+                                    PropertyPath="@PropertyPath.Parse(nameof(V1WorkflowInstance.Status))">
+                                    <CellTemplate Context="context">
+                                        <span class="badge rounded-pill @GetCssClassFor((V1WorkflowInstanceStatus)context.Value!)">@(EnumHelper.Stringify((V1WorkflowInstanceStatus)context.Value))</span>
+                                    </CellTemplate>
+                                </Column>
+                                <Column
+                                    T="V1WorkflowInstance"   
+                                    Name="Started at"
+                                    ValueProvider="source => source.StartedAt"
+                                    PropertyPath="@PropertyPath.Parse(nameof(V1WorkflowInstance.StartedAt))"
+                                    Format="MM/dd/yyyy, HH:mm"/>
+                                <Column
+                                    T="V1WorkflowInstance"   
+                                    Name="Executed at"
+                                    ValueProvider="source => source.ExecutedAt"
+                                    PropertyPath="@PropertyPath.Parse(nameof(V1WorkflowInstance.ExecutedAt))"
+                                    Format="MM/dd/yyyy, HH:mm"/>
+                                <Column
+                                    T="V1WorkflowInstance"   
+                                    Name="Duration"
+                                    ValueProvider="source => ((V1WorkflowInstance)source).Duration"
+                                    IsSorteable="false"
+                                    IsFilterable="false"/>
+                                <ViewDetailsColumn T="V1WorkflowInstance" OnViewDetails="OnViewWorkflowInstance" />
+                            </Columns>
+                        </Table>
+                    </TabPage>
+                    <TabPage Header="Definition">
+                        @if (workflow?.Definition != null)
+                        {
+                            <MonacoEditor
+                                CssClass="h-100 flex-grow"
+                                ConstructionOptions="MonacoEditorHelper.GetStandaloneEditorConstructionOptions(JsonConvert.SerializeObject(workflow.Definition, Formatting.Indented), true)"/>
+                        }
+                    </TabPage>
+                    <TabPage Header="Metrics">
+                        <WorkflowsMetrics Workflow="workflow" />
+                    </TabPage>
+                </TabControl>
+            }
+            else if(workflowInstance != null)
+            {
+                
+                <TabControl>
+                    <TabPage Header="Input/Output">
+                        <WorkflowInstanceIO WorkflowInstance="workflowInstance" />
+                    </TabPage>
+                    <TabPage Header="Activities">
+                        <WorkflowInstanceActivitiesList Activities="sortedActivities" />
+                    </TabPage>
+                </TabControl>
+            }
+        </div>
+    </div>
+}
+else
+{
+    <Loader />
+}
+@code
+{
+
+    [Parameter]
+    public string WorkflowId { get; set; } = null!;
+    [Parameter]
+    public string? WorkflowInstanceId { get; set; } = null!;
+
+    private IDisposable? _WorkflowInstanceSubscription;
+    protected IFeature<V1WorkflowInstanceCollectionState> _WorkflowInstanceFeature = null!;
+    protected V1Workflow workflow = null!;
+    protected V1WorkflowInstance workflowInstance = null!;
+    protected List<V1WorkflowActivity> sortedActivities = new List<V1WorkflowActivity>();
+    protected Diagram diagram { get; set; } = null!;
+    protected List<V1WorkflowInstance> instances = new();
+    protected IEnumerable<IBreadcrumbItem> workflowBreadCrumbBase = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        this.workflow = await this.SynapseApi.GetWorkflowByIdAsync(this.WorkflowId);
+        this.diagram = await this.WorkflowDiagramBuilder.BuildDiagram(this.workflow.Definition);
+        this._WorkflowInstanceFeature = this.Store.GetFeature<V1WorkflowInstanceCollectionState>();
+        this._WorkflowInstanceSubscription = this._WorkflowInstanceFeature
+            .Subscribe(instances =>
+            {
+                this.instances = instances;
+                this.StateHasChanged();;
+            });
+        this.Dispatcher.Dispatch(new ListV1WorkflowInstancesByDefinition(this.WorkflowId));
+        this.diagram.DisplayActivityStatusFor(this.instances);
+        await this.BreadcrumbService.Use(KnownBreadcrumbs.Workflows);
+        await this.BreadcrumbService.AddCurrentUri(this.WorkflowId);
+        this.workflowBreadCrumbBase = new List<IBreadcrumbItem>(this.BreadcrumbService.Items);
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await this.BreadcrumbService.Use(this.workflowBreadCrumbBase);
+        if (this.WorkflowInstanceId == null)
+        {
+            this.workflowInstance = null!;
+            this.sortedActivities = new List<V1WorkflowActivity>();
+            this.diagram.DisplayActivityStatusFor(this.instances);
+        }
+        else
+        {
+            await this.BreadcrumbService.AddCurrentUri($"Instance {this.WorkflowInstanceId}");
+            this.workflowInstance = await this.SynapseApi.GetWorkflowInstanceByIdAsync(this.WorkflowInstanceId);
+            this.sortedActivities = this.workflowInstance.Activities.OrderBy(a => a.StartedAt).ToList();
+            this.diagram.DisplayActivityStatusFor(this.instances.Where(i => i.Id == this.WorkflowInstanceId));
+        }
+        this.StateHasChanged();
+    }
+
+    protected string GetCssClassFor(V1WorkflowInstanceStatus workflowInstanceStatus)
+    {
+        return workflowInstanceStatus switch
+        {
+            V1WorkflowInstanceStatus.Pending => "bg-secondary", 
+            V1WorkflowInstanceStatus.Scheduling => "border-primary",
+            V1WorkflowInstanceStatus.Scheduled => "bg-primary",
+            V1WorkflowInstanceStatus.Starting or V1WorkflowInstanceStatus.Resuming => "border-primary text-primary",
+            V1WorkflowInstanceStatus.Running => "bg-primary",
+            V1WorkflowInstanceStatus.Suspended => "bg-warning",
+            V1WorkflowInstanceStatus.Faulted => "bg-danger",
+            V1WorkflowInstanceStatus.Completed => "bg-success",
+            _ => string.Empty
+        };
+    }
+
+    private void OnViewWorkflowInstance(V1WorkflowInstance workflowInstance)
+    {
+        this.NavigationManager.NavigateTo($"/workflows/{this.WorkflowId}/instance/{workflowInstance.Id}");
+    }
+
+    public void Dispose()
+    {
+        this._WorkflowInstanceSubscription?.Dispose();
+        this._WorkflowInstanceSubscription = null;
+    }
+
+}

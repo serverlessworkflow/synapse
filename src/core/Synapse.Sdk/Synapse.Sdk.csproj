@@ -1,0 +1,84 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>disable</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="6.0.1" />
+		<PackageReference Include="Neuroglia.Serialization.NewtonsoftJson" Version="2.0.1.21" />
+		<PackageReference Include="Neuroglia.Serialization.Protobuf" Version="2.0.1.21" />
+		<PackageReference Include="Neuroglia.Serialization.YamlDotNet" Version="2.0.1.21" />
+		<PackageReference Include="ServerlessWorkflow.Sdk" Version="0.7.4.4" />
+	</ItemGroup>
+
+  <ItemGroup>
+    <None Update="Templates\commands.tst">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>commands.tt</DependentUpon>
+    </None>
+    <None Update="Templates\commands.tt">
+      <LastGenOutput>commands.tst</LastGenOutput>
+      <Generator>TextTemplatingFileGenerator</Generator>
+    </None>
+    <None Update="Templates\events.tst">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>events.tt</DependentUpon>
+    </None>
+    <None Update="Templates\events.tt">
+      <LastGenOutput>events.tst</LastGenOutput>
+      <Generator>TextTemplatingFileGenerator</Generator>
+    </None>
+    <None Update="Templates\models.tst">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>models.tt</DependentUpon>
+    </None>
+    <None Update="Templates\models.tt">
+      <LastGenOutput>models.tst</LastGenOutput>
+      <Generator>TextTemplatingFileGenerator</Generator>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Commands\Generic\v1\Generated\V1DeleteCommand.cs">
+      <CustomToolNamespace>..\Synapse.Application\Commands\Generic\v1\V1DeleteCommand.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Commands\Generic\v1\Generated\V1PatchCommand.cs">
+      <CustomToolNamespace>..\Synapse.Application\Commands\Generic\v1\V1PatchCommand.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Commands\WorkflowInstances\v1\Generated\V1CreateWorkflowInstanceCommand.cs">
+      <CustomToolNamespace>..\Synapse.Application\Commands\WorkflowInstances\v1\V1CreateWorkflowInstanceCommand.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Commands\Workflows\v1\Generated\V1CreateWorkflowCommand.cs">
+      <CustomToolNamespace>..\Synapse.Application\Commands\Workflows\v1\V1CreateWorkflowCommand.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\Workflows\v1\Generated\V1WorkflowCreatedIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\Workflows\v1\V1WorkflowCreatedDomainEvent.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Models\WorkflowInstance\v1\Generated\V1WorkflowInstance.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Models\WorkflowInstance\v1\V1WorkflowInstance.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Models\Workflow\v1\Generated\V1Workflow.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Models\Workflow\v1\V1Workflow.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Models\Workflow\v1\Generated\V1WorkflowResourceDefinition.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Models\Workflow\v1\V1WorkflowResourceDefinition.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Models\Workflow\v1\Generated\V1WorkflowSpec.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Models\Workflow\v1\V1WorkflowSpec.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Models\Workflow\v1\Generated\V1WorkflowStatus.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Models\Workflow\v1\V1WorkflowStatus.cs</CustomToolNamespace>
+    </Compile>
+  </ItemGroup>
+
+</Project>

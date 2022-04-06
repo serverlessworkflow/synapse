@@ -1,0 +1,18 @@
+﻿@namespace Synapse.Dashboard
+@inherits LayoutComponentBase
+
+<div class="page h-100">
+    <NavMenu />
+    <div class="main p-4 d-flex flex-column">
+        <!--<Header />-->
+        <Breadcrumb />
+        <div class="w-100 flex-grow flex-lg-row flex-column d-flex">
+            <RightSidebar />
+            <div class="content flex-grow">
+                @Body
+            </div>
+            <LeftSidebar />
+        </div>
+    </div>
+</div>
+<Toaster />

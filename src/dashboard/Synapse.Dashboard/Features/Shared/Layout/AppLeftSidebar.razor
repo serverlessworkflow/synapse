@@ -1,0 +1,32 @@
+﻿@namespace Synapse.Dashboard
+@implements IDisposable
+@inject ILayoutService Layout
+@code
+{
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        if (this.Layout != null)
+            this.Layout.LeftSidebar = this;
+    }
+
+    protected override bool ShouldRender()
+    {
+        var shouldRender = base.ShouldRender();
+        if (shouldRender)
+            this.Layout.UpdateLeftSidebar();
+        return shouldRender;
+    }
+
+    public void Dispose()
+    {
+        if (this.Layout != null)
+            this.Layout.LeftSidebar = null;
+        GC.SuppressFinalize(this);
+    }
+
+}

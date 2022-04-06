@@ -1,0 +1,100 @@
+﻿@using Microsoft.AspNetCore.Components.Web
+@inject DagreService DagreService
+@inject IJSRuntime JSRuntime
+
+@if (Graph != null) {
+    <CascadingValue Value="Graph">
+        <svg @ref="_graphReference"
+            class="dagre-graph @Graph.CssClass"
+            width="@(Graph.Width?.ToString() ?? "100%")" 
+            height="@(Graph.Height?.ToString() ?? "100%")"
+            @onmousedown="OnMouseDown"
+            @onmouseup="OnMouseUp"
+            @onmousemove="OnMouseMove"
+            @onwheel="OnWheel"
+        >
+            <defs>
+                @foreach(var def in Graph.SvgDefinitionComponents)
+                {
+                    <DynamicComponent @key="def" Type="def" />
+                }
+            </defs>
+            <g 
+                class="graph"
+                transform="scale(@(Graph.Scale.ToInvariantString())) translate(@Graph.X.ToInvariantString(), @Graph.Y.ToInvariantString())"
+            >
+                <g class="clusters">
+                    @foreach(var cluster in Graph.AllClusters.Values)
+                    {
+                        @if (cluster != null)
+                        {
+                            <InteractiveDynamicComponent @key="cluster" Type="Graph.GetComponentType(cluster)" Parameters="GetComponentParameter(cluster)" />
+                        }
+                    }
+                </g>
+                <g class="edges">
+                    @foreach(var edge in Graph.Edges.Values)
+                    {
+                        @if (edge != null)
+                        {
+                            <DynamicComponent @key="edge" Type="Graph.GetComponentType(edge)" Parameters="GetComponentParameter(edge)" />
+                        }
+                    }
+                </g>
+                <g class="nodes">
+                    @foreach(var node in Graph.AllNodes.Values)
+                    {
+                        @if (node != null)
+                        {
+                            <InteractiveDynamicComponent @key="node" Type="Graph.GetComponentType(node)" Parameters="GetComponentParameter(node)" />
+                        }
+                    }
+                </g>
+            </g>
+        </svg>
+    </CascadingValue>
+}
+
+@code {
+    [Parameter]
+    public IDagreGraphOptions? Options { get; set; }
+
+    [Parameter]
+    public IGraphViewModel? Graph { get; set; }
+
+    protected ElementReference _graphReference;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (this.Graph != null)
+        {
+            await this.DagreService.ComputePositions(this.Graph, this.Options);
+            //Console.WriteLine(await this.DagreService.Serialize(this.Graph.DagreGraph!));
+            //Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(this.Graph.DagreGraph));
+            //Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(this.Graph));
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await this.JSRuntime.InvokeVoidAsync("neuroglia.blazor.preventScroll", this._graphReference);
+    }
+
+    protected virtual Dictionary<string, object> GetComponentParameter(IGraphElement element)
+    {
+        var parameters = new Dictionary<string, object>()
+        {
+            { "Element", element }
+        };
+        return parameters;
+    }
+
+    protected virtual void OnMouseDown(MouseEventArgs e) => this.Graph?.OnMouseDown(null, e);
+
+    protected virtual void OnMouseMove(MouseEventArgs e) => this.Graph?.OnMouseMove(null, e);
+
+    protected virtual void OnMouseUp(MouseEventArgs e) => this.Graph?.OnMouseUp(null, e);
+
+    protected virtual void OnWheel(WheelEventArgs e) => this.Graph?.OnWheel(null, e);
+}

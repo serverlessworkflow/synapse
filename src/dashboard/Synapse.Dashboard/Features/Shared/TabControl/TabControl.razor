@@ -1,0 +1,50 @@
+﻿@namespace Synapse.Dashboard
+
+<div class="container d-flex flex-column">    
+    <div class="row">
+        <ul class="nav nav-tabs">
+            @foreach (TabPage tabPage in Pages)
+            {
+                <li class="nav-item cursor-pointer">
+                    <a class="nav-link @GetButtonClass(tabPage)" @onclick=@( () => ActivatePage(tabPage) )>@tabPage.Header</a>
+                </li>
+            }
+        </ul>
+    </div>
+    <div class="row flex-grow-1 d-block">
+        <CascadingValue Value="this">
+            @ChildContent
+        </CascadingValue>
+    </div>
+</div>
+
+@code 
+{
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    public TabPage ActivePage { get; set; }
+
+    List<TabPage> Pages = new List<TabPage>();
+
+    internal void AddPage(TabPage tabPage)
+    {
+        this.Pages.Add(tabPage);
+        if (this.Pages.Count == 1)
+            this.ActivePage = tabPage;
+        this.StateHasChanged();
+    }
+
+    string GetButtonClass(TabPage page)
+    {
+        return page == this.ActivePage ? "active" : "";
+    }
+
+    void ActivatePage(TabPage page)
+    {
+        this.ActivePage = page;
+        this.StateHasChanged();
+    }
+
+}

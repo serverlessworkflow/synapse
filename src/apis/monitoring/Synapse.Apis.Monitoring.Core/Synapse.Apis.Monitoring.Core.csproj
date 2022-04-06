@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	<TargetFramework>net6.0</TargetFramework>
+	<RootNamespace>$(MSBuildProjectName.Replace(" ", "_").Replace(".Core", ""))</RootNamespace>
+	<ImplicitUsings>enable</ImplicitUsings>
+	<Nullable>enable</Nullable>
+	<VersionPrefix>0.1.0</VersionPrefix>
+	<GenerateDocumentationFile>True</GenerateDocumentationFile>
+	<Authors>The Synapse Authors</Authors>
+	<Company>Cloud Native Computing Foundation</Company>
+	<Copyright>Copyright © 2022-Present The Synapse Authors. All Rights Reserved.</Copyright>
+	<RepositoryUrl>https://github.com/serverlessworkflow/synapse</RepositoryUrl>
+	<RepositoryType>git</RepositoryType>
+	<PackageProjectUrl>https://github.com/serverlessworkflow/synapse</PackageProjectUrl>
+	<PackageTags>synapse monitoring api core</PackageTags>
+	<NeutralLanguage>en</NeutralLanguage>
+	<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+	<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+	<AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
+	<FileVersion>$(VersionPrefix).0</FileVersion>
+	<OutputType>Library</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\core\Synapse.Integration\Synapse.Integration.csproj" />
+  </ItemGroup>
+
+</Project>

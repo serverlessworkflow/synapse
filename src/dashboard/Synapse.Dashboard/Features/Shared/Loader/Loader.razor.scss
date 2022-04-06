@@ -1,0 +1,21 @@
+﻿.loader-container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+
+    .logo-viewbox {
+        width: 75px;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+}
+
+.animation-in-out {
+    animation: fadeIn 0.5s infinite alternate;
+}

@@ -1,0 +1,11 @@
+﻿@namespace Synapse.Dashboard
+@typeparam T
+
+<span title="@RenderContext.Column.Description">@RenderContext.Column.Name</span>
+
+@code {
+
+    [Parameter]
+    public ColumnHeaderRenderingContext<T> RenderContext { get; set; }
+
+}

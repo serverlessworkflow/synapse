@@ -1,0 +1,11 @@
+﻿@namespace Synapse.Dashboard
+@typeparam T
+
+<span>@RenderContext.Value</span>
+
+@code {
+
+    [Parameter]
+    public CellRenderingContext<T> RenderContext { get; set; }
+
+}

@@ -1,0 +1,39 @@
+﻿@page "/workflows/new"
+@using Neuroglia.Data.Flux
+@using ServerlessWorkflow.Sdk.Models
+@using Synapse.Apis.Management
+@using Synapse.Integration.Commands.Workflows
+@inject IDispatcher Dispatcher
+@inject ISynapseManagementApi SynapseApi
+@inject IBreadcrumbService BreadcrumbService
+@inject NavigationManager NavigationManager
+
+<PageTitle>New workflow</PageTitle>
+<AppHeader>
+    <span class="h5 m-0 p-0">New workflow</span>
+</AppHeader>
+<WorkflowForm OnSubmitWorkflowDefinition="OnCreateWorkflow" />
+
+@code {
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await this.BreadcrumbService.Use(KnownBreadcrumbs.CreateWorkflow);
+    }
+
+    async Task OnCreateWorkflow(WorkflowDefinition definition)
+    {
+        if (definition != null) 
+        {
+            var command = new V1CreateWorkflowCommand()
+            {
+                Definition = definition
+            };
+            var workflow = await this.SynapseApi.CreateWorkflowAsync(command);
+            if (workflow != null)
+                this.NavigationManager.NavigateTo("workflows");
+        }
+    }
+
+}

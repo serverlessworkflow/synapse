@@ -1,0 +1,43 @@
+﻿@namespace Synapse.Dashboard
+@implements IAccordionModel
+
+<div>
+    <div @onclick="ToggleExpandAsync">
+        @Header
+    </div>
+    <div class="collapse @(IsExpanded ? "show" : "")">
+        @Body
+    </div>
+</div>
+
+@code 
+{
+
+    [Parameter]
+    public RenderFragment Header { get; set; }
+
+    [Parameter]
+    public RenderFragment Body { get; set; }
+
+    /// <summary>
+    /// Gets a boolean indicating whether or not the <see cref="Collapse"/> is expanded
+    /// </summary>
+    [Parameter]
+    public bool IsExpanded { get; set; }
+
+    /// <summary>
+    /// Gets the <see cref="EventCallback"/> to invoke whenever the <see cref="Collapse"/> is being expanded or collapsed
+    /// </summary>
+    [Parameter]
+    public EventCallback<ChangeEventArgs> OnToggleExpand { get; set; }
+
+    public bool AllowsMultiple { get; set; } = true;
+
+    public async Task ToggleExpandAsync()
+    {
+        this.IsExpanded = !this.IsExpanded;
+        //this.StateHasChanged();
+        await this.OnToggleExpand.InvokeAsync(new() { Value = this.IsExpanded });
+    }
+
+}

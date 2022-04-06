@@ -1,0 +1,42 @@
+﻿@using Blazor.Diagrams.Components.Renderers
+@using System.Collections.Specialized
+@namespace Synapse.Dashboard
+
+<div class="border border-dark rounded bg-white px-3 py-2 text-wrap text-center function-node">
+    <div><b>@Node.Action.Name</b></div>
+    <div class="border border-dark rounded-circle bg-primary text-white position-absolute instance-counter d-flex @DisplayClass"><span class="m-auto">@this.Node.ActiveInstances.Count</span></div>
+    @foreach (var port in Node.Ports)
+    {
+        <PortRenderer Port="port" />
+    }
+</div>
+
+@code {
+
+    [Parameter]
+    public FunctionRefNodeModel Node { get; set; }
+
+    string DisplayClass
+    {
+        get
+        {
+            if (this.Node.ActiveInstances.Any())
+                return string.Empty;
+            else
+                return "d-none";
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        this.Node.ActiveInstances.CollectionChanged += this.OnWorkflowInstanceCollectionChanged!;
+        this.Node.FaultedInstances.CollectionChanged += this.OnWorkflowInstanceCollectionChanged!;
+        await base.OnParametersSetAsync();
+    }
+
+    private void OnWorkflowInstanceCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+    {
+        this.StateHasChanged();
+    }
+
+}

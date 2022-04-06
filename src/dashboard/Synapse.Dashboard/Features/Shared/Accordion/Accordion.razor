@@ -1,0 +1,74 @@
+﻿@namespace Synapse.Dashboard
+@inject IAccordionManager AccordionManager
+@implements IDisposable
+@implements IAccordionModel
+
+<div class="accordion">
+    <div class="accordion-item">
+        <div class="accordion-header">
+            <button type="button" class="accordion-button" @onclick="Toggle">
+                @Header
+            </button>
+        </div>
+        <div class="accordion-collapse @(IsExpanded ? "collapse show" : "collapsed")">
+            <div class="accordion-body">
+                @Body
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    /// <summary>
+    /// Gets/sets the title of the accordion
+    /// </summary>
+    [Parameter]
+    public RenderFragment? Header { get; set; }
+
+    /// <summary>
+    /// Gets/sets the content of the accordion
+    /// </summary>
+    [Parameter]
+    public RenderFragment? Body { get; set; }
+
+    /// <summary>
+    /// Gets/sets if the accordion is opened
+    /// </summary>
+    [Parameter]
+    public bool IsExpanded { get; set; } = false;
+
+    /// <summary>
+    /// Gets/sets if the accordion can be opened at the same time than others
+    /// </summary>
+    [Parameter]
+    public bool AllowsMultiple { get; set; } = true;
+
+    /// <summary>
+    /// Register the accordion
+    /// </summary>
+    /// <returns></returns>
+    protected override async Task OnInitializedAsync()
+    {
+        await this.AccordionManager.Register(this);
+        await base.OnInitializedAsync();
+    }
+
+    /// <summary>
+    /// Deregister the accordion when the component is disposed
+    /// </summary>
+    public void Dispose()
+    {
+        this.AccordionManager.Deregister(this);
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Toggles the accordion
+    /// </summary>
+    /// <returns></returns>
+    public async Task Toggle()
+    {
+        await this.AccordionManager.Toggle(this);
+    }
+
+}

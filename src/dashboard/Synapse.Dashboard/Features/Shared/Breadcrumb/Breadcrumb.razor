@@ -1,0 +1,39 @@
+﻿@namespace Synapse.Dashboard
+@inject IBreadcrumbService BreadcrumbService
+@implements IDisposable
+<nav class="pb-4" aria-label="breadcrumb">
+    <ul class="breadcrumb">
+        @foreach(var item in BreadcrumbService.Items) {
+            <li class="breadcrumb-item">
+                <a href="@item.Link">
+                    @if (!String.IsNullOrWhiteSpace(item.Icon))
+                    {
+                        <span class="oi @item.Icon" aria-hidden="true"></span>
+                    }
+                    @item.Label
+                </a>
+            </li>
+        }
+    </ul>
+</nav>
+
+@code {
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        this.BreadcrumbService.PropertyChanged += this.OnBreadcrumbChanged;
+    }
+
+    protected void OnBreadcrumbChanged(object? sender, PropertyChangedEventArgs args)
+    {
+        this.StateHasChanged();
+    }
+    
+
+    public void Dispose()
+    {
+        if (this.BreadcrumbService != null)
+            this.BreadcrumbService.PropertyChanged -= this.OnBreadcrumbChanged;
+        GC.SuppressFinalize(this);
+    }
+}

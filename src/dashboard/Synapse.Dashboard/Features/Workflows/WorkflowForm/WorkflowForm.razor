@@ -1,0 +1,119 @@
+﻿@using ServerlessWorkflow.Sdk.Models
+@using ServerlessWorkflow.Sdk.Services.IO
+@using ServerlessWorkflow.Sdk.Services.Validation
+@using System.Text
+@namespace Synapse.Dashboard
+@inject IMonacoEditorHelper MonacoEditorHelper
+@inject IWorkflowReader WorkflowReader
+@inject IWorkflowValidator WorkflowValidator
+
+<div class="h-100 mh-100 flex-grow d-flex flex-column justify-content-between align-items-start">
+    <label class="form-form-label">Definition</label>
+    <div class="flex-grow d-flex flex-row w-100 h-100">
+        <div class="w-75 h-100 mh-100">
+            <MonacoEditor
+                @ref="editor"
+                Id="definition-editor"
+                CssClass="h-100"
+                ConstructionOptions="MonacoEditorHelper.GetStandaloneEditorConstructionOptions()"
+                OnDidInit="OnMonacoEditorDidInit"
+                OnDidChangeModelDecorations="OnMonacoEditorDidChangeModelDecorations"
+            />
+        </div>
+        <div class="w-25">            
+            @if(validationErrors != null && validationErrors.Any())
+            {
+                <div class="validation-errors alert alert-danger">
+                    <ul>
+                        @foreach (var error in validationErrors)
+                        {
+                            <li>@error.ToString()</li>
+                        }
+                    </ul>
+                </div>
+            }
+        </div>
+    </div>
+    <button disabled="@IsCreateDisabled" @onclick="OnCreateWorkflow" type="button" class="btn btn-blockquote btn-dark">Create Workflow</button>
+</div>
+
+@code {
+
+    [Parameter]
+    public EventCallback<WorkflowDefinition> OnSubmitWorkflowDefinition { get; set; }
+    protected IList<string> validationErrors = new List<string>();
+    protected MonacoEditor editor;
+    protected bool IsCreateDisabled { get; set; } = true;
+
+    async Task OnCreateWorkflow()
+    {
+        await this.Validate();
+        var rawDefinition = await this.editor.GetValue();
+        if (string.IsNullOrWhiteSpace(rawDefinition))
+        {
+            return;
+        }
+        try
+        {
+            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(rawDefinition));
+            WorkflowDefinition definition = await this.WorkflowReader.ReadAsync(stream);
+            var validationResult = await this.WorkflowValidator.ValidateAsync(definition, false, true);
+            if (!validationResult.IsValid)
+            {
+                validationResult.SchemaValidationErrors.ToList().ForEach(error =>
+                {
+                    this.validationErrors.Add($"(Schema) ${error.Message}");
+                });
+                validationResult.DslValidationErrors.ToList().ForEach(error =>
+                {
+                    this.validationErrors.Add($"(DSL) ${error.ErrorMessage}");
+                });
+                return;
+            }
+            await this.OnSubmitWorkflowDefinition.InvokeAsync(definition);
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            //todo: warn the user via validationErrors
+            return;
+        }
+    }
+
+    protected async Task OnMonacoEditorDidInit(MonacoEditorBase editorBase)
+    {
+        var model = await this.editor.GetModel();
+        await this.editor.SetValue("");
+        await model.jsRuntime.InvokeVoidAsync("enableJsonValidation08" , model.Uri);
+    }
+
+    protected async Task OnMonacoEditorDidChangeModelDecorations(ModelDecorationsChangedEvent modelDecorationsChangedEvent)
+    {
+        await this.Validate();
+    }
+
+    protected async Task Validate()
+    {
+        this.validationErrors.Clear();
+        this.IsCreateDisabled = false;
+        var model = await this.editor.GetModel();
+        var owner = await model.GetModeId();
+        var markers = await model.jsRuntime.InvokeAsync<IEnumerable<MonacoEditorMarker>>("getModelMarkers" , owner);
+        var severeMarkers = markers.Where(marker => marker.Severity >= (int)MonacoEditorMarkerSeverity.Warning);
+        var rawDefinition = await this.editor.GetValue();
+        if (severeMarkers.Any())
+        {
+            this.IsCreateDisabled = true;
+            severeMarkers.ToList().ForEach(marker =>
+            {
+                this.validationErrors.Add($"{marker.Message} ");
+            });
+        }
+        else if (String.IsNullOrEmpty(rawDefinition))
+        {
+            this.validationErrors.Add("The definition cannot be empty");
+            this.IsCreateDisabled = true;
+        }
+    }
+
+}
