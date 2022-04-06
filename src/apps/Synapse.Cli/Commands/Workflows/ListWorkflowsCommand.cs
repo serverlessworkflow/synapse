@@ -64,10 +64,12 @@ namespace Synapse.Cli.Commands.Workflows
                 query = $"$filter={string.Join(" AND ", filters)}";
             var workflows = await this.SynapseManagementApi.GetWorkflowsAsync(query);
             var table = new Table();
-            table.AddColumn("Id");
-            table.AddColumn("Version");
-            table.AddColumn("Created at");
-            table.AddColumn("Last instanciated at");
+            table.Expand = true;
+            table.Border(TableBorder.None);
+            table.AddColumn("ID");
+            table.AddColumn("VERSION");
+            table.AddColumn("CREATED AT");
+            table.AddColumn("LAST INSTANCIATED AT");
             foreach(var workflow in workflows)
             {
                 table.AddRow(workflow.Definition.Id!, workflow.Definition.Version, workflow.CreatedAt.ToString(), (workflow.LastInstanciated.HasValue ? workflow.LastInstanciated.ToString() : "-")!);

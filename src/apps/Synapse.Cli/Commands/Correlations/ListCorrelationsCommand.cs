@@ -57,15 +57,17 @@ namespace Synapse.Cli.Commands.Correlations
                 query = $"$filter={string.Join(" AND ", filters)}";
             var correlations = await this.SynapseManagementApi.GetCorrelationsAsync(query);
             var table = new Table();
-            table.AddColumn("Id");
-            table.AddColumn("Lifetime");
-            table.AddColumn("Outcome type");
-            table.AddColumn("Outcome target");
-            table.AddColumn("Condition type");
-            table.AddColumn("Conditions");
-            table.AddColumn("Contexts");
-            table.AddColumn("Created at");
-            table.AddColumn("Last modified");
+            table.Expand = true;
+            table.Border(TableBorder.None);
+            table.AddColumn("ID");
+            table.AddColumn("LIFETIME");
+            table.AddColumn("OUTCOME TYPE");
+            table.AddColumn("OUTCOME TARGET");
+            table.AddColumn("CONDITION TYPE");
+            table.AddColumn("CONDITIONS");
+            table.AddColumn("CONTEXTS");
+            table.AddColumn("CREATED AT");
+            table.AddColumn("LAST MODIFIED");
             foreach (var correlation in correlations)
             {
                 table.AddRow(correlation.Id, correlation.Lifetime.ToString(), correlation.Outcome.Target, correlation.Outcome.Type.ToString(), correlation.ConditionType.ToString(), correlation.Conditions.Count.ToString(), correlation.Contexts.Count.ToString(), correlation.CreatedAt.ToString(), correlation.LastModified.ToString());
