@@ -6,7 +6,7 @@
 
 ## About
 
-Synapse is a vendor-neutral, free, open-source, and community-driven Workflow Management System (WMS) implementing the [Serverless Workflow specification](https://github.com/serverlessworkflow/specification).
+Synapse is a vendor-neutral, free, open-source, and community-driven Workflow Management System (WFMS) implementing the [Serverless Workflow specification](https://github.com/serverlessworkflow/specification).
 
 ## Requirements
 
