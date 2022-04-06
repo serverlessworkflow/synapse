@@ -4,16 +4,22 @@
         marker-start="@GetDefinitionUrl(Edge.StartMarkerId)"
         marker-end="@GetDefinitionUrl(Edge.EndMarkerId)"
     ></path>
-    <g class="edge-label label">
-        <foreignObject 
-            x="@((Edge.BBox.X - Edge.BBox.Width / 2).ToInvariantString())"
-            y="@(Edge.BBox.Y.ToInvariantString())" 
-            width="@Edge.BBox.Width.ToInvariantString()" 
-            height="@Consts.LabelHeight"
-        >
-            <div>@Edge.Label</div>
-        </foreignObject>
-    </g>
+    @if (LabelCenter != null && !string.IsNullOrWhiteSpace(Edge.Label)) {
+        <g class="edge-label label">
+            <foreignObject 
+                x="@((LabelCenter.X - Edge.BBox.Width / 2).ToInvariantString())"
+                y="@(LabelCenter.Y.ToInvariantString())" 
+                width="@Edge.BBox.Width.ToInvariantString()" 
+                height="@Consts.LabelHeight"
+            >
+                <div>@Edge.Label</div>
+            </foreignObject>
+        </g>
+    }
+    @foreach(var point in Edge.Points)
+    {
+        <circle cx="@point.X.ToInvariantString()" cy="@point.Y.ToInvariantString()" r="1" stroke="red" style="stroke: red!important;"></circle>
+    }
 </g>
 
 @code {
@@ -25,12 +31,22 @@
 
     protected IEdgeViewModel Edge => (IEdgeViewModel)this.Element;
 
+    protected virtual IPosition? LabelCenter { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if (this.Edge.Points.Any()) {
+            var index = (int)Math.Ceiling((double)(this.Edge.Points.Count() / 2)) - 1;
+            this.LabelCenter = this.Edge.Points.ElementAt(index);
+        }
+    }
+
     protected virtual string GetPath(IEdgeViewModel edge)
     {
         switch(edge.Shape)
         {
             case EdgeShape.BSpline:
-                //return PathBuilder.GetBSplinePath(edge.Points);                
+            //return PathBuilder.GetBSplinePath(edge.Points);                
             default:
                 return PathBuilder.GetLinearPath(edge.Points);
         }
