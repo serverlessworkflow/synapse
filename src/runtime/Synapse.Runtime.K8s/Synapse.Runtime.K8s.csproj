@@ -4,6 +4,22 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+	<VersionPrefix>0.1.0</VersionPrefix>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+	<Authors>The Synapse Authors</Authors>
+	<Company>Cloud Native Computing Foundation</Company>
+    <Copyright>Copyright © 2022-Present The Synapse Authors. All Rights Reserved.</Copyright>
+    <RepositoryUrl>https://github.com/serverlessworkflow/synapse</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/serverlessworkflow/synapse</PackageProjectUrl>
+    <PackageTags>synapse runtime host k8s</PackageTags>
+    <NeutralLanguage>en</NeutralLanguage>
+	<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+	<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
+    <FileVersion>$(VersionPrefix).0</FileVersion>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+	<DebugType>embedded</DebugType>
   </PropertyGroup>
 
   <ItemGroup>

@@ -19,6 +19,7 @@
     <AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
     <FileVersion>$(VersionPrefix).0</FileVersion>
     <AppDesignerFolder>Properties</AppDesignerFolder>
+	<DebugType>embedded</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
