@@ -16,7 +16,7 @@ Here are a few tips for repository maintainers.
 
 ## Branch Management
 
-The `main` branch is is the bleeding edge. New major versions of the module
+The `main` branch is the bleeding edge. New major versions of the project
 are cut from this branch and tagged. If you intend to submit a pull request
 you should use `main HEAD` as your starting point.
 

@@ -55,14 +55,16 @@ namespace Synapse.Cli.Commands.WorkflowInstances
                 query = $"$filter={filter}";
             var workflowInstances = await this.SynapseManagementApi.GetWorkflowInstancesAsync(query);
             var table = new Table();
-            table.AddColumn("Id");
-            table.AddColumn("Workflow");
-            table.AddColumn("Key");
-            table.AddColumn("Status");
-            table.AddColumn("Activation type");
-            table.AddColumn("Created at");
-            table.AddColumn("Started at");
-            table.AddColumn("Executed at");
+            table.Expand = true;
+            table.Border(TableBorder.None);
+            table.AddColumn("ID");
+            table.AddColumn("WORKFLOW");
+            table.AddColumn("KEY");
+            table.AddColumn("STATUS");
+            table.AddColumn("ACTIVATION TYPE");
+            table.AddColumn("CREATED AT");
+            table.AddColumn("STARTED AT");
+            table.AddColumn("EXECUTED AT");
             foreach (var workflowInstance in workflowInstances)
             {
                 var status = workflowInstance.Status switch
