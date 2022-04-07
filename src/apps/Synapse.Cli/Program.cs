@@ -51,7 +51,7 @@ static IServiceProvider BuildServiceProvider()
         settings.NullValueHandling = NullValueHandling.Ignore;
     });
     services.AddServerlessWorkflow();
-    services.AddSynapseRestApiClient(http => http.BaseAddress = new Uri("http://localhost:9600")); //todo: config based
+    services.AddSynapseRestApiClient(http => http.BaseAddress = new Uri("http://localhost:42286")); //todo: config based
     services.AddCliCommands();
     return services.BuildServiceProvider();
 }

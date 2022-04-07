@@ -15,28 +15,30 @@
  *
  */
 
-using System.Runtime.Serialization;
-
-namespace Synapse.Runtime.Docker
+namespace Synapse.Runtime.Docker.Configuration
 {
 
     /// <summary>
-    /// Enumerates all supported Docker image pull policies
+    /// Represents the options used to configure a Synapse Docker-based runtime
     /// </summary>
-    [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-    [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.StringEnumConverterFactory))]
-    public enum ImagePullPolicy
+    public class NativeRuntimeOptions
     {
+
         /// <summary>
-        /// Indicates that the image should only be pulled when not present
+        /// Gets the name of the default worker file
         /// </summary>
-        [EnumMember(Value = "IfNotPresent")]
-        IfNotPresent,
+        public const string DefaultWorkerFileName = "Synapse.Worker";
+
         /// <summary>
-        /// Indicates that the image should always be pulled
+        /// Gets/sets the name of the worker file to run
         /// </summary>
-        [EnumMember(Value = "Always")]
-        Always
+        public virtual string WorkerFileName { get; set; } = DefaultWorkerFileName;
+
+        /// <summary>
+        /// Gets/sets the directory in which to run the worker process
+        /// </summary>
+        public virtual string WorkingDirectory { get; set; } = Path.Combine(AppContext.BaseDirectory, "bin", "worker");
+
     }
 
 }

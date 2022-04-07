@@ -1,0 +1,213 @@
+﻿/*
+ * Copyright © 2022-Present The Synapse Authors
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Synapse.Application.Services;
+using Synapse.Domain.Models;
+using Synapse.Runtime.Docker.Configuration;
+using System.Collections.Concurrent;
+using System.Diagnostics;
+using System.IO.Compression;
+using System.Runtime.InteropServices;
+
+namespace Synapse.Runtime.Services
+{
+
+    /// <summary>
+    /// Represents the native implementation of the <see cref="IWorkflowRuntimeHost"/>
+    /// </summary>
+    public class NativeRuntimeHost
+        : WorkflowRuntimeHostBase
+    {
+
+        /// <summary>
+        /// Initializes a new <see cref="NativeRuntimeHost"/>
+        /// </summary>
+        /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
+        /// <param name="httpClientFactory">The service used to create <see cref="System.Net.Http.HttpClient"/>s</param>
+        /// <param name="options">The service used to access the current <see cref="NativeRuntimeOptions"/></param>
+        public NativeRuntimeHost(ILoggerFactory loggerFactory, IHttpClientFactory httpClientFactory, IOptions<NativeRuntimeOptions> options)
+            : base(loggerFactory)
+        {
+            this.HttpClient = httpClientFactory.CreateClient();
+            this.Options = options.Value;
+        }
+
+        /// <summary>
+        /// Gets the <see cref="System.Net.Http.HttpClient"/> used to perform HTTP requests
+        /// </summary>
+        protected HttpClient HttpClient { get; }
+
+        /// <summary>
+        /// Gets the current <see cref="NativeRuntimeOptions"/>
+        /// </summary>
+        protected NativeRuntimeOptions Options { get; }
+
+        /// <summary>
+        /// Gets a <see cref="ConcurrentDictionary{TKey, TValue}"/> containing all known worker processes
+        /// </summary>
+        protected ConcurrentDictionary<string, Process> Processes { get; } = new();
+
+        /// <inheritdoc/>
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            await this.InstallWorkerAsync(stoppingToken);
+        }
+
+        /// <summary>
+        /// Downloads and installs the worker binaries, if not already present
+        /// </summary>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        protected virtual async Task InstallWorkerAsync(CancellationToken cancellationToken)
+        {
+            this.Logger.LogInformation("Downloading worker app...");
+            var workerDirectory = new DirectoryInfo(this.Options.WorkingDirectory);
+            if (!workerDirectory.Exists)
+                workerDirectory.Create();
+            if (File.Exists(Path.Combine(workerDirectory.FullName, this.Options.WorkerFileName)))
+            {
+                this.Logger.LogInformation("Worker app already present locally. Skipping download."); //todo: config based: the user might want to get latest every time
+                return;
+            } 
+            var target = null as string;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                target = "win-x64.zip";
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                target = "linux-x64.tar.gz";
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                target = "osx-64.tar.gz";
+            else
+                throw new PlatformNotSupportedException();
+            using var packageStream = await this.HttpClient.GetStreamAsync($"https://github.com/neuroglia-io/synapse/releases/download/latest/synapse-worker-{target}", cancellationToken); //todo: config based
+            using ZipArchive archive = new ZipArchive(packageStream, ZipArchiveMode.Read);
+            this.Logger.LogInformation("Worker app successfully downloaded. Extracting...");
+            archive.ExtractToDirectory(workerDirectory.FullName, true);
+            this.Logger.LogInformation("Worker app successfully extracted");
+        }
+
+        /// <inheritdoc/>
+        public override async Task<string> StartAsync(V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default)
+        {
+            if (workflowInstance == null)
+                throw new ArgumentNullException(nameof(workflowInstance));
+            var workerFileName = Path.Combine(this.Options.WorkerFileName);
+            var fileName = null as string;
+            var args = null as string;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                fileName = "cmd.exe";
+                args = @$"/c {this.Options.WorkerFileName}";
+            }
+            else
+            {
+                fileName = "bash";
+                args = @$"-c {this.Options.WorkerFileName}";
+            }
+            var startInfo = new ProcessStartInfo()
+            {
+                FileName = fileName,
+                Arguments = args,
+                WorkingDirectory = this.Options.WorkingDirectory,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true,
+                UseShellExecute = false
+            };
+            startInfo.Environment.Add(EnvironmentVariables.Api.HostName.Name, EnvironmentVariables.Api.HostName.Value!); //todo: instead, fetch values from options
+            startInfo.Environment.Add(EnvironmentVariables.Runtime.WorkflowInstanceId.Name, workflowInstance.Id.ToString());
+            var process = new Process()
+            {
+                StartInfo = startInfo
+            };
+            process.OutputDataReceived += (sender, e) =>
+            {
+
+            };
+            process.ErrorDataReceived += (sender, e) =>
+            {
+
+            };
+            process.Exited += (sender, e) =>
+            {
+
+            };
+            process.Disposed += (sender, e) =>
+            {
+
+            };
+            process.Start();
+            _ = Task.Run(() =>
+            {
+                process.WaitForExit();
+                var output = process.StandardOutput.ReadToEnd();
+                var error = process.StandardError.ReadToEnd();
+            });
+            return await Task.FromResult(process.Id.ToString());
+        }
+
+        /// <summary>
+        /// Handles the exit of a <see cref="Process"/>
+        /// </summary>
+        /// <param name="process">The <see cref="Process"/> that has exited</param>
+        protected virtual void OnProcessExited(Process process)
+        {
+            if (process == null)
+                throw new ArgumentNullException(nameof(process));
+            process.Dispose();
+        }
+
+        /// <summary>
+        /// Handles the disposal of a <see cref="Process"/>
+        /// </summary>
+        /// <param name="workflowInstanceId">The id of the <see cref="V1WorkflowInstance"/> the <see cref="Process"/> belongs to</param>
+        /// <param name="process">The disposed <see cref="Process"/></param>
+        protected virtual void OnProcessDisposed(string workflowInstanceId, Process process)
+        {
+            if (string.IsNullOrWhiteSpace(workflowInstanceId))
+                throw new ArgumentNullException(nameof(workflowInstanceId));
+            if (process == null)
+                throw new ArgumentNullException(nameof(process));
+            this.Processes.TryRemove(workflowInstanceId, out _);
+        }
+
+        /// <inheritdoc/>
+        protected override async ValueTask DisposeAsync()
+        {
+            foreach(var process in this.Processes)
+            {
+                process.Value.Dispose();
+            }
+            this.Processes.Clear();
+            await base.DisposeAsync();
+        }
+
+        /// <inheritdoc/>
+        public override void Dispose()
+        {
+            foreach (var process in this.Processes)
+            {
+                process.Value.Dispose();
+            }
+            this.Processes.Clear();
+            base.Dispose();
+        }
+
+    }
+
+}

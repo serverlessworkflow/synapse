@@ -39,7 +39,7 @@ builder.Services.AddServerlessWorkflow();
 builder.Services.AddPluralizer();
 builder.Services.AddSingleton<IODataClient>(new ODataClient(new ODataClientSettings()
 {
-    BaseUri = new($"http://localhost:9600/api/odata"),
+    BaseUri = new($"http://localhost:42286/api/odata"),
     PayloadFormat = ODataPayloadFormat.Json
 }));
 builder.Services.AddScoped<ILayoutService, LayoutService>();
@@ -59,7 +59,7 @@ builder.Services.AddFlux(flux =>
 builder.Services.AddSingleton(provider =>
 {
     return new HubConnectionBuilder()
-        .WithUrl($"http://localhost:9600/api/ws")
+        .WithUrl($"http://localhost:42286/api/ws")
         .WithAutomaticReconnect()
         .AddNewtonsoftJsonProtocol(options =>
         {

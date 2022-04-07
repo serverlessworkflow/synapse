@@ -14,10 +14,13 @@
  * limitations under the License.
  *
  */
+
 using Grpc.Net.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 using ProtoBuf.Grpc.Client;
+using Synapse.Apis.Runtime.Grpc.Configuration;
 
 namespace Synapse.Apis.Runtime.Grpc
 {
@@ -32,18 +35,34 @@ namespace Synapse.Apis.Runtime.Grpc
         /// Adds and configures a GRPC-based client for the Synapse Runtime API
         /// </summary>
         /// <param name="services">The <see cref="IServiceCollection"/> to configure</param>
+        /// <param name="configurationAction">An <see cref="Action{T}"/> used to configure the <see cref="SynapseGrpcRuntimeApiClientOptions"/> to use</param>
         /// <returns>The configured <see cref="IServiceCollection"/></returns>
-        public static IServiceCollection AddSynapseGrpcRuntimeApiClient(this IServiceCollection services)
+        public static IServiceCollection AddSynapseGrpcRuntimeApiClient(this IServiceCollection services, Action<ISynapseGrpcRuntimeApiClientOptionsBuilder> configurationAction)
         {
+            if(configurationAction == null)
+                throw new ArgumentNullException(nameof(configurationAction));
+            var builder = new SynapseGrpcRuntimeApiClientOptionsBuilder();
+            configurationAction(builder);
+            var options = builder.Build();
+            services.TryAddSingleton(Options.Create(options));
             services.TryAddSingleton(provider =>
             {
-                var channel = GrpcChannel.ForAddress($"{EnvironmentVariables.Api.Host.Value}:8080"); //todo: config-based
+                var channel = GrpcChannel.ForAddress(options.Address, options.ChannelOptions);
                 return channel.CreateGrpcService<ISynapseGrpcRuntimeApi>();
             });
             services.TryAddSingleton<ISynapseRuntimeApi, SynapseGrpcRuntimeApiClient>();
             return services;
         }
 
-    }
+        /// <summary>
+        /// Adds and configures a GRPC-based client for the Synapse Runtime API
+        /// </summary>
+        /// <param name="services">The <see cref="IServiceCollection"/> to configure</param>
+        /// <returns>The configured <see cref="IServiceCollection"/></returns>
+        public static IServiceCollection AddSynapseGrpcRuntimeApiClient(this IServiceCollection services)
+        {
+            return services.AddSynapseGrpcRuntimeApiClient(builder => { });
+        }
 
+    }
 }

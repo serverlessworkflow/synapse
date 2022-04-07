@@ -70,7 +70,7 @@ namespace Synapse.Worker.Executor.Services.Processors
                 }
             }
 
-            var channel = GrpcChannel.ForAddress($"{EnvironmentVariables.Api.Host.Value}:8080");
+            var channel = GrpcChannel.ForAddress($"{EnvironmentVariables.Api.HostName.Value}:8080");
             var serviceName = "";
             var client = new GrpcClient(channel, serviceName);
 

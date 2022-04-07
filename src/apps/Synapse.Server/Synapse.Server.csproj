@@ -26,6 +26,7 @@
     <ProjectReference Include="..\..\apis\runtime\Synapse.Apis.Runtime.Grpc\Synapse.Apis.Runtime.Grpc.csproj" />
     <ProjectReference Include="..\..\dashboard\Synapse.Dashboard\Synapse.Dashboard.csproj" />
     <ProjectReference Include="..\..\runtime\Synapse.Runtime.Docker\Synapse.Runtime.Docker.csproj" />
+    <ProjectReference Include="..\..\runtime\Synapse.Runtime.Native\Synapse.Runtime.Native.csproj" />
   </ItemGroup>
 
 </Project>

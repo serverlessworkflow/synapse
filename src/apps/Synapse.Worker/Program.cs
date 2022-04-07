@@ -30,10 +30,15 @@ AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport
 using var host = Host.CreateDefaultBuilder(args)
     .ConfigureAppConfiguration(config =>
     {
-        config.AddKeyPerFile("/run/secrets", true);
+        config.AddJsonFile("appsettings.json", true, true);
+        config.AddKeyPerFile("/run/secrets", true, true);
     })
-    .ConfigureServices(services =>
+    .ConfigureServices((context, services) =>
     {
+        var applicationOptions = new ApplicationOptions();
+        context.Configuration.Bind(applicationOptions);
+        services.AddSingleton(Options.Create(applicationOptions));
+
         services.AddLogging(builder =>
         {
             builder.AddSimpleConsole(options =>

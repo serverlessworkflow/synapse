@@ -8,9 +8,14 @@
     {
 
         /// <summary>
+        /// Gets/sets the object used to configure the Synapse APIs clients used to by the application
+        /// </summary>
+        public virtual ApiClientConfigurationCollection Api { get; set; } = new();
+
+        /// <summary>
         /// Gets/sets the options used to configure the runtime's event correlation feature
         /// </summary>
-        public CorrelationOptions Correlation { get; set; } = new();
+        public virtual CorrelationOptions Correlation { get; set; } = new();
 
     }
 
