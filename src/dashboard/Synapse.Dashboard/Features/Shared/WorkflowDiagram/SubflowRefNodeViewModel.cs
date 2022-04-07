@@ -1,5 +1,4 @@
-﻿using Blazor.Diagrams.Core.Models;
-using ServerlessWorkflow.Sdk.Models;
+﻿using ServerlessWorkflow.Sdk.Models;
 
 namespace Synapse.Dashboard
 {
@@ -15,7 +14,7 @@ namespace Synapse.Dashboard
         /// </summary>
         /// <param name="subflow">The <see cref="SubflowReference"/> the <see cref="SubflowRefNodeViewModel"/> represents</param>
         public SubflowRefNodeViewModel(SubflowReference subflow)
-            : base($"{subflow.WorkflowId}{(string.IsNullOrEmpty(subflow.Version) ? "" : $":{subflow.Version}")}")
+            : base($"{subflow.WorkflowId}{(string.IsNullOrEmpty(subflow.Version) ? "" : $":{subflow.Version}")}", "subflow-node")
         {
             this.Subflow = subflow;
         }

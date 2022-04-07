@@ -24,18 +24,6 @@
     "inputFile": "Features/Shared/Toast/Toaster.razor.scss"
   },
   {
-    "outputFile": "Features/Shared/WorkflowDiagram/EndNode.razor.css",
-    "inputFile": "Features/Shared/WorkflowDiagram/EndNode.razor.scss"
-  },
-  {
-    "outputFile": "Features/Shared/WorkflowDiagram/FunctionRefNode.razor.css",
-    "inputFile": "Features/Shared/WorkflowDiagram/FunctionRefNode.razor.scss"
-  },
-  {
-    "outputFile": "Features/Shared/WorkflowDiagram/StartNode.razor.css",
-    "inputFile": "Features/Shared/WorkflowDiagram/StartNode.razor.scss"
-  },
-  {
     "outputFile": "Pages/Workflows/View.razor.css",
     "inputFile": "Pages/Workflows/View.razor.scss"
   },

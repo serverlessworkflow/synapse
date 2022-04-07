@@ -4,7 +4,7 @@ using Neuroglia.Blazor.Dagre.Models;
 namespace Synapse.Dashboard
 {
     public class StartNodeViewModel
-        : NodeViewModel
+        : WorkflowNodeViewModel
     {
         public StartNodeViewModel()
             :base("", "start-node", NodeShape.Circle, 20, 20)

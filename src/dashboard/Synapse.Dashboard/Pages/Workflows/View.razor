@@ -8,7 +8,6 @@
 @inject IStore Store
 @inject IDispatcher Dispatcher
 @inject ISynapseManagementApi SynapseApi
-@*@inject IWorkflowDiagramBuilder WorkflowDiagramBuilder*@
 @inject WorkflowGraphBuilder WorkflowGraphBuilder 
 @inject IMonacoEditorHelper MonacoEditorHelper
 @inject IBreadcrumbService BreadcrumbService
@@ -39,7 +38,7 @@
 {
     <div class="container-fluid h-100">
         <div class="row h-50 position-relative">
-            <WorkflowDiagram2 Graph="graph" />
+            <WorkflowDiagram Graph="graph" />
         </div>
         <div class="row h-50">            
             @if (workflowInstance == null)
@@ -129,7 +128,6 @@ else
     protected V1Workflow workflow = null!;
     protected V1WorkflowInstance workflowInstance = null!;
     protected List<V1WorkflowActivity> sortedActivities = new List<V1WorkflowActivity>();
-    //protected Diagram diagram { get; set; } = null!;
     protected IGraphViewModel graph { get; set; } = null!;
     protected List<V1WorkflowInstance> instances = new();
     protected IEnumerable<IBreadcrumbItem> workflowBreadCrumbBase = null!;
@@ -138,7 +136,6 @@ else
     {
         await base.OnInitializedAsync();
         this.workflow = await this.SynapseApi.GetWorkflowByIdAsync(this.WorkflowId);
-        //this.diagram = await this.WorkflowDiagramBuilder.BuildDiagram(this.workflow.Definition);
         this.graph = await this.WorkflowGraphBuilder.BuildGraph(this.workflow.Definition);
         this._WorkflowInstanceFeature = this.Store.GetFeature<V1WorkflowInstanceCollectionState>();
         this._WorkflowInstanceSubscription = this._WorkflowInstanceFeature
@@ -148,7 +145,7 @@ else
                 this.StateHasChanged();;
             });
         this.Dispatcher.Dispatch(new ListV1WorkflowInstancesByDefinition(this.WorkflowId));
-        //this.diagram.DisplayActivityStatusFor(this.instances);
+        this.graph.DisplayActivityStatusFor(this.instances);
         await this.BreadcrumbService.Use(KnownBreadcrumbs.Workflows);
         await this.BreadcrumbService.AddCurrentUri(this.WorkflowId);
         this.workflowBreadCrumbBase = new List<IBreadcrumbItem>(this.BreadcrumbService.Items);
@@ -161,14 +158,14 @@ else
         {
             this.workflowInstance = null!;
             this.sortedActivities = new List<V1WorkflowActivity>();
-            //this.diagram.DisplayActivityStatusFor(this.instances);
+            this.graph.DisplayActivityStatusFor(this.instances);
         }
         else
         {
             await this.BreadcrumbService.AddCurrentUri($"Instance {this.WorkflowInstanceId}");
             this.workflowInstance = await this.SynapseApi.GetWorkflowInstanceByIdAsync(this.WorkflowInstanceId);
             this.sortedActivities = this.workflowInstance.Activities.OrderBy(a => a.StartedAt).ToList();
-            //this.diagram.DisplayActivityStatusFor(this.instances.Where(i => i.Id == this.WorkflowInstanceId));
+            this.graph.DisplayActivityStatusFor(this.instances.Where(i => i.Id == this.WorkflowInstanceId));
         }
         this.StateHasChanged();
     }

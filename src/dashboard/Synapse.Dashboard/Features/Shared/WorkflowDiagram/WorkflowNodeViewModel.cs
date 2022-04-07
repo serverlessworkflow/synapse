@@ -11,7 +11,7 @@ namespace Synapse.Dashboard
     /// Represents the base class for all workflow-related <see cref="NodeModel"/>s
     /// </summary>
     public abstract class WorkflowNodeViewModel
-        : NodeViewModel, IWorkflowNodeModel
+        : NodeViewModel, IWorkflowNodeViewModel
     {
 
         /// <inheritdoc/>

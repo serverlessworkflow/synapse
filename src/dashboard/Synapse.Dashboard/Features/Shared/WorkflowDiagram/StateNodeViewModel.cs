@@ -10,7 +10,7 @@ namespace Synapse.Dashboard
     /// Represents a <see cref="StateDefinition"/> <see cref="NodeViewModel"/>
     /// </summary>
     public class StateNodeViewModel
-        : ClusterViewModel, IWorkflowNodeModel
+        : ClusterViewModel, IWorkflowNodeViewModel
     {
 
         /// <summary>

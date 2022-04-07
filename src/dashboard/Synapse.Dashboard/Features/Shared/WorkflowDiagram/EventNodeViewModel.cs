@@ -1,5 +1,4 @@
-﻿using Blazor.Diagrams.Core.Models;
-using ServerlessWorkflow.Sdk;
+﻿using ServerlessWorkflow.Sdk;
 using ServerlessWorkflow.Sdk.Models;
 
 namespace Synapse.Dashboard
@@ -17,7 +16,7 @@ namespace Synapse.Dashboard
         /// <param name="kind">The kind of the <see cref="EventDefinition"/> the <see cref="EventNodeViewModel"/> represents</param>
         /// <param name="refName">The name of the <see cref="EventDefinition"/> the <see cref="EventNodeViewModel"/> represents</param>
         public EventNodeViewModel(EventKind kind, string refName)
-            :base(refName)
+            :base(refName, "event-node")
         {
             this.Kind = kind;
             this.RefName = refName;

@@ -1,5 +1,4 @@
-﻿using Blazor.Diagrams.Core.Models;
-using ServerlessWorkflow.Sdk;
+﻿using ServerlessWorkflow.Sdk;
 
 namespace Synapse.Dashboard
 {
@@ -15,8 +14,10 @@ namespace Synapse.Dashboard
         /// </summary>
         /// <param name="completionType">The gateway's ParallelCompletionType</param>
         public GatewayNodeViewModel(ParallelCompletionType completionType)
+            : base("", "gateway-node", null, 40)
         {
             this.CompletionType = completionType;
+            this.ComponentType = typeof(GatewayNodeTemplate);
         }
 
         /// <summary>

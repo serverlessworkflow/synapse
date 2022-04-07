@@ -1,5 +1,4 @@
-﻿using Blazor.Diagrams.Core.Models;
-using ServerlessWorkflow.Sdk.Models;
+﻿using ServerlessWorkflow.Sdk.Models;
 
 namespace Synapse.Dashboard
 {
@@ -15,6 +14,7 @@ namespace Synapse.Dashboard
         /// </summary>
         /// <param name="dataCase">The name of the <see cref="DataCaseDefinition"/> the <see cref="NodeViewModel"/> represents</param>
         public DataCaseNodeViewModel(string dataCaseName)
+            : base("", "datacase-node")
         {
             this.DataCaseName = dataCaseName;
         }
