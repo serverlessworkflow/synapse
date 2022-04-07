@@ -29,6 +29,7 @@ namespace Synapse.Dashboard
         private async Task BuildStateNodes(WorkflowDefinition definition, GraphViewModel graph, StateDefinition state, NodeViewModel endNode, NodeViewModel previousNode)
         {
             var stateNodeGroup = new StateNodeViewModel(state);
+            await graph.AddElementAsync(stateNodeGroup);
             //List<NodeViewModel> childNodes = new();
             NodeViewModel? firstNode, lastNode = null;
             switch (state)
@@ -220,7 +221,6 @@ namespace Synapse.Dashboard
                 await this.BuildEdgeBetween(graph, stateNodeGroup, endNode);
                 return;
             }*/
-            await graph.AddElementAsync(stateNodeGroup);
             if (lastNode == null)
             {
                 throw new Exception("Every switch case should provide a last node.");

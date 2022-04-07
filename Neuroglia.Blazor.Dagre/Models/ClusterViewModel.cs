@@ -14,6 +14,8 @@ namespace Neuroglia.Blazor.Dagre.Models
         protected readonly Dictionary<Guid, IClusterViewModel> _allClusters;
         public virtual IReadOnlyDictionary<Guid, IClusterViewModel> AllClusters => this._allClusters;
 
+        public virtual event Action<INodeViewModel>? ChildAdded;
+
         public ClusterViewModel(
             Dictionary<Guid, INodeViewModel>? children = null,
             string? label = "",
@@ -79,6 +81,7 @@ namespace Neuroglia.Blazor.Dagre.Models
             node.ParentId = this.Id;
             node.Changed += OnChildChanged;
             this._children.Add(node.Id, node);
+            this.ChildAdded?.Invoke(node);
             if (node is IClusterViewModel cluster)
             {
                 this._allClusters.Add(cluster.Id, cluster);

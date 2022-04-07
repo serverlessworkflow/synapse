@@ -130,6 +130,7 @@ namespace Neuroglia.Blazor.Dagre.Models
                 {
                     continue;
                 }
+                cluster.ChildAdded += this.OnChildAdded;
                 this._allClusters.Add(cluster.Id, cluster);
                 this.Flatten(cluster);
             }
@@ -178,6 +179,7 @@ namespace Neuroglia.Blazor.Dagre.Models
             }
             this._clusters.Add(cluster.Id, cluster);
             this._allClusters.Add(cluster.Id, cluster);
+            cluster.ChildAdded += this.OnChildAdded;
             this.Flatten(cluster);
             await Task.CompletedTask;
         }
@@ -339,5 +341,18 @@ namespace Neuroglia.Blazor.Dagre.Models
         public virtual void OnMouseUp(IGraphElement? element, MouseEventArgs e) => this.MouseUp?.Invoke(element, e);
 
         public virtual void OnWheel(IGraphElement? element, WheelEventArgs e) => this.Wheel?.Invoke(element, e);
+
+        public virtual void OnChildAdded(INodeViewModel child)
+        {
+            if(child is IClusterViewModel cluster)
+            {
+                this._allClusters.Add(cluster.Id, cluster);
+                this.Flatten(cluster);
+            }
+            else if (child is INodeViewModel node)
+            {
+                this._allNodes.Add(node.Id, node);
+            }
+        }
     }
 }
