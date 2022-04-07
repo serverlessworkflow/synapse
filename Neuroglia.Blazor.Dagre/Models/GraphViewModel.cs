@@ -141,7 +141,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <param name="node"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public virtual async Task AddElement(IGraphElement element)
+        public virtual async Task AddElementAsync(IGraphElement element)
         {
             if (element == null)
             {
@@ -149,17 +149,17 @@ namespace Neuroglia.Blazor.Dagre.Models
             }
             if (element is IEdgeViewModel edge)
             {
-                await this.AddEdge(edge);
+                await this.AddEdgeAsync(edge);
                 return;
             }
             if (element is IClusterViewModel cluster)
             {
-                await this.AddCluster(cluster);
+                await this.AddClusterAsync(cluster);
                 return;
             }
             if (element is INodeViewModel node)
             {
-                await this.AddNode(node);
+                await this.AddNodeAsync(node);
                 return;
             }
             throw new Exception("Unknown element type");
@@ -171,7 +171,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <param name="cluster"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        protected virtual async Task AddCluster(IClusterViewModel cluster)
+        protected virtual async Task AddClusterAsync(IClusterViewModel cluster)
         {
             if  (cluster == null) { 
                 throw new ArgumentNullException(nameof(cluster)); 
@@ -188,7 +188,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <param name="node"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        protected virtual async Task AddNode(INodeViewModel node)
+        protected virtual async Task AddNodeAsync(INodeViewModel node)
         {
             if (node == null)
             {
@@ -196,7 +196,7 @@ namespace Neuroglia.Blazor.Dagre.Models
             }
             if (node is IClusterViewModel cluster)
             {                
-                await this.AddCluster(cluster);
+                await this.AddClusterAsync(cluster);
                 return;
             }
             this._nodes.Add(node.Id, node);
@@ -210,7 +210,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <param name="node"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        protected virtual async Task AddEdge(IEdgeViewModel edge)
+        protected virtual async Task AddEdgeAsync(IEdgeViewModel edge)
         {
             if (edge == null)
             {
@@ -228,7 +228,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="ArgumentException"></exception>
-        public virtual async Task RegisterComponentType<TElement, TComponent>()
+        public virtual async Task RegisterComponentTypeAsync<TElement, TComponent>()
             where TElement : IGraphElement
             where TComponent : ComponentBase
         {
@@ -256,7 +256,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <typeparam name="TNode"></typeparam>
         /// <param name="node"></param>
         /// <returns></returns>
-        public virtual Type GetComponentType<TElement>(TElement element)
+        public virtual Type GetComponentTypeAsync<TElement>(TElement element)
             where TElement : IGraphElement
         {
             if (element.ComponentType != null)

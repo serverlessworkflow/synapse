@@ -78,13 +78,14 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Apis.Runtime.Ipc.Client", "src\apis\runtime\Synapse.Apis.Runtime.Ipc.Client\Synapse.Apis.Runtime.Ipc.Client.csproj", "{CA50AABD-3B15-460B-8B50-E30815DE0A1D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Neuroglia.Blazor.Dagre", "Neuroglia.Blazor.Dagre\Neuroglia.Blazor.Dagre.csproj", "{E705A2E8-292A-4487-88BF-1E7AB3A66EF5}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "apps", "apps", "{43E4163F-489D-4F58-BDB9-12813207FC49}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Server", "src\apps\Synapse.Server\Synapse.Server.csproj", "{957782C5-7A45-4D16-9539-607C0F397471}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Worker", "src\apps\Synapse.Worker\Synapse.Worker.csproj", "{DDDFF6AC-8237-4A59-A834-CF959419E316}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synapse.Cli", "src\apps\Synapse.Cli\Synapse.Cli.csproj", "{D4BEDBC3-47F8-4F4C-A644-995F10EE1C18}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Cli", "src\apps\Synapse.Cli\Synapse.Cli.csproj", "{D4BEDBC3-47F8-4F4C-A644-995F10EE1C18}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

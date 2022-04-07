@@ -13,7 +13,18 @@
             <Rectangle BBox="Node.BBox" RadiusX="Node.RadiusX" RadiusY="Node.RadiusY" />
         }
     </g>
-    <Label Text="@Node.Label" BBox="Node.BBox" />
+    @if (!string.IsNullOrWhiteSpace(Node.Label)) {
+        <g class="label">
+            <foreignObject 
+                x="@((Node.BBox!.X).ToInvariantString())"
+                y="@((0 - Consts.LabelHeight / 2).ToInvariantString())" 
+                width="@Node.BBox!.Width.ToInvariantString()" 
+                height="@Consts.LabelHeight"
+            >
+                <div>@Node.Label</div>
+            </foreignObject>
+        </g>
+    }
 </g>
 
 @code {

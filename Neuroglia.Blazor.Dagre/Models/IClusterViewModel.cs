@@ -6,6 +6,6 @@
         IReadOnlyDictionary<Guid, INodeViewModel> Children { get; }
         IReadOnlyDictionary<Guid, INodeViewModel> AllNodes { get; }
         IReadOnlyDictionary<Guid, IClusterViewModel> AllClusters { get; }
-        Task AddChild(INodeViewModel node);
+        Task AddChildAsync(INodeViewModel node);
     }
 }

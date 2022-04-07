@@ -1,5 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Components.Web
-@inject DagreService DagreService
+@inject IDagreService DagreService
 @inject IJSRuntime JSRuntime
 
 @if (Graph != null) {
@@ -28,7 +28,7 @@
                     {
                         @if (cluster != null)
                         {
-                            <InteractiveDynamicComponent @key="cluster" Type="Graph.GetComponentType(cluster)" Parameters="GetComponentParameter(cluster)" />
+                            <InteractiveDynamicComponent @key="cluster" Type="Graph.GetComponentTypeAsync(cluster)" Parameters="GetComponentParameter(cluster)" />
                         }
                     }
                 </g>
@@ -37,7 +37,7 @@
                     {
                         @if (edge != null)
                         {
-                            <DynamicComponent @key="edge" Type="Graph.GetComponentType(edge)" Parameters="GetComponentParameter(edge)" />
+                            <DynamicComponent @key="edge" Type="Graph.GetComponentTypeAsync(edge)" Parameters="GetComponentParameter(edge)" />
                         }
                     }
                 </g>
@@ -46,7 +46,7 @@
                     {
                         @if (node != null)
                         {
-                            <InteractiveDynamicComponent @key="node" Type="Graph.GetComponentType(node)" Parameters="GetComponentParameter(node)" />
+                            <InteractiveDynamicComponent @key="node" Type="Graph.GetComponentTypeAsync(node)" Parameters="GetComponentParameter(node)" />
                         }
                     }
                 </g>
@@ -68,10 +68,9 @@
     {
         if (this.Graph != null)
         {
-            await this.DagreService.ComputePositions(this.Graph, this.Options);
-            //Console.WriteLine(await this.DagreService.Serialize(this.Graph.DagreGraph!));
-            //Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(this.Graph.DagreGraph));
-            //Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(this.Graph));
+            await this.DagreService.ComputePositionsAsync(this.Graph, this.Options);
+            Console.WriteLine(await this.DagreService.SerializeAsync(this.Graph.DagreGraph!));
+            Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(this.Graph));
         }
     }
 

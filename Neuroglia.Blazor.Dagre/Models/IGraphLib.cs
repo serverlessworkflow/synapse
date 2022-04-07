@@ -16,7 +16,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// children nodes names list.
         /// </returns>
-        Task<string[]> Children(string v);
+        Task<string[]> ChildrenAsync(string v);
 
         /// <summary>
         /// Gets the label for the specified edge.
@@ -25,8 +25,8 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// value associated with specified edge.
         /// </returns>
-        Task<GraphLibEdge> Edge(string v, string w);
-        Task<GraphLibEdge> Edge(string v, string w, string name);
+        Task<GraphLibEdge> EdgeAsync(string v, string w);
+        Task<GraphLibEdge> EdgeAsync(string v, string w, string name);
 
         /// <summary>
         /// Gets the label for the specified edge.
@@ -35,7 +35,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// value associated with specified edge.
         /// </returns>
-        Task<GraphLibEdge> Edge(GraphLibEdge e);
+        Task<GraphLibEdge> EdgeAsync(GraphLibEdge e);
 
         /// <summary>
         /// Gets the number of edges in the graph.
@@ -44,7 +44,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// edges count.
         /// </returns>
-        Task<double> EdgeCount();
+        Task<double> EdgeCountAsync();
 
         /// <summary>
         /// Gets edges of the graph. In case of compound graph subgraphs are not considered.
@@ -53,7 +53,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// graph edges list.
         /// </returns>
-        Task<GraphLibEdge[]> Edges();
+        Task<GraphLibEdge[]> EdgesAsync();
 
         /// <summary>
         /// Creates new graph with nodes filtered via filter. Edges incident to rejected node
@@ -64,7 +64,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// new graph made from current and nodes filtered.
         /// </returns>
-        Task<IGraphLib> FilterNodes(Func<string, bool> filter);
+        Task<IGraphLib> FilterNodesAsync(Func<string, bool> filter);
 
         /// <summary>
         /// Gets the graph metadata.
@@ -72,7 +72,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// currently assigned label for the graph or undefined if no label assigned.
         /// </returns>
-        Task<IDagreGraphConfig?> Graph();
+        Task<IDagreGraphConfig?> GraphAsync();
 
         /// <summary>
         /// Detects whether the graph contains specified edge or not. No subgraphs are considered.
@@ -81,7 +81,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// whether the graph contains the specified edge or not.
         /// </returns>
-        Task<bool> HasEdge(string v, string w, string name);
+        Task<bool> HasEdgeAsync(string v, string w, string name);
 
         /// <summary>
         /// Detects whether the graph contains specified edge or not. No subgraphs are considered.
@@ -90,7 +90,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// whether the graph contains the specified edge or not.
         /// </returns>
-        Task<bool> HasEdge(GraphLibEdge edge);
+        Task<bool> HasEdgeAsync(GraphLibEdge edge);
 
         /// <summary>
         /// Detects whether graph has a node with specified name or not.
@@ -98,7 +98,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// true if graph has node with specified name, false - otherwise.
         /// </returns>
-        Task<bool> HasNode(string name);
+        Task<bool> HasNodeAsync(string name);
 
         /// <summary>
         /// Return all edges that point to the node v. Optionally filters those edges down to just those
@@ -108,7 +108,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// edges descriptors list if v is in the graph, or undefined otherwise.
         /// </returns>
-        Task<GraphLibEdge[]?> InEdges(string v, string w);
+        Task<GraphLibEdge[]?> InEdgesAsync(string v, string w);
 
         /// <summary>
         /// Whether graph was created with 'compound' flag set to true or not.
@@ -116,7 +116,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// whether a node of the graph can have subnodes.
         /// </returns>
-        Task<bool> IsCompound();
+        Task<bool> IsCompoundAsync();
 
         /// <summary>
         /// Whether graph was created with 'directed' flag set to true or not.
@@ -124,7 +124,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// whether the graph edges have an orientation.
         /// </returns>
-        Task<bool> IsDirected();
+        Task<bool> IsDirectedAsync();
 
         /// <summary>
         /// Whether graph was created with 'multigraph' flag set to true or not.
@@ -132,13 +132,13 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// whether the pair of nodes of the graph can have multiple edges.
         /// </returns>
-        Task<bool> IsMultigraph();
+        Task<bool> IsMultigraphAsync();
 
         /// <summary>
         /// Gets the underlying <see cref="IJSObjectReference"/> instance
         /// </summary>
         /// <returns></returns>
-        Task<IJSObjectReference> Instance();
+        Task<IJSObjectReference> InstanceAsync();
 
         /// <summary>
         /// Return all nodes that are predecessors or successors of the specified node or undefined if
@@ -148,7 +148,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// node identifiers list or undefined if v is not in the graph.
         /// </returns>
-        Task<string[]?> Neighbors(string v);
+        Task<string[]?> NeighborsAsync(string v);
 
         /// <summary>
         /// Gets the label of node with specified name.
@@ -157,7 +157,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// label value of the node.
         /// </returns>
-        Task<GraphLibNode> Node(string name);
+        Task<GraphLibNode> NodeAsync(string name);
 
         /// <summary>
         /// Gets the number of nodes in the graph.
@@ -166,7 +166,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// nodes count.
         /// </returns>
-        Task<double> NodeCount();
+        Task<double> NodeCountAsync();
 
         /// <summary>
         /// Returns all edges to or from node v regardless of direction. Optionally filters those edges
@@ -176,7 +176,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// edges descriptors list if v is in the graph, or undefined otherwise.
         /// </returns>
-        Task<GraphLibEdge[]?> NodeEdges(string v, string w);
+        Task<GraphLibEdge[]?> NodeEdgesAsync(string v, string w);
 
         /// <summary>
         /// Gets all nodes of the graph. Note, the in case of compound graph subnodes are
@@ -186,7 +186,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// list of graph nodes.
         /// </returns>
-        Task<string[]> Nodes();
+        Task<string[]> NodesAsync();
 
         /// <summary>
         /// Return all edges that are pointed at by node v. Optionally filters those edges down to just
@@ -196,7 +196,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// edges descriptors list if v is in the graph, or undefined otherwise.
         /// </returns>
-        Task<GraphLibEdge[]?> OutEdges(string v, string w);
+        Task<GraphLibEdge[]?> OutEdgesAsync(string v, string w);
 
         /// <summary>
         /// Gets parent node for node v.
@@ -205,7 +205,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// parent node name or void if v has no parent.
         /// </returns>
-        Task<string[]?> Parent(string v);
+        Task<string[]?> ParentAsync(string v);
 
         /// <summary>
         /// Return all nodes that are predecessors of the specified node or undefined if node v is not in
@@ -215,7 +215,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// node identifiers list or undefined if v is not in the graph.
         /// </returns>
-        Task<string[]?> Predecessors(string v);
+        Task<string[]?> PredecessorsAsync(string v);
 
         /// <summary>
         /// Removes the specified edge from the graph. No subgraphs are considered.
@@ -224,7 +224,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// the graph, allowing this to be chained with other functions.
         /// </returns>
-        Task<IGraphLib> RemoveEdge(GraphLibEdge edge);
+        Task<IGraphLib> RemoveEdgeAsync(GraphLibEdge edge);
 
         /// <summary>
         /// Removes the specified edge from the graph. No subgraphs are considered.
@@ -233,7 +233,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// the graph, allowing this to be chained with other functions.
         /// </returns>
-        Task<IGraphLib> RemoveEdge(string v, string w, string name);
+        Task<IGraphLib> RemoveEdgeAsync(string v, string w, string name);
 
         /// <summary>
         /// Remove the node with the name from the graph or do nothing if the node is not in
@@ -244,7 +244,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// the graph, allowing this to be chained with other functions.
         /// </returns>
-        Task<IGraphLib> RemoveNode(string name);
+        Task<IGraphLib> RemoveNodeAsync(string name);
 
         /// <summary>
         /// Sets the default edge label. This label will be assigned as default label
@@ -254,7 +254,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// the graph, allowing this to be chained with other functions.
         /// </returns>
-        Task<IGraphLib> SetDefaultEdgeLabel(object label);
+        Task<IGraphLib> SetDefaultEdgeLabelAsync(object label);
 
         /// <summary>
         /// Sets the default edge label factory function. This function will be invoked
@@ -265,7 +265,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// the graph, allowing this to be chained with other functions.
         /// </returns>
-        Task<IGraphLib> SetDefaultEdgeLabel(Func<string, object> labelFn);
+        Task<IGraphLib> SetDefaultEdgeLabelAsync(Func<string, object> labelFn);
 
         /// <summary>
         /// Sets the default node label. This label will be assigned as default label
@@ -275,7 +275,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// the graph, allowing this to be chained with other functions.
         /// </returns>
-        Task<IGraphLib> SetDefaultNodeLabel(object label);
+        Task<IGraphLib> SetDefaultNodeLabelAsync(object label);
 
         /// <summary>
         /// Sets the default node label factory function. This function will be invoked
@@ -286,7 +286,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// the graph, allowing this to be chained with other functions.
         /// </returns>
-        Task<IGraphLib> SetDefaultNodeLabel(Func<string, object> labelFn);
+        Task<IGraphLib> SetDefaultNodeLabelAsync(Func<string, object> labelFn);
 
         /// <summary>
         /// Creates or updates the label for the edge (v, w) with the optionally supplied
@@ -298,9 +298,9 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// the graph, allowing this to be chained with other functions.
         /// </returns>
-        Task<IGraphLib> SetEdge(string v, string w);
-        Task<IGraphLib> SetEdge(string v, string w, object label);
-        Task<IGraphLib> SetEdge(string v, string w, object label, string name);
+        Task<IGraphLib> SetEdgeAsync(string v, string w);
+        Task<IGraphLib> SetEdgeAsync(string v, string w, object label);
+        Task<IGraphLib> SetEdgeAsync(string v, string w, object label, string name);
 
         /// <summary>
         /// Creates or updates the label for the specified edge. If label is supplied it is
@@ -312,7 +312,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// the graph, allowing this to be chained with other functions.
         /// </returns>
-        Task<IGraphLib> SetEdge(GraphLibEdge edge, object label);
+        Task<IGraphLib> SetEdgeAsync(GraphLibEdge edge, object label);
 
         /// <summary>
         /// Sets the metadata of the graph.
@@ -320,7 +320,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// the graph, allowing this to be chained with other functions.
         /// </returns>
-        Task<IGraphLib> SetGraph(IDagreGraphConfig label);
+        Task<IGraphLib> SetGraphAsync(IDagreGraphConfig label);
 
         /// <summary>
         /// Creates or updates the value for the node v in the graph. If label is supplied
@@ -331,7 +331,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// the graph, allowing this to be chained with other functions.
         /// </returns>
-        Task<IGraphLib> SetNode(string name, object label);
+        Task<IGraphLib> SetNodeAsync(string name, object label);
 
         /// <summary>
         /// Invokes setNode method for each node in names list.
@@ -340,7 +340,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// the graph, allowing this to be chained with other functions.
         /// </returns>
-        Task<IGraphLib> SetNodes(string[] names, object label);
+        Task<IGraphLib> SetNodesAsync(string[] names, object label);
 
         /// <summary>
         /// Sets node p as a parent for node v if it is defined, or removes the
@@ -351,7 +351,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// the graph, allowing this to be chained with other functions.
         /// </returns>
-        Task<IGraphLib> SetParent(string v, string p);
+        Task<IGraphLib> SetParentAsync(string v, string p);
 
         /// <summary>
         /// Establish an edges path over the nodes in nodes list. If some edge is already
@@ -362,7 +362,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// the graph, allowing this to be chained with other functions.
         /// </returns>
-        Task<IGraphLib> SetPath(string[] nodes, object label);
+        Task<IGraphLib> SetPathAsync(string[] nodes, object label);
 
         /// <summary>
         /// Gets list of nodes without out-edges.
@@ -371,7 +371,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// the graph source nodes.
         /// </returns>
-        Task<string[]> Sinks();
+        Task<string[]> SinksAsync();
 
         /// <summary>
         /// Gets list of nodes without in-edges.
@@ -380,7 +380,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// the graph source nodes.
         /// </returns>
-        Task<string[]> Sources();
+        Task<string[]> SourcesAsync();
 
         /// <summary>
         /// Return all nodes that are successors of the specified node or undefined if node v is not in
@@ -390,6 +390,6 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <returns>
         /// node identifiers list or undefined if v is not in the graph.
         /// </returns>
-        Task<string[]?> Successors(string v);
+        Task<string[]?> SuccessorsAsync(string v);
     }
 }

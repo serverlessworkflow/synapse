@@ -13,15 +13,15 @@ namespace Synapse.Dashboard
         {
             var graph = new GraphViewModel();
             var startState = definition.GetStartState();
-            var startNode = this.BuildStartNode(graph);
-            var endNode = this.BuildEndNode(graph);
-            await graph.AddElement(startNode);
+            var startNode = this.BuildStartNode();
+            var endNode = this.BuildEndNode();
+            await graph.AddElementAsync(startNode);
             await this.BuildStateNodes(definition, graph, startState, endNode, startNode);
-            await graph.AddElement(endNode);
+            await graph.AddElementAsync(endNode);
             return await Task.FromResult(graph);
         }
 
-        private NodeViewModel BuildStartNode(GraphViewModel graph)
+        private NodeViewModel BuildStartNode()
         {
             return new StartNodeViewModel();
         }
@@ -29,31 +29,67 @@ namespace Synapse.Dashboard
         private async Task BuildStateNodes(WorkflowDefinition definition, GraphViewModel graph, StateDefinition state, NodeViewModel endNode, NodeViewModel previousNode)
         {
             var stateNodeGroup = new StateNodeViewModel(state);
-            await graph.AddElement(stateNodeGroup);
-            List<NodeViewModel> childNodes = new();
-            NodeViewModel node, firstNode, lastNode;
+            //List<NodeViewModel> childNodes = new();
+            NodeViewModel? firstNode, lastNode = null;
             switch (state)
             {
                 case CallbackStateDefinition callbackState:
-                    childNodes = await this.BuildActionNodes(graph, state, ((CallbackStateDefinition)state).Action!);
+                    // todo: refactor?
+                    /*
+                    childNodes = await this.BuildActionNodes(graph, ((CallbackStateDefinition)state).Action!);
                     firstNode = childNodes.Last();
-                    lastNode = this.BuildConsumeEventNode(state, ((CallbackStateDefinition)state).Event!);
+                    lastNode = this.BuildConsumeEventNode(((CallbackStateDefinition)state).Event!);
                     childNodes.Add(lastNode);
                     await this.BuildEdgeBetween(graph, firstNode, lastNode);
+                    */
                     break;
                 case EventStateDefinition eventState:
-                    var completionType = eventState.Exclusive ? ParallelCompletionType.Xor : ParallelCompletionType.And;
-                    firstNode = this.BuildGatewayNode(state, completionType);
-                    childNodes.Add(firstNode);
-                    lastNode = this.BuildGatewayNode(state, completionType);
-                    childNodes.Add(lastNode);
-                    eventState.Triggers.ForEach(trigger =>
+                    firstNode = eventState.Exclusive ? this.BuildGatewayNode(ParallelCompletionType.Xor) : this.BuildJunctionNode();
+                    lastNode = this.BuildJunctionNode();
+                    await stateNodeGroup.AddChildAsync(firstNode);
+                    await this.BuildEdgeBetween(graph, previousNode, firstNode);
+                    var andNode = this.BuildGatewayNode(ParallelCompletionType.And);
+                    if (!eventState.Exclusive)
+                    {
+                        await stateNodeGroup.AddChildAsync(andNode);
+                    }
+                    foreach (var trigger in eventState.Triggers)
                     {
                         var refName = string.Join(" | ", trigger.Events);
-                        var eventNode = this.BuildConsumeEventNode(eventState, refName);
-                        //this.BuildLinkBetween(graph, firstNode, eventNode);
-
-                    });
+                        var eventNode = this.BuildConsumeEventNode(refName);
+                        await stateNodeGroup.AddChildAsync(eventNode);
+                        await this.BuildEdgeBetween(graph, firstNode, eventNode);
+                        if (eventState.Exclusive) { 
+                            foreach (var action in trigger.Actions)
+                            {
+                                var actionsNodes = await this.BuildActionNodes(graph, action);
+                                foreach(var actionNode in actionsNodes)
+                                {
+                                    await stateNodeGroup.AddChildAsync(actionNode);
+                                }
+                                await this.BuildEdgeBetween(graph, eventNode, actionsNodes.First());
+                                await this.BuildEdgeBetween(graph, actionsNodes.Last(), lastNode);
+                            }
+                        }
+                        else
+                        {
+                            await this.BuildEdgeBetween(graph, eventNode, andNode);
+                        }
+                    }
+                    if (!eventState.Exclusive)
+                    {
+                        foreach (var action in eventState.Triggers.SelectMany(trigger => trigger.Actions))
+                        {
+                            var actionsNodes = await this.BuildActionNodes(graph, action);
+                            foreach (var actionNode in actionsNodes)
+                            {
+                                await stateNodeGroup.AddChildAsync(actionNode);
+                            }
+                            await this.BuildEdgeBetween(graph, andNode, actionsNodes.First());
+                            await this.BuildEdgeBetween(graph, actionsNodes.Last(), lastNode);
+                        }
+                    }
+                    await stateNodeGroup.AddChildAsync(lastNode);
                     break;
                 case ForEachStateDefinition foreachState:
 
@@ -62,35 +98,36 @@ namespace Synapse.Dashboard
 
                     break;
                 case OperationStateDefinition operationState:
-                    node = previousNode;
                     switch (operationState.ActionMode)
                     {
                         case ActionExecutionMode.Parallel:
-                            var startNode = this.BuildGatewayNode(state, ParallelCompletionType.And);
-                            childNodes.Add(startNode);
-                            var finalNode = this.BuildGatewayNode(state, ParallelCompletionType.And);
-                            childNodes.Add(finalNode);
+                            firstNode = this.BuildGatewayNode(ParallelCompletionType.And);
+                            lastNode = this.BuildJunctionNode();
+                            await stateNodeGroup.AddChildAsync(firstNode);
+                            await this.BuildEdgeBetween(graph, previousNode, firstNode);
                             foreach(var action in operationState.Actions)
                             {
-                                var actionNodes = await this.BuildActionNodes(graph, state, action);
-                                await this.BuildEdgeBetween(graph, startNode, actionNodes.First());
-                                await this.BuildEdgeBetween(graph, actionNodes.Last(), finalNode);
-                                foreach(var n in actionNodes)
+                                var actionNodes = await this.BuildActionNodes(graph, action);
+                                foreach (var actionNode in actionNodes)
                                 {
-                                    await stateNodeGroup.AddChild(n);
+                                    await stateNodeGroup.AddChildAsync(actionNode);
                                 }
+                                await this.BuildEdgeBetween(graph, firstNode, actionNodes.First());
+                                await this.BuildEdgeBetween(graph, actionNodes.Last(), lastNode);
                             }
+                            await stateNodeGroup.AddChildAsync(lastNode);
                             break;
                         case ActionExecutionMode.Sequential:
-                            var index = 0;
+                            lastNode = previousNode;
                             foreach (var action in operationState.Actions)
                             {
-                                var actionNodes = await this.BuildActionNodes(graph, state, action);
-                                if (index != 0)
-                                    await this.BuildEdgeBetween(graph, node, actionNodes.First());
-                                actionNodes.ForEach(n => childNodes.Add(n));
-                                node = actionNodes.First();
-                                index++;
+                                var actionNodes = await this.BuildActionNodes(graph, action);
+                                foreach (var actionNode in actionNodes)
+                                {
+                                    await stateNodeGroup.AddChildAsync(actionNode);
+                                }
+                                await this.BuildEdgeBetween(graph, lastNode, actionNodes.First());
+                                lastNode = actionNodes.Last();
                             }
                             break;
                         default:
@@ -104,7 +141,7 @@ namespace Synapse.Dashboard
 
                     break;
                 case SwitchStateDefinition switchState:
-                    firstNode = this.BuildGatewayNode(state, ParallelCompletionType.Xor);
+                    /*firstNode = this.BuildGatewayNode(ParallelCompletionType.Xor);
                     childNodes.Add(firstNode);
                     switch (switchState.SwitchType)
                     {
@@ -152,15 +189,15 @@ namespace Synapse.Dashboard
                             break;
                         default:
                             throw new Exception($"The specified switch state type '{switchState.Type}' is not supported");
-                    }
+                    }*/
                     break;
                 default:
                     throw new Exception($"The specified state type '{state.Type}' is not supported");
             }
-            foreach(var n in childNodes)
+            /*foreach(var n in childNodes)
             {
-                await stateNodeGroup.AddChild(n);
-            }
+                await stateNodeGroup.AddChildAsync(n);
+            }*/
             /* ?
             if (stateNodeGroup.Children.Any())
             {
@@ -174,13 +211,24 @@ namespace Synapse.Dashboard
                     node.RemovePort(port);
             }
             */
-            lastNode = childNodes.Last();
+            /*lastNode = childNodes.Last();
             if (previousNode != null)
                 await this.BuildEdgeBetween(graph, previousNode, stateNodeGroup);
             if (state.IsEnd
                 || state.End != null)
             {
                 await this.BuildEdgeBetween(graph, stateNodeGroup, endNode);
+                return;
+            }*/
+            await graph.AddElementAsync(stateNodeGroup);
+            if (lastNode == null)
+            {
+                throw new Exception("Every switch case should provide a last node.");
+            }
+            if (state.IsEnd
+                || state.End != null)
+            {
+                await this.BuildEdgeBetween(graph, lastNode, endNode);
                 return;
             }
             if (!string.IsNullOrWhiteSpace(state.TransitionToStateName)
@@ -195,17 +243,17 @@ namespace Synapse.Dashboard
             }
         }
 
-        private async Task<List<NodeViewModel>> BuildActionNodes(GraphViewModel graph, StateDefinition state, ActionDefinition action)
+        private async Task<List<NodeViewModel>> BuildActionNodes(GraphViewModel graph, ActionDefinition action)
         {
             switch (action.Type)
             {
                 case ActionType.Function:
-                    return new() { this.BuildFunctionNode(state, action, action.Function!) };
+                    return new() { this.BuildFunctionNode(action, action.Function!) };
                 case ActionType.Subflow:
-                    return new() { this.BuildSubflowNode(state, action.Subflow!) };
+                    return new() { this.BuildSubflowNode(action.Subflow!) };
                 case ActionType.Trigger:
-                    var triggerEventNode = this.BuildProduceEventNode(state, action.Event!.ProduceEvent);
-                    var resultEventNode = this.BuildConsumeEventNode(state, action.Event!.ResultEvent);
+                    var triggerEventNode = this.BuildProduceEventNode(action.Event!.ProduceEvent);
+                    var resultEventNode = this.BuildConsumeEventNode(action.Event!.ResultEvent);
                     await this.BuildEdgeBetween(graph, triggerEventNode, resultEventNode);
                     return new() { triggerEventNode, resultEventNode };
                 default:
@@ -213,44 +261,49 @@ namespace Synapse.Dashboard
             }
         }
 
-        private FunctionRefNodeViewModel BuildFunctionNode(StateDefinition state, ActionDefinition action, FunctionReference function)
+        private FunctionRefNodeViewModel BuildFunctionNode(ActionDefinition action, FunctionReference function)
         {
             return new(action, function);
         }
 
-        private SubflowRefNodeViewModel BuildSubflowNode(StateDefinition state, SubflowReference subflowRef)
+        private SubflowRefNodeViewModel BuildSubflowNode(SubflowReference subflowRef)
         {
             return new(subflowRef);
         }
 
-        private EventNodeViewModel BuildProduceEventNode(StateDefinition state, string refName)
+        private EventNodeViewModel BuildProduceEventNode(string refName)
         {
             return new(EventKind.Produced, refName);
         }
 
-        private EventNodeViewModel BuildConsumeEventNode(StateDefinition state, string refName)
+        private EventNodeViewModel BuildConsumeEventNode(string refName)
         {
             return new(EventKind.Consumed, refName);
         }
 
-        private GatewayNodeViewModel BuildGatewayNode(StateDefinition state, ParallelCompletionType completionType)
+        private GatewayNodeViewModel BuildGatewayNode( ParallelCompletionType completionType)
         {
             return new(completionType);
         }
 
-        private DataCaseNodeViewModel BuildDataConditionNode(StateDefinition state, string caseDefinitionName)
+        private JunctionNodeViewModel BuildJunctionNode()
+        {
+            return new();
+        }
+
+        private DataCaseNodeViewModel BuildDataConditionNode(string caseDefinitionName)
         {
             return new(caseDefinitionName);
         }
 
-        private NodeViewModel BuildEndNode(GraphViewModel graph)
+        private NodeViewModel BuildEndNode()
         {
             return new EndNodeViewModel();
         }
 
         private async Task BuildEdgeBetween(GraphViewModel graph, NodeViewModel node1, NodeViewModel node2)
         {
-            await graph.AddElement(new EdgeViewModel(node1.Id, node2.Id));
+            await graph.AddElementAsync(new EdgeViewModel(node1.Id, node2.Id));
         }
 
 

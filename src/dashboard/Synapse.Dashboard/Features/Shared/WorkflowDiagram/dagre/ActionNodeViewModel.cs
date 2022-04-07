@@ -1,5 +1,4 @@
-﻿using Blazor.Diagrams.Core.Models;
-using ServerlessWorkflow.Sdk.Models;
+﻿using ServerlessWorkflow.Sdk.Models;
 
 namespace Synapse.Dashboard
 {

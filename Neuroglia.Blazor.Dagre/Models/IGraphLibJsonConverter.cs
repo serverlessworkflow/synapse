@@ -10,12 +10,12 @@
         /// </summary>
         /// <param name="graph"></param>
         /// <returns>The serialized <see cref="IGraphLib"/></returns>
-        Task<string> Serialize(IGraphLib graph);
+        Task<string> SerializeAsync(IGraphLib graph);
         /// <summary>
         /// Deserializes a JSON to a 
         /// </summary>
         /// <param name="json"></param> <see cref="IGraphLib"/> (aka GraphLib json.read(json))
         /// <returns>The deserialied <see cref="IGraphLib"/></returns>
-        Task<IGraphLib> Deserialize(string json);
+        Task<IGraphLib> DeserializeAsync(string json);
     }
 }

@@ -13,7 +13,18 @@
             <Rectangle BBox="Cluster.BBox" RadiusX="Cluster.RadiusX" RadiusY="Cluster.RadiusY" />
         }
     </g>
-    <Label Text="@Cluster.Label" BBox="Cluster.BBox" />
+    @if (!string.IsNullOrWhiteSpace(Cluster.Label)) {
+        <g class="label">
+            <foreignObject 
+                x="@(Cluster.BBox!.X.ToInvariantString())"
+                y="@((Cluster.BBox!.Height / 2).ToInvariantString())" 
+                width="@Cluster.BBox!.Width.ToInvariantString()" 
+                height="@Consts.LabelHeight"
+            >
+                <div>@Cluster.Label</div>
+            </foreignObject>
+        </g>
+    }
 </g>
 
 @code {
