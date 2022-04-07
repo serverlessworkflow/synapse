@@ -17,6 +17,7 @@
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Synapse.Application.Configuration;
 using Synapse.Application.Services;
 using Synapse.Runtime.Docker.Configuration;
@@ -42,6 +43,7 @@ namespace Synapse.Runtime
             app.Configuration.Bind("native", runtimeHostOptions);
             app.Services.AddSingleton<NativeRuntimeHost>();
             app.Services.AddSingleton<IWorkflowRuntimeHost>(provider => provider.GetRequiredService<NativeRuntimeHost>());
+            app.Services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<NativeRuntimeHost>());
             return app;
         }
 

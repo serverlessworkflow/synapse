@@ -94,7 +94,7 @@ namespace Synapse.Runtime.Services
                 target = "osx-64.tar.gz";
             else
                 throw new PlatformNotSupportedException();
-            using var packageStream = await this.HttpClient.GetStreamAsync($"https://github.com/neuroglia-io/synapse/releases/download/latest/synapse-worker-{target}", cancellationToken); //todo: config based
+            using var packageStream = await this.HttpClient.GetStreamAsync($"https://github.com/neuroglia-io/synapse/releases/download/0.1.0/synapse-worker-{target}", cancellationToken); //todo: config based
             using ZipArchive archive = new ZipArchive(packageStream, ZipArchiveMode.Read);
             this.Logger.LogInformation("Worker app successfully downloaded. Extracting...");
             archive.ExtractToDirectory(workerDirectory.FullName, true);
@@ -133,57 +133,27 @@ namespace Synapse.Runtime.Services
             startInfo.Environment.Add(EnvironmentVariables.Runtime.WorkflowInstanceId.Name, workflowInstance.Id.ToString());
             var process = new Process()
             {
-                StartInfo = startInfo
+                StartInfo = startInfo,
+                EnableRaisingEvents = true
             };
-            process.OutputDataReceived += (sender, e) =>
-            {
-
-            };
-            process.ErrorDataReceived += (sender, e) =>
-            {
-
-            };
-            process.Exited += (sender, e) =>
-            {
-
-            };
-            process.Disposed += (sender, e) =>
-            {
-
-            };
+            process.Exited += (sender, e) => this.OnProcessExited(workflowInstance.Id, (Process)sender!);
             process.Start();
-            _ = Task.Run(() =>
-            {
-                process.WaitForExit();
-                var output = process.StandardOutput.ReadToEnd();
-                var error = process.StandardError.ReadToEnd();
-            });
             return await Task.FromResult(process.Id.ToString());
         }
 
         /// <summary>
         /// Handles the exit of a <see cref="Process"/>
         /// </summary>
-        /// <param name="process">The <see cref="Process"/> that has exited</param>
-        protected virtual void OnProcessExited(Process process)
-        {
-            if (process == null)
-                throw new ArgumentNullException(nameof(process));
-            process.Dispose();
-        }
-
-        /// <summary>
-        /// Handles the disposal of a <see cref="Process"/>
-        /// </summary>
         /// <param name="workflowInstanceId">The id of the <see cref="V1WorkflowInstance"/> the <see cref="Process"/> belongs to</param>
-        /// <param name="process">The disposed <see cref="Process"/></param>
-        protected virtual void OnProcessDisposed(string workflowInstanceId, Process process)
+        /// <param name="process">The <see cref="Process"/> that has exited</param>
+        protected virtual void OnProcessExited(string workflowInstanceId, Process process)
         {
             if (string.IsNullOrWhiteSpace(workflowInstanceId))
                 throw new ArgumentNullException(nameof(workflowInstanceId));
             if (process == null)
                 throw new ArgumentNullException(nameof(process));
             this.Processes.TryRemove(workflowInstanceId, out _);
+            process.Dispose();
         }
 
         /// <inheritdoc/>
