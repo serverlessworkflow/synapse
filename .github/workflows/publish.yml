@@ -34,7 +34,7 @@ jobs:
         shell: bash
         run: |
           tag=$(git describe --tags --abbrev=0)
-          release_name="synctl-$tag-${{ matrix.target }}"
+          release_name="synctl-${{ matrix.target }}"
           # Publish
           dotnet publish src/apps/Synapse.Cli/Synapse.Cli.csproj --runtime "${{ matrix.target }}" -c Release -o "$release_name" -p:PublishSingleFile=true -p:GenerateDocumentationFile=false --self-contained true
           # Pack
