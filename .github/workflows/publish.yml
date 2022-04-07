@@ -153,3 +153,13 @@ jobs:
           files: "synctl*"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  release:
+    name: Release
+    runs-on: ubuntu:latest
+    steps:
+      - name: Add latest tag
+        uses: EndBug/latest-tag@latest
+        with:
+          tag-name: latest
+          description: The latest version
