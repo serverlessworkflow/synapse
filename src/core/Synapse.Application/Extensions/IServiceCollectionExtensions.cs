@@ -47,17 +47,31 @@ namespace Synapse.Application.Configuration
             return services;
         }
 
+        /// <summary>
+        /// Adds and configures the <see cref="IIntegrationEventBus"/> service
+        /// </summary>
+        /// <param name="services">The <see cref="IServiceCollection"/> to configure</param>
+        /// <returns>The configured <see cref="IServiceCollection"/></returns>
         public static IServiceCollection AddIntegrationEventBus(this IServiceCollection services)
         {
-            services.TryAddSingleton<IIntegrationEventBusFactory, MetaIntegrationBusFactory>();
+            services.TryAddSingleton<IIntegrationEventBusFactory, IntegrationBusPipelineFactory>();
             services.TryAddSingleton(provider => provider.GetRequiredService<IIntegrationEventBusFactory>().Create());
             return services;
         }
 
-        public static IServiceCollection AddIntegrationEventBus(this IServiceCollection services, Func<IServiceProvider, CloudEvent, CancellationToken, Task> delegateFunction)
+        /// <summary>
+        /// Adds the specified <see cref="PublishIntegrationEventDelegate"/> to the <see cref="IIntegrationEventBus"/> pipeline
+        /// </summary>
+        /// <param name="services">The <see cref="IServiceCollection"/> to configure</param>
+        /// <param name="middleware">The <see cref="PublishIntegrationEventDelegate"/> middleware to add to the pipeline</param>
+        /// <returns>The configured <see cref="IServiceCollection"/></returns>
+        public static IServiceCollection AddIntegrationEventBus(this IServiceCollection services, PublishIntegrationEventDelegate middleware)
         {
             services.AddIntegrationEventBus();
-            services.AddSingleton<IIntegrationEventBus>(provider => ActivatorUtilities.CreateInstance<DelegateIntegrationEventBus>(provider, delegateFunction));
+            services.Configure<IntegrationEventBusPipelineOptions>(options =>
+            {
+                options.Middlewares.Add(middleware);
+            });
             return services;
         }
 
