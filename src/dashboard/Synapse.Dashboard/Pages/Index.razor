@@ -12,55 +12,10 @@
 
 Welcome to Synapse - Serverless Workflow Management System
 
-<Counter />
-
-<Table Items="@users">
-    <RowTemplate Context="row">
-        <Expander HeaderContainerTagName="tr" BodyContainerTagName="tr">
-            <HeaderTemplate Context="header">@header.Header</HeaderTemplate>
-            <Header>
-                <ColumnHeaderCollectionPresenter T="TestUserState" />
-            </Header>
-            <Body>
-                <td colspan="100%">Some exapandable content</td>
-            </Body>
-        </Expander>
-    </RowTemplate>
-    <Columns>
-        <Column T="TestUserState" Name="Test">
-            <CellTemplate Context="context">
-                <div class="badge rounded-pill bg-primary">Some value</div>
-            </CellTemplate>
-        </Column>
-    </Columns>
-</Table>
-
 @code{
-
-    private List<TestUserState> users = new() { new("FakeFirstName", "Fake Last Name", "fake@email.com"), new("FakeFirstName", "Fake Last Name", "fake@email.com") };
-
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
         await this.BreadcrumbService.Use(KnownBreadcrumbs.Home);
     }
-
-    public class TestUserState
-    {
-
-        public TestUserState(string firstName, string lastName, string email)
-        {
-            this.FirstName = firstName;
-            this.LastName = lastName;
-            this.Email = email;
-        }
-
-        public string FirstName{ get; }
-
-        public string LastName{ get; }
-
-        public string Email { get; }
-
-    }
-
 }

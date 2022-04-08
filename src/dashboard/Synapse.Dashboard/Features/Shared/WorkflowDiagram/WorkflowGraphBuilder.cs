@@ -21,13 +21,12 @@ namespace Synapse.Dashboard
             return await Task.FromResult(graph);
         }
 
-        private NodeViewModel BuildStartNode()
+        protected NodeViewModel BuildStartNode()
         {
             return new StartNodeViewModel();
         }
 
-        // returns the last node
-        private async Task<NodeViewModel> BuildStateNodes(WorkflowDefinition definition, GraphViewModel graph, StateDefinition state, NodeViewModel endNode, NodeViewModel previousNode)
+        protected async Task<NodeViewModel> BuildStateNodes(WorkflowDefinition definition, GraphViewModel graph, StateDefinition state, NodeViewModel endNode, NodeViewModel previousNode)
         {
             var stateNodeGroup = new StateNodeViewModel(state);
             await graph.AddElementAsync(stateNodeGroup);
@@ -74,7 +73,7 @@ namespace Synapse.Dashboard
                                         await stateNodeGroup.AddChildAsync(actionNode);
                                     }
                                     await this.BuildEdgeBetween(graph, eventNode, actionsNodes.First());
-                                    await this.BuildJunctionBetween(graph, actionsNodes.Last(), lastNode);
+                                    await this.BuildEdgeBetween(graph, actionsNodes.Last(), lastNode);
                                 }
                             }
                             else
@@ -92,7 +91,7 @@ namespace Synapse.Dashboard
                                     await stateNodeGroup.AddChildAsync(actionNode);
                                 }
                                 await this.BuildEdgeBetween(graph, andNode, actionsNodes.First());
-                                await this.BuildJunctionBetween(graph, actionsNodes.Last(), lastNode);
+                                await this.BuildEdgeBetween(graph, actionsNodes.Last(), lastNode);
                             }
                         }
                         await stateNodeGroup.AddChildAsync(lastNode);
@@ -261,7 +260,7 @@ namespace Synapse.Dashboard
             return lastNode;
         }
 
-        private async Task<List<NodeViewModel>> BuildActionNodes(GraphViewModel graph, ActionDefinition action)
+        protected async Task<List<NodeViewModel>> BuildActionNodes(GraphViewModel graph, ActionDefinition action)
         {
             switch (action.Type)
             {
@@ -279,64 +278,79 @@ namespace Synapse.Dashboard
             }
         }
 
-        private FunctionRefNodeViewModel BuildFunctionNode(ActionDefinition action, FunctionReference function)
+        protected FunctionRefNodeViewModel BuildFunctionNode(ActionDefinition action, FunctionReference function)
         {
             return new(action, function);
         }
 
-        private SubflowRefNodeViewModel BuildSubflowNode(SubflowReference subflowRef)
+        protected SubflowRefNodeViewModel BuildSubflowNode(SubflowReference subflowRef)
         {
             return new(subflowRef);
         }
 
-        private EventNodeViewModel BuildProduceEventNode(string refName)
+        protected EventNodeViewModel BuildProduceEventNode(string refName)
         {
             return new(EventKind.Produced, refName);
         }
 
-        private EventNodeViewModel BuildConsumeEventNode(string refName)
+        protected EventNodeViewModel BuildConsumeEventNode(string refName)
         {
             return new(EventKind.Consumed, refName);
         }
 
-        private GatewayNodeViewModel BuildGatewayNode( ParallelCompletionType completionType)
+        protected GatewayNodeViewModel BuildGatewayNode( ParallelCompletionType completionType)
         {
             return new(completionType);
         }
 
-        private JunctionNodeViewModel BuildJunctionNode()
+        protected JunctionNodeViewModel BuildJunctionNode()
         {
             return new();
         }
 
-        private InjectNodeViewMode BuildInjectNode(InjectStateDefinition injectState)
+        protected InjectNodeViewMode BuildInjectNode(InjectStateDefinition injectState)
         {
             return new(Newtonsoft.Json.JsonConvert.SerializeObject(injectState.Data, Newtonsoft.Json.Formatting.Indented));
         }
 
-        private SleepNodeViewModel BuildSleepNode(SleepStateDefinition sleepState)
+        protected SleepNodeViewModel BuildSleepNode(SleepStateDefinition sleepState)
         {
             return new(sleepState.Delay);
         }
 
-        private DataCaseNodeViewModel BuildDataConditionNode(string caseDefinitionName)
+        protected DataCaseNodeViewModel BuildDataConditionNode(string caseDefinitionName)
         {
             return new(caseDefinitionName);
         }
 
-        private NodeViewModel BuildEndNode()
+        protected NodeViewModel BuildEndNode()
         {
             return new EndNodeViewModel();
         }
 
-        private async Task BuildEdgeBetween(GraphViewModel graph, NodeViewModel node1, NodeViewModel node2)
+
+        /// <summary>
+        /// Builds an edge between two nodes
+        /// </summary>
+        /// <param name="graph">The graph instance hosting the edge</param>
+        /// <param name="source">The edge's source node</param>
+        /// <param name="target">The edge's target node</param>
+        /// <returns></returns>
+        protected async Task BuildEdgeBetween(GraphViewModel graph, NodeViewModel source, NodeViewModel target)
         {
-            await graph.AddElementAsync(new EdgeViewModel(node1.Id, node2.Id));
+            await graph.AddElementAsync(new EdgeViewModel(source.Id, target.Id));
         }
 
-        private async Task BuildJunctionBetween(GraphViewModel graph, NodeViewModel node1, NodeViewModel node2)
+        /// <summary>
+        /// Builds an edge between two nodes without the end arrow
+        /// </summary>
+        /// <param name="graph">The graph instance hosting the edge</param>
+        /// <param name="source">The edge's source node</param>
+        /// <param name="target">The edge's target node</param>
+        /// <returns></returns>
+        protected async Task BuildJunctionBetween(GraphViewModel graph, NodeViewModel source, NodeViewModel target)
         {
-            await graph.AddElementAsync(new EdgeViewModel(node1.Id, node2.Id) { EndMarkerId = null });
+            await graph.AddElementAsync(new EdgeViewModel(source.Id, target.Id) { EndMarkerId = null });
         }
 
 
