@@ -37,7 +37,7 @@ jobs:
           tag=$(git describe --tags --abbrev=0)
           release_name="synapse-${{ matrix.target }}"
           # Publish
-          dotnet publish src/apps/Synapse.Server/Synapse.Server.csproj --runtime "${{ matrix.target }}" -c Release -o "$release_name" -p:PublishSingleFile=true --self-contained true
+          dotnet publish src/apps/Synapse.Server/Synapse.Server.csproj --runtime "${{ matrix.target }}" -c Release -o "$release_name" -p:PublishSingleFile=true
           # Pack
           if [ "${{ matrix.target }}" == "win-x64" ]; then
             # Pack for Windows
@@ -87,7 +87,7 @@ jobs:
           tag=$(git describe --tags --abbrev=0)
           release_name="synapse-worker-${{ matrix.target }}"
           # Publish
-          dotnet publish src/apps/Synapse.Worker/Synapse.Worker.csproj --runtime "${{ matrix.target }}" -c Release -o "$release_name" -p:PublishSingleFile=true --self-contained true
+          dotnet publish src/apps/Synapse.Worker/Synapse.Worker.csproj --runtime "${{ matrix.target }}" -c Release -o "$release_name" -p:PublishSingleFile=true
           # Pack
           if [ "${{ matrix.target }}" == "win-x64" ]; then
             # Pack for Windows
@@ -136,7 +136,7 @@ jobs:
           tag=$(git describe --tags --abbrev=0)
           release_name="synctl-${{ matrix.target }}"
           # Publish
-          dotnet publish src/apps/Synapse.Cli/Synapse.Cli.csproj --runtime "${{ matrix.target }}" -c Release -o "$release_name" -p:PublishSingleFile=true -p:GenerateDocumentationFile=false --self-contained true
+          dotnet publish src/apps/Synapse.Cli/Synapse.Cli.csproj --runtime "${{ matrix.target }}" -c Release -o "$release_name" -p:PublishSingleFile=true -p:GenerateDocumentationFile=false
           # Pack
           if [ "${{ matrix.target }}" == "win-x64" ]; then
             # Pack for Windows
