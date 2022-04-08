@@ -37,7 +37,7 @@ jobs:
           tag=$(git describe --tags --abbrev=0)
           release_name="synapse-${{ matrix.target }}"
           # Publish
-          dotnet publish src/apps/Synapse.Server/Synapse.Server.csproj --runtime "${{ matrix.target }}" -c Release -o "$release_name" -p:PublishSingleFile=true
+          dotnet publish src/apps/Synapse.Server/Synapse.Server.csproj --runtime "${{ matrix.target }}" -c Release -o "$release_name"
           # Pack
           if [ "${{ matrix.target }}" == "win-x64" ]; then
             # Pack for Windows
