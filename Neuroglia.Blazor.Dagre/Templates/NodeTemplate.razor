@@ -34,5 +34,5 @@
     [Parameter]
     public virtual IGraphElement Element { get; set; } = null!;
 
-    protected INodeViewModel Node => (INodeViewModel)this.Element;
+    protected virtual INodeViewModel Node => (INodeViewModel)this.Element;
 }

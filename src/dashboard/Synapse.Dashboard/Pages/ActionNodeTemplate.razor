@@ -1,0 +1,42 @@
+﻿@*
+ * instead of defining the CascadingParameter Graph and the Parameter Element, 
+ * we could inherit from `NodeTemplate` and use either the `Element` property (IGraphElement) or the `Node` property (INodeViewModel).
+ * For the sake of the example, we will implement it manually in the @code section
+
+@inherits NodeTemplate 
+*@
+
+<g class="node @Node.CssClass" transform="translate(@X, @Y)">
+    <g transform="translate(-@HalfHeight, -@HalfHeight)">
+        <polygon stroke="black" stroke-width="1" fill="white" points="0,@HalfHeight @HalfHeight,0 @Node.BBox!.Height,@HalfHeight @HalfHeight,@Node.BBox!.Height" />
+        <text alignment-baseline="middle" text-anchor="middle" x="@HalfHeight" y="@HalfHeight" font-size="24" font-weight="bold">!</text>
+    </g>
+    @if (!string.IsNullOrWhiteSpace(Node.Label)) {
+        <g class="label">
+            <foreignObject 
+                x="@BBoxX"
+                y="@HalfHeight" 
+                width="@Width" 
+                height="@Consts.LabelHeight"
+            >
+                <div>@Node.Label</div>
+            </foreignObject>
+        </g>
+    }
+</g>
+
+@code {
+    [CascadingParameter]
+    public virtual IGraphViewModel Graph { get; set; } = null!;
+
+    [Parameter]
+    public virtual IGraphElement Element { get; set; } = null!;
+
+    protected virtual INodeViewModel Node => (INodeViewModel)this.Element;
+    protected virtual string? X => this.Node.X.ToInvariantString();
+    protected virtual string? Y => this.Node.Y.ToInvariantString();
+    protected virtual string? Width => this.Node.BBox.Width.ToInvariantString();
+    protected virtual string? Height => this.Node.BBox.Height.ToInvariantString();
+    protected virtual string? HalfHeight => (this.Node.BBox.Height / 2).ToInvariantString();
+    protected virtual string? BBoxX => this.Node.BBox.X.ToInvariantString();
+}

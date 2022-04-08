@@ -34,5 +34,5 @@
     [Parameter]
     public virtual IGraphElement Element { get; set; } = null!;
 
-    protected IClusterViewModel Cluster => (IClusterViewModel)this.Element;
+    protected virtual IClusterViewModel Cluster => (IClusterViewModel)this.Element;
 }

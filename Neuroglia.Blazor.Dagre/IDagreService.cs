@@ -1,4 +1,6 @@
-﻿namespace Neuroglia.Blazor.Dagre.Models
+﻿using Neuroglia.Blazor.Dagre.Models;
+
+namespace Neuroglia.Blazor.Dagre
 {
     public interface IDagreService
         : IGraphLibJsonConverter
