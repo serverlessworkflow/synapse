@@ -20,12 +20,14 @@ namespace Neuroglia.Blazor.Dagre.Models
         event Action<IGraphElement?, MouseEventArgs>? MouseUp;
         event Action<IGraphElement?, WheelEventArgs>? Wheel;
 
-        Task RegisterComponentType<TElement, TComponent>()
+        Task RegisterComponentTypeAsync<TElement, TComponent>()
             where TElement : IGraphElement
             where TComponent : ComponentBase;
 
-        Type GetComponentType<TElement>(TElement node)
+        Type GetComponentTypeAsync<TElement>(TElement node)
             where TElement : IGraphElement;
+
+        Task AddElementAsync(IGraphElement element);
 
         void OnMouseMove(IGraphElement? element, MouseEventArgs e);
 

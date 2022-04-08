@@ -1,4 +1,4 @@
-﻿using Blazor.Diagrams.Core.Models;
+﻿using Neuroglia.Blazor.Dagre.Models;
 using ServerlessWorkflow.Sdk.Models;
 using Synapse.Integration.Models;
 using System.Collections.ObjectModel;
@@ -7,23 +7,20 @@ namespace Synapse.Dashboard
 {
 
     /// <summary>
-    /// Represents a <see cref="StateDefinition"/> <see cref="NodeModel"/>
+    /// Represents a <see cref="StateDefinition"/> <see cref="NodeViewModel"/>
     /// </summary>
-    public class StateNodeModel
-        : GroupModel, IWorkflowNodeModel
+    public class StateNodeViewModel
+        : ClusterViewModel, IWorkflowNodeViewModel
     {
 
         /// <summary>
-        /// Initializes a new <see cref="StateNodeModel"/>
+        /// Initializes a new <see cref="StateNodeViewModel"/>
         /// </summary>
-        /// <param name="state">The <see cref="StateDefinition"/> the <see cref="StateNodeModel"/> represents</param>
-        public StateNodeModel(StateDefinition state)
-            : base(Array.Empty<NodeModel>())
+        /// <param name="state">The <see cref="StateDefinition"/> the <see cref="StateNodeViewModel"/> represents</param>
+        public StateNodeViewModel(StateDefinition state)
+            : base(null, state.Name!)
         {
             this.State = state;
-            this.Title = state.Name!;
-            this.AddPort(PortAlignment.Top);
-            this.AddPort(PortAlignment.Bottom);
         }
 
         /// <summary>

@@ -1,52 +1,51 @@
-﻿using Blazor.Diagrams.Core;
+﻿using Neuroglia.Blazor.Dagre.Models;
 using Synapse.Integration.Models;
 
 namespace Synapse.Dashboard
 {
-    public static class DiagramExtensions
+    public static class GraphExtensions
     {
 
-        public static void DisplayActivityStatusFor(this Diagram diagram, IEnumerable<V1WorkflowInstance> instances)
+        public static void DisplayActivityStatusFor(this IGraphViewModel graph, IEnumerable<V1WorkflowInstance> instances)
         {
-            diagram.ClearActivityStatus();
+            graph.ClearActivityStatus();
             foreach (var instance in instances)
             {
                 if(instance.Status == V1WorkflowInstanceStatus.Pending 
                     || instance.Status == V1WorkflowInstanceStatus.Starting)
                 {
-                    var node = diagram.Nodes.OfType<StartNodeModel>().FirstOrDefault();
+                    var node = graph.Nodes.OfType<StartNodeViewModel>().FirstOrDefault();
                     if(node != null)
                         node.ActiveInstances.Add(instance);
                     continue;
                 }
                 foreach(var activity in instance.Activities.Where(a => a.Status == V1WorkflowActivityStatus.Running))
                 {
-                    var node = diagram.GetNodeFor(activity);
+                    var node = graph.GetNodeFor(activity);
                     if(node != null)
                         node.ActiveInstances.Add(instance);    
                 }
                 foreach (var activity in instance.Activities.Where(a => a.Status == V1WorkflowActivityStatus.Faulted))
                 {
-                    var node = diagram.GetNodeFor(activity);
+                    var node = graph.GetNodeFor(activity);
                     if (node != null)
                         node.FaultedInstances.Add(instance);
                 }
             }
         }
 
-        public static void ClearActivityStatus(this Diagram diagram)
+        public static void ClearActivityStatus(this IGraphViewModel graph)
         {
-            var nodes = diagram.Nodes.ToList();
-            nodes.AddRange(diagram.Groups);
-            nodes.AddRange(diagram.Groups.SelectMany(g => g.Children));
-            foreach (var node in nodes.OfType<IWorkflowNodeModel>())
+            var nodes = graph.AllNodes.Values.ToList();
+            nodes.AddRange(graph.AllClusters.Values);
+            foreach (var node in nodes.OfType<IWorkflowNodeViewModel>())
             {
                 node.ActiveInstances.Clear();
                 node.FaultedInstances.Clear();
             }
         }
 
-        public static IWorkflowNodeModel? GetNodeFor(this Diagram diagram, V1WorkflowActivity activity)
+        public static IWorkflowNodeViewModel? GetNodeFor(this IGraphViewModel graph, V1WorkflowActivity activity)
         {
             if (activity == null)
                 throw new ArgumentNullException(nameof(activity));
@@ -55,13 +54,13 @@ namespace Synapse.Dashboard
                 case V1WorkflowActivityType.Action:
                     return null;
                 case V1WorkflowActivityType.Function:
-                    return diagram.GetActionNodeFor(activity);
+                    return graph.GetActionNodeFor(activity);
                 case V1WorkflowActivityType.Branch:
                     throw new NotImplementedException(); //todo
                 case V1WorkflowActivityType.ConsumeEvent:
                     throw new NotImplementedException(); //todo
                 case V1WorkflowActivityType.End:
-                    return diagram.Nodes.OfType<EndNodeModel>().FirstOrDefault();
+                    return graph.Nodes.OfType<EndNodeViewModel>().FirstOrDefault();
                 case V1WorkflowActivityType.Error:
                     throw new NotImplementedException(); //todo
                 case V1WorkflowActivityType.EventTrigger:
@@ -71,9 +70,9 @@ namespace Synapse.Dashboard
                 case V1WorkflowActivityType.ProduceEvent:
                     throw new NotImplementedException(); //todo
                 case V1WorkflowActivityType.Start:
-                    return diagram.Nodes.OfType<StartNodeModel>().FirstOrDefault();
+                    return graph.Nodes.OfType<StartNodeViewModel>().FirstOrDefault();
                 case V1WorkflowActivityType.State:
-                    return diagram.GetStateNodeFor(activity);
+                    return graph.GetStateNodeFor(activity);
                 case V1WorkflowActivityType.SubFlow:
                     throw new NotImplementedException(); //todo
                 default:
@@ -81,19 +80,19 @@ namespace Synapse.Dashboard
             }
         }
 
-        private static IWorkflowNodeModel? GetStateNodeFor(this Diagram diagram, V1WorkflowActivity activity)
+        private static IWorkflowNodeViewModel? GetStateNodeFor(this IGraphViewModel graph, V1WorkflowActivity activity)
         {
             if (!activity.Metadata.TryGetValue("state", out var stateName))
                 throw new InvalidDataException($"The specified activity's metadata does not define a 'state' value");
-            return diagram.Groups.OfType<StateNodeModel>().FirstOrDefault(g => g.State.Name == stateName);
+            return graph.Clusters.Values.OfType<StateNodeViewModel>().FirstOrDefault(g => g.State.Name == stateName);
         }
 
-        private static IWorkflowNodeModel? GetActionNodeFor(this Diagram diagram, V1WorkflowActivity activity)
+        private static IWorkflowNodeViewModel? GetActionNodeFor(this IGraphViewModel graph, V1WorkflowActivity activity)
         {
-            var stateNode = (StateNodeModel)diagram.GetStateNodeFor(activity)!;
+            var stateNode = (StateNodeViewModel)graph.GetStateNodeFor(activity)!;
             if (!activity.Metadata.TryGetValue("action", out var actionName))
                 throw new InvalidDataException($"The specified activity's metadata does not define a 'action' value");
-            return stateNode.Children.OfType<ActionNodeModel>().FirstOrDefault(a => a.Action.Name == actionName);
+            return stateNode.Children.OfType<ActionNodeViewModel>().FirstOrDefault(a => a.Action.Name == actionName);
         }
 
     }

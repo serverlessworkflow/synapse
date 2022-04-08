@@ -1,43 +1,32 @@
-﻿@page "/diagrams"
-
-@using Blazor.Diagrams.Core
-@using Blazor.Diagrams.Core.Geometry
-@using Blazor.Diagrams.Core.Models
-@using Blazor.Diagrams.Components
-@using Blazor.Diagrams.Core.Models.Base
-@using QG = QuikGraph
-@using GraphShape.Algorithms.Layout
+﻿
 @using ServerlessWorkflow.Sdk
 @using ServerlessWorkflow.Sdk.Models
 
 @namespace Synapse.Dashboard
 
-@if (Diagram != null) {
-    <div class="diagram-container h-100">
-      <CascadingValue Value="Diagram">
-        <DiagramCanvas></DiagramCanvas>
-      </CascadingValue>
-    </div>
+@if (Graph != null) {
+    <DagreGraph Graph="Graph" />
 }
 
 @implements IDisposable
 @code {
 
     [Parameter]
-    public Diagram Diagram { get; set; } = null!;
+    public IGraphViewModel Graph { get; set; } = null!;
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        this.Diagram.SelectionChanged += this.OnNodeSelectionChanged;
+        //this.Diagram.SelectionChanged += this.OnNodeSelectionChanged;
     }
 
     public void Dispose()
     {
-        this.Diagram.SelectionChanged -= this.OnNodeSelectionChanged;
+        //this.Diagram.SelectionChanged -= this.OnNodeSelectionChanged;
         GC.SuppressFinalize(this);
     }
 
+    /*
     private void OnNodeSelectionChanged(SelectableModel elem)
     {
         if (!elem.Selected
@@ -45,6 +34,6 @@
             return;
 
     }
-
+    */
 
 }

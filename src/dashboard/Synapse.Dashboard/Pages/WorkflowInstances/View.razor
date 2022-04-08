@@ -1,6 +1,4 @@
-﻿
-@using Blazor.Diagrams.Core
-@using Microsoft.AspNetCore.SignalR.Client
+﻿@using Microsoft.AspNetCore.SignalR.Client
 @using Neuroglia.Serialization
 @using Newtonsoft.Json
 @using Newtonsoft.Json.Linq
@@ -10,7 +8,7 @@
 @using System.Text
 @inject ISynapseManagementApi SynapseApi
 @inject IJsonSerializer JsonSerializer
-@inject IWorkflowDiagramBuilder WorkflowDiagramBuilder
+@inject WorkflowGraphBuilder WorkflowGraphBuilder
 @inject IMonacoEditorHelper MonacoEditorHelper
 @inject HubConnection HubConnection
 @inject HttpClient HttpClient

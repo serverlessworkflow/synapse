@@ -1,24 +1,23 @@
-﻿using Blazor.Diagrams.Core.Models;
-using ServerlessWorkflow.Sdk;
+﻿using ServerlessWorkflow.Sdk;
 
 namespace Synapse.Dashboard
 {
     /// <summary>
-    /// Represents a logical gateway <see cref="NodeModel"/>
+    /// Represents a logical gateway <see cref="NodeViewModel"/>
     /// </summary>
-    public class GatewayNodeModel
-        : WorkflowNodeModel
+    public class GatewayNodeViewModel
+        : WorkflowNodeViewModel
     {
 
         /// <summary>
-        /// Initializes a new <see cref="GatewayNodeModel"/>
+        /// Initializes a new <see cref="GatewayNodeViewModel"/>
         /// </summary>
         /// <param name="completionType">The gateway's ParallelCompletionType</param>
-        public GatewayNodeModel(ParallelCompletionType completionType)
+        public GatewayNodeViewModel(ParallelCompletionType completionType)
+            : base("", "gateway-node", null, 40)
         {
             this.CompletionType = completionType;
-            this.AddPort(PortAlignment.Top);
-            this.AddPort(PortAlignment.Bottom);
+            this.ComponentType = typeof(GatewayNodeTemplate);
         }
 
         /// <summary>

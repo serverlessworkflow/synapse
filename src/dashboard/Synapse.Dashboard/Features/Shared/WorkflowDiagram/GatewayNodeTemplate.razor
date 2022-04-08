@@ -1,0 +1,43 @@
+﻿@namespace Synapse.Dashboard
+@inherits NodeTemplate
+<g class="node @Node.CssClass" transform="translate(@((Node.X ?? 0).ToInvariantString()), @((Node.Y ?? 0).ToInvariantString()))">
+    <foreignObject
+        x="@(Node.BBox!.X.ToInvariantString())" 
+        y="@(Node.BBox!.Y.ToInvariantString())" 
+        width="@Width" 
+        height="@Height"
+    >
+        <svg>
+            <polygon stroke="black" stroke-width="1" fill="white" points="0,@HalfHeight @HalfWidth,0 @Width,@HalfHeight @HalfWidth,@Height" />
+            <text alignment-baseline="middle" text-anchor="middle" x="@HalfWidth" y="@HalfHeight" font-size="24" font-weight="bold">
+                @Symbol
+            </text>
+        </svg>
+    </foreignObject>
+</g>
+@code {
+    protected virtual string? Width => this.Node.BBox!.Width.ToInvariantString();
+    protected virtual string? Height => this.Node.BBox!.Height.ToInvariantString();
+    protected virtual string? HalfWidth => (this.Node.BBox!.Width / 2).ToInvariantString();
+    protected virtual string? HalfHeight => (this.Node.BBox!.Height / 2).ToInvariantString();
+    protected virtual string Symbol
+    {
+        get
+        {
+            if (this.Gateway.CompletionType == ServerlessWorkflow.Sdk.ParallelCompletionType.And)
+            {
+                return "+";
+            }
+            else if (this.Gateway.CompletionType == ServerlessWorkflow.Sdk.ParallelCompletionType.Xor)
+            {
+                return "x";
+            }
+            else if (this.Gateway.CompletionType == ServerlessWorkflow.Sdk.ParallelCompletionType.N)
+            {
+                return "n";
+            }
+            return "";
+        }
+    }
+    protected GatewayNodeViewModel Gateway => (GatewayNodeViewModel)this.Element;
+}

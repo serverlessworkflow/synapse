@@ -6,7 +6,7 @@ namespace Synapse.Dashboard
     /// <summary>
     /// Defines the fundamentals of a workflow node
     /// </summary>
-    public interface IWorkflowNodeModel
+    public interface IWorkflowNodeViewModel
     {
 
         /// <summary>

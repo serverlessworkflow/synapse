@@ -4,7 +4,10 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-	<DebugType>embedded</DebugType>
+    <Company>Neuroglia SRL</Company>
+    <Copyright>Copyright © 2021 Neuroglia SPRL. All rights reserved.</Copyright>
+    <Authors>Neuroglia SRL</Authors>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
