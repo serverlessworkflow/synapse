@@ -24,6 +24,7 @@
 	<DockerfileContext>..\..\..</DockerfileContext>
 	<DockerfileTag>synapse/server</DockerfileTag>
 	<RuntimeIdentifiers>win10-x64;linux-x64;osx-x64</RuntimeIdentifiers>
+    <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
   </PropertyGroup>
 
   <ItemGroup>

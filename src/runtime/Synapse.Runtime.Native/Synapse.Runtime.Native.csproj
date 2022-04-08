@@ -23,7 +23,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\apps\Synapse.Worker\Synapse.Worker.csproj" />
     <ProjectReference Include="..\..\core\Synapse.Application\Synapse.Application.csproj" />
   </ItemGroup>
 
