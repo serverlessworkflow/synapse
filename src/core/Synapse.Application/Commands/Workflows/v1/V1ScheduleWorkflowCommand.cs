@@ -114,14 +114,14 @@ namespace Synapse.Application.Commands.Workflows
             Func<IServiceProvider, Task> job = async provider =>
             {
                 var mediator = provider.GetRequiredService<IMediator>();
-                await mediator.ExecuteAndUnwrapAsync(new V1CreateWorkflowInstanceCommand(workflow.Id, V1WorkflowInstanceActivationType.Cron, new(), null, true));
+                await mediator.ExecuteAndUnwrapAsync(new V1CreateWorkflowInstanceCommand(workflow.Id, V1WorkflowInstanceActivationType.Cron, new(), null, true, null));
             };
             if (command.CatchUpMissedOccurences
                 && workflow.LastInstanciated.HasValue)
             {
                 foreach(var occurence in cronExpression.GetOccurrences(workflow.LastInstanciated.Value.DateTime, DateTime.Now, timeZone))
                 {
-                    await this.Mediator.ExecuteAndUnwrapAsync(new V1CreateWorkflowInstanceCommand(workflow.Id, V1WorkflowInstanceActivationType.Cron, new(), null, true), cancellationToken);
+                    await this.Mediator.ExecuteAndUnwrapAsync(new V1CreateWorkflowInstanceCommand(workflow.Id, V1WorkflowInstanceActivationType.Cron, new(), null, true, null), cancellationToken);
                 }
             }
             await this.CronJobScheduler.ScheduleJobAsync(workflow.Definition.Id!, cronExpression, timeZone, job, workflow.Definition.Start.Schedule.Cron?.ValidUntil, cancellationToken);

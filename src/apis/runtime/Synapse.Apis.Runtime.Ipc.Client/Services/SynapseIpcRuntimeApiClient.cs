@@ -162,6 +162,14 @@ namespace Synapse.Apis.Runtime.Ipc
         }
 
         /// <inheritdoc/>
+        public virtual async Task<V1WorkflowActivity> SetActivityMetadataAsync(V1SetWorkflowActivityMetadataCommand command, CancellationToken cancellationToken = default)
+        {
+            if (command == null)
+                throw new ArgumentNullException(nameof(command));
+            return await this.Mediator.ExecuteAndUnwrapAsync(this.Mapper.Map<Application.Commands.WorkflowActivities.V1SetWorkflowActivityMetadataCommand>(command), cancellationToken);
+        }
+
+        /// <inheritdoc/>
         public virtual async Task<V1WorkflowActivity> FaultActivityAsync(V1FaultWorkflowActivityCommand command, CancellationToken cancellationToken = default)
         {
             if (command == null)
@@ -207,6 +215,14 @@ namespace Synapse.Apis.Runtime.Ipc
             if (command == null)
                 throw new ArgumentNullException(nameof(command));
             await this.Mediator.ExecuteAndUnwrapAsync(this.Mapper.Map<Application.Commands.WorkflowInstances.V1SetWorkflowInstanceCorrelationMappingCommand>(command), cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<V1WorkflowInstance> StartSubflowAsync(V1CreateWorkflowInstanceCommand command, CancellationToken cancellationToken = default)
+        {
+            if (command == null)
+                throw new ArgumentNullException(nameof(command));
+            return await this.Mediator.ExecuteAndUnwrapAsync(this.Mapper.Map<Application.Commands.WorkflowInstances.V1CreateWorkflowInstanceCommand>(command), cancellationToken);
         }
 
         /// <inheritdoc/>

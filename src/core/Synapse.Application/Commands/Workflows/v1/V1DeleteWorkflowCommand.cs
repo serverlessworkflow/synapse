@@ -70,8 +70,7 @@ namespace Synapse.Application.Commands.Workflows
         /// <param name="mapper">The service used to map objects</param>
         /// <param name="workflowWriteModems">The <see cref="IRepository"/> used to manage <see cref="V1Workflow"/>s</param>
         /// <param name="workflowReadModels">The <see cref="IRepository"/> used to manage <see cref="Integration.Models.V1Workflow"/>s</param>
-        /// <param name="workflowInstanceWriteModels">The <see cref="IRepository"/> used to manage <see cref="V1WorkflowInstance"/>s</param>
-        /// <param name="workflowInstances">The <see cref="IRepository"/> used to manage <see cref="Integration.Models.V1WorkflowInstance"/>s</param>
+        /// <param name="workflowInstances">The <see cref="IRepository"/> used to manage <see cref="V1WorkflowInstance"/>s</param>
         public V1DeleteWorkflowCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper,
             IRepository<V1Workflow> workflowWriteModems, IRepository<Integration.Models.V1Workflow> workflowReadModels, IRepository<Integration.Models.V1WorkflowInstance> workflowInstances) 
             : base(loggerFactory, mediator, mapper)

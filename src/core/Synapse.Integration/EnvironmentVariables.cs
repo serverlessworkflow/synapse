@@ -43,24 +43,6 @@ namespace Synapse
             public const string Prefix = EnvironmentVariables.Prefix + "CLOUDEVENTS_";
 
             /// <summary>
-            /// Exposes constants about <see cref="CloudEvent"/> source environment variable
-            /// </summary>
-            public static class Source
-            {
-
-                /// <summary>
-                /// Gets the name of the <see cref="CloudEvent"/> source environment variable
-                /// </summary>
-                public const string Name = Prefix + "SOURCE";
-
-                /// <summary>
-                /// Gets the value of the <see cref="CloudEvent"/> source environment variable
-                /// </summary>
-                public static string Value = Environment.GetEnvironmentVariable(Name);
-
-            }
-
-            /// <summary>
             /// Exposes constants about <see cref="CloudEvent"/> broker related environment variables
             /// </summary>
             public static class Broker
@@ -105,20 +87,118 @@ namespace Synapse
             public const string Prefix = EnvironmentVariables.Prefix + "API_";
 
             /// <summary>
-            /// Exposes constants about the api host environment variable
+            /// Exposes constants about the api host name environment variable
             /// </summary>
-            public static class Host
+            public static class HostName
             {
 
                 /// <summary>
                 /// Gets the name of the api host environment variable
                 /// </summary>
-                public const string Name = Prefix + "HOST";
+                public const string Name = Prefix + "HOSTNAME";
 
                 /// <summary>
                 /// Gets the value of the api host environment variable
                 /// </summary>
                 public static string Value = Environment.GetEnvironmentVariable(Name);
+
+            }
+
+            /// <summary>
+            /// Exposes constants about HTTP api-related environment variables
+            /// </summary>
+            public static class Http
+            {
+
+                /// <summary>
+                /// Gets the prefix for all HTTP api related environment variables
+                /// </summary>
+                public const string Prefix = EnvironmentVariables.Prefix + "HTTP_";
+
+                /// <summary>
+                /// Exposes constants about the HTTP api scheme environment variable
+                /// </summary>
+                public static class Scheme
+                {
+
+                    /// <summary>
+                    /// Gets the name of the HTTP api scheme environment variable
+                    /// </summary>
+                    public const string Name = Prefix + "SCHEME";
+
+                    /// <summary>
+                    /// Gets the value of the HTTP api scheme environment variable
+                    /// </summary>
+                    public static string Value = Environment.GetEnvironmentVariable(Name);
+
+                }
+
+                /// <summary>
+                /// Exposes constants about the HTTP api port environment variable
+                /// </summary>
+                public static class Port
+                {
+
+                    /// <summary>
+                    /// Gets the name of the HTTP api port environment variable
+                    /// </summary>
+                    public const string Name = Prefix + "PORT";
+
+                    /// <summary>
+                    /// Gets the value of the HTTP api port environment variable
+                    /// </summary>
+                    public static string Value = Environment.GetEnvironmentVariable(Name);
+
+                }
+
+            }
+
+            /// <summary>
+            /// Exposes constants about GRPC api-related environment variables
+            /// </summary>
+            public static class Grpc
+            {
+
+                /// <summary>
+                /// Gets the prefix for all GRPC api related environment variables
+                /// </summary>
+                public const string Prefix = EnvironmentVariables.Prefix + "GRPC_";
+
+                /// <summary>
+                /// Exposes constants about the GRPC api scheme environment variable
+                /// </summary>
+                public static class Scheme
+                {
+
+                    /// <summary>
+                    /// Gets the name of the GRPC api scheme environment variable
+                    /// </summary>
+                    public const string Name = Prefix + "SCHEME";
+
+                    /// <summary>
+                    /// Gets the value of the GRPC api scheme environment variable
+                    /// </summary>
+                    public static string Value = Environment.GetEnvironmentVariable(Name);
+
+                }
+
+                /// <summary>
+                /// Exposes constants about the GRPC api port environment variable
+                /// </summary>
+                public static class Port
+                {
+
+                    /// <summary>
+                    /// Gets the name of the GRPC api port environment variable
+                    /// </summary>
+                    public const string Name = Prefix + "PORT";
+
+                    /// <summary>
+                    /// Gets the value of the GRPC api port environment variable
+                    /// </summary>
+                    public static string Value = Environment.GetEnvironmentVariable(Name);
+
+                }
 
             }
 

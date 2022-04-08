@@ -6,7 +6,7 @@ namespace Synapse.Application.Queries.WorkflowActivities
 {
 
     /// <summary>
-    /// Represents the <see cref="IQuery"/> used to get the <see cref="Domain.Models.V1WorkflowActivity"/> instances that belong to a specific <see cref="V1WorkflowInstance"/>
+    /// Represents the <see cref="IQuery"/> used to get the <see cref="Domain.Models.V1WorkflowActivity"/> instances that belong to a specific <see cref="Domain.Models.V1WorkflowInstance"/>
     /// </summary>
     [DataTransferObjectType(typeof(Integration.Queries.WorkflowActivities.V1GetWorkflowActivitiesQuery))]
     public class V1GetWorkflowActivitiesQuery

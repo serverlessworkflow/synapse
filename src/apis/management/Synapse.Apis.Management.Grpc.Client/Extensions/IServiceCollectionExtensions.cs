@@ -17,7 +17,9 @@
 using Grpc.Net.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 using ProtoBuf.Grpc.Client;
+using Synapse.Apis.Management.Grpc.Configuration;
 
 namespace Synapse.Apis.Management.Grpc
 {
@@ -29,19 +31,36 @@ namespace Synapse.Apis.Management.Grpc
     {
 
         /// <summary>
-        /// Adds and configures a GRPC-based client for the Synapse API
+        /// Adds and configures a GRPC-based client for the Synapse Management API
+        /// </summary>
+        /// <param name="services">The <see cref="IServiceCollection"/> to configure</param>
+        /// <param name="configurationAction">An <see cref="Action{T}"/> used to configure the <see cref="SynapseGrpcManagementApiClientOptions"/> to use</param>
+        /// <returns>The configured <see cref="IServiceCollection"/></returns>
+        public static IServiceCollection AddSynapseGrpcManagementApiClient(this IServiceCollection services, Action<ISynapseGrpcManagementApiClientOptionsBuilder> configurationAction)
+        {
+            if (configurationAction == null)
+                throw new ArgumentNullException(nameof(configurationAction));
+            var builder = new SynapseGrpcManagementApiClientOptionsBuilder();
+            configurationAction(builder);
+            var options = builder.Build();
+            services.TryAddSingleton(Options.Create(options));
+            services.TryAddSingleton(provider =>
+            {
+                var channel = GrpcChannel.ForAddress(options.Address, options.ChannelOptions);
+                return channel.CreateGrpcService<ISynapseGrpcManagementApi>();
+            });
+            services.TryAddSingleton<ISynapseManagementApi, SynapseGrpcManagementApiClient>();
+            return services;
+        }
+
+        /// <summary>
+        /// Adds and configures a GRPC-based client for the Synapse Management API
         /// </summary>
         /// <param name="services">The <see cref="IServiceCollection"/> to configure</param>
         /// <returns>The configured <see cref="IServiceCollection"/></returns>
         public static IServiceCollection AddSynapseGrpcManagementApiClient(this IServiceCollection services)
         {
-            services.TryAddSingleton(provider =>
-            {
-                var channel = GrpcChannel.ForAddress($"{EnvironmentVariables.Api.Host.Value}:8080"); //todo: config-based
-                return channel.CreateGrpcService<ISynapseGrpcManagementApi>();
-            });
-            services.TryAddSingleton<ISynapseManagementApi, SynapseGrpcManagementApiClient>();
-            return services;
+            return services.AddSynapseGrpcManagementApiClient(builder => { });
         }
 
     }

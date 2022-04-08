@@ -19,6 +19,7 @@
 		<AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
 		<FileVersion>$(VersionPrefix).0</FileVersion>
 		<OutputType>Library</OutputType>
+		<DebugType>embedded</DebugType>
 	</PropertyGroup>
 
   <ItemGroup>

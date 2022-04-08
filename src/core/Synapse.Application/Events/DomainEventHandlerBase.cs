@@ -64,16 +64,15 @@ namespace Synapse.Application.Events
             if (!e.GetType().TryGetCustomAttribute(out DataTransferObjectTypeAttribute dataTransferObjectTypeAttribute))
                 return;
             var integrationEvent = (V1IntegrationEvent)this.Mapper.Map(e, e.GetType(), dataTransferObjectTypeAttribute.Type);
-            var aggregateName = e.GetType().GetGenericType(typeof(DomainEvent<,>)).GetGenericArguments()[0].Name.ToLower();
-            var actionName = e.GetType().Name.Replace(aggregateName, string.Empty, StringComparison.OrdinalIgnoreCase).Replace("DomainEvent", string.Empty, StringComparison.OrdinalIgnoreCase).ToLower();
+            var aggregateType = e.GetType().GetGenericType(typeof(DomainEvent<,>)).GetGenericArguments()[0];
             var cloudEvent = new CloudEvent()
             {
                 Id = Guid.NewGuid().ToString(),
-                Source = this.ApplicationOptions.CloudEvents.Source,
-                Type = $"io.synapse/{aggregateName}/{actionName}/v1",
+                Source = CloudEvents.Source,
+                Type = CloudEvents.TypeOf(typeof(TEvent), aggregateType),
                 Time = e.CreatedAt,
                 Subject = e.AggregateId.ToString(),
-                DataSchema = new($"https://synapse.io/events/{aggregateName}/{actionName}/v1"),
+                DataSchema = CloudEvents.SchemaOf(typeof(TEvent), aggregateType),
                 DataContentType = MediaTypeNames.Application.Json,
                 Data = integrationEvent
             };

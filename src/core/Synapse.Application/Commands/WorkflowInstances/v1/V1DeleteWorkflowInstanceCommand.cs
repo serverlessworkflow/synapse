@@ -37,7 +37,7 @@ namespace Synapse.Application.Commands.WorkflowInstances
         /// <summary>
         /// Initializes a new <see cref="V1DeleteWorkflowInstanceCommand"/>
         /// </summary>
-        /// <param name="id">The id of the <see cref=".V1WorkflowInstance"/> to delete</param>
+        /// <param name="id">The id of the <see cref="V1WorkflowInstance"/> to delete</param>
         public V1DeleteWorkflowInstanceCommand(string id)
         {
             this.WorkflowInstanceId = id;

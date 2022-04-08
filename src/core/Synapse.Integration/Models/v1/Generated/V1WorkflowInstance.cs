@@ -54,65 +54,72 @@ namespace Synapse.Integration.Models
 		public virtual V1WorkflowInstanceActivationType ActivationType { get; set; }
 
 		/// <summary>
+		/// The id of the V1WorkflowInstance's parent, if any
+		/// </summary>
+		[DataMember(Name = "ParentId", Order = 4)]
+		[Description("The id of the V1WorkflowInstance's parent, if any")]
+		public virtual string ParentId { get; set; }
+
+		/// <summary>
 		/// The V1WorkflowInstance's input
 		/// </summary>
-		[DataMember(Name = "Input", Order = 4)]
+		[DataMember(Name = "Input", Order = 5)]
 		[Description("The V1WorkflowInstance's input")]
 		public virtual Dynamic Input { get; set; }
 
 		/// <summary>
 		/// An IReadOnlyCollection`1 containing descriptors of the CloudEvents that have triggered the V1WorkflowInstance
 		/// </summary>
-		[DataMember(Name = "TriggerEvents", Order = 5)]
+		[DataMember(Name = "TriggerEvents", Order = 6)]
 		[Description("An IReadOnlyCollection`1 containing descriptors of the CloudEvents that have triggered the V1WorkflowInstance")]
 		public virtual ICollection<V1Event> TriggerEvents { get; set; }
 
 		/// <summary>
 		/// The V1WorkflowInstance's status
 		/// </summary>
-		[DataMember(Name = "Status", Order = 6)]
+		[DataMember(Name = "Status", Order = 7)]
 		[Description("The V1WorkflowInstance's status")]
 		public virtual V1WorkflowInstanceStatus Status { get; set; }
 
 		/// <summary>
 		/// The date and time at which the V1WorkflowInstance has started
 		/// </summary>
-		[DataMember(Name = "StartedAt", Order = 7)]
+		[DataMember(Name = "StartedAt", Order = 8)]
 		[Description("The date and time at which the V1WorkflowInstance has started")]
 		public virtual DateTime? StartedAt { get; set; }
 
 		/// <summary>
 		/// The date and time at which the V1WorkflowInstance has been executed<para></para>  The value is set when the V1WorkflowInstance has been cancelled, faults or completes.
 		/// </summary>
-		[DataMember(Name = "ExecutedAt", Order = 8)]
+		[DataMember(Name = "ExecutedAt", Order = 9)]
 		[Description("The date and time at which the V1WorkflowInstance has been executed<para></para>  The value is set when the V1WorkflowInstance has been cancelled, faults or completes.")]
 		public virtual DateTime? ExecutedAt { get; set; }
 
 		/// <summary>
 		/// The V1WorkflowInstance's V1CorrelationContext
 		/// </summary>
-		[DataMember(Name = "CorrelationContext", Order = 9)]
+		[DataMember(Name = "CorrelationContext", Order = 10)]
 		[Description("The V1WorkflowInstance's V1CorrelationContext")]
 		public virtual V1CorrelationContext CorrelationContext { get; set; }
 
 		/// <summary>
 		/// An IReadOnlyCollection`1 containing the activities the V1WorkflowInstance is made out of
 		/// </summary>
-		[DataMember(Name = "Activities", Order = 10)]
+		[DataMember(Name = "Activities", Order = 11)]
 		[Description("An IReadOnlyCollection`1 containing the activities the V1WorkflowInstance is made out of")]
 		public virtual ICollection<V1WorkflowActivity> Activities { get; set; }
 
 		/// <summary>
 		/// The Error that caused the V1WorkflowInstance to end prematurily
 		/// </summary>
-		[DataMember(Name = "Error", Order = 11)]
+		[DataMember(Name = "Error", Order = 12)]
 		[Description("The Error that caused the V1WorkflowInstance to end prematurily")]
 		public virtual Error Error { get; set; }
 
 		/// <summary>
 		/// The V1WorkflowInstance's output
 		/// </summary>
-		[DataMember(Name = "Output", Order = 12)]
+		[DataMember(Name = "Output", Order = 13)]
 		[Description("The V1WorkflowInstance's output")]
 		public virtual Dynamic Output { get; set; }
 

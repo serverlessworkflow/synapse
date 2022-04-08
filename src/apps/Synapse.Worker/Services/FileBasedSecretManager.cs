@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
 using System.Dynamic;
+using System.Runtime.InteropServices;
 
 namespace Synapse.Worker.Executor.Services
 {
@@ -10,6 +11,17 @@ namespace Synapse.Worker.Executor.Services
     public class FileBasedSecretManager
         : BackgroundService, ISecretManager
     {
+
+        public static string DefaultSecretDirectory
+        {
+            get
+            {
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "secrets");
+                else
+                    return "/run/secrets/";
+            }
+        }
 
         /// <summary>
         /// Initializes a new <see cref="FileBasedSecretManager"/>
@@ -40,8 +52,10 @@ namespace Synapse.Worker.Executor.Services
         /// <inheritdoc/>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            var directory = new DirectoryInfo("/run/secrets/");
-            foreach(var file in directory.GetFiles())
+            var directory = new DirectoryInfo(DefaultSecretDirectory); //todo: replace with options-based values
+            if (!directory.Exists)
+                directory.Create();
+            foreach (var file in directory.GetFiles())
             {
                 using var stream = file.OpenRead();
                 var mediaTypeName = MimeTypes.GetMimeType(file.Name);

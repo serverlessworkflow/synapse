@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Synapse.Application.Services;
@@ -27,30 +28,32 @@ namespace Synapse.Runtime.Services
 {
 
     /// <summary>
-    /// Represents the Docker implementation if the <see cref="IWorkflowRuntimeHost"/>
+    /// Represents the Docker implementation of the <see cref="IWorkflowRuntimeHost"/>
     /// </summary>
     public class DockerRuntimeHost
         : WorkflowRuntimeHostBase
     {
 
         /// <summary>
-        /// Gets boolean indicating whether or not the <see cref="DockerRuntimeHost"/> is running in Docker
-        /// </summary>
-        protected static readonly bool IsRunningInDocker = File.Exists("/.dockerenv");
-
-        /// <summary>
         /// Initializes a new <see cref="DockerRuntimeHost"/>
         /// </summary>
         /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
+        /// <param name="environment">The current <see cref="IHostEnvironment"/></param>
         /// <param name="options">The service used to access the current <see cref="DockerRuntimeHostOptions"/></param>
         /// <param name="docker">The service used to interact with the Docker API</param>
-        public DockerRuntimeHost(ILoggerFactory loggerFactory, IOptions<DockerRuntimeHostOptions> options, IDockerClient docker)
+        public DockerRuntimeHost(ILoggerFactory loggerFactory, IHostEnvironment environment, IOptions<DockerRuntimeHostOptions> options, IDockerClient docker)
             : base(loggerFactory)
         {
+            this.Environment = environment;
             this.Options = options.Value;
             this.Docker = docker;
    
         }
+
+        /// <summary>
+        /// Gets the current <see cref="IHostEnvironment"/>
+        /// </summary>
+        protected IHostEnvironment Environment { get; }
 
         /// <summary>
         /// Gets the current <see cref="DockerRuntimeHostOptions"/>
@@ -68,7 +71,7 @@ namespace Synapse.Runtime.Services
             try
             {
                 var response = await this.Docker.Networks.InspectNetworkAsync(this.Options.Network, stoppingToken);
-                if (IsRunningInDocker
+                if (this.Environment.RunsInDocker()
                     && this.TryGetDockerContainerId(out var containerId)
                     && !response.Containers.ContainsKey(containerId))
                     await this.Docker.Networks.ConnectNetworkAsync(this.Options.Network, new NetworkConnectParameters() { Container = containerId }, stoppingToken);
@@ -86,7 +89,7 @@ namespace Synapse.Runtime.Services
                 throw new ArgumentNullException(nameof(workflowInstance));
             await this.PullRuntimeExecutorImageAsync(cancellationToken);
             var containerConfig = this.Options.Runtime.Container;
-            containerConfig.AddOrUpdateEnvironmentVariable(EnvironmentVariables.Api.Host.Name, EnvironmentVariables.Api.Host.Value!); //todo: instead, fetch values from options
+            containerConfig.AddOrUpdateEnvironmentVariable(EnvironmentVariables.Api.HostName.Name, EnvironmentVariables.Api.HostName.Value!); //todo: instead, fetch values from options
             containerConfig.AddOrUpdateEnvironmentVariable(EnvironmentVariables.Runtime.WorkflowInstanceId.Name, workflowInstance.Id.ToString()); //todo: instead, fetch values from options
             var name = workflowInstance.Id.Replace(":", "-");
             var hostConfig = new HostConfig()
@@ -108,7 +111,7 @@ namespace Synapse.Runtime.Services
                 HostConfig = hostConfig
             };
             var createContainerResult = await this.Docker.Containers.CreateContainerAsync(createContainerParameters, cancellationToken);
-            if (IsRunningInDocker)
+            if (this.Environment.RunsInDocker())
                 await this.Docker.Networks.ConnectNetworkAsync(this.Options.Network, new NetworkConnectParameters() { Container = createContainerResult.ID }, cancellationToken);
             foreach (var warning in createContainerResult.Warnings)
             {

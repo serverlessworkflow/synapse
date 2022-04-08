@@ -171,6 +171,15 @@ namespace Synapse.Domain.Models
         }
 
         /// <summary>
+        /// Sets the <see cref="V1WorkflowActivity"/>'s metadata
+        /// </summary>
+        /// <param name="metadata">An <see cref="IDictionary{TKey, TValue}"/> containing the metadata to set</param>
+        public virtual void SetMetadata(IDictionary<string, string>? metadata)
+        {
+            this.On(this.RegisterEvent(new V1WorkflowActivityMetadataChangedDomainEvent(this.Id, metadata)));
+        }
+
+        /// <summary>
         /// Completes and sets the <see cref="V1WorkflowActivity"/>'s output
         /// </summary>
         public virtual void SetOutput(object? output)
@@ -259,6 +268,16 @@ namespace Synapse.Domain.Models
             this.LastModified = e.CreatedAt;
             this.ExecutedAt = e.CreatedAt;
             this.Status = V1WorkflowActivityStatus.Skipped;
+        }
+
+        /// <summary>
+        /// Handles the specified <see cref="V1WorkflowActivityMetadataChangedDomainEvent"/>
+        /// </summary>
+        /// <param name="e">The <see cref="V1WorkflowActivityMetadataChangedDomainEvent"/> to handle</param>
+        protected virtual void On(V1WorkflowActivityMetadataChangedDomainEvent e)
+        {
+            this.LastModified = e.CreatedAt;
+            this.Metadata = e.Metadata;
         }
 
         /// <summary>

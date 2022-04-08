@@ -15,8 +15,6 @@
  *
  */
 
-using System.Runtime.Serialization;
-
 namespace Synapse
 {
 
@@ -41,7 +39,12 @@ namespace Synapse
         /// Indicates that the workflow instance has been dynamically created by a CRON schedule
         /// </summary>
         [EnumMember(Value = "cron")]
-        Cron = 2
+        Cron = 2,
+        /// <summary>
+        /// Indicates that the workflow instance has been created by another workflow instance
+        /// </summary>
+        [EnumMember(Value = "subflow")]
+        Subflow = 3
     }
 
 }

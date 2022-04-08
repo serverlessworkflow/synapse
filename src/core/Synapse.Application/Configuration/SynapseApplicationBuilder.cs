@@ -1,4 +1,21 @@
-﻿using CloudNative.CloudEvents.NewtonsoftJson;
+﻿/*
+ * Copyright © 2022-Present The Synapse Authors
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+using CloudNative.CloudEvents.NewtonsoftJson;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Adapters;
 using Neuroglia.Data.Expressions;
@@ -6,6 +23,7 @@ using Neuroglia.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using ServerlessWorkflow.Sdk;
+using System.Reactive.Subjects;
 using System.Reflection;
 
 namespace Synapse.Application.Configuration
@@ -121,11 +139,16 @@ namespace Synapse.Application.Configuration
             this.Services.AddServerlessWorkflow();
             this.Services.AddSingleton<CloudEventCorrelator>();
             this.Services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<CloudEventCorrelator>());
-            //todo: re-establish
-            //this.Services.AddIntegrationEventBus(async (provider, e, cancellationToken) =>
-            //{
-            //    await provider.GetRequiredService<ICloudEventBus>().PublishAsync(e, cancellationToken);
-            //});
+            this.Services.AddIntegrationEventBus((provider, e) =>
+            {
+                var stream = provider.GetRequiredService<ISubject<CloudEvent>>();
+                stream.OnNext(e);
+                return Task.CompletedTask;
+            });
+            this.Services.AddIntegrationEventBus(async (provider, e) =>
+            {
+                await provider.GetRequiredService<ICloudEventBus>().PublishAsync(e);
+            });
             this.Services.AddAuthorization();
             this.Services.AddSingleton<IExpressionEvaluatorProvider, ExpressionEvaluatorProvider>();
             this.Services.AddRepositories(writeModelTypes, this.WriteModelRepositoryType, ServiceLifetime.Scoped);

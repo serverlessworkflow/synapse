@@ -70,7 +70,7 @@ namespace Synapse.Cli.Commands.Correlations
             table.AddColumn("LAST MODIFIED");
             foreach (var correlation in correlations)
             {
-                table.AddRow(correlation.Id, correlation.Lifetime.ToString(), correlation.Outcome.Target, correlation.Outcome.Type.ToString(), correlation.ConditionType.ToString(), correlation.Conditions.Count.ToString(), correlation.Contexts.Count.ToString(), correlation.CreatedAt.ToString(), correlation.LastModified.ToString());
+                table.AddRow(correlation.Id, correlation.Lifetime.ToString(), correlation.Outcome.Type.ToString(), correlation.Outcome.Target, correlation.ConditionType.ToString(), correlation.Conditions.Count.ToString(), correlation.Contexts.Count.ToString(), correlation.CreatedAt.ToString(), correlation.LastModified.ToString());
             }
             AnsiConsole.Write(table);
         }

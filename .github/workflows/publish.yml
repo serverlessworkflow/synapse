@@ -5,8 +5,9 @@ on:
     types: [published]
 
 jobs:
-  release:
-    name: Release CLI
+
+  release-server-bin:
+    name: Release Server Binaries
     strategy:
       matrix:
         kind: ['linux', 'windows', 'macOS']
@@ -34,9 +35,108 @@ jobs:
         shell: bash
         run: |
           tag=$(git describe --tags --abbrev=0)
-          release_name="synctl-$tag-${{ matrix.target }}"
+          release_name="synapse-${{ matrix.target }}"
           # Publish
-          dotnet publish src/apps/Synapse.Cli/Synapse.Cli.csproj --runtime "${{ matrix.target }}" -c Release -o "$release_name"
+          dotnet publish src/apps/Synapse.Server/Synapse.Server.csproj --runtime "${{ matrix.target }}" -c Release -o "$release_name"
+          # Pack
+          if [ "${{ matrix.target }}" == "win-x64" ]; then
+            # Pack for Windows
+            7z a -tzip "${release_name}.zip" "./${release_name}/*"
+          else
+            # Pack for other OS
+            tar czvf "${release_name}.tar.gz" "$release_name"
+          fi
+          # Delete output directory
+          rm -r "$release_name"
+      - name: Publish
+        uses: softprops/action-gh-release@v1
+        with:
+          files: "synapse*"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+  release-worker-bin:
+    name: Release Worker Binaries
+    strategy:
+      matrix:
+        kind: ['linux', 'windows', 'macOS']
+        include:
+          - kind: linux
+            os: ubuntu-latest
+            target: linux-x64
+          - kind: windows
+            os: windows-latest
+            target: win-x64
+          - kind: macOS
+            os: macos-latest
+            target: osx-x64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Setup
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.0.x
+      - name: Restore
+        run: dotnet restore
+      - name: Build
+        shell: bash
+        run: |
+          tag=$(git describe --tags --abbrev=0)
+          release_name="synapse-worker-${{ matrix.target }}"
+          # Publish
+          dotnet publish src/apps/Synapse.Worker/Synapse.Worker.csproj --runtime "${{ matrix.target }}" -c Release -o "$release_name" -p:PublishSingleFile=true
+          # Pack
+          if [ "${{ matrix.target }}" == "win-x64" ]; then
+            # Pack for Windows
+            7z a -tzip "${release_name}.zip" "./${release_name}/*"
+          else
+            # Pack for other OS
+            tar czvf "${release_name}.tar.gz" "$release_name"
+          fi
+          # Delete output directory
+          rm -r "$release_name"
+      - name: Publish
+        uses: softprops/action-gh-release@v1
+        with:
+          files: "synapse-worker*"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+  release-cli-bin:
+    name: Release CLI Binaries
+    strategy:
+      matrix:
+        kind: ['linux', 'windows', 'macOS']
+        include:
+          - kind: linux
+            os: ubuntu-latest
+            target: linux-x64
+          - kind: windows
+            os: windows-latest
+            target: win-x64
+          - kind: macOS
+            os: macos-latest
+            target: osx-x64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Setup
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.0.x
+      - name: Restore
+        run: dotnet restore
+      - name: Build
+        shell: bash
+        run: |
+          tag=$(git describe --tags --abbrev=0)
+          release_name="synctl-${{ matrix.target }}"
+          # Publish
+          dotnet publish src/apps/Synapse.Cli/Synapse.Cli.csproj --runtime "${{ matrix.target }}" -c Release -o "$release_name" -p:PublishSingleFile=true -p:GenerateDocumentationFile=false
           # Pack
           if [ "${{ matrix.target }}" == "win-x64" ]; then
             # Pack for Windows

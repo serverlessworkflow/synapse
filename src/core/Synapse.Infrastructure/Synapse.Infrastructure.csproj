@@ -18,6 +18,7 @@
 	<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
     <FileVersion>$(VersionPrefix).0</FileVersion>
+	<DebugType>embedded</DebugType>
   </PropertyGroup>
 
 </Project>

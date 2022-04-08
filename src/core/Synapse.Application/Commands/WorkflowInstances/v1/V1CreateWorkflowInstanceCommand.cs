@@ -46,13 +46,15 @@ namespace Synapse.Application.Commands.WorkflowInstances
         /// <param name="inputData">The input data of the <see cref="Domain.Models.V1WorkflowInstance"/> to create</param>
         /// <param name="correlationContext">The <see cref="V1CorrelationContext"/> of the <see cref="V1WorkflowInstance"/> to create</param>
         /// <param name="autoStart">A boolean indicating whether or not to start the <see cref="Domain.Models.V1WorkflowInstance"/> once it has been created</param>
-        public V1CreateWorkflowInstanceCommand(string workflowId, V1WorkflowInstanceActivationType activationType, object? inputData, V1CorrelationContext? correlationContext, bool autoStart)
+        /// <param name="parentId">The id of the parent <see cref="V1WorkflowInstance"/> of the <see cref="V1WorkflowInstance"/> to create</param>
+        public V1CreateWorkflowInstanceCommand(string workflowId, V1WorkflowInstanceActivationType activationType, object? inputData, V1CorrelationContext? correlationContext, bool autoStart, string? parentId)
         {
             this.WorkflowId = workflowId;
             this.ActivationType = activationType;
             this.InputData = inputData;
             this.CorrelationContext = correlationContext;
             this.AutoStart = autoStart;
+            this.ParentId = parentId;
         }
 
         /// <summary>
@@ -79,6 +81,11 @@ namespace Synapse.Application.Commands.WorkflowInstances
         /// Gets a boolean indicating whether or not to automatically start the <see cref="Domain.Models.V1WorkflowInstance"/> once it has been created
         /// </summary>
         public virtual bool AutoStart { get; protected set; }
+
+        /// <summary>
+        /// Gets the id of the parent <see cref="V1WorkflowInstance"/> of the <see cref="V1WorkflowInstance"/> to create
+        /// </summary>
+        public virtual string? ParentId { get; protected set; }
 
     }
 
@@ -127,6 +134,13 @@ namespace Synapse.Application.Commands.WorkflowInstances
             var workflow = await this.Workflows.FindAsync(command.WorkflowId, cancellationToken);
             if(workflow == null)
                 throw DomainException.NullReference(typeof(V1Workflow), command.WorkflowId);
+            var parent = null as V1WorkflowInstance;
+            if (!string.IsNullOrWhiteSpace(command.ParentId))
+            {
+                parent = await this.WorkflowInstances.FindAsync(command.ParentId, cancellationToken);
+                if(parent == null)
+                    throw DomainException.NullReference(typeof(V1WorkflowInstance), command.ParentId);
+            }
             string? key = null;
             var dataInputSchema = workflow.Definition.DataInputSchema?.Schema;
             if (dataInputSchema == null
@@ -162,7 +176,7 @@ namespace Synapse.Application.Commands.WorkflowInstances
             {
                 key = Guid.NewGuid().ToBase64();
             }
-            var workflowInstance = await this.WorkflowInstances.AddAsync(new(key, workflow, command.ActivationType, command.InputData, command.CorrelationContext), cancellationToken);
+            var workflowInstance = await this.WorkflowInstances.AddAsync(new(key, workflow, command.ActivationType, command.InputData, command.CorrelationContext, parent), cancellationToken);
             await this.WorkflowInstances.SaveChangesAsync(cancellationToken);
             workflow.Instanciate();
             await this.Workflows.UpdateAsync(workflow, cancellationToken);

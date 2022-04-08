@@ -4,9 +4,10 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-	<Company>Neuroglia SRL</Company>
-	<Copyright>Copyright © 2021 Neuroglia SPRL. All rights reserved.</Copyright>
-	<Authors>Neuroglia SRL</Authors>
+    <Company>Neuroglia SRL</Company>
+    <Copyright>Copyright © 2021 Neuroglia SPRL. All rights reserved.</Copyright>
+    <Authors>Neuroglia SRL</Authors>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
@@ -28,7 +29,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.3" />
-    <PackageReference Include="Neuroglia.Serialization.NewtonsoftJson" Version="2.0.1.52" />
+    <PackageReference Include="Neuroglia.Serialization.NewtonsoftJson" Version="2.0.1.57" />
   </ItemGroup>
 
 </Project>
