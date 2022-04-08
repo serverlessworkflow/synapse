@@ -1,6 +1,4 @@
-﻿[TOC]
-
-# Neuroglia.Blazor.Dagre
+﻿# Neuroglia.Blazor.Dagre
 Neuroglia.Blazor.Dagre is a Blazor wrapper and a **customizable** renderer for [dagrejs/dragre][dagrejs/dragre] and, by extension, [dagrejs/graphlib][dagrejs/graphlib]. In other words, it allows graph or diagram data visualisation.
 
 
@@ -49,7 +47,7 @@ await builder.Build().RunAsync();
 
 - *(optional but recommanded)* Add `Neuroglia.Blazor.Dagre` namespaces to your global `_Imports.razor`
 
-```
+```csharp
 // ...
 @using Neuroglia.Blazor.Dagre
 @using Neuroglia.Blazor.Dagre.Models
@@ -59,7 +57,7 @@ await builder.Build().RunAsync();
 
 - Build and display your graph in a razor file
 
-```
+```csharp
 @inject IDagreService Dagre
 <DagreGraph Graph="Graph" />
 @code {
@@ -96,7 +94,7 @@ await builder.Build().RunAsync();
 	}
 }
 ```
-[![Sample minimalist diagram](https://github.com/neuroglia-io/synapse/blob/main/get-started-diagram.png "Sample minimalist diagram")](https://github.com/neuroglia-io/synapse/blob/main/get-started-diagram.png "Sample minimalist diagram")
+[![Sample minimalist diagram](https://github.com/neuroglia-io/synapse/blob/overhaul/Neuroglia.Blazor.Dagre/get-started-diagram.png "Sample minimalist diagram")](https://github.com/neuroglia-io/synapse/blob/overhaul/Neuroglia.Blazor.Dagre/get-started-diagram.png "Sample minimalist diagram")
 
 ## Custom templates
 You can use custom Razor templates if you'd like to render you own `IGraphElement`, aka `INodeViewModel`, `IClusterViewModel` or  `IEdgeViewModel`.
@@ -108,7 +106,7 @@ The renderer will provide two parameters to the component:
 Let's use a custom component for the `Action` node of the `Get Started` sample
 - Create a new Razor Component named `ActionNodeTemplate`
 
-```
+```csharp
 @*
  * instead of defining the CascadingParameter Graph and the Parameter Element, 
  * we could inherit from `NodeTemplate` and use either the `Element` property (IGraphElement) or the `Node` property (INodeViewModel).
@@ -156,10 +154,10 @@ Let's use a custom component for the `Action` node of the `Get Started` sample
 - Register the component type for our node
 
 ```csharp
-        var action1 = new NodeViewModel("Action 1")
-        {
-            ComponentType = typeof(ActionNodeTemplate)
-        };
+var action1 = new NodeViewModel("Action 1")
+{
+    ComponentType = typeof(ActionNodeTemplate)
+};
 ```
 Alternatively, you could create an ActionNodeViewModel that inherits `NodeViewModel` and sets the `ComponentType` in its constructor, or bind the type `ActionNodeViewModel` to it's component via the graph:
 
@@ -167,7 +165,7 @@ Alternatively, you could create an ActionNodeViewModel that inherits `NodeViewMo
 await this.Graph.RegisterComponentTypeAsync(typeof(ActionNodeViewModel), typeof(ActionNodeTemplate));
 ```
 
-[![Custom template](https://github.com/neuroglia-io/synapse/blob/main/custom-template.png "Custom template")](https://github.com/neuroglia-io/synapse/blob/main/custom-template.png "Sample minimalist diagram")
+[![Custom template](https://github.com/neuroglia-io/synapse/blob/overhaul/Neuroglia.Blazor.Dagre/custom-template.png "Custom template")](https://github.com/neuroglia-io/synapse/blob/overhaul/Neuroglia.Blazor.Dagre/custom-template.png "Sample minimalist diagram")
 
 ## Sample app
 
