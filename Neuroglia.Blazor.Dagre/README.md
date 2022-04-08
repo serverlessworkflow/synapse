@@ -197,6 +197,8 @@ There is no sample application per se at the moment but the package is used by t
 - [x] Support `mousedown`, `mousemove`, `mouseup` events
 - [x] Support zoom
 - [x] Support pan
+- [x] Support center
+- [ ] Support zoom to fit
 - [ ] Support nodes and clusters drag around
   - [x] Move nodes
   - [x] Move clusters

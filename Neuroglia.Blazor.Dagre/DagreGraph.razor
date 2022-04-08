@@ -3,56 +3,66 @@
 @inject IJSRuntime JSRuntime
 
 @if (Graph != null) {
-    <CascadingValue Value="Graph">
-        <svg @ref="_graphReference"
-            class="dagre-graph @Graph.CssClass"
-            width="@(Graph.Width?.ToString() ?? "100%")" 
-            height="@(Graph.Height?.ToString() ?? "100%")"
-            @onmousedown="OnMouseDown"
-            @onmouseup="OnMouseUp"
-            @onmousemove="OnMouseMove"
-            @onwheel="OnWheel"
-        >
-            <defs>
-                @foreach(var def in Graph.SvgDefinitionComponents)
-                {
-                    <DynamicComponent @key="def" Type="def" />
-                }
-            </defs>
-            <g 
-                class="graph"
-                transform="scale(@(Graph.Scale.ToInvariantString())) translate(@Graph.X.ToInvariantString(), @Graph.Y.ToInvariantString())"
+    <div class="graph-container">
+        <CascadingValue Value="Graph">
+            <svg @ref="_graphReference"
+                class="graph-canvas @Graph.CssClass"
+                width="@(Graph.Width?.ToString() ?? "100%")" 
+                height="@(Graph.Height?.ToString() ?? "100%")"
+                @onmousedown="OnMouseDown"
+                @onmouseup="OnMouseUp"
+                @onmousemove="OnMouseMove"
+                @onwheel="OnWheel"
             >
-                <g class="clusters">
-                    @foreach(var cluster in Graph.AllClusters.Values)
+                <defs>
+                    @foreach(var def in Graph.SvgDefinitionComponents)
                     {
-                        @if (cluster != null)
-                        {
-                            <InteractiveDynamicComponent @key="cluster" Type="Graph.GetComponentTypeAsync(cluster)" Parameters="GetComponentParameter(cluster)" />
-                        }
+                        <DynamicComponent @key="def" Type="def" />
                     }
-                </g>
-                <g class="edges">
-                    @foreach(var edge in Graph.Edges.Values)
-                    {
-                        @if (edge != null)
+                </defs>
+                <g 
+                    class="graph"
+                    transform="scale(@(Graph.Scale.ToInvariantString())) translate(@Graph.X.ToInvariantString(), @Graph.Y.ToInvariantString())"
+                >
+                    <g class="clusters">
+                        @foreach(var cluster in Graph.AllClusters.Values)
                         {
-                            <DynamicComponent @key="edge" Type="Graph.GetComponentTypeAsync(edge)" Parameters="GetComponentParameter(edge)" />
+                            @if (cluster != null)
+                            {
+                                <InteractiveDynamicComponent @key="cluster" Type="Graph.GetComponentTypeAsync(cluster)" Parameters="GetComponentParameter(cluster)" />
+                            }
                         }
-                    }
-                </g>
-                <g class="nodes">
-                    @foreach(var node in Graph.AllNodes.Values)
-                    {
-                        @if (node != null)
+                    </g>
+                    <g class="edges">
+                        @foreach(var edge in Graph.Edges.Values)
                         {
-                            <InteractiveDynamicComponent @key="node" Type="Graph.GetComponentTypeAsync(node)" Parameters="GetComponentParameter(node)" />
+                            @if (edge != null)
+                            {
+                                <DynamicComponent @key="edge" Type="Graph.GetComponentTypeAsync(edge)" Parameters="GetComponentParameter(edge)" />
+                            }
                         }
-                    }
+                    </g>
+                    <g class="nodes">
+                        @foreach(var node in Graph.AllNodes.Values)
+                        {
+                            @if (node != null)
+                            {
+                                <InteractiveDynamicComponent @key="node" Type="Graph.GetComponentTypeAsync(node)" Parameters="GetComponentParameter(node)" />
+                            }
+                        }
+                    </g>
                 </g>
-            </g>
-        </svg>
-    </CascadingValue>
+            </svg>
+        </CascadingValue>
+        <div class="graph-controls">
+            <button class="btn btn-outline-dark" type="button" @onclick="Center">
+                <span class="oi oi-target"></span>
+            </button>
+            <button class="btn btn-outline-dark" type="button" @onclick="ZoomToFit">
+                <span class="oi oi-resize-both"></span>
+            </button>
+        </div>
+    </div>
 }
 
 @code {
@@ -69,8 +79,9 @@
         if (this.Graph != null)
         {
             await this.DagreService.ComputePositionsAsync(this.Graph, this.Options);
-            Console.WriteLine(await this.DagreService.SerializeAsync(this.Graph.DagreGraph!));
-            Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(this.Graph));
+            await this.Center();
+            //Console.WriteLine(await this.DagreService.SerializeAsync(this.Graph.DagreGraph!));
+            //Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(this.Graph));
         }
     }
 
@@ -78,6 +89,22 @@
     {
         if (firstRender)
             await this.JSRuntime.InvokeVoidAsync("neuroglia.blazor.preventScroll", this._graphReference);
+    }
+
+    protected virtual async Task Center()
+    {
+        if (this.Graph == null) 
+            return;
+        var position = await this.JSRuntime.InvokeAsync<BoundingBox>("neuroglia.blazor.getCenter", this._graphReference);
+        this.Graph.X = position.X / (double)this.Graph.Scale;
+        this.Graph.Y = position.Y / (double)this.Graph.Scale;
+    }
+
+    protected virtual async Task ZoomToFit()
+    {
+        if (this.Graph == null) 
+            return;
+        throw new NotImplementedException();
     }
 
     protected virtual Dictionary<string, object> GetComponentParameter(IGraphElement element)

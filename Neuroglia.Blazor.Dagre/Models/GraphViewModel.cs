@@ -136,6 +136,15 @@ namespace Neuroglia.Blazor.Dagre.Models
             }
         }
 
+        public virtual async Task Center() 
+        { 
+        }
+
+        public virtual async Task ZoomToFit()
+        {
+
+        }
+
         /// <summary>
         /// Adds the provided <see cref="IGraphElement"/> to the graph
         /// </summary>

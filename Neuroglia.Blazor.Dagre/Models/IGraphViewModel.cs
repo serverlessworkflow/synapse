@@ -20,6 +20,10 @@ namespace Neuroglia.Blazor.Dagre.Models
         event Action<IGraphElement?, MouseEventArgs>? MouseUp;
         event Action<IGraphElement?, WheelEventArgs>? Wheel;
 
+        Task Center();
+
+        Task ZoomToFit();
+
         Task RegisterComponentTypeAsync<TElement, TComponent>()
             where TElement : IGraphElement
             where TComponent : ComponentBase;

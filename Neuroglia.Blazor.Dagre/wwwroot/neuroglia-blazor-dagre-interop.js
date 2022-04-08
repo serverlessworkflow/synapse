@@ -19,7 +19,17 @@
     window.neuroglia.blazor.dagre.read = (str) => {
         return dagre.graphlib.json.read(JSON.parse(str));
     };
-    window.neuroglia.blazor.preventScroll = (element) => {
-        element.addEventListener("wheel", e => e.preventDefault(), { passive: false });
+    window.neuroglia.blazor.preventScroll = (graphElement) => {
+        graphElement.addEventListener("wheel", e => e.preventDefault(), { passive: false });
+    }
+    window.neuroglia.blazor.getCenter = (graphElement) => {
+        const svgBbox = graphElement.getBoundingClientRect();
+        const graphBbox = graphElement.getBBox();
+        return {
+            x: (svgBbox.width - graphBbox.width) / 2,
+            y: (svgBbox.height - graphBbox.height) / 2
+        };
+    }
+    window.neuroglia.blazor.getScale = (graphElement) => {
     }
 })();
