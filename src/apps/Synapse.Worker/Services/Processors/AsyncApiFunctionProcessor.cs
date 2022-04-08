@@ -40,6 +40,7 @@ namespace Synapse.Worker.Executor.Services.Processors
         /// <summary>
         /// Initializes a new <see cref="AsyncApiFunctionProcessor"/>
         /// </summary>
+        /// <param name="serviceProvider">The current <see cref="ISerializerProvider"/></param>
         /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
         /// <param name="context">The current <see cref="IWorkflowRuntimeContext"/></param>
         /// <param name="activityProcessorFactory">The service used to create <see cref="IWorkflowActivityProcessor"/>s</param>

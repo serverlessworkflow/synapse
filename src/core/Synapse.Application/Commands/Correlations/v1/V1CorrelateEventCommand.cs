@@ -178,7 +178,7 @@ namespace Synapse.Application.Commands.Correlations
             switch (correlation.Outcome.Type)
             {
                 case V1CorrelationOutcomeType.Start:
-                    await this.Mediator.ExecuteAndUnwrapAsync(new V1CreateWorkflowInstanceCommand(correlation.Outcome.Target, V1WorkflowInstanceActivationType.Trigger, new(), correlationContext, true), cancellationToken);
+                    await this.Mediator.ExecuteAndUnwrapAsync(new V1CreateWorkflowInstanceCommand(correlation.Outcome.Target, V1WorkflowInstanceActivationType.Trigger, new(), correlationContext, true, null), cancellationToken);
                     break;
                 case V1CorrelationOutcomeType.Correlate:
                     await this.Mediator.ExecuteAndUnwrapAsync(new V1CorrelateWorkflowInstanceCommand(correlation.Outcome.Target, correlationContext), cancellationToken);

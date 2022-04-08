@@ -48,7 +48,8 @@ namespace Synapse.Domain.Events.WorkflowInstances
         /// <param name="activationType">The type of the <see cref="V1WorkflowInstance"/>'s activation</param>
         /// <param name="input">The newly created <see cref="V1WorkflowInstance"/>'s input data</param>
         /// <param name="correlationContext">The newly created <see cref="V1WorkflowInstance"/>'s <see cref="V1CorrelationContext"/></param>
-        public V1WorkflowInstanceCreatedDomainEvent(string id, string workflowId, string key, V1WorkflowInstanceActivationType activationType, object? input, Models.V1CorrelationContext correlationContext)
+        /// <param name="parentId">The id of the newly created <see cref="V1WorkflowInstance"/>'s parent, if any</param>
+        public V1WorkflowInstanceCreatedDomainEvent(string id, string workflowId, string key, V1WorkflowInstanceActivationType activationType, object? input, Models.V1CorrelationContext correlationContext, string? parentId)
             : base(id)
         {
             this.Key = key;
@@ -56,6 +57,7 @@ namespace Synapse.Domain.Events.WorkflowInstances
             this.ActivationType = activationType;
             this.Input = input;
             this.CorrelationContext = correlationContext;
+            this.ParentId = parentId;
         }
 
         /// <summary>
@@ -82,6 +84,11 @@ namespace Synapse.Domain.Events.WorkflowInstances
         /// Gets the newly created <see cref="V1WorkflowInstance"/>'s <see cref="V1CorrelationContext"/>
         /// </summary>
         public virtual Models.V1CorrelationContext CorrelationContext { get; protected set; }
+
+        /// <summary>
+        /// Gets the id of the newly created <see cref="V1WorkflowInstance"/>'s parent, if any
+        /// </summary>
+        public virtual string? ParentId { get; protected set; }
 
     }
 

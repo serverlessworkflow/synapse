@@ -48,14 +48,15 @@ namespace Synapse.Domain.Models
         /// <param name="activationType">The <see cref="V1WorkflowInstance"/>'s activation type</param>
         /// <param name="input">The <see cref="V1WorkflowInstance"/>'s input data</param>
         /// <param name="correlationContext">An <see cref="IEnumerable{T}"/> containing the <see cref="CloudEvent"/>s that have triggered the creation of the <see cref="V1WorkflowInstance"/></param>
-        public V1WorkflowInstance(string key, V1Workflow workflow, V1WorkflowInstanceActivationType activationType, object? input = null, V1CorrelationContext? correlationContext = null)
+        /// <param name="parent">The <see cref="V1WorkflowInstance"/>'s parent, if any</param>
+        public V1WorkflowInstance(string key, V1Workflow workflow, V1WorkflowInstanceActivationType activationType, object? input = null, V1CorrelationContext? correlationContext = null, V1WorkflowInstance? parent = null)
             : this()
         {
             if(workflow == null)
                 throw DomainException.ArgumentNull(nameof(workflow));
             if (correlationContext == null)
                 correlationContext = new();
-            this.On(this.RegisterEvent(new V1WorkflowInstanceCreatedDomainEvent(BuildUniqueIdentifier(key, workflow), workflow.Id, key, activationType, input, correlationContext)));
+            this.On(this.RegisterEvent(new V1WorkflowInstanceCreatedDomainEvent(BuildUniqueIdentifier(key, workflow), workflow.Id, key, activationType, input, correlationContext, parent?.Id)));
         }
 
         /// <summary>
@@ -74,6 +75,11 @@ namespace Synapse.Domain.Models
         /// Gets the <see cref="V1WorkflowInstance"/>'s activation type
         /// </summary>
         public virtual V1WorkflowInstanceActivationType ActivationType { get; protected set; }
+
+        /// <summary>
+        /// Gets the id of the <see cref="V1WorkflowInstance"/>'s parent, if any
+        /// </summary>
+        public virtual string? ParentId { get; protected set; }
 
         /// <summary>
         /// Gets the <see cref="V1WorkflowInstance"/>'s input
@@ -319,6 +325,7 @@ namespace Synapse.Domain.Models
             this.Input = e.Input;
             this._TriggerEvents = e.CorrelationContext.PendingEvents.ToList();
             this.CorrelationContext = e.CorrelationContext;
+            this.ParentId = e.ParentId;
         }
 
         /// <summary>
@@ -427,10 +434,9 @@ namespace Synapse.Domain.Models
         /// <param name="e">The <see cref="V1WorkflowInstanceFaultedDomainEvent"/> to handle</param>
         protected virtual void On(V1WorkflowInstanceFaultedDomainEvent e)
         {
-            this.LastModified = e.CreatedAt;
-            this.ExecutedAt = e.CreatedAt;
             this.Status = V1WorkflowInstanceStatus.Faulted;
             this.Error = e.Error;
+            this.On(this.RegisterEvent(new V1WorkflowInstanceExecutedDomainEvent(this.Id, this.Status, this.Error)));
         }
 
         /// <summary>
@@ -449,9 +455,8 @@ namespace Synapse.Domain.Models
         /// <param name="e">The <see cref="V1WorkflowInstanceCancelledDomainEvent"/> to handle</param>
         protected virtual void On(V1WorkflowInstanceCancelledDomainEvent e)
         {
-            this.LastModified = e.CreatedAt;
-            this.ExecutedAt = e.CreatedAt;
             this.Status = V1WorkflowInstanceStatus.Cancelled;
+            this.On(this.RegisterEvent(new V1WorkflowInstanceExecutedDomainEvent(this.Id, this.Status)));
         }
 
         /// <summary>
@@ -460,10 +465,19 @@ namespace Synapse.Domain.Models
         /// <param name="e">The <see cref="V1WorkflowInstanceCompletedDomainEvent"/> to handle</param>
         protected virtual void On(V1WorkflowInstanceCompletedDomainEvent e)
         {
-            this.LastModified = e.CreatedAt;
-            this.ExecutedAt = e.CreatedAt;
             this.Status = V1WorkflowInstanceStatus.Completed;
             this.Output = e.Output;
+            this.On(this.RegisterEvent(new V1WorkflowInstanceExecutedDomainEvent(this.Id, this.Status, this.Output)));
+        }
+
+        /// <summary>
+        /// Handles the specified <see cref="V1WorkflowInstanceExecutedDomainEvent"/>
+        /// </summary>
+        /// <param name="e">The <see cref="V1WorkflowInstanceExecutedDomainEvent"/> to handle</param>
+        protected virtual void On(V1WorkflowInstanceExecutedDomainEvent e)
+        {
+            this.LastModified = e.CreatedAt;
+            this.ExecutedAt = e.CreatedAt;
         }
 
         /// <summary>

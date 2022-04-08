@@ -35,7 +35,6 @@ namespace Synapse.Worker.Executor.Services.Processors
         /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
         /// <param name="context">The current <see cref="IWorkflowRuntimeContext"/></param>
         /// <param name="activityProcessorFactory">The service used to create <see cref="IWorkflowActivityProcessor"/>s</param>
-        /// <param name="oAuth2TokenManager">The service used to manage <see cref="OAuth2Token"/>s</param>
         /// <param name="options">The service used to access the current <see cref="ApplicationOptions"/></param>
         /// <param name="activity">The <see cref="V1WorkflowActivity"/> to process</param>
         /// <param name="action">The <see cref="ActionDefinition"/> to process</param>
@@ -105,6 +104,7 @@ namespace Synapse.Worker.Executor.Services.Processors
             }
         }
 
+        /// <inheritdoc/>
         protected override async Task OnNextAsync(IV1WorkflowActivityIntegrationEvent e, CancellationToken cancellationToken)
         {
             if (e is V1WorkflowActivityCompletedIntegrationEvent completedEvent)

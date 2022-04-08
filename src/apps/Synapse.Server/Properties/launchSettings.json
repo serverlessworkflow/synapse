@@ -29,7 +29,7 @@
     "Docker": {
       "commandName": "Docker",
       "launchBrowser": true,
-      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+      "launchUrl": "{Scheme}://{ServiceHost}:42286",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "SYNAPSE_API_HOSTNAME": "synapse"

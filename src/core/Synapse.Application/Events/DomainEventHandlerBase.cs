@@ -68,7 +68,7 @@ namespace Synapse.Application.Events
             var cloudEvent = new CloudEvent()
             {
                 Id = Guid.NewGuid().ToString(),
-                Source = this.ApplicationOptions.CloudEvents.Source,
+                Source = CloudEvents.Source,
                 Type = CloudEvents.TypeOf(typeof(TEvent), aggregateType),
                 Time = e.CreatedAt,
                 Subject = e.AggregateId.ToString(),

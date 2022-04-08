@@ -126,6 +126,15 @@ namespace Synapse.Apis.Runtime.Grpc
         Task<GrpcApiResult<V1WorkflowActivity>> SkipActivityAsync(string activityId, CallContext context = default);
 
         /// <summary>
+        /// Sets the specified <see cref="V1WorkflowActivity"/>'s metadata
+        /// </summary>
+        /// <param name="command">The object that describes the command to execute</param>
+        /// <param name="context">The current server call context</param>
+        /// <returns>The updated <see cref="V1WorkflowActivity"/></returns>
+        [OperationContract]
+        Task<GrpcApiResult<V1WorkflowActivity>> SetActivityMetadataAsync(V1SetWorkflowActivityMetadataCommand command, CallContext context = default);
+
+        /// <summary>
         /// Faults the specified workflow activity
         /// </summary>
         /// <param name="command">An object that describes the command to execute</param>
@@ -160,6 +169,15 @@ namespace Synapse.Apis.Runtime.Grpc
         /// <returns>The data of the <see cref="StateDefinition"/> the specified <see cref="V1WorkflowActivity"/> belongs to</returns>
         [OperationContract]
         Task<GrpcApiResult<Dynamic>> GetActivityStateDataAsync(string activityId, CallContext context = default);
+
+        /// <summary>
+        /// Starts a subflow
+        /// </summary>
+        /// <param name="command">The object that describes the command to execute</param>
+        /// <param name="context">The current server call context</param>
+        /// <returns>The newly created workflow instance</returns>
+        [OperationContract]
+        Task<GrpcApiResult<V1WorkflowInstance>> StartSubflowAsync(V1CreateWorkflowInstanceCommand command, CallContext context = default);
 
         /// <summary>
         /// Faults the specified workflow instance

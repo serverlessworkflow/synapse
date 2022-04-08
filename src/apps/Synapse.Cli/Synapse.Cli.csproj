@@ -21,6 +21,7 @@
     <FileVersion>$(VersionPrefix).0</FileVersion>
     <AppDesignerFolder>Properties</AppDesignerFolder>
 	<DebugType>embedded</DebugType>
+	<AssemblyName>synctl</AssemblyName>
   </PropertyGroup>
 	
   <ItemGroup>

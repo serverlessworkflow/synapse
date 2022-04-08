@@ -84,6 +84,9 @@
     <Compile Update="Commands\WorkflowActivities\v1\Generated\V1FaultWorkflowActivityCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\WorkflowActivities\v1\V1FaultWorkflowActivityCommand.cs</CustomToolNamespace>
     </Compile>
+    <Compile Update="Commands\WorkflowActivities\v1\Generated\V1SetWorkflowActivityMetadataCommand.cs">
+      <CustomToolNamespace>..\Synapse.Application\Commands\WorkflowActivities\v1\V1SetWorkflowActivityMetadataCommand.cs</CustomToolNamespace>
+    </Compile>
     <Compile Update="Commands\WorkflowActivities\v1\Generated\V1SetWorkflowActivityOutputCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\WorkflowActivities\v1\V1SetWorkflowActivityOutputCommand.cs</CustomToolNamespace>
     </Compile>
@@ -177,6 +180,9 @@
     <Compile Update="Events\WorkflowActivities\v1\Generated\V1WorkflowActivityFaultedIntegrationEvent.cs">
       <CustomToolNamespace>..\Synapse.Domain\Events\WorkflowActivities\v1\V1WorkflowActivityFaultedDomainEvent.cs</CustomToolNamespace>
     </Compile>
+    <Compile Update="Events\WorkflowActivities\v1\Generated\V1WorkflowActivityMetadataChangedIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\WorkflowActivities\v1\V1WorkflowActivityMetadataChangedDomainEvent.cs</CustomToolNamespace>
+    </Compile>
     <Compile Update="Events\WorkflowActivities\v1\Generated\V1WorkflowActivityResumedIntegrationEvent.cs">
       <CustomToolNamespace>..\Synapse.Domain\Events\WorkflowActivities\v1\V1WorkflowActivityResumedDomainEvent.cs</CustomToolNamespace>
     </Compile>
@@ -230,6 +236,9 @@
     </Compile>
     <Compile Update="Events\WorkflowInstances\v1\Generated\V1WorkflowInstanceDeletedIntegrationEvent.cs">
       <CustomToolNamespace>..\Synapse.Domain\Events\WorkflowInstances\v1\V1WorkflowInstanceDeletedDomainEvent.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\WorkflowInstances\v1\Generated\V1WorkflowInstanceExecutedIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\WorkflowInstances\v1\V1WorkflowInstanceExecutedDomainEvent.cs</CustomToolNamespace>
     </Compile>
     <Compile Update="Events\WorkflowInstances\v1\Generated\V1WorkflowInstanceFaultedIntegrationEvent.cs">
       <CustomToolNamespace>..\Synapse.Domain\Events\WorkflowInstances\v1\V1WorkflowInstanceFaultedDomainEvent.cs</CustomToolNamespace>

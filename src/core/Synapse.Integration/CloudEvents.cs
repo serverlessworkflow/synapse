@@ -27,6 +27,11 @@ namespace Synapse
     {
 
         /// <summary>
+        /// Gets the source uri of Synapse <see cref="CloudEvent"/>s
+        /// </summary>
+        public static Uri Source = new("https://synapse.io/runtime/events");
+
+        /// <summary>
         /// Gets the <see cref="CloudEvent"/> type for the specified event CLR type
         /// </summary>
         /// <param name="eventType">The event type to get the <see cref="CloudEvent"/> type of</param>

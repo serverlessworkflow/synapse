@@ -15,7 +15,6 @@
  *
  */
 
-using Newtonsoft.Json;
 using Synapse.Integration.Events.WorkflowActivities;
 using System.Reactive.Linq;
 

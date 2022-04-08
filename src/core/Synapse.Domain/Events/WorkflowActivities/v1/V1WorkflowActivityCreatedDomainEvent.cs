@@ -56,8 +56,6 @@ namespace Synapse.Domain.Events.WorkflowActivities
         /// <summary>
         /// Gets the newly created <see cref="V1WorkflowActivity"/>'s metadata
         /// </summary>
-        [Newtonsoft.Json.JsonExtensionData]
-        [System.Text.Json.Serialization.JsonExtensionData]
         public virtual IDictionary<string, string>? Metadata { get; protected set; }
 
         /// <summary>
@@ -66,7 +64,5 @@ namespace Synapse.Domain.Events.WorkflowActivities
         public virtual string? ParentId { get; protected set; }
 
     }
-
-    
 
 }

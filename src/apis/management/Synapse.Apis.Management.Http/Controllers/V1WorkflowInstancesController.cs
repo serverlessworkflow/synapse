@@ -84,7 +84,6 @@ namespace Synapse.Apis.Management.Http.Controllers
         /// Starts the workflow instance with the specified id
         /// </summary>
         /// <param name="id">The id of the workflow instance to start</param>
-        /// <param name="at">The date and time at which to start the specified workflow instance</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A new <see cref="IActionResult"/></returns>
         [HttpPut("byid/{id}/start")]

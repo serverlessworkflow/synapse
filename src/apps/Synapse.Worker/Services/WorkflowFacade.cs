@@ -16,6 +16,8 @@
  */
 
 using CloudNative.CloudEvents;
+using Microsoft.AspNetCore.JsonPatch;
+using Newtonsoft.Json;
 using Synapse.Apis.Runtime;
 using Synapse.Integration.Events;
 using Synapse.Integration.Events.WorkflowActivities;
@@ -159,6 +161,14 @@ namespace Synapse.Worker.Services
         }
 
         /// <inheritdoc/>
+        public virtual async Task SetActivityMetadataAsync(V1WorkflowActivity activity, CancellationToken cancellationToken = default)
+        {
+            if (activity == null)
+                throw new ArgumentNullException(nameof(activity));
+            await this.SynapseRuntimeApi.SetActivityMetadataAsync(new() { Id = activity.Id, Metadata = activity.Metadata }, cancellationToken);
+        }
+
+        /// <inheritdoc/>
         public virtual async Task FaultActivityAsync(V1WorkflowActivity activity, Exception ex, CancellationToken cancellationToken = default)
         {
             if (activity == null)
@@ -205,6 +215,16 @@ namespace Synapse.Worker.Services
         }
 
         /// <inheritdoc/>
+        public virtual async Task<string> StartSubflowAsync(string workflowId, object? input, CancellationToken cancellationToken = default)
+        {
+            var inputData = input as Dynamic;
+            if (inputData == null && input != null)
+                inputData = Dynamic.FromObject(input);
+            var workflowInstance = await this.SynapseRuntimeApi.StartSubflowAsync(new() { WorkflowId = workflowId, InputData = inputData, ActivationType = V1WorkflowInstanceActivationType.Subflow, ParentId = this.Instance.Id, AutoStart = true }, cancellationToken);
+            return workflowInstance.Id;
+        }
+
+        /// <inheritdoc/>
         public virtual async Task SuspendAsync(CancellationToken cancellationToken = default)
         {
             this.Instance = await this.SynapseRuntimeApi.SuspendAsync(this.Instance.Id, cancellationToken);
@@ -231,10 +251,10 @@ namespace Synapse.Worker.Services
         /// <inheritdoc/>
         public virtual async Task SetOutputAsync(object? output, CancellationToken cancellationToken = default)
         {
-            var outputParam = output as Dynamic;
-            if (outputParam == null && output != null)
-                outputParam = Dynamic.FromObject(output);
-            this.Instance = await this.SynapseRuntimeApi.SetOutputAsync(new() { Id = this.Instance.Id, Output = outputParam }, cancellationToken);
+            var outputData = output as Dynamic;
+            if (outputData == null && output != null)
+                outputData = Dynamic.FromObject(output);
+            this.Instance = await this.SynapseRuntimeApi.SetOutputAsync(new() { Id = this.Instance.Id, Output = outputData }, cancellationToken);
         }
 
         /// <inheritdoc/>

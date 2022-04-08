@@ -22,10 +22,10 @@ namespace Synapse.Application.Events.Domain
 {
 
     /// <summary>
-    /// Represents the service used to handle <see cref="Synapse.Domain.Models.V1WorkflowInstance"/>-related <see cref="IDomainEvent"/>s
+    /// Represents the service used to handle <see cref="V1WorkflowInstance"/>-related <see cref="IDomainEvent"/>s
     /// </summary>
     public class V1WorkflowInstanceDomainEventHandler
-        : DomainEventHandlerBase<Synapse.Domain.Models.V1WorkflowInstance, Integration.Models.V1WorkflowInstance, string>,
+        : DomainEventHandlerBase<V1WorkflowInstance, Integration.Models.V1WorkflowInstance, string>,
         INotificationHandler<V1WorkflowInstanceCreatedDomainEvent>,
         INotificationHandler<V1WorkflowInstanceSchedulingDomainEvent>,
         INotificationHandler<V1WorkflowInstanceScheduledDomainEvent>,
@@ -39,6 +39,7 @@ namespace Synapse.Application.Events.Domain
         INotificationHandler<V1WorkflowInstanceCancellingDomainEvent>,
         INotificationHandler<V1WorkflowInstanceCancelledDomainEvent>,
         INotificationHandler<V1WorkflowInstanceCompletedDomainEvent>,
+        INotificationHandler<V1WorkflowInstanceExecutedDomainEvent>,
         INotificationHandler<V1WorkflowInstanceDeletedDomainEvent>
     {
 
@@ -200,6 +201,12 @@ namespace Synapse.Application.Events.Domain
         }
 
         /// <inheritdoc/>
+        public virtual async Task HandleAsync(V1WorkflowInstanceExecutedDomainEvent e, CancellationToken cancellationToken = default)
+        {
+            await this.PublishIntegrationEventAsync(e, cancellationToken);
+        }
+
+        /// <inheritdoc/>
         public virtual async Task HandleAsync(V1WorkflowInstanceDeletedDomainEvent e, CancellationToken cancellationToken = default)
         {
             var instance = await this.GetOrReconcileProjectionAsync(e.AggregateId, cancellationToken);
@@ -207,7 +214,7 @@ namespace Synapse.Application.Events.Domain
             await this.Projections.SaveChangesAsync(cancellationToken);
             await this.PublishIntegrationEventAsync(e, cancellationToken);
         }
- 
+
     }
 
 }

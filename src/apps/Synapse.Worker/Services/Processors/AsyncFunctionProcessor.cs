@@ -16,7 +16,6 @@
  */
 
 using CloudNative.CloudEvents;
-using Newtonsoft.Json;
 using Synapse.Integration.Events;
 using Synapse.Integration.Events.WorkflowActivities;
 using System.Reactive.Linq;

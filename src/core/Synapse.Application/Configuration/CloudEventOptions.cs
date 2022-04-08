@@ -24,21 +24,6 @@ namespace Synapse.Application.Configuration
     {
 
         /// <summary>
-        /// Initializes a new <see cref="CloudEventOptions"/>
-        /// </summary>
-        public CloudEventOptions()
-        {
-            string? source = EnvironmentVariables.CloudEvents.Source.Value;
-            if (!string.IsNullOrWhiteSpace(source))
-                this.Source = new(source);
-        }
-
-        /// <summary>
-        /// Gets/sets the value of the <see cref="CloudEvent.Source"/> property for all <see cref="CloudEvent"/>s produced by the application
-        /// </summary>
-        public virtual Uri Source { get; set; } = new("https://synapse.io/runtime/events");
-
-        /// <summary>
         /// Gets/sets the options used to configure the broker to post cloud events to
         /// </summary>
         public virtual CloudEventBrokerOptions Broker { get; set; } = new();

@@ -31,6 +31,10 @@
         /// Gets the name of the 'trigger' metadata, used to store the name of the event trigger the activity belongs to
         /// </summary>
         public const string Trigger = "trigger";
+        /// <summary>
+        /// Gets the name of the 'subflow' metadata, used to store the id of the subflow's instance
+        /// </summary>
+        public const string Subflow = "subflow";
 
     }
 

@@ -17,6 +17,7 @@
 using CloudNative.CloudEvents;
 using ConcurrentCollections;
 using Microsoft.Extensions.Hosting;
+using Newtonsoft.Json;
 using Synapse.Apis.Runtime;
 using Synapse.Integration.Events.WorkflowActivities;
 using Synapse.Worker.Executor.Services;
@@ -239,6 +240,9 @@ namespace Synapse.Worker.Services
         {
             if (signal == null)
                 return;
+
+            Console.WriteLine($"Signal of type '{signal.Type}' received: {JsonConvert.SerializeObject(signal.Data)}"); //todo: remove
+
             try
             {
                 switch (signal.Type)
@@ -247,7 +251,9 @@ namespace Synapse.Worker.Services
                         var correlationContext = signal.Data!.ToObject<V1CorrelationContext>();
                         foreach (var e in correlationContext.PendingEvents)
                         {
+                            Console.WriteLine($"SPUBLISHING INTEGRATION EVENT"); //todo: remove
                             this.IntegrationEventBus.InboundStream.OnNext(e.ToCloudEvent());
+                            Console.WriteLine($"INTEGRATION EVENT PUBLISHED"); //todo: remove
                         }
                         break;
                     case V1RuntimeSignalType.Suspend:

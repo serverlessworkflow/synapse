@@ -226,9 +226,9 @@ namespace Synapse.Domain.Models
         }
 
         /// <summary>
-        /// Handles the specified <see cref="V1TriggerCorrelationContextReleasedDomainEvent"/>
+        /// Handles the specified <see cref="V1CorrelationContextReleasedDomainEvent"/>
         /// </summary>
-        /// <param name="e">The <see cref="V1TriggerCorrelationContextReleasedDomainEvent"/> to handle</param>
+        /// <param name="e">The <see cref="V1CorrelationContextReleasedDomainEvent"/> to handle</param>
         protected virtual void On(V1CorrelationContextReleasedDomainEvent e)
         {
             var context = this.Contexts.FirstOrDefault(c => c.Id == e.ContextId);

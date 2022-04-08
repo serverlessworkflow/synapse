@@ -43,24 +43,6 @@ namespace Synapse
             public const string Prefix = EnvironmentVariables.Prefix + "CLOUDEVENTS_";
 
             /// <summary>
-            /// Exposes constants about <see cref="CloudEvent"/> source environment variable
-            /// </summary>
-            public static class Source
-            {
-
-                /// <summary>
-                /// Gets the name of the <see cref="CloudEvent"/> source environment variable
-                /// </summary>
-                public const string Name = Prefix + "SOURCE";
-
-                /// <summary>
-                /// Gets the value of the <see cref="CloudEvent"/> source environment variable
-                /// </summary>
-                public static string Value = Environment.GetEnvironmentVariable(Name);
-
-            }
-
-            /// <summary>
             /// Exposes constants about <see cref="CloudEvent"/> broker related environment variables
             /// </summary>
             public static class Broker

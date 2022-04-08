@@ -16,6 +16,7 @@
  */
 using Neuroglia.Serialization;
 using ServerlessWorkflow.Sdk.Models;
+using Synapse.Integration.Commands.Generic;
 using Synapse.Integration.Commands.WorkflowActivities;
 using Synapse.Integration.Commands.WorkflowInstances;
 using Synapse.Integration.Models;
@@ -150,6 +151,15 @@ namespace Synapse.Apis.Runtime
         Task<V1WorkflowActivity> SkipActivityAsync(string activityId, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Sets the specified <see cref="V1WorkflowActivity"/>'s metadata
+        /// </summary>
+        /// <param name="command">The object that describes the command to execute</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        [OperationContract]
+        Task<V1WorkflowActivity> SetActivityMetadataAsync(V1SetWorkflowActivityMetadataCommand command, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Faults the specified activity
         /// </summary>
         /// <param name="command">The object that describes the command to execute</param>
@@ -184,6 +194,14 @@ namespace Synapse.Apis.Runtime
         /// <returns>The data of the <see cref="StateDefinition"/> the specified <see cref="V1WorkflowActivity"/> belongs to</returns>
         [OperationContract]
         Task<Dynamic> GetActivityStateDataAsync(string activityId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Starts a subflow
+        /// </summary>
+        /// <param name="command">The object that describes the command to execute</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The id of the subflow's newly created workflow instance</returns>
+        Task<V1WorkflowInstance> StartSubflowAsync(V1CreateWorkflowInstanceCommand command, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Marks the <see cref="V1WorkflowInstance"/> as suspended

@@ -91,6 +91,12 @@ namespace Synapse.Worker.Services
             }
         }
 
+        /// <summary>
+        /// Creates a new <see cref="IStateProcessor"/>
+        /// </summary>
+        /// <param name="state">The <see cref="StateDefinition"/> to create a new <see cref="IStateProcessor"/> for</param>
+        /// <param name="activity">The <see cref="V1WorkflowActivity"/> that describe the <see cref="V1WorkflowActivity"/> to process</param>
+        /// <returns>A new <see cref="IStateProcessor"/></returns>
         protected virtual IStateProcessor CreateStateActivityProcessor(StateDefinition state, V1WorkflowActivity activity)
         {
             return state switch
@@ -107,6 +113,12 @@ namespace Synapse.Worker.Services
             };
         }
 
+        /// <summary>
+        /// Creates a new <see cref="IWorkflowActivityProcessor"/> for an <see cref="V1WorkflowActivity"/> of type <see cref="V1WorkflowActivityType.Action"/>
+        /// </summary>
+        /// <param name="state">The <see cref="StateDefinition"/> that defines the action to process</param>
+        /// <param name="activity">The <see cref="V1WorkflowActivity"/> that describe the <see cref="V1WorkflowActivity"/> to process</param>
+        /// <returns>A new <see cref="IWorkflowActivityProcessor"/></returns>
         protected virtual IWorkflowActivityProcessor CreateActionActivityProcessor(StateDefinition state, V1WorkflowActivity activity)
         {
             if(!state.TryGetAction(activity.Metadata, out var action))
@@ -114,12 +126,18 @@ namespace Synapse.Worker.Services
             return action.Type switch
             {
                 ActionType.Function => this.CreateFunctionActivityProcessor(state, activity),
-                ActionType.Subflow => throw new NotImplementedException(),//todo
+                ActionType.Subflow => this.CreateSubflowActivityProcessor(state, activity),
                 ActionType.Trigger => this.CreateAsyncFunctionActivityProcessor(state, activity),
                 _ => throw new NotSupportedException($"The specified {typeof(ActionType).Name} '{action.Type}' is not supported"),
             };
         }
 
+        /// <summary>
+        /// Creates a new <see cref="IWorkflowActivityProcessor"/> for an <see cref="V1WorkflowActivity"/> of type <see cref="V1WorkflowActivityType.Function"/>
+        /// </summary>
+        /// <param name="state">The <see cref="StateDefinition"/> that defines the action to process</param>
+        /// <param name="activity">The <see cref="V1WorkflowActivity"/> that describe the <see cref="V1WorkflowActivity"/> to process</param>
+        /// <returns>A new <see cref="IWorkflowActivityProcessor"/></returns>
         protected virtual IWorkflowActivityProcessor CreateFunctionActivityProcessor(StateDefinition state, V1WorkflowActivity activity)
         {
             if (!state.TryGetAction(activity.Metadata, out var action))
@@ -139,6 +157,12 @@ namespace Synapse.Worker.Services
             };
         }
 
+        /// <summary>
+        /// Creates a new <see cref="IWorkflowActivityProcessor"/> for an <see cref="V1WorkflowActivity"/> of type <see cref="V1WorkflowActivityType.EventTrigger"/>
+        /// </summary>
+        /// <param name="state">The <see cref="StateDefinition"/> that defines the action to process</param>
+        /// <param name="activity">The <see cref="V1WorkflowActivity"/> that describe the <see cref="V1WorkflowActivity"/> to process</param>
+        /// <returns>A new <see cref="IWorkflowActivityProcessor"/></returns>
         protected virtual IWorkflowActivityProcessor CreateAsyncFunctionActivityProcessor(StateDefinition state, V1WorkflowActivity activity)
         {
             if (!state.TryGetAction(activity.Metadata, out var action))
@@ -154,6 +178,28 @@ namespace Synapse.Worker.Services
             return ActivatorUtilities.CreateInstance<AsyncFunctionProcessor>(this.ServiceProvider, state, activity, action, triggerEvent, resultEvent);
         }
 
+        /// <summary>
+        /// Creates a new <see cref="IWorkflowActivityProcessor"/> for an <see cref="V1WorkflowActivity"/> of type <see cref="V1WorkflowActivityType.SubFlow"/>
+        /// </summary>
+        /// <param name="state">The <see cref="StateDefinition"/> that defines the action to process</param>
+        /// <param name="activity">The <see cref="V1WorkflowActivity"/> that describe the <see cref="V1WorkflowActivity"/> to process</param>
+        /// <returns>A new <see cref="IWorkflowActivityProcessor"/></returns>
+        protected virtual IWorkflowActivityProcessor CreateSubflowActivityProcessor(StateDefinition state, V1WorkflowActivity activity)
+        {
+            if (!state.TryGetAction(activity.Metadata, out var action))
+                throw new NullReferenceException($"Failed to find an action that matches the metadata specified by the activity with id '{activity.Id}'");
+            if (action.Type != ActionType.Subflow 
+                || action.Subflow == null)
+                throw new InvalidCastException($"The action with name '{action.Name}' is not of type '{ActionType.Subflow}'");
+            return ActivatorUtilities.CreateInstance<SubflowProcessor>(this.ServiceProvider, state, activity, action);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="IWorkflowActivityProcessor"/> for an <see cref="V1WorkflowActivity"/> of type <see cref="V1WorkflowActivityType.EventTrigger"/>
+        /// </summary>
+        /// <param name="state">The <see cref="StateDefinition"/> that defines the action to process</param>
+        /// <param name="activity">The <see cref="V1WorkflowActivity"/> that describe the <see cref="V1WorkflowActivity"/> to process</param>
+        /// <returns>A new <see cref="IWorkflowActivityProcessor"/></returns>
         protected virtual IWorkflowActivityProcessor CreateEventStateTriggerProcessor(StateDefinition state, V1WorkflowActivity activity)
         {
             if (state is not EventStateDefinition eventState)
@@ -167,6 +213,11 @@ namespace Synapse.Worker.Services
             return ActivatorUtilities.CreateInstance<EventStateTriggerProcessor>(this.ServiceProvider, activity, state, trigger);
         }
 
+        /// <summary>
+        /// Creates a new <see cref="IWorkflowActivityProcessor"/> for an <see cref="V1WorkflowActivity"/> of type <see cref="V1WorkflowActivityType.ProduceEvent"/>
+        /// </summary>
+        /// <param name="activity">The <see cref="V1WorkflowActivity"/> that describe the <see cref="V1WorkflowActivity"/> to process</param>
+        /// <returns>A new <see cref="IWorkflowActivityProcessor"/></returns>
         protected virtual IWorkflowActivityProcessor CreateProduceEventActivityProcessor(V1WorkflowActivity activity)
         {
             if (!activity.Metadata.TryGetValue(V1WorkflowActivityMetadata.Event, out var eventName))
@@ -176,6 +227,11 @@ namespace Synapse.Worker.Services
             return ActivatorUtilities.CreateInstance<ProduceEventProcessor>(this.ServiceProvider, activity, e);
         }
 
+        /// <summary>
+        /// Creates a new <see cref="IWorkflowActivityProcessor"/> for an <see cref="V1WorkflowActivity"/> of type <see cref="V1WorkflowActivityType.ConsumeEvent"/>
+        /// </summary>
+        /// <param name="activity">The <see cref="V1WorkflowActivity"/> that describe the <see cref="V1WorkflowActivity"/> to process</param>
+        /// <returns>A new <see cref="IWorkflowActivityProcessor"/></returns>
         protected virtual IWorkflowActivityProcessor CreateConsumeEventActivityProcessor(V1WorkflowActivity activity)
         {
             if (!activity.Metadata.TryGetValue(V1WorkflowActivityMetadata.Event, out var eventName))

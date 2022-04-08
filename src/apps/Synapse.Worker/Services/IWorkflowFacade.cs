@@ -151,6 +151,14 @@ namespace Synapse.Worker.Services
         Task SkipActivityAsync(V1WorkflowActivity activity, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Updates the specified <see cref="V1WorkflowActivity"/>'s metadata
+        /// </summary>
+        /// <param name="activity">The <see cref="V1WorkflowActivity"/> to update the metadata of</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        Task SetActivityMetadataAsync(V1WorkflowActivity activity, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Cancels the execution of the specified activity
         /// </summary>
         /// <param name="activity">The activity to cancel the execution of</param>
@@ -183,6 +191,15 @@ namespace Synapse.Worker.Services
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>The data of the <see cref="StateDefinition"/> the specified <see cref="V1WorkflowActivity"/> belongs to</returns>
         Task<object> GetActivityStateDataAsync(V1WorkflowActivity activity, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Starts a subflow
+        /// </summary>
+        /// <param name="workflowId">The id of the workflow to start</param>
+        /// <param name="input">The data to input to the workflow to start</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The id of the subflow's newly created workflow instance</returns>
+        Task<string> StartSubflowAsync(string workflowId, object? input, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Marks the <see cref="V1WorkflowInstance"/> as suspended

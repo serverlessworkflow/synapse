@@ -66,6 +66,13 @@ namespace Synapse.Integration.Commands.WorkflowInstances
 		[Description("A boolean indicating whether or not to automatically start the V1WorkflowInstance once it has been created")]
 		public virtual bool AutoStart { get; set; }
 
+		/// <summary>
+		/// The id of the parent V1WorkflowInstance of the V1WorkflowInstance to create
+		/// </summary>
+		[DataMember(Name = "ParentId", Order = 6)]
+		[Description("The id of the parent V1WorkflowInstance of the V1WorkflowInstance to create")]
+		public virtual string ParentId { get; set; }
+
     }
 
 }

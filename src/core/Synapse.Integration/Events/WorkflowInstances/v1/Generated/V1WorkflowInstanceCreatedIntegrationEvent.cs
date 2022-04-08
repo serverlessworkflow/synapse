@@ -80,6 +80,13 @@ namespace Synapse.Integration.Events.WorkflowInstances
 		[Description("The newly created V1WorkflowInstance's V1CorrelationContext")]
 		public virtual V1CorrelationContext CorrelationContext { get; set; }
 
+		/// <summary>
+		/// The id of the newly created V1WorkflowInstance's parent, if any
+		/// </summary>
+		[DataMember(Name = "ParentId", Order = 8)]
+		[Description("The id of the newly created V1WorkflowInstance's parent, if any")]
+		public virtual string ParentId { get; set; }
+
     }
 
 }
