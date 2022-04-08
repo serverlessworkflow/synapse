@@ -23,6 +23,7 @@ using Neuroglia.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using ServerlessWorkflow.Sdk;
+using System.Reactive.Subjects;
 using System.Reflection;
 
 namespace Synapse.Application.Configuration
@@ -138,9 +139,15 @@ namespace Synapse.Application.Configuration
             this.Services.AddServerlessWorkflow();
             this.Services.AddSingleton<CloudEventCorrelator>();
             this.Services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<CloudEventCorrelator>());
-            this.Services.AddIntegrationEventBus(async (provider, e, cancellationToken) =>
+            this.Services.AddIntegrationEventBus((provider, e) =>
             {
-                await provider.GetRequiredService<ICloudEventBus>().PublishAsync(e, cancellationToken);
+                var stream = provider.GetRequiredService<ISubject<CloudEvent>>();
+                stream.OnNext(e);
+                return Task.CompletedTask;
+            });
+            this.Services.AddIntegrationEventBus(async (provider, e) =>
+            {
+                await provider.GetRequiredService<ICloudEventBus>().PublishAsync(e);
             });
             this.Services.AddAuthorization();
             this.Services.AddSingleton<IExpressionEvaluatorProvider, ExpressionEvaluatorProvider>();

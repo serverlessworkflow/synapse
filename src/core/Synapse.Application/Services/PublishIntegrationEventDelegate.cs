@@ -15,20 +15,15 @@
  *
  */
 
-namespace Synapse.Application.Configuration
+namespace Synapse.Application.Services
 {
 
     /// <summary>
-    /// Represents the options used to configure the Synapse application
+    /// Publishes the specified <see cref="CloudEvent"/>
     /// </summary>
-    public class SynapseApplicationOptions
-    {
-
-        /// <summary>
-        /// Gets/sets the options used to configure the application's cloud eventss
-        /// </summary>
-        public virtual CloudEventOptions CloudEvents { get; set; } = new();
-
-    }
+    /// <param name="serviceProvider">The current <see cref="IServiceProvider"/></param>
+    /// <param name="e">The <see cref="CloudEvent"/> to publish</param>
+    /// <returns>A new awaitable <see cref="Task"/></returns>
+    public delegate Task PublishIntegrationEventDelegate(IServiceProvider serviceProvider, CloudEvent e);
 
 }

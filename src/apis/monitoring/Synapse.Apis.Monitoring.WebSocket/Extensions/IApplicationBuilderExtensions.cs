@@ -48,7 +48,7 @@ namespace Synapse.Apis.Monitoring.WebSocket
                         NullValueHandling = NullValueHandling.Ignore
                     };
                 });
-            synapse.Services.AddIntegrationEventBus(async (provider, e, cancellationToken) =>
+            synapse.Services.AddIntegrationEventBus(async (provider, e) =>
             {
                 var mapper = provider.GetRequiredService<IMapper>();
                 var hub = provider.GetRequiredService<IHubContext<SynapseWebSocketMonitoringApi, ISynapseMonitoringApiClient>>();

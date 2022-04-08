@@ -52,7 +52,7 @@ namespace Synapse.Application.Services
             var tasks = new List<Task>();
             foreach (var middleware in this.Options.Middlewares)
             {
-                tasks.Add(middleware.Invoke(this.ServiceProvider, e, cancellationToken));
+                tasks.Add(middleware.Invoke(this.ServiceProvider, e));
             }
             await Task.WhenAll(tasks);
         }
