@@ -31,5 +31,19 @@
         };
     }
     window.neuroglia.blazor.getScale = (graphElement) => {
+        const svgBbox = graphElement.getBoundingClientRect();
+        const graphBbox = graphElement.querySelector('g.graph').getBBox();
+        const wScale = Math.floor(svgBbox.width) / Math.ceil(graphBbox.width);
+        const hScale = Math.floor(svgBbox.height) / Math.ceil(graphBbox.height);
+        if (graphBbox.width / graphBbox.height >= 1) {
+            if (graphBbox.height * wScale < svgBbox.height) {
+                return wScale;
+            }
+            return hScale;
+        }
+        else if (graphBbox.width * hScale < svgBbox.width) {
+            return hScale;
+        }
+        return wScale;
     }
 })();

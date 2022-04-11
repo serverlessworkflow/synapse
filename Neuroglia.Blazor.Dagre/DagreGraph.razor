@@ -104,7 +104,9 @@
     {
         if (this.Graph == null) 
             return;
-        throw new NotImplementedException();
+        this.Graph.Scale = await this.JSRuntime.InvokeAsync<decimal>("neuroglia.blazor.getScale", this._graphReference);
+        this.StateHasChanged();
+        await this.Center();
     }
 
     protected virtual Dictionary<string, object> GetComponentParameter(IGraphElement element)
