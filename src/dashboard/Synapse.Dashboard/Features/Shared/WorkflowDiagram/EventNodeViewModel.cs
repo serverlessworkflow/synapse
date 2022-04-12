@@ -7,7 +7,7 @@ namespace Synapse.Dashboard
     /// Represents an <see cref="EventDefinition"/> reference <see cref="NodeViewModel"/>
     /// </summary>
     public class EventNodeViewModel
-        : WorkflowNodeViewModel
+        : LabeledNodeViewModel
     {
 
         /// <summary>

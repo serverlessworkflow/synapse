@@ -16,6 +16,10 @@
             </foreignObject>
         </g>
     }
+    @foreach(var point in Edge.Points)
+    {
+        <circle cx="@point.X" cy="@point.Y" r="1" fill="red"></circle>
+    }
 </g>
 
 @code {
@@ -42,7 +46,7 @@
         switch(edge.Shape)
         {
             case EdgeShape.BSpline:
-            //return PathBuilder.GetBSplinePath(edge.Points);                
+                //return PathBuilder.GetBSplinePath(edge.Points);                
             default:
                 return PathBuilder.GetLinearPath(edge.Points);
         }

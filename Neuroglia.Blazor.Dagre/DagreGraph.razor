@@ -79,7 +79,8 @@
         if (this.Graph != null)
         {
             await this.DagreService.ComputePositionsAsync(this.Graph, this.Options);
-            await this.Center();
+            this.StateHasChanged();
+            await this.ZoomToFit();
             //Console.WriteLine(await this.DagreService.SerializeAsync(this.Graph.DagreGraph!));
             //Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(this.Graph));
         }
