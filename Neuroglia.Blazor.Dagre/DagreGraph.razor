@@ -78,6 +78,7 @@
     {
         if (this.Graph != null)
         {
+            this.Graph.ShowConstruction = true;
             await this.DagreService.ComputePositionsAsync(this.Graph, this.Options);
             this.StateHasChanged();
             await this.ZoomToFit();

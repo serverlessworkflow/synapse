@@ -198,7 +198,7 @@ There is no sample application per se at the moment but the package is used by t
 - [x] Support zoom
 - [x] Support pan
 - [x] Support center
-- [ ] Support zoom to fit
+- [x] Support zoom to fit
 - [ ] Support nodes and clusters drag around
   - [x] Move nodes
   - [x] Move clusters
@@ -207,7 +207,7 @@ There is no sample application per se at the moment but the package is used by t
 - [ ] ? Add/support more events ?
 - [ ] Write proper comments
 - [ ] Write proper documentation
-- [ ] Test
+- [ ] Write tests
 
 ## Contributing
 

@@ -7,6 +7,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         : IIdentifiable, ILabeled, IDimension, IPosition, ICssClass, IMetadata
     {
         decimal Scale { get; set; }
+        bool ShowConstruction { get; set; }
         IReadOnlyDictionary<Guid, INodeViewModel> Nodes { get; }
         IReadOnlyDictionary<Guid, INodeViewModel> AllNodes { get; }
         IReadOnlyDictionary<Guid, IEdgeViewModel> Edges { get; }
@@ -19,10 +20,6 @@ namespace Neuroglia.Blazor.Dagre.Models
         event Action<IGraphElement?, MouseEventArgs>? MouseDown;
         event Action<IGraphElement?, MouseEventArgs>? MouseUp;
         event Action<IGraphElement?, WheelEventArgs>? Wheel;
-
-        Task Center();
-
-        Task ZoomToFit();
 
         Task RegisterComponentTypeAsync<TElement, TComponent>()
             where TElement : IGraphElement

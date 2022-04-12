@@ -63,6 +63,8 @@ namespace Neuroglia.Blazor.Dagre.Models
         protected readonly Collection<Type> _svgDefinitionComponents;
         public virtual IReadOnlyCollection<Type> SvgDefinitionComponents => this._svgDefinitionComponents;
 
+        public virtual bool ShowConstruction { get; set; }
+
         /// <summary>
         /// The map of node type and their component type
         /// </summary>
@@ -93,7 +95,8 @@ namespace Neuroglia.Blazor.Dagre.Models
             double? width = null,
             double? height = null,
             string? label = null,
-            Type? componentType = null
+            Type? componentType = null,
+            bool showConstruction = false
         )
             : base(label, cssClass, componentType)
         {
@@ -112,6 +115,7 @@ namespace Neuroglia.Blazor.Dagre.Models
             this._allNodes = new Dictionary<Guid, INodeViewModel>();
             this._allClusters = new Dictionary<Guid, IClusterViewModel>();
             this._behaviors = new Dictionary<Type, GraphBehavior>();
+            this.ShowConstruction = showConstruction;
             //this.RegisterBehavior(new DebugEventsBehavior(this));
             this.RegisterBehavior(new ZoomBahavior(this));
             this.RegisterBehavior(new PanBahavior(this));
@@ -136,14 +140,6 @@ namespace Neuroglia.Blazor.Dagre.Models
             }
         }
 
-        public virtual async Task Center() 
-        { 
-        }
-
-        public virtual async Task ZoomToFit()
-        {
-
-        }
 
         /// <summary>
         /// Adds the provided <see cref="IGraphElement"/> to the graph
