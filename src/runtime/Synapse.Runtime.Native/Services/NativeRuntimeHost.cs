@@ -15,6 +15,7 @@
  *
  */
 
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Synapse.Application.Services;
@@ -39,14 +40,21 @@ namespace Synapse.Runtime.Services
         /// Initializes a new <see cref="NativeRuntimeHost"/>
         /// </summary>
         /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
+        /// <param name="environment">The current <see cref="IHostEnvironment"/></param>
         /// <param name="httpClientFactory">The service used to create <see cref="System.Net.Http.HttpClient"/>s</param>
         /// <param name="options">The service used to access the current <see cref="NativeRuntimeOptions"/></param>
-        public NativeRuntimeHost(ILoggerFactory loggerFactory, IHttpClientFactory httpClientFactory, IOptions<NativeRuntimeOptions> options)
+        public NativeRuntimeHost(ILoggerFactory loggerFactory, IHostEnvironment environment, IHttpClientFactory httpClientFactory, IOptions<NativeRuntimeOptions> options)
             : base(loggerFactory)
         {
+            this.Environment = environment;
             this.HttpClient = httpClientFactory.CreateClient();
             this.Options = options.Value;
         }
+
+        /// <summary>
+        /// Gets the current <see cref="IHostEnvironment"/>
+        /// </summary>
+        protected IHostEnvironment Environment { get; }
 
         /// <summary>
         /// Gets the <see cref="System.Net.Http.HttpClient"/> used to perform HTTP requests
@@ -80,7 +88,7 @@ namespace Synapse.Runtime.Services
             var workerDirectory = new DirectoryInfo(this.Options.WorkingDirectory);
             if (!workerDirectory.Exists)
                 workerDirectory.Create();
-            if (File.Exists(Path.Combine(workerDirectory.FullName, this.Options.WorkerFileName)))
+            if (File.Exists(this.Options.GetWorkerFileName()))
             {
                 this.Logger.LogInformation("Worker app already present locally. Skipping download."); //todo: config based: the user might want to get latest every time
                 return;
@@ -107,18 +115,10 @@ namespace Synapse.Runtime.Services
             if (workflowInstance == null)
                 throw new ArgumentNullException(nameof(workflowInstance));
             var workerFileName = Path.Combine(this.Options.WorkerFileName);
-            var fileName = null as string;
+            var fileName = this.Options.GetWorkerFileName();
             var args = null as string;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                fileName = "cmd.exe";
-                args = @$"/c {this.Options.WorkerFileName}";
-            }
-            else
-            {
-                fileName = "bash";
-                args = @$"-c {this.Options.WorkerFileName}";
-            }
+            if (this.Environment.IsDevelopment())
+                args += "--debug";
             var startInfo = new ProcessStartInfo()
             {
                 FileName = fileName,

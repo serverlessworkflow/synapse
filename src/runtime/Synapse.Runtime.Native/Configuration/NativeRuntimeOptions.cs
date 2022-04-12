@@ -15,6 +15,8 @@
  *
  */
 
+using System.Runtime.InteropServices;
+
 namespace Synapse.Runtime.Docker.Configuration
 {
 
@@ -38,6 +40,19 @@ namespace Synapse.Runtime.Docker.Configuration
         /// Gets/sets the directory in which to run the worker process
         /// </summary>
         public virtual string WorkingDirectory { get; set; } = Path.Combine(AppContext.BaseDirectory, "bin", "worker");
+
+        /// <summary>
+        /// Gets the full name of the worker file to run
+        /// </summary>
+        /// <returns>The full name of the worker file to run</returns>
+        public virtual string GetWorkerFileName()
+        {
+            var directory = this.WorkingDirectory;
+            var fileName = this.WorkerFileName;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                fileName += ".exe";
+            return Path.Combine(directory, fileName);
+        }
 
     }
 

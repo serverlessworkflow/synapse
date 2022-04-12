@@ -25,7 +25,12 @@ using Neuroglia.Data.Expressions.JQ;
 using Synapse.Apis.Management.Grpc;
 using Synapse.Apis.Runtime.Grpc;
 using Synapse.Worker.Executor.Services;
+using System.Diagnostics;
 
+if (args.Any() 
+    && args.Contains("--debug") 
+    && !Debugger.IsAttached)
+    Debugger.Launch();
 AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 using var host = Host.CreateDefaultBuilder(args)
     .ConfigureAppConfiguration(config =>
