@@ -20,6 +20,7 @@ using System.Reactive.Linq;
 
 namespace Synapse.Worker.Executor.Services.Processors
 {
+
     /// <summary>
     /// Represents a <see cref="IWorkflowActivityProcessor"/> used to process <see cref="EventStateTriggerDefinition"/>s
     /// </summary>
@@ -108,7 +109,9 @@ namespace Synapse.Worker.Executor.Services.Processors
             }
             foreach (V1WorkflowActivity childActivity in await this.Context.Workflow.GetOperativeActivitiesAsync(this.Activity, cancellationToken))
             {
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                 this.CreateProcessorFor(childActivity);
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             }
         }
 
@@ -121,6 +124,7 @@ namespace Synapse.Worker.Executor.Services.Processors
             }
         }
 
+        private bool _Triggered;
         /// <summary>
         /// Handles the next <see cref="ConsumeEventProcessor"/>'s <see cref="V1WorkflowActivityCompletedIntegrationEvent"/>
         /// </summary>
@@ -130,60 +134,63 @@ namespace Synapse.Worker.Executor.Services.Processors
         /// <returns>A new awaitable <see cref="Task"/></returns>
         protected virtual async Task OnEventResultAsync(ConsumeEventProcessor processor, V1WorkflowActivityCompletedIntegrationEvent e, CancellationToken cancellationToken)
         {
-            var consumeEventActivities = (await this.Context.Workflow.GetActivitiesAsync(this.Activity, cancellationToken))
-                .Where(a => a.Type == V1WorkflowActivityType.ConsumeEvent)
-                .ToList();
-            if (this.State.Exclusive)
+            using (var asyncLock = await this.Lock.LockAsync(cancellationToken))
             {
-                foreach (IWorkflowActivityProcessor childProcessor in this.Processors
-                    .Where(p => p.Activity.Type == V1WorkflowActivityType.ConsumeEvent)
-                    .ToList())
+                var consumeEventActivities = (await this.Context.Workflow.GetActivitiesAsync(this.Activity, cancellationToken))
+                    .Where(a => a.Type == V1WorkflowActivityType.ConsumeEvent)
+                    .ToList();
+                if (this.State.Exclusive)
                 {
-                    if (childProcessor == processor)
-                        continue;
-                    await childProcessor.TerminateAsync(cancellationToken);
-                    this.Processors.TryRemove(childProcessor);
-                    childProcessor.Dispose();
+                    foreach (IWorkflowActivityProcessor childProcessor in this.Processors
+                        .Where(p => p.Activity.Type == V1WorkflowActivityType.ConsumeEvent)
+                        .ToList())
+                    {
+                        if (childProcessor == processor)
+                            continue;
+                        await childProcessor.TerminateAsync(cancellationToken);
+                        this.Processors.TryRemove(childProcessor);
+                        childProcessor.Dispose();
+                    }
                 }
-            }
-            if (this.State.Exclusive
-                || consumeEventActivities.All(p => p.Status == V1WorkflowActivityStatus.Completed))
-            {
-                var input = this.Activity.Input.ToObject();
-                foreach (var consumeEventActivity in consumeEventActivities
-                    .Where(p => p.Status == V1WorkflowActivityStatus.Completed && p.Output != null))
+                if (this.State.Exclusive
+                    || (consumeEventActivities.All(p => p.Status == V1WorkflowActivityStatus.Completed) && consumeEventActivities.Count == this.Trigger.Events.Count && !this._Triggered))
                 {
-                    input = input.Merge(consumeEventActivity.Output.ToObject());
+                    this._Triggered = true;
+                    var input = this.Activity.Input.ToObject();
+                    foreach (var consumeEventActivity in consumeEventActivities
+                        .Where(p => p.Status == V1WorkflowActivityStatus.Completed && p.Output != null))
+                    {
+                        input = input.Merge(consumeEventActivity.Output.ToObject());
+                    }
+                    var metadata = new Dictionary<string, string>()
+                    {
+                        { V1WorkflowActivityMetadata.State, this.State.Name! },
+                        { V1WorkflowActivityMetadata.Trigger, this.State.Triggers.IndexOf(this.Trigger).ToString() }
+                    };
+                    switch (this.Trigger.ActionMode)
+                    {
+                        case ActionExecutionMode.Parallel:
+                            foreach (ActionDefinition triggerAction in this.Trigger.Actions)
+                            {
+                                metadata[V1WorkflowActivityMetadata.Action] = triggerAction.Name!;
+                                await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Action, await this.Context.FilterInputAsync(triggerAction, input!), metadata, this.Activity, cancellationToken);
+                            }
+                            break;
+                        case ActionExecutionMode.Sequential:
+                            var action = this.Trigger.Actions.First();
+                            metadata[V1WorkflowActivityMetadata.Action] = action.Name!;
+                            await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Action, await this.Context.FilterInputAsync(action, input!), metadata, this.Activity, cancellationToken);
+                            break;
+                        default:
+                            throw new NotSupportedException($"The specified {nameof(ActionExecutionMode)} '{this.Trigger.ActionMode}' is not supported");
+                    }
+                    foreach (V1WorkflowActivity activity in await this.Context.Workflow.GetOperativeActivitiesAsync(this.Activity, cancellationToken))
+                    {
+                        var childProcessor = this.CreateProcessorFor(activity);
+                        await childProcessor.ProcessAsync(cancellationToken);
+                    }
                 }
-                var metadata = new Dictionary<string, string>()
-                {
-                    { V1WorkflowActivityMetadata.State, this.State.Name! },
-                    { V1WorkflowActivityMetadata.Trigger, this.State.Triggers.IndexOf(this.Trigger).ToString() }
-                };
-                switch (this.Trigger.ActionMode)
-                {
-                    case ActionExecutionMode.Parallel:
-                        foreach (ActionDefinition triggerAction in this.Trigger.Actions)
-                        {
-                            metadata[V1WorkflowActivityMetadata.Action] = triggerAction.Name!;
-                            await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Action, await this.Context.FilterInputAsync(triggerAction, input!), metadata, this.Activity, cancellationToken);
-                        }
-                        break;
-                    case ActionExecutionMode.Sequential:
-                        var action = this.Trigger.Actions.First();
-                        metadata[V1WorkflowActivityMetadata.Action] = action.Name!;
-                        await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Action, await this.Context.FilterInputAsync(action, input!), metadata, this.Activity, cancellationToken);
-                        break;
-                    default:
-                        throw new NotSupportedException($"The specified {nameof(ActionExecutionMode)} '{this.Trigger.ActionMode}' is not supported");
-                }
-                foreach (V1WorkflowActivity activity in await this.Context.Workflow.GetOperativeActivitiesAsync(this.Activity, cancellationToken))
-                {
-#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-                    this.CreateProcessorFor(activity);
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-                }
-            }
+            }   
         }
 
         /// <summary>
@@ -194,11 +201,10 @@ namespace Synapse.Worker.Executor.Services.Processors
         /// <returns>A new awaitable <see cref="Task"/></returns>
         protected virtual async Task OnEventCompletedAsync(ConsumeEventProcessor processor, CancellationToken cancellationToken)
         {
-            this.Processors.TryRemove(processor);
-            processor.Dispose();
-            foreach (IWorkflowActivityProcessor childProcessor in this.Processors.ToList())
+            using (var asyncLock = await this.Lock.LockAsync(cancellationToken))
             {
-                await childProcessor.ProcessAsync(cancellationToken);
+                this.Processors.TryRemove(processor);
+                processor.Dispose();
             }
         }
 
@@ -211,65 +217,67 @@ namespace Synapse.Worker.Executor.Services.Processors
         /// <returns>A new awaitable <see cref="Task"/></returns>
         protected virtual async Task OnActionResultAsync(ActionProcessor processor, V1WorkflowActivityCompletedIntegrationEvent e, CancellationToken cancellationToken)
         {
-            if (this.Trigger.ActionMode == ActionExecutionMode.Sequential)
+            using (var asyncLock = await this.Lock.LockAsync(cancellationToken))
             {
-                if (this.Trigger.TryGetNextAction(processor.Action.Name!, out ActionDefinition action))
+                if (this.Trigger.ActionMode == ActionExecutionMode.Sequential)
                 {
-                    var metadata = new Dictionary<string, string>()
+                    if (this.Trigger.TryGetNextAction(processor.Action.Name!, out ActionDefinition action))
+                    {
+                        var metadata = new Dictionary<string, string>()
                     {
                         { V1WorkflowActivityMetadata.State, this.State.Name! },
                         { V1WorkflowActivityMetadata.Trigger, this.State.Triggers.IndexOf(this.Trigger).ToString() },
                         { V1WorkflowActivityMetadata.Action, action.Name! }
                     };
-                    var activity = await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Action, this.Context.FilterInputAsync(action, e.Output), metadata, this.Activity, cancellationToken);
-#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-                    this.CreateProcessorFor(activity);
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                        var activity = await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Action, await this.Context.FilterInputAsync(action, e.Output), metadata, this.Activity, cancellationToken);
+                        var subProcessor = this.CreateProcessorFor(activity);
+                        await subProcessor.ProcessAsync(cancellationToken);
+                    }
+                    else
+                    {
+                        await this.OnNextAsync(e, cancellationToken);
+                    }
                 }
                 else
                 {
-                    await this.OnNextAsync(e, cancellationToken);
-                }
-            }
-            else
-            {
-                var childActivities = (await this.Context.Workflow.GetOperativeActivitiesAsync(this.Activity, cancellationToken))
-                    .Where(p => p.Type == V1WorkflowActivityType.Action
-                        && p.Status == V1WorkflowActivityStatus.Completed
-                        && p.Output != null)
-                    .ToList();
-                if (childActivities.Count == this.Trigger.Actions.Count)
-                {
-                    var output = new object();
-                    foreach (var activity in childActivities
-                        .Where(p => p.Status == V1WorkflowActivityStatus.Completed && p.Output != null))
+                    var childActivities = (await this.Context.Workflow.GetOperativeActivitiesAsync(this.Activity, cancellationToken))
+                        .Where(p => p.Type == V1WorkflowActivityType.Action
+                            && p.Status == V1WorkflowActivityStatus.Completed
+                            && p.Output != null)
+                        .ToList();
+                    if (childActivities.Count == this.Trigger.Actions.Count)
                     {
-                        if (!activity.Metadata.TryGetValue(V1WorkflowActivityMetadata.Trigger, out var rawTriggerId))
-                            throw new ArgumentException($"The specified activity '{activity.Id}' is missing the required metadata field '{V1WorkflowActivityMetadata.Trigger}'");
-                        if(!int.TryParse(rawTriggerId, out var triggerId))
-                            throw new ArgumentException($"The '{V1WorkflowActivityMetadata.Trigger}' metadata field of activity '{activity.Id}' is not a valid integer");
-                        if(!this.State.TryGetTrigger(triggerId, out var trigger))
-                            throw new NullReferenceException($"Failed to find a trigger ath the specified index '{triggerId}' in the event state with name '{this.State.Name}'");
-                        if (!trigger.TryGetAction(rawTriggerId, out var action))
-                            throw new NullReferenceException($"Failed to find an action with name '{rawTriggerId}' in the event trigger with at index '{triggerId}', inside state with name '{this.State.Name}'");
-                        if (action.UseResults())
+                        var output = new object();
+                        foreach (var activity in childActivities
+                            .Where(p => p.Status == V1WorkflowActivityStatus.Completed && p.Output != null))
                         {
-                            var expression = action.ActionDataFilter?.ToStateData?.Trim();
-                            var json = await this.JsonSerializer.SerializeAsync(activity.Output, cancellationToken);
-                            if (string.IsNullOrWhiteSpace(expression))
+                            if (!activity.Metadata.TryGetValue(V1WorkflowActivityMetadata.Trigger, out var rawTriggerId))
+                                throw new ArgumentException($"The specified activity '{activity.Id}' is missing the required metadata field '{V1WorkflowActivityMetadata.Trigger}'");
+                            if (!int.TryParse(rawTriggerId, out var triggerId))
+                                throw new ArgumentException($"The '{V1WorkflowActivityMetadata.Trigger}' metadata field of activity '{activity.Id}' is not a valid integer");
+                            if (!this.State.TryGetTrigger(triggerId, out var trigger))
+                                throw new NullReferenceException($"Failed to find a trigger ath the specified index '{triggerId}' in the event state with name '{this.State.Name}'");
+                            if (!trigger.TryGetAction(rawTriggerId, out var action))
+                                throw new NullReferenceException($"Failed to find an action with name '{rawTriggerId}' in the event trigger with at index '{triggerId}', inside state with name '{this.State.Name}'");
+                            if (action.UseResults())
                             {
-                                expression = json;
+                                var expression = action.ActionDataFilter?.ToStateData?.Trim();
+                                var json = await this.JsonSerializer.SerializeAsync(activity.Output, cancellationToken);
+                                if (string.IsNullOrWhiteSpace(expression))
+                                {
+                                    expression = json;
+                                }
+                                else
+                                {
+                                    if (expression.StartsWith("${"))
+                                        expression = expression[2..^1];
+                                    expression = $"{expression} = {json}";
+                                }
+                                output = await this.Context.EvaluateAsync(expression, output, cancellationToken);
                             }
-                            else
-                            {
-                                if (expression.StartsWith("${"))
-                                    expression = expression[2..^1];
-                                expression = $"{expression} = {json}";
-                            }
-                            output = await this.Context.EvaluateAsync(expression, output, cancellationToken);
                         }
+                        await this.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, output), cancellationToken);
                     }
-                    await this.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, output), cancellationToken);
                 }
             }
         }
@@ -282,21 +290,18 @@ namespace Synapse.Worker.Executor.Services.Processors
         /// <returns>A new awaitable <see cref="Task"/></returns>
         protected virtual async Task OnActionCompletedAsync(ActionProcessor processor, CancellationToken cancellationToken)
         {
-            this.Processors.TryRemove(processor);
-            processor.Dispose();
-            IEnumerable<V1WorkflowActivity> childActivities = await this.Context.Workflow.GetOperativeActivitiesAsync(this.Activity, cancellationToken);
-            if (childActivities
-                .Where(a => a.Type != V1WorkflowActivityType.End && a.Type != V1WorkflowActivityType.Transition)
-                .All(p => p.Status == V1WorkflowActivityStatus.Completed))
+            using (var asyncLock = await this.Lock.LockAsync(cancellationToken))
             {
-                await base.OnCompletedAsync(cancellationToken);
-                return;
-            }
-            foreach (V1WorkflowActivity activity in childActivities
-                .Where(p => p.Type == V1WorkflowActivityType.Action && p.Status == V1WorkflowActivityStatus.Pending))
-            {
-                var nextProcessor = this.CreateProcessorFor(activity);
-                await nextProcessor.ProcessAsync(cancellationToken);
+                this.Processors.TryRemove(processor);
+                processor.Dispose();
+                IEnumerable<V1WorkflowActivity> childActivities = await this.Context.Workflow.GetOperativeActivitiesAsync(this.Activity, cancellationToken);
+                if (childActivities
+                    .Where(a => a.Type != V1WorkflowActivityType.End && a.Type != V1WorkflowActivityType.Transition)
+                    .All(p => p.Status == V1WorkflowActivityStatus.Completed))
+                {
+                    await base.OnCompletedAsync(cancellationToken);
+                    return;
+                }
             }
         }
 

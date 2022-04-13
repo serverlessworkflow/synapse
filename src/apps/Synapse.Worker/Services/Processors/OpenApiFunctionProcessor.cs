@@ -124,15 +124,15 @@ namespace Synapse.Worker.Executor.Services.Processors
         /// <inheritdoc/>
         protected override async Task InitializeAsync(CancellationToken cancellationToken)
         {
-            await base.InitializeAsync(cancellationToken);
-            await this.HttpClient.ConfigureAuthorizationAsync(this.ServiceProvider, this.Authentication, cancellationToken);
-            var operationComponents = this.Function.Operation.Split('#');
-            if (operationComponents.Length != 2)
-                throw new FormatException($"The 'operation' property of the Open API function with name '{this.Function.Name}' has an invalid value '{this.Function.Operation}'. Open API functions expect a value in the following format: <url_to_openapi_endpoint>#<operation_id>");
-            var openApiUri = new Uri(operationComponents.First());
-            var operationId = operationComponents.Last();
             try
             {
+                await base.InitializeAsync(cancellationToken);
+                await this.HttpClient.ConfigureAuthorizationAsync(this.ServiceProvider, this.Authentication, cancellationToken);
+                var operationComponents = this.Function.Operation.Split('#');
+                if (operationComponents.Length != 2)
+                    throw new FormatException($"The 'operation' property of the Open API function with name '{this.Function.Name}' has an invalid value '{this.Function.Operation}'. Open API functions expect a value in the following format: <url_to_openapi_endpoint>#<operation_id>");
+                var openApiUri = new Uri(operationComponents.First());
+                var operationId = operationComponents.Last();
                 using (HttpRequestMessage request = new(HttpMethod.Get, openApiUri))
                 {
                     using HttpResponseMessage response = await this.HttpClient.SendAsync(request, cancellationToken);
@@ -156,7 +156,7 @@ namespace Synapse.Worker.Executor.Services.Processors
                 if (!this.Servers.Any())
                     this.Servers.Add(openApiUri.ToString().Replace(openApiUri.PathAndQuery, string.Empty));
                 KeyValuePair<string, OpenApiPathItem> path = this.Document.Paths
-                    .Single(p => p.Value.Operations.Contains(operation));
+                    .Single(p => p.Value.Operations.Any(o => o.Value.OperationId == operation.Value.OperationId));
                 this.Path = path.Key;
                 await this.BuildParametersAsync(cancellationToken);
                 foreach (OpenApiParameter param in this.Operation.Parameters
@@ -231,14 +231,15 @@ namespace Synapse.Worker.Executor.Services.Processors
                 this.Parameters = new Dictionary<string, object>();
             if (this.FunctionReference.Arguments == null)
                 return;
-            string json = JsonConvert.SerializeObject(this.FunctionReference.Arguments);
-            foreach (Match match in Regex.Matches(json, @"""\$\{.+?\}"""))
+            var jsonInput = JsonConvert.SerializeObject(this.Activity.Input!.ToObject()!);
+            var jsonArgs = JsonConvert.SerializeObject(this.FunctionReference.Arguments);
+            foreach (Match match in Regex.Matches(jsonArgs, @"""\$\{.+?\}"""))
             {
                 var expression = match.Value[3..^2].Trim();
                 var evaluationResult = await this.Context.EvaluateAsync(expression, this.Activity.Input!.ToObject()!, cancellationToken);
                 if(evaluationResult == null)
                 {
-                    Console.WriteLine($"Evaluation result of expression {expression} on data {JsonConvert.SerializeObject(this.Activity.Input)} is NULL"); //todo: replace with better message
+                    this.Logger.LogWarning("Failed to evaluate the result of parameter expression '{expression}' on input data '{input}'", expression, jsonInput);
                     continue;
                 }
                 var valueToken = JToken.FromObject(evaluationResult);
@@ -253,9 +254,9 @@ namespace Synapse.Worker.Executor.Services.Processors
                 }
                 if (string.IsNullOrEmpty(value))
                     value = "null";
-                json = json.Replace(match.Value, value);
+                jsonArgs = jsonArgs.Replace(match.Value, value);
             }
-            this.Parameters = JsonConvert.DeserializeObject<ExpandoObject>(json)!;
+            this.Parameters = JsonConvert.DeserializeObject<ExpandoObject>(jsonArgs)!;
         }
 
         protected virtual async Task<(bool HasMatch, string Value)> TryGetParameterAsync(string expression, CancellationToken cancellationToken)
