@@ -29,9 +29,6 @@
     overflow: hidden;
 }
 
-rect {
-    &.selected {
-        stroke: #154d04;
-        fill: #e2f5dc;
-    }
+#end-arrow {
+    fill: #333;
 }

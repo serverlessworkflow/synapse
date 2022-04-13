@@ -7,7 +7,7 @@
 @inject IWorkflowReader WorkflowReader
 @inject IWorkflowValidator WorkflowValidator
 
-<div class="h-100 mh-100 flex-grow d-flex flex-column justify-content-between align-items-start">
+
     <label class="form-form-label">Definition</label>
     <div class="flex-grow d-flex flex-row w-100 h-100">
         <div class="w-75 h-100 mh-100">
@@ -35,14 +35,14 @@
         </div>
     </div>
     <button disabled="@IsCreateDisabled" @onclick="OnCreateWorkflow" type="button" class="btn btn-blockquote btn-dark">Create Workflow</button>
-</div>
+
 
 @code {
 
     [Parameter]
     public EventCallback<WorkflowDefinition> OnSubmitWorkflowDefinition { get; set; }
     protected IList<string> validationErrors = new List<string>();
-    protected MonacoEditor editor;
+    protected MonacoEditor editor = null!;
     protected bool IsCreateDisabled { get; set; } = true;
 
     async Task OnCreateWorkflow()

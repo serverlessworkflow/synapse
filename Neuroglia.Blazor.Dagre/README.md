@@ -94,7 +94,7 @@ await builder.Build().RunAsync();
 	}
 }
 ```
-[![Sample minimalist diagram](https://github.com/neuroglia-io/synapse/blob/overhaul/Neuroglia.Blazor.Dagre/get-started-diagram.png "Sample minimalist diagram")](https://github.com/neuroglia-io/synapse/blob/overhaul/Neuroglia.Blazor.Dagre/get-started-diagram.png "Sample minimalist diagram")
+[![Sample minimalist diagram](https://github.com/neuroglia-io/synapse/blob/main/Neuroglia.Blazor.Dagre/get-started-diagram.png "Sample minimalist diagram")](https://github.com/neuroglia-io/synapse/blob/main/Neuroglia.Blazor.Dagre/get-started-diagram.png "Sample minimalist diagram")
 
 ## Custom templates
 You can use custom Razor templates if you'd like to render you own `IGraphElement`, aka `INodeViewModel`, `IClusterViewModel` or  `IEdgeViewModel`.
@@ -165,7 +165,7 @@ Alternatively, you could create an ActionNodeViewModel that inherits `NodeViewMo
 await this.Graph.RegisterComponentTypeAsync(typeof(ActionNodeViewModel), typeof(ActionNodeTemplate));
 ```
 
-[![Custom template](https://github.com/neuroglia-io/synapse/blob/overhaul/Neuroglia.Blazor.Dagre/custom-template.png "Custom template")](https://github.com/neuroglia-io/synapse/blob/overhaul/Neuroglia.Blazor.Dagre/custom-template.png "Sample minimalist diagram")
+[![Custom template](https://github.com/neuroglia-io/synapse/blob/main/Neuroglia.Blazor.Dagre/custom-template.png "Custom template")](https://github.com/neuroglia-io/synapse/blob/main/Neuroglia.Blazor.Dagre/custom-template.png "Sample minimalist diagram")
 
 ## Sample app
 

@@ -1,0 +1,88 @@
+﻿@namespace Synapse.Dashboard
+@using Neuroglia.Serialization
+@using ServerlessWorkflow.Sdk.Models
+
+<AppRightSidebar>
+    <Toolbar>
+        <button class="btn btn-outline-dark" title="inject state">
+            <svg width="16" height="16">
+                <use xlink:href="#inject-symbol" />
+            </svg>
+        </button>
+        <button class="btn btn-outline-dark" title="operation state">
+            <svg width="16" height="16">
+                <use xlink:href="#operation-symbol" />
+            </svg>
+        </button>
+        <button class="btn btn-outline-dark" title="sleep state">
+            <svg width="16" height="16">
+                <use xlink:href="#sleep-symbol" />
+            </svg>
+        </button>
+        <button class="btn btn-outline-dark" title="event state">
+            <svg width="16" height="16">
+                <use xlink:href="#event-symbol" />
+            </svg>
+        </button>
+        <button class="btn btn-outline-dark" title="switch state">
+            <svg width="16" height="16">
+                <use xlink:href="#switch-symbol" />
+            </svg>
+        </button>
+        <button class="btn btn-outline-dark" title="parallel state">
+            <svg width="16" height="16">
+                <use xlink:href="#parallel-symbol" />
+            </svg>
+        </button>
+        <button class="btn btn-outline-dark" title="foreach state">
+            <svg width="16" height="16">
+                <use xlink:href="#foreach-symbol" />
+            </svg>
+        </button>
+        <button class="btn btn-outline-dark" title="callback state">
+            <svg width="16" height="16">
+                <use xlink:href="#callback-symbol" />
+            </svg>
+        </button>
+    </Toolbar>
+</AppRightSidebar>
+<div class="container-fluid h-100">
+    <div class="row h-100">
+        <WorkflowDiagram Graph="Graph" />
+    </div>
+</div>
+<Modal @ref="StateModal">
+    <Title></Title>
+    <Body></Body>
+    <Footer></Footer>
+</Modal>
+
+@code {
+    [Parameter]
+    public EventCallback<WorkflowDefinition> OnSubmitWorkflowDefinition { get; set; }
+
+    public Modal StateModal = null!;
+    public IGraphViewModel Graph = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        this.Graph = new GraphViewModel();
+        var startNode = new StartNodeViewModel();
+        var endNode = new EndNodeViewModel();
+        await this.Graph.AddElementAsync(startNode);
+        await this.Graph.AddElementAsync(endNode);
+        await this.Graph.AddElementAsync(new EdgeViewModel(startNode.Id, endNode.Id));
+        /*var injectState = new InjectStateDefinition()
+            {
+                Name = "My inject state",
+                Data = new DynamicObject(new Dictionary<string, object>() { { "Foo", "Bar" } })
+            };
+        var injectStateNode = new StateNodeViewModel(injectState);
+        var injectNode = new InjectNodeViewMode(injectState.Data.ToString() ?? "");
+        await injectStateNode.AddChildAsync(injectNode);
+        await this.Graph.AddElementAsync(injectStateNode);
+        await this.Graph.AddElementAsync(new EdgeViewModel(startNode.Id, injectNode.Id));
+        await this.Graph.AddElementAsync(new EdgeViewModel(injectNode.Id, endNode.Id));*/
+    }
+}

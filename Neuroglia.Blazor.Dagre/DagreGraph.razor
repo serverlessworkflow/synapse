@@ -78,7 +78,7 @@
     {
         if (this.Graph != null)
         {
-            this.Graph.ShowConstruction = true;
+            //this.Graph.ShowConstruction = true;
             await this.DagreService.ComputePositionsAsync(this.Graph, this.Options);
             this.StateHasChanged();
             await this.ZoomToFit();
@@ -106,7 +106,7 @@
     {
         if (this.Graph == null) 
             return;
-        this.Graph.Scale = await this.JSRuntime.InvokeAsync<decimal>("neuroglia.blazor.getScale", this._graphReference);
+        this.Graph.Scale = Math.Clamp(await this.JSRuntime.InvokeAsync<decimal>("neuroglia.blazor.getScale", this._graphReference), Consts.MinScale, Consts.MaxScale);
         this.StateHasChanged();
         await this.Center();
     }

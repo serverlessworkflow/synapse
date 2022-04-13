@@ -30,6 +30,8 @@ namespace Neuroglia.Blazor.Dagre.Models
 
         Task AddElementAsync(IGraphElement element);
 
+        Task AddElementsAsync(IEnumerable<IGraphElement> elements);
+
         void OnMouseMove(IGraphElement? element, MouseEventArgs e);
 
         void OnMouseDown(IGraphElement? element, MouseEventArgs e);

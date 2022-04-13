@@ -116,10 +116,10 @@ namespace Neuroglia.Blazor.Dagre.Models
             this._allClusters = new Dictionary<Guid, IClusterViewModel>();
             this._behaviors = new Dictionary<Type, GraphBehavior>();
             this.ShowConstruction = showConstruction;
-            //this.RegisterBehavior(new DebugEventsBehavior(this));
+            // this.RegisterBehavior(new DebugEventsBehavior(this));
             this.RegisterBehavior(new ZoomBahavior(this));
             this.RegisterBehavior(new PanBahavior(this));
-            this.RegisterBehavior(new MoveNodeBehavior(this));
+            // this.RegisterBehavior(new MoveNodeBehavior(this));
             foreach (var node in this._nodes.Values)
             {
                 if (node == null)
@@ -169,6 +169,24 @@ namespace Neuroglia.Blazor.Dagre.Models
                 return;
             }
             throw new Exception("Unknown element type");
+        }
+
+        /// <summary>
+        /// Adds the provided <see cref="IGraphElement"/>s to the graph
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public virtual async Task AddElementsAsync(IEnumerable<IGraphElement> elements)
+        {
+            if (elements == null || !elements.Any())
+            {
+                throw new ArgumentNullException(nameof(elements));
+            }
+            foreach (var element in elements)
+            {
+                await this.AddElementAsync(element);
+            }
         }
 
         /// <summary>
