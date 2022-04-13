@@ -29,7 +29,7 @@ using System.Net.Mime;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Synapse.Worker.Executor.Services.Processors
+namespace Synapse.Worker.Services.Processors
 {
 
     /// <summary>

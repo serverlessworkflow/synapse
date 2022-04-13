@@ -17,8 +17,9 @@
 
 using Synapse.Integration.Events.WorkflowActivities;
 
-namespace Synapse.Worker.Executor.Services.Processors
+namespace Synapse.Worker.Services.Processors
 {
+
     /// <summary>
     /// Represents a <see cref="IWorkflowActivityProcessor"/> used to process <see cref="SleepStateDefinition"/>s
     /// </summary>

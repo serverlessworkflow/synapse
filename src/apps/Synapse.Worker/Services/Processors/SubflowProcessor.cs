@@ -20,7 +20,7 @@ using Synapse.Integration.Events.WorkflowActivities;
 using Synapse.Integration.Events.WorkflowInstances;
 using System.Reactive.Linq;
 
-namespace Synapse.Worker.Executor.Services.Processors
+namespace Synapse.Worker.Services.Processors
 {
     /// <summary>
     /// Represents an <see cref="ActionProcessor"/> used to process subflows

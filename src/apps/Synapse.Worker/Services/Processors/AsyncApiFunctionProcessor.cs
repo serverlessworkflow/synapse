@@ -27,7 +27,7 @@ using System.Dynamic;
 using System.Reactive;
 using System.Text.RegularExpressions;
 
-namespace Synapse.Worker.Executor.Services.Processors
+namespace Synapse.Worker.Services.Processors
 {
 
     /// <summary>

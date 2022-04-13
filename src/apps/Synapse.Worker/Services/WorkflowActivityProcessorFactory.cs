@@ -16,7 +16,7 @@
  */
 
 using Microsoft.Extensions.DependencyInjection;
-using Synapse.Worker.Executor.Services.Processors;
+using Synapse.Worker.Services.Processors;
 
 namespace Synapse.Worker.Services
 {
@@ -80,7 +80,7 @@ namespace Synapse.Worker.Services
                     V1WorkflowActivityType.Start => ActivatorUtilities.CreateInstance<StartProcessor>(this.ServiceProvider, activity, this.Context.Workflow.Definition.Start ?? new()),
                     V1WorkflowActivityType.State => this.CreateStateActivityProcessor(state, activity),
                     V1WorkflowActivityType.SubFlow => this.CreateSubflowActivityProcessor(state, activity),
-                    V1WorkflowActivityType.Transition => throw new NotImplementedException(),//todo
+                    V1WorkflowActivityType.Transition => this.CreateTransitionActivityProcessor(state, activity),
                     _ => throw new NotSupportedException($"The specified {typeof(V1WorkflowActivityType).Name} '{activity.Type}' is not supported"),
                 };
             }
@@ -108,7 +108,7 @@ namespace Synapse.Worker.Services
                 OperationStateDefinition operationState => ActivatorUtilities.CreateInstance<OperationStateProcessor>(this.ServiceProvider, state, activity),
                 //ParallelStateDefinition parallelState => ActivatorUtilities.CreateInstance<ParallelStateProcessor>(this.ServiceProvider, state, activity),//todo
                 SleepStateDefinition delayState => ActivatorUtilities.CreateInstance<SleepStateProcessor>(this.ServiceProvider, state, activity),
-                //SwitchStateDefinition switchState => ActivatorUtilities.CreateInstance<SwitchStateProcessor>(this.ServiceProvider, state, activity),//todo
+                SwitchStateDefinition switchState => ActivatorUtilities.CreateInstance<SwitchStateProcessor>(this.ServiceProvider, state, activity),
                 _ => throw new NotSupportedException($"The specified {nameof(StateDefinition)} type '{state.GetType().Name}' is not supported"),
             };
         }
@@ -228,6 +228,34 @@ namespace Synapse.Worker.Services
             if (!int.TryParse(rawIterationIndex, out var iterationIndex))
                 throw new ArgumentException($"The '{V1WorkflowActivityMetadata.Iteration}' metadata field of activity '{activity.Id}' is not a valid integer");
             return ActivatorUtilities.CreateInstance<IterationProcessor>(this.ServiceProvider, activity, foreachState, iterationIndex);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="IWorkflowActivityProcessor"/> for an <see cref="V1WorkflowActivity"/> of type <see cref="V1WorkflowActivityType.Transition"/>
+        /// </summary>
+        /// <param name="state">The <see cref="StateDefinition"/> that defines the <see cref="TransitionDefinition"/> to process</param>
+        /// <param name="activity">The <see cref="V1WorkflowActivity"/> that describe the <see cref="V1WorkflowActivity"/> to process</param>
+        /// <returns>A new <see cref="IWorkflowActivityProcessor"/></returns>
+        protected virtual IWorkflowActivityProcessor CreateTransitionActivityProcessor(StateDefinition state, V1WorkflowActivity activity)
+        {
+            var transition = null as TransitionDefinition;
+            if (state is SwitchStateDefinition @switch)
+            {
+                if (!activity.Metadata.TryGetValue(V1WorkflowActivityMetadata.Case, out var caseName))
+                    throw new ArgumentException($"The specified activity '{activity.Id}' is missing the required metadata field '{V1WorkflowActivityMetadata.Case}'");
+                if (!@switch.TryGetCase(caseName, out SwitchCaseDefinition dataCondition))
+                    throw new NullReferenceException($"Failed to find a condition with the specified name '{caseName}'");
+                transition = dataCondition.Transition;
+                if (transition == null)
+                    transition = new() { NextState = dataCondition.TransitionToStateName! };
+            }
+            else
+            {
+                transition = state.Transition;
+                if (transition == null)
+                    transition = new() { NextState = state.TransitionToStateName! };
+            }
+            return ActivatorUtilities.CreateInstance<TransitionProcessor>(this.ServiceProvider, activity, state, transition);
         }
 
         /// <summary>

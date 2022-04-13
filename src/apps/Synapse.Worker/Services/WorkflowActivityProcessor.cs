@@ -19,7 +19,7 @@ using Synapse.Integration.Events;
 using Synapse.Integration.Events.WorkflowActivities;
 using System.Reactive.Subjects;
 
-namespace Synapse.Worker.Executor.Services
+namespace Synapse.Worker.Services
 {
 
     /// <summary>

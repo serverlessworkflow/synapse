@@ -17,7 +17,7 @@
 
 using Synapse.Integration.Events.WorkflowActivities;
 
-namespace Synapse.Worker.Executor.Services.Processors
+namespace Synapse.Worker.Services.Processors
 {
 
     /// <summary>

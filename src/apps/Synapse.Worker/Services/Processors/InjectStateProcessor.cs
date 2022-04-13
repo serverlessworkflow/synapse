@@ -17,7 +17,7 @@
 
 using Synapse.Integration.Events.WorkflowActivities;
 
-namespace Synapse.Worker.Executor.Services.Processors
+namespace Synapse.Worker.Services.Processors
 {
 
     /// <summary>
@@ -44,7 +44,9 @@ namespace Synapse.Worker.Executor.Services.Processors
         /// <inheritdoc/>
         protected override async Task ProcessAsync(CancellationToken cancellationToken)
         {
-            await this.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, this.State.Data), cancellationToken);
+            var output = this.Activity.Input!.ToObject()!;
+            output = output.Merge(this.State.Data!.ToObject()!);
+            await this.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, output), cancellationToken);
             await this.OnCompletedAsync(cancellationToken);
         }
 

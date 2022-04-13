@@ -1,4 +1,4 @@
-﻿namespace Synapse.Worker.Executor.Configuration
+﻿namespace Synapse.Worker.Configuration
 {
 
     /// <summary>

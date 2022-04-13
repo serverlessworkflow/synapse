@@ -19,7 +19,7 @@ using Google.Protobuf.Reflection;
 using Grpc.Net.Client;
 using ProtoBuf.Grpc.Client;
 
-namespace Synapse.Worker.Executor.Services.Processors
+namespace Synapse.Worker.Services.Processors
 {
 
     /// <summary>

@@ -1,4 +1,4 @@
-﻿namespace Synapse.Worker.Executor.Services
+﻿namespace Synapse.Worker.Services
 {
 
     /// <summary>

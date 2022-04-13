@@ -5,5 +5,5 @@ global using Neuroglia.Serialization;
 global using ServerlessWorkflow.Sdk;
 global using ServerlessWorkflow.Sdk.Models;
 global using Synapse.Integration.Models;
-global using Synapse.Worker.Executor.Configuration;
+global using Synapse.Worker.Configuration;
 global using Synapse.Worker.Services;
