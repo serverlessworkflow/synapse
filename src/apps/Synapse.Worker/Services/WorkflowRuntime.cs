@@ -324,10 +324,10 @@ namespace Synapse.Worker.Services
             {
                 if (processor.State.Transition != null
                     && string.IsNullOrWhiteSpace(processor.State.TransitionToStateName))
-                    await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Transition, e.Output, metadata, null, this.CancellationToken);
+                    await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Transition, e.Output!.ToObject()!, metadata, null, this.CancellationToken);
                 else if (processor.State.End != null
                     || processor.State.IsEnd)
-                    await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.End, e.Output, metadata, null, this.CancellationToken);
+                    await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.End, e.Output!.ToObject()!, metadata, null, this.CancellationToken);
                 else
                     throw new InvalidOperationException($"The state '{processor.State.Name}' must declare a transition definition or an end definition for it is part of the main execution logic of the workflow '{this.Context.Workflow.Definition.Id}'");
                 foreach (var activity in await this.Context.Workflow.GetOperativeActivitiesAsync(this.CancellationToken))

@@ -121,9 +121,9 @@ namespace Synapse.Worker.Services
         /// <inheritdoc/>
         public virtual async Task<V1WorkflowActivity> CreateActivityAsync(V1WorkflowActivityType type, object? input, IDictionary<string, string>? metadata, V1WorkflowActivity? parent, CancellationToken cancellationToken)
         {
-            var inputParam = input as DynamicObject;
+            var inputParam = input as Dynamic;
             if (inputParam == null && input != null)
-                inputParam = DynamicObject.FromObject(input);
+                inputParam = Dynamic.FromObject(input);
             var metadataParam = metadata == null ? null : new NameValueCollection<string>(metadata);
             return await this.SynapseRuntimeApi.CreateActivityAsync(new() { WorkflowInstanceId = this.Instance.Id, Type = type, Input = inputParam, Metadata = metadataParam, ParentId = parent?.Id }, cancellationToken);
         }

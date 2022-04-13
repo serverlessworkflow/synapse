@@ -75,7 +75,7 @@ namespace Synapse.Worker.Services
                     V1WorkflowActivityType.End => ActivatorUtilities.CreateInstance<EndProcessor>(this.ServiceProvider, activity, state.End ?? new()),
                     V1WorkflowActivityType.Error => throw new NotImplementedException(),//todo
                     V1WorkflowActivityType.EventTrigger => this.CreateEventStateTriggerProcessor(state, activity),
-                    V1WorkflowActivityType.Iteration => throw new NotImplementedException(),//todo
+                    V1WorkflowActivityType.Iteration => this.CreateIterationProcessor(state, activity),
                     V1WorkflowActivityType.ProduceEvent => this.CreateProduceEventActivityProcessor(activity),
                     V1WorkflowActivityType.Start => ActivatorUtilities.CreateInstance<StartProcessor>(this.ServiceProvider, activity, this.Context.Workflow.Definition.Start ?? new()),
                     V1WorkflowActivityType.State => this.CreateStateActivityProcessor(state, activity),
@@ -103,7 +103,7 @@ namespace Synapse.Worker.Services
             {
                 //CallbackStateDefinition callbackState => ActivatorUtilities.CreateInstance<CallbackStateProcessor>(this.ServiceProvider, state, activity), //todo
                 EventStateDefinition eventState => ActivatorUtilities.CreateInstance<EventStateProcessor>(this.ServiceProvider, state, activity),
-                //ForEachStateDefinition forEachState => ActivatorUtilities.CreateInstance<ForEachStateProcessor>(this.ServiceProvider, state, activity),//todo
+                ForEachStateDefinition forEachState => ActivatorUtilities.CreateInstance<ForEachStateProcessor>(this.ServiceProvider, state, activity),
                 InjectStateDefinition injectState => ActivatorUtilities.CreateInstance<InjectStateProcessor>(this.ServiceProvider, state, activity),
                 OperationStateDefinition operationState => ActivatorUtilities.CreateInstance<OperationStateProcessor>(this.ServiceProvider, state, activity),
                 //ParallelStateDefinition parallelState => ActivatorUtilities.CreateInstance<ParallelStateProcessor>(this.ServiceProvider, state, activity),//todo
@@ -210,7 +210,24 @@ namespace Synapse.Worker.Services
                 throw new ArgumentException($"The '{V1WorkflowActivityMetadata.Trigger}' metadata field of activity '{activity.Id}' is not a valid integer");
             if (!eventState.TryGetTrigger(triggerId, out var trigger))
                 throw new NullReferenceException($"Failed to find a trigger ath the specified index '{triggerId}' in the event state with name '{eventState.Name}'");
-            return ActivatorUtilities.CreateInstance<EventStateTriggerProcessor>(this.ServiceProvider, activity, state, trigger);
+            return ActivatorUtilities.CreateInstance<EventStateTriggerProcessor>(this.ServiceProvider, activity, eventState, trigger);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="IWorkflowActivityProcessor"/> for an <see cref="V1WorkflowActivity"/> of type <see cref="V1WorkflowActivityType.Iteration"/>
+        /// </summary>
+        /// <param name="state">The <see cref="StateDefinition"/> that defines the action to process</param>
+        /// <param name="activity">The <see cref="V1WorkflowActivity"/> that describe the <see cref="V1WorkflowActivity"/> to process</param>
+        /// <returns>A new <see cref="IWorkflowActivityProcessor"/></returns>
+        protected virtual IWorkflowActivityProcessor CreateIterationProcessor(StateDefinition state, V1WorkflowActivity activity)
+        {
+            if (state is not ForEachStateDefinition foreachState)
+                throw new ArgumentException($"The specified state definition with name '{state.Name}' is not the definition of a foreach state");
+            if (!activity.Metadata.TryGetValue(V1WorkflowActivityMetadata.Iteration, out var rawIterationIndex))
+                throw new ArgumentException($"The specified activity '{activity.Id}' is missing the required metadata field '{V1WorkflowActivityMetadata.Iteration}'");
+            if (!int.TryParse(rawIterationIndex, out var iterationIndex))
+                throw new ArgumentException($"The '{V1WorkflowActivityMetadata.Iteration}' metadata field of activity '{activity.Id}' is not a valid integer");
+            return ActivatorUtilities.CreateInstance<IterationProcessor>(this.ServiceProvider, activity, foreachState, iterationIndex);
         }
 
         /// <summary>

@@ -24,6 +24,10 @@
         /// </summary>
         public const string Event = "event";
         /// <summary>
+        /// Gets the name of the 'iteration' metadata, used to store the index of the iteration to process
+        /// </summary>
+        public const string Iteration = "iteration";
+        /// <summary>
         /// Gets the name of the 'state' metadata, used to store the name of the state the activity belongs to
         /// </summary>
         public const string State = "state";
