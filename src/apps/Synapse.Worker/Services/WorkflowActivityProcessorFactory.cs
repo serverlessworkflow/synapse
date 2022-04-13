@@ -79,7 +79,7 @@ namespace Synapse.Worker.Services
                     V1WorkflowActivityType.ProduceEvent => this.CreateProduceEventActivityProcessor(activity),
                     V1WorkflowActivityType.Start => ActivatorUtilities.CreateInstance<StartProcessor>(this.ServiceProvider, activity, this.Context.Workflow.Definition.Start ?? new()),
                     V1WorkflowActivityType.State => this.CreateStateActivityProcessor(state, activity),
-                    V1WorkflowActivityType.SubFlow => throw new NotImplementedException(),//todo
+                    V1WorkflowActivityType.SubFlow => this.CreateSubflowActivityProcessor(state, activity),
                     V1WorkflowActivityType.Transition => throw new NotImplementedException(),//todo
                     _ => throw new NotSupportedException($"The specified {typeof(V1WorkflowActivityType).Name} '{activity.Type}' is not supported"),
                 };
@@ -107,7 +107,7 @@ namespace Synapse.Worker.Services
                 InjectStateDefinition injectState => ActivatorUtilities.CreateInstance<InjectStateProcessor>(this.ServiceProvider, state, activity),
                 OperationStateDefinition operationState => ActivatorUtilities.CreateInstance<OperationStateProcessor>(this.ServiceProvider, state, activity),
                 //ParallelStateDefinition parallelState => ActivatorUtilities.CreateInstance<ParallelStateProcessor>(this.ServiceProvider, state, activity),//todo
-                //SleepStateDefinition delayState => ActivatorUtilities.CreateInstance<DelayStateProcessor>(this.ServiceProvider, state, activity),//todo
+                SleepStateDefinition delayState => ActivatorUtilities.CreateInstance<SleepStateProcessor>(this.ServiceProvider, state, activity),
                 //SwitchStateDefinition switchState => ActivatorUtilities.CreateInstance<SwitchStateProcessor>(this.ServiceProvider, state, activity),//todo
                 _ => throw new NotSupportedException($"The specified {nameof(StateDefinition)} type '{state.GetType().Name}' is not supported"),
             };

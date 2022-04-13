@@ -39,7 +39,7 @@
 	<PackageReference Include="Neuroglia.Mapping" Version="2.0.1.57" />
 	<PackageReference Include="Neuroglia.Mediation" Version="2.0.1.57" />
 	<PackageReference Include="Neuroglia.Mediation.FluentValidation" Version="2.0.1.57" />
-	<PackageReference Include="ServerlessWorkflow.Sdk" Version="0.8.0.15" />
+	<PackageReference Include="ServerlessWorkflow.Sdk" Version="0.8.0.16" />
   </ItemGroup>
 
 </Project>

@@ -315,7 +315,7 @@ namespace Synapse.Dashboard
 
         protected SleepNodeViewModel BuildSleepNode(SleepStateDefinition sleepState)
         {
-            return new(sleepState.Delay);
+            return new(sleepState.Duration);
         }
 
         protected DataCaseNodeViewModel BuildDataConditionNode(string caseDefinitionName)
