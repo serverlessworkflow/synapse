@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+
 using CloudNative.CloudEvents;
 using ConcurrentCollections;
 using Microsoft.Extensions.Hosting;
@@ -362,11 +363,23 @@ namespace Synapse.Worker.Services
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
 
+        /// <summary>
+        /// Handles the completion of the specified <see cref="IEndProcessor"/>
+        /// </summary>
+        /// <param name="processor">The <see cref="IEndProcessor"/> that has produced the <see cref="V1WorkflowActivityCompletedIntegrationEvent"/></param>
+        /// <param name="e">The <see cref="V1WorkflowActivityCompletedIntegrationEvent"/> to handle</param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
         protected virtual async Task OnEndCompletedAsync(IEndProcessor processor, V1WorkflowActivityCompletedIntegrationEvent e)
         {
             await this.Context.Workflow.SetOutputAsync(e.Output, this.CancellationToken);
         }
 
+        /// <summary>
+        /// Handles an <see cref="Exception"/> that has occured during the processing of a <see cref="V1WorkflowActivity"/>
+        /// </summary>
+        /// <param name="processor">The <see cref="IWorkflowActivityProcessor"/> that has thrown the <see cref="Exception"/> to handle</param>
+        /// <param name="ex">The <see cref="Exception"/> to handle</param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
         protected virtual async Task OnActivityProcessingErrorAsync(IWorkflowActivityProcessor processor, Exception ex)
         {
             try
@@ -382,6 +395,11 @@ namespace Synapse.Worker.Services
             }
         }
 
+        /// <summary>
+        /// Handles the completion of the specified <see cref="IWorkflowActivityProcessor"/>
+        /// </summary>
+        /// <param name="processor">The <see cref="IWorkflowActivityProcessor"/> to handle the completion of</param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
         protected virtual async Task OnActivityProcessingCompletedAsync(IWorkflowActivityProcessor processor)
         {
             this.Processors.TryRemove(processor);
@@ -392,6 +410,11 @@ namespace Synapse.Worker.Services
             }
         }
 
+        /// <summary>
+        /// Handles the completion of the specified <see cref="IEndProcessor"/>
+        /// </summary>
+        /// <param name="processor">The <see cref="IEndProcessor"/> to handle the completion of</param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
         protected virtual async Task OnCompletedAsync(IEndProcessor processor)
         {
             await this.OnActivityProcessingCompletedAsync(processor);
