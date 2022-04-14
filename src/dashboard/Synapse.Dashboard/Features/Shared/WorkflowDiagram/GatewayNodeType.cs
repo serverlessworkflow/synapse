@@ -14,18 +14,26 @@
  * limitations under the License.
  *
  */
-using System.Linq.Expressions;
 
 namespace Synapse.Dashboard
 {
-    public static class ExpressionExtensions
+    /// <summary>
+    /// Enumerates all supported types of <see cref="GatewayNodeViewModel"/>s
+    /// </summary>
+    public enum GatewayNodeType
     {
-
-        public static Expression CombineWith(this Expression left, Expression right)
-        {
-            return Expression.And(left, right);
-        }
-
+        /// <summary>
+        /// Indicates a cumulative gateway
+        /// </summary>
+        And,
+        /// <summary>
+        /// Indicates an exclusive gateway
+        /// </summary>
+        Xor,
+        /// <summary>
+        /// Indicates a cumulative gateway for N instances
+        /// </summary>
+        N
     }
 
 }

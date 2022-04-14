@@ -1,4 +1,21 @@
-﻿using Neuroglia.Blazor.Dagre.Models;
+﻿/*
+ * Copyright © 2022-Present The Synapse Authors
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+using Neuroglia.Blazor.Dagre.Models;
 using ServerlessWorkflow.Sdk;
 using ServerlessWorkflow.Sdk.Models;
 
@@ -49,11 +66,11 @@ namespace Synapse.Dashboard
                     }
                 case EventStateDefinition eventState:
                     { 
-                        firstNode = eventState.Exclusive ? this.BuildGatewayNode(ParallelCompletionType.Xor) : this.BuildJunctionNode();
-                        lastNode = eventState.Exclusive ? this.BuildGatewayNode(ParallelCompletionType.Xor) : this.BuildJunctionNode();
+                        firstNode = eventState.Exclusive ? this.BuildGatewayNode(GatewayNodeType.Xor) : this.BuildJunctionNode();
+                        lastNode = eventState.Exclusive ? this.BuildGatewayNode(GatewayNodeType.Xor) : this.BuildJunctionNode();
                         await stateNodeGroup.AddChildAsync(firstNode);
                         await this.BuildEdgeBetween(graph, previousNode, firstNode);
-                        var andNode = this.BuildGatewayNode(ParallelCompletionType.And);
+                        var andNode = this.BuildGatewayNode(GatewayNodeType.And);
                         if (!eventState.Exclusive)
                         {
                             await stateNodeGroup.AddChildAsync(andNode);
@@ -113,7 +130,7 @@ namespace Synapse.Dashboard
                         switch (operationState.ActionMode)
                         {
                             case ActionExecutionMode.Parallel:
-                                firstNode = this.BuildGatewayNode(ParallelCompletionType.And);
+                                firstNode = this.BuildGatewayNode(GatewayNodeType.And);
                                 lastNode = this.BuildJunctionNode();
                                 await stateNodeGroup.AddChildAsync(firstNode);
                                 await this.BuildEdgeBetween(graph, previousNode, firstNode);
@@ -149,7 +166,7 @@ namespace Synapse.Dashboard
                     }
                 case ParallelStateDefinition parallelState:
                     {
-                        firstNode = this.BuildGatewayNode(parallelState.CompletionType);
+                        firstNode = this.BuildGatewayNode(parallelState.CompletionType == ParallelCompletionType.AllOf ? GatewayNodeType.And : GatewayNodeType.N);
                         lastNode = this.BuildJunctionNode();
                         await stateNodeGroup.AddChildAsync(firstNode);
                         await this.BuildEdgeBetween(graph, previousNode, firstNode);
@@ -177,7 +194,7 @@ namespace Synapse.Dashboard
                     }
                 case SwitchStateDefinition switchState:
                     {
-                        firstNode = this.BuildGatewayNode(ParallelCompletionType.Xor);
+                        firstNode = this.BuildGatewayNode(GatewayNodeType.Xor);
                         await stateNodeGroup.AddChildAsync(firstNode);
                         await this.BuildEdgeBetween(graph, previousNode, firstNode);
                         switch (switchState.SwitchType)
@@ -298,9 +315,9 @@ namespace Synapse.Dashboard
             return new(EventKind.Consumed, refName);
         }
 
-        protected GatewayNodeViewModel BuildGatewayNode( ParallelCompletionType completionType)
+        protected GatewayNodeViewModel BuildGatewayNode(GatewayNodeType gatewayNodeType)
         {
-            return new(completionType);
+            return new(gatewayNodeType);
         }
 
         protected JunctionNodeViewModel BuildJunctionNode()

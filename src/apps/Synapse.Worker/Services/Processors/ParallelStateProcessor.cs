@@ -110,11 +110,7 @@ namespace Synapse.Worker.Services.Processors
             var executed = false;
             switch (this.State.CompletionType)
             {
-                case ParallelCompletionType.Xor:
-                    output = e.Output!.ToObject()!;
-                    executed = true;
-                    break;
-                case ParallelCompletionType.N:
+                case ParallelCompletionType.AtLeastN:
                     var executedActivities = childActivities
                         .Where(p => p.Status >= V1WorkflowActivityStatus.Faulted)
                         .ToList();
@@ -128,7 +124,7 @@ namespace Synapse.Worker.Services.Processors
                         }
                     }
                     break;
-                default:
+                case ParallelCompletionType.AllOf:
                     if (childActivities.All(p => p.Status >= V1WorkflowActivityStatus.Faulted))
                     {
                         executed = true;
@@ -139,6 +135,8 @@ namespace Synapse.Worker.Services.Processors
                         }
                     }
                     break;
+                default:
+                    throw new NotSupportedException($"The specified {nameof(ParallelCompletionType)} '{this.State.CompletionType}' is not supported");
             }
             if (!executed)
                 return;
@@ -172,16 +170,15 @@ namespace Synapse.Worker.Services.Processors
                 var completed = false;
                 switch (this.State.CompletionType)
                 {
-                    case ParallelCompletionType.Xor:
-                        completed = true;
+                    case ParallelCompletionType.AllOf:
+                        completed = childActivities.All(p => p.Status >= V1WorkflowActivityStatus.Faulted);
                         break;
-                    case ParallelCompletionType.N:
+                    case ParallelCompletionType.AtLeastN:
                         if (childActivities.Where(p => p.Status >= V1WorkflowActivityStatus.Faulted).Count() >= this.State.N)
                             completed = true;
                         break;
                     default:
-                        completed = childActivities.All(p => p.Status >= V1WorkflowActivityStatus.Faulted);
-                        break;
+                        throw new NotSupportedException($"The specified {nameof(ParallelCompletionType)} '{this.State.CompletionType}' is not supported");
                 }
                 if (!completed)
                     return;

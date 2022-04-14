@@ -1,9 +1,25 @@
-﻿using ServerlessWorkflow.Sdk;
+﻿/*
+ * Copyright © 2022-Present The Synapse Authors
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 
 namespace Synapse.Dashboard
 {
+
     /// <summary>
-    /// Represents a logical gateway <see cref="NodeViewModel"/>
+    /// Represents a logical gateway <see cref="WorkflowNodeViewModel"/>
     /// </summary>
     public class GatewayNodeViewModel
         : WorkflowNodeViewModel
@@ -12,20 +28,19 @@ namespace Synapse.Dashboard
         /// <summary>
         /// Initializes a new <see cref="GatewayNodeViewModel"/>
         /// </summary>
-        /// <param name="completionType">The gateway's ParallelCompletionType</param>
-        public GatewayNodeViewModel(ParallelCompletionType completionType)
+        /// <param name="type">The gateway's type</param>
+        public GatewayNodeViewModel(GatewayNodeType type)
             : base("", "gateway-node", null, 40)
         {
-            this.CompletionType = completionType;
+            this.Type = type;
             this.ComponentType = typeof(GatewayNodeTemplate);
         }
 
         /// <summary>
         /// Gets the gateway's ParallelCompletionType
         /// </summary>
-        public ParallelCompletionType CompletionType { get; }
+        public GatewayNodeType Type { get; }
 
     }
     
-
 }
