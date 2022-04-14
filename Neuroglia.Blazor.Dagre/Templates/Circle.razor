@@ -1,0 +1,10 @@
+﻿<circle 
+    cx="0" 
+    cy="0"
+    r="@(BBox.Width.ToInvariantString())"
+/>
+
+@code {
+    [Parameter]
+    public virtual IBoundingBox BBox { get; set; } = null!;
+}

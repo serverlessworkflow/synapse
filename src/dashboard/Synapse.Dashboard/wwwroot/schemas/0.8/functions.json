@@ -1,0 +1,72 @@
+{
+  "$id": "https://serverlessworkflow.io/schemas/0.8/functions.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "Serverless Workflow specification - functions schema",
+  "type": "object",
+  "functions": {
+    "oneOf": [
+      {
+        "type": "string",
+        "format": "uri",
+        "description": "URI to a resource containing function definitions (json or yaml)"
+      },
+      {
+        "type": "array",
+        "description": "Workflow function definitions",
+        "items": {
+          "type": "object",
+          "$ref": "#/definitions/function"
+        },
+        "additionalItems": false,
+        "minItems": 1
+      }
+    ]
+  },
+  "required": [
+    "functions"
+  ],
+  "definitions": {
+    "function": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Unique function name",
+          "minLength": 1
+        },
+        "operation": {
+          "type": "string",
+          "description": "If type is `rest`, <path_to_openapi_definition>#<operation_id>. If type is `asyncapi`, <path_to_asyncapi_definition>#<operation_id>. If type is `rpc`, <path_to_grpc_proto_file>#<service_name>#<service_method>. If type is `graphql`, <url_to_graphql_endpoint>#<literal \\\"mutation\\\" or \\\"query\\\">#<query_or_mutation_name>. If type is `odata`, <URI_to_odata_service>#<Entity_Set_Name>. If type is `expression`, defines the workflow expression.",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "description": "Defines the function type. Is either `rest`, `asyncapi, `rpc`, `graphql`, `odata`, `expression`, or `custom`. Default is `rest`",
+          "enum": [
+            "rest",
+            "asyncapi",
+            "rpc",
+            "graphql",
+            "odata",
+            "expression",
+            "custom"
+          ],
+          "default": "rest"
+        },
+        "authRef": {
+          "type": "string",
+          "description": "References an auth definition name to be used to access to resource defined in the operation parameter",
+          "minLength": 1
+        },
+        "metadata": {
+          "$ref": "common.json#/definitions/metadata"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "operation"
+      ]
+    }
+  }
+}

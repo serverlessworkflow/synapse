@@ -1,0 +1,50 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	<VersionPrefix>0.1.0</VersionPrefix>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+	<Authors>The Synapse Authors</Authors>
+	<Company>Cloud Native Computing Foundation</Company>
+    <Copyright>Copyright © 2022-Present The Synapse Authors. All Rights Reserved.</Copyright>
+    <RepositoryUrl>https://github.com/serverlessworkflow/synapse</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/serverlessworkflow/synapse</PackageProjectUrl>
+    <PackageTags>synapse synctl app cli</PackageTags>
+    <NeutralLanguage>en</NeutralLanguage>
+	<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+	<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
+    <FileVersion>$(VersionPrefix).0</FileVersion>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+	<DebugType>embedded</DebugType>
+	<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+	<DockerfileContext>..\..\..</DockerfileContext>
+	<DockerfileTag>synapse/server</DockerfileTag>
+	<RuntimeIdentifiers>win10-x64;linux-x64;osx-x64</RuntimeIdentifiers>
+    <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="6.0.4" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.15.0" />
+    <PackageReference Include="Neuroglia.Caching.InMemory" Version="2.0.1.57" />
+    <PackageReference Include="Neuroglia.Data.Expressions.JQ" Version="2.0.1.57" />
+    <PackageReference Include="Neuroglia.Eventing.CloudEvents.AspNetCore" Version="2.0.1.57" />
+    <PackageReference Include="Neuroglia.Serialization.Json" Version="2.0.1.57" />
+    <PackageReference Include="protobuf-net.Grpc.AspNetCore" Version="1.0.152" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\apis\management\Synapse.Apis.Management.Grpc\Synapse.Apis.Management.Grpc.csproj" />
+    <ProjectReference Include="..\..\apis\management\Synapse.Apis.Management.Http\Synapse.Apis.Management.Http.csproj" />
+    <ProjectReference Include="..\..\apis\monitoring\Synapse.Apis.Monitoring.WebSocket\Synapse.Apis.Monitoring.WebSocket.csproj" />
+    <ProjectReference Include="..\..\apis\runtime\Synapse.Apis.Runtime.Grpc\Synapse.Apis.Runtime.Grpc.csproj" />
+    <ProjectReference Include="..\..\dashboard\Synapse.Dashboard\Synapse.Dashboard.csproj" />
+    <ProjectReference Include="..\..\runtime\Synapse.Runtime.Docker\Synapse.Runtime.Docker.csproj" />
+    <ProjectReference Include="..\..\runtime\Synapse.Runtime.Native\Synapse.Runtime.Native.csproj" />
+  </ItemGroup>
+
+</Project>

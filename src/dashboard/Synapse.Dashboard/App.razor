@@ -1,0 +1,177 @@
+﻿@* 
+    Copyright © 2022-Present The Synapse Authors
+    <p>
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+    <p>
+    http://www.apache.org/licenses/LICENSE-2.0
+    <p>
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*@
+
+@using Microsoft.AspNetCore.SignalR.Client
+@using Neuroglia.Data.Flux
+@using Neuroglia.Data.Flux.Components
+@using System.Reactive.Linq
+@using Newtonsoft.Json.Linq
+@using Synapse.Integration.Events.WorkflowInstances
+@using Synapse.Integration.Events.Workflows
+@inject HubConnection HubConnection
+@inject IIntegrationEventStream IntegrationEventStream
+@inject IDispatcher Dispatcher;
+
+<FluxStore />
+<Router AppAssembly="@typeof(App).Assembly">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+    </Found>
+    <NotFound>
+        <PageTitle>Not found</PageTitle>
+        <LayoutView Layout="@typeof(MainLayout)">
+            <p role="alert">Sorry, there's nothing at this address.</p>
+        </LayoutView>
+    </NotFound>
+</Router>
+
+@code
+{
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        //todo: should probably move this somewhere else, for example in a dedicated class (ex: V1WorkflowSubscriber), or within concerned components
+        this.IntegrationEventStream
+            .Where(e => e.Type == "io.synapse/v1workflow/created/v1")
+            .Subscribe(e =>
+            {
+                try
+                {
+                    var data = e.Data.ToObject<V1WorkflowCreatedIntegrationEvent>();
+                    this.Dispatcher.Dispatch(new AddV1Workflow(new() { Id = data.AggregateId, CreatedAt = data.CreatedAt, LastModified = data.CreatedAt, Definition = data.Definition })); //todo: should prefer a mapping
+            }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }   
+            });
+        this.IntegrationEventStream
+            .Where(e => e.Type == "io.synapse/v1workflow/deleted/v1")
+            .Subscribe(e =>
+            {
+                try
+                {
+                    var data = e.Data.ToObject<V1WorkflowCreatedIntegrationEvent>();
+                    this.Dispatcher.Dispatch(new RemoveV1Workflow(data.AggregateId));
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }   
+            });
+
+        this.IntegrationEventStream
+            .Where(e => e.Type == "io.synapse/v1workflowinstance/created/v1")
+            .Subscribe(e =>
+            {
+                try
+                {
+                    var data = e.Data.ToObject<V1WorkflowInstanceCreatedIntegrationEvent>();
+                    this.Dispatcher.Dispatch(new AddV1WorkflowInstance(new() 
+                    { 
+                        Id = data.AggregateId, 
+                        CreatedAt = data.CreatedAt, 
+                        LastModified = data.CreatedAt, 
+                        WorkflowId = data.WorkflowId, 
+                        Key = data.Key,
+                        ActivationType = data.ActivationType,
+                        Input = data.Input,
+                        CorrelationContext = data.CorrelationContext
+                    })); //todo: should prefer a mapping
+            }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }   
+            });
+        this.IntegrationEventStream
+            .Where(e => e.Type == "io.synapse/v1workflowinstance/starting/v1")
+            .Subscribe(e =>
+            {
+                try
+                {
+                    var data = e.Data.ToObject<V1WorkflowInstanceStartedIntegrationEvent>();
+                    this.Dispatcher.Dispatch(new MarkV1WorkflowAsStarting(data.AggregateId, data.CreatedAt));
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }   
+            });
+        this.IntegrationEventStream
+            .Where(e => e.Type == "io.synapse/v1workflowinstance/started/v1")
+            .Subscribe(e =>
+            {
+                try
+                {
+                    var data = e.Data.ToObject<V1WorkflowInstanceStartedIntegrationEvent>();
+                    this.Dispatcher.Dispatch(new MarkV1WorkflowAsStarted(data.AggregateId, data.CreatedAt));
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }   
+            });
+        this.IntegrationEventStream
+            .Where(e => e.Type == "io.synapse/v1workflowinstance/faulted/v1")
+            .Subscribe(e =>
+            {
+                try
+                {
+                    var data = e.Data.ToObject<V1WorkflowInstanceFaultedIntegrationEvent>();
+                    this.Dispatcher.Dispatch(new MarkV1WorkflowAsFaulted(data.AggregateId, data.CreatedAt, data.Error));
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }   
+            });
+        this.IntegrationEventStream
+            .Where(e => e.Type == "io.synapse/v1workflowinstance/completed/v1")
+            .Subscribe(e =>
+            {
+                try
+                {
+                    var data = e.Data.ToObject<V1WorkflowInstanceCompletedIntegrationEvent>();
+                    this.Dispatcher.Dispatch(new MarkV1WorkflowAsCompleted(data.AggregateId, data.CreatedAt, data.Output));
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }   
+            });
+        this.IntegrationEventStream
+            .Where(e => e.Type == "io.synapse/v1workflowinstance/deleted/v1")
+            .Subscribe(e =>
+            {
+                try
+                {
+                    var data = e.Data.ToObject<V1WorkflowInstanceDeletedIntegrationEvent>();
+                    this.Dispatcher.Dispatch(new RemoveV1WorkflowInstance(data.AggregateId));
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }   
+            });
+
+        await this.HubConnection.StartAsync();
+    }
+
+}

@@ -1,0 +1,41 @@
+﻿<g class="node @Node.CssClass" transform="translate(@((Node.X ?? 0).ToInvariantString()), @((Node.Y ?? 0).ToInvariantString()))">
+    <g class="node-shape">
+        @if (Node.Shape == NodeShape.Circle)
+        {
+            <Circle BBox="Node.BBox" />
+        }
+        else if (Node.Shape == NodeShape.Ellipse)
+        {
+            <Ellipse BBox="Node.BBox" />
+        }
+        else
+        {
+            <Rectangle BBox="Node.BBox" RadiusX="Node.RadiusX" RadiusY="Node.RadiusY" />
+        }
+    </g>
+    @if (!string.IsNullOrWhiteSpace(Node.Label)) {
+        <g class="label">
+            <foreignObject 
+                x="@((Node.BBox!.X).ToInvariantString())"
+                y="@((0 - Consts.LabelHeight / 2).ToInvariantString())" 
+                width="@Node.BBox!.Width.ToInvariantString()" 
+                height="@Consts.LabelHeight"
+            >
+                <div>@Node.Label</div>
+            </foreignObject>
+        </g>
+    }
+    @if (Graph.ShowConstruction) {
+        <circle cx="0" cy="0" r="1" fill="red" />
+    }
+</g>
+
+@code {
+    [CascadingParameter]
+    public virtual IGraphViewModel Graph { get; set; } = null!;
+
+    [Parameter]
+    public virtual IGraphElement Element { get; set; } = null!;
+
+    protected virtual INodeViewModel Node => (INodeViewModel)this.Element;
+}

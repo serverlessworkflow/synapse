@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<RootNamespace>$(MSBuildProjectName.Replace(" ", "_").Replace(".Client", ""))</RootNamespace>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<VersionPrefix>0.1.0</VersionPrefix>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<Authors>The Synapse Authors</Authors>
+		<Company>Cloud Native Computing Foundation</Company>
+		<Copyright>Copyright © 2022-Present The Synapse Authors. All Rights Reserved.</Copyright>
+		<RepositoryUrl>https://github.com/serverlessworkflow/synapse</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageProjectUrl>https://github.com/serverlessworkflow/synapse</PackageProjectUrl>
+		<PackageTags>synapse management api http client</PackageTags>
+		<NeutralLanguage>en</NeutralLanguage>
+		<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+		<AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
+		<FileVersion>$(VersionPrefix).0</FileVersion>
+		<OutputType>Library</OutputType>
+		<DebugType>embedded</DebugType>
+	</PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Synapse.Apis.Management.Core\Synapse.Apis.Management.Core.csproj" />
+  </ItemGroup>
+	
+  <ItemGroup>
+    <PackageReference Include="Microsoft.OpenApi.Readers" Version="1.3.1" />
+  </ItemGroup>
+	
+</Project>

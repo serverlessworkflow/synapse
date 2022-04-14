@@ -1,0 +1,29 @@
+﻿<g
+    @onmousemove="OnMouseMove"
+    @onmousedown="OnMouseDown"
+    @onmousedown:stopPropagation
+    @onmouseup="OnMouseUp"
+    @onmouseup:stopPropagation
+>
+    <CascadingValue Value="Graph">
+        <DynamicComponent Type="Type" Parameters="Parameters" />
+    </CascadingValue>
+</g>
+@code {
+    [CascadingParameter]
+    public virtual IGraphViewModel Graph { get; set; } = null!;
+
+    [Parameter]
+    public virtual Type Type { get; set; } = null!;
+
+    [Parameter]
+    public virtual IDictionary<string, object> Parameters { get; set; } = null!;
+
+    protected virtual IGraphElement Element => (IGraphElement)this.Parameters["Element"];
+
+    protected virtual void OnMouseDown(MouseEventArgs e) => this.Graph.OnMouseDown(this.Element, e);
+
+    protected virtual void OnMouseMove(MouseEventArgs e) => this.Graph.OnMouseMove(this.Element, e);
+
+    protected virtual void OnMouseUp(MouseEventArgs e) => this.Graph.OnMouseUp(this.Element, e);
+}

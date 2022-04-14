@@ -1,0 +1,90 @@
+﻿@* 
+    Copyright © 2022-Present The Synapse Authors
+    <p>
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+    <p>
+    http://www.apache.org/licenses/LICENSE-2.0
+    <p>
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*@
+
+@using Newtonsoft.Json.Schema
+@namespace Synapse.Dashboard
+
+@if(!string.IsNullOrWhiteSpace(Name) 
+    && Schema != null)
+{
+    <div>
+        @switch (Schema.Type)
+        {
+            case JSchemaType.Array:
+                //todo
+                break;
+            case JSchemaType.Boolean:
+                <div class="form-check">
+                    <input name="@Name" class="form-check-input" type="checkbox" value="@Value">
+                    <label for="@Name" class="form-check-label">@displayName</label>
+                </div>
+                break;
+            case JSchemaType.Integer:
+                <label for="@Name" class="form-label">@displayName</label>
+                <input name="@Name" title="@Schema.Description" placeholder="@displayName" min="@Schema.Minimum" max="@Schema.Maximum" multiple="@Schema.MultipleOf" required="@Schema.Required" value="@Value" class="form-control" />
+                break;
+            case JSchemaType.Number:
+                <label for="@Name" class="form-label">@displayName</label>    
+                <input name="@Name" title="@Schema.Description" placeholder="@displayName" min="@Schema.Minimum" max="@Schema.Maximum" multiple="@Schema.MultipleOf" required="@Schema.Required" value="@Value" class="form-control" />
+                break;
+            case JSchemaType.Object:
+                <label for="@Name" class="form-label">@displayName</label>    
+                <JsonForm Schema="@Schema" Model="@Value" />
+                break;
+            case JSchemaType.String:
+                <label for="@Name" class="form-label">@displayName</label>
+                @if(Schema.Enum != null && Schema.Enum.Any())
+                {
+                    <select name="@Name" title="@Schema.Description" readonly="@Schema.ReadOnly" value="@Value" class="form-control" >
+                        @foreach (var option in Schema.Enum)
+                        {
+                            <option value="@option">@option</option>
+                        }
+                    </select>
+                }
+                else
+                {
+                    <input name="@Name" title="@Schema.Description" placeholder="@displayName" maxlength="@Schema.MaximumLength" pattern="@Schema.Pattern" required="@Schema.Required" readonly="@Schema.ReadOnly" value="@Value" class="form-control" />
+                }
+                break;
+        }
+    </div>
+}
+
+@code 
+{
+
+    [CascadingParameter]
+    private JsonForm Form { get; set; }
+
+    [Parameter]
+    public string Name { get; set; }
+
+    [Parameter]
+    public JSchema Schema { get; set; }
+
+    [Parameter]
+    public object Value { get; set; }
+
+    private string displayName => string.IsNullOrWhiteSpace(this.Schema.Title) ? this.Name : this.Schema.Title;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        this.Form.AddProperty(this);
+    }
+
+}

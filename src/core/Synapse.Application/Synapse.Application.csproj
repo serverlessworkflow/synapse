@@ -1,0 +1,45 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	<VersionPrefix>0.1.0</VersionPrefix>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+	<Authors>The Synapse Authors</Authors>
+	<Company>Cloud Native Computing Foundation</Company>
+    <Copyright>Copyright © 2022-Present The Synapse Authors. All Rights Reserved.</Copyright>
+    <RepositoryUrl>https://github.com/serverlessworkflow/synapse</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/serverlessworkflow/synapse</PackageProjectUrl>
+    <PackageTags>synapse application</PackageTags>
+    <NeutralLanguage>en</NeutralLanguage>
+	<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+	<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
+    <FileVersion>$(VersionPrefix).0</FileVersion>
+    <OutputType>Library</OutputType>
+	<DebugType>embedded</DebugType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\apis\runtime\Synapse.Apis.Runtime.Core\Synapse.Apis.Runtime.Core.csproj" />
+    <ProjectReference Include="..\..\core\Synapse.Domain\Synapse.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+	<PackageReference Include="CloudNative.CloudEvents.NewtonsoftJson" Version="2.2.0" />
+	<PackageReference Include="Cronos" Version="0.7.1" />
+	<PackageReference Include="Microsoft.AspNetCore.OData" Version="8.0.8" />
+	<PackageReference Include="Microsoft.OData.ModelBuilder" Version="1.0.8" />
+	<PackageReference Include="Neuroglia.AspNetCore.JsonPatch" Version="2.0.1.57" />
+	<PackageReference Include="Neuroglia.Data.DistributedCache" Version="2.0.1.57" />
+	<PackageReference Include="Neuroglia.Data.Expressions" Version="2.0.1.57" />
+	<PackageReference Include="Neuroglia.Eventing.CloudEvents" Version="2.0.1.57" />
+	<PackageReference Include="Neuroglia.Mapping" Version="2.0.1.57" />
+	<PackageReference Include="Neuroglia.Mediation" Version="2.0.1.57" />
+	<PackageReference Include="Neuroglia.Mediation.FluentValidation" Version="2.0.1.57" />
+	<PackageReference Include="ServerlessWorkflow.Sdk" Version="0.8.0.19" />
+  </ItemGroup>
+
+</Project>

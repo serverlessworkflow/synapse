@@ -1,0 +1,316 @@
+﻿@* 
+    Copyright © 2022-Present The Synapse Authors
+    <p>
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+    <p>
+    http://www.apache.org/licenses/LICENSE-2.0
+    <p>
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*@
+
+@using Microsoft.AspNetCore.SignalR.Client
+@using Neuroglia.Serialization
+@using Newtonsoft.Json
+@using Newtonsoft.Json.Linq
+@using Newtonsoft.Json.Schema
+@using Synapse.Apis.Management
+@using Synapse.Integration.Models
+@using System.Text
+@inject ISynapseManagementApi SynapseApi
+@inject IJsonSerializer JsonSerializer
+@inject WorkflowGraphBuilder WorkflowGraphBuilder
+@inject IMonacoEditorHelper MonacoEditorHelper
+@inject HubConnection HubConnection
+@inject HttpClient HttpClient
+
+<PageTitle>@workflowInstance?.Id</PageTitle>
+<AppHeader>
+      <div>
+        <div class="border rounded-pill border-dark px-3 py-1 d-inline">
+            <span class="h5 m-0 p-0">@workflowInstance?.WorkflowId</span>
+        </div>
+        <div class="border rounded-pill bg-dark border-dark text-white px-3 py-1 d-inline">
+            <span class="h5 m-0 p-0">@workflowInstance?.Key</span>
+        </div>
+    </div>
+</AppHeader>
+
+@if (workflowInstance != null)
+{
+    <div class="container-fluid h-100">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Workflow Id</label>
+                                <input type="text" class="form-control" readonly value="@workflowInstance.WorkflowId" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Key</label>
+                                <input type="text" class="form-control" readonly value="@workflowInstance.Key" />
+                            </div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Activation Type</label>
+                                <div class="border border-dark rounded-pill p-1 text-center">@workflowInstance.ActivationType</div>
+                            </div>
+                           <div class="col-md-6">
+                                <label class="form-label">Status</label>
+                                  <div class="border border-dark rounded-pill p-1 text-center @GetStatusClass()">@workflowInstance.Status</div>
+                            </div>
+                        </div>
+                        <div class="row g-3">
+                             <div class="col-md-3">
+                                <label class="form-label">Created at</label>
+                                <input type="text" class="form-control" readonly value="@workflowInstance.CreatedAt" />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Started at</label>
+                                <input type="text" class="form-control" readonly value="@workflowInstance.StartedAt" />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Executed at</label>
+                                <input type="text" class="form-control" readonly value="@workflowInstance.ExecutedAt" />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Duration</label>
+                                <input type="text" class="form-control" readonly value="@workflowInstance.Duration?.ToString()" />
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <MonacoDiffEditor CssClass="monaco-normal" @ref="diffEditor" ConstructionOptions="MonacoEditorHelper.GetDiffEditorConstructionOptions()"></MonacoDiffEditor>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">History</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col"></th>
+                                    <th scope="col">Type</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Started At</th>
+                                    <th scope="col">Executed At</th>
+                                    <th scope="col">Duration</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach(var activity in sortedActivities)
+                                {
+                                    <ExpandableDataRow @ref="rows[sortedActivities.IndexOf(activity)]">
+                                        <Header>
+                                            <td>
+                                                @if (rows[sortedActivities.IndexOf(activity)].IsExpanded)
+                                                {
+                                                    <span class="oi oi-chevron-top"></span>
+                                                } else
+                                                {
+                                                    <span class="oi oi-chevron-bottom"></span>
+                                                }
+                                            </td>
+                                            <td>@activity.Type</td>
+                                            <td>
+                                                @switch(activity.Type)
+                                                {
+                                                    case(V1WorkflowActivityType.State):
+                                                        @activity.Metadata[V1WorkflowActivityMetadata.State]
+                                                        break;
+                                                    case(V1WorkflowActivityType.Action):
+                                                        @activity.Metadata[V1WorkflowActivityMetadata.Action]
+                                                        break;
+                                                    case(V1WorkflowActivityType.Branch):
+                                                        @activity.Metadata[V1WorkflowActivityMetadata.Branch]
+                                                        break;
+                                                }
+                                            </td>
+                                            <td>@activity.Status</td>
+                                            <td>@activity.StartedAt?.ToString("MM/dd/yyyy, HH:mm")</td>
+                                            <td>@activity.ExecutedAt?.ToString("MM/dd/yyyy, HH:mm")</td>
+                                            <td>@(activity.Duration?.ToString() ?? "")</td>
+                                        </Header>
+                                        <Body>
+                                        <td colspan="5">
+                                            <div class="row">
+                                                @if (activity.Type == V1WorkflowActivityType.State)
+                                                {
+                                                    <div class="col">
+                                                        <MonacoDiffEditor                                                    
+                                                            CssClass="monaco-small"
+                                                            ConstructionOptions="MonacoEditorHelper.GetDiffEditorConstructionOptions()"
+                                                            OnDidInit="OnActivityDiffEditorDidInit(JsonConvert.SerializeObject(
+                                                                activity.Input, Formatting.Indented), 
+                                                                activity.Output != null ? JsonConvert.SerializeObject(activity.Output, Formatting.Indented) : JsonConvert.SerializeObject(activity.Error, Formatting.Indented)
+                                                            )"
+                                                        />
+                                                    </div>
+                                                } 
+                                                else {
+                                                     <div class="col-6">
+                                                        <p class="font-weight-bold">Input</p>
+                                                        @if(activity.Input != null)
+                                                        {
+                                                            <MonacoEditor 
+                                                                CssClass="monaco-small"
+                                                                ConstructionOptions="MonacoEditorHelper.GetStandaloneEditorConstructionOptions(JsonConvert.SerializeObject(activity.Input, Formatting.Indented), true)" />
+                                                        }
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <p class="font-weight-bold">Output</p>
+                                                        @if(activity.Output != null)
+                                                        {
+                                                            <MonacoEditor 
+                                                                CssClass="monaco-small"
+                                                                ConstructionOptions="MonacoEditorHelper.GetStandaloneEditorConstructionOptions(JsonConvert.SerializeObject(activity.Output, Formatting.Indented), true)" />
+                                                        }
+                                                        @if(activity.Error != null)
+                                                        {
+                                                            <MonacoEditor                                                 
+                                                                CssClass="monaco-small"
+                                                                ConstructionOptions="MonacoEditorHelper.GetStandaloneEditorConstructionOptions(JsonConvert.SerializeObject(activity.Error, Formatting.Indented), true)" />
+                                                        }
+                                                    </div>
+                                                }
+                                            </div>
+                                        </td>
+                                        </Body>
+                                    </ExpandableDataRow>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <Modal @ref="errorModal">
+        <Title>Error</Title>
+        <Body>
+            <p>An error occured:</p>
+            <div class="border rounded bg-danger text-white text-break p-1">@((MarkupString)error)</div>
+        </Body>
+        <Footer>
+            <button @onclick="() => errorModal.Hide()" class="btn btn-secondary">Close</button>
+        </Footer>
+    </Modal>
+}
+else
+{
+    <Loader />
+}
+@code
+{
+
+    [Parameter]
+    public string WorkflowId { get; set; } = null!;
+    [Parameter]
+    public string WorkflowInstanceId { get; set; } = null!;
+
+    protected Modal errorModal = null!;
+    protected string error = null!;
+    protected V1WorkflowInstance workflowInstance = null!;
+    protected List<V1WorkflowActivity> sortedActivities = new List<V1WorkflowActivity>();
+    protected Dictionary<int, ExpandableDataRow> rows = new Dictionary<int, ExpandableDataRow>();
+    protected MonacoDiffEditor diffEditor = null!;
+
+    private string GetStatusClass()
+    {
+        switch (this.workflowInstance.Status)
+        {
+            case V1WorkflowInstanceStatus.Pending:
+                return "bg-secondary";
+            case V1WorkflowInstanceStatus.Starting:
+            case V1WorkflowInstanceStatus.Resuming:
+            case V1WorkflowInstanceStatus.Running:
+                return "bg-primary text-white";
+            case V1WorkflowInstanceStatus.Suspending:
+            case V1WorkflowInstanceStatus.Suspended:
+                return "bg-warning text-white";
+            case V1WorkflowInstanceStatus.Faulted:
+            case V1WorkflowInstanceStatus.Cancelling:
+            case V1WorkflowInstanceStatus.Cancelled:
+                return "bg-danger text-white";
+            case  V1WorkflowInstanceStatus.Completed:
+                return "bg-success text-white";
+            default:
+                return string.Empty;
+        }
+    }
+
+    protected Func<MonacoEditorBase, Task> OnActivityDiffEditorDidInit(string original, string modified)
+    {
+        return async (MonacoEditorBase editor) =>
+        {
+            var diffEditor = (MonacoDiffEditor)editor;    
+            TextModel inputModel = await MonacoEditorBase.CreateModel("", "json");
+            TextModel outputModel = await MonacoEditorBase.CreateModel("", "json");
+            if (!string.IsNullOrWhiteSpace(original))
+            {
+                inputModel = await MonacoEditorBase.CreateModel(original, "json");
+            }
+            if (!string.IsNullOrWhiteSpace(modified))
+            {
+                outputModel = await MonacoEditorBase.CreateModel(modified, "json");
+            }
+            await diffEditor.SetModel(new DiffEditorModel
+            {
+                Original = inputModel,
+                Modified = outputModel
+            });
+        };
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        this.workflowInstance = await this.SynapseApi.GetWorkflowInstanceByIdAsync(this.WorkflowInstanceId);
+        this.sortedActivities = this.workflowInstance.Activities.OrderBy(a => a.StartedAt).ToList();
+        //this.StateHasChanged();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        var input = string.Empty;
+        var output = string.Empty;        
+        TextModel inputModel = await MonacoEditorBase.CreateModel("", "json");
+        TextModel outputModel = await MonacoEditorBase.CreateModel("", "json");
+        if (this.workflowInstance.Input != null) {
+            input = JsonConvert.SerializeObject(this.workflowInstance.Input, Formatting.Indented);
+            inputModel = await MonacoEditorBase.CreateModel(input, "json");
+        }
+        if (this.workflowInstance.Output != null) {
+            output = JsonConvert.SerializeObject(this.workflowInstance.Output, Formatting.Indented);
+            outputModel = await MonacoEditorBase.CreateModel(output, "json");
+        }
+        if (this.workflowInstance.Error != null) {
+            output = JsonConvert.SerializeObject(this.workflowInstance.Error, Formatting.Indented);
+            outputModel = await MonacoEditorBase.CreateModel(output, "json");
+        }
+        await this.diffEditor.SetModel(new DiffEditorModel
+        {
+            Original = inputModel,
+            Modified = outputModel
+        });
+        //this.StateHasChanged();
+    }
+
+}
