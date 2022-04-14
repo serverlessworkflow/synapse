@@ -115,11 +115,26 @@ namespace Synapse.Dashboard
                         break;
                     }
                 case ForEachStateDefinition foreachState:
-                    { 
+                    {
+                        firstNode = this.BuildForEachNode(foreachState);
+                        lastNode = this.BuildForEachNode(foreachState);
+                        await stateNodeGroup.AddChildAsync(firstNode);
+                        await this.BuildEdgeBetween(graph, previousNode, firstNode);
+                        foreach (var action in foreachState.Actions)
+                        {
+                            var actionNodes = await this.BuildActionNodes(graph, action);
+                            foreach (var actionNode in actionNodes)
+                            {
+                                await stateNodeGroup.AddChildAsync(actionNode);
+                            }
+                            await this.BuildEdgeBetween(graph, firstNode, actionNodes.First());
+                            await this.BuildJunctionBetween(graph, actionNodes.Last(), lastNode);
+                        }
+                        await stateNodeGroup.AddChildAsync(lastNode);
                         break;
                     }
                 case InjectStateDefinition injectState:
-                    { 
+                    {
                         lastNode = this.BuildInjectNode(injectState);
                         await stateNodeGroup.AddChildAsync(lastNode);
                         await this.BuildEdgeBetween(graph, previousNode, lastNode);
@@ -325,9 +340,14 @@ namespace Synapse.Dashboard
             return new();
         }
 
-        protected InjectNodeViewMode BuildInjectNode(InjectStateDefinition injectState)
+        protected InjectNodeViewModel BuildInjectNode(InjectStateDefinition injectState)
         {
             return new(Newtonsoft.Json.JsonConvert.SerializeObject(injectState.Data, Newtonsoft.Json.Formatting.Indented));
+        }
+
+        protected ForEachNodeViewModel BuildForEachNode(ForEachStateDefinition forEachState)
+        {
+            return new();
         }
 
         protected SleepNodeViewModel BuildSleepNode(SleepStateDefinition sleepState)

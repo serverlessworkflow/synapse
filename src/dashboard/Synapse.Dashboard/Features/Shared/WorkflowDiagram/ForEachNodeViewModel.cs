@@ -17,27 +17,24 @@
 
 namespace Synapse.Dashboard
 {
+
     /// <summary>
-    /// Represents a inject state node
+    /// Represents a logical ForEach <see cref="WorkflowNodeViewModel"/>
     /// </summary>
-    public class InjectNodeViewModel
+    public class ForEachNodeViewModel
         : WorkflowNodeViewModel
     {
 
         /// <summary>
-        /// Initializes a new <see cref="InjectNodeViewModel"/>
+        /// Initializes a new <see cref="ForEachNodeViewModel"/>
         /// </summary>
-        /// <param name="data"></param>
-        public InjectNodeViewModel(string data)
-            : base("", "inject-node", null, 40)
+        /// <param name="type">The ForEach's type</param>
+        public ForEachNodeViewModel()
+            : base("", "foreach-node", null, 40)
         {
-            this.Data = data;
-            this.ComponentType = typeof(InjectNodeTemplate);
+            this.ComponentType = typeof(ForEachNodeTemplate);
         }
-
-        public string Data { get; set; }
 
     }
     
-
 }
