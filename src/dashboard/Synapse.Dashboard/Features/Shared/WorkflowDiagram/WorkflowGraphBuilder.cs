@@ -128,7 +128,7 @@ namespace Synapse.Dashboard
                                 await stateNodeGroup.AddChildAsync(actionNode);
                             }
                             await this.BuildEdgeBetween(graph, firstNode, actionNodes.First());
-                            await this.BuildJunctionBetween(graph, actionNodes.Last(), lastNode);
+                            await this.BuildEdgeBetween(graph, actionNodes.Last(), lastNode);
                         }
                         await stateNodeGroup.AddChildAsync(lastNode);
                         break;
@@ -145,8 +145,8 @@ namespace Synapse.Dashboard
                         switch (operationState.ActionMode)
                         {
                             case ActionExecutionMode.Parallel:
-                                firstNode = this.BuildGatewayNode(GatewayNodeType.And);
-                                lastNode = this.BuildJunctionNode();
+                                firstNode = this.BuildParellelNode();
+                                lastNode = this.BuildParellelNode();
                                 await stateNodeGroup.AddChildAsync(firstNode);
                                 await this.BuildEdgeBetween(graph, previousNode, firstNode);
                                 foreach(var action in operationState.Actions)
@@ -157,7 +157,7 @@ namespace Synapse.Dashboard
                                         await stateNodeGroup.AddChildAsync(actionNode);
                                     }
                                     await this.BuildEdgeBetween(graph, firstNode, actionNodes.First());
-                                    await this.BuildJunctionBetween(graph, actionNodes.Last(), lastNode);
+                                    await this.BuildEdgeBetween(graph, actionNodes.Last(), lastNode);
                                 }
                                 await stateNodeGroup.AddChildAsync(lastNode);
                                 break;
@@ -181,8 +181,8 @@ namespace Synapse.Dashboard
                     }
                 case ParallelStateDefinition parallelState:
                     {
-                        firstNode = this.BuildGatewayNode(parallelState.CompletionType == ParallelCompletionType.AllOf ? GatewayNodeType.And : GatewayNodeType.N);
-                        lastNode = this.BuildJunctionNode();
+                        firstNode = parallelState.CompletionType == ParallelCompletionType.AllOf ? this.BuildParellelNode() : this.BuildGatewayNode(GatewayNodeType.N);
+                        lastNode = parallelState.CompletionType == ParallelCompletionType.AllOf ? this.BuildParellelNode() : this.BuildGatewayNode(GatewayNodeType.N);
                         await stateNodeGroup.AddChildAsync(firstNode);
                         await this.BuildEdgeBetween(graph, previousNode, firstNode);
                         foreach(var branch in parallelState.Branches)
@@ -195,7 +195,7 @@ namespace Synapse.Dashboard
                                     await stateNodeGroup.AddChildAsync(actionNode);
                                 }
                                 await this.BuildEdgeBetween(graph, firstNode, actionNodes.First());
-                                await this.BuildJunctionBetween(graph, actionNodes.Last(), lastNode);
+                                await this.BuildEdgeBetween(graph, actionNodes.Last(), lastNode);
                             }
                         }
                         await stateNodeGroup.AddChildAsync(lastNode);
@@ -216,48 +216,97 @@ namespace Synapse.Dashboard
                         switch (switchState.SwitchType)
                         {
                             case SwitchStateType.Data:
-                                foreach(var condition in switchState.DataConditions)
-                                {
-                                    var caseNode = this.BuildDataConditionNode(condition.Name!); // todo: should be a labeled edge, not a node?
-                                    await stateNodeGroup.AddChildAsync(caseNode);
-                                    await this.BuildEdgeBetween(graph, firstNode, caseNode);
-                                    switch (condition.Type)
+                                { 
+                                    foreach(var condition in switchState.DataConditions)
                                     {
-                                        case ConditionType.End:
-                                            await this.BuildEdgeBetween(graph, caseNode, endNode);
-                                            break;
-                                        case ConditionType.Transition:
-                                            var nextStateName = condition.Transition == null ? condition.TransitionToStateName : condition.Transition.NextState;
-                                            var nextState = definition.GetState(nextStateName!);
-                                            if (nextState == null)
-                                                throw new Exception($"Failed to find a state with name '{nextStateName}' in definition '{definition.GetUniqueIdentifier()}");
-                                            lastNode = await this.BuildStateNodes(definition, graph, nextState, endNode, caseNode);
-                                            break;
-                                        default:
-                                            throw new Exception($"The specified condition type '${condition.Type}' is not supported");
+                                        var caseNode = this.BuildDataConditionNode(condition.Name!); // todo: should be a labeled edge, not a node?
+                                        await stateNodeGroup.AddChildAsync(caseNode);
+                                        await this.BuildEdgeBetween(graph, firstNode, caseNode);
+                                        switch (condition.Type)
+                                        {
+                                            case ConditionType.End:
+                                                await this.BuildEdgeBetween(graph, caseNode, endNode);
+                                                break;
+                                            case ConditionType.Transition:
+                                                var nextStateName = condition.Transition == null ? condition.TransitionToStateName : condition.Transition.NextState;
+                                                var nextState = definition.GetState(nextStateName!);
+                                                if (nextState == null)
+                                                    throw new Exception($"Failed to find a state with name '{nextStateName}' in definition '{definition.GetUniqueIdentifier()}");
+                                                lastNode = await this.BuildStateNodes(definition, graph, nextState, endNode, caseNode);
+                                                break;
+                                            default:
+                                                throw new Exception($"The specified condition type '${condition.Type}' is not supported");
+                                        }
                                     }
-                                }
-                                var defaultCaseNode = this.BuildDataConditionNode("default");
-                                await stateNodeGroup.AddChildAsync(defaultCaseNode);
-                                await this.BuildEdgeBetween(graph, firstNode, defaultCaseNode);
-                                if (switchState.DefaultCondition.IsEnd
-                                    || switchState.DefaultCondition.End != null)
-                                {
-                                    lastNode = defaultCaseNode;
-                                }
-                                else if (!string.IsNullOrWhiteSpace(switchState.DefaultCondition.TransitionToStateName)
-                                    || switchState.DefaultCondition.Transition != null)
-                                {
-                                    var nextStateName = switchState.DefaultCondition.Transition == null ? switchState.DefaultCondition.TransitionToStateName : switchState.DefaultCondition.Transition.NextState;
-                                    var nextState = definition.GetState(nextStateName!);
-                                    if (nextState == null)
-                                        throw new Exception($"Failed to find a state with name '{nextStateName}' in definition '{definition.GetUniqueIdentifier()}");
-                                    lastNode = await this.BuildStateNodes(definition, graph, nextState, endNode, defaultCaseNode);
+                                    var defaultCaseNode = this.BuildDataConditionNode("default");
+                                    await stateNodeGroup.AddChildAsync(defaultCaseNode);
+                                    await this.BuildEdgeBetween(graph, firstNode, defaultCaseNode);
+                                    if (switchState.DefaultCondition.IsEnd
+                                        || switchState.DefaultCondition.End != null)
+                                    {
+                                        lastNode = defaultCaseNode;
+                                        if (!state.IsEnd && state.End == null)
+                                        {
+                                            await this.BuildEdgeBetween(graph, lastNode, endNode);
+                                        }
+                                    }
+                                    else if (!string.IsNullOrWhiteSpace(switchState.DefaultCondition.TransitionToStateName)
+                                        || switchState.DefaultCondition.Transition != null)
+                                    {
+                                        var nextStateName = switchState.DefaultCondition.Transition == null ? switchState.DefaultCondition.TransitionToStateName : switchState.DefaultCondition.Transition.NextState;
+                                        var nextState = definition.GetState(nextStateName!);
+                                        if (nextState == null)
+                                            throw new Exception($"Failed to find a state with name '{nextStateName}' in definition '{definition.GetUniqueIdentifier()}");
+                                        lastNode = await this.BuildStateNodes(definition, graph, nextState, endNode, defaultCaseNode);
+                                    }
                                 }
                                 break;
                             case SwitchStateType.Event:
-                                throw new NotImplementedException();
-                                //break;
+                                { 
+                                    foreach (var condition in switchState.EventConditions)
+                                    {
+                                        var caseNode = this.BuildDataConditionNode(condition.Name!); // todo: should be a labeled edge, not a node?
+                                        await stateNodeGroup.AddChildAsync(caseNode);
+                                        await this.BuildEdgeBetween(graph, firstNode, caseNode);
+                                        switch (condition.Type)
+                                        {
+                                            case ConditionType.End:
+                                                await this.BuildEdgeBetween(graph, caseNode, endNode);
+                                                break;
+                                            case ConditionType.Transition:
+                                                var nextStateName = condition.Transition == null ? condition.TransitionToStateName : condition.Transition.NextState;
+                                                var nextState = definition.GetState(nextStateName!);
+                                                if (nextState == null)
+                                                    throw new Exception($"Failed to find a state with name '{nextStateName}' in definition '{definition.GetUniqueIdentifier()}");
+                                                lastNode = await this.BuildStateNodes(definition, graph, nextState, endNode, caseNode);
+                                                break;
+                                            default:
+                                                throw new Exception($"The specified condition type '${condition.Type}' is not supported");
+                                        }
+                                    }
+                                    var defaultCaseNode = this.BuildDataConditionNode("default");
+                                    await stateNodeGroup.AddChildAsync(defaultCaseNode);
+                                    await this.BuildEdgeBetween(graph, firstNode, defaultCaseNode);
+                                    if (switchState.DefaultCondition.IsEnd
+                                        || switchState.DefaultCondition.End != null)
+                                    {
+                                        lastNode = defaultCaseNode;
+                                        if (!state.IsEnd && state.End == null)
+                                        {
+                                            await this.BuildEdgeBetween(graph, lastNode, endNode);
+                                        }
+                                    }
+                                    else if (!string.IsNullOrWhiteSpace(switchState.DefaultCondition.TransitionToStateName)
+                                        || switchState.DefaultCondition.Transition != null)
+                                    {
+                                        var nextStateName = switchState.DefaultCondition.Transition == null ? switchState.DefaultCondition.TransitionToStateName : switchState.DefaultCondition.Transition.NextState;
+                                        var nextState = definition.GetState(nextStateName!);
+                                        if (nextState == null)
+                                            throw new Exception($"Failed to find a state with name '{nextStateName}' in definition '{definition.GetUniqueIdentifier()}");
+                                        lastNode = await this.BuildStateNodes(definition, graph, nextState, endNode, defaultCaseNode);
+                                    }
+                                }
+                                break;
                             default:
                                 throw new Exception($"The specified switch state type '{switchState.Type}' is not supported");
                         }
@@ -351,6 +400,11 @@ namespace Synapse.Dashboard
             return new();
         }
 
+        protected ParallelNodeViewModel BuildParellelNode()
+        {
+            return new();
+        }
+
         protected SleepNodeViewModel BuildSleepNode(SleepStateDefinition sleepState)
         {
             return new(sleepState.Duration);
@@ -377,18 +431,6 @@ namespace Synapse.Dashboard
         protected async Task BuildEdgeBetween(GraphViewModel graph, NodeViewModel source, NodeViewModel target)
         {
             await graph.AddElementAsync(new EdgeViewModel(source.Id, target.Id));
-        }
-
-        /// <summary>
-        /// Builds an edge between two nodes without the end arrow
-        /// </summary>
-        /// <param name="graph">The graph instance hosting the edge</param>
-        /// <param name="source">The edge's source node</param>
-        /// <param name="target">The edge's target node</param>
-        /// <returns></returns>
-        protected async Task BuildJunctionBetween(GraphViewModel graph, NodeViewModel source, NodeViewModel target)
-        {
-            await graph.AddElementAsync(new EdgeViewModel(source.Id, target.Id) { EndMarkerId = null });
         }
 
 

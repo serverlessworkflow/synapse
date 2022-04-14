@@ -19,20 +19,25 @@ namespace Synapse.Dashboard
 {
 
     /// <summary>
-    /// Represents a for each <see cref="WorkflowNodeViewModel"/>
+    /// Represents a parallel <see cref="WorkflowNodeViewModel"/>
     /// </summary>
-    public class ForEachNodeViewModel
+    public class ParallelNodeViewModel
         : WorkflowNodeViewModel
     {
 
         /// <summary>
-        /// Initializes a new <see cref="ForEachNodeViewModel"/>
+        /// Initializes a new <see cref="ParallelNodeViewModel"/>
         /// </summary>
-        public ForEachNodeViewModel()
-            : base("", "foreach-node", null, 40)
+        public ParallelNodeViewModel()
+            : base("", "parallel-node", null, 40)
         {
-            this.ComponentType = typeof(ForEachNodeTemplate);
+            this.ComponentType = typeof(ParellelNodeTemplate);
         }
+
+        /// <summary>
+        /// Gets the gateway's ParallelCompletionType
+        /// </summary>
+        public GatewayNodeType Type { get; }
 
     }
     
