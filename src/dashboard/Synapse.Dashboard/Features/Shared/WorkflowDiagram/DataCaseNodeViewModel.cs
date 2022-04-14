@@ -31,7 +31,7 @@ namespace Synapse.Dashboard
         /// </summary>
         /// <param name="dataCase">The name of the <see cref="DataCaseDefinition"/> the <see cref="NodeViewModel"/> represents</param>
         public DataCaseNodeViewModel(string dataCaseName)
-            : base("", "datacase-node")
+            : base(dataCaseName, "datacase-node")
         {
             this.DataCaseName = dataCaseName;
         }

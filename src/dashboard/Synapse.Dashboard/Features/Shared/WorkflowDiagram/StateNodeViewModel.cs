@@ -43,6 +43,8 @@ namespace Synapse.Dashboard
         /// <summary>
         /// Gets the <see cref="StateDefinition"/> the <see cref="ActionNodeModel"/> represents
         /// </summary>
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Always)]
+        [Newtonsoft.Json.JsonProperty]
         public StateDefinition State { get; }
 
         /// <inheritdoc/>
