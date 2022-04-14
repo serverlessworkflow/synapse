@@ -1,0 +1,20 @@
+﻿@namespace Synapse.Dashboard
+@inherits NodeTemplate
+<g class="node @Node.CssClass" transform="translate(@((Node.X ?? 0).ToInvariantString()), @((Node.Y ?? 0).ToInvariantString()))">
+    <polygon stroke="black" stroke-width="1" fill="white" points="@NegHalfWidth,0 0,@NegHalfHeight @HalfWidth,0 0,@HalfHeight" />
+    <g transform="translate(@X, @Y)">
+        <svg width="@HalfWidth" height="@HalfHeight">
+            <use xlink:href="#parallel-symbol" />
+        </svg>
+    </g>
+</g>
+@code {
+    protected virtual string? Width => this.Node.BBox!.Width.ToInvariantString();
+    protected virtual string? Height => this.Node.BBox!.Height.ToInvariantString();
+    protected virtual string? HalfWidth => (this.Node.BBox!.Width / 2).ToInvariantString();
+    protected virtual string? HalfHeight => (this.Node.BBox!.Height / 2).ToInvariantString();
+    protected virtual string? NegHalfWidth => (0 - this.Node.BBox!.Width / 2).ToInvariantString();
+    protected virtual string? NegHalfHeight => (0 - this.Node.BBox!.Height / 2).ToInvariantString();
+    protected virtual string? X => (0 - this.Node.BBox!.Width / 4).ToInvariantString();
+    protected virtual string? Y => (0 - this.Node.BBox!.Height / 4).ToInvariantString();
+}

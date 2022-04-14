@@ -15,33 +15,30 @@
  *
  */
 
-using ServerlessWorkflow.Sdk.Models;
-
 namespace Synapse.Dashboard
 {
+
     /// <summary>
-    /// Represents a data case <see cref="NodeViewModel"/>
+    /// Represents a parallel <see cref="WorkflowNodeViewModel"/>
     /// </summary>
-    public class DataCaseNodeViewModel
+    public class ParallelNodeViewModel
         : WorkflowNodeViewModel
     {
 
         /// <summary>
-        /// Initializes a new <see cref="DataCaseNodeViewModel"/>
+        /// Initializes a new <see cref="ParallelNodeViewModel"/>
         /// </summary>
-        /// <param name="dataCase">The name of the <see cref="DataCaseDefinition"/> the <see cref="NodeViewModel"/> represents</param>
-        public DataCaseNodeViewModel(string dataCaseName)
-            : base(dataCaseName, "datacase-node")
+        public ParallelNodeViewModel()
+            : base("", "parallel-node", null, 40)
         {
-            this.DataCaseName = dataCaseName;
+            this.ComponentType = typeof(ParellelNodeTemplate);
         }
 
         /// <summary>
-        /// Gets the name of the <see cref="DataCaseDefinition"/> the <see cref="NodeViewModel"/> represents
+        /// Gets the gateway's ParallelCompletionType
         /// </summary>
-        public string DataCaseName { get; }
+        public GatewayNodeType Type { get; }
 
     }
     
-
 }
