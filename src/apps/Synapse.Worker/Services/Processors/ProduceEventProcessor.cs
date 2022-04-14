@@ -19,7 +19,7 @@ using CloudNative.CloudEvents;
 using Synapse.Integration.Events.WorkflowActivities;
 using System.Net.Mime;
 
-namespace Synapse.Worker.Executor.Services.Processors
+namespace Synapse.Worker.Services.Processors
 {
     /// <summary>
     /// Represents a <see cref="IWorkflowActivityProcessor"/> used to process <see cref="EventDefinition"/>s to produce

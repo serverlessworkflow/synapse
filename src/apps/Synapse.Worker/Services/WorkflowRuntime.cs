@@ -14,13 +14,14 @@
  * limitations under the License.
  *
  */
+
 using CloudNative.CloudEvents;
 using ConcurrentCollections;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using Synapse.Apis.Runtime;
 using Synapse.Integration.Events.WorkflowActivities;
-using Synapse.Worker.Executor.Services;
+using Synapse.Worker.Services;
 using System.Reactive.Linq;
 
 namespace Synapse.Worker.Services
@@ -308,26 +309,30 @@ namespace Synapse.Worker.Services
                 if (!switchState.TryGetCase(caseName, out SwitchCaseDefinition switchCase))
                     throw new InvalidOperationException($"Failed to find a case with name '{caseName}' in the state '{processor.State.Name}' of workflow '{this.Context.Workflow.Definition.Id}'");
                 metadata.Add(V1WorkflowActivityMetadata.Case, caseName);
+                var activity = null as V1WorkflowActivity;
                 switch (switchCase.Type)
                 {
                     case ConditionType.End:
-                        await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.End, e.Output, metadata, null, this.CancellationToken);
+                        activity = await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.End, e.Output, metadata, null, this.CancellationToken);
                         break;
                     case ConditionType.Transition:
-                        await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Transition, e.Output, metadata, null, this.CancellationToken);
+                        activity = await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Transition, e.Output, metadata, null, this.CancellationToken);
                         break;
                     default:
                         throw new NotSupportedException($"The specified condition type '{switchCase.Type}' is not supported in this context");
                 }
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                this.CreateActivityProcessor(activity);
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             }
             else
             {
                 if (processor.State.Transition != null
                     && string.IsNullOrWhiteSpace(processor.State.TransitionToStateName))
-                    await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Transition, e.Output, metadata, null, this.CancellationToken);
+                    await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Transition, e.Output!.ToObject()!, metadata, null, this.CancellationToken);
                 else if (processor.State.End != null
                     || processor.State.IsEnd)
-                    await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.End, e.Output, metadata, null, this.CancellationToken);
+                    await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.End, e.Output!.ToObject()!, metadata, null, this.CancellationToken);
                 else
                     throw new InvalidOperationException($"The state '{processor.State.Name}' must declare a transition definition or an end definition for it is part of the main execution logic of the workflow '{this.Context.Workflow.Definition.Id}'");
                 foreach (var activity in await this.Context.Workflow.GetOperativeActivitiesAsync(this.CancellationToken))
@@ -358,11 +363,23 @@ namespace Synapse.Worker.Services
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
 
+        /// <summary>
+        /// Handles the completion of the specified <see cref="IEndProcessor"/>
+        /// </summary>
+        /// <param name="processor">The <see cref="IEndProcessor"/> that has produced the <see cref="V1WorkflowActivityCompletedIntegrationEvent"/></param>
+        /// <param name="e">The <see cref="V1WorkflowActivityCompletedIntegrationEvent"/> to handle</param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
         protected virtual async Task OnEndCompletedAsync(IEndProcessor processor, V1WorkflowActivityCompletedIntegrationEvent e)
         {
             await this.Context.Workflow.SetOutputAsync(e.Output, this.CancellationToken);
         }
 
+        /// <summary>
+        /// Handles an <see cref="Exception"/> that has occured during the processing of a <see cref="V1WorkflowActivity"/>
+        /// </summary>
+        /// <param name="processor">The <see cref="IWorkflowActivityProcessor"/> that has thrown the <see cref="Exception"/> to handle</param>
+        /// <param name="ex">The <see cref="Exception"/> to handle</param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
         protected virtual async Task OnActivityProcessingErrorAsync(IWorkflowActivityProcessor processor, Exception ex)
         {
             try
@@ -378,6 +395,11 @@ namespace Synapse.Worker.Services
             }
         }
 
+        /// <summary>
+        /// Handles the completion of the specified <see cref="IWorkflowActivityProcessor"/>
+        /// </summary>
+        /// <param name="processor">The <see cref="IWorkflowActivityProcessor"/> to handle the completion of</param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
         protected virtual async Task OnActivityProcessingCompletedAsync(IWorkflowActivityProcessor processor)
         {
             this.Processors.TryRemove(processor);
@@ -388,6 +410,11 @@ namespace Synapse.Worker.Services
             }
         }
 
+        /// <summary>
+        /// Handles the completion of the specified <see cref="IEndProcessor"/>
+        /// </summary>
+        /// <param name="processor">The <see cref="IEndProcessor"/> to handle the completion of</param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
         protected virtual async Task OnCompletedAsync(IEndProcessor processor)
         {
             await this.OnActivityProcessingCompletedAsync(processor);

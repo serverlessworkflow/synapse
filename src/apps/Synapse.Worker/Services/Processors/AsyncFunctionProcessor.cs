@@ -20,7 +20,7 @@ using Synapse.Integration.Events;
 using Synapse.Integration.Events.WorkflowActivities;
 using System.Reactive.Linq;
 
-namespace Synapse.Worker.Executor.Services.Processors
+namespace Synapse.Worker.Services.Processors
 {
     /// <summary>
     /// Represents an <see cref="IWorkflowActivityProcessor"/> implementation used to process <see cref="EventReference"/>

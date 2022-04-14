@@ -2,7 +2,7 @@
 using System.Dynamic;
 using System.Runtime.InteropServices;
 
-namespace Synapse.Worker.Executor.Services
+namespace Synapse.Worker.Services
 {
 
     /// <summary>

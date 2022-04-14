@@ -20,7 +20,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Synapse.Apis.Management;
 using Synapse.Apis.Runtime;
-using Synapse.Worker.Executor.Services;
+using Synapse.Worker.Services;
 using System.Text.RegularExpressions;
 
 namespace Synapse.Worker.Services

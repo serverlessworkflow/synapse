@@ -40,7 +40,7 @@ Docker is the recommended way to run the Synapse Server for those who do not wan
 To run the server on Docker, simply execute the following command in your system's shell:
 
 ```shell
-docker run synapse/server
+docker run ghcr.io/serverlessworkflow/synapse:latest
 ```
 
 For more information on how to configure Synapse for Docker, please read the [docs]().

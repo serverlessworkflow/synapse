@@ -18,7 +18,7 @@
 using CloudNative.CloudEvents;
 using System.Reactive.Subjects;
 
-namespace Synapse.Worker.Executor.Services
+namespace Synapse.Worker.Services
 {
     /// <summary>
     /// Represents the default implementation of the <see cref="IIntegrationEventBus"/> interface

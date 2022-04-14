@@ -16,7 +16,7 @@
  */
 
 using Microsoft.Extensions.DependencyInjection;
-using Synapse.Worker.Executor.Services.Processors;
+using Synapse.Worker.Services.Processors;
 
 namespace Synapse.Worker.Services
 {
@@ -70,17 +70,17 @@ namespace Synapse.Worker.Services
                 return activity.Type switch
                 {
                     V1WorkflowActivityType.Action => this.CreateActionActivityProcessor(state, activity),
-                    V1WorkflowActivityType.Branch => throw new NotImplementedException(),//todo
+                    V1WorkflowActivityType.Branch => this.CreateBranchActivityProcessor(state, activity),
                     V1WorkflowActivityType.ConsumeEvent => this.CreateConsumeEventActivityProcessor(activity),
                     V1WorkflowActivityType.End => ActivatorUtilities.CreateInstance<EndProcessor>(this.ServiceProvider, activity, state.End ?? new()),
                     V1WorkflowActivityType.Error => throw new NotImplementedException(),//todo
-                    V1WorkflowActivityType.EventTrigger => this.CreateEventStateTriggerProcessor(state, activity),
-                    V1WorkflowActivityType.Iteration => throw new NotImplementedException(),//todo
+                    V1WorkflowActivityType.EventTrigger => this.CreateEventStateTriggerActivityProcessor(state, activity),
+                    V1WorkflowActivityType.Iteration => this.CreateIterationActivityProcessor(state, activity),
                     V1WorkflowActivityType.ProduceEvent => this.CreateProduceEventActivityProcessor(activity),
                     V1WorkflowActivityType.Start => ActivatorUtilities.CreateInstance<StartProcessor>(this.ServiceProvider, activity, this.Context.Workflow.Definition.Start ?? new()),
                     V1WorkflowActivityType.State => this.CreateStateActivityProcessor(state, activity),
-                    V1WorkflowActivityType.SubFlow => throw new NotImplementedException(),//todo
-                    V1WorkflowActivityType.Transition => throw new NotImplementedException(),//todo
+                    V1WorkflowActivityType.SubFlow => this.CreateSubflowActivityProcessor(state, activity),
+                    V1WorkflowActivityType.Transition => this.CreateTransitionActivityProcessor(state, activity),
                     _ => throw new NotSupportedException($"The specified {typeof(V1WorkflowActivityType).Name} '{activity.Type}' is not supported"),
                 };
             }
@@ -103,12 +103,12 @@ namespace Synapse.Worker.Services
             {
                 //CallbackStateDefinition callbackState => ActivatorUtilities.CreateInstance<CallbackStateProcessor>(this.ServiceProvider, state, activity), //todo
                 EventStateDefinition eventState => ActivatorUtilities.CreateInstance<EventStateProcessor>(this.ServiceProvider, state, activity),
-                //ForEachStateDefinition forEachState => ActivatorUtilities.CreateInstance<ForEachStateProcessor>(this.ServiceProvider, state, activity),//todo
+                ForEachStateDefinition forEachState => ActivatorUtilities.CreateInstance<ForEachStateProcessor>(this.ServiceProvider, state, activity),
                 InjectStateDefinition injectState => ActivatorUtilities.CreateInstance<InjectStateProcessor>(this.ServiceProvider, state, activity),
                 OperationStateDefinition operationState => ActivatorUtilities.CreateInstance<OperationStateProcessor>(this.ServiceProvider, state, activity),
-                //ParallelStateDefinition parallelState => ActivatorUtilities.CreateInstance<ParallelStateProcessor>(this.ServiceProvider, state, activity),//todo
-                //SleepStateDefinition delayState => ActivatorUtilities.CreateInstance<DelayStateProcessor>(this.ServiceProvider, state, activity),//todo
-                //SwitchStateDefinition switchState => ActivatorUtilities.CreateInstance<SwitchStateProcessor>(this.ServiceProvider, state, activity),//todo
+                ParallelStateDefinition parallelState => ActivatorUtilities.CreateInstance<ParallelStateProcessor>(this.ServiceProvider, state, activity),
+                SleepStateDefinition delayState => ActivatorUtilities.CreateInstance<SleepStateProcessor>(this.ServiceProvider, state, activity),
+                SwitchStateDefinition switchState => ActivatorUtilities.CreateInstance<SwitchStateProcessor>(this.ServiceProvider, state, activity),
                 _ => throw new NotSupportedException($"The specified {nameof(StateDefinition)} type '{state.GetType().Name}' is not supported"),
             };
         }
@@ -200,7 +200,7 @@ namespace Synapse.Worker.Services
         /// <param name="state">The <see cref="StateDefinition"/> that defines the action to process</param>
         /// <param name="activity">The <see cref="V1WorkflowActivity"/> that describe the <see cref="V1WorkflowActivity"/> to process</param>
         /// <returns>A new <see cref="IWorkflowActivityProcessor"/></returns>
-        protected virtual IWorkflowActivityProcessor CreateEventStateTriggerProcessor(StateDefinition state, V1WorkflowActivity activity)
+        protected virtual IWorkflowActivityProcessor CreateEventStateTriggerActivityProcessor(StateDefinition state, V1WorkflowActivity activity)
         {
             if (state is not EventStateDefinition eventState)
                 throw new ArgumentException($"The specified state definition with name '{state.Name}' is not the definition of an event state");
@@ -209,8 +209,70 @@ namespace Synapse.Worker.Services
             if (!int.TryParse(rawTriggerId, out var triggerId))
                 throw new ArgumentException($"The '{V1WorkflowActivityMetadata.Trigger}' metadata field of activity '{activity.Id}' is not a valid integer");
             if (!eventState.TryGetTrigger(triggerId, out var trigger))
-                throw new NullReferenceException($"Failed to find a trigger ath the specified index '{triggerId}' in the event state with name '{eventState.Name}'");
-            return ActivatorUtilities.CreateInstance<EventStateTriggerProcessor>(this.ServiceProvider, activity, state, trigger);
+                throw new NullReferenceException($"Failed to find a trigger at the specified index '{triggerId}' in the event state with name '{eventState.Name}'");
+            return ActivatorUtilities.CreateInstance<EventStateTriggerProcessor>(this.ServiceProvider, activity, eventState, trigger);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="IWorkflowActivityProcessor"/> for an <see cref="V1WorkflowActivity"/> of type <see cref="V1WorkflowActivityType.Branch"/>
+        /// </summary>
+        /// <param name="state">The <see cref="StateDefinition"/> that defines the <see cref="BranchDefinition"/> to process</param>
+        /// <param name="activity">The <see cref="V1WorkflowActivity"/> that describe the <see cref="V1WorkflowActivity"/> to process</param>
+        /// <returns>A new <see cref="IWorkflowActivityProcessor"/></returns>
+        protected virtual IWorkflowActivityProcessor CreateBranchActivityProcessor(StateDefinition state, V1WorkflowActivity activity)
+        {
+            if (state is not ParallelStateDefinition parallelState)
+                throw new ArgumentException($"The specified state definition with name '{state.Name}' is not the definition of a parallel state");
+            if (!activity.Metadata.TryGetValue(V1WorkflowActivityMetadata.Branch, out var branchName))
+                throw new ArgumentException($"The specified activity '{activity.Id}' is missing the required metadata field '{V1WorkflowActivityMetadata.Branch}'");
+            if(!parallelState.TryGetBranch(branchName, out var branch))
+                throw new NullReferenceException($"Failed to find a branch with the specified name '{branchName}' in the parallel state with name '{parallelState.Name}'");
+            return ActivatorUtilities.CreateInstance<BranchProcessor>(this.ServiceProvider, activity, parallelState, branch);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="IWorkflowActivityProcessor"/> for an <see cref="V1WorkflowActivity"/> of type <see cref="V1WorkflowActivityType.Iteration"/>
+        /// </summary>
+        /// <param name="state">The <see cref="StateDefinition"/> that defines the action to process</param>
+        /// <param name="activity">The <see cref="V1WorkflowActivity"/> that describe the <see cref="V1WorkflowActivity"/> to process</param>
+        /// <returns>A new <see cref="IWorkflowActivityProcessor"/></returns>
+        protected virtual IWorkflowActivityProcessor CreateIterationActivityProcessor(StateDefinition state, V1WorkflowActivity activity)
+        {
+            if (state is not ForEachStateDefinition foreachState)
+                throw new ArgumentException($"The specified state definition with name '{state.Name}' is not the definition of a foreach state");
+            if (!activity.Metadata.TryGetValue(V1WorkflowActivityMetadata.Iteration, out var rawIterationIndex))
+                throw new ArgumentException($"The specified activity '{activity.Id}' is missing the required metadata field '{V1WorkflowActivityMetadata.Iteration}'");
+            if (!int.TryParse(rawIterationIndex, out var iterationIndex))
+                throw new ArgumentException($"The '{V1WorkflowActivityMetadata.Iteration}' metadata field of activity '{activity.Id}' is not a valid integer");
+            return ActivatorUtilities.CreateInstance<IterationProcessor>(this.ServiceProvider, activity, foreachState, iterationIndex);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="IWorkflowActivityProcessor"/> for an <see cref="V1WorkflowActivity"/> of type <see cref="V1WorkflowActivityType.Transition"/>
+        /// </summary>
+        /// <param name="state">The <see cref="StateDefinition"/> that defines the <see cref="TransitionDefinition"/> to process</param>
+        /// <param name="activity">The <see cref="V1WorkflowActivity"/> that describe the <see cref="V1WorkflowActivity"/> to process</param>
+        /// <returns>A new <see cref="IWorkflowActivityProcessor"/></returns>
+        protected virtual IWorkflowActivityProcessor CreateTransitionActivityProcessor(StateDefinition state, V1WorkflowActivity activity)
+        {
+            var transition = null as TransitionDefinition;
+            if (state is SwitchStateDefinition @switch)
+            {
+                if (!activity.Metadata.TryGetValue(V1WorkflowActivityMetadata.Case, out var caseName))
+                    throw new ArgumentException($"The specified activity '{activity.Id}' is missing the required metadata field '{V1WorkflowActivityMetadata.Case}'");
+                if (!@switch.TryGetCase(caseName, out SwitchCaseDefinition dataCondition))
+                    throw new NullReferenceException($"Failed to find a condition with the specified name '{caseName}'");
+                transition = dataCondition.Transition;
+                if (transition == null)
+                    transition = new() { NextState = dataCondition.TransitionToStateName! };
+            }
+            else
+            {
+                transition = state.Transition;
+                if (transition == null)
+                    transition = new() { NextState = state.TransitionToStateName! };
+            }
+            return ActivatorUtilities.CreateInstance<TransitionProcessor>(this.ServiceProvider, activity, state, transition);
         }
 
         /// <summary>

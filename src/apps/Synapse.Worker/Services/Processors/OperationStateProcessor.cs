@@ -19,7 +19,7 @@ using Synapse.Integration.Events;
 using Synapse.Integration.Events.WorkflowActivities;
 using System.Reactive.Linq;
 
-namespace Synapse.Worker.Executor.Services.Processors
+namespace Synapse.Worker.Services.Processors
 {
 
     /// <summary>
@@ -92,7 +92,9 @@ namespace Synapse.Worker.Executor.Services.Processors
             }
             foreach (var activity in await this.Context.Workflow.GetOperativeActivitiesAsync(this.Activity, cancellationToken))
             {
-                _ = this.CreateProcessorFor(activity);
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                this.CreateProcessorFor(activity);
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             }
         }
 
@@ -213,7 +215,7 @@ namespace Synapse.Worker.Executor.Services.Processors
         /// <summary>
         /// Handles the completion of the specified <see cref="V1WorkflowActivity"/>
         /// </summary>
-        /// <param name="processor">The <see cref="ActionProcessor"/> that has returned the <see cref="V1WorkflowExecutionResult"/></param>
+        /// <param name="processor">The <see cref="ActionProcessor"/> that has completed</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A new awaitable <see cref="Task"/></returns>
         protected virtual async Task OnActionCompletedAsync(ActionProcessor processor, CancellationToken cancellationToken)

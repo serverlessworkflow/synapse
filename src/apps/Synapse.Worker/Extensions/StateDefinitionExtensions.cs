@@ -86,7 +86,7 @@ namespace Synapse.Worker
                 action = state.GetAction(metadata);
                 return action != null;
             }
-            catch(Exception ex)
+            catch
             {
                 return false;
             }

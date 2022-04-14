@@ -1,4 +1,4 @@
-﻿namespace Synapse.Worker.Executor.Configuration
+﻿namespace Synapse.Worker.Configuration
 {
     /// <summary>
     /// Represents the object used to configure the runtime's event correlation feature

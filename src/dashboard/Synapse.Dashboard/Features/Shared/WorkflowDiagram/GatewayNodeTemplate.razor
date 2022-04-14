@@ -24,15 +24,15 @@
     {
         get
         {
-            if (this.Gateway.CompletionType == ServerlessWorkflow.Sdk.ParallelCompletionType.And)
+            if (this.Gateway.Type == GatewayNodeType.And)
             {
                 return "+";
             }
-            else if (this.Gateway.CompletionType == ServerlessWorkflow.Sdk.ParallelCompletionType.Xor)
+            else if (this.Gateway.Type == GatewayNodeType.Xor)
             {
                 return "x";
             }
-            else if (this.Gateway.CompletionType == ServerlessWorkflow.Sdk.ParallelCompletionType.N)
+            else if (this.Gateway.Type == GatewayNodeType.N)
             {
                 return "n";
             }

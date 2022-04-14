@@ -18,7 +18,7 @@
 using Synapse.Integration.Events;
 using Synapse.Integration.Events.WorkflowActivities;
 
-namespace Synapse.Worker.Executor.Services.Processors
+namespace Synapse.Worker.Services.Processors
 {
 
     /// <summary>
@@ -47,6 +47,15 @@ namespace Synapse.Worker.Executor.Services.Processors
         /// Gets the <see cref="StateDefinition"/> to process
         /// </summary>
         public virtual StateDefinition State { get; }
+
+        /// <inheritdoc/>
+        protected override async Task OnNextAsync(IV1WorkflowActivityIntegrationEvent e, CancellationToken cancellationToken)
+        {
+            if(e is V1WorkflowActivityCompletedIntegrationEvent completedEvent)
+                await base.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, await this.Context.FilterOutputAsync(this.State, completedEvent.Output!.ToObject()!, cancellationToken)), cancellationToken);
+            else
+                await base.OnNextAsync(e, cancellationToken);
+        }
 
     }
 

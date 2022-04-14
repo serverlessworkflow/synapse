@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+
 using Neuroglia.Data.Expressions;
 
 namespace Synapse.Worker
@@ -77,19 +78,19 @@ namespace Synapse.Worker
         }
 
         /// <summary>
-        /// Filters output data based on the specified <see cref="EventDataFilterDefinition"/>
+        /// Filters the output of the specified <see cref="StateDefinition"/>
         /// </summary>
         /// <param name="context">The <see cref="IWorkflowRuntimeContext"/> to use</param>
-        /// <param name="filter">The <see cref="EventDataFilterDefinition"/> used to filter the specified output</param>
+        /// <param name="state">The <see cref="StateDefinition"/> to filter the output for</param>
         /// <param name="output">The output data to filter</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>The filtered output</returns>
-        public static async Task<object?> FilterOutputAsync(this IWorkflowRuntimeContext context, EventDataFilterDefinition filter, object output, CancellationToken cancellationToken = default)
+        public static async Task<object?> FilterOutputAsync(this IWorkflowRuntimeContext context, StateDefinition state, object output, CancellationToken cancellationToken = default)
         {
-            if (filter == null
-                || string.IsNullOrWhiteSpace(filter.Data))
+            if (state.DataFilter == null
+                || string.IsNullOrWhiteSpace(state.DataFilter.Output))
                 return output;
-            return await context.EvaluateAsync(filter.Data, output, cancellationToken);
+            return await context.EvaluateAsync(state.DataFilter.Output, output, cancellationToken);
         }
 
         /// <summary>
@@ -106,6 +107,22 @@ namespace Synapse.Worker
                 || string.IsNullOrWhiteSpace(action.ActionDataFilter.Results))
                 return output;
             return await context.EvaluateAsync(action.ActionDataFilter.Results, output, cancellationToken);
+        }
+
+        /// <summary>
+        /// Filters output data based on the specified <see cref="EventDataFilterDefinition"/>
+        /// </summary>
+        /// <param name="context">The <see cref="IWorkflowRuntimeContext"/> to use</param>
+        /// <param name="filter">The <see cref="EventDataFilterDefinition"/> used to filter the specified output</param>
+        /// <param name="output">The output data to filter</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The filtered output</returns>
+        public static async Task<object?> FilterOutputAsync(this IWorkflowRuntimeContext context, EventDataFilterDefinition filter, object output, CancellationToken cancellationToken = default)
+        {
+            if (filter == null
+                || string.IsNullOrWhiteSpace(filter.Data))
+                return output;
+            return await context.EvaluateAsync(filter.Data, output, cancellationToken);
         }
 
     }
