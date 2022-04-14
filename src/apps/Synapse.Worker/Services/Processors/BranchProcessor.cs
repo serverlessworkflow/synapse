@@ -17,30 +17,51 @@
 
 using Synapse.Integration.Events;
 using Synapse.Integration.Events.WorkflowActivities;
-using System.Reactive.Linq;
 
 namespace Synapse.Worker.Services.Processors
 {
 
     /// <summary>
-    /// Represents the <see cref="IWorkflowActivityProcessor"/> used to process <see cref="OperationStateDefinition"/>s
+    /// Represents a <see cref="IWorkflowActivityProcessor"/> used to process <see cref="ParallelStateDefinition"/>'s branches
     /// </summary>
-    public class OperationStateProcessor
-        : StateProcessor<OperationStateDefinition>
+    public class BranchProcessor
+        : WorkflowActivityProcessor
     {
 
-        /// <inheritdoc/>
-        public OperationStateProcessor(ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory,
-            IJsonSerializer jsonSerializer, IOptions<ApplicationOptions> options, V1WorkflowActivity activity, OperationStateDefinition state)
-            : base(loggerFactory, context, activityProcessorFactory, options, activity, state)
+        /// <summary>
+        /// Initializes a new <see cref="WorkflowActivityProcessor"/>
+        /// </summary>
+        /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
+        /// <param name="context">The current <see cref="IWorkflowRuntimeContext"/></param>
+        /// <param name="activityProcessorFactory">The service used to create <see cref="IWorkflowActivityProcessor"/>s</param>
+        /// <param name="jsonSerializer">The service used to serialize/deserialize to/from JSON</param>
+        /// <param name="options">The service used to access the current <see cref="ApplicationOptions"/></param>
+        /// <param name="activity">The <see cref="V1WorkflowActivity"/> to process</param>
+        /// <param name="state">The <see cref="ParallelStateDefinition"/> that defines the <see cref="BranchDefinition"/> to process</param>
+        /// <param name="branch">The <see cref="BranchDefinition"/> to process</param>
+        public BranchProcessor(ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory,
+            IJsonSerializer jsonSerializer, IOptions<ApplicationOptions> options, V1WorkflowActivity activity, ParallelStateDefinition state, BranchDefinition branch) 
+            : base(loggerFactory, context, activityProcessorFactory, options, activity)
         {
             this.JsonSerializer = jsonSerializer;
+            this.State = state;
+            this.Branch = branch;
         }
 
         /// <summary>
         /// Gets the service used to serialize/deserialize to/from JSON
         /// </summary>
         protected IJsonSerializer JsonSerializer { get; }
+
+        /// <summary>
+        /// Gets the <see cref="ParallelStateDefinition"/> that defines the <see cref="BranchDefinition"/> to process
+        /// </summary>
+        public ParallelStateDefinition State { get; }
+
+        /// <summary>
+        /// Gets the <see cref="BranchDefinition"/> to process
+        /// </summary>
+        public BranchDefinition Branch { get; }
 
         /// <inheritdoc/>
         protected override IWorkflowActivityProcessor CreateProcessorFor(V1WorkflowActivity activity)
@@ -62,32 +83,34 @@ namespace Synapse.Worker.Services.Processors
             {
                 var input = null as object;
                 var metadata = null as Dictionary<string, string>;
-                switch (this.State.ActionMode)
+                switch (this.Branch.ActionMode)
                 {
                     case ActionExecutionMode.Parallel:
-                        foreach (var action in this.State.Actions)
+                        foreach (var action in this.Branch.Actions)
                         {
                             input = await this.Context.FilterInputAsync(action, this.Activity.Input, cancellationToken);
-                            metadata = new() 
+                            metadata = new()
                             {
                                 { V1WorkflowActivityMetadata.State, this.State.Name! },
-                                { V1WorkflowActivityMetadata.Action, action.Name! } 
+                                { V1WorkflowActivityMetadata.Action, action.Name! },
+                                { V1WorkflowActivityMetadata.Branch, this.Branch.Name }
                             };
                             await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Action, input, metadata, this.Activity, cancellationToken);
                         }
                         break;
                     case ActionExecutionMode.Sequential:
-                        var firstAction = this.State.Actions.First();
+                        var firstAction = this.Branch.Actions.First();
                         input = await this.Context.FilterInputAsync(firstAction, this.Activity.Input, cancellationToken);
                         metadata = new()
                         {
                             { V1WorkflowActivityMetadata.State, this.State.Name! },
-                            { V1WorkflowActivityMetadata.Action, firstAction.Name! }
+                            { V1WorkflowActivityMetadata.Action, firstAction.Name! },
+                            { V1WorkflowActivityMetadata.Branch, this.Branch.Name }
                         };
                         await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Action, input, metadata, this.Activity, cancellationToken);
                         break;
                     default:
-                        throw new NotSupportedException($"The specified {nameof(ActionExecutionMode)} '{this.State.ActionMode}' is not supported");
+                        throw new NotSupportedException($"The specified {nameof(ActionExecutionMode)} '{this.Branch.ActionMode}' is not supported");
                 }
             }
             foreach (var activity in await this.Context.Workflow.GetOperativeActivitiesAsync(this.Activity, cancellationToken))
@@ -101,14 +124,14 @@ namespace Synapse.Worker.Services.Processors
         /// <inheritdoc/>
         protected override async Task ProcessAsync(CancellationToken cancellationToken)
         {
-            foreach (IWorkflowActivityProcessor processor in this.Processors.ToList())
+            foreach (var processor in this.Processors.ToList())
             {
                 await processor.ProcessAsync(cancellationToken);
             }
         }
 
         /// <summary>
-        /// Aggregates the output of the completed actions activities that belongs to the processed <see cref="OperationStateDefinition"/>
+        /// Aggregates the output of the completed actions activities that belongs to the processed <see cref="BranchDefinition"/>
         /// </summary>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>The result of the action outputs aggregation</returns>
@@ -121,7 +144,7 @@ namespace Synapse.Worker.Services.Processors
             {
                 if (!activity.Metadata.TryGetValue(V1WorkflowActivityMetadata.Action, out var actionName))
                     throw new ArgumentException($"The specified activity '{activity.Id}' is missing the required metadata field '{V1WorkflowActivityMetadata.Action}'");
-                if (!this.State.TryGetAction(actionName, out var action))
+                if (!this.Branch.TryGetAction(actionName, out var action))
                     throw new NullReferenceException($"Failed to find an action with name '{actionName}' in the operation state with name '{this.State.Name}'");
                 if (action.UseResults())
                 {
@@ -159,7 +182,7 @@ namespace Synapse.Worker.Services.Processors
                     using (await this.Lock.LockAsync(cancellationToken))
                     {
                         var output = null as object;
-                        switch (this.State.ActionMode)
+                        switch (this.Branch.ActionMode)
                         {
                             case ActionExecutionMode.Parallel:
                                 var activities = (await this.Context.Workflow.GetActivitiesAsync(this.Activity, cancellationToken))
@@ -174,13 +197,14 @@ namespace Synapse.Worker.Services.Processors
                             case ActionExecutionMode.Sequential:
                                 output = await this.AggregateActionOutputsAsync(cancellationToken);
                                 if (processor.Activity.Metadata.TryGetValue(V1WorkflowActivityMetadata.Action, out var currentActionName)
-                                     && this.State.TryGetNextAction(currentActionName, out ActionDefinition nextAction))
+                                     && this.Branch.TryGetNextAction(currentActionName, out ActionDefinition nextAction))
                                 {
                                     var input = await this.Context.FilterInputAsync(nextAction, output, cancellationToken);
                                     var metadata = new Dictionary<string, string>()
                                     {
                                         { V1WorkflowActivityMetadata.State, this.State.Name! },
-                                        { V1WorkflowActivityMetadata.Action, nextAction.Name! }
+                                        { V1WorkflowActivityMetadata.Action, nextAction.Name! },
+                                        { V1WorkflowActivityMetadata.Branch, this.Branch.Name }
                                     };
                                     await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Action, input, metadata, this.Activity, cancellationToken);
                                 }
@@ -190,7 +214,7 @@ namespace Synapse.Worker.Services.Processors
                                 }
                                 break;
                             default:
-                                throw new NotSupportedException($"The specified {nameof(ActionExecutionMode)} '{this.State.ActionMode}' is not supported");
+                                throw new NotSupportedException($"The specified {nameof(ActionExecutionMode)} '{this.Branch.ActionMode}' is not supported");
                         }
                     }
                     break;
