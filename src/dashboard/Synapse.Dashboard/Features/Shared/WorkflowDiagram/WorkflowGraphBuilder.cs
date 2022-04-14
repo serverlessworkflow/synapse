@@ -205,6 +205,7 @@ namespace Synapse.Dashboard
                     { 
                         lastNode = this.BuildSleepNode(sleepState);
                         await stateNodeGroup.AddChildAsync(lastNode);
+                        await this.BuildEdgeBetween(graph, previousNode, lastNode);
                         break;
                     }
                 case SwitchStateDefinition switchState:
