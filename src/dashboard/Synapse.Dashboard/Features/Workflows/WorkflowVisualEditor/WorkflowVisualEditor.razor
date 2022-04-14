@@ -1,10 +1,11 @@
 ﻿@namespace Synapse.Dashboard
 @using Neuroglia.Serialization
 @using ServerlessWorkflow.Sdk.Models
+@using ServerlessWorkflow.Sdk.Services.FluentBuilders
 
 <AppRightSidebar>
     <Toolbar>
-        <button class="btn btn-outline-dark" title="inject state">
+        <button class="btn btn-outline-dark" title="inject state" @onclick="AddInjectTest">
             <svg width="16" height="16">
                 <use xlink:href="#inject-symbol" />
             </svg>
@@ -48,41 +49,53 @@
 </AppRightSidebar>
 <div class="container-fluid h-100">
     <div class="row h-100">
-        <WorkflowDiagram Graph="Graph" />
+        @if (WorkflowDefinition != null && WorkflowDefinition.States != null && WorkflowDefinition.States.Any())
+        {
+            <WorkflowDiagram WorkflowDefinition="WorkflowDefinition" />
+        }
     </div>
 </div>
-<Modal @ref="StateModal">
-    <Title></Title>
-    <Body></Body>
-    <Footer></Footer>
-</Modal>
 
 @code {
     [Parameter]
     public EventCallback<WorkflowDefinition> OnSubmitWorkflowDefinition { get; set; }
 
     public Modal StateModal = null!;
-    public IGraphViewModel Graph = null!;
+    public WorkflowDefinition WorkflowDefinition = new WorkflowDefinition();
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        this.Graph = new GraphViewModel();
-        var startNode = new StartNodeViewModel();
-        var endNode = new EndNodeViewModel();
-        await this.Graph.AddElementAsync(startNode);
-        await this.Graph.AddElementAsync(endNode);
-        await this.Graph.AddElementAsync(new EdgeViewModel(startNode.Id, endNode.Id));
-        /*var injectState = new InjectStateDefinition()
-            {
-                Name = "My inject state",
-                Data = new DynamicObject(new Dictionary<string, object>() { { "Foo", "Bar" } })
-            };
-        var injectStateNode = new StateNodeViewModel(injectState);
-        var injectNode = new InjectNodeViewMode(injectState.Data.ToString() ?? "");
-        await injectStateNode.AddChildAsync(injectNode);
-        await this.Graph.AddElementAsync(injectStateNode);
-        await this.Graph.AddElementAsync(new EdgeViewModel(startNode.Id, injectNode.Id));
-        await this.Graph.AddElementAsync(new EdgeViewModel(injectNode.Id, endNode.Id));*/
+        this.WorkflowDefinition = new WorkflowDefinition();
+    }
+
+    protected void AddInjectTest()
+    {
+        StateDefinition? prevState = this.WorkflowDefinition.States.FirstOrDefault(state => state.IsEnd);
+        var rnd = new Random();
+        var injectState = new InjectStateDefinition()
+        {
+                Name = "My inject state " + (char)rnd.Next('a','z') + (char)rnd.Next('a','z') + (char)rnd.Next('a','z'),
+                Data = new DynamicObject(new Dictionary<string, object>() { { "Foo", "Bar" } }),
+                IsEnd = true
+        };
+        this.WorkflowDefinition.States.Add(injectState);
+        if (prevState != null )
+        {
+            prevState.IsEnd = false;
+            prevState.TransitionToStateName = injectState.Name;
+        }
+        if (this.WorkflowDefinition.States.Count == 1)
+        {
+            this.WorkflowDefinition.StartStateName = injectState.Name;
+        }
+        //Console.WriteLine($"WF StartStateName {this.WorkflowDefinition.StartStateName}");
+        //Console.WriteLine($"WF Start.StateName {(this.WorkflowDefinition.Start?.StateName ?? "none")}");
+        for(int i = 0, c = this.WorkflowDefinition.States.Count; i<c; i++)
+        {
+            var state = this.WorkflowDefinition.States.ElementAt(i);
+            //Console.WriteLine($"[{i}][editor] state: {state.Name} - isEnd: {state.IsEnd} / {(state.End == null ? "End is null" : "End exists" )} - transition: {state.TransitionToStateName}");
+        }
+        
     }
 }

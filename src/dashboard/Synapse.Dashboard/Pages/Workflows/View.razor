@@ -8,7 +8,6 @@
 @inject IStore Store
 @inject IDispatcher Dispatcher
 @inject ISynapseManagementApi SynapseApi
-@inject WorkflowGraphBuilder WorkflowGraphBuilder 
 @inject IMonacoEditorHelper MonacoEditorHelper
 @inject IBreadcrumbService BreadcrumbService
 @inject HubConnection HubConnection
@@ -38,7 +37,7 @@
 {
     <div class="container-fluid h-100">
         <div class="row h-50 position-relative">
-            <WorkflowDiagram Graph="graph" />
+            <WorkflowDiagram @ref="workflowDiagram" WorkflowDefinition="workflow.Definition" />
         </div>
         <div class="row h-50">            
             @if (workflowInstance == null)
@@ -123,12 +122,12 @@ else
     [Parameter]
     public string? WorkflowInstanceId { get; set; } = null!;
 
-    private IDisposable? _WorkflowInstanceSubscription;
-    protected IFeature<V1WorkflowInstanceCollectionState> _WorkflowInstanceFeature = null!;
+    protected IDisposable? workflowInstanceSubscription;
+    protected WorkflowDiagram workflowDiagram = null!;
+    protected IFeature<V1WorkflowInstanceCollectionState> workflowInstanceFeature = null!;
     protected V1Workflow workflow = null!;
     protected V1WorkflowInstance workflowInstance = null!;
     protected List<V1WorkflowActivity> sortedActivities = new List<V1WorkflowActivity>();
-    protected IGraphViewModel graph { get; set; } = null!;
     protected List<V1WorkflowInstance> instances = new();
     protected IEnumerable<IBreadcrumbItem> workflowBreadCrumbBase = null!;
 
@@ -136,16 +135,14 @@ else
     {
         await base.OnInitializedAsync();
         this.workflow = await this.SynapseApi.GetWorkflowByIdAsync(this.WorkflowId);
-        this.graph = await this.WorkflowGraphBuilder.BuildGraph(this.workflow.Definition);
-        this._WorkflowInstanceFeature = this.Store.GetFeature<V1WorkflowInstanceCollectionState>();
-        this._WorkflowInstanceSubscription = this._WorkflowInstanceFeature
+        this.workflowInstanceFeature = this.Store.GetFeature<V1WorkflowInstanceCollectionState>();
+        this.workflowInstanceSubscription = this.workflowInstanceFeature
             .Subscribe(instances =>
             {
                 this.instances = instances;
                 this.StateHasChanged();;
             });
         this.Dispatcher.Dispatch(new ListV1WorkflowInstancesByDefinition(this.WorkflowId));
-        this.graph.DisplayActivityStatusFor(this.instances);
         await this.BreadcrumbService.Use(KnownBreadcrumbs.Workflows);
         await this.BreadcrumbService.AddCurrentUri(this.WorkflowId);
         this.workflowBreadCrumbBase = new List<IBreadcrumbItem>(this.BreadcrumbService.Items);
@@ -158,14 +155,14 @@ else
         {
             this.workflowInstance = null!;
             this.sortedActivities = new List<V1WorkflowActivity>();
-            this.graph.DisplayActivityStatusFor(this.instances);
+            if (this.workflowDiagram != null) this.workflowDiagram.DisplayActivityStatusFor(this.instances);
         }
         else
         {
             await this.BreadcrumbService.AddCurrentUri($"Instance {this.WorkflowInstanceId}");
             this.workflowInstance = await this.SynapseApi.GetWorkflowInstanceByIdAsync(this.WorkflowInstanceId);
             this.sortedActivities = this.workflowInstance.Activities.OrderBy(a => a.StartedAt).ToList();
-            this.graph.DisplayActivityStatusFor(this.instances.Where(i => i.Id == this.WorkflowInstanceId));
+            if (this.workflowDiagram != null) this.workflowDiagram.DisplayActivityStatusFor(this.instances.Where(i => i.Id == this.WorkflowInstanceId));
         }
         this.StateHasChanged();
     }
@@ -193,8 +190,8 @@ else
 
     public void Dispose()
     {
-        this._WorkflowInstanceSubscription?.Dispose();
-        this._WorkflowInstanceSubscription = null;
+        this.workflowInstanceSubscription?.Dispose();
+        this.workflowInstanceSubscription = null;
     }
 
 }

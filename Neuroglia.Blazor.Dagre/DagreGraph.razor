@@ -74,16 +74,25 @@
 
     protected ElementReference _graphReference;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
+        await base.OnParametersSetAsync();
         if (this.Graph != null)
         {
             //this.Graph.ShowConstruction = true;
+            await this.RefreshAsync();
+            //Console.WriteLine(await this.DagreService.SerializeAsync(this.Graph.DagreGraph!));
+            //Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(this.Graph));
+        }
+    }
+
+    public virtual async Task RefreshAsync()
+    {
+        if (this.Graph != null)
+        {
             await this.DagreService.ComputePositionsAsync(this.Graph, this.Options);
             this.StateHasChanged();
             await this.ZoomToFit();
-            //Console.WriteLine(await this.DagreService.SerializeAsync(this.Graph.DagreGraph!));
-            //Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(this.Graph));
         }
     }
 
