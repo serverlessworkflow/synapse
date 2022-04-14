@@ -9,7 +9,7 @@
             <Ellipse BBox="Node.BBox" />
         }
         else
-        {        
+        {
             <Rectangle BBox="Node.BBox" RadiusX="Node.RadiusX" RadiusY="Node.RadiusY" />
         }
     </g>
@@ -24,6 +24,9 @@
                 <div>@Node.Label</div>
             </foreignObject>
         </g>
+    }
+    @if (Graph.ShowConstruction) {
+        <circle cx="0" cy="0" r="1" fill="red" />
     }
 </g>
 

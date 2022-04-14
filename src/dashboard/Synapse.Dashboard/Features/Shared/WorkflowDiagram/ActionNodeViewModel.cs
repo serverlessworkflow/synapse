@@ -21,10 +21,10 @@ namespace Synapse.Dashboard
 {
 
     /// <summary>
-    /// Represents a <see cref="ActionDefinition"/> <see cref="NodeModel"/>
+    /// Represents a <see cref="ActionDefinition"/> <see cref="NodeViewModel"/>
     /// </summary>
     public class ActionNodeViewModel
-        : WorkflowNodeViewModel
+        : LabeledNodeViewModel
     {
 
         /// <summary>

@@ -1,0 +1,101 @@
+﻿@namespace Synapse.Dashboard
+@using Neuroglia.Serialization
+@using ServerlessWorkflow.Sdk.Models
+@using ServerlessWorkflow.Sdk.Services.FluentBuilders
+
+<AppRightSidebar>
+    <Toolbar>
+        <button class="btn btn-outline-dark" title="inject state" @onclick="AddInjectTest">
+            <svg width="16" height="16">
+                <use xlink:href="#inject-symbol" />
+            </svg>
+        </button>
+        <button class="btn btn-outline-dark" title="operation state">
+            <svg width="16" height="16">
+                <use xlink:href="#operation-symbol" />
+            </svg>
+        </button>
+        <button class="btn btn-outline-dark" title="sleep state">
+            <svg width="16" height="16">
+                <use xlink:href="#sleep-symbol" />
+            </svg>
+        </button>
+        <button class="btn btn-outline-dark" title="event state">
+            <svg width="16" height="16">
+                <use xlink:href="#event-symbol" />
+            </svg>
+        </button>
+        <button class="btn btn-outline-dark" title="switch state">
+            <svg width="16" height="16">
+                <use xlink:href="#switch-symbol" />
+            </svg>
+        </button>
+        <button class="btn btn-outline-dark" title="parallel state">
+            <svg width="16" height="16">
+                <use xlink:href="#parallel-symbol" />
+            </svg>
+        </button>
+        <button class="btn btn-outline-dark" title="foreach state">
+            <svg width="16" height="16">
+                <use xlink:href="#foreach-symbol" />
+            </svg>
+        </button>
+        <button class="btn btn-outline-dark" title="callback state">
+            <svg width="16" height="16">
+                <use xlink:href="#callback-symbol" />
+            </svg>
+        </button>
+    </Toolbar>
+</AppRightSidebar>
+<div class="container-fluid h-100">
+    <div class="row h-100">
+        @if (WorkflowDefinition != null && WorkflowDefinition.States != null && WorkflowDefinition.States.Any())
+        {
+            <WorkflowDiagram WorkflowDefinition="WorkflowDefinition" />
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback<WorkflowDefinition> OnSubmitWorkflowDefinition { get; set; }
+
+    public Modal StateModal = null!;
+    public WorkflowDefinition WorkflowDefinition = new WorkflowDefinition();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        this.WorkflowDefinition = new WorkflowDefinition();
+    }
+
+    protected void AddInjectTest()
+    {
+        StateDefinition? prevState = this.WorkflowDefinition.States.FirstOrDefault(state => state.IsEnd);
+        var rnd = new Random();
+        var injectState = new InjectStateDefinition()
+        {
+                Name = "My inject state " + (char)rnd.Next('a','z') + (char)rnd.Next('a','z') + (char)rnd.Next('a','z'),
+                Data = new DynamicObject(new Dictionary<string, object>() { { "Foo", "Bar" } }),
+                IsEnd = true
+        };
+        this.WorkflowDefinition.States.Add(injectState);
+        if (prevState != null )
+        {
+            prevState.IsEnd = false;
+            prevState.TransitionToStateName = injectState.Name;
+        }
+        if (this.WorkflowDefinition.States.Count == 1)
+        {
+            this.WorkflowDefinition.StartStateName = injectState.Name;
+        }
+        //Console.WriteLine($"WF StartStateName {this.WorkflowDefinition.StartStateName}");
+        //Console.WriteLine($"WF Start.StateName {(this.WorkflowDefinition.Start?.StateName ?? "none")}");
+        for(int i = 0, c = this.WorkflowDefinition.States.Count; i<c; i++)
+        {
+            var state = this.WorkflowDefinition.States.ElementAt(i);
+            //Console.WriteLine($"[{i}][editor] state: {state.Name} - isEnd: {state.IsEnd} / {(state.End == null ? "End is null" : "End exists" )} - transition: {state.TransitionToStateName}");
+        }
+        
+    }
+}

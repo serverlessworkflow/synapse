@@ -6,3 +6,11 @@
     -ms-user-select: none;
     user-select: none; 
 }
+.graph-container {
+    position: relative;
+}
+.graph-controls {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+}

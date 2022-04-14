@@ -63,6 +63,8 @@ namespace Neuroglia.Blazor.Dagre.Models
         protected readonly Collection<Type> _svgDefinitionComponents;
         public virtual IReadOnlyCollection<Type> SvgDefinitionComponents => this._svgDefinitionComponents;
 
+        public virtual bool ShowConstruction { get; set; }
+
         /// <summary>
         /// The map of node type and their component type
         /// </summary>
@@ -93,7 +95,8 @@ namespace Neuroglia.Blazor.Dagre.Models
             double? width = null,
             double? height = null,
             string? label = null,
-            Type? componentType = null
+            Type? componentType = null,
+            bool showConstruction = false
         )
             : base(label, cssClass, componentType)
         {
@@ -112,10 +115,11 @@ namespace Neuroglia.Blazor.Dagre.Models
             this._allNodes = new Dictionary<Guid, INodeViewModel>();
             this._allClusters = new Dictionary<Guid, IClusterViewModel>();
             this._behaviors = new Dictionary<Type, GraphBehavior>();
-            //this.RegisterBehavior(new DebugEventsBehavior(this));
+            this.ShowConstruction = showConstruction;
+            // this.RegisterBehavior(new DebugEventsBehavior(this));
             this.RegisterBehavior(new ZoomBahavior(this));
             this.RegisterBehavior(new PanBahavior(this));
-            this.RegisterBehavior(new MoveNodeBehavior(this));
+            // this.RegisterBehavior(new MoveNodeBehavior(this));
             foreach (var node in this._nodes.Values)
             {
                 if (node == null)
@@ -135,6 +139,7 @@ namespace Neuroglia.Blazor.Dagre.Models
                 this.Flatten(cluster);
             }
         }
+
 
         /// <summary>
         /// Adds the provided <see cref="IGraphElement"/> to the graph
@@ -164,6 +169,24 @@ namespace Neuroglia.Blazor.Dagre.Models
                 return;
             }
             throw new Exception("Unknown element type");
+        }
+
+        /// <summary>
+        /// Adds the provided <see cref="IGraphElement"/>s to the graph
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public virtual async Task AddElementsAsync(IEnumerable<IGraphElement> elements)
+        {
+            if (elements == null || !elements.Any())
+            {
+                throw new ArgumentNullException(nameof(elements));
+            }
+            foreach (var element in elements)
+            {
+                await this.AddElementAsync(element);
+            }
         }
 
         /// <summary>

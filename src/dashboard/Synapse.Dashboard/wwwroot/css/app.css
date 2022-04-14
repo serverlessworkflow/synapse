@@ -12286,3 +12286,7 @@ input[type=time]::-webkit-clear-button {
 .end-node circle {
   stroke-width: 3px;
 }
+
+.btn-outline-dark:hover {
+  fill: white;
+}

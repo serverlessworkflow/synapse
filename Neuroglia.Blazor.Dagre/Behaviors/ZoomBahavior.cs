@@ -17,7 +17,7 @@ namespace Neuroglia.Blazor.Dagre.Behaviors
             if (element != null)
                 return;
             this.Graph.Scale += (decimal)(e.DeltaY / Math.Abs(e.DeltaY)) * -0.1M; ;
-            this.Graph.Scale = Math.Clamp(this.Graph.Scale, 0.1M, 3M);
+            this.Graph.Scale = Math.Clamp(this.Graph.Scale, Consts.MinScale, Consts.MaxScale);
         }
 
         public override void Dispose()

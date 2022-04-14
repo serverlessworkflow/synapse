@@ -7,6 +7,7 @@ namespace Neuroglia.Blazor.Dagre.Models
         : IIdentifiable, ILabeled, IDimension, IPosition, ICssClass, IMetadata
     {
         decimal Scale { get; set; }
+        bool ShowConstruction { get; set; }
         IReadOnlyDictionary<Guid, INodeViewModel> Nodes { get; }
         IReadOnlyDictionary<Guid, INodeViewModel> AllNodes { get; }
         IReadOnlyDictionary<Guid, IEdgeViewModel> Edges { get; }
@@ -28,6 +29,8 @@ namespace Neuroglia.Blazor.Dagre.Models
             where TElement : IGraphElement;
 
         Task AddElementAsync(IGraphElement element);
+
+        Task AddElementsAsync(IEnumerable<IGraphElement> elements);
 
         void OnMouseMove(IGraphElement? element, MouseEventArgs e);
 

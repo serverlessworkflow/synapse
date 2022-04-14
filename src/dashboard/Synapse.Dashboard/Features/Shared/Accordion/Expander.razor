@@ -87,7 +87,6 @@
 
     public async Task ToggleExpandAsync()
     {
-        Console.WriteLine("TOGGGLED");
         this.IsExpanded = !this.IsExpanded;
         //this.StateHasChanged();
         await this.OnToggleExpand.InvokeAsync(this.IsExpanded);

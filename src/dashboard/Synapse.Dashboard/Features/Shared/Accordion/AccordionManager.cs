@@ -83,7 +83,6 @@ namespace Synapse.Dashboard
         /// <returns></returns>
         public virtual async Task Toggle(IAccordionModel model)
         {
-            Console.WriteLine("Toggling ...");
             if (model.IsExpanded) {
                 await this.Close(model);
             }

@@ -23,7 +23,7 @@ namespace Synapse.Dashboard
     /// Represents a <see cref="SubflowReference"/> <see cref="NodeViewModel"/>
     /// </summary>
     public class SubflowRefNodeViewModel
-        : WorkflowNodeViewModel
+        : LabeledNodeViewModel
     {
 
         /// <summary>

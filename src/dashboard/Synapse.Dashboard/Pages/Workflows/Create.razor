@@ -28,9 +28,24 @@
 <AppHeader>
     <span class="h5 m-0 p-0">New workflow</span>
 </AppHeader>
-<WorkflowForm OnSubmitWorkflowDefinition="OnCreateWorkflow" />
+<div class="h-100 mh-100 flex-grow d-flex flex-column justify-content-between align-items-start">
+    @if (ShowVisualEditor)
+    {
+        <WorkflowVisualEditor OnSubmitWorkflowDefinition="OnCreateWorkflow" />
+    }
+    else {    
+        <WorkflowForm OnSubmitWorkflowDefinition="OnCreateWorkflow" />
+    }
+    <!--
+    <div class="form-check form-switch align-self-end">
+        <input class="form-check-input" type="checkbox" role="switch" id="show-visual-editor-switch" checked="@ShowVisualEditor" @onchange="ToggleVisualEditor">
+        <label class="form-check-label" for="show-visual-editor-switch">Show visual editor</label>
+    </div>
+    -->
+</div>
 
 @code {
+    public virtual bool ShowVisualEditor { get; set; } = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -50,6 +65,11 @@
             if (workflow != null)
                 this.NavigationManager.NavigateTo("workflows");
         }
+    }
+
+    public void ToggleVisualEditor()
+    {
+        this.ShowVisualEditor = !this.ShowVisualEditor;
     }
 
 }

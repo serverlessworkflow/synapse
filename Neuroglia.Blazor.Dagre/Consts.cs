@@ -19,5 +19,8 @@
         public const double LabelHeight = 25;
 
         public const string EdgeEndArrowId = "end-arrow";
+
+        public const decimal MinScale = 0.2M;
+        public const decimal MaxScale = 5M;
     }
 }

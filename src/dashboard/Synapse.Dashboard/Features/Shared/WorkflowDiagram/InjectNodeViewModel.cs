@@ -29,9 +29,10 @@ namespace Synapse.Dashboard
         /// </summary>
         /// <param name="data"></param>
         public InjectNodeViewMode(string data)
-            : base("", "inject-node")
+            : base("", "inject-node", null, 40)
         {
             this.Data = data;
+            this.ComponentType = typeof(InjectNodeTemplate);
         }
 
         public string Data { get; set; }

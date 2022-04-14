@@ -3,7 +3,7 @@
         d="@GetPath(Edge)"
         marker-start="@GetDefinitionUrl(Edge.StartMarkerId)"
         marker-end="@GetDefinitionUrl(Edge.EndMarkerId)"
-    ></path>
+    />
     @if (LabelCenter != null && !string.IsNullOrWhiteSpace(Edge.Label)) {
         <g class="edge-label label">
             <foreignObject 
@@ -15,6 +15,12 @@
                 <div>@Edge.Label</div>
             </foreignObject>
         </g>
+    }
+    @if (Graph.ShowConstruction) {
+        @foreach(var point in Edge.Points)
+        {
+            <circle cx="@point.X" cy="@point.Y" r="1" fill="red" />
+        }
     }
 </g>
 
@@ -42,7 +48,7 @@
         switch(edge.Shape)
         {
             case EdgeShape.BSpline:
-            //return PathBuilder.GetBSplinePath(edge.Points);                
+                //return PathBuilder.GetBSplinePath(edge.Points);                
             default:
                 return PathBuilder.GetLinearPath(edge.Points);
         }

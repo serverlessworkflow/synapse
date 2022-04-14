@@ -257,7 +257,7 @@ namespace Synapse.Dashboard
             if (state.IsEnd
                 || state.End != null)
             {
-                Console.WriteLine($"State '{state.Name}' ends");
+                //Console.WriteLine($"State '{state.Name}' ends");
                 await this.BuildEdgeBetween(graph, lastNode, endNode);
                 return lastNode;
             }
@@ -265,15 +265,15 @@ namespace Synapse.Dashboard
                 || state.Transition != null)
             {
                 var nextStateName = state.Transition == null ? state.TransitionToStateName! : state.Transition!.NextState;
-                Console.WriteLine($"State '{state.Name}' transitions to '{nextStateName}'");
+                //Console.WriteLine($"State '{state.Name}' transitions to '{nextStateName}'");
                 var nextState = definition.GetState(nextStateName);
                 if (nextState == null)
                     throw new Exception($"Failed to find a state with name '{nextStateName}' in definition '{definition.GetUniqueIdentifier()}'");
                 await this.BuildStateNodes(definition, graph, nextState, endNode, lastNode);
                 return lastNode;
             }
-            Console.WriteLine($"No transition for state '{state.Name}'");
-            Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(state));
+            //Console.WriteLine($"No transition for state '{state.Name}'");
+            //Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(state));
             return lastNode;
         }
 
