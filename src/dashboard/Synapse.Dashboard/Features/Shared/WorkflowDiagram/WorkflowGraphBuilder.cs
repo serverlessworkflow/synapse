@@ -1,12 +1,12 @@
 ﻿/*
  * Copyright © 2022-Present The Synapse Authors
- * <p>
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p>
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -47,7 +47,6 @@ namespace Synapse.Dashboard
         {
             var stateNodeGroup = new StateNodeViewModel(state);
             await graph.AddElementAsync(stateNodeGroup);
-            //List<NodeViewModel> childNodes = new();
             NodeViewModel? firstNode, lastNode = null;
             switch (state)
             {
@@ -66,48 +65,32 @@ namespace Synapse.Dashboard
                     }
                 case EventStateDefinition eventState:
                     { 
-                        firstNode = eventState.Exclusive ? this.BuildGatewayNode(GatewayNodeType.Xor) : this.BuildJunctionNode();
-                        lastNode = eventState.Exclusive ? this.BuildGatewayNode(GatewayNodeType.Xor) : this.BuildJunctionNode();
+                        firstNode = this.BuildParellelNode();
+                        lastNode = this.BuildParellelNode();
                         await stateNodeGroup.AddChildAsync(firstNode);
                         await this.BuildEdgeBetween(graph, previousNode, firstNode);
-                        var andNode = this.BuildGatewayNode(GatewayNodeType.And);
-                        if (!eventState.Exclusive)
-                        {
-                            await stateNodeGroup.AddChildAsync(andNode);
-                        }
                         foreach (var trigger in eventState.Triggers)
                         {
-                            var refName = string.Join(" | ", trigger.Events);
-                            var eventNode = this.BuildConsumeEventNode(refName);
-                            await stateNodeGroup.AddChildAsync(eventNode);
-                            await this.BuildEdgeBetween(graph, firstNode, eventNode);
-                            if (eventState.Exclusive) { 
-                                foreach (var action in trigger.Actions)
-                                {
-                                    var actionsNodes = await this.BuildActionNodes(graph, action);
-                                    foreach(var actionNode in actionsNodes)
-                                    {
-                                        await stateNodeGroup.AddChildAsync(actionNode);
-                                    }
-                                    await this.BuildEdgeBetween(graph, eventNode, actionsNodes.First());
-                                    await this.BuildEdgeBetween(graph, actionsNodes.Last(), lastNode);
-                                }
-                            }
-                            else
+                            var gatewayIn = this.BuildGatewayNode(eventState.Exclusive ?  GatewayNodeType.Xor : GatewayNodeType.And);
+                            var gatewayOut = this.BuildGatewayNode(eventState.Exclusive ? GatewayNodeType.Xor : GatewayNodeType.And);
+                            await stateNodeGroup.AddChildAsync(gatewayIn);
+                            await stateNodeGroup.AddChildAsync(gatewayOut);
+                            await this.BuildEdgeBetween(graph, firstNode, gatewayIn);
+                            foreach (var eventName in trigger.Events)
                             {
-                                await this.BuildEdgeBetween(graph, eventNode, andNode);
+                                var eventNode = this.BuildConsumeEventNode(eventName);
+                                await stateNodeGroup.AddChildAsync(eventNode);
+                                await this.BuildEdgeBetween(graph, gatewayIn, eventNode);
+                                await this.BuildEdgeBetween(graph, eventNode, gatewayOut);
                             }
-                        }
-                        if (!eventState.Exclusive)
-                        {
-                            foreach (var action in eventState.Triggers.SelectMany(trigger => trigger.Actions))
+                            foreach (var action in trigger.Actions)
                             {
                                 var actionsNodes = await this.BuildActionNodes(graph, action);
-                                foreach (var actionNode in actionsNodes)
+                                foreach(var actionNode in actionsNodes)
                                 {
                                     await stateNodeGroup.AddChildAsync(actionNode);
                                 }
-                                await this.BuildEdgeBetween(graph, andNode, actionsNodes.First());
+                                await this.BuildEdgeBetween(graph, gatewayOut, actionsNodes.First());
                                 await this.BuildEdgeBetween(graph, actionsNodes.Last(), lastNode);
                             }
                         }
