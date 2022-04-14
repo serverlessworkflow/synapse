@@ -16,35 +16,33 @@
  */
 
 using Microsoft.Extensions.DependencyInjection;
-using Synapse.Cli.Commands.Correlations;
+using Synapse.Cli.Commands.Systems;
 
 namespace Synapse.Cli.Commands
 {
 
     /// <summary>
-    /// Represents the <see cref="Command"/> used to manage <see cref="V1Correlation"/>s
+    /// Represents the <see cref="Command"/> used to manage Synapse
     /// </summary>
-    public class CorrelationCommand
+    public class SystemCommand
         : Command
     {
 
         /// <summary>
-        /// Gets the <see cref="CorrelationCommand"/>'s name
+        /// Gets the <see cref="SystemCommand"/>'s name
         /// </summary>
-        public const string CommandName = "correlations";
+        public const string CommandName = "system";
         /// <summary>
-        /// Gets the <see cref="CorrelationCommand"/>'s description
+        /// Gets the <see cref="SystemCommand"/>'s description
         /// </summary>
-        public const string CommandDescription = "Manages correlations";
+        public const string CommandDescription = "Manages Synapse";
 
         /// <inheritdoc/>
-        public CorrelationCommand(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, ISynapseManagementApi synapseManagementApi)
+        public SystemCommand(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, ISynapseManagementApi synapseManagementApi)
             : base(serviceProvider, loggerFactory, synapseManagementApi, CommandName, CommandDescription)
         {
-            this.AddAlias("correl");
-            this.AddAlias("crl");
-            this.AddCommand(ActivatorUtilities.CreateInstance<GetCorrelationCommand>(this.ServiceProvider));
-            this.AddCommand(ActivatorUtilities.CreateInstance<ListCorrelationsCommand>(this.ServiceProvider));
+            this.AddAlias("sys");
+            this.AddCommand(ActivatorUtilities.CreateInstance<InstallCommand>(this.ServiceProvider));
         }
 
     }

@@ -38,6 +38,16 @@ static Parser BuildCommandLineParser()
     }
     return new CommandLineBuilder(rootCommand)
         .UseDefaults()
+        .UseExceptionHandler((ex, context) =>
+        {
+            AnsiConsole.MarkupLine($"[red]{ex.Message}[/]");
+            var inner = ex.InnerException;
+            while(inner != null)
+            {
+                AnsiConsole.MarkupLine($"[red]{inner.Message}[/]");
+                inner = inner.InnerException;
+            }
+        })
         .Build();
 }
 
