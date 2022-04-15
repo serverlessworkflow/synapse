@@ -21,10 +21,10 @@ Synapse is a vendor-neutral, free, open-source, and community-driven Workflow Ma
 
 1. Download and extract synctl:
 
-*In the following commands, please replace `{version}` with the version you wish to download (ex: `0.1.0`), and replace `{target}` with one of the following values: `win-x64`, `linux-x64` or `osx-x64`*
+*In the following commands, please replace `{target}` with one of the following values: `win-x64`, `linux-x64` or `osx-x64`*
 
 ```
-wget https://github.com/serverlessworkflow/synapse/releases/download/{version}/synctl-{target}{.zip|.tar.gz}
+wget https://github.com/serverlessworkflow/synapse/releases/latest/download/synctl-{target}{.zip|.tar.gz}
 tar -xf synctl-{target}{.zip|.tar.gz}
 ```
 
