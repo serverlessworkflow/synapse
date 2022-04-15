@@ -68,17 +68,21 @@ namespace Synapse.Runtime.Services
         /// <inheritdoc/>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            var response = null as NetworkResponse;
             try
             {
-                var response = await this.Docker.Networks.InspectNetworkAsync(this.Options.Network, stoppingToken);
-                if (this.Environment.RunsInDocker()
-                    && this.TryGetDockerContainerId(out var containerId)
-                    && !response.Containers.ContainsKey(containerId))
-                    await this.Docker.Networks.ConnectNetworkAsync(this.Options.Network, new NetworkConnectParameters() { Container = containerId }, stoppingToken);
+                response = await this.Docker.Networks.InspectNetworkAsync(this.Options.Network, stoppingToken);
             }
             catch(DockerNetworkNotFoundException)
             {
                 await this.Docker.Networks.CreateNetworkAsync(new() { Name = this.Options.Network }, stoppingToken);
+            }
+            finally
+            {
+                if (this.Environment.RunsInDocker()
+                    && this.TryGetDockerContainerId(out var containerId)
+                    && (response == null ? true : !response!.Containers.ContainsKey(containerId)))
+                    await this.Docker.Networks.ConnectNetworkAsync(this.Options.Network, new NetworkConnectParameters() { Container = containerId }, stoppingToken);
             }
         }
 

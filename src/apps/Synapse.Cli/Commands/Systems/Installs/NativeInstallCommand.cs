@@ -114,11 +114,11 @@ namespace Synapse.Cli.Commands.Systems.Installs
         private static class CommandOptions
         {
 
-            public static Option<bool> Directory
+            public static Option<string> Directory
             {
                 get
                 {
-                    var option = new Option<bool>("--directory")
+                    var option = new Option<string>("--directory")
                     {
                         Description = "The directory to install Synapse to"
                     };
