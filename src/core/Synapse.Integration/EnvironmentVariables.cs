@@ -43,29 +43,29 @@ namespace Synapse
             public const string Prefix = EnvironmentVariables.Prefix + "CLOUDEVENTS_";
 
             /// <summary>
-            /// Exposes constants about <see cref="CloudEvent"/> broker related environment variables
+            /// Exposes constants about <see cref="CloudEvent"/> sink related environment variables
             /// </summary>
-            public static class Broker
+            public static class Sink
             {
 
                 /// <summary>
-                /// Gets the prefix for all <see cref="CloudEvent"/> broker related environment variables
+                /// Gets the prefix for all <see cref="CloudEvent"/> sink related environment variables
                 /// </summary>
-                public const string Prefix = CloudEvents.Prefix + "BROKER_";
+                public const string Prefix = CloudEvents.Prefix + "SINK_";
 
                 /// <summary>
-                /// Exposes constants about the <see cref="CloudEvent"/> broker uri environment variable
+                /// Exposes constants about the <see cref="CloudEvent"/> sink uri environment variable
                 /// </summary>
                 public static class Uri
                 {
 
                     /// <summary>
-                    /// Gets the name of the <see cref="CloudEvent"/> broker uri environment variable
+                    /// Gets the name of the <see cref="CloudEvent"/> sink uri environment variable
                     /// </summary>
                     public const string Name = Prefix + "URI";
 
                     /// <summary>
-                    /// Gets the value of the <see cref="CloudEvent"/> broker uri environment variable
+                    /// Gets the value of the <see cref="CloudEvent"/> sink uri environment variable
                     /// </summary>
                     public static string Value = Environment.GetEnvironmentVariable(Name);
 

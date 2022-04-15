@@ -42,6 +42,7 @@ namespace Synapse.Cli.Commands.Systems
             : base(serviceProvider, loggerFactory, synapseManagementApi, CommandName, CommandDescription)
         {
             this.AddCommand(ActivatorUtilities.CreateInstance<NativeInstallCommand>(this.ServiceProvider));
+            this.AddCommand(ActivatorUtilities.CreateInstance<DockerInstallCommand>(this.ServiceProvider));
         }
 
     }

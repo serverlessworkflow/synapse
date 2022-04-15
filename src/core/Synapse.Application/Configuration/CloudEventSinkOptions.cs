@@ -19,17 +19,17 @@ namespace Synapse.Application.Configuration
 {
 
     /// <summary>
-    /// Represents the options used to configure the broker to post cloud eventss to
+    /// Represents the options used to configure the sink to post cloud eventss to
     /// </summary>
-    public class CloudEventBrokerOptions
+    public class CloudEventSinkOptions
     {
 
         /// <summary>
-        /// Initializes a new <see cref="CloudEventBrokerOptions"/>
+        /// Initializes a new <see cref="CloudEventSinkOptions"/>
         /// </summary>
-        public CloudEventBrokerOptions()
+        public CloudEventSinkOptions()
         {
-            string? uri = EnvironmentVariables.CloudEvents.Broker.Uri.Value;
+            string? uri = EnvironmentVariables.CloudEvents.Sink.Uri.Value;
             if (string.IsNullOrWhiteSpace(uri))
                 this.Uri = null!;
             else
@@ -37,7 +37,7 @@ namespace Synapse.Application.Configuration
         }
 
         /// <summary>
-        /// Gets/sets the cloud event broker uri
+        /// Gets/sets the cloud event sink uri
         /// </summary>
         public virtual Uri Uri { get; set; }
 

@@ -24,9 +24,9 @@ namespace Synapse.Application.Configuration
     {
 
         /// <summary>
-        /// Gets/sets the options used to configure the broker to post cloud events to
+        /// Gets/sets the options used to configure the sink to post cloud events to
         /// </summary>
-        public virtual CloudEventBrokerOptions Broker { get; set; } = new();
+        public virtual CloudEventSinkOptions Sink { get; set; } = new();
 
     }
 
