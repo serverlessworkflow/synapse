@@ -4,6 +4,12 @@
 
 # Synapse
 
+[![Publish](https://github.com/serverlessworkflow/synapse/actions/workflows/publish.yml/badge.svg)](https://github.com/serverlessworkflow/synapse/actions/workflows/publish.yml)
+![Release](https://img.shields.io/github/v/release/serverlessworkflow/synapse?include_prereleases)
+![Release](https://img.shields.io/github/release-date/serverlessworkflow/synapse?color=blueviolet)
+![GitHub commits since latest release (by SemVer)](https://img.shields.io/github/commits-since/serverlessworkflow/synapse/latest)
+![Last Commit](https://img.shields.io/github/last-commit/serverlessworkflow/synapse?color=blueviolet)
+
 ## About
 
 Synapse is a vendor-neutral, free, open-source, and community-driven Workflow Management System (WFMS) implementing the [Serverless Workflow specification](https://github.com/serverlessworkflow/specification).
