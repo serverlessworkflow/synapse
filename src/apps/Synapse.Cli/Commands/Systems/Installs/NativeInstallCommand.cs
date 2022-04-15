@@ -100,7 +100,7 @@ namespace Synapse.Cli.Commands.Systems.Installs
                         {
                             AutoStart = false
                         });
-                        await this.HttpClient.DownloadAsync($"https://github.com/neuroglia-io/synapse/releases/download/0.1.0/synapse-{target}", packageStream, task);
+                        await this.HttpClient.DownloadAsync($"https://github.com/serverlessworkflow/synapse/releases/download/0.1.0/synapse-{target}", packageStream, task);
                     });
                 });
             AnsiConsole.Status()
