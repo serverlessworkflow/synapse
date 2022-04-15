@@ -102,7 +102,7 @@ namespace Synapse.Runtime.Services
                 target = "osx-64.tar.gz";
             else
                 throw new PlatformNotSupportedException();
-            using var packageStream = await this.HttpClient.GetStreamAsync($"https://github.com/neuroglia-io/synapse/releases/download/0.1.0/synapse-worker-{target}", cancellationToken); //todo: config based
+            using var packageStream = await this.HttpClient.GetStreamAsync($"https://github.com/serverlessworkflow/synapse/releases/download/0.1.0/synapse-worker-{target}", cancellationToken); //todo: config based
             using ZipArchive archive = new ZipArchive(packageStream, ZipArchiveMode.Read);
             this.Logger.LogInformation("Worker app successfully downloaded. Extracting...");
             archive.ExtractToDirectory(workerDirectory.FullName, true);
