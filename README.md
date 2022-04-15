@@ -17,6 +17,25 @@ Synapse is a vendor-neutral, free, open-source, and community-driven Workflow Ma
 - [Docker](https://www.docker.com/)
 - [Kubernetes](https://kubernetes.io/)
 
+## Quick start
+
+1. Download and extract synctl:
+
+*In the following commands, please replace `{version}` with the version you wish to download (ex: `0.1.0`), and replace `{target}` with one of the following values: `win-x64`, `linux-x64` or `osx-x64`*
+
+```
+wget https://github.com/serverlessworkflow/synapse/releases/download/{version}/synctl-{target}.zip
+tar -xf synctl-{target}.zip
+```
+
+2. Install Synapse:
+
+```
+synctl system install native|docker
+```
+
+3. Have fun!
+
 ## Server
 
 ### Installing
