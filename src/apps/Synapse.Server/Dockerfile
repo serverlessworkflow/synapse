@@ -2,7 +2,7 @@
 
 FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
 WORKDIR /app
-EXPOSE 80 8080
+EXPOSE 42286 41387
 RUN apt-get update
 RUN apt-get install -y jq
 
