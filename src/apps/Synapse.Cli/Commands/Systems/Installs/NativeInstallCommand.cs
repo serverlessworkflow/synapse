@@ -29,11 +29,11 @@ namespace Synapse.Cli.Commands.Systems.Installs
     {
 
         /// <summary>
-        /// Gets the <see cref="InstallCommand"/>'s name
+        /// Gets the <see cref="NativeInstallCommand"/>'s name
         /// </summary>
         public const string CommandName = "native";
         /// <summary>
-        /// Gets the <see cref="InstallCommand"/>'s description
+        /// Gets the <see cref="NativeInstallCommand"/>'s description
         /// </summary>
         public const string CommandDescription = "Installs Synapse on the current OS";
 

@@ -134,7 +134,7 @@ namespace Synapse.Application.Configuration
             this.Services.AddSingleton<CloudEventFormatter, JsonEventFormatter>();
             this.Services.AddCloudEventBus(builder =>
             {
-                builder.WithBrokerUri(options.CloudEvents.Broker.Uri);
+                builder.WithBrokerUri(options.CloudEvents.Sink.Uri);
             });
             this.Services.AddServerlessWorkflow();
             this.Services.AddSingleton<CloudEventCorrelator>();
