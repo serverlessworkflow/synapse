@@ -51,8 +51,22 @@ tar -xf synctl-osx-x64.tar.gz
 
 **2. Install Synapse:**
 
+*Natively*:
+
 ```
-synctl system install native|docker
+synctl system install native
+```
+
+*On Docker*:
+
+```
+synctl system install docker
+```
+
+*On Kubernetes*:
+
+```
+synctl system install kubernetes
 ```
 
 **3. Have fun!**
