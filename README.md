@@ -7,7 +7,6 @@
 ![Release](https://img.shields.io/github/release-date/serverlessworkflow/synapse?color=blueviolet)
 ![GitHub commits since latest release (by SemVer)](https://img.shields.io/github/commits-since/serverlessworkflow/synapse/latest)
 ![Last Commit](https://img.shields.io/github/last-commit/serverlessworkflow/synapse?color=blueviolet)
-
 ![License](https://img.shields.io/github/license/serverlessworkflow/synapse?label=License&color=important)
 
 ## About
