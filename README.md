@@ -2,6 +2,8 @@
   <img src="assets/images/synapse-color.png" height="350px" alt="Synapse Logo"/>
 </p>
 
+---
+
 [![Publish](https://github.com/serverlessworkflow/synapse/actions/workflows/publish.yml/badge.svg)](https://github.com/serverlessworkflow/synapse/actions/workflows/publish.yml)
 [![Release](https://img.shields.io/github/v/release/serverlessworkflow/synapse?include_prereleases)](https://github.com/serverlessworkflow/synapse/releases/latest)
 [![Release](https://img.shields.io/github/release-date/serverlessworkflow/synapse?color=blueviolet)](https://github.com/serverlessworkflow/synapse/releases/latest)
