@@ -99,7 +99,7 @@ namespace Synapse.Runtime.Services
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 target = "linux-x64.tar.gz";
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                target = "osx-64.tar.gz";
+                target = "osx-x64.tar.gz";
             else
                 throw new PlatformNotSupportedException();
             using var packageStream = await this.HttpClient.GetStreamAsync($"https://github.com/serverlessworkflow/synapse/releases/download/0.1.0/synapse-worker-{target}", cancellationToken); //todo: config based
