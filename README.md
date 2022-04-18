@@ -26,22 +26,36 @@ Synapse is a vendor-neutral, free, open-source, and community-driven Workflow Ma
 
 ## Quick start
 
-1. Download and extract synctl:
+**1. Download and extract synctl:**
 
-*In the following commands, please replace `{target}` with one of the following values: `win-x64`, `linux-x64` or `osx-x64`*
+*On Windows*:
 
 ```
-wget https://github.com/serverlessworkflow/synapse/releases/latest/download/synctl-{target}{.zip|.tar.gz}
-tar -xf synctl-{target}{.zip|.tar.gz}
+wget https://github.com/serverlessworkflow/synapse/releases/latest/download/synctl-win-x64.zip
+tar -xf synctl-win-x64.zip
 ```
 
-2. Install Synapse:
+*On Linux*:
+
+```
+wget https://github.com/serverlessworkflow/synapse/releases/latest/download/synctl-linux-x64.tar.gz
+tar -xf synctl-linux-x64.tar.gz
+```
+
+*On Mac OSX*:
+
+```
+wget https://github.com/serverlessworkflow/synapse/releases/latest/download/synctl-osx-x64.tar.gz
+tar -xf synctl-osx-x64.tar.gz
+```
+
+**2. Install Synapse:**
 
 ```
 synctl system install native|docker
 ```
 
-3. Have fun!
+**3. Have fun!**
 
 ## Server
 
