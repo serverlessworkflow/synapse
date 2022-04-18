@@ -48,7 +48,7 @@ synctl system install native|docker
 
 #### Native
 
-The Synapse Server can run natively on Windows, Mac and Linux, without any dependencies aside from .NET. Event though it is the easier way to get started, it should only be used for tests purposes. For production, you should prefer the Docker or Kubernetes based setups.
+The Synapse Server can run natively on Windows, Mac and Linux, without any dependencies aside from .NET. Even though it is the easier way to get started, it should only be used for tests purposes. For production, you should prefer the Docker or Kubernetes based setups.
 
 To get started, just download the appropriate [release](https://github.com/serverlessworkflow/synapse/releases/latest) for your system, then start it using the following command:
 
