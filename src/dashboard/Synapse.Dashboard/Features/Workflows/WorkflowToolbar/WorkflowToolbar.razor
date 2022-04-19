@@ -50,10 +50,11 @@
             }
             else
             {
+                <p>Input de JSON payload to start the workflow with:</p>
                 <MonacoEditor
                     @ref="workflowInputEditor"
                     CssClass="monaco-small"
-                    ConstructionOptions="MonacoEditorHelper.GetStandaloneEditorConstructionOptions()"/>
+                    ConstructionOptions='MonacoEditorHelper.GetStandaloneEditorConstructionOptions("{}")'/>
             }
             @if (inputValidationErrors != null)
             {
@@ -89,7 +90,7 @@
     protected override async Task OnParametersSetAsync()
     {
         if(this.workflowInputEditor != null)
-            await this.workflowInputEditor.SetValue(string.Empty);
+            await this.workflowInputEditor.SetValue("{}");
         if (this.Workflow != null)
         {
             await this.LoadDataInputSchemaAsync();
@@ -112,7 +113,7 @@
     {
         this.inputValidationErrors = null;
         if(this.workflowInputEditor != null)
-            await this.workflowInputEditor.SetValue(string.Empty);
+            await this.workflowInputEditor.SetValue("{}");
         if(this.dataInputSchema != null
             && this.workflowInputEditor != null)
         {
@@ -154,7 +155,7 @@
         this.workflowInputModal.Hide();
         this.inputValidationErrors = null;
         if(this.workflowInputEditor != null)
-            await this.workflowInputEditor.SetValue(string.Empty);
+            await this.workflowInputEditor.SetValue("{}");
         var inputData = await this.JsonSerializer.DeserializeAsync<DynamicObject>(json);
         try
         {
