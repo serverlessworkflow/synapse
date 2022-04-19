@@ -32,6 +32,24 @@ namespace Synapse
         public const string Prefix = "SYNAPSE_";
 
         /// <summary>
+        /// Exposes constants about the environment variable used to skip certificate validation
+        /// </summary>
+        public static class SkipCertificateValidation
+        {
+
+            /// <summary>
+            /// Gets the name of the environment variable used to skip certificate validation
+            /// </summary>
+            public const string Name = Prefix + "SKIP_CERTIFICATE_VALIDATION";
+
+            /// <summary>
+            /// Gets the value of the environment variable used to skip certificate validation
+            /// </summary>
+            public static string Value = Environment.GetEnvironmentVariable(Name);
+
+        }
+
+        /// <summary>
         /// Exposes constants about <see cref="CloudEvent"/>-related environment variables
         /// </summary>
         public static class CloudEvents

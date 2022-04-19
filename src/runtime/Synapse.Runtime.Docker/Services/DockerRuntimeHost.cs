@@ -17,6 +17,7 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Synapse.Application.Configuration;
 using Synapse.Application.Services;
 using Synapse.Domain.Models;
 using Synapse.Runtime.Docker;
@@ -39,21 +40,27 @@ namespace Synapse.Runtime.Services
         /// </summary>
         /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
         /// <param name="environment">The current <see cref="IHostEnvironment"/></param>
+        /// <param name="applicationOptions">The service used to access the current <see cref="SynapseApplicationOptions"/></param>
         /// <param name="options">The service used to access the current <see cref="DockerRuntimeHostOptions"/></param>
         /// <param name="docker">The service used to interact with the Docker API</param>
-        public DockerRuntimeHost(ILoggerFactory loggerFactory, IHostEnvironment environment, IOptions<DockerRuntimeHostOptions> options, IDockerClient docker)
+        public DockerRuntimeHost(ILoggerFactory loggerFactory, IHostEnvironment environment, IOptions<SynapseApplicationOptions> applicationOptions, IOptions<DockerRuntimeHostOptions> options, IDockerClient docker)
             : base(loggerFactory)
         {
             this.Environment = environment;
+            this.ApplicationOptions = applicationOptions.Value;
             this.Options = options.Value;
             this.Docker = docker;
-   
         }
 
         /// <summary>
         /// Gets the current <see cref="IHostEnvironment"/>
         /// </summary>
         protected IHostEnvironment Environment { get; }
+
+        /// <summary>
+        /// Gets the current <see cref="SynapseApplicationOptions"/>
+        /// </summary>
+        protected SynapseApplicationOptions ApplicationOptions { get; }
 
         /// <summary>
         /// Gets the current <see cref="DockerRuntimeHostOptions"/>
@@ -68,6 +75,7 @@ namespace Synapse.Runtime.Services
         /// <inheritdoc/>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            var containerId = System.Environment.MachineName;
             var response = null as NetworkResponse;
             try
             {
@@ -80,7 +88,6 @@ namespace Synapse.Runtime.Services
             finally
             {
                 if (this.Environment.RunsInDocker()
-                    && this.TryGetDockerContainerId(out var containerId)
                     && (response == null ? true : !response!.Containers.ContainsKey(containerId)))
                     await this.Docker.Networks.ConnectNetworkAsync(this.Options.Network, new NetworkConnectParameters() { Container = containerId }, stoppingToken);
             }
@@ -95,6 +102,8 @@ namespace Synapse.Runtime.Services
             var containerConfig = this.Options.Runtime.Container;
             containerConfig.AddOrUpdateEnvironmentVariable(EnvironmentVariables.Api.HostName.Name, EnvironmentVariables.Api.HostName.Value!); //todo: instead, fetch values from options
             containerConfig.AddOrUpdateEnvironmentVariable(EnvironmentVariables.Runtime.WorkflowInstanceId.Name, workflowInstance.Id.ToString()); //todo: instead, fetch values from options
+            if (this.ApplicationOptions.SkipCertificateValidation)
+                containerConfig.AddOrUpdateEnvironmentVariable(EnvironmentVariables.SkipCertificateValidation.Name, "true");
             var name = workflowInstance.Id.Replace(":", "-");
             var hostConfig = new HostConfig()
             {
@@ -147,42 +156,6 @@ namespace Synapse.Runtime.Services
                 {
                     await this.Docker.Images.CreateImageAsync(new() { FromImage = this.Options.Runtime.Container.Image, Repo = this.Options.Runtime.ImageRepository }, new(), new Progress<JSONMessage>(), cancellationToken);
                 }
-            }
-        }
-
-        /// <summary>
-        /// Attempts to get the application's container id, if running in Docker
-        /// </summary>
-        /// <param name="containerId">The id of the application's Docker container</param>
-        /// <returns>A boolean indicating whether or not the application is running in Docker</returns>
-        protected virtual bool TryGetDockerContainerId(out string containerId)
-        {
-            using var process = new Process();
-            var stringBuilder = new StringBuilder();
-            containerId = null!;
-            process.StartInfo = new()
-            {
-                FileName = "bash",
-                Arguments = "-c \"head -1 /proc/self/cgroup|cut -d/ -f3\"",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false
-            };
-            try
-            {
-                process.Start();
-                process.WaitForExit(500);
-                var output = process.StandardOutput.ReadToEnd();
-                var error = process.StandardError.ReadToEnd();
-                if (process.ExitCode != 0)
-                    return false;
-                if(output.EndsWith("\n"))
-                    containerId = output[..^1];
-                return true;
-            }
-            catch
-            {
-                return false;
             }
         }
 

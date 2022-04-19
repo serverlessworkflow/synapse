@@ -20,6 +20,7 @@ using GraphQL.Client.Abstractions.Websocket;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Http;
 using Neuroglia.AsyncApi;
 using Neuroglia.Data.Expressions.JQ;
 using Synapse.Apis.Management.Grpc;
@@ -84,6 +85,22 @@ using var host = Host.CreateDefaultBuilder(args)
         services.AddHostedService(provider => provider.GetRequiredService<IWorkflowRuntime>());
 
         services.AddSingleton<IIntegrationEventBus, IntegrationEventBus>();
+
+        if (applicationOptions.SkipCertificateValidation)
+        {
+            System.Net.ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
+            services.ConfigureAll<HttpClientFactoryOptions>(options =>
+            {
+                options.HttpMessageHandlerBuilderActions.Add(builder =>
+                {
+                    builder.PrimaryHandler = new HttpClientHandler
+                    {
+                        ClientCertificateOptions = ClientCertificateOption.Manual,
+                        ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, cetChain, policyErrors) => true
+                    };
+                });
+            });
+        }
     })
     .Build();
 await host.RunAsync();
