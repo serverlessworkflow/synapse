@@ -152,6 +152,9 @@ namespace Synapse.Application.Configuration
             });
             this.Services.AddAuthorization();
             this.Services.AddSingleton<IExpressionEvaluatorProvider, ExpressionEvaluatorProvider>();
+            this.Services.AddSingleton<PluginManager>();
+            this.Services.AddSingleton<IPluginManager>(provider => provider.GetRequiredService<PluginManager>());
+            this.Services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<PluginManager>());
             this.Services.AddRepositories(writeModelTypes, this.WriteModelRepositoryType, ServiceLifetime.Scoped);
             this.Services.AddRepositories(readModelTypes, this.ReadModelRepositoryType, ServiceLifetime.Scoped);
 
