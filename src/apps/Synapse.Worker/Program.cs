@@ -25,7 +25,6 @@ using Neuroglia.AsyncApi;
 using Neuroglia.Data.Expressions.JQ;
 using Synapse.Apis.Management.Grpc;
 using Synapse.Apis.Runtime.Grpc;
-using Synapse.Worker.Services;
 using System.Diagnostics;
 
 if (args.Any() 

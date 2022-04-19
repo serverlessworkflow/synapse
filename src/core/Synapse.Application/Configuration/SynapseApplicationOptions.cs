@@ -41,6 +41,11 @@ namespace Synapse.Application.Configuration
         public virtual bool SkipCertificateValidation { get; set; }
 
         /// <summary>
+        /// Gets/sets the path (relative or absolute) to the application's plugins directory
+        /// </summary>
+        public virtual string PluginsDirectory { get; set; } = Path.Combine(AppContext.BaseDirectory, "plugins");
+
+        /// <summary>
         /// Gets/sets the options used to configure the application's cloud eventss
         /// </summary>
         public virtual CloudEventOptions CloudEvents { get; set; } = new();

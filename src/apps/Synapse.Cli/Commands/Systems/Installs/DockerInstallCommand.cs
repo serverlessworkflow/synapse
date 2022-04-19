@@ -16,6 +16,7 @@
  */
 
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace Synapse.Cli.Commands.Systems.Installs
 {
@@ -44,7 +45,8 @@ namespace Synapse.Cli.Commands.Systems.Installs
             this.AddOption(CommandOptions.Name);
             this.AddOption(CommandOptions.HostName);
             this.AddOption(CommandOptions.CloudEventSinkUri);
-            this.Handler = CommandHandler.Create<string, string, Uri>(this.HandleAsync);
+            this.AddOption(CommandOptions.SkipCertificateValidation);
+            this.Handler = CommandHandler.Create<string, string, Uri, bool>(this.HandleAsync);
         }
 
         /// <summary>
@@ -58,12 +60,42 @@ namespace Synapse.Cli.Commands.Systems.Installs
         /// <param name="name">The Synapse container name"</param>
         /// <param name="hostName">Synapse's host name</param>
         /// <param name="ceSink">The Synapse cloud event sink uri</param>
+        /// <param name="skipCertificateValidation">A boolean indicating whether or not to skip certificate validation</param>
         /// <returns>A new awaitable <see cref="Task"/></returns>
-        public async Task HandleAsync(string name, string hostName, Uri ceSink)
+        public async Task HandleAsync(string name, string hostName, Uri ceSink, bool skipCertificateValidation)
         {
-            var args = @$"run --name {name} -v /var/run/docker.sock:/var/run/docker.sock --add-host=host.docker.internal:host-gateway -p 42286:42286 -p 41387:41387 -d --restart unless-stopped -e ""{EnvironmentVariables.Api.HostName.Name} = {hostName}"" -e ""{EnvironmentVariables.CloudEvents.Sink.Uri.Name} = {ceSink}"" ghcr.io/serverlessworkflow/synapse:latest";
+            var environmentVariables = new List<string>();
+            environmentVariables.Add(@$"-e ""{EnvironmentVariables.Api.HostName.Name} = {hostName}""");
+            environmentVariables.Add(@$"-e ""{EnvironmentVariables.CloudEvents.Sink.Uri.Name} = {ceSink}""");
+            if(skipCertificateValidation)
+                environmentVariables.Add(@$"-e ""{EnvironmentVariables.SkipCertificateValidation.Name} = {skipCertificateValidation}""");
+            var args = @$"run --name {name} -v /var/run/docker.sock:/var/run/docker.sock --add-host=host.docker.internal:host-gateway -p 42286:42286 -p 41387:41387 -d --restart unless-stopped {string.Join(" ", environmentVariables)} ghcr.io/serverlessworkflow/synapse:latest";
             var process = Process.Start("docker", args);
             await process.WaitForExitAsync();
+            await Task.Delay(500); //wait for the server to run
+            var uri = "http://localhost:42286";
+            try
+            {
+                Process.Start(uri);
+            }
+            catch
+            {
+                try
+                {
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                        Process.Start(new ProcessStartInfo("cmd", $"/c start {uri.Replace("&", "^&")}") { CreateNoWindow = true });
+                    else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                        Process.Start("xdg-open", uri);
+                    else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                        Process.Start("open", uri);
+                    else
+                        throw new NotSupportedException();
+                }
+                catch (NotSupportedException)
+                {
+                    throw;
+                }
+            }
         }
 
         private static class CommandOptions
@@ -107,6 +139,19 @@ namespace Synapse.Cli.Commands.Systems.Installs
                     };
                     option.SetDefaultValue(new Uri("https://en37uhd2he6t4.x.pipedream.net"));
                     option.AddAlias("-ces");
+                    return option;
+                }
+            }
+
+            public static Option<bool> SkipCertificateValidation
+            {
+                get
+                {
+                    var option = new Option<bool>("--skip-certificate-validation")
+                    {
+                        Description = "Skips certificate validation when performing http requests"
+                    };
+                    option.AddAlias("-scv");
                     return option;
                 }
             }
