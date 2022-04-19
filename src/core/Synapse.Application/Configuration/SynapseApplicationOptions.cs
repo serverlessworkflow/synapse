@@ -25,6 +25,22 @@ namespace Synapse.Application.Configuration
     {
 
         /// <summary>
+        /// Initializes a new <see cref="SynapseApplicationOptions"/>
+        /// </summary>
+        public SynapseApplicationOptions()
+        {
+            var env = EnvironmentVariables.SkipCertificateValidation.Value;
+            if (!string.IsNullOrWhiteSpace(env)
+                && bool.TryParse(env, out var skipCertificateValidation))
+                this.SkipCertificateValidation = skipCertificateValidation;
+        }
+
+        /// <summary>
+        /// Gets/sets a boolean indicating whether or not to skip certificate validation when performing http requests
+        /// </summary>
+        public virtual bool SkipCertificateValidation { get; set; }
+
+        /// <summary>
         /// Gets/sets the options used to configure the application's cloud eventss
         /// </summary>
         public virtual CloudEventOptions CloudEvents { get; set; } = new();

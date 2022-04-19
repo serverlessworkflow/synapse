@@ -18,6 +18,7 @@
 using CloudNative.CloudEvents.NewtonsoftJson;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Adapters;
+using Microsoft.Extensions.Http;
 using Neuroglia.Data.Expressions;
 using Neuroglia.Serialization;
 using Newtonsoft.Json;
@@ -153,6 +154,22 @@ namespace Synapse.Application.Configuration
             this.Services.AddSingleton<IExpressionEvaluatorProvider, ExpressionEvaluatorProvider>();
             this.Services.AddRepositories(writeModelTypes, this.WriteModelRepositoryType, ServiceLifetime.Scoped);
             this.Services.AddRepositories(readModelTypes, this.ReadModelRepositoryType, ServiceLifetime.Scoped);
+
+            if (options.SkipCertificateValidation)
+            {
+                System.Net.ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
+                this.Services.ConfigureAll<HttpClientFactoryOptions>(options =>
+                {
+                    options.HttpMessageHandlerBuilderActions.Add(builder =>
+                    {
+                        builder.PrimaryHandler = new HttpClientHandler
+                        {
+                            ClientCertificateOptions = ClientCertificateOption.Manual,
+                            ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, cetChain, policyErrors) => true
+                        };
+                    });
+                });
+            }
         }
 
     }

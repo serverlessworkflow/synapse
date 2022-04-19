@@ -17,6 +17,7 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Synapse.Application.Configuration;
 using Synapse.Application.Services;
 using Synapse.Domain.Models;
 using Synapse.Runtime.Docker;
@@ -39,21 +40,27 @@ namespace Synapse.Runtime.Services
         /// </summary>
         /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
         /// <param name="environment">The current <see cref="IHostEnvironment"/></param>
+        /// <param name="applicationOptions">The service used to access the current <see cref="SynapseApplicationOptions"/></param>
         /// <param name="options">The service used to access the current <see cref="DockerRuntimeHostOptions"/></param>
         /// <param name="docker">The service used to interact with the Docker API</param>
-        public DockerRuntimeHost(ILoggerFactory loggerFactory, IHostEnvironment environment, IOptions<DockerRuntimeHostOptions> options, IDockerClient docker)
+        public DockerRuntimeHost(ILoggerFactory loggerFactory, IHostEnvironment environment, IOptions<SynapseApplicationOptions> applicationOptions, IOptions<DockerRuntimeHostOptions> options, IDockerClient docker)
             : base(loggerFactory)
         {
             this.Environment = environment;
+            this.ApplicationOptions = applicationOptions.Value;
             this.Options = options.Value;
             this.Docker = docker;
-   
         }
 
         /// <summary>
         /// Gets the current <see cref="IHostEnvironment"/>
         /// </summary>
         protected IHostEnvironment Environment { get; }
+
+        /// <summary>
+        /// Gets the current <see cref="SynapseApplicationOptions"/>
+        /// </summary>
+        protected SynapseApplicationOptions ApplicationOptions { get; }
 
         /// <summary>
         /// Gets the current <see cref="DockerRuntimeHostOptions"/>
@@ -95,6 +102,8 @@ namespace Synapse.Runtime.Services
             var containerConfig = this.Options.Runtime.Container;
             containerConfig.AddOrUpdateEnvironmentVariable(EnvironmentVariables.Api.HostName.Name, EnvironmentVariables.Api.HostName.Value!); //todo: instead, fetch values from options
             containerConfig.AddOrUpdateEnvironmentVariable(EnvironmentVariables.Runtime.WorkflowInstanceId.Name, workflowInstance.Id.ToString()); //todo: instead, fetch values from options
+            if (this.ApplicationOptions.SkipCertificateValidation)
+                containerConfig.AddOrUpdateEnvironmentVariable(EnvironmentVariables.SkipCertificateValidation.Name, "true");
             var name = workflowInstance.Id.Replace(":", "-");
             var hostConfig = new HostConfig()
             {
