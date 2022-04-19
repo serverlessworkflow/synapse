@@ -68,6 +68,7 @@ namespace Synapse.Runtime.Services
         /// <inheritdoc/>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            var containerId = System.Environment.MachineName;
             var response = null as NetworkResponse;
             try
             {
@@ -80,7 +81,6 @@ namespace Synapse.Runtime.Services
             finally
             {
                 if (this.Environment.RunsInDocker()
-                    && this.TryGetDockerContainerId(out var containerId)
                     && (response == null ? true : !response!.Containers.ContainsKey(containerId)))
                     await this.Docker.Networks.ConnectNetworkAsync(this.Options.Network, new NetworkConnectParameters() { Container = containerId }, stoppingToken);
             }
@@ -147,42 +147,6 @@ namespace Synapse.Runtime.Services
                 {
                     await this.Docker.Images.CreateImageAsync(new() { FromImage = this.Options.Runtime.Container.Image, Repo = this.Options.Runtime.ImageRepository }, new(), new Progress<JSONMessage>(), cancellationToken);
                 }
-            }
-        }
-
-        /// <summary>
-        /// Attempts to get the application's container id, if running in Docker
-        /// </summary>
-        /// <param name="containerId">The id of the application's Docker container</param>
-        /// <returns>A boolean indicating whether or not the application is running in Docker</returns>
-        protected virtual bool TryGetDockerContainerId(out string containerId)
-        {
-            using var process = new Process();
-            var stringBuilder = new StringBuilder();
-            containerId = null!;
-            process.StartInfo = new()
-            {
-                FileName = "bash",
-                Arguments = "-c \"head -1 /proc/self/cgroup|cut -d/ -f3\"",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false
-            };
-            try
-            {
-                process.Start();
-                process.WaitForExit(500);
-                var output = process.StandardOutput.ReadToEnd();
-                var error = process.StandardError.ReadToEnd();
-                if (process.ExitCode != 0)
-                    return false;
-                if(output.EndsWith("\n"))
-                    containerId = output[..^1];
-                return true;
-            }
-            catch
-            {
-                return false;
             }
         }
 
