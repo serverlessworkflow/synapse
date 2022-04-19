@@ -2,13 +2,14 @@
   <img src="assets/images/synapse-color.png" height="350px" alt="Synapse Logo"/>
 </p>
 
-# Synapse
+---
 
 [![Publish](https://github.com/serverlessworkflow/synapse/actions/workflows/publish.yml/badge.svg)](https://github.com/serverlessworkflow/synapse/actions/workflows/publish.yml)
-![Release](https://img.shields.io/github/v/release/serverlessworkflow/synapse?include_prereleases)
-![Release](https://img.shields.io/github/release-date/serverlessworkflow/synapse?color=blueviolet)
-![GitHub commits since latest release (by SemVer)](https://img.shields.io/github/commits-since/serverlessworkflow/synapse/latest)
-![Last Commit](https://img.shields.io/github/last-commit/serverlessworkflow/synapse?color=blueviolet)
+[![Release](https://img.shields.io/github/v/release/serverlessworkflow/synapse?include_prereleases)](https://github.com/serverlessworkflow/synapse/releases/latest)
+[![Release](https://img.shields.io/github/release-date/serverlessworkflow/synapse?color=blueviolet)](https://github.com/serverlessworkflow/synapse/releases/latest)
+[![Commits since latest](https://img.shields.io/github/commits-since/serverlessworkflow/synapse/latest)](https://github.com/serverlessworkflow/synapse/commits/)
+[![Commits since latest](https://img.shields.io/github/last-commit/serverlessworkflow/synapse?color=blueviolet)](https://github.com/serverlessworkflow/synapse/commits/)
+[![License](https://img.shields.io/github/license/serverlessworkflow/synapse?label=License&color=important)](https://github.com/serverlessworkflow/synapse/blob/main/LICENSE)
 
 ## About
 
@@ -25,22 +26,50 @@ Synapse is a vendor-neutral, free, open-source, and community-driven Workflow Ma
 
 ## Quick start
 
-1. Download and extract synctl:
+**1. Download and extract synctl:**
 
-*In the following commands, please replace `{target}` with one of the following values: `win-x64`, `linux-x64` or `osx-x64`*
-
-```
-wget https://github.com/serverlessworkflow/synapse/releases/latest/download/synctl-{target}{.zip|.tar.gz}
-tar -xf synctl-{target}{.zip|.tar.gz}
-```
-
-2. Install Synapse:
+*On Windows*:
 
 ```
-synctl system install native|docker
+wget https://github.com/serverlessworkflow/synapse/releases/latest/download/synctl-win-x64.zip
+tar -xf synctl-win-x64.zip
 ```
 
-3. Have fun!
+*On Linux*:
+
+```
+wget https://github.com/serverlessworkflow/synapse/releases/latest/download/synctl-linux-x64.tar.gz
+tar -xf synctl-linux-x64.tar.gz
+```
+
+*On Mac OSX*:
+
+```
+wget https://github.com/serverlessworkflow/synapse/releases/latest/download/synctl-osx-x64.tar.gz
+tar -xf synctl-osx-x64.tar.gz
+```
+
+**2. Install Synapse:**
+
+*Natively*:
+
+```
+synctl system install native
+```
+
+*On Docker*:
+
+```
+synctl system install docker
+```
+
+*On Kubernetes*:
+
+```
+synctl system install kubernetes
+```
+
+**3. Have fun!**
 
 ## Server
 
