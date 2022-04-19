@@ -34,29 +34,22 @@ namespace Synapse.Cli
         /// <returns>A new awaitable <see cref="Task"/></returns>
         public static async Task DownloadAsync(this HttpClient client, string fileUri, Stream outputStream, ProgressTask progress, CancellationToken cancellationToken = default)
         {
-            try
+            using (HttpResponseMessage response = await client.GetAsync(fileUri, HttpCompletionOption.ResponseHeadersRead, cancellationToken))
             {
-                using (HttpResponseMessage response = await client.GetAsync(fileUri, HttpCompletionOption.ResponseHeadersRead, cancellationToken))
+                response.EnsureSuccessStatusCode();
+                progress.MaxValue(response.Content.Headers.ContentLength ?? 0);
+                progress.StartTask();
+                var filename = fileUri.Substring(fileUri.LastIndexOf('/') + 1);
+                using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
+                var buffer = new byte[8192];
+                while (true)
                 {
-                    response.EnsureSuccessStatusCode();
-                    progress.MaxValue(response.Content.Headers.ContentLength ?? 0);
-                    progress.StartTask();
-                    var filename = fileUri.Substring(fileUri.LastIndexOf('/') + 1);
-                    using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
-                    var buffer = new byte[8192];
-                    while (true)
-                    {
-                        var bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken);
-                        if (bytesRead == 0)
-                            break;
-                        progress.Increment(bytesRead);
-                        await outputStream.WriteAsync(buffer, 0, bytesRead, cancellationToken);
-                    }
+                    var bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken);
+                    if (bytesRead == 0)
+                        break;
+                    progress.Increment(bytesRead);
+                    await outputStream.WriteAsync(buffer, 0, bytesRead, cancellationToken);
                 }
-            }
-            catch (Exception ex)
-            {
-                AnsiConsole.MarkupLine($"[red]Error:[/] {ex}");
             }
         }
 
