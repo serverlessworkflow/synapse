@@ -15,6 +15,9 @@
  *
  */
 
+using Neuroglia.Serialization;
+using Synapse.Infrastructure.Plugins;
+
 namespace Synapse.Application.Services
 {
 
@@ -26,15 +29,29 @@ namespace Synapse.Application.Services
     {
 
         /// <summary>
+        /// Gets the name of an <see cref="IPlugin"/> metadata file
+        /// </summary>
+        public const string PluginMetadataFileName = "plugin.json";
+
+        /// <summary>
         /// Initializes a new <see cref="PluginManager"/>
         /// </summary>
+        /// <param name="serviceProvider">The current <see cref="IServiceProvider"/></param>
         /// <param name="logger">The service used to perform logging</param>
+        /// <param name="jsonSerializer">The service to serialize/deserialize to/from JSON</param>
         /// <param name="applicationOptions">The service used to access the current <see cref="SynapseApplicationOptions"/></param>
-        public PluginManager(ILogger<PluginManager> logger, IOptions<SynapseApplicationOptions> applicationOptions)
+        public PluginManager(IServiceProvider serviceProvider, ILogger<PluginManager> logger, IJsonSerializer jsonSerializer, IOptions<SynapseApplicationOptions> applicationOptions)
         {
+            this.ServiceProvider = serviceProvider;
             this.Logger = logger;
+            this.JsonSerializer = jsonSerializer;
             this.ApplicationOptions = applicationOptions.Value;
         }
+
+        /// <summary>
+        /// Gets the current <see cref="IServiceProvider"/>
+        /// </summary>
+        protected IServiceProvider ServiceProvider { get; }
 
         /// <summary>
         /// Gets the service used to perform logging
@@ -42,81 +59,167 @@ namespace Synapse.Application.Services
         protected ILogger Logger { get; }
 
         /// <summary>
+        /// Gets the service to serialize/deserialize to/from JSON
+        /// </summary>
+        protected IJsonSerializer JsonSerializer { get; }
+
+        /// <summary>
         /// Gets the current <see cref="SynapseApplicationOptions"/>
         /// </summary>
         protected SynapseApplicationOptions ApplicationOptions { get; }
 
         /// <summary>
-        /// Gets the service used to watch plugin files
+        /// Gets the service used to watch the <see cref="IPlugin"/> files
         /// </summary>
         protected FileSystemWatcher FileSystemWatcher { get; private set; } = null!;
 
         /// <summary>
-        /// Gets a <see cref="SynchronizedCollection{T}"/> containing all loaded <see cref="IPlugin"/>s
+        /// Gets the <see cref="PluginManager"/>'s <see cref="CancellationTokenSource"/>
         /// </summary>
-        protected SynchronizedCollection<IPlugin> Plugins { get; } = new();
+        protected CancellationTokenSource CancellationTokenSource { get; private set; } = null!;
 
-        IEnumerable<IPlugin> IPluginManager.Plugins => this.Plugins;
+        /// <summary>
+        /// Gets an <see cref="SynchronizedCollection{T}"/> containing the handles to all discovered <see cref="IPlugin"/>s
+        /// </summary>
+        public SynchronizedCollection<IPluginHandle> Plugins { get; } = new();
+
+        IEnumerable<IPluginHandle> IPluginManager.Plugins => this.Plugins;
 
         /// <inheritdoc/>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            var directory = new DirectoryInfo(this.ApplicationOptions.PluginsDirectory);
-            if (!directory.Exists)
-                directory.Create();
-            this.Logger.LogInformation("Loading application plugins...");
-            foreach (var path in directory.GetFiles("*.dll", SearchOption.AllDirectories))
-            {
-                try
-                {
-                    this.LoadPluginFrom(path.FullName);
-                }
-                catch(Exception ex)
-                {
-                    this.Logger.LogWarning("An error occured while loading the plugin '{pluginFilePath}': {ex}", path, ex.ToString());
-                }
-            }
-            this.Logger.LogInformation("Application plugins loaded");
-            this.FileSystemWatcher = new(directory.FullName, "*.dll");
-            this.FileSystemWatcher.NotifyFilter = NotifyFilters.Attributes
-                | NotifyFilters.CreationTime
-                | NotifyFilters.DirectoryName
-                | NotifyFilters.FileName
-                | NotifyFilters.LastAccess
-                | NotifyFilters.LastWrite
-                | NotifyFilters.Security
-                | NotifyFilters.Size;
+            this.CancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
+            var pluginDirectory = new DirectoryInfo(this.ApplicationOptions.Plugins.Directory);
+            if(!pluginDirectory.Exists)
+                pluginDirectory.Create();
+            foreach (var plugin in await this.FindPluginsAsync(pluginDirectory.FullName))
+                await plugin.LoadAsync(this.CancellationTokenSource.Token);
+            this.FileSystemWatcher = new(pluginDirectory.FullName, PluginMetadataFileName);
             this.FileSystemWatcher.IncludeSubdirectories = true;
+            this.FileSystemWatcher.Created += this.OnPluginFileCreatedAsync;
+            this.FileSystemWatcher.Deleted += this.OnPluginFileDeletedAsync;
             this.FileSystemWatcher.EnableRaisingEvents = true;
-            this.FileSystemWatcher.Changed += this.OnPluginFileDetected;
-            await Task.CompletedTask;
         }
 
-        /// <inheritdoc/>
-        public virtual IPlugin LoadPluginFrom(string path)
+        /// <summary>
+        /// Finds all <see cref="IPlugin"/>s in the specified directory
+        /// </summary>
+        /// <param name="directoryPath">The path of the directory to scan for <see cref="IPlugin"/>s</param>
+        /// <returns>A new <see cref="IEnumerable{T}"/> containing all <see cref="IPluginHandle"/>s that have been found</returns>
+        public virtual async Task<IEnumerable<IPluginHandle>> FindPluginsAsync(string directoryPath)
         {
-            if(string.IsNullOrWhiteSpace(path))
-                throw new ArgumentNullException(nameof(path));
-            var file = new FileInfo(path);
+            if (string.IsNullOrWhiteSpace(directoryPath))
+                throw new ArgumentNullException(nameof(directoryPath));
+            var directory = new DirectoryInfo(directoryPath);
+            if (!directory.Exists)
+                throw new DirectoryNotFoundException($"Failed to find the specified directory '{directoryPath}'");
+            var pluginFiles = directory.GetFiles(PluginMetadataFileName, SearchOption.AllDirectories);
+            var plugins = new List<IPluginHandle>(pluginFiles.Count());
+            foreach (var pluginFile in pluginFiles)
+            {
+                plugins.Add(await this.FindPluginAsync(pluginFile.FullName));
+            }
+            return plugins;
+        }
+
+        /// <summary>
+        /// Finds the <see cref="IPlugin"/> at the specified file path
+        /// </summary>
+        /// <param name="metadataFilePath">The file path of the <see cref="IPlugin"/> to find</param>
+        /// <returns>A new <see cref="IPluginHandle"/></returns>
+        public virtual async Task<IPluginHandle> FindPluginAsync(string metadataFilePath)
+        {
+            if (string.IsNullOrWhiteSpace(metadataFilePath))
+                throw new ArgumentNullException(nameof(metadataFilePath));
+            var plugin = this.Plugins.FirstOrDefault(p => p.MetadataFilePath == metadataFilePath);
+            if (plugin != null)
+                return plugin;
+            var file = new FileInfo(metadataFilePath);
             if (!file.Exists)
-                throw new FileNotFoundException("Failed to find the specified plugin file", path);
-            var loadContext = new PluginAssemblyLoadContext(path);
-            var assembly = loadContext.LoadFromAssemblyName(new(Path.GetFileNameWithoutExtension(file.FullName)));
-            var plugin = new Plugin(loadContext, assembly);
+                throw new DirectoryNotFoundException($"Failed to find the specified file '{metadataFilePath}'");
+            if (file.Name != PluginMetadataFileName)
+                throw new Exception($"The specified file '{metadataFilePath}' is not a valid plugin metadata file");
+            using var fileStream = file.OpenRead();
+            var pluginMetadata = await this.JsonSerializer.DeserializeAsync<PluginMetadata>(fileStream, this.CancellationTokenSource.Token);
+            plugin = ActivatorUtilities.CreateInstance<PluginHandle>(this.ServiceProvider, pluginMetadata, metadataFilePath);
+            plugin.Disposed += (sender, e) => this.OnPluginHandleDisposed((IPluginHandle)sender!);
             this.Plugins.Add(plugin);
             return plugin;
         }
 
-        /// <summary>
-        /// Handles the detection of a new plugin file
-        /// </summary>
-        /// <param name="sender">The <see cref="System.IO.FileSystemWatcher"/> that has detected the plugin file</param>
-        /// <param name="e">An object that describes the detected plugin file</param>
-        protected virtual void OnPluginFileDetected(object sender, FileSystemEventArgs e)
+        /// <inheritdoc/>
+        public virtual async Task<IPlugin> LoadPluginAsync(IPluginHandle pluginHandle)
         {
-            if (this.Plugins.ToList().Any(p => p.Assembly.Location == e.FullPath))
-                return;
-            this.LoadPluginFrom(e.FullPath);
+            if(pluginHandle == null)
+                throw new ArgumentNullException(nameof(pluginHandle));
+            await pluginHandle.LoadAsync(this.CancellationTokenSource.Token);
+            return pluginHandle.GetPlugin();
+        }
+
+        /// <inheritdoc/>
+        public virtual async ValueTask UnloadPluginAsync(IPluginHandle pluginHandle)
+        {
+            if (pluginHandle == null)
+                throw new ArgumentNullException(nameof(pluginHandle));
+            pluginHandle.Unload();
+            await ValueTask.CompletedTask;
+        }
+
+        /// <inheritdoc/>
+        public virtual IPlugin? GetPlugin(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentNullException(nameof(name));
+            var pluginHandle = this.Plugins.FirstOrDefault(p => p.Metadata.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+            return pluginHandle?.GetPlugin();
+        }
+
+        /// <inheritdoc/>
+        public virtual TPlugin? GetPlugin<TPlugin>()
+            where TPlugin : IPlugin
+        {
+            return this.Plugins.OfType<TPlugin>()
+                .FirstOrDefault();
+        }
+
+        /// <inheritdoc/>
+        public virtual IEnumerable<TPlugin> GetPlugins<TPlugin>()
+            where TPlugin : IPlugin
+        {
+            return this.Plugins.OfType<TPlugin>()
+                .ToList();
+        }
+
+        /// <summary>
+        /// Handles the creation of a new <see cref="IPlugin"/> file
+        /// </summary>
+        /// <param name="sender">The service used to watch the <see cref="IPlugin"/> files</param>
+        /// <param name="e">The <see cref="FileSystemEventArgs"/> to handle</param>
+        protected virtual async void OnPluginFileCreatedAsync(object sender, FileSystemEventArgs e)
+        {
+            await this.FindPluginAsync(e.FullPath);
+        }
+
+        /// <summary>
+        /// Handles the deletion of a new <see cref="IPlugin"/> file
+        /// </summary>
+        /// <param name="sender">The service used to watch the <see cref="IPlugin"/> files</param>
+        /// <param name="e">The <see cref="FileSystemEventArgs"/> to handle</param>
+        protected virtual async void OnPluginFileDeletedAsync(object sender, FileSystemEventArgs e)
+        {
+            var pluginHandler = this.Plugins.FirstOrDefault(p => p.MetadataFilePath == e.FullPath);
+            if (pluginHandler != null)
+                pluginHandler.Dispose();
+            await Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Handles the disposal of the specified <see cref="IPluginHandle"/>
+        /// </summary>
+        /// <param name="pluginHandle">The <see cref="IPluginHandle"/> that has been disposed of</param>
+        protected virtual void OnPluginHandleDisposed(IPluginHandle pluginHandle)
+        {
+            this.Plugins.Remove(pluginHandle);
         }
 
     }

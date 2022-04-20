@@ -8,4 +8,5 @@ global using Neuroglia.Mapping;
 global using Neuroglia.Mediation;
 global using Synapse.Application.Configuration;
 global using Synapse.Application.Services;
+global using Synapse.Infrastructure.Services;
 global using Synapse.Domain.Models;

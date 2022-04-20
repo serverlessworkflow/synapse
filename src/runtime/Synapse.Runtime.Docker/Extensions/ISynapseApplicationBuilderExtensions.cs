@@ -21,7 +21,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Synapse.Application.Configuration;
-using Synapse.Application.Services;
+using Synapse.Infrastructure.Services;
 using Synapse.Runtime.Docker.Configuration;
 using Synapse.Runtime.Services;
 

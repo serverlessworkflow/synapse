@@ -15,23 +15,20 @@
  *
  */
 
-namespace Synapse.Application.Services
-{
+using Synapse.Infrastructure.Plugins;
 
+namespace Synapse.Application.Configuration
+{
     /// <summary>
-    /// Defines the fundamentals of a service used to host workflow runtimes
+    /// Represents the options used to configure an <see cref="IRepository"/>
     /// </summary>
-    public interface IWorkflowRuntimeHost
-        : IDisposable, IAsyncDisposable
+    public class RepositoryOptions
     {
 
         /// <summary>
-        /// Starts the execution of the specified <see cref="V1WorkflowInstance"/>
+        /// Gets/sets the name of the <see cref="IRepositoryPlugin"/> to use
         /// </summary>
-        /// <param name="workflowInstance">The <see cref="V1WorkflowInstance"/> to start the execution of</param>
-        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-        /// <returns>An id used to identify the <see cref="V1WorkflowInstance"/>'s runtime</returns>
-        Task<string> StartAsync(V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default);
+        public virtual string PluginName { get; set; } = null!;
 
     }
 

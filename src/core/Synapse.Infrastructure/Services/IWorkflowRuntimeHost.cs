@@ -15,24 +15,23 @@
  *
  */
 
-using Synapse.Apis.Runtime;
-
-namespace Synapse.Application.Services
+namespace Synapse.Infrastructure.Services
 {
 
     /// <summary>
-    /// Defines the fundamentals of a service used to create <see cref="IWorkflowRuntimeProxy"/>
+    /// Defines the fundamentals of a service used to host workflow runtimes
     /// </summary>
-    public interface IWorkflowRuntimeProxyFactory
+    public interface IWorkflowRuntimeHost
+        : IDisposable, IAsyncDisposable
     {
 
         /// <summary>
-        /// Creates a new <see cref="IWorkflowRuntimeProxy"/>
+        /// Starts the execution of the specified <see cref="V1WorkflowInstance"/>
         /// </summary>
-        /// <param name="id">The id of the workflow instance to create a new <see cref="IWorkflowRuntimeProxy"/> for</param>
-        /// <param name="signalStream">The service used to write <see cref="V1RuntimeSignal"/>s to the stream</param>
-        /// <returns>A new <see cref="IWorkflowRuntimeProxy"/></returns>
-        IWorkflowRuntimeProxy CreateProxy(string id, IAsyncStreamWriter<V1RuntimeSignal> signalStream);
+        /// <param name="workflowInstance">The <see cref="V1WorkflowInstance"/> to start the execution of</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>An id used to identify the <see cref="V1WorkflowInstance"/>'s runtime</returns>
+        Task<string> StartAsync(V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default);
 
     }
 

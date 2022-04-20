@@ -15,26 +15,22 @@
  *
  */
 
-using System.Reflection;
-using System.Runtime.Loader;
-
-namespace Synapse.Application.Services
+namespace Synapse.Infrastructure.Plugins
 {
+
     /// <summary>
-    /// Defines the fundamentals of a plugin
+    /// Defines the base contract of all plugins
     /// </summary>
     public interface IPlugin
+        : IDisposable, IAsyncDisposable
     {
 
         /// <summary>
-        /// Gets the <see cref="IPlugin"/>'s <see cref="System.Runtime.Loader.AssemblyLoadContext"/>
+        /// Initialzes the <see cref="IPlugin"/>
         /// </summary>
-        AssemblyLoadContext AssemblyLoadContext { get; }
-
-        /// <summary>
-        /// Gets the <see cref="IPlugin"/>'s <see cref="System.Reflection.Assembly"/>
-        /// </summary>
-        Assembly Assembly { get; }
+        /// <param name="stoppingToken">A <see cref="CancellationToken"/> used to manage the <see cref="IPlugin"/>'s lifetime</param>
+        /// <returns>A new awaitable <see cref="ValueTask"/></returns>
+        ValueTask InitializeAsync(CancellationToken stoppingToken);
 
     }
 

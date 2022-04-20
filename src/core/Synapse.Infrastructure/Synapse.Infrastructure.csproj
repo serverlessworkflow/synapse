@@ -21,4 +21,17 @@
 	<DebugType>embedded</DebugType>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\apis\runtime\Synapse.Apis.Runtime.Core\Synapse.Apis.Runtime.Core.csproj" />
+    <ProjectReference Include="..\Synapse.Domain\Synapse.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+	<PackageReference Include="Cronos" Version="0.7.1" />
+	<PackageReference Include="Neuroglia.Data.Expressions" Version="2.0.1.57" />
+	<PackageReference Include="Neuroglia.Eventing.CloudEvents" Version="2.0.1.57" />
+	<PackageReference Include="Neuroglia.Mapping" Version="2.0.1.57" />
+	<PackageReference Include="Neuroglia.Mediation" Version="2.0.1.57" />
+  </ItemGroup>
+	
 </Project>

@@ -19,6 +19,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Synapse.Application.Commands.Generic;
 using Synapse.Application.Queries.Generic;
 using Synapse.Domain;
+using Synapse.Infrastructure;
 
 namespace Synapse.Application.Configuration
 {
@@ -136,21 +137,20 @@ namespace Synapse.Application.Configuration
             return services;
         }
 
-        static IServiceCollection AddRepository(this IServiceCollection services, Type entityType, Type repositoryType, ServiceLifetime lifetime)
+        static IServiceCollection AddRepository(this IServiceCollection services, Type entityType, ServiceLifetime lifetime, ApplicationModelType modelType)
         {
-            Type keyType = entityType.GetGenericType(typeof(IIdentifiable<>)).GetGenericArguments()[0];
-            Type implementationType = repositoryType.MakeGenericType(entityType, keyType);
-            services.Add(new(implementationType, implementationType, lifetime));
-            services.Add(new(typeof(IRepository<>).MakeGenericType(entityType), provider => provider.GetRequiredService(implementationType), lifetime));
-            services.Add(new(typeof(IRepository<,>).MakeGenericType(entityType, keyType), provider => provider.GetRequiredService(implementationType), lifetime));
+            var keyType = entityType.GetGenericType(typeof(IIdentifiable<>)).GetGenericArguments()[0];
+            var genericRepositoryType = typeof(IRepository<,>).MakeGenericType(entityType, keyType);
+            services.Add(new(genericRepositoryType, provider => provider.GetRequiredService<IRepositoryFactory>().CreateRepository(entityType, modelType), lifetime));
+            services.Add(new(typeof(IRepository<>).MakeGenericType(entityType), provider => provider.GetRequiredService(genericRepositoryType), lifetime));
             return services;
         }
 
-        internal static IServiceCollection AddRepositories(this IServiceCollection services, IEnumerable<Type> entityTypes, Type repositoryType, ServiceLifetime lifetime)
+        internal static IServiceCollection AddRepositories(this IServiceCollection services, IEnumerable<Type> entityTypes, ServiceLifetime lifetime, ApplicationModelType modelType)
         {
             foreach (Type entityType in entityTypes)
             {
-                services.AddRepository(entityType, repositoryType, lifetime);
+                services.AddRepository(entityType, lifetime, modelType);
             }
             return services;
         }

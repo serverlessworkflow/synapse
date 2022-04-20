@@ -15,32 +15,29 @@
  *
  */
 
-namespace Synapse.Application.Services
+using Cronos;
+
+namespace Synapse.Infrastructure.Services
 {
 
     /// <summary>
-    /// Defines the fundamentals of a CRON-based job
+    /// Defines the fundamentals of a service used to schedule CRON jobs
     /// </summary>
-    public interface ICronJob
+    public interface ICronJobScheduler
         : IDisposable, IAsyncDisposable
     {
 
         /// <summary>
-        /// Gets the event fired whenever the <see cref="CronJob"/> expires
+        /// Schedules the specified job
         /// </summary>
-        event EventHandler Expired;
-
-        /// <summary>
-        /// Gets the <see cref="ICronJob"/>'s id
-        /// </summary>
-        string Id { get; }
-
-        /// <summary>
-        /// Schedules the <see cref="ICronJob"/>
-        /// </summary>
+        /// <param name="jobId">The id of the job to schedule</param>
+        /// <param name="cronExpression">The <see cref="CronExpression"/> that represents the interval at which to run the job</param>
+        /// <param name="timeZone">The <see cref="TimeZoneInfo"/> used to determine the next CRON occurence</param>
+        /// <param name="job">The job to execute</param>
+        /// <param name="validUntil">The date and time until which the job to schedule is valid</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A new awaitable <see cref="Task"/></returns>
-        Task ScheduleAsync(CancellationToken cancellationToken = default);
+        Task ScheduleJobAsync(string jobId, CronExpression cronExpression, TimeZoneInfo timeZone, Func<IServiceProvider, Task> job, DateTimeOffset? validUntil = null, CancellationToken cancellationToken = default);
 
     }
 

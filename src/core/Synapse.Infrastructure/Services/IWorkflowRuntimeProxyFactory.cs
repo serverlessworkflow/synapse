@@ -15,26 +15,24 @@
  *
  */
 
-namespace Synapse.Application.Services
+using Synapse.Apis.Runtime;
+
+namespace Synapse.Infrastructure.Services
 {
 
     /// <summary>
-    /// Defines the fundamentals of a service used to manage plugins
+    /// Defines the fundamentals of a service used to create <see cref="IWorkflowRuntimeProxy"/>
     /// </summary>
-    public interface IPluginManager
+    public interface IWorkflowRuntimeProxyFactory
     {
 
         /// <summary>
-        /// Gets an <see cref="IEnumerable{T}"/> containing all loaded plugings
+        /// Creates a new <see cref="IWorkflowRuntimeProxy"/>
         /// </summary>
-        IEnumerable<IPlugin> Plugins { get; }
-
-        /// <summary>
-        /// Loads a <see cref="IPlugin"/> from the specified path
-        /// </summary>
-        /// <param name="path">The path of the <see cref="IPlugin"/> to load</param>
-        /// <returns>The loaded <see cref="IPlugin"/></returns>
-        IPlugin LoadPluginFrom(string path);
+        /// <param name="id">The id of the workflow instance to create a new <see cref="IWorkflowRuntimeProxy"/> for</param>
+        /// <param name="signalStream">The service used to write <see cref="V1RuntimeSignal"/>s to the stream</param>
+        /// <returns>A new <see cref="IWorkflowRuntimeProxy"/></returns>
+        IWorkflowRuntimeProxy CreateProxy(string id, IAsyncStreamWriter<V1RuntimeSignal> signalStream);
 
     }
 

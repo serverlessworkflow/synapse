@@ -24,6 +24,7 @@ using Neuroglia.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using ServerlessWorkflow.Sdk;
+using Synapse.Infrastructure;
 using System.Reactive.Subjects;
 using System.Reflection;
 
@@ -57,16 +58,6 @@ namespace Synapse.Application.Configuration
         /// Gets the <see cref="IServiceCollection"/> to configure
         /// </summary>
         public IServiceCollection Services { get; }
-
-        /// <summary>
-        /// Gets the type of <see cref="IRepository"/> to use for write models
-        /// </summary>
-        protected Type WriteModelRepositoryType { get; set; } = typeof(DistributedCacheRepository<,>);
-
-        /// <summary>
-        /// Gets the type of <see cref="IRepository"/> to use for read models
-        /// </summary>
-        protected Type ReadModelRepositoryType { get; set; }= typeof(DistributedCacheRepository<,>);
 
         /// <summary>
         /// Gets a <see cref="List{T}"/> containing the assemblies to scan to automatically register mapping-related services
@@ -155,8 +146,9 @@ namespace Synapse.Application.Configuration
             this.Services.AddSingleton<PluginManager>();
             this.Services.AddSingleton<IPluginManager>(provider => provider.GetRequiredService<PluginManager>());
             this.Services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<PluginManager>());
-            this.Services.AddRepositories(writeModelTypes, this.WriteModelRepositoryType, ServiceLifetime.Scoped);
-            this.Services.AddRepositories(readModelTypes, this.ReadModelRepositoryType, ServiceLifetime.Scoped);
+            this.Services.AddScoped<IRepositoryFactory, PluginBasedRepositoryFactory>();
+            this.Services.AddRepositories(writeModelTypes, ServiceLifetime.Scoped, ApplicationModelType.WriteModel);
+            this.Services.AddRepositories(readModelTypes, ServiceLifetime.Scoped, ApplicationModelType.ReadModel);
 
             if (options.SkipCertificateValidation)
             {

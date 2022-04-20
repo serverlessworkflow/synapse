@@ -1,4 +1,4 @@
-﻿namespace Synapse.Application.Services
+﻿namespace Synapse.Infrastructure.Services
 {
 
     /// <summary>
