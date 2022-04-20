@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	<VersionPrefix>0.1.0</VersionPrefix>
+	<VersionPrefix>0.1.1</VersionPrefix>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
 	<Authors>The Synapse Authors</Authors>
 	<Company>Cloud Native Computing Foundation</Company>
@@ -23,17 +23,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Synapse.Infrastructure\Synapse.Infrastructure.csproj" />
+	<ProjectReference Include="..\Synapse.Infrastructure\Synapse.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
 	<PackageReference Include="CloudNative.CloudEvents.NewtonsoftJson" Version="2.2.0" />
-	<PackageReference Include="Microsoft.AspNetCore.OData" Version="8.0.8" />
+	<PackageReference Include="Microsoft.AspNetCore.OData" Version="8.0.9" />
 	<PackageReference Include="Microsoft.OData.ModelBuilder" Version="1.0.8" />
-	<PackageReference Include="Neuroglia.AspNetCore.JsonPatch" Version="2.0.1.57" />
-	<PackageReference Include="Neuroglia.Data.DistributedCache" Version="2.0.1.57" />
-	<PackageReference Include="Neuroglia.Mediation.FluentValidation" Version="2.0.1.57" />
-	<PackageReference Include="ServerlessWorkflow.Sdk" Version="0.8.0.19" />
+	<PackageReference Include="Neuroglia.AspNetCore.JsonPatch" Version="2.0.1.58" />
+	<PackageReference Include="Neuroglia.Data.DistributedCache" Version="2.0.1.58" />
+	<PackageReference Include="Neuroglia.Mediation.FluentValidation" Version="2.0.1.58" />
+	<PackageReference Include="ServerlessWorkflow.Sdk" Version="0.8.0.20" />
   </ItemGroup>
 
 </Project>

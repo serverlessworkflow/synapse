@@ -15,6 +15,8 @@
  *
  */
 
+using Neuroglia.Data;
+
 namespace Synapse.Infrastructure.Plugins
 {
 
@@ -24,13 +26,6 @@ namespace Synapse.Infrastructure.Plugins
     public interface IRepositoryPlugin
         : IPlugin
     {
-
-        /// <summary>
-        /// Creates a new <see cref="IRepository"/>
-        /// </summary>
-        /// <param name="entityType">The type of entity to create a new <see cref="IRepository"/> for</param>
-        /// <returns>A new <see cref="IRepository"/></returns>
-        IRepository CreateRepository(Type entityType);
 
         /// <summary>
         /// Creates a new <see cref="IRepository"/>

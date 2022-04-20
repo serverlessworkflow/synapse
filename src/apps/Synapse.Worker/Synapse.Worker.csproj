@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	<OutputType>Exe</OutputType>
-	<VersionPrefix>0.1.0</VersionPrefix>
+	<VersionPrefix>0.1.1</VersionPrefix>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
 	<Authors>The Synapse Authors</Authors>
 	<Company>Cloud Native Computing Foundation</Company>
@@ -35,15 +35,15 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
     <PackageReference Include="Microsoft.OpenApi" Version="1.3.1" />
     <PackageReference Include="Microsoft.OpenApi.Readers" Version="1.3.1" />
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.15.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.15.1" />
     <PackageReference Include="MimeTypes" Version="2.4.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Neuroglia.AsyncApi.Client.All" Version="2.1.0.6" />
-    <PackageReference Include="Neuroglia.Data.Expressions.JQ" Version="2.0.1.57" />
-    <PackageReference Include="Neuroglia.Eventing.CloudEvents" Version="2.0.1.57" />
-    <PackageReference Include="Neuroglia.Serialization.NewtonsoftJson" Version="2.0.1.57" />
+    <PackageReference Include="Neuroglia.Data.Expressions.JQ" Version="2.0.1.58" />
+    <PackageReference Include="Neuroglia.Eventing.CloudEvents" Version="2.0.1.58" />
+    <PackageReference Include="Neuroglia.Serialization.NewtonsoftJson" Version="2.0.1.58" />
     <PackageReference Include="protobuf-net.Grpc" Version="1.0.152" />
     <PackageReference Include="protobuf-net.Grpc.ClientFactory" Version="1.0.152" />
     <PackageReference Include="Simple.OData.Client" Version="5.26.0" />

@@ -15,7 +15,7 @@
  *
  */
 
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Synapse.Infrastructure.Plugins
 {
@@ -27,20 +27,6 @@ namespace Synapse.Infrastructure.Plugins
     {
 
         private bool _Disposed;
-
-        /// <summary>
-        /// Initializes a new <see cref="Plugin"/>
-        /// </summary>
-        /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
-        protected Plugin(ILoggerFactory loggerFactory)
-        {
-            this.Logger = loggerFactory.CreateLogger(this.GetType());
-        }
-
-        /// <summary>
-        /// Gets the service used to perform logging
-        /// </summary>
-        protected ILogger Logger { get; }
 
         /// <summary>
         /// Gets the <see cref="Plugin"/>'s <see cref="System.Threading.CancellationTokenSource"/>

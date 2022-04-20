@@ -17,6 +17,7 @@
 
 namespace Synapse.Application.Configuration
 {
+
     /// <summary>
     /// Represents the options used to configure the application's plugins
     /// </summary>

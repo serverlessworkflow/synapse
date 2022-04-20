@@ -99,9 +99,13 @@ namespace Synapse.Application.Services
             try
             {
                 this.CancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
-                this.LoadContext = new PluginAssemblyLoadContext(Path.GetDirectoryName(this.AssemblyFilePath)!);
+                this.LoadContext = new PluginAssemblyLoadContext(this.AssemblyFilePath);
                 this.Assembly = this.LoadContext.LoadFromAssemblyName(new(Path.GetFileNameWithoutExtension(this.AssemblyFilePath)));
-                var pluginType = this.Assembly.GetTypes().FirstOrDefault(t => t.IsClass && !t.IsInterface && !t.IsGenericTypeDefinition && !t.IsAbstract && typeof(IPlugin).IsAssignableFrom(t));
+                var pluginType = this.Assembly.GetTypes().FirstOrDefault(t => t.IsClass 
+                    && !t.IsInterface 
+                    && !t.IsGenericTypeDefinition 
+                    && !t.IsAbstract 
+                    && typeof(IPlugin).IsAssignableFrom(t));
                 if (pluginType == null)
                     throw new TypeLoadException($"Failed to find a valid plugin type in the specified assembly '{this.Assembly.FullName}'");
                 this.Plugin = (IPlugin)ActivatorUtilities.CreateInstance(this.ServiceProvider, pluginType);

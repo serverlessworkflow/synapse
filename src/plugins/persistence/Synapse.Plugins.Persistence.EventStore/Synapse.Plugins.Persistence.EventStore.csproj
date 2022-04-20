@@ -12,23 +12,35 @@
     <RepositoryUrl>https://github.com/serverlessworkflow/synapse</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://github.com/serverlessworkflow/synapse</PackageProjectUrl>
-    <PackageTags>synapse domain</PackageTags>
+    <PackageTags>synapse plugins persistence eventstore</PackageTags>
     <NeutralLanguage>en</NeutralLanguage>
 	<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
 	<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
     <FileVersion>$(VersionPrefix).0</FileVersion>
-	<DebugType>embedded</DebugType>
+    <OutputType>Library</OutputType>
+	<EnableDynamicLoading>true</EnableDynamicLoading>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Neuroglia.Data" Version="2.0.1.58" />
-    <PackageReference Include="Neuroglia.Data.Kubernetes" Version="2.0.1.58" />
-    <PackageReference Include="ServerlessWorkflow.Sdk" Version="0.8.0.20" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
+    <PackageReference Include="Neuroglia.Data.EventSourcing.EventStore" Version="2.0.1.58" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Synapse.Integration\Synapse.Integration.csproj" />
+    <ProjectReference Include="..\..\..\core\Synapse.Infrastructure\Synapse.Infrastructure.csproj">
+	  <Private>false</Private>
+	  <ExcludeAssets>runtime</ExcludeAssets>
+	</ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="plugin.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
