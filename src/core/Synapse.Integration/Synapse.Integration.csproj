@@ -282,14 +282,14 @@
     <Compile Update="Models\v1\Generated\V1CorrelationCondition.cs">
       <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1CorrelationCondition.cs</CustomToolNamespace>
     </Compile>
+    <Compile Update="Models\v1\Generated\V1CorrelationContext.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1CorrelationContext.cs</CustomToolNamespace>
+    </Compile>
     <Compile Update="Models\v1\Generated\V1CorrelationOutcome.cs">
       <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1CorrelationOutcome.cs</CustomToolNamespace>
     </Compile>
     <Compile Update="Models\v1\Generated\V1Event.cs">
       <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1Event.cs</CustomToolNamespace>
-    </Compile>
-    <Compile Update="Models\v1\Generated\V1CorrelationContext.cs">
-      <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1CorrelationContext.cs</CustomToolNamespace>
     </Compile>
     <Compile Update="Models\v1\Generated\V1EventFilter.cs">
       <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1EventFilter.cs</CustomToolNamespace>
