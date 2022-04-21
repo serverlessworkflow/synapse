@@ -42,9 +42,9 @@ namespace Synapse.Plugins.Persistence.MongoDB
         {
             await base.InitializeAsync(stoppingToken);
             var configuration = new ConfigurationBuilder()
-                .AddJsonFile(Path.Combine(Path.GetDirectoryName(typeof(MongoDBRepositoryPlugin).Assembly.Location)!, "appsettings.json"), true, true)
+                .AddJsonFile(Path.Combine(Path.GetDirectoryName(typeof(MongoDBRepositoryPlugin).Assembly.Location)!, "settings.plugin.json"), true, true)
                 .Build();
-            var mongoSettings = MongoClientSettings.FromConnectionString(configuration.GetConnectionString("Mongo"));
+            var mongoSettings = MongoClientSettings.FromConnectionString(configuration.GetConnectionString("MongoDB"));
             mongoSettings.LinqProvider = LinqProvider.V3;
             var services = new ServiceCollection();
             services.AddLogging();

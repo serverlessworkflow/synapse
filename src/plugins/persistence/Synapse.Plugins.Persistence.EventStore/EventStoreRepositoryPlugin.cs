@@ -60,7 +60,7 @@ namespace Synapse.Plugins.Persistence.EventStore
         {
             await base.InitializeAsync(stoppingToken);
             var configuration = new ConfigurationBuilder()
-                .AddJsonFile(Path.Combine(Path.GetDirectoryName(typeof(EventStoreRepositoryPlugin).Assembly.Location)!, "appsettings.json"), true, true)
+                .AddJsonFile(Path.Combine(Path.GetDirectoryName(typeof(EventStoreRepositoryPlugin).Assembly.Location)!, "settings.plugin.json"), true, true)
                 .Build();
             var services = new ServiceCollection();
             services.AddLogging();

@@ -17,6 +17,7 @@
 
 using Neuroglia.Serialization;
 using Synapse.Infrastructure.Plugins;
+using System.IO.Compression;
 
 namespace Synapse.Application.Services
 {
@@ -103,9 +104,17 @@ namespace Synapse.Application.Services
             var pluginDirectory = new DirectoryInfo(this.ApplicationOptions.Plugins.Directory);
             if(!pluginDirectory.Exists)
                 pluginDirectory.Create();
+            foreach(var packageFile in pluginDirectory.GetFiles("*.tar.gz"))
+            {
+                using var packageFileStream = packageFile.OpenRead();
+                using var package = new ZipArchive(packageFileStream, ZipArchiveMode.Read);
+                package.ExtractToDirectory(Path.Combine(packageFile.Directory!.FullName, packageFile.Name.Replace(".tar.gz", string.Empty)), true);
+                package.Dispose();
+                packageFile.Delete();
+            }
             foreach (var plugin in await this.FindPluginsAsync(pluginDirectory.FullName))
                 await plugin.LoadAsync(this.CancellationTokenSource.Token);
-            this.FileSystemWatcher = new(pluginDirectory.FullName, PluginMetadataFileName);
+            this.FileSystemWatcher = new(pluginDirectory.FullName, $"*.*");
             this.FileSystemWatcher.IncludeSubdirectories = true;
             this.FileSystemWatcher.Created += this.OnPluginFileCreatedAsync;
             this.FileSystemWatcher.Deleted += this.OnPluginFileDeletedAsync;
@@ -209,7 +218,25 @@ namespace Synapse.Application.Services
         /// <param name="e">The <see cref="FileSystemEventArgs"/> to handle</param>
         protected virtual async void OnPluginFileCreatedAsync(object sender, FileSystemEventArgs e)
         {
-            await this.FindPluginAsync(e.FullPath);
+            if (e.FullPath.EndsWith(".tar.gz"))
+            {
+                var packageFile = new FileInfo(e.FullPath);
+                do
+                {
+                    await Task.Delay(250);
+                }
+                while (packageFile.IsLocked());
+                using var packageFileStream = packageFile.OpenRead();
+                using var package = new ZipArchive(packageFileStream, ZipArchiveMode.Read);
+                package.ExtractToDirectory(Path.Combine(packageFile.Directory!.FullName, packageFile.Name.Replace(".tar.gz", string.Empty)), true);
+                package.Dispose();
+                await this.FindPluginsAsync(packageFile.Directory!.FullName);
+                packageFile.Delete();
+            }
+            else if(e.FullPath == "plugin.json")
+            {
+                await this.FindPluginAsync(e.FullPath);
+            }
         }
 
         /// <summary>

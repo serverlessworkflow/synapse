@@ -53,7 +53,7 @@ namespace Synapse.Infrastructure.Plugins
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("authors")]
         [Newtonsoft.Json.JsonProperty("authors")]
-        public virtual string? Auhtors { get; protected set; }
+        public virtual string? Authors { get; protected set; }
 
         /// <summary>
         /// Gets the <see cref="IPlugin"/>'s copyright

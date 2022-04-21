@@ -35,7 +35,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="appsettings.json">
+    <None Update="settings.plugin.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="plugin.json">

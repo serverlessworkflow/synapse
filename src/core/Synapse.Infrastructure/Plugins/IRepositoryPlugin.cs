@@ -15,8 +15,6 @@
  *
  */
 
-using Neuroglia.Data;
-
 namespace Synapse.Infrastructure.Plugins
 {
 
