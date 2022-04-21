@@ -85,6 +85,17 @@ namespace Synapse.Application.Services
 
         IEnumerable<IPluginHandle> IPluginManager.Plugins => this.Plugins;
 
+        /// <summary>
+        /// Gets the <see cref="TaskCompletionSource"/> used to wait for the <see cref="PluginManager"/>'s 
+        /// </summary>
+        protected TaskCompletionSource StartupTaskCompletionSource { get; } = new();
+
+        /// <inheritdoc/>
+        public async ValueTask WaitForStartupAsync(CancellationToken stoppingToken)
+        {
+            await this.StartupTaskCompletionSource.Task;
+        }
+
         /// <inheritdoc/>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -99,6 +110,7 @@ namespace Synapse.Application.Services
             this.FileSystemWatcher.Created += this.OnPluginFileCreatedAsync;
             this.FileSystemWatcher.Deleted += this.OnPluginFileDeletedAsync;
             this.FileSystemWatcher.EnableRaisingEvents = true;
+            this.StartupTaskCompletionSource.SetResult();
         }
 
         /// <summary>

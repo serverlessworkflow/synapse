@@ -16,6 +16,7 @@
  */
 
 using Synapse.Application.Commands.Workflows;
+using Synapse.Infrastructure.Plugins;
 
 namespace Synapse.Application.Services
 {
@@ -32,10 +33,12 @@ namespace Synapse.Application.Services
         /// </summary>
         /// <param name="serviceProvider">The current <see cref="IServiceProvider"/></param>
         /// <param name="logger">The service used to perform logging</param>
-        public WorkflowScheduler(IServiceProvider serviceProvider, ILogger<WorkflowScheduler> logger)
+        /// <param name="pluginManager">The service used to manage <see cref="IPlugin"/>s</param>
+        public WorkflowScheduler(IServiceProvider serviceProvider, ILogger<WorkflowScheduler> logger, IPluginManager pluginManager)
         {
             this.ServiceProvider = serviceProvider;
             this.Logger = logger;
+            this.PluginManager = pluginManager;
         }
 
         /// <summary>
@@ -48,17 +51,23 @@ namespace Synapse.Application.Services
         /// </summary>
         protected ILogger Logger { get; }
 
+        /// <summary>
+        /// Gets the service used to manage <see cref="IPlugin"/>s
+        /// </summary>
+        protected IPluginManager PluginManager { get; }
+
         /// <inheritdoc/>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            await this.PluginManager.WaitForStartupAsync(stoppingToken);
             using var scope = this.ServiceProvider.CreateScope();
             var workflows = scope.ServiceProvider.GetRequiredService<IRepository<Integration.Models.V1Workflow>>();
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
             foreach(var workflow in workflows.AsQueryable()
                 .Where(w => w.Definition.Start != null && w.Definition.Start.Schedule != null)
+                .ToList()
                 .GroupBy(w => w.Definition.Id)
-                .Select(w => w.OrderByDescending(w => w.Definition.Version).First())
-                .ToList())
+                .Select(w => w.OrderByDescending(w => w.Definition.Version).First()))
             {
                 try
                 {

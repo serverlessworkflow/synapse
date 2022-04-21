@@ -24,6 +24,7 @@ namespace Synapse.Infrastructure.Services
     /// Defines the fundamentals of a service used to manage plugins
     /// </summary>
     public interface IPluginManager
+        : IService
     {
 
         /// <summary>

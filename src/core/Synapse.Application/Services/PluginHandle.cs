@@ -55,6 +55,11 @@ namespace Synapse.Application.Services
         /// </summary>
         protected IServiceProvider ServiceProvider { get; }
 
+        /// <summary>
+        /// Gets the <see cref="PluginHandle"/>'s <see cref="IServiceScope"/>
+        /// </summary>
+        protected IServiceScope ServiceScope { get; private set; } = null!;
+
         /// <inheritdoc/>
         public virtual PluginMetadata Metadata { get; }
 
@@ -108,7 +113,8 @@ namespace Synapse.Application.Services
                     && typeof(IPlugin).IsAssignableFrom(t));
                 if (pluginType == null)
                     throw new TypeLoadException($"Failed to find a valid plugin type in the specified assembly '{this.Assembly.FullName}'");
-                this.Plugin = (IPlugin)ActivatorUtilities.CreateInstance(this.ServiceProvider, pluginType);
+                this.ServiceScope = this.ServiceProvider.CreateScope();
+                this.Plugin = (IPlugin)ActivatorUtilities.CreateInstance(this.ServiceScope.ServiceProvider, pluginType);
                 await this.Plugin.InitializeAsync(this.CancellationTokenSource.Token);
                 this.IsLoaded = true;
                 await ValueTask.CompletedTask;
@@ -133,6 +139,8 @@ namespace Synapse.Application.Services
         {
             if (!this.IsLoaded)
                 return;
+            this.ServiceScope?.Dispose();
+            this.ServiceScope = null!;
             this.Assembly = null;
             this.LoadContext?.Unload();
             this.LoadContext = null;

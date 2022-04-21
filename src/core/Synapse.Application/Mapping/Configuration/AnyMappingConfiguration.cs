@@ -16,6 +16,7 @@
  */
 using AutoMapper;
 using Neuroglia.Serialization;
+using Newtonsoft.Json.Linq;
 
 namespace Synapse.Application.Mapping.Configuration
 {
@@ -28,6 +29,8 @@ namespace Synapse.Application.Mapping.Configuration
             {
                 if (source == null)
                     return null!;
+                if (source is JObject jobj)
+                    return DynamicObject.FromObject(jobj.ToObject())!;
                 if (source is Dynamic dyn)
                     return dyn;
                 return Dynamic.FromObject(source)!;

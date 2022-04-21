@@ -17,41 +17,23 @@
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 using Neuroglia.Data;
-using Neuroglia.Data.EventSourcing;
-using Neuroglia.Data.EventSourcing.Services;
-using Neuroglia.Mediation;
-using Neuroglia.Serialization;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using Synapse.Infrastructure.Plugins;
 
-namespace Synapse.Plugins.Persistence.EventStore
+namespace Synapse.Plugins.Persistence.MongoDB
 {
 
     /// <summary>
-    /// Represents the official <see cref="IRepositoryPlugin"/> implementation for EventStore
+    /// Represents the official <see cref="IRepositoryPlugin"/> implementation for MongoDB
     /// </summary>
-    public class EventStoreRepositoryPlugin
+    public class MongoDBRepositoryPlugin
         : Plugin, IRepositoryPlugin
     {
 
         /// <summary>
-        /// Initializes a new <see cref="EventStoreRepositoryPlugin"/>
-        /// </summary>
-        /// <param name="mediator">The service used to mediate calls</param>
-        public EventStoreRepositoryPlugin(IMediator mediator)
-        {
-            this.Mediator = mediator;
-        }
-
-        /// <summary>
-        /// Gets the service used to mediate calls
-        /// </summary>
-        protected IMediator Mediator { get; }
-
-        /// <summary>
-        /// Gets the <see cref="EventStoreRepositoryPlugin"/>'s <see cref="IServiceProvider"/>
+        /// Gets the <see cref="MongoDBRepositoryPlugin"/>'s <see cref="IServiceProvider"/>
         /// </summary>
         protected IServiceProvider ServiceProvider { get; private set; } = null!;
 
@@ -60,23 +42,14 @@ namespace Synapse.Plugins.Persistence.EventStore
         {
             await base.InitializeAsync(stoppingToken);
             var configuration = new ConfigurationBuilder()
-                .AddJsonFile(Path.Combine(Path.GetDirectoryName(typeof(EventStoreRepositoryPlugin).Assembly.Location)!, "appsettings.json"), true, true)
+                .AddJsonFile(Path.Combine(Path.GetDirectoryName(typeof(MongoDBRepositoryPlugin).Assembly.Location)!, "appsettings.json"), true, true)
                 .Build();
+            var mongoSettings = MongoClientSettings.FromConnectionString(configuration.GetConnectionString("Mongo"));
+            mongoSettings.LinqProvider = LinqProvider.V3;
             var services = new ServiceCollection();
             services.AddLogging();
-            services.AddSingleton(this.Mediator);
-            services.AddEventStore(es =>
-            {
-                es.ConfigureClient(client =>
-                {
-                    client.UseConnectionString(configuration.GetConnectionString("EventStore"));
-                });
-            });
-            services.AddNewtonsoftJsonSerializer(options =>
-            {
-                options.ContractResolver = new NonPublicSetterContractResolver();
-                options.NullValueHandling = NullValueHandling.Ignore;
-            });
+            services.AddMongoClient(mongoSettings, ServiceLifetime.Singleton);
+            services.AddMongoDatabase("synapse", ServiceLifetime.Singleton);
             this.ServiceProvider = services.BuildServiceProvider();
         }
 
@@ -87,7 +60,7 @@ namespace Synapse.Plugins.Persistence.EventStore
                 throw new ArgumentNullException(nameof(entityType));
             if (keyType == null)
                 throw new ArgumentNullException(nameof(keyType));
-            var repositoryType = typeof(EventSourcingRepository<,>).MakeGenericType(entityType, keyType);
+            var repositoryType = typeof(MongoRepository<,>).MakeGenericType(entityType, keyType);
             var repository = (IRepository)ActivatorUtilities.CreateInstance(this.ServiceProvider, repositoryType);
             return repository;
         }
