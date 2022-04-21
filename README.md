@@ -200,4 +200,4 @@ documents:
 | [GOVERNANCE](GOVERNANCE.md) | Project Governance Info | 
 | [CONTRIBUTING](CONTRIBUTING.md) | Documentation on how to contribute to the project | 
 | [CODE-OF-CONDUCT](code-of-conduct.md) | Defines the project's Code of Conduct | 
-| [roadmap](roadmap/README.md) | Project Roadmap |
+| [ROADMAP](https://github.com/serverlessworkflow/synapse/milestones) | Project Roadmap |

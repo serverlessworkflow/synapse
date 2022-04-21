@@ -18,9 +18,11 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Synapse.Application.Configuration;
 using Synapse.Application.Services;
 using Synapse.Domain.Models;
 using Synapse.Runtime.Docker.Configuration;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO.Compression;
@@ -42,12 +44,15 @@ namespace Synapse.Runtime.Services
         /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
         /// <param name="environment">The current <see cref="IHostEnvironment"/></param>
         /// <param name="httpClientFactory">The service used to create <see cref="System.Net.Http.HttpClient"/>s</param>
+        /// <param name="applicationOptions">The service used to access the current <see cref="SynapseApplicationOptions"/></param>
         /// <param name="options">The service used to access the current <see cref="NativeRuntimeOptions"/></param>
-        public NativeRuntimeHost(ILoggerFactory loggerFactory, IHostEnvironment environment, IHttpClientFactory httpClientFactory, IOptions<NativeRuntimeOptions> options)
+        public NativeRuntimeHost(ILoggerFactory loggerFactory, IHostEnvironment environment, IHttpClientFactory httpClientFactory, 
+            IOptions<SynapseApplicationOptions> applicationOptions, IOptions<NativeRuntimeOptions> options)
             : base(loggerFactory)
         {
             this.Environment = environment;
             this.HttpClient = httpClientFactory.CreateClient();
+            this.ApplicationOptions = applicationOptions.Value;
             this.Options = options.Value;
         }
 
@@ -60,6 +65,11 @@ namespace Synapse.Runtime.Services
         /// Gets the <see cref="System.Net.Http.HttpClient"/> used to perform HTTP requests
         /// </summary>
         protected HttpClient HttpClient { get; }
+
+        /// <summary>
+        /// Gets the current <see cref="SynapseApplicationOptions"/>
+        /// </summary>
+        protected SynapseApplicationOptions ApplicationOptions { get; }
 
         /// <summary>
         /// Gets the current <see cref="NativeRuntimeOptions"/>
@@ -102,7 +112,7 @@ namespace Synapse.Runtime.Services
                 target = "osx-x64.tar.gz";
             else
                 throw new PlatformNotSupportedException();
-            using var packageStream = await this.HttpClient.GetStreamAsync($"https://github.com/serverlessworkflow/synapse/releases/download/0.1.0/synapse-worker-{target}", cancellationToken); //todo: config based
+            using var packageStream = await this.HttpClient.GetStreamAsync($"https://github.com/serverlessworkflow/synapse/releases/download/{typeof(NativeRuntimeHost).Assembly.GetName().Version!.ToString(3)!}/synapse-worker-{target}", cancellationToken); //todo: config based
             using ZipArchive archive = new ZipArchive(packageStream, ZipArchiveMode.Read);
             this.Logger.LogInformation("Worker app successfully downloaded. Extracting...");
             archive.ExtractToDirectory(workerDirectory.FullName, true);
@@ -131,6 +141,8 @@ namespace Synapse.Runtime.Services
             };
             startInfo.Environment.Add(EnvironmentVariables.Api.HostName.Name, EnvironmentVariables.Api.HostName.Value!); //todo: instead, fetch values from options
             startInfo.Environment.Add(EnvironmentVariables.Runtime.WorkflowInstanceId.Name, workflowInstance.Id.ToString());
+            if (this.ApplicationOptions.SkipCertificateValidation)
+                startInfo.Environment.Add(EnvironmentVariables.SkipCertificateValidation.Name, "true");
             var process = new Process()
             {
                 StartInfo = startInfo,
