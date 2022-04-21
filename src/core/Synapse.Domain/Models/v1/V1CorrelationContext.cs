@@ -43,6 +43,8 @@ namespace Synapse.Domain.Models
         /// <summary>
         /// Gets an <see cref="IReadOnlyDictionary{TKey, TValue}"/> containing the correlations' value by key mappings
         /// </summary>
+        [Newtonsoft.Json.JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public virtual IReadOnlyDictionary<string, string> Mappings => new ReadOnlyDictionary<string, string>(this._Mappings);
 
         [Newtonsoft.Json.JsonProperty(nameof(PendingEvents))]
@@ -51,6 +53,8 @@ namespace Synapse.Domain.Models
         /// <summary>
         /// Gets an <see cref="IReadOnlyCollection{T}"/> containing all correlated <see cref="V1Event"/>s pending processing
         /// </summary>
+        [Newtonsoft.Json.JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public virtual IReadOnlyCollection<V1Event> PendingEvents => this._PendingEvents.AsReadOnly();
 
         /// <summary>

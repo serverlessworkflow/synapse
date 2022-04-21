@@ -15,23 +15,20 @@
  *
  */
 
-namespace Synapse.Application.Services
+namespace Synapse.Infrastructure.Services
 {
-
     /// <summary>
-    /// Defines the fundamentals of a service used to host workflow runtimes
+    /// Defines the fundamentals of a service
     /// </summary>
-    public interface IWorkflowRuntimeHost
-        : IDisposable, IAsyncDisposable
+    public interface IService
     {
 
         /// <summary>
-        /// Starts the execution of the specified <see cref="V1WorkflowInstance"/>
+        /// Waits for the <see cref="IService"/> to start
         /// </summary>
-        /// <param name="workflowInstance">The <see cref="V1WorkflowInstance"/> to start the execution of</param>
-        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-        /// <returns>An id used to identify the <see cref="V1WorkflowInstance"/>'s runtime</returns>
-        Task<string> StartAsync(V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default);
+        /// <param name="stoppingToken">A <see cref="CancellationToken"/> used to control the <see cref="IService"/>'s lifetime</param>
+        /// <returns>A new awaitable <see cref="ValueTask"/></returns>
+        ValueTask WaitForStartupAsync(CancellationToken stoppingToken);
 
     }
 

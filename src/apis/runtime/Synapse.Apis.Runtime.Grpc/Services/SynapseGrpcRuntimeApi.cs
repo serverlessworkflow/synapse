@@ -21,7 +21,7 @@ using Neuroglia.Mediation;
 using Neuroglia.Serialization;
 using ProtoBuf.Grpc;
 using Synapse.Apis.Runtime.Grpc.Models;
-using Synapse.Application.Services;
+using Synapse.Infrastructure.Services;
 using Synapse.Integration.Commands.WorkflowActivities;
 using Synapse.Integration.Commands.WorkflowInstances;
 using Synapse.Integration.Models;

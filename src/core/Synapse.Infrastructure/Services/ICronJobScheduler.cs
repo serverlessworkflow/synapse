@@ -17,8 +17,9 @@
 
 using Cronos;
 
-namespace Synapse.Application.Services
+namespace Synapse.Infrastructure.Services
 {
+
     /// <summary>
     /// Defines the fundamentals of a service used to schedule CRON jobs
     /// </summary>

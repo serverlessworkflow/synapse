@@ -15,24 +15,23 @@
  *
  */
 
-using Synapse.Apis.Runtime;
-
-namespace Synapse.Application.Services
+namespace Synapse.Infrastructure.Plugins
 {
 
     /// <summary>
-    /// Defines the fundamentals of a service used to create <see cref="IWorkflowRuntimeProxy"/>
+    /// Defines the fundamentals of an <see cref="IPlugin"/> used to create <see cref="IRepository"/> instances
     /// </summary>
-    public interface IWorkflowRuntimeProxyFactory
+    public interface IRepositoryPlugin
+        : IPlugin
     {
 
         /// <summary>
-        /// Creates a new <see cref="IWorkflowRuntimeProxy"/>
+        /// Creates a new <see cref="IRepository"/>
         /// </summary>
-        /// <param name="id">The id of the workflow instance to create a new <see cref="IWorkflowRuntimeProxy"/> for</param>
-        /// <param name="signalStream">The service used to write <see cref="V1RuntimeSignal"/>s to the stream</param>
-        /// <returns>A new <see cref="IWorkflowRuntimeProxy"/></returns>
-        IWorkflowRuntimeProxy CreateProxy(string id, IAsyncStreamWriter<V1RuntimeSignal> signalStream);
+        /// <param name="entityType">The type of entity to create a new <see cref="IRepository"/> for</param>
+        /// <param name="keyType">The type of key used to manage the entities to create a new <see cref="IRepository"/> for</param>
+        /// <returns>A new <see cref="IRepository"/></returns>
+        IRepository CreateRepository(Type entityType, Type keyType);
 
     }
 

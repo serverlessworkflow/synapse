@@ -15,32 +15,24 @@
  *
  */
 
-namespace Synapse.Application.Services
+using Synapse.Apis.Runtime;
+
+namespace Synapse.Infrastructure.Services
 {
 
     /// <summary>
-    /// Defines the fundamentals of a CRON-based job
+    /// Defines the fundamentals of a service used to create <see cref="IWorkflowRuntimeProxy"/>
     /// </summary>
-    public interface ICronJob
-        : IDisposable, IAsyncDisposable
+    public interface IWorkflowRuntimeProxyFactory
     {
 
         /// <summary>
-        /// Gets the event fired whenever the <see cref="CronJob"/> expires
+        /// Creates a new <see cref="IWorkflowRuntimeProxy"/>
         /// </summary>
-        event EventHandler Expired;
-
-        /// <summary>
-        /// Gets the <see cref="ICronJob"/>'s id
-        /// </summary>
-        string Id { get; }
-
-        /// <summary>
-        /// Schedules the <see cref="ICronJob"/>
-        /// </summary>
-        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-        /// <returns>A new awaitable <see cref="Task"/></returns>
-        Task ScheduleAsync(CancellationToken cancellationToken = default);
+        /// <param name="id">The id of the workflow instance to create a new <see cref="IWorkflowRuntimeProxy"/> for</param>
+        /// <param name="signalStream">The service used to write <see cref="V1RuntimeSignal"/>s to the stream</param>
+        /// <returns>A new <see cref="IWorkflowRuntimeProxy"/></returns>
+        IWorkflowRuntimeProxy CreateProxy(string id, IAsyncStreamWriter<V1RuntimeSignal> signalStream);
 
     }
 

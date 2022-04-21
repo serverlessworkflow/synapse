@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	<VersionPrefix>0.1.1</VersionPrefix>
+	  <VersionPrefix>0.1.2</VersionPrefix>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
 	<Authors>The Synapse Authors</Authors>
 	<Company>Cloud Native Computing Foundation</Company>
@@ -22,9 +22,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Neuroglia.Data" Version="2.0.1.57" />
-    <PackageReference Include="Neuroglia.Data.Kubernetes" Version="2.0.1.57" />
-    <PackageReference Include="ServerlessWorkflow.Sdk" Version="0.8.0.19" />
+    <PackageReference Include="Neuroglia.Data" Version="2.0.1.58" />
+    <PackageReference Include="Neuroglia.Data.Kubernetes" Version="2.0.1.58" />
+    <PackageReference Include="ServerlessWorkflow.Sdk" Version="0.8.0.20" />
   </ItemGroup>
 
   <ItemGroup>

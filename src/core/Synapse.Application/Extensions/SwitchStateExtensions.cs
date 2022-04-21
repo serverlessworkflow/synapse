@@ -20,6 +20,7 @@ using ServerlessWorkflow.Sdk.Models;
 
 namespace Synapse
 {
+
     /// <summary>
     /// Defines extensions for <see cref="SwitchStateDefinition"/>s
     /// </summary>

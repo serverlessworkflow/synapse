@@ -12,7 +12,9 @@
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
+        "SYNAPSE_PERSISTENCE_WRITEMODEL_DEFAULT_REPOSITORY": "EventStore",
         "ASPNETCORE_ENVIRONMENT": "Development",
+        "SYNAPSE_PERSISTENCE_READMODEL_DEFAULT_REPOSITORY": "MongoDB",
         "SYNAPSE_API_HOSTNAME": "localhost"
       },
       "applicationUrl": "http://localhost:42286",

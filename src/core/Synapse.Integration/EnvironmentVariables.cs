@@ -50,50 +50,6 @@ namespace Synapse
         }
 
         /// <summary>
-        /// Exposes constants about <see cref="CloudEvent"/>-related environment variables
-        /// </summary>
-        public static class CloudEvents
-        {
-
-            /// <summary>
-            /// Gets the prefix for all <see cref="CloudEvent"/>-related environment variables
-            /// </summary>
-            public const string Prefix = EnvironmentVariables.Prefix + "CLOUDEVENTS_";
-
-            /// <summary>
-            /// Exposes constants about <see cref="CloudEvent"/> sink related environment variables
-            /// </summary>
-            public static class Sink
-            {
-
-                /// <summary>
-                /// Gets the prefix for all <see cref="CloudEvent"/> sink related environment variables
-                /// </summary>
-                public const string Prefix = CloudEvents.Prefix + "SINK_";
-
-                /// <summary>
-                /// Exposes constants about the <see cref="CloudEvent"/> sink uri environment variable
-                /// </summary>
-                public static class Uri
-                {
-
-                    /// <summary>
-                    /// Gets the name of the <see cref="CloudEvent"/> sink uri environment variable
-                    /// </summary>
-                    public const string Name = Prefix + "URI";
-
-                    /// <summary>
-                    /// Gets the value of the <see cref="CloudEvent"/> sink uri environment variable
-                    /// </summary>
-                    public static string Value = Environment.GetEnvironmentVariable(Name);
-
-                }
-
-            }
-
-        }
-
-        /// <summary>
         /// Exposes constants about api-related environment variables
         /// </summary>
         public static class Api
@@ -217,6 +173,156 @@ namespace Synapse
                     public static string Value = Environment.GetEnvironmentVariable(Name);
 
                 }
+
+            }
+
+        }
+
+        /// <summary>
+        /// Exposes constants about <see cref="CloudEvent"/>-related environment variables
+        /// </summary>
+        public static class CloudEvents
+        {
+
+            /// <summary>
+            /// Gets the prefix for all <see cref="CloudEvent"/>-related environment variables
+            /// </summary>
+            public const string Prefix = EnvironmentVariables.Prefix + "CLOUDEVENTS_";
+
+            /// <summary>
+            /// Exposes constants about <see cref="CloudEvent"/> sink related environment variables
+            /// </summary>
+            public static class Sink
+            {
+
+                /// <summary>
+                /// Gets the prefix for all <see cref="CloudEvent"/> sink related environment variables
+                /// </summary>
+                public const string Prefix = CloudEvents.Prefix + "SINK_";
+
+                /// <summary>
+                /// Exposes constants about the <see cref="CloudEvent"/> sink uri environment variable
+                /// </summary>
+                public static class Uri
+                {
+
+                    /// <summary>
+                    /// Gets the name of the <see cref="CloudEvent"/> sink uri environment variable
+                    /// </summary>
+                    public const string Name = Prefix + "URI";
+
+                    /// <summary>
+                    /// Gets the value of the <see cref="CloudEvent"/> sink uri environment variable
+                    /// </summary>
+                    public static string Value = Environment.GetEnvironmentVariable(Name);
+
+                }
+
+            }
+
+        }
+
+        /// <summary>
+        /// Exposes constants about persistence-related environment variables
+        /// </summary>
+        public static class Persistence
+        {
+
+            /// <summary>
+            /// Gets the prefix for all persistence related environment variables
+            /// </summary>
+            public const string Prefix = EnvironmentVariables.Prefix + "PERSISTENCE_";
+
+            /// <summary>
+            /// Exposes constants about write model-related environment variables
+            /// </summary>
+            public static class WriteModel
+            {
+
+                /// <summary>
+                /// Gets the prefix for all write model related environment variables
+                /// </summary>
+                public const string Prefix = Persistence.Prefix + "WRITEMODEL_";
+
+                /// <summary>
+                /// Exposes constants about the default write model repository environment variable
+                /// </summary>
+                public static class DefaultRepository
+                {
+
+                    /// <summary>
+                    /// Gets the name of the default write model repository environment variable
+                    /// </summary>
+                    public const string Name = Prefix + "DEFAULT_REPOSITORY";
+
+                    /// <summary>
+                    /// Gets the value of the default write model repository environment variable
+                    /// </summary>
+                    public static string Value = Environment.GetEnvironmentVariable(Name);
+
+                }
+
+            }
+
+            /// <summary>
+            /// Exposes constants about read model-related environment variables
+            /// </summary>
+            public static class ReadModel
+            {
+
+                /// <summary>
+                /// Gets the prefix for all read model related environment variables
+                /// </summary>
+                public const string Prefix = Persistence.Prefix + "READMODEL_";
+
+                /// <summary>
+                /// Exposes constants about the default read model repository environment variable
+                /// </summary>
+                public static class DefaultRepository
+                {
+
+                    /// <summary>
+                    /// Gets the name of the default read model repository environment variable
+                    /// </summary>
+                    public const string Name = Prefix + "DEFAULT_REPOSITORY";
+
+                    /// <summary>
+                    /// Gets the value of the default read model repository environment variable
+                    /// </summary>
+                    public static string Value = Environment.GetEnvironmentVariable(Name);
+
+                }
+
+            }
+
+        }
+
+        /// <summary>
+        /// Exposes constants about plugins-related environment variables
+        /// </summary>
+        public static class Plugins
+        {
+
+            /// <summary>
+            /// Gets the prefix for all plugins related environment variables
+            /// </summary>
+            public const string Prefix = EnvironmentVariables.Prefix + "PLUGINS_";
+
+            /// <summary>
+            /// Exposes constants about the plugins directory environment variable
+            /// </summary>
+            public static class Directory
+            {
+
+                /// <summary>
+                /// Gets the name of the plugins directory environment variable
+                /// </summary>
+                public const string Name = Prefix + "DIRECTORY";
+
+                /// <summary>
+                /// Gets the value of the plugins directory environment variable
+                /// </summary>
+                public static string Value = Environment.GetEnvironmentVariable(Name);
 
             }
 

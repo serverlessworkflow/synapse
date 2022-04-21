@@ -3,7 +3,7 @@ using Neuroglia;
 using Neuroglia.Mapping;
 using Neuroglia.Mediation;
 using Neuroglia.Serialization;
-using Synapse.Application.Services;
+using Synapse.Infrastructure.Services;
 using Synapse.Integration.Commands.WorkflowActivities;
 using Synapse.Integration.Commands.WorkflowInstances;
 using Synapse.Integration.Models;

@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	<VersionPrefix>0.1.1</VersionPrefix>
+	  <VersionPrefix>0.1.2</VersionPrefix>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
 	<Authors>The Synapse Authors</Authors>
 	<Company>Cloud Native Computing Foundation</Company>
@@ -29,11 +29,11 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="6.0.4" />
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.15.0" />
-    <PackageReference Include="Neuroglia.Caching.InMemory" Version="2.0.1.57" />
-    <PackageReference Include="Neuroglia.Data.Expressions.JQ" Version="2.0.1.57" />
-    <PackageReference Include="Neuroglia.Eventing.CloudEvents.AspNetCore" Version="2.0.1.57" />
-    <PackageReference Include="Neuroglia.Serialization.Json" Version="2.0.1.57" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.15.1" />
+    <PackageReference Include="Neuroglia.Caching.InMemory" Version="2.0.1.58" />
+    <PackageReference Include="Neuroglia.Data.Expressions.JQ" Version="2.0.1.58" />
+    <PackageReference Include="Neuroglia.Eventing.CloudEvents.AspNetCore" Version="2.0.1.58" />
+    <PackageReference Include="Neuroglia.Serialization.Json" Version="2.0.1.58" />
     <PackageReference Include="protobuf-net.Grpc.AspNetCore" Version="1.0.152" />
   </ItemGroup>
 

@@ -1,0 +1,5 @@
+﻿{
+  "ConnectionStrings": {
+    "EventStore": "esdb://localhost:2113?tls=false"
+  }
+}

@@ -15,26 +15,20 @@
  *
  */
 
-namespace Synapse.Application.Services
-{
+using Synapse.Infrastructure.Plugins;
 
+namespace Synapse.Application.Configuration
+{
     /// <summary>
-    /// Defines the fundamentals of a service used to manage plugins
+    /// Represents the options used to configure an <see cref="IRepository"/>
     /// </summary>
-    public interface IPluginManager
+    public class RepositoryOptions
     {
 
         /// <summary>
-        /// Gets an <see cref="IEnumerable{T}"/> containing all loaded plugings
+        /// Gets/sets the name of the <see cref="IRepositoryPlugin"/> to use
         /// </summary>
-        IEnumerable<IPlugin> Plugins { get; }
-
-        /// <summary>
-        /// Loads a <see cref="IPlugin"/> from the specified path
-        /// </summary>
-        /// <param name="path">The path of the <see cref="IPlugin"/> to load</param>
-        /// <returns>The loaded <see cref="IPlugin"/></returns>
-        IPlugin LoadPluginFrom(string path);
+        public virtual string PluginName { get; set; } = null!;
 
     }
 

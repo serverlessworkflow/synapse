@@ -15,26 +15,29 @@
  *
  */
 
-using System.Reflection;
-using System.Runtime.Loader;
-
-namespace Synapse.Application.Services
+namespace Synapse.Application.Configuration
 {
+
     /// <summary>
-    /// Defines the fundamentals of a plugin
+    /// Represents the options used to configure the application's plugins
     /// </summary>
-    public interface IPlugin
+    public class PluginsOptions
     {
 
         /// <summary>
-        /// Gets the <see cref="IPlugin"/>'s <see cref="System.Runtime.Loader.AssemblyLoadContext"/>
+        /// Initializes a new <see cref="PluginsOptions"/>
         /// </summary>
-        AssemblyLoadContext AssemblyLoadContext { get; }
+        public PluginsOptions()
+        {
+            var env = EnvironmentVariables.Plugins.Directory.Value;
+            if (!string.IsNullOrWhiteSpace(env))
+                this.Directory = env;
+        }
 
         /// <summary>
-        /// Gets the <see cref="IPlugin"/>'s <see cref="System.Reflection.Assembly"/>
+        /// Gets/sets the path to the application's plugins directory
         /// </summary>
-        Assembly Assembly { get; }
+        public virtual string Directory { get; set; } = Path.Combine(AppContext.BaseDirectory, "plugins");
 
     }
 

@@ -83,7 +83,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Worker", "src\apps\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Cli", "src\apps\Synapse.Cli\Synapse.Cli.csproj", "{D4BEDBC3-47F8-4F4C-A644-995F10EE1C18}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synapse.Runtime.Native", "src\runtime\Synapse.Runtime.Native\Synapse.Runtime.Native.csproj", "{758730F9-7E71-410F-9B99-C3B6D9F0B4A2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Runtime.Native", "src\runtime\Synapse.Runtime.Native\Synapse.Runtime.Native.csproj", "{758730F9-7E71-410F-9B99-C3B6D9F0B4A2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "plugins", "plugins", "{D16F33A0-AFCB-474E-ADA1-07D3A1FE7B90}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "persistence", "persistence", "{122C059F-62B2-4A98-BB40-351CE3D0ED98}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Plugins.Persistence.EventStore", "src\plugins\persistence\Synapse.Plugins.Persistence.EventStore\Synapse.Plugins.Persistence.EventStore.csproj", "{5B2D5EF6-B553-4CA3-8433-5AA4C9738ED1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Plugins.Persistence.MongoDB", "src\plugins\persistence\Synapse.Plugins.Persistence.MongoDB\Synapse.Plugins.Persistence.MongoDB.csproj", "{F0D8E334-F777-46E0-BBE1-6F03CF4CB3C1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -183,6 +191,14 @@ Global
 		{758730F9-7E71-410F-9B99-C3B6D9F0B4A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{758730F9-7E71-410F-9B99-C3B6D9F0B4A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{758730F9-7E71-410F-9B99-C3B6D9F0B4A2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B2D5EF6-B553-4CA3-8433-5AA4C9738ED1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B2D5EF6-B553-4CA3-8433-5AA4C9738ED1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B2D5EF6-B553-4CA3-8433-5AA4C9738ED1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B2D5EF6-B553-4CA3-8433-5AA4C9738ED1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F0D8E334-F777-46E0-BBE1-6F03CF4CB3C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F0D8E334-F777-46E0-BBE1-6F03CF4CB3C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F0D8E334-F777-46E0-BBE1-6F03CF4CB3C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F0D8E334-F777-46E0-BBE1-6F03CF4CB3C1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -228,6 +244,10 @@ Global
 		{DDDFF6AC-8237-4A59-A834-CF959419E316} = {43E4163F-489D-4F58-BDB9-12813207FC49}
 		{D4BEDBC3-47F8-4F4C-A644-995F10EE1C18} = {43E4163F-489D-4F58-BDB9-12813207FC49}
 		{758730F9-7E71-410F-9B99-C3B6D9F0B4A2} = {FA3BA61B-BBD3-4EF3-8087-09C3D7411540}
+		{D16F33A0-AFCB-474E-ADA1-07D3A1FE7B90} = {D789B1B2-073B-4609-948F-25C70148CDFB}
+		{122C059F-62B2-4A98-BB40-351CE3D0ED98} = {D16F33A0-AFCB-474E-ADA1-07D3A1FE7B90}
+		{5B2D5EF6-B553-4CA3-8433-5AA4C9738ED1} = {122C059F-62B2-4A98-BB40-351CE3D0ED98}
+		{F0D8E334-F777-46E0-BBE1-6F03CF4CB3C1} = {122C059F-62B2-4A98-BB40-351CE3D0ED98}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1FCD70A-A848-4567-B59C-D7B076BC2F2E}

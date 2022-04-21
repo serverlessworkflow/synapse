@@ -15,11 +15,13 @@
  *
  */
 
+using Synapse.Infrastructure.Plugins;
 using System.Reflection;
 using System.Runtime.Loader;
 
 namespace Synapse.Application.Services
 {
+
     /// <summary>
     /// Represents an <see cref="AssemblyLoadContext"/> used to load <see cref="IPlugin"/> assemblies
     /// </summary>
@@ -32,6 +34,7 @@ namespace Synapse.Application.Services
         /// </summary>
         /// <param name="assemblyDependencyResolver">The service used to resolve assembly dependencies</param>
         public PluginAssemblyLoadContext(AssemblyDependencyResolver assemblyDependencyResolver)
+            : base("PluginAssemblyLoadContext", true)
         {
             this.AssemblyDependencyResolver = assemblyDependencyResolver;
         }
@@ -43,7 +46,13 @@ namespace Synapse.Application.Services
         public PluginAssemblyLoadContext(string path)
             : this(new AssemblyDependencyResolver(path))
         {
-
+            var directory = new DirectoryInfo(Path.GetDirectoryName(path)!);
+            foreach(var assemblyFile in directory.GetFiles("*.dll"))
+            {
+                var assemblyName = new AssemblyName(Path.GetFileNameWithoutExtension(assemblyFile.FullName)!);
+                if(Default.Assemblies.Any(a => a.GetName().Name == assemblyName.Name))
+                    assemblyFile.Delete();
+            }
         }
 
         /// <summary>
@@ -54,6 +63,9 @@ namespace Synapse.Application.Services
         /// <inheritdoc/>
         protected override Assembly? Load(AssemblyName assemblyName)
         {
+            var assembly = Default.Assemblies.FirstOrDefault(a => a.FullName == assemblyName.FullName);
+            if (assembly != null)
+                return assembly;
             var assemblyPath = this.AssemblyDependencyResolver.ResolveAssemblyToPath(assemblyName);
             if (string.IsNullOrWhiteSpace(assemblyPath))
                 return null;
