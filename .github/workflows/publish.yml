@@ -232,7 +232,7 @@ jobs:
       - name: Publish
         uses: softprops/action-gh-release@v1
         with:
-          files: "synctl*"
+          files: "${release_name}.tar.gz*"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
@@ -261,6 +261,6 @@ jobs:
       - name: Publish
         uses: softprops/action-gh-release@v1
         with:
-          files: "synctl*"
+          files: "${release_name}.tar.gz*"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
