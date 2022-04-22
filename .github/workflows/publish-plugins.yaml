@@ -32,7 +32,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: 0.1.2
-          files: "${release_name}*"
+          files: "EventStoreRepositoryPlugin*"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
@@ -62,6 +62,6 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: 0.1.2
-          files: "${release_name}*"
+          files: "MongoDBRepositoryPlugin*"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
