@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	  <VersionPrefix>0.1.2</VersionPrefix>
+	<VersionPrefix>0.1.2</VersionPrefix>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
 	<Authors>The Synapse Authors</Authors>
 	<Company>Cloud Native Computing Foundation</Company>
@@ -19,7 +19,6 @@
     <AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
     <FileVersion>$(VersionPrefix).0</FileVersion>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-	<DebugType>embedded</DebugType>
 	<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
 	<DockerfileContext>..\..\..</DockerfileContext>
 	<DockerfileTag>synapse/server</DockerfileTag>
@@ -30,11 +29,12 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="6.0.4" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.15.1" />
-    <PackageReference Include="Neuroglia.Caching.InMemory" Version="2.0.1.58" />
-    <PackageReference Include="Neuroglia.Data.Expressions.JQ" Version="2.0.1.58" />
-    <PackageReference Include="Neuroglia.Eventing.CloudEvents.AspNetCore" Version="2.0.1.58" />
-    <PackageReference Include="Neuroglia.Serialization.Json" Version="2.0.1.58" />
+    <PackageReference Include="Neuroglia.Caching.InMemory" Version="2.0.1.59" />
+    <PackageReference Include="Neuroglia.Data.Expressions.JQ" Version="2.0.1.59" />
+    <PackageReference Include="Neuroglia.Eventing.CloudEvents.AspNetCore" Version="2.0.1.59" />
+    <PackageReference Include="Neuroglia.Serialization.Json" Version="2.0.1.59" />
     <PackageReference Include="protobuf-net.Grpc.AspNetCore" Version="1.0.152" />
+    <PackageReference Include="System.IO.FileSystem" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>
