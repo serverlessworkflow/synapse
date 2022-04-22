@@ -232,7 +232,8 @@ jobs:
       - name: Publish
         uses: softprops/action-gh-release@v1
         with:
-          files: "${release_name}.tar.gz*"
+          tag_name: 0.1.2
+          files: "EventStoreRepositoryPlugin*"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
@@ -261,6 +262,7 @@ jobs:
       - name: Publish
         uses: softprops/action-gh-release@v1
         with:
-          files: "${release_name}.tar.gz*"
+          tag_name: 0.1.2
+          files: "MongoDBRepositoryPlugin*"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
