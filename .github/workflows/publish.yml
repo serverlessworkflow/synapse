@@ -227,7 +227,6 @@ jobs:
           dotnet publish src/plugins/persistence/Synapse.Plugins.Persistence.EventStore/Synapse.Plugins.Persistence.EventStore.csproj -c Release -o "$release_name"
           # Pack
           tar czvf "${release_name}.tar.gz" "$release_name"
-          fi
           # Delete output directory
           rm -r "$release_name"
       - name: Publish
@@ -257,7 +256,6 @@ jobs:
           dotnet publish src/plugins/persistence/Synapse.Plugins.Persistence.MongoDB/Synapse.Plugins.Persistence.MongoDB.csproj -c Release -o "$release_name"
           # Pack
           tar czvf "${release_name}.tar.gz" "$release_name"
-          fi
           # Delete output directory
           rm -r "$release_name"
       - name: Publish
