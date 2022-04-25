@@ -11,6 +11,7 @@
 *.userprefs
 
 # Build results
+deployment/docker-compose/plugins
 [Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/

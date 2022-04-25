@@ -106,14 +106,24 @@ namespace Synapse.Application.Services
                 pluginDirectory.Create();
             foreach(var packageFile in pluginDirectory.GetFiles("*.tar.gz"))
             {
-                using var packageFileStream = packageFile.OpenRead();
-                using var package = new ZipArchive(packageFileStream, ZipArchiveMode.Read);
-                package.ExtractToDirectory(Path.Combine(packageFile.Directory!.FullName, packageFile.Name.Replace(".tar.gz", string.Empty)), true);
-                package.Dispose();
+                await TarGzPackage.ExtractToDirectoryAsync(packageFile.FullName, packageFile.Directory!.FullName, stoppingToken);
                 packageFile.Delete();
             }
-            foreach (var plugin in await this.FindPluginsAsync(pluginDirectory.FullName))
-                await plugin.LoadAsync(this.CancellationTokenSource.Token);
+            var plugins = await this.FindPluginsAsync(pluginDirectory.FullName);
+            foreach (var plugin in plugins)
+            {
+                this.Logger.LogInformation("Loading plugin '{plugin}'...", plugin.ToString());
+                try
+                {
+                    await plugin.LoadAsync(this.CancellationTokenSource.Token);
+                    this.Logger.LogInformation("The plugin '{plugin}' has been successfully loaded", plugin.ToString());
+                }
+                catch(Exception ex)
+                {
+                    this.Logger.LogWarning("An error occured while loading plugin '{plugin}': {ex}", plugin.ToString(), ex.ToString());
+                    continue;
+                }
+            }
             this.FileSystemWatcher = new(pluginDirectory.FullName, $"*.*");
             this.FileSystemWatcher.IncludeSubdirectories = true;
             this.FileSystemWatcher.Created += this.OnPluginFileCreatedAsync;
@@ -131,15 +141,18 @@ namespace Synapse.Application.Services
         {
             if (string.IsNullOrWhiteSpace(directoryPath))
                 throw new ArgumentNullException(nameof(directoryPath));
+            this.Logger.LogInformation("Scanning directory'{directory}' for plugins...", directoryPath);
             var directory = new DirectoryInfo(directoryPath);
             if (!directory.Exists)
                 throw new DirectoryNotFoundException($"Failed to find the specified directory '{directoryPath}'");
             var pluginFiles = directory.GetFiles(PluginMetadataFileName, SearchOption.AllDirectories);
+            this.Logger.LogInformation("Found {results} matching plugin files in directory '{directory}'", pluginFiles.Count(), directoryPath);
             var plugins = new List<IPluginHandle>(pluginFiles.Count());
             foreach (var pluginFile in pluginFiles)
             {
                 plugins.Add(await this.FindPluginAsync(pluginFile.FullName));
             }
+            this.Logger.LogInformation("{pluginCount} plugins have been found in '{directory}' directory", plugins.Count(), directoryPath);
             return plugins;
         }
 
@@ -227,9 +240,8 @@ namespace Synapse.Application.Services
                 }
                 while (packageFile.IsLocked());
                 using var packageFileStream = packageFile.OpenRead();
-                using var package = new ZipArchive(packageFileStream, ZipArchiveMode.Read);
-                package.ExtractToDirectory(Path.Combine(packageFile.Directory!.FullName, packageFile.Name.Replace(".tar.gz", string.Empty)), true);
-                package.Dispose();
+                await TarGzPackage.ExtractToDirectoryAsync(packageFile.FullName, packageFile.Directory!.FullName);
+                await packageFileStream.DisposeAsync();
                 await this.FindPluginsAsync(packageFile.Directory!.FullName);
                 packageFile.Delete();
             }
