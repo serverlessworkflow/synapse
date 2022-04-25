@@ -20,6 +20,7 @@ using Microsoft.Extensions.Options;
 using Synapse.Application.Configuration;
 using Synapse.Application.Services;
 using Synapse.Domain.Models;
+using Synapse.Infrastructure.Services;
 using Synapse.Runtime.Docker;
 using Synapse.Runtime.Docker.Configuration;
 using System.Diagnostics;
@@ -75,7 +76,10 @@ namespace Synapse.Runtime.Services
         /// <inheritdoc/>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            var containerId = System.Environment.MachineName;
+            if (!this.Environment.RunsInDocker())
+                return;
+            var containerShortId = System.Environment.MachineName;
+            var containerId = (await this.Docker.Containers.InspectContainerAsync(containerShortId, stoppingToken)).ID;
             var response = null as NetworkResponse;
             try
             {
@@ -87,8 +91,7 @@ namespace Synapse.Runtime.Services
             }
             finally
             {
-                if (this.Environment.RunsInDocker()
-                    && (response == null ? true : !response!.Containers.ContainsKey(containerId)))
+                if (response == null ? true : !response!.Containers.ContainsKey(containerId))
                     await this.Docker.Networks.ConnectNetworkAsync(this.Options.Network, new NetworkConnectParameters() { Container = containerId }, stoppingToken);
             }
         }

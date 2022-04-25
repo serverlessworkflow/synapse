@@ -21,7 +21,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
 	<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
 	<DockerfileContext>..\..\..</DockerfileContext>
-	<DockerfileTag>synapse/server</DockerfileTag>
+	<DockerfileTag>ghcr.io/serverlessworkflow/synapse</DockerfileTag>
 	<RuntimeIdentifiers>win10-x64;linux-x64;osx-x64</RuntimeIdentifiers>
     <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
   </PropertyGroup>

@@ -200,7 +200,13 @@ namespace Synapse.Application.Services
             this.CancellationTokenSource?.Dispose();
             GC.SuppressFinalize(this);
         }
-    
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return this.Metadata.ToString()!;
+        }
+
     }
 
 }

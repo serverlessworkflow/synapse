@@ -16,6 +16,7 @@
  */
 
 using Synapse.Application.Commands.WorkflowInstances;
+using Synapse.Application.Queries.Correlations;
 
 namespace Synapse.Application.Commands.Correlations
 {
@@ -90,12 +91,8 @@ namespace Synapse.Application.Commands.Correlations
         public virtual async Task<IOperationResult> HandleAsync(V1CorrelateEventCommand command, CancellationToken cancellationToken = default)
         {
             this.Logger.LogInformation("Processing event with id '{eventId}', type '{eventType}' and source '{eventSource}'...", command.Event.Id, command.Event.Type, command.Event.Source);
-            IEnumerable<V1Correlation> correlations = await this.Correlations.ToListAsync(cancellationToken);
-            int totalTriggerCount = correlations.Count();
-            correlations = correlations.Where(c => c.AppliesTo(command.Event));
-            int matchingTriggerCount = correlations.Count();
-            this.Logger.LogInformation("Matched the event against {matchingCorrelationCount} out of {totalCorrelationCount} correlations.", matchingTriggerCount, totalTriggerCount);
-            foreach (var correlation in correlations)
+            var correlations = await this.Mediator.ExecuteAndUnwrapAsync(new V1GetEventCorrelationsQuery(command.Event), cancellationToken);
+            await foreach (var correlation in correlations)
             {
                 this.Logger.LogInformation("Processing correlation with id '{correlationId}'...", correlation.Id);
                 var matchingCondition = correlation.GetMatchingConditionFor(command.Event)!;

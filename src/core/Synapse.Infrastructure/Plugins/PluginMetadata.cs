@@ -105,6 +105,15 @@ namespace Synapse.Infrastructure.Plugins
         [Newtonsoft.Json.JsonProperty("assemblyFile", Required = Newtonsoft.Json.Required.Always)]
         public virtual string AssemblyFileName { get; protected set; } = null!;
 
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            if (string.IsNullOrWhiteSpace(this.Version))
+                return this.Name;
+            else
+                return $"{this.Name}:{this.Version}";
+        }
+
     }
 
 }

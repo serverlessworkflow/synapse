@@ -62,6 +62,19 @@ namespace Synapse.Integration.Models
         }
 
         /// <summary>
+        /// Attempts to get the attribute with the specified name
+        /// </summary>
+        /// <param name="name">The name of the attribute to get</param>
+        /// <param name="value">The value of the attribute, if any</param>
+        /// <returns>A boolean indicating whether or not the attribute with the specified name is defined</returns>
+        public virtual bool TryGetAttribute(string name, out string value)
+        {
+            if (string.IsNullOrEmpty(name))
+                throw new ArgumentNullException(nameof(name));
+            return this.Attributes.TryGetValue(name, out value!);
+        }
+
+        /// <summary>
         /// Creates a new <see cref="V1Event"/> for the specified <see cref="CloudEvent"/>
         /// </summary>
         /// <param name="cloudEvent">The <see cref="CloudEvent"/> to create a new <see cref="V1Event"/> for</param>
