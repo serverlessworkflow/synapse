@@ -223,6 +223,55 @@ namespace Synapse
         }
 
         /// <summary>
+        /// Exposes constants about Kuberneres environment variables
+        /// </summary>
+        public static class Kubernetes
+        {
+
+            /// <summary>
+            /// Gets the prefix for all Kubernetes environment variables
+            /// </summary>
+            public const string Prefix = "KUBERNETES_";
+
+            /// <summary>
+            /// Exposes constants about the Kubernetes namespace environment variable
+            /// </summary>
+            public static class Namespace
+            {
+
+                /// <summary>
+                /// Gets the name of the Kubernetes namespace environment variable
+                /// </summary>
+                public const string Name = Prefix + "NAMESPACE";
+
+                /// <summary>
+                /// Gets the value of the Kubernetes namespace environment variable
+                /// </summary>
+                public static string Value = Environment.GetEnvironmentVariable(Name);
+
+            }
+
+            /// <summary>
+            /// Exposes constants about the Kubernetes pod name environment variable
+            /// </summary>
+            public static class PodName
+            {
+
+                /// <summary>
+                /// Gets the name of the Kubernetes pod name environment variable
+                /// </summary>
+                public const string Name = Prefix + "POD_NAME";
+
+                /// <summary>
+                /// Gets the value of the Kubernetes pod name environment variable
+                /// </summary>
+                public static string Value = Environment.GetEnvironmentVariable(Name);
+
+            }
+
+        }
+
+        /// <summary>
         /// Exposes constants about persistence-related environment variables
         /// </summary>
         public static class Persistence

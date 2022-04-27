@@ -43,9 +43,9 @@ namespace Synapse.Application.Commands.WorkflowInstances
         /// </summary>
         /// <param name="workflowId">The id of the <see cref="V1Workflow"/> to instanciate</param>
         /// <param name="activationType">The <see cref="V1Workflow"/>'s activation type</param>
-        /// <param name="inputData">The input data of the <see cref="Domain.Models.V1WorkflowInstance"/> to create</param>
+        /// <param name="inputData">The input data of the <see cref="V1WorkflowInstance"/> to create</param>
         /// <param name="correlationContext">The <see cref="V1CorrelationContext"/> of the <see cref="V1WorkflowInstance"/> to create</param>
-        /// <param name="autoStart">A boolean indicating whether or not to start the <see cref="Domain.Models.V1WorkflowInstance"/> once it has been created</param>
+        /// <param name="autoStart">A boolean indicating whether or not to start the <see cref="V1WorkflowInstance"/> once it has been created</param>
         /// <param name="parentId">The id of the parent <see cref="V1WorkflowInstance"/> of the <see cref="V1WorkflowInstance"/> to create</param>
         public V1CreateWorkflowInstanceCommand(string workflowId, V1WorkflowInstanceActivationType activationType, object? inputData, V1CorrelationContext? correlationContext, bool autoStart, string? parentId)
         {
@@ -68,7 +68,7 @@ namespace Synapse.Application.Commands.WorkflowInstances
         public virtual V1WorkflowInstanceActivationType ActivationType { get; protected set; }
 
         /// <summary>
-        /// Gets the input data of the <see cref="Domain.Models.V1WorkflowInstance"/> to create
+        /// Gets the input data of the <see cref="V1WorkflowInstance"/> to create
         /// </summary>
         public virtual object? InputData { get; protected set; }
 
@@ -78,7 +78,7 @@ namespace Synapse.Application.Commands.WorkflowInstances
         public virtual V1CorrelationContext? CorrelationContext { get; protected set; }
 
         /// <summary>
-        /// Gets a boolean indicating whether or not to automatically start the <see cref="Domain.Models.V1WorkflowInstance"/> once it has been created
+        /// Gets a boolean indicating whether or not to automatically start the <see cref="V1WorkflowInstance"/> once it has been created
         /// </summary>
         public virtual bool AutoStart { get; protected set; }
 
@@ -119,7 +119,7 @@ namespace Synapse.Application.Commands.WorkflowInstances
         protected IRepository<V1Workflow> Workflows { get; }
 
         /// <summary>
-        /// Gets the <see cref="IRepository"/> used to manage <see cref="Domain.Models.V1WorkflowInstance"/>s
+        /// Gets the <see cref="IRepository"/> used to manage <see cref="V1WorkflowInstance"/>s
         /// </summary>
         protected IRepository<V1WorkflowInstance> WorkflowInstances { get;}
 
@@ -176,7 +176,7 @@ namespace Synapse.Application.Commands.WorkflowInstances
             {
                 key = Guid.NewGuid().ToBase64();
             }
-            var workflowInstance = await this.WorkflowInstances.AddAsync(new(key, workflow, command.ActivationType, command.InputData, command.CorrelationContext, parent), cancellationToken);
+            var workflowInstance = await this.WorkflowInstances.AddAsync(new(key.ToLowerInvariant(), workflow, command.ActivationType, command.InputData, command.CorrelationContext, parent), cancellationToken);
             await this.WorkflowInstances.SaveChangesAsync(cancellationToken);
             workflow.Instanciate();
             await this.Workflows.UpdateAsync(workflow, cancellationToken);

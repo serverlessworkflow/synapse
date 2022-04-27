@@ -21,6 +21,7 @@ namespace Synapse.Application.Mapping.Configuration
 
     internal class V1EventMappingConfiguration
         : IMappingConfiguration<CloudEvent, Integration.Models.V1Event>,
+        IMappingConfiguration<V1Event, Integration.Models.V1Event>,
         IMappingConfiguration<Integration.Models.V1Event, V1Event>
     {
 
@@ -29,9 +30,14 @@ namespace Synapse.Application.Mapping.Configuration
             
         }
 
-        void IMappingConfiguration<Integration.Models.V1Event, V1Event>.Configure(IMappingExpression<Integration.Models.V1Event, Domain.Models.V1Event> mapping)
+        void IMappingConfiguration<V1Event, Integration.Models.V1Event>.Configure(IMappingExpression<V1Event, Integration.Models.V1Event> mapping)
         {
-            
+            mapping.ForMember(e => e.Attributes, options => options.Ignore());
+        }
+
+        void IMappingConfiguration<Integration.Models.V1Event, V1Event>.Configure(IMappingExpression<Integration.Models.V1Event, V1Event> mapping)
+        {
+            mapping.ForMember(e => e.Attributes, options => options.Ignore());
         }
 
     }
