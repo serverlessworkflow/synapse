@@ -242,10 +242,9 @@ namespace Synapse.Domain.Models
         /// <param name="e">The <see cref="V1WorkflowActivityFaultedDomainEvent"/> to handle</param>
         protected virtual void On(V1WorkflowActivityFaultedDomainEvent e)
         {
-            this.LastModified = e.CreatedAt;
-            this.ExecutedAt = e.CreatedAt;
             this.Error = e.Error;
             this.Status = V1WorkflowActivityStatus.Faulted;
+            this.On(this.RegisterEvent(new V1WorkflowActivityExecutedDomainEvent(this.Id, this.Status, this.Error)));
         }
 
         /// <summary>
@@ -254,9 +253,8 @@ namespace Synapse.Domain.Models
         /// <param name="e">The <see cref="V1WorkflowActivityCancelledDomainEvent"/> to handle</param>
         protected virtual void On(V1WorkflowActivityCancelledDomainEvent e)
         {
-            this.LastModified = e.CreatedAt;
-            this.ExecutedAt = e.CreatedAt;
             this.Status = V1WorkflowActivityStatus.Cancelled;
+            this.On(this.RegisterEvent(new V1WorkflowActivityExecutedDomainEvent(this.Id, this.Status)));
         }
 
         /// <summary>
@@ -265,9 +263,8 @@ namespace Synapse.Domain.Models
         /// <param name="e">The <see cref="V1WorkflowActivitySkippedDomainEvent"/> to handle</param>
         protected virtual void On(V1WorkflowActivitySkippedDomainEvent e)
         {
-            this.LastModified = e.CreatedAt;
-            this.ExecutedAt = e.CreatedAt;
             this.Status = V1WorkflowActivityStatus.Skipped;
+            this.On(this.RegisterEvent(new V1WorkflowActivityExecutedDomainEvent(this.Id, this.Status)));
         }
 
         /// <summary>
@@ -286,10 +283,19 @@ namespace Synapse.Domain.Models
         /// <param name="e">The <see cref="V1WorkflowActivityCompletedDomainEvent"/> to handle</param>
         protected virtual void On(V1WorkflowActivityCompletedDomainEvent e)
         {
-            this.LastModified = e.CreatedAt;
-            this.ExecutedAt = e.CreatedAt;
             this.Status = V1WorkflowActivityStatus.Completed;
             this.Output = e.Output;
+            this.On(this.RegisterEvent(new V1WorkflowActivityExecutedDomainEvent(this.Id, this.Status, this.Output)));
+        }
+
+        /// <summary>
+        /// Handles the specified <see cref="V1WorkflowActivityExecutedDomainEvent"/>
+        /// </summary>
+        /// <param name="e">The <see cref="V1WorkflowActivityExecutedDomainEvent"/> to handle</param>
+        protected virtual void On(V1WorkflowActivityExecutedDomainEvent e)
+        {
+            this.LastModified = e.CreatedAt;
+            this.ExecutedAt = e.CreatedAt;
         }
 
     }

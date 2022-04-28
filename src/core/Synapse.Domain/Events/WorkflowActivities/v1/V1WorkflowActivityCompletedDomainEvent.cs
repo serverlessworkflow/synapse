@@ -2,6 +2,7 @@
 
 namespace Synapse.Domain.Events.WorkflowActivities
 {
+
     /// <summary>
     /// Represents the <see cref="IDomainEvent"/> fired whenever the execution of a <see cref="V1WorkflowActivity"/> has been completed
     /// </summary>
