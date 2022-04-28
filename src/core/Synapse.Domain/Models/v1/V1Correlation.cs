@@ -186,6 +186,14 @@ namespace Synapse.Domain.Models
         }
 
         /// <summary>
+        /// Deletes the <see cref="V1Correlation"/>
+        /// </summary>
+        public virtual void Delete()
+        {
+            this.On(this.RegisterEvent(new V1CorrelationDeletedDomainEvent(this.Id)));
+        }
+
+        /// <summary>
         /// Handles the specified <see cref="V1CorrelationCreatedDomainEvent"/>
         /// </summary>
         /// <param name="e">The <see cref="V1CorrelationCreatedDomainEvent"/> to handle</param>
@@ -235,6 +243,15 @@ namespace Synapse.Domain.Models
             if (context == null)
                 throw DomainException.NullReference(typeof(V1CorrelationContext), e.ContextId);
             this._Contexts.Remove(context);
+        }
+
+        /// <summary>
+        /// Handles the specified <see cref="V1CorrelationDeletedDomainEvent"/>
+        /// </summary>
+        /// <param name="e">The <see cref="V1CorrelationDeletedDomainEvent"/> to handle</param>
+        protected virtual void On(V1CorrelationDeletedDomainEvent e)
+        {
+
         }
 
     }

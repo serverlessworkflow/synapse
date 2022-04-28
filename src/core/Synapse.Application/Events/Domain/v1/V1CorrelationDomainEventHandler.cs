@@ -27,7 +27,8 @@ namespace Synapse.Application.Events.Domain
         : DomainEventHandlerBase<V1Correlation, Integration.Models.V1Correlation, string>,
         INotificationHandler<V1CorrelationCreatedDomainEvent>,
         INotificationHandler<V1ContextAddedToCorrelationDomainEvent>,
-        INotificationHandler<V1CorrelationContextReleasedDomainEvent>
+        INotificationHandler<V1CorrelationContextReleasedDomainEvent>,
+        INotificationHandler<V1CorrelationDeletedDomainEvent>
     {
 
         /// <inheritdoc/>
@@ -67,6 +68,14 @@ namespace Synapse.Application.Events.Domain
                 return;
             correlation.Contexts.Remove(context);
             await this.Projections.UpdateAsync(correlation, cancellationToken);
+            await this.Projections.SaveChangesAsync(cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task HandleAsync(V1CorrelationDeletedDomainEvent e, CancellationToken cancellationToken = default)
+        {
+            var correlation = await this.GetOrReconcileProjectionAsync(e.AggregateId, cancellationToken);
+            await this.Projections.RemoveAsync(correlation, cancellationToken);
             await this.Projections.SaveChangesAsync(cancellationToken);
         }
 
