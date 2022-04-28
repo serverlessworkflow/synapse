@@ -97,7 +97,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "deployment", "deployment", 
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "deployment\docker-compose\docker-compose.dcproj", "{A2D3AFB0-C7E0-4778-9D0A-DFCE0E24AF17}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synapse.Runtime.Kubernetes", "src\runtime\Synapse.Runtime.Kubernetes\Synapse.Runtime.Kubernetes.csproj", "{B6EB8D95-3859-4F6B-8C2C-C0409E5E4CF1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Runtime.Kubernetes", "src\runtime\Synapse.Runtime.Kubernetes\Synapse.Runtime.Kubernetes.csproj", "{B6EB8D95-3859-4F6B-8C2C-C0409E5E4CF1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kubernetes", "deployment\kubernetes\kubernetes.csproj", "{B22FB8BB-7E3A-448E-B5A3-ABCD95764B34}"
 EndProject
@@ -326,11 +326,9 @@ Global
 		{B6EB8D95-3859-4F6B-8C2C-C0409E5E4CF1}.Release|x86.ActiveCfg = Release|Any CPU
 		{B6EB8D95-3859-4F6B-8C2C-C0409E5E4CF1}.Release|x86.Build.0 = Release|Any CPU
 		{B22FB8BB-7E3A-448E-B5A3-ABCD95764B34}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{B22FB8BB-7E3A-448E-B5A3-ABCD95764B34}.Debug|Any CPU.Build.0 = Debug|x86
 		{B22FB8BB-7E3A-448E-B5A3-ABCD95764B34}.Debug|x86.ActiveCfg = Debug|x86
 		{B22FB8BB-7E3A-448E-B5A3-ABCD95764B34}.Debug|x86.Build.0 = Debug|x86
 		{B22FB8BB-7E3A-448E-B5A3-ABCD95764B34}.Release|Any CPU.ActiveCfg = Debug|x86
-		{B22FB8BB-7E3A-448E-B5A3-ABCD95764B34}.Release|Any CPU.Build.0 = Debug|x86
 		{B22FB8BB-7E3A-448E-B5A3-ABCD95764B34}.Release|x86.ActiveCfg = Debug|x86
 		{B22FB8BB-7E3A-448E-B5A3-ABCD95764B34}.Release|x86.Build.0 = Debug|x86
 	EndGlobalSection
