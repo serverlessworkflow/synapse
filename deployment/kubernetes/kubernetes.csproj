@@ -11,6 +11,10 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="server.yaml" />
+    <None Include="eventstore+mongo.yaml" />
+    <None Include="stand-alone.yaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="plugins\" />
   </ItemGroup>
 </Project>
