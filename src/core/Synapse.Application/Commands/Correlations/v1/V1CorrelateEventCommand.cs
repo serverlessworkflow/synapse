@@ -189,8 +189,7 @@ namespace Synapse.Application.Commands.Correlations
             if(correlation.Lifetime == V1CorrelationLifetime.Singleton)
             {
                 this.Logger.LogInformation("The correlation with id '{correlationId}' is a singleton and its context has been released. Disposing of it...", correlation.Id);
-                await this.Correlations.RemoveAsync(correlation, cancellationToken);
-                await this.Correlations.SaveChangesAsync(cancellationToken);
+                await this.Mediator.ExecuteAndUnwrapAsync(new V1DeleteCorrelationCommand(correlation.Id), cancellationToken);
                 this.Logger.LogInformation("The correlation with id '{correlationId}' has been successfully disposed of", correlation.Id);
             }
             this.Logger.LogInformation("Correlation outcome successfully computed");

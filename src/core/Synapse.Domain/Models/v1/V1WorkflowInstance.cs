@@ -53,6 +53,8 @@ namespace Synapse.Domain.Models
         {
             if(workflow == null)
                 throw DomainException.ArgumentNull(nameof(workflow));
+            if (input == null)
+                input = new();
             if (correlationContext == null)
                 correlationContext = new();
             this.On(this.RegisterEvent(new V1WorkflowInstanceCreatedDomainEvent(BuildUniqueIdentifier(key, workflow), workflow.Id, key.ToLowerInvariant(), activationType, input, correlationContext, parent?.Id)));
