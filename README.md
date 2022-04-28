@@ -94,16 +94,44 @@ Docker is the recommended way to run the Synapse Server for those who do not wan
 To run the server on Docker, simply execute the following command in your system's shell:
 
 ```shell
-docker run --name synapse -e "SYNAPSE_API_HOSTNAME=synapse" -v /var/run/docker.sock:/var/run/docker.sock --add-host=host.docker.internal:host-gateway -p 42286:42286 -p 41387:41387 ghcr.io/serverlessworkflow/synapse:latest
+docker run --name synapse -v /var/run/docker.sock:/var/run/docker.sock -p 42286:42286 -p 41387:41387 ghcr.io/serverlessworkflow/synapse:latest
 ```
 
 *Notes: you need to mount the `docker.sock` and/or run the container with the `--network host` option for Synapse to be able to spawn its own containers*
 
 For more information on how to configure Synapse for Docker, please read the [docs]().
 
+#### Docker-Compose
+
+Docker-Compose helps you to get started easier and faster than with Docker, as it allows to declare and configure multiple container at once, which will likely be needed if using persistence, for instance.
+
+To run the server on Docker-Compose, simply execute the following command in your system's shell:
+
+```shell
+docker-compose -f deployment/docker-compose/docker-compose.yml up -d
+```
+
+Alternatively, you can use the file using EventStore and MongoDB powered persistence:
+
+```shell
+docker-compose -f deployment/docker-compose/eventstore+mongo.yml up -d
+```
+
 #### Kubernetes
 
-Coming soon
+Kubernetes is the preferred way to run the Synapse Server, as it offers a wide range of tools to configure, run and manage multiple containers at once, which will likely be needed if using persistence, for instance.
+
+To run the server on Kubernetes, simply execute the following command in your system's shell:
+
+```shell
+kubectl apply -f deployment/kubernetes/stand-alone.yaml
+```
+
+Alternatively, you can use the file using EventStore and MongoDB powered persistence:
+
+```shell
+kubectl apply -f deployment/kubernetes/eventstore+mongo.yaml
+```
 
 ## User Interfaces
 
