@@ -44,10 +44,10 @@ builder.Services.AddSynapse(builder.Configuration, synapse =>
     synapse
         .UseHttpManagementApi()
         .UseWebSocketMonitoringApi();
-    if (builder.Environment.RunsInDocker())
+    if (builder.Environment.RunsInKubernetes())
+        synapse.UseKubernetesRuntimeHost();
+    else if (builder.Environment.RunsInDocker())
         synapse.UseDockerRuntimeHost();
-    //else if (builder.Environment.IsKubernetes())
-    //    synapse.UseKubernetesRuntimeHost();
     else
         synapse.UseNativeRuntimeHost();
 });

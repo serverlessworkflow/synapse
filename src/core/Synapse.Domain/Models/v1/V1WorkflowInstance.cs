@@ -16,7 +16,6 @@
  */
 
 using Synapse.Domain.Events.WorkflowInstances;
-using System.Collections.ObjectModel;
 
 namespace Synapse.Domain.Models
 {
@@ -56,7 +55,7 @@ namespace Synapse.Domain.Models
                 throw DomainException.ArgumentNull(nameof(workflow));
             if (correlationContext == null)
                 correlationContext = new();
-            this.On(this.RegisterEvent(new V1WorkflowInstanceCreatedDomainEvent(BuildUniqueIdentifier(key, workflow), workflow.Id, key, activationType, input, correlationContext, parent?.Id)));
+            this.On(this.RegisterEvent(new V1WorkflowInstanceCreatedDomainEvent(BuildUniqueIdentifier(key, workflow), workflow.Id, key.ToLowerInvariant(), activationType, input, correlationContext, parent?.Id)));
         }
 
         /// <summary>

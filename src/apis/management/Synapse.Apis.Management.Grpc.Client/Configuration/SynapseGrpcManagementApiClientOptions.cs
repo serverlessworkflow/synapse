@@ -38,7 +38,7 @@ namespace Synapse.Apis.Management.Grpc.Configuration
                     scheme = "http";
                 var host = EnvironmentVariables.Api.HostName.Value;
                 if (string.IsNullOrWhiteSpace(host))
-                    scheme = "synapse";
+                    host = "synapse";
                 var port = EnvironmentVariables.Api.Grpc.Port.Value;
                 if (string.IsNullOrWhiteSpace(port))
                     port = "41387";
