@@ -5,7 +5,7 @@
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     public class ReadModelAttribute
-        : Attribute
+        : QueryableAttribute
     {
 
 

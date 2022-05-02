@@ -80,7 +80,7 @@
                 this.workflows = workflows
                     .GroupBy(w => w.Definition.Id!)
                     .ToDictionary(g => g.Key, g => g.ToList())!;
-                this.StateHasChanged();;
+                this.StateHasChanged();
             });
         this.Dispatcher.Dispatch(new ListV1Workflows());
     }

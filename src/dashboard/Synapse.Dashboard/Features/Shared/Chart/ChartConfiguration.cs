@@ -15,16 +15,28 @@
  *
  */
 
-namespace Synapse.Integration.Models
+namespace Synapse.Dashboard
 {
-
-    public partial class V1WorkflowInstance
+    /// <summary>
+    /// Represents the object used to configure the <see cref="Chart"/>
+    /// </summary>
+    public class ChartConfiguration
     {
 
         /// <summary>
-        /// Gets the workflow instance's duration
+        /// Gets/sets the <see cref="Chart"/>'s type
         /// </summary>
-        public virtual TimeSpan? Duration => this.ExecutedAt.HasValue && this.StartedAt.HasValue ? this.ExecutedAt.Value.Subtract(this.StartedAt.Value) : null;
+        public virtual ChartType Type { get; set; }
+
+        /// <summary>
+        /// Gets/sets the <see cref="Chart"/>'s options
+        /// </summary>
+        public virtual object? Options { get; set; }
+
+        /// <summary>
+        /// Gets/sets the <see cref="Chart"/>'s data
+        /// </summary>
+        public virtual ChartData Data { get; set; } = new();
 
     }
 

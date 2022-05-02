@@ -19,11 +19,26 @@ namespace Synapse.Integration.Models
 {
 
     [ReadModel]
-    public class V1RuntimeStatistics
-        : EntityDto<string>
+    public class V1ApplicationMetrics
+        : IIdentifiable<string>
     {
 
-        public virtual DateOnly Date { get; set; }
+        protected V1ApplicationMetrics()
+        {
+
+        }
+
+        public V1ApplicationMetrics(DateTime date)
+        {
+            this.Id = GetIdFor(date);
+            this.Date = date;
+        }
+
+        public string Id { get; }
+
+        object IIdentifiable.Id => this.Id;
+
+        public virtual DateTime Date { get; set; }
 
         public virtual long TotalDefinitions { get; set; }
 
@@ -54,6 +69,11 @@ namespace Synapse.Integration.Models
         public virtual long CancelledActivities { get; set; }
 
         public virtual long SkippedActivities { get; set; }
+
+        public static string GetIdFor(DateTime date)
+        {
+            return date.ToString("yyyyMMdd");
+        }
 
     }
 

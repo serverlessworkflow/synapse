@@ -179,6 +179,16 @@ namespace Synapse.Apis.Management.Grpc
 
         #endregion
 
+        #region Metrics
+
+        /// <inheritdoc/>
+        public virtual async Task<GrpcApiResult<V1ApplicationMetrics>> GetApplicationMetricsAsync(CallContext context = default)
+        {
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new V1FindByIdQuery<V1ApplicationMetrics, string>(V1ApplicationMetrics.GetIdFor(DateTime.Now.Date)), context.CancellationToken));
+        }
+
+        #endregion
+
     }
 
 }

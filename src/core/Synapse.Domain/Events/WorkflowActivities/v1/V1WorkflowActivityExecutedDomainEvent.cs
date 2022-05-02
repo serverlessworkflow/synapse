@@ -5,7 +5,7 @@ namespace Synapse.Domain.Events.WorkflowActivities
     /// <summary>
     /// Represents the <see cref="IDomainEvent"/> fired whenever the execution of a <see cref="V1WorkflowActivity"/> has been executed
     /// </summary>
-    [DataTransferObjectType(typeof(V1WorkflowActivityCompletedIntegrationEvent))]
+    [DataTransferObjectType(typeof(V1WorkflowActivityExecutedIntegrationEvent))]
     public class V1WorkflowActivityExecutedDomainEvent
          : DomainEvent<Models.V1WorkflowActivity, string>
     {

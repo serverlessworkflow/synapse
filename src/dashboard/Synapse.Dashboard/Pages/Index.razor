@@ -16,22 +16,267 @@
 
 @namespace Synapse.Dashboard
 @page "/"
-@using Synapse.Dashboard.Features.Test
+
 @using System.Dynamic
 @using System.Collections.ObjectModel
+@inject ISynapseManagementApi SynapseManagementApi
 @inject IBreadcrumbService BreadcrumbService
+@inject IStyleManager StyleManager
 
 <PageTitle>Overview</PageTitle>
 <AppHeader>
     <span class="h5 m-0 p-0">Overview</span>
 </AppHeader>
 
-Welcome to Synapse - Serverless Workflow Management System
+<div class="container text-center">
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title">Today</h4>
+        </div>
+        <div class="card-body">
+             <div class="row">
+                <div class="col-4">
+                    <div class="card-metric info">
+                        <span class="card-metric-value">@metrics?.RunningInstances</span>
+                        <span class="card-metric-name">Running instances</span>
+                    </div>
+                    <div class="card-metric success">
+                        <span class="card-metric-value">@metrics?.CompletedInstances</span>
+                        <span class="card-metric-name">Completed instances</span>
+                    </div>
+                    <div class="card-metric danger">
+                        <span class="card-metric-value">@metrics?.FaultedInstances</span>
+                        <span class="card-metric-name">Failed instances</span>
+                    </div>
+                    <div class="card-metric warning">
+                        <span class="card-metric-value">@metrics?.CancelledInstances</span>
+                        <span class="card-metric-name">Cancelled instances</span>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <Chart Configuration="@dailyExecutedInstancesChart" />
+                    <h5 class="mt-3">Executed instances</h5>
+                </div>
+                <div class="col-4">
+                    <Chart Configuration="@dailyExecutedActivitiesChart" />
+                    <h5 class="mt-3">Executed activities</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card mt-3">
+        <div class="card-header">
+            <h4 class="card-title">This week</h4>
+        </div>
+        <div class="card-body">
+             <div class="row">
+                <div class="col-6">
+                    <h5 class="mt-3">Executed instances</h5>
+                    <Chart Configuration="@weeklyExecutedInstancesChart" />
+                </div>
+                <div class="col-6">
+                    <h5 class="mt-3">Executed activities</h5>
+                    <Chart Configuration="@weeklyExecutedInstancesChart" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 @code{
+
+    private V1ApplicationMetrics? metrics;
+    private ChartConfiguration? dailyExecutedInstancesChart;
+    private ChartConfiguration? dailyExecutedActivitiesChart;
+    private ChartConfiguration? weeklyExecutedInstancesChart;
+    private ChartConfiguration? weeklyExecutedActivitiesChart;
+
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+        try
+        {
+            this.metrics = await this.SynapseManagementApi.GetApplicationMetricsAsync();
+        }
+        catch (Exception) { }   
+        if(this.metrics != null)
+        {
+            await this.BuildDailyExecutedInstancesChartAsync();
+            await this.BuildDailyExecutedActivitiesChartAsync();
+            //this.BuildWeeklyExecutedInstancesChart();
+            //this.BuildWeeklyExecutedActivitiesChart();
+        }
         await this.BreadcrumbService.Use(KnownBreadcrumbs.Home);
     }
+
+    private async ValueTask BuildDailyExecutedInstancesChartAsync()
+    {
+        if (this.metrics == null)
+            return;
+        this.dailyExecutedInstancesChart = new()
+        {
+            Type = ChartType.Pie,
+            Data =
+            {
+                Labels = new()
+                {
+                    "Completed",
+                    "Faulted",
+                    "Cancelled"
+                },
+                Datasets = new()
+                {
+                    new ChartDataset()
+                    {
+                        Data = new()
+                        {
+                            metrics.CompletedInstances,
+                            metrics.FaultedInstances,
+                            metrics.CancelledInstances
+                        },
+                        BackgroundColor = new()
+                        {
+                            await this.StyleManager.GetVariableValueAsync("--bs-success"),
+                            await this.StyleManager.GetVariableValueAsync("--bs-danger"),
+                            await this.StyleManager.GetVariableValueAsync("--bs-warning")
+                        }
+                    }
+                }
+            }
+        };
+    }
+
+    private async ValueTask BuildDailyExecutedActivitiesChartAsync()
+    {
+         if (this.metrics == null)
+            return;
+        this.dailyExecutedActivitiesChart = new()
+        {
+            Type = ChartType.Doughnut,
+            Data =
+            {
+                Labels = new()
+                {
+                    "Completed",
+                    "Faulted",
+                    "Cancelled",
+                    "Skipped"
+                },
+                Datasets = new()
+                {
+                    new ChartDataset()
+                    {
+                        Data = new()
+                        {
+                            metrics.CompletedActivities,
+                            metrics.FaultedActivities,
+                            metrics.CancelledActivities,
+                            metrics.SkippedActivities
+                        },
+                        BackgroundColor = new()
+                        {
+                            await this.StyleManager.GetVariableValueAsync("--bs-success"),
+                            await this.StyleManager.GetVariableValueAsync("--bs-danger"),
+                            await this.StyleManager.GetVariableValueAsync("--bs-warning"),
+                            await this.StyleManager.GetVariableValueAsync("--bs-secondary")
+                        }
+                    }
+                }
+            }
+        };
+    }
+
+    //private void BuildWeeklyExecutedInstancesChart()
+    //{
+    //    this.weeklyExecutedInstancesChart = new()
+    //    {
+    //        Type = ChartType.Line,
+    //        Data = new()
+    //        {
+    //            Labels = stats.LastDays.Select(d => d.Date.ToShortDateString()).ToList(),
+    //            Datasets = new()
+    //            {
+    //                new ChartDataset()
+    //                {
+    //                    Label = "Executed",
+    //                    Data = stats.LastDays.Select(d => d.ExecutedInstances).ToList(),
+    //                    BorderColor = "#3FC9F2",
+    //                    BorderWidth = 1.5
+    //                },
+    //                new ChartDataset()
+    //                {
+    //                    Label = "Completed",
+    //                    Data = stats.LastDays.Select(d => d.CompletedInstances).ToList(),
+    //                    BorderColor = "#8DF0A4",
+    //                    BorderWidth = 1
+    //                },
+    //                new ChartDataset()
+    //                {
+    //                    Label = "Faulted",
+    //                    Data = stats.LastDays.Select(d => d.FaultedInstances).ToList(),
+    //                    BorderColor = "#F06975",
+    //                    BorderWidth = 1
+    //                },
+    //                new ChartDataset()
+    //                {
+    //                    Label = "Cancelled",
+    //                    Data = stats.LastDays.Select(d => d.CancelledInstances).ToList(),
+    //                    BorderColor = "#F0BF81",
+    //                    BorderWidth = 1
+    //                }
+    //            }
+    //        }
+    //    };
+    //}
+
+    //private void BuildWeeklyExecutedActivitiesChart()
+    //{
+    //     this.weeklyExecutedActivitiesChart = new()
+    //    {
+    //        Type = ChartType.Line,
+    //        Data = new()
+    //        {
+    //            Labels = stats.LastDays.Select(d => d.Date.ToShortDateString()).ToList(),
+    //            Datasets = new()
+    //            {
+    //                new ChartDataset()
+    //                {
+    //                    Label = "Executed",
+    //                    Data = stats.LastDays.Select(d => d.ExecutedActivities).ToList(),
+    //                    BorderColor = "#3FC9F2",
+    //                    BorderWidth = 1.5
+    //                },
+    //                new ChartDataset()
+    //                {
+    //                    Label = "Completed",
+    //                    Data = stats.LastDays.Select(d => d.CompletedActivities).ToList(),
+    //                    BorderColor = "#8DF0A4",
+    //                    BorderWidth = 1
+    //                },
+    //                new ChartDataset()
+    //                {
+    //                    Label = "Faulted",
+    //                    Data = stats.LastDays.Select(d => d.FaultedActivities).ToList(),
+    //                    BorderColor = "#F06975",
+    //                    BorderWidth = 1
+    //                },
+    //                new ChartDataset()
+    //                {
+    //                    Label = "Cancelled",
+    //                    Data = stats.LastDays.Select(d => d.CancelledActivities).ToList(),
+    //                    BorderColor = "#F0BF81",
+    //                    BorderWidth = 1
+    //                },
+    //                new ChartDataset()
+    //                {
+    //                    Label = "Skipped",
+    //                    Data = stats.LastDays.Select(d => d.CancelledActivities).ToList(),
+    //                    BorderColor = "#864BF2",
+    //                    BorderWidth = 1
+    //                }
+    //            }
+    //        }
+    //    };
+    //}
+
 }

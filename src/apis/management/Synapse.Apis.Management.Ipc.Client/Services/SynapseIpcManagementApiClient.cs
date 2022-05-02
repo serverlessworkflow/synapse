@@ -222,6 +222,16 @@ namespace Synapse.Apis.Management.Ipc
 
         #endregion region
 
+        #region Metrics
+
+        /// <inheritdoc/>
+        public virtual async Task<V1ApplicationMetrics> GetApplicationMetricsAsync(CancellationToken cancellationToken = default)
+        {
+            return await this.Mediator.ExecuteAndUnwrapAsync(new Application.Queries.Generic.V1FindByIdQuery<V1ApplicationMetrics, string>(V1ApplicationMetrics.GetIdFor(DateTime.Now.Date)), cancellationToken);
+        }
+
+        #endregion
+
     }
 
 }
