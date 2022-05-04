@@ -69,9 +69,9 @@ namespace Synapse.Worker.Services.Processors
             var processor = (ActionProcessor)base.CreateProcessorFor(activity);
             processor.SubscribeAsync
             (
-                async e => await this.OnNextActionAsync(processor, e, this.CancellationTokenSource.Token),
-                async ex => await this.OnActionFaultedAsync(processor, ex, this.CancellationTokenSource.Token),
-                async () => await this.OnActionCompletedAsync(processor, this.CancellationTokenSource.Token)
+                async e => await this.OnNextActionAsync(processor, e),
+                async ex => await this.OnActionFaultedAsync(processor, ex),
+                async () => await this.OnActionCompletedAsync(processor)
             );
             return processor;
         }
@@ -171,46 +171,45 @@ namespace Synapse.Worker.Services.Processors
         /// </summary>
         /// <param name="processor">The <see cref="IActionProcessor"/> to handle the <see cref="V1WorkflowActivityCompletedIntegrationEvent"/> for</param>
         /// <param name="e">The <see cref="V1WorkflowActivityCompletedIntegrationEvent"/> to handle</param>
-        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A new awaitable <see cref="Task"/></returns>
-        protected virtual async Task OnNextActionAsync(IActionProcessor processor, IV1WorkflowActivityIntegrationEvent e, CancellationToken cancellationToken)
+        protected virtual async Task OnNextActionAsync(IActionProcessor processor, IV1WorkflowActivityIntegrationEvent e)
         {
             switch (e)
             {
                 case V1WorkflowActivitySkippedIntegrationEvent:
                 case V1WorkflowActivityCompletedIntegrationEvent:
-                    using (await this.Lock.LockAsync(cancellationToken))
+                    using (await this.Lock.LockAsync(this.CancellationTokenSource.Token))
                     {
                         var output = null as object;
                         switch (this.Branch.ActionMode)
                         {
                             case ActionExecutionMode.Parallel:
-                                var activities = (await this.Context.Workflow.GetActivitiesAsync(this.Activity, cancellationToken))
+                                var activities = (await this.Context.Workflow.GetActivitiesAsync(this.Activity, this.CancellationTokenSource.Token))
                                    .Where(a => a.Type == V1WorkflowActivityType.Action)
                                    .ToList();
                                 if (activities.All(a => a.Status >= V1WorkflowActivityStatus.Faulted))
                                 {
-                                    output = await this.AggregateActionOutputsAsync(cancellationToken);
-                                    await this.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, output), cancellationToken);
+                                    output = await this.AggregateActionOutputsAsync(this.CancellationTokenSource.Token);
+                                    await this.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, output), this.CancellationTokenSource.Token);
                                 }
                                 break;
                             case ActionExecutionMode.Sequential:
-                                output = await this.AggregateActionOutputsAsync(cancellationToken);
+                                output = await this.AggregateActionOutputsAsync(this.CancellationTokenSource.Token);
                                 if (processor.Activity.Metadata.TryGetValue(V1WorkflowActivityMetadata.Action, out var currentActionName)
                                      && this.Branch.TryGetNextAction(currentActionName, out ActionDefinition nextAction))
                                 {
-                                    var input = await this.Context.FilterInputAsync(nextAction, output, cancellationToken);
+                                    var input = await this.Context.FilterInputAsync(nextAction, output, this.CancellationTokenSource.Token);
                                     var metadata = new Dictionary<string, string>()
                                     {
                                         { V1WorkflowActivityMetadata.State, this.State.Name! },
                                         { V1WorkflowActivityMetadata.Action, nextAction.Name! },
                                         { V1WorkflowActivityMetadata.Branch, this.Branch.Name }
                                     };
-                                    await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Action, input, metadata, this.Activity, cancellationToken);
+                                    await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Action, input, metadata, this.Activity, this.CancellationTokenSource.Token);
                                 }
                                 else
                                 {
-                                    await this.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, output), cancellationToken);
+                                    await this.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, output), this.CancellationTokenSource.Token);
                                 }
                                 break;
                             default:
@@ -226,13 +225,20 @@ namespace Synapse.Worker.Services.Processors
         /// </summary>
         /// <param name="processor">The <see cref="ActionProcessor"/> that has thrown the specified <see cref="Exception"/></param>
         /// <param name="ex">The thrown <see cref="Exception"/></param>
-        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A new awaitable <see cref="Task"/></returns>
-        protected virtual async Task OnActionFaultedAsync(ActionProcessor processor, Exception ex, CancellationToken cancellationToken)
+        protected virtual async Task OnActionFaultedAsync(ActionProcessor processor, Exception ex)
         {
-            using (await this.Lock.LockAsync(cancellationToken))
+            using (await this.Lock.LockAsync(this.CancellationTokenSource.Token))
             {
-                await base.OnErrorAsync(ex, cancellationToken);
+                foreach (var childProcessor in this.Processors)
+                {
+                    if (childProcessor == processor)
+                        continue;
+                    await childProcessor.TerminateAsync(this.CancellationTokenSource.Token);
+                    this.Processors.TryRemove(processor);
+                    childProcessor.Dispose();
+                }
+                await base.OnErrorAsync(ex, this.CancellationTokenSource.Token);
             }
         }
 
@@ -240,26 +246,25 @@ namespace Synapse.Worker.Services.Processors
         /// Handles the completion of the specified <see cref="V1WorkflowActivity"/>
         /// </summary>
         /// <param name="processor">The <see cref="ActionProcessor"/> that has completed</param>
-        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A new awaitable <see cref="Task"/></returns>
-        protected virtual async Task OnActionCompletedAsync(ActionProcessor processor, CancellationToken cancellationToken)
+        protected virtual async Task OnActionCompletedAsync(ActionProcessor processor)
         {
-            using (await this.Lock.LockAsync(cancellationToken))
+            using (await this.Lock.LockAsync(this.CancellationTokenSource.Token))
             {
                 this.Processors.TryRemove(processor);
                 processor.Dispose();
-                var activities = (await this.Context.Workflow.GetActivitiesAsync(this.Activity, cancellationToken))
+                var activities = (await this.Context.Workflow.GetActivitiesAsync(this.Activity, this.CancellationTokenSource.Token))
                     .Where(a => a.Type == V1WorkflowActivityType.Action);
                 if (activities.All(a => a.Status >= V1WorkflowActivityStatus.Faulted))
                 {
-                    await base.OnCompletedAsync(cancellationToken);
+                    await base.OnCompletedAsync(this.CancellationTokenSource.Token);
                     return;
                 }
                 foreach (var activity in activities
                     .Where(p => p.Status == V1WorkflowActivityStatus.Pending))
                 {
                     var nextProcessor = this.CreateProcessorFor(activity);
-                    await nextProcessor.ProcessAsync(cancellationToken);
+                    await nextProcessor.ProcessAsync(this.CancellationTokenSource.Token);
                 }
             }
         }
