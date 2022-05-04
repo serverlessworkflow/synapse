@@ -31,7 +31,8 @@ namespace Synapse.Application.Events.Domain
         INotificationHandler<V1WorkflowActivityFaultedDomainEvent>,
         INotificationHandler<V1WorkflowActivityCancelledDomainEvent>,
         INotificationHandler<V1WorkflowActivitySkippedDomainEvent>,
-        INotificationHandler<V1WorkflowActivityCompletedDomainEvent>
+        INotificationHandler<V1WorkflowActivityCompletedDomainEvent>,
+        INotificationHandler<V1WorkflowActivityExecutedDomainEvent>
     {
 
         /// <inheritdoc/>
@@ -148,6 +149,12 @@ namespace Synapse.Application.Events.Domain
             await this.Projections.UpdateAsync(activity, cancellationToken);
             await this.Projections.SaveChangesAsync(cancellationToken);
             await this.UpdateParentWorkflowInstanceAsync(activity, cancellationToken);
+            await this.PublishIntegrationEventAsync(e, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task HandleAsync(V1WorkflowActivityExecutedDomainEvent e, CancellationToken cancellationToken = default)
+        {
             await this.PublishIntegrationEventAsync(e, cancellationToken);
         }
 

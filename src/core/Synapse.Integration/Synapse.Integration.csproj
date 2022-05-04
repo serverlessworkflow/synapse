@@ -177,6 +177,9 @@
     <Compile Update="Events\WorkflowActivities\v1\Generated\V1WorkflowActivityCreatedIntegrationEvent.cs">
       <CustomToolNamespace>..\Synapse.Domain\Events\WorkflowActivities\v1\V1WorkflowActivityCreatedDomainEvent.cs</CustomToolNamespace>
     </Compile>
+    <Compile Update="Events\WorkflowActivities\v1\Generated\V1WorkflowActivityExecutedIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\WorkflowActivities\v1\V1WorkflowActivityExecutedDomainEvent.cs</CustomToolNamespace>
+    </Compile>
     <Compile Update="Events\WorkflowActivities\v1\Generated\V1WorkflowActivityFaultedIntegrationEvent.cs">
       <CustomToolNamespace>..\Synapse.Domain\Events\WorkflowActivities\v1\V1WorkflowActivityFaultedDomainEvent.cs</CustomToolNamespace>
     </Compile>
