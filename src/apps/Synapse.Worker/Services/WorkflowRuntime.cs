@@ -340,11 +340,10 @@ namespace Synapse.Worker.Services
         }
 
         /// <summary>
-        /// Handles the next <see cref="V1WorkflowExecutionResult"/> returned by a <see cref="IWorkflowActivityProcessor"/>
+        /// Handles the next <see cref="V1WorkflowActivityCompletedIntegrationEvent"/>
         /// </summary>
-        /// <param name="processor">The <see cref="IWorkflowActivityProcessor"/> that has returned an <see cref="V1WorkflowExecutionResult"/></param>
-        /// <param name="result">The <see cref="V1WorkflowExecutionResult"/> to process</param>
-        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <param name="processor">The <see cref="IWorkflowActivityProcessor"/> that has produced an <see cref="V1WorkflowActivityCompletedIntegrationEvent"/></param>
+        /// <param name="e">The <see cref="V1WorkflowActivityCompletedIntegrationEvent"/> to process</param>
         /// <returns>A new awaitable <see cref="Task"/></returns>
         protected virtual async Task OnTransitionCompletedAsync(ITransitionProcessor processor, V1WorkflowActivityCompletedIntegrationEvent e)
         {

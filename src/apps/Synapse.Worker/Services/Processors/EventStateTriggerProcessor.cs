@@ -285,7 +285,7 @@ namespace Synapse.Worker.Services.Processors
         /// <summary>
         /// Handles the completion of the specified <see cref="V1WorkflowActivity"/>
         /// </summary>
-        /// <param name="processor">The <see cref="ActionProcessor"/> that has returned the <see cref="V1WorkflowExecutionResult"/></param>
+        /// <param name="processor">The <see cref="ActionProcessor"/> that has completed</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A new awaitable <see cref="Task"/></returns>
         protected virtual async Task OnActionCompletedAsync(ActionProcessor processor, CancellationToken cancellationToken)
