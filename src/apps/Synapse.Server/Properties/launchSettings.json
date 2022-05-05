@@ -17,6 +17,7 @@
         "SYNAPSE_PERSISTENCE_READMODEL_DEFAULT_REPOSITORY": "MongoDB",
         "SYNAPSE_API_HOSTNAME": "localhost"
       },
+      "inspectUri": "{wsProtocol}://{url.hostname}:{url.port}/_framework/debug/ws-proxy?browser={browserInspectUri}",
       "applicationUrl": "http://localhost:42286",
       "dotnetRunMessages": true
     },
