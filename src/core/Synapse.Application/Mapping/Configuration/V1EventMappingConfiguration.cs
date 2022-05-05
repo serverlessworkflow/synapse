@@ -27,7 +27,7 @@ namespace Synapse.Application.Mapping.Configuration
 
         void IMappingConfiguration<CloudEvent, Integration.Models.V1Event>.Configure(IMappingExpression<CloudEvent, Integration.Models.V1Event> mapping)
         {
-            
+            mapping.ForMember(e => e.SpecVersion, options => options.MapFrom(ce => ce.SpecVersion.VersionId));
         }
 
         void IMappingConfiguration<V1Event, Integration.Models.V1Event>.Configure(IMappingExpression<V1Event, Integration.Models.V1Event> mapping)
