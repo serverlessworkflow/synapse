@@ -30,16 +30,17 @@ using Synapse.Dashboard;
 using Synapse.Dashboard.Services;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
+var baseAddress = builder.HostEnvironment.BaseAddress;
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-builder.Services.AddScoped(provider => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
-builder.Services.AddSynapseRestApiClient(http => http.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
+builder.Services.AddScoped(provider => new HttpClient { BaseAddress = new Uri(baseAddress) });
+builder.Services.AddSynapseRestApiClient(http => http.BaseAddress = new Uri(baseAddress));
 builder.Services.AddServerlessWorkflow();
 builder.Services.AddPluralizer();
 builder.Services.AddSingleton<IODataClient>(new ODataClient(new ODataClientSettings()
 {
-    BaseUri = new($"http://localhost:42286/api/odata"),
+    BaseUri = new($"{baseAddress}api/odata"),
     PayloadFormat = ODataPayloadFormat.Json
 }));
 builder.Services.AddScoped<ILayoutService, LayoutService>();
@@ -59,7 +60,7 @@ builder.Services.AddFlux(flux =>
 builder.Services.AddSingleton(provider =>
 {
     return new HubConnectionBuilder()
-        .WithUrl($"http://localhost:42286/api/ws")
+        .WithUrl($"{baseAddress}api/ws")
         .WithAutomaticReconnect()
         .AddNewtonsoftJsonProtocol(options =>
         {
