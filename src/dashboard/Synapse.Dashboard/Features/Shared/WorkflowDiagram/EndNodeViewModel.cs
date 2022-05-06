@@ -23,7 +23,7 @@ namespace Synapse.Dashboard
         : WorkflowNodeViewModel
     {
         public EndNodeViewModel()
-            :base("", "end-node", NodeShape.Circle, 20, 20)
+            :base("", "end-node", NodeShape.Circle, Constants.GraphStartEndNodeRadius, Constants.GraphStartEndNodeRadius)
         {
 
         }

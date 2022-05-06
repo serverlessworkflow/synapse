@@ -23,7 +23,7 @@ namespace Neuroglia.Blazor.Dagre
 
         public static string GetBSplinePath(ICollection<IPosition> points)
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException(); // todo
         }
     }
 }

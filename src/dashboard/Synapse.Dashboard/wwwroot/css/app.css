@@ -6253,54 +6253,6 @@ textarea.form-control-lg {
   filter: invert(1) grayscale(100%) brightness(200%);
 }
 
-.toast {
-  width: 350px;
-  max-width: 100%;
-  font-size: 0.875rem;
-  pointer-events: auto;
-  background-color: rgba(255, 255, 255, 0.85);
-  background-clip: padding-box;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-  border-radius: 0.25rem;
-}
-.toast.showing {
-  opacity: 0;
-}
-.toast:not(.show) {
-  display: none;
-}
-
-.toast-container {
-  width: max-content;
-  max-width: 100%;
-  pointer-events: none;
-}
-.toast-container > :not(:last-child) {
-  margin-bottom: 0.75rem;
-}
-
-.toast-header {
-  display: flex;
-  align-items: center;
-  padding: 0.5rem 0.75rem;
-  color: #6c757d;
-  background-color: rgba(255, 255, 255, 0.85);
-  background-clip: padding-box;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  border-top-left-radius: calc(0.25rem - 1px);
-  border-top-right-radius: calc(0.25rem - 1px);
-}
-.toast-header .btn-close {
-  margin-right: -0.375rem;
-  margin-left: 0.75rem;
-}
-
-.toast-body {
-  padding: 0.75rem;
-  word-wrap: break-word;
-}
-
 .modal {
   position: fixed;
   top: 0;
@@ -12283,10 +12235,70 @@ input[type=time]::-webkit-clear-button {
   width: 16px;
 }
 
+.toast-container {
+  z-index: 1 !important;
+  position: fixed !important;
+  width: 25rem !important;
+  top: 0px !important;
+  right: 0px !important;
+}
+
 .end-node circle {
   stroke-width: 3px;
 }
 
 .btn-outline-dark:hover {
   fill: white;
+}
+
+.node .badge circle, .cluster .badge circle {
+  stroke-width: 0;
+  fill: var(--bs-primary);
+}
+.node .badge foreignObject, .cluster .badge foreignObject {
+  text-align: center;
+  font-size: 8px;
+  color: white;
+}
+.node .badge foreignObject div, .cluster .badge foreignObject div {
+  display: flex;
+  align-content: center;
+  align-items: center;
+  justify-content: center;
+}
+.node .activity-badge circle, .cluster .activity-badge circle {
+  stroke-width: 1;
+}
+.node .activity-badge.activity-badge--active circle, .cluster .activity-badge.activity-badge--active circle {
+  fill: var(--bs-success);
+}
+.node .activity-badge.activity-badge--faulted circle, .cluster .activity-badge.activity-badge--faulted circle {
+  fill: var(--bs-danger);
+}
+.node .add-state .add-state__label, .cluster .add-state .add-state__label {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.toolbar .btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.edges {
+  pointer-events: none;
+}
+
+.ghost {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.drop-destination rect,
+.drop-destination circle,
+.drop-destination ellipse {
+  stroke: red;
+  stroke-width: 2px;
+  stroke-dasharray: 2;
 }

@@ -22,10 +22,12 @@ namespace Synapse.Dashboard
     public class StartNodeViewModel
         : WorkflowNodeViewModel
     {
-        public StartNodeViewModel()
-            :base("", "start-node", NodeShape.Circle, 20, 20)
-        {
+        public bool HasSuccessor { get; set; }
 
+        public StartNodeViewModel(bool hasSuccessor = false)
+            :base("", "start-node", NodeShape.Circle, Constants.GraphStartEndNodeRadius, Constants.GraphStartEndNodeRadius)
+        {
+            this.HasSuccessor = hasSuccessor;
         }
     }
 }

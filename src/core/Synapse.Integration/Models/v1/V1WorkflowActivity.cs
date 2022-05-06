@@ -23,7 +23,7 @@ namespace Synapse.Integration.Models
         /// <summary>
         /// Gets the workflow instance's duration
         /// </summary>
-        public virtual TimeSpan? Duration => this.ExecutedAt.HasValue ? this.ExecutedAt.Value.Subtract(this.StartedAt.Value) : null;
+        public virtual TimeSpan? Duration => this.StartedAt.HasValue && this.ExecutedAt.HasValue ? this.ExecutedAt.Value.Subtract(this.StartedAt.Value) : null;
 
 
     }

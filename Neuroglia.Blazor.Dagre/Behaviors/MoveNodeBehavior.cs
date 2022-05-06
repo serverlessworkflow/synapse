@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components.Web;
+﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 using Neuroglia.Blazor.Dagre.Models;
 
 namespace Neuroglia.Blazor.Dagre.Behaviors
@@ -15,33 +16,36 @@ namespace Neuroglia.Blazor.Dagre.Behaviors
         public MoveNodeBehavior(IGraphViewModel graph)
             : base(graph)
         {
-            this.Graph.MouseMove += this.OnMouseMove;
-            this.Graph.MouseDown += this.OnMouseDown;
-            this.Graph.MouseUp += this.OnMouseUp;
+            this.Graph.MouseMove += this.OnMouseMoveAsync;
+            this.Graph.MouseDown += this.OnMouseDownAsync;
+            this.Graph.MouseUp += this.OnMouseUpAsync;
         }
 
-        protected virtual void OnMouseMove(IGraphElement? element, MouseEventArgs e)
+        protected virtual async Task OnMouseMoveAsync(ElementReference sender, MouseEventArgs e, IGraphElement? element)
         {
             if (this._target == null)
                 return;
             this._movementX = e.ClientX - this._previousX;
             this._movementY = e.ClientY - this._previousY;
             this.UpdatedPosition();
+            await Task.CompletedTask;
         }
 
-        protected virtual void OnMouseDown(IGraphElement? element, MouseEventArgs e)
+        protected virtual async Task OnMouseDownAsync(ElementReference sender, MouseEventArgs e, IGraphElement? element)
         {
             if (element == null || element is not INodeViewModel)
                 return;
             this._target = (INodeViewModel)element;
             this._previousX = e.ClientX;
             this._previousY = e.ClientY;
+            await Task.CompletedTask;
         }
 
-        protected virtual void OnMouseUp(IGraphElement? element, MouseEventArgs e)
+        protected virtual async Task OnMouseUpAsync(ElementReference sender, MouseEventArgs e, IGraphElement? element)
         {
             this._target = null;
             this.UpdatedPosition();
+            await Task.CompletedTask;
         }
 
         protected virtual void UpdatedPosition()
@@ -59,9 +63,9 @@ namespace Neuroglia.Blazor.Dagre.Behaviors
 
         public override void Dispose()
         {
-            this.Graph.MouseMove -= this.OnMouseMove;
-            this.Graph.MouseDown -= this.OnMouseDown;
-            this.Graph.MouseUp -= this.OnMouseUp;
+            this.Graph.MouseMove -= this.OnMouseMoveAsync;
+            this.Graph.MouseDown -= this.OnMouseDownAsync;
+            this.Graph.MouseUp -= this.OnMouseUpAsync;
         }
     }
 }

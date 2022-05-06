@@ -139,8 +139,10 @@ else
     public string? WorkflowInstanceId { get; set; } = null!;
 
     protected IDisposable? workflowInstanceSubscription;
+    protected IDisposable? workflowActivitySubscription;
     protected WorkflowDiagram workflowDiagram = null!;
     protected IFeature<V1WorkflowInstanceCollectionState> workflowInstanceFeature = null!;
+    protected IFeature<V1WorkflowActivityCollectionState> workflowActivityFeature = null!;
     protected V1Workflow workflow = null!;
     protected V1WorkflowInstance workflowInstance = null!;
     protected List<V1WorkflowActivity> sortedActivities = new List<V1WorkflowActivity>();
@@ -152,11 +154,33 @@ else
         await base.OnInitializedAsync();
         this.workflow = await this.SynapseApi.GetWorkflowByIdAsync(this.WorkflowId);
         this.workflowInstanceFeature = this.Store.GetFeature<V1WorkflowInstanceCollectionState>();
+        this.workflowActivityFeature = this.Store.GetFeature<V1WorkflowActivityCollectionState>();
         this.workflowInstanceSubscription = this.workflowInstanceFeature
             .Subscribe(instances =>
             {
                 this.instances = instances;
-                this.StateHasChanged();;
+                this.UpdateActivities();
+            });
+
+        this.workflowActivitySubscription = this.workflowActivityFeature
+            .Subscribe(activities =>
+            {
+                if(this.instances == null || !this.instances.Any())
+                    return;
+                var foo = activities.ToList();
+                this.instances.ForEach(instance =>
+                {
+                    var instanceActivities = activities.Where(activity => activity.WorkflowInstanceId == instance.Id);
+                    if (instanceActivities.Any())
+                    {
+                        instance.Activities.Clear();
+                        foreach(var activity in instanceActivities)
+                        {
+                            instance.Activities.Add(activity);                        
+                        }
+                    }
+                });
+                this.UpdateActivities();
             });
         this.Dispatcher.Dispatch(new ListV1WorkflowInstancesByDefinition(this.WorkflowId));
         await this.BreadcrumbService.Use(KnownBreadcrumbs.Workflows);
@@ -170,14 +194,25 @@ else
         if (this.WorkflowInstanceId == null)
         {
             this.workflowInstance = null!;
+        }
+        else
+        { 
+            this.workflowInstance = await this.SynapseApi.GetWorkflowInstanceByIdAsync(this.WorkflowInstanceId);
+            await this.BreadcrumbService.AddCurrentUri($"Instance {this.WorkflowInstanceId}");
+        }
+        this.UpdateActivities();
+    }
+
+    protected void UpdateActivities()
+    {
+        if (this.WorkflowInstanceId == null)
+        {
             this.sortedActivities = new List<V1WorkflowActivity>();
             if (this.workflowDiagram != null) this.workflowDiagram.DisplayActivityStatusFor(this.instances);
         }
         else
         {
-            await this.BreadcrumbService.AddCurrentUri($"Instance {this.WorkflowInstanceId}");
-            this.workflowInstance = await this.SynapseApi.GetWorkflowInstanceByIdAsync(this.WorkflowInstanceId);
-            this.sortedActivities = this.workflowInstance.Activities.OrderBy(a => a.StartedAt).ToList();
+            this.sortedActivities = this.workflowInstance.Activities.OrderBy(a => a.CreatedAt).ToList();
             if (this.workflowDiagram != null) this.workflowDiagram.DisplayActivityStatusFor(this.instances.Where(i => i.Id == this.WorkflowInstanceId));
         }
         this.StateHasChanged();
@@ -206,8 +241,16 @@ else
 
     public void Dispose()
     {
-        this.workflowInstanceSubscription?.Dispose();
-        this.workflowInstanceSubscription = null;
+        if (this.workflowInstanceSubscription != null)
+        {
+            this.workflowInstanceSubscription?.Dispose();
+            this.workflowInstanceSubscription = null;
+        }
+        if (this.workflowActivitySubscription != null)
+        {
+            this.workflowActivitySubscription?.Dispose();
+            this.workflowActivitySubscription = null;
+        }
     }
 
 }

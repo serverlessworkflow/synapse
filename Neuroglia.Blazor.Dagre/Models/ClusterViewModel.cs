@@ -21,10 +21,10 @@ namespace Neuroglia.Blazor.Dagre.Models
             string? label = "",
             string? cssClass = null,
             string? shape = null,
-            double? width = Consts.ClusterWidth,
-            double? height = Consts.ClusterHeight,
-            double? radiusX = Consts.ClusterRadius,
-            double? radiusY = Consts.ClusterRadius,
+            double? width = Constants.ClusterWidth,
+            double? height = Constants.ClusterHeight,
+            double? radiusX = Constants.ClusterRadius,
+            double? radiusY = Constants.ClusterRadius,
             double? x = 0,
             double? y = 0,
             Type? componentType = null,
@@ -124,8 +124,8 @@ namespace Neuroglia.Blazor.Dagre.Models
             var maxY = this.Children.Values.Select(node => node.Y + (node.Height ?? 0) / 2).Max();
             var x = (minX + maxX) / 2;
             var y = (minY + maxY) / 2;
-            var width = maxX - minX + Consts.ClusterPaddingX;
-            var height = maxY - minY + Consts.ClusterPaddingY;
+            var width = maxX - minX + Constants.ClusterPaddingX;
+            var height = maxY - minY + Constants.ClusterPaddingY;
             this.SetGeometry(x, y, width, height);
         }
     }

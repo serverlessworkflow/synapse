@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 
-namespace Synapse.Services
+namespace Synapse.Dashboard.Services
 {
     public class ExpressionParameterReplacer
         : ExpressionVisitor

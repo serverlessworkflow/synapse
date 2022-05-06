@@ -78,17 +78,17 @@
         public virtual event Action? Changed;
 
         public NodeViewModel()
-            : this("", null, null, Consts.NodeWidth, Consts.NodeHeight, Consts.NodeRadius, Consts.NodeRadius, 0, 0, null, null)
+            : this("", null, null, Constants.NodeWidth, Constants.NodeHeight, Constants.NodeRadius, Constants.NodeRadius, 0, 0, null, null)
         { }
 
         public NodeViewModel(
             string? label = "",
             string? cssClass = null,
             string? shape = null,
-            double? width = Consts.NodeWidth, 
-            double? height = Consts.NodeHeight,
-            double? radiusX = Consts.NodeRadius,
-            double? radiusY = Consts.NodeRadius,
+            double? width = Constants.NodeWidth, 
+            double? height = Constants.NodeHeight,
+            double? radiusX = Constants.NodeRadius,
+            double? radiusY = Constants.NodeRadius,
             double? x = 0,
             double? y = 0,
             Type? componentType = null,

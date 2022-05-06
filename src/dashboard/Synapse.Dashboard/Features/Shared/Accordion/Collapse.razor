@@ -53,7 +53,9 @@
     {
         this.IsExpanded = !this.IsExpanded;
         //this.StateHasChanged();
-        await this.OnToggleExpand.InvokeAsync(new() { Value = this.IsExpanded });
+        if (this.OnToggleExpand.HasDelegate) {
+            await this.OnToggleExpand.InvokeAsync(new() { Value = this.IsExpanded });
+        }
     }
 
 }

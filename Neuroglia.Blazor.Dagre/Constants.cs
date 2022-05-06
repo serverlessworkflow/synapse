@@ -1,6 +1,6 @@
 ﻿namespace Neuroglia.Blazor.Dagre
 {
-    public static class Consts
+    public static class Constants
     {
         public const double NodeWidth = 80;
         public const double NodeHeight = 40;

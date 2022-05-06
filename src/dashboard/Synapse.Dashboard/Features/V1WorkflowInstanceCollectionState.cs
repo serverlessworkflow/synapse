@@ -26,18 +26,11 @@ namespace Synapse.Dashboard
     public class V1WorkflowInstanceCollectionState
         : List<V1WorkflowInstance>
     {
-
         public V1WorkflowInstanceCollectionState()
-        {
-
-        }
-
+        {}
         public V1WorkflowInstanceCollectionState(IEnumerable<V1WorkflowInstance> workflows)
             : base(workflows)
-        {
-
-        }
-
+        {}
     }
 
     [Reducer]
@@ -49,13 +42,13 @@ namespace Synapse.Dashboard
             return new(action.WorkflowInstances);
         }
 
-        public static V1WorkflowInstanceCollectionState OnAddV1Workflow(V1WorkflowInstanceCollectionState state, AddV1WorkflowInstance action)
+        public static V1WorkflowInstanceCollectionState OnAddV1WorkflowInstance(V1WorkflowInstanceCollectionState state, AddV1WorkflowInstance action)
         {
             state.Add(action.WorkflowInstance);
             return state;
         }
 
-        public static V1WorkflowInstanceCollectionState OnMarkV1WorkflowAsStarting(V1WorkflowInstanceCollectionState state, MarkV1WorkflowAsStarting action)
+        public static V1WorkflowInstanceCollectionState OnMarkV1WorkflowInstanceAsStarting(V1WorkflowInstanceCollectionState state, MarkV1WorkflowInstanceAsStarting action)
         {
             var instance = state.FirstOrDefault(i => i.Id == action.Id);
             if(instance != null)
@@ -66,7 +59,7 @@ namespace Synapse.Dashboard
             return state;
         }
 
-        public static V1WorkflowInstanceCollectionState OnMarkV1WorkflowAsStarted(V1WorkflowInstanceCollectionState state, MarkV1WorkflowAsStarted action)
+        public static V1WorkflowInstanceCollectionState OnMarkV1WorkflowInstanceAsStarted(V1WorkflowInstanceCollectionState state, MarkV1WorkflowInstanceAsStarted action)
         {
             var instance = state.FirstOrDefault(i => i.Id == action.Id);
             if (instance != null)
@@ -78,7 +71,7 @@ namespace Synapse.Dashboard
             return state;
         }
 
-        public static V1WorkflowInstanceCollectionState OnMarkV1WorkflowAsFaulted(V1WorkflowInstanceCollectionState state, MarkV1WorkflowAsFaulted action)
+        public static V1WorkflowInstanceCollectionState OnMarkV1WorkflowInstanceAsFaulted(V1WorkflowInstanceCollectionState state, MarkV1WorkflowInstanceAsFaulted action)
         {
             var instance = state.FirstOrDefault(i => i.Id == action.Id);
             if (instance != null)
@@ -91,7 +84,7 @@ namespace Synapse.Dashboard
             return state;
         }
 
-        public static V1WorkflowInstanceCollectionState OnMarkV1WorkflowAsCompleted(V1WorkflowInstanceCollectionState state, MarkV1WorkflowAsCompleted action)
+        public static V1WorkflowInstanceCollectionState OnMarkV1WorkflowInstanceAsCompleted(V1WorkflowInstanceCollectionState state, MarkV1WorkflowAsCompleted action)
         {
             var instance = state.FirstOrDefault(i => i.Id == action.Id);
             if (instance != null)
@@ -151,10 +144,10 @@ namespace Synapse.Dashboard
 
     }
 
-    public class MarkV1WorkflowAsStarting
+    public class MarkV1WorkflowInstanceAsStarting
     {
 
-        public MarkV1WorkflowAsStarting(string id, DateTime startingAt)
+        public MarkV1WorkflowInstanceAsStarting(string id, DateTime startingAt)
         {
             this.Id = id;
             this.StartingAt = startingAt;
@@ -166,10 +159,10 @@ namespace Synapse.Dashboard
 
     }
 
-    public class MarkV1WorkflowAsStarted
+    public class MarkV1WorkflowInstanceAsStarted
     {
 
-        public MarkV1WorkflowAsStarted(string id, DateTime startedAt)
+        public MarkV1WorkflowInstanceAsStarted(string id, DateTime startedAt)
         {
             this.Id = id;
             this.StartedAt = startedAt;
@@ -181,10 +174,10 @@ namespace Synapse.Dashboard
 
     }
 
-    public class MarkV1WorkflowAsFaulted
+    public class MarkV1WorkflowInstanceAsFaulted
     {
 
-        public MarkV1WorkflowAsFaulted(string id, DateTime faultedAt, Error error)
+        public MarkV1WorkflowInstanceAsFaulted(string id, DateTime faultedAt, Error error)
         {
             this.Id = id;
             this.FaultedAt = faultedAt;
