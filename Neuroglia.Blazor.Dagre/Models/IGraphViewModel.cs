@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Components.Web;
 
 namespace Neuroglia.Blazor.Dagre.Models
 {
+    public delegate Task MouseEventHandler(ElementReference sender, MouseEventArgs e, IGraphElement? element);
+    public delegate Task WheelEventHandler(ElementReference sender, WheelEventArgs e, IGraphElement? element);
+
     public interface IGraphViewModel
         : IIdentifiable, ILabeled, IDimension, IPosition, ICssClass, IMetadata
     {
@@ -16,10 +19,12 @@ namespace Neuroglia.Blazor.Dagre.Models
         IReadOnlyCollection<Type> SvgDefinitionComponents { get; }
         IGraphLib? DagreGraph {  get; set; }
 
-        event Action<IGraphElement?, MouseEventArgs>? MouseMove;
-        event Action<IGraphElement?, MouseEventArgs>? MouseDown;
-        event Action<IGraphElement?, MouseEventArgs>? MouseUp;
-        event Action<IGraphElement?, WheelEventArgs>? Wheel;
+        event MouseEventHandler? MouseMove;
+        event MouseEventHandler? MouseDown;
+        event MouseEventHandler? MouseUp;
+        event MouseEventHandler? MouseEnter;
+        event MouseEventHandler? MouseLeave;
+        event WheelEventHandler? Wheel;
 
         Task RegisterComponentTypeAsync<TElement, TComponent>()
             where TElement : IGraphElement
@@ -32,13 +37,17 @@ namespace Neuroglia.Blazor.Dagre.Models
 
         Task AddElementsAsync(IEnumerable<IGraphElement> elements);
 
-        void OnMouseMove(IGraphElement? element, MouseEventArgs e);
+        Task OnMouseMoveAsync(ElementReference sender, MouseEventArgs e, IGraphElement? element);
 
-        void OnMouseDown(IGraphElement? element, MouseEventArgs e);
+        Task OnMouseDownAsync(ElementReference sender, MouseEventArgs e, IGraphElement? element);
 
-        void OnMouseUp(IGraphElement? element, MouseEventArgs e);
+        Task OnMouseUpAsync(ElementReference sender, MouseEventArgs e, IGraphElement? element);
 
-        void OnWheel(IGraphElement? element, WheelEventArgs e);
+        Task OnMouseEnterAsync(ElementReference sender, MouseEventArgs e, IGraphElement? element);
+
+        Task OnMouseLeaveAsync(ElementReference sender, MouseEventArgs e, IGraphElement? element);
+
+        Task OnWheelAsync(ElementReference sender, WheelEventArgs e, IGraphElement? element);
 
     }
 }

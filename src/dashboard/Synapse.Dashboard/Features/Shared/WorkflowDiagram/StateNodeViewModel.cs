@@ -34,10 +34,12 @@ namespace Synapse.Dashboard
         /// Initializes a new <see cref="StateNodeViewModel"/>
         /// </summary>
         /// <param name="state">The <see cref="StateDefinition"/> the <see cref="StateNodeViewModel"/> represents</param>
-        public StateNodeViewModel(StateDefinition state)
-            : base(null, state.Name!)
+        public StateNodeViewModel(StateDefinition state, bool isFirst = false)
+            : base(null, state.Name!, null, null, Neuroglia.Blazor.Dagre.Constants.ClusterWidth * 1.5, Neuroglia.Blazor.Dagre.Constants.ClusterWidth * 1.5)
         {
             this.State = state;
+            this.IsFirst = isFirst;
+            this.ComponentType = typeof(StateNodeTemplate);
         }
 
         /// <summary>
@@ -46,6 +48,11 @@ namespace Synapse.Dashboard
         [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Always)]
         [Newtonsoft.Json.JsonProperty]
         public StateDefinition State { get; }
+
+        /// <summary>
+        /// Gets if the state is the first of the worlflow
+        /// </summary>
+        public bool IsFirst { get; }
 
         /// <inheritdoc/>
         public ObservableCollection<V1WorkflowInstance> ActiveInstances { get; } = new();

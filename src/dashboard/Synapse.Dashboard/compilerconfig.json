@@ -34,5 +34,13 @@
   {
     "outputFile": "Features/Shared/Toolbar/Toolbar.razor.css",
     "inputFile": "Features/Shared/Toolbar/Toolbar.razor.scss"
+  },
+  {
+    "outputFile": "Features/Workflows/WorkflowVisualEditor/AddStateContextualMenu.razor.css",
+    "inputFile": "Features/Workflows/WorkflowVisualEditor/AddStateContextualMenu.razor.scss"
+  },
+  {
+    "outputFile": "Features/Workflows/WorkflowVisualEditor/WorkflowVisualEditor.razor.css",
+    "inputFile": "Features/Workflows/WorkflowVisualEditor/WorkflowVisualEditor.razor.scss"
   }
 ]

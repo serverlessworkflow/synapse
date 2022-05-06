@@ -47,7 +47,7 @@ namespace Neuroglia.Blazor.Dagre.Models
             this.TargetId = targetId;
             this._points = points ?? new Collection<IPosition>();
             this.Shape = shape ?? EdgeShape.BSpline;
-            this.EndMarkerId = Consts.EdgeEndArrowId;
+            this.EndMarkerId = Constants.EdgeEndArrowId;
             this.BBox = new BoundingBox();
         }
     }

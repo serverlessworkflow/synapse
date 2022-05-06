@@ -41,10 +41,10 @@ namespace Synapse.Dashboard
             string? label = "",
             string? cssClass = null,
             string? shape = null,
-            double? width = Consts.NodeWidth,
-            double? height = Consts.NodeHeight,
-            double? radiusX = Consts.NodeRadius,
-            double? radiusY = Consts.NodeRadius,
+            double? width = Neuroglia.Blazor.Dagre.Constants.NodeWidth * 1.5,
+            double? height = Neuroglia.Blazor.Dagre.Constants.NodeHeight * 1.5,
+            double? radiusX = Neuroglia.Blazor.Dagre.Constants.NodeRadius,
+            double? radiusY = Neuroglia.Blazor.Dagre.Constants.NodeRadius,
             double? x = 0,
             double? y = 0,
             Type? componentType = null,
@@ -52,6 +52,7 @@ namespace Synapse.Dashboard
         )
             : base(label, cssClass, shape, width, height, radiusX, radiusY, x, y, componentType, parentId)
         {
+            this.ComponentType = typeof(WorkflowNodeTemplate);
             this.ActiveInstances.CollectionChanged += this.OnCollectionChanged;
         }
 

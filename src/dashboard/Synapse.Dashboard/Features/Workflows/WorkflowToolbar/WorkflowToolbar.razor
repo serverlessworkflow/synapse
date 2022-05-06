@@ -28,7 +28,7 @@
 @if (Workflow != null) 
 {
     <Toolbar>
-        <button @onclick="OnShowWorkflowInputModal" class="btn btn-outline-dark" title="Start workflow"><span class="oi oi-media-play"></span></button>
+        <button @onclick="OnShowWorkflowInputModal" class="btn btn-outline-dark" title="Start workflow">Start workflow <span class="oi oi-media-play"></span></button>
     </Toolbar>
     
     <Modal @ref="errorModal">
@@ -38,7 +38,7 @@
             <div class="border rounded bg-danger text-white text-break p-1">@((MarkupString)error)</div>
         </Body>
         <Footer>
-            <button @onclick="() => errorModal.Hide()" class="btn btn-secondary">Close</button>
+            <button @onclick="errorModal.HideAsync" class="btn btn-secondary">Close</button>
         </Footer>
     </Modal>
     <Modal @ref="workflowInputModal">
@@ -69,7 +69,7 @@
             }
         </Body>
         <Footer>
-            <button @onclick="() => workflowInputModal.Hide()" class="btn btn-secondary">Cancel</button>
+            <button @onclick="workflowInputModal.HideAsync" class="btn btn-secondary">Cancel</button>
             <button @onclick="OnStartWorkflowAsync" class="btn btn-primary">Start</button>
         </Footer>
     </Modal>
@@ -124,7 +124,7 @@
                 await this.workflowInputEditor.SetValue(json);
             }  
         }
-        this.workflowInputModal.Show();
+        await this.workflowInputModal.ShowAsync();
     }
 
     protected async Task OnStartWorkflowAsync()
@@ -152,7 +152,7 @@
             var value = await this.jsonForm.GetValueAsync();
             json = await this.JsonSerializer.SerializeAsync(value);
         }
-        this.workflowInputModal.Hide();
+        await this.workflowInputModal.HideAsync();
         this.inputValidationErrors = null;
         if(this.workflowInputEditor != null)
             await this.workflowInputEditor.SetValue("{}");
@@ -163,14 +163,14 @@
             {
                 WorkflowId = this.Workflow.Id,
                 ActivationType = V1WorkflowInstanceActivationType.Manual,
-                InputData = inputData
+                InputData = inputData,
+                AutoStart = true
             });
-            await this.SynapseApi.StartWorkflowInstanceAsync(workflowInstance.Id);
         }
         catch(Exception ex)
         {
             this.error = ex.ToString();
-            this.errorModal.Show();
+            await this.errorModal.ShowAsync();
         } 
     }
 }

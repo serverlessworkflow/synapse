@@ -15,6 +15,7 @@
  *
  */
 
+using Microsoft.JSInterop;
 using Neuroglia.Blazor.Dagre.Models;
 using ServerlessWorkflow.Sdk;
 using ServerlessWorkflow.Sdk.Models;
@@ -25,27 +26,42 @@ namespace Synapse.Dashboard
     //: IWorkflowGraphViewModelBuilder
     {
 
+        protected readonly IJSRuntime jSRuntime;
+
+        public WorkflowGraphBuilder(IJSRuntime jSRuntime)
+        {
+            this.jSRuntime = jSRuntime;
+        }
+
         /// <inheritdoc/>
         public async Task<IGraphViewModel> BuildGraph(WorkflowDefinition definition)
         {
+            var isEmpty = definition.States == null || !definition.States.Any();
             var graph = new GraphViewModel();
-            var startState = definition.GetStartState();
-            var startNode = this.BuildStartNode();
+            //graph.RegisterBehavior(new DragAndDropNodeBehavior(graph, this.jSRuntime));
+            var startNode = this.BuildStartNode(!isEmpty);
             var endNode = this.BuildEndNode();
             await graph.AddElementAsync(startNode);
-            await this.BuildStateNodes(definition, graph, startState, endNode, startNode);
+            if (!isEmpty) { 
+                var startState = definition.GetStartState();
+                await this.BuildStateNodes(definition, graph, startState, endNode, startNode);
+            }
+            else
+            {
+                await this.BuildEdgeBetween(graph, startNode, endNode);
+            }
             await graph.AddElementAsync(endNode);
             return await Task.FromResult(graph);
         }
 
-        protected NodeViewModel BuildStartNode()
+        protected NodeViewModel BuildStartNode(bool hasSuccessor = false)
         {
-            return new StartNodeViewModel();
+            return new StartNodeViewModel(hasSuccessor);
         }
 
         protected async Task<NodeViewModel> BuildStateNodes(WorkflowDefinition definition, GraphViewModel graph, StateDefinition state, NodeViewModel endNode, NodeViewModel previousNode)
         {
-            var stateNodeGroup = new StateNodeViewModel(state);
+            var stateNodeGroup = new StateNodeViewModel(state, state == definition.GetStartState());
             await graph.AddElementAsync(stateNodeGroup);
             NodeViewModel? firstNode, lastNode = null;
             switch (state)
@@ -248,7 +264,8 @@ namespace Synapse.Dashboard
                                 { 
                                     foreach (var condition in switchState.EventConditions)
                                     {
-                                        var caseNode = this.BuildDataConditionNode(condition.Name!); // todo: should be a labeled edge, not a node?
+                                        Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(condition));
+                                        var caseNode = this.BuildDataConditionNode(condition.Name ?? condition.Event); // todo: should be a labeled edge, not a node?
                                         await stateNodeGroup.AddChildAsync(caseNode);
                                         await this.BuildEdgeBetween(graph, firstNode, caseNode);
                                         switch (condition.Type)

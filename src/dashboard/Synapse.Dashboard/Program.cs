@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.SignalR.Client;
 using Neuroglia.Blazor.Dagre;
 using Neuroglia.Data;
 using Neuroglia.Data.Flux;
+using Neuroglia.Mapping;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using ServerlessWorkflow.Sdk;
@@ -28,6 +29,7 @@ using Simple.OData.Client;
 using Synapse;
 using Synapse.Dashboard;
 using Synapse.Dashboard.Services;
+using System.Reflection;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 var baseAddress = builder.HostEnvironment.BaseAddress;
@@ -38,6 +40,7 @@ builder.Services.AddScoped(provider => new HttpClient { BaseAddress = new Uri(ba
 builder.Services.AddSynapseRestApiClient(http => http.BaseAddress = new Uri(baseAddress));
 builder.Services.AddServerlessWorkflow();
 builder.Services.AddPluralizer();
+builder.Services.AddMapper(typeof(Program).Assembly);
 builder.Services.AddSingleton<IODataClient>(new ODataClient(new ODataClientSettings()
 {
     BaseUri = new($"{baseAddress}api/odata"),
@@ -50,6 +53,8 @@ builder.Services.AddSingleton<IIntegrationEventStream, IntegrationEventStream>()
 builder.Services.AddSingleton<IMonacoEditorHelper, MonacoEditorHelper>();
 builder.Services.AddSingleton<IBreadcrumbService, BreadcrumbService>();
 builder.Services.AddSingleton<IDagreService, DagreService>();
+builder.Services.AddSingleton<IClonerService, ClonerService>();
+builder.Services.AddSingleton<IWorkflowGraphEventDispatcher, WorkflowGraphEventDispatcher>();
 builder.Services.AddScoped<WorkflowGraphBuilder>();
 builder.Services.AddFlux(flux =>
 {

@@ -123,6 +123,16 @@
         "FONT-LICENSE",
         "ICON-LICENSE"
       ]
+    },
+    {
+      "provider": "unpkg",
+      "library": "jq-web@0.5.1",
+      "destination": "wwwroot/lib/jq-web/",
+      "files": [
+        "LICENSE",
+        "jq.wasm.js",
+        "jq.wasm.wasm"
+      ]
     }
   ]
 }

@@ -81,10 +81,12 @@ namespace Neuroglia.Blazor.Dagre.Models
 
         private readonly Dictionary<Type, GraphBehavior> _behaviors;
 
-        public event Action<IGraphElement?, MouseEventArgs>? MouseMove;
-        public event Action<IGraphElement?, MouseEventArgs>? MouseDown;
-        public event Action<IGraphElement?, MouseEventArgs>? MouseUp;
-        public event Action<IGraphElement?, WheelEventArgs>? Wheel;
+        public event MouseEventHandler? MouseMove;
+        public event MouseEventHandler? MouseDown;
+        public event MouseEventHandler? MouseUp;
+        public event MouseEventHandler? MouseEnter;
+        public event MouseEventHandler? MouseLeave;
+        public event WheelEventHandler? Wheel;
 
         public GraphViewModel(
             Dictionary<Guid, INodeViewModel>? nodes = null,
@@ -103,7 +105,7 @@ namespace Neuroglia.Blazor.Dagre.Models
             this._nodes = nodes ?? new Dictionary<Guid, INodeViewModel>();
             this._edges = edges ?? new Dictionary<Guid, IEdgeViewModel>(); ;
             this._clusters = clusters ?? new Dictionary<Guid, IClusterViewModel>();
-            this._svgDefinitionComponents = svgDefinitions ?? new Collection<Type>() { 
+            this._svgDefinitionComponents = svgDefinitions ?? new Collection<Type>() {
                 typeof(ArrowDefinitionTemplate)
             };
             this.Scale = 1;
@@ -197,8 +199,9 @@ namespace Neuroglia.Blazor.Dagre.Models
         /// <exception cref="ArgumentNullException"></exception>
         protected virtual async Task AddClusterAsync(IClusterViewModel cluster)
         {
-            if  (cluster == null) { 
-                throw new ArgumentNullException(nameof(cluster)); 
+            if (cluster == null)
+            {
+                throw new ArgumentNullException(nameof(cluster));
             }
             this._clusters.Add(cluster.Id, cluster);
             this._allClusters.Add(cluster.Id, cluster);
@@ -220,7 +223,7 @@ namespace Neuroglia.Blazor.Dagre.Models
                 throw new ArgumentNullException(nameof(node));
             }
             if (node is IClusterViewModel cluster)
-            {                
+            {
                 await this.AddClusterAsync(cluster);
                 return;
             }
@@ -357,17 +360,45 @@ namespace Neuroglia.Blazor.Dagre.Models
             this._behaviors.Remove(behaviorType);
         }
 
-        public virtual void OnMouseMove(IGraphElement? element, MouseEventArgs e) => this.MouseMove?.Invoke(element, e);
+        public virtual async Task OnMouseMoveAsync(ElementReference sender, MouseEventArgs e, IGraphElement? element)
+        {
+            if (this.MouseMove != null)
+                await this.MouseMove.Invoke(sender, e, element);
+        }
 
-        public virtual void OnMouseDown(IGraphElement? element, MouseEventArgs e) => this.MouseDown?.Invoke(element, e);
+        public virtual async Task OnMouseDownAsync(ElementReference sender, MouseEventArgs e, IGraphElement? element)
+        {
+            if (this.MouseDown != null)
+                await this.MouseDown.Invoke(sender, e, element);
+        }
 
-        public virtual void OnMouseUp(IGraphElement? element, MouseEventArgs e) => this.MouseUp?.Invoke(element, e);
+        public virtual async Task OnMouseUpAsync(ElementReference sender, MouseEventArgs e, IGraphElement? element)
+        {
+            if (this.MouseUp != null)
+                await this.MouseUp.Invoke(sender, e, element);
+        }
 
-        public virtual void OnWheel(IGraphElement? element, WheelEventArgs e) => this.Wheel?.Invoke(element, e);
+        public virtual async Task OnMouseEnterAsync(ElementReference sender, MouseEventArgs e, IGraphElement? element)
+        {
+            if (this.MouseEnter != null)
+                await this.MouseEnter.Invoke(sender, e, element);
+        }
+
+        public virtual async Task OnMouseLeaveAsync(ElementReference sender, MouseEventArgs e, IGraphElement? element)
+        {
+            if (this.MouseLeave != null)
+                await this.MouseLeave.Invoke(sender, e, element);
+        }
+
+        public virtual async Task OnWheelAsync(ElementReference sender, WheelEventArgs e, IGraphElement? element)
+        {
+            if (this.Wheel != null)
+                await this.Wheel.Invoke(sender, e, element);
+        }
 
         public virtual void OnChildAdded(INodeViewModel child)
         {
-            if(child is IClusterViewModel cluster)
+            if (child is IClusterViewModel cluster)
             {
                 this._allClusters.Add(cluster.Id, cluster);
                 this.Flatten(cluster);

@@ -208,7 +208,7 @@
             <div class="border rounded bg-danger text-white text-break p-1">@((MarkupString)error)</div>
         </Body>
         <Footer>
-            <button @onclick="() => errorModal.Hide()" class="btn btn-secondary">Close</button>
+            <button @onclick="errorModal.HideAsync" class="btn btn-secondary">Close</button>
         </Footer>
     </Modal>
 }

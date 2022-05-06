@@ -11,35 +11,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Features\WorkflowInstances\WorkflowInstanceView\**" />
-    <Compile Remove="Features\Workflows\WorkflowMetrics\**" />
-    <Content Remove="Features\WorkflowInstances\WorkflowInstanceView\**" />
-    <Content Remove="Features\Workflows\WorkflowMetrics\**" />
-    <EmbeddedResource Remove="Features\WorkflowInstances\WorkflowInstanceView\**" />
-    <EmbeddedResource Remove="Features\Workflows\WorkflowMetrics\**" />
-    <None Remove="Features\WorkflowInstances\WorkflowInstanceView\**" />
-    <None Remove="Features\Workflows\WorkflowMetrics\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Remove="compilerconfig.json" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="compilerconfig.json" />
-    <None Include="Features\Shared\Accordion\Accordion.razor" />
-    <None Include="Features\Shared\Accordion\Collapse.razor" />
-    <None Include="Features\Shared\Accordion\ExpandableDataRow.razor" />
-    <None Include="Features\Shared\Accordion\Expander.razor" />
-    <None Include="Features\Shared\Layout\AppHeader.razor" />
-    <None Include="Features\Shared\Layout\Header.razor" />
-    <None Include="Features\Shared\Layout\MainLayout.razor" />
-    <None Include="Features\Shared\Layout\NavMenu.razor" />
-    <None Include="Features\Shared\Modal\Modal.razor" />
-    <None Include="Features\Shared\Toast\Toaster.razor" />
-  </ItemGroup>
-
-  <ItemGroup>
 	<PackageReference Include="BlazorMonaco" Version="2.1.0" />
 	<PackageReference Include="BuildWebCompiler2022" Version="1.14.7" Condition="$([MSBuild]::IsOsPlatform('Windows'))" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.4" />
@@ -50,6 +21,7 @@
 	<PackageReference Include="Neuroglia.Data.Flux" Version="2.0.1.59" />
 	<PackageReference Include="Neuroglia.Data.Flux.ReduxDevTools" Version="2.0.1.59" />
 	<PackageReference Include="Neuroglia.Data.OData" Version="2.0.1.59" />
+	<PackageReference Include="Neuroglia.Mapping" Version="2.0.1.59" />
   </ItemGroup>
 
   <ItemGroup>

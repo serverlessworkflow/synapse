@@ -29,7 +29,7 @@ namespace Synapse.Dashboard
         /// Initializes a new <see cref="ParallelNodeViewModel"/>
         /// </summary>
         public ParallelNodeViewModel()
-            : base("", "parallel-node", null, 40)
+            : base("", "parallel-node", null, Neuroglia.Blazor.Dagre.Constants.NodeHeight * 1.5, Neuroglia.Blazor.Dagre.Constants.NodeHeight * 1.5)
         {
             this.ComponentType = typeof(ParellelNodeTemplate);
         }

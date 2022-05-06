@@ -142,7 +142,9 @@
             || column.PropertyPath == null)
             return;
         column.ToggleSortMode();
-        await this.OnOrderBy.InvokeAsync(column);
+        if (this.OnOrderBy.HasDelegate) {
+            await this.OnOrderBy.InvokeAsync(column);
+        }
     }
 
     internal void OnStartDragColumn(Column<T> column)

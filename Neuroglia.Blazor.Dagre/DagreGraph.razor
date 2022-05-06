@@ -5,10 +5,12 @@
 @if (Graph != null) {
     <div class="graph-container">
         <CascadingValue Value="Graph">
-            <svg @ref="_graphReference"
+            <svg @ref="graphReference"
                 class="graph-canvas @Graph.CssClass"
                 width="@(Graph.Width?.ToString() ?? "100%")" 
                 height="@(Graph.Height?.ToString() ?? "100%")"
+                @onmouseenter="OnMouseEnter"
+                @onmouseleave="OnMouseLeave"
                 @onmousedown="OnMouseDown"
                 @onmouseup="OnMouseUp"
                 @onmousemove="OnMouseMove"
@@ -72,7 +74,7 @@
     [Parameter]
     public IGraphViewModel? Graph { get; set; }
 
-    protected ElementReference _graphReference;
+    protected ElementReference graphReference;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -99,14 +101,14 @@
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
-            await this.JSRuntime.InvokeVoidAsync("neuroglia.blazor.preventScroll", this._graphReference);
+            await this.JSRuntime.InvokeVoidAsync("neuroglia.blazor.preventScroll", this.graphReference);
     }
 
     protected virtual async Task Center()
     {
         if (this.Graph == null) 
             return;
-        var position = await this.JSRuntime.InvokeAsync<BoundingBox>("neuroglia.blazor.getCenter", this._graphReference);
+        var position = await this.JSRuntime.InvokeAsync<BoundingBox>("neuroglia.blazor.getCenter", this.graphReference);
         this.Graph.X = position.X / (double)this.Graph.Scale;
         this.Graph.Y = position.Y / (double)this.Graph.Scale;
     }
@@ -115,7 +117,7 @@
     {
         if (this.Graph == null) 
             return;
-        this.Graph.Scale = Math.Clamp(await this.JSRuntime.InvokeAsync<decimal>("neuroglia.blazor.getScale", this._graphReference), Consts.MinScale, Consts.MaxScale);
+        this.Graph.Scale = Math.Clamp(await this.JSRuntime.InvokeAsync<decimal>("neuroglia.blazor.getScale", this.graphReference), Constants.MinScale, Constants.MaxScale);
         this.StateHasChanged();
         await this.Center();
     }
@@ -129,11 +131,39 @@
         return parameters;
     }
 
-    protected virtual void OnMouseDown(MouseEventArgs e) => this.Graph?.OnMouseDown(null, e);
+    protected virtual async Task OnMouseEnter(MouseEventArgs e)
+    {
+        if (this.Graph != null)
+            await this.Graph.OnMouseEnterAsync(this.graphReference, e, null);
+    }
 
-    protected virtual void OnMouseMove(MouseEventArgs e) => this.Graph?.OnMouseMove(null, e);
+    protected virtual async Task OnMouseLeave(MouseEventArgs e)
+    {
+        if (this.Graph != null)
+            await this.Graph.OnMouseLeaveAsync(this.graphReference, e, null);
+    }
 
-    protected virtual void OnMouseUp(MouseEventArgs e) => this.Graph?.OnMouseUp(null, e);
+    protected virtual async Task OnMouseDown(MouseEventArgs e)
+    {
+        if (this.Graph != null)
+            await this.Graph.OnMouseDownAsync(this.graphReference, e, null);
+    }
 
-    protected virtual void OnWheel(WheelEventArgs e) => this.Graph?.OnWheel(null, e);
+    protected virtual async Task OnMouseMove(MouseEventArgs e)
+    {
+        if (this.Graph != null)
+            await this.Graph.OnMouseMoveAsync(this.graphReference, e, null);
+    }
+
+    protected virtual async Task OnMouseUp(MouseEventArgs e)
+    {
+        if (this.Graph != null)
+            await this.Graph.OnMouseUpAsync(this.graphReference, e, null);
+    }
+
+    protected virtual async Task OnWheel(WheelEventArgs e)
+    {
+        if (this.Graph != null)
+            await this.Graph.OnWheelAsync(this.graphReference, e, null);
+    }
 }
