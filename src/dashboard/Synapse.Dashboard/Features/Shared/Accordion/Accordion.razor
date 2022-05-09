@@ -25,11 +25,13 @@
                 @Header
             </button>
         </div>
-        <div class="accordion-collapse @(IsExpanded ? "collapse show" : "collapse")">
-            <div class="accordion-body">
-                @Body
+        @if (IsExpanded) {
+            <div class="accordion-collapse collapse show">
+                <div class="accordion-body">
+                    @Body
+                </div>
             </div>
-        </div>
+        }
     </div>
 </div>
 
