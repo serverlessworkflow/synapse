@@ -111,7 +111,7 @@ namespace Synapse.Dashboard
             var stateNode = (StateNodeViewModel)graph.GetStateNodeFor(activity)!;
             if (!activity.Metadata.TryGetValue("action", out var actionName))
                 throw new InvalidDataException($"The specified activity's metadata does not define a 'action' value");
-            return stateNode.Children.OfType<ActionNodeViewModel>().FirstOrDefault(a => a.Action.Name == actionName);
+            return stateNode.Children.Values.Where(node => typeof(IActionNodeViewModel).IsAssignableFrom(node.GetType())).Select(node => node as IActionNodeViewModel).FirstOrDefault(node => node != null && node.Action.Name == actionName);
         }
 
     }

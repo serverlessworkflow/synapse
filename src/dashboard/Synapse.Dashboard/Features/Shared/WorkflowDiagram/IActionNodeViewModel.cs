@@ -23,24 +23,13 @@ namespace Synapse.Dashboard
     /// <summary>
     /// Represents a <see cref="ActionDefinition"/> <see cref="NodeViewModel"/>
     /// </summary>
-    public class ActionNodeViewModel
-        : LabeledNodeViewModel, IActionNodeViewModel
+    public interface IActionNodeViewModel
+        : IWorkflowNodeViewModel
     {
-
-        /// <summary>
-        /// Initializes a new <see cref="ActionNodeViewModel"/>
-        /// </summary>
-        /// <param name="action">The <see cref="ActionDefinition"/> the <see cref="ActionNodeViewModel"/> represents</param>
-        public ActionNodeViewModel(ActionDefinition action, string? cssClass = "action-node")
-            : base(action.Name ?? action.Function?.RefName ?? action.Subflow?.WorkflowId ?? action.RetryRef, cssClass)
-        {
-            this.Action = action;
-        }
-
         /// <summary>
         /// Gets the <see cref="ActionDefinition"/> the <see cref="ActionNodeViewModel"/> represents
         /// </summary>
-        public ActionDefinition Action { get; }
+        ActionDefinition Action { get; }
 
     }
 
