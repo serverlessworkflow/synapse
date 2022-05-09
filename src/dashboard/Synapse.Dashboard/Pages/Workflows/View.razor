@@ -197,21 +197,24 @@ else
             this.workflowId = this.WorkflowId;
             this.UpdateActivities();
         }
-        if (this.WorkflowInstanceId == null)
+        if (this.WorkflowInstanceId != this.workflowInstanceId)
         {
-            this.workflowInstance = null!;
-        }
-        else  if (this.WorkflowInstanceId != this.workflowInstanceId)
-        {
-            this.workflowInstanceId = this.WorkflowInstanceId;
-            this.workflowInstance = await this.SynapseApi.GetWorkflowInstanceByIdAsync(this.WorkflowInstanceId);
-            await this.BreadcrumbService.AddCurrentUri($"Instance {this.WorkflowInstanceId}");
+            this.workflowInstanceId = this.WorkflowInstanceId;            
+            if (this.WorkflowInstanceId == null)
+            {
+                this.workflowInstance = null!;
+            }
+            else {
+                this.workflowInstance = /* await this.SynapseApi.GetWorkflowInstanceByIdAsync(this.WorkflowInstanceId); */ this.instances.FirstOrDefault(i => i.Id == this.WorkflowInstanceId);
+                await this.BreadcrumbService.AddCurrentUri($"Instance {this.WorkflowInstanceId}");
+            }
             this.UpdateActivities();
         }
     }
 
     protected void UpdateActivities()
     {
+        Console.WriteLine("Update started");
         if (this.WorkflowInstanceId == null)
         {
             this.sortedActivities = new List<V1WorkflowActivity>();
@@ -222,7 +225,9 @@ else
             this.sortedActivities = this.workflowInstance?.Activities != null ? this.workflowInstance.Activities.OrderBy(a => a.CreatedAt).ToList() : new List<V1WorkflowActivity>();
             if (this.workflowDiagram != null) this.workflowDiagram.DisplayActivityStatusFor(this.instances.Where(i => i.Id == this.WorkflowInstanceId));
         }
+        Console.WriteLine("Update done");
         this.StateHasChanged();
+        Console.WriteLine("Rendered");
     }
 
     protected string GetCssClassFor(V1WorkflowInstanceStatus workflowInstanceStatus)
