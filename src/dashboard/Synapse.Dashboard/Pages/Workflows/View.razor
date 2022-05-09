@@ -1,12 +1,12 @@
 ﻿@* 
     Copyright © 2022-Present The Synapse Authors
-    <p>
+
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
-    <p>
+
     http://www.apache.org/licenses/LICENSE-2.0
-    <p>
+
     Unless required by applicable law or agreed to in writing, software
     distributed under the License is distributed on an "AS IS" BASIS,
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -135,8 +135,10 @@ else
 
     [Parameter]
     public string WorkflowId { get; set; } = null!;
+    protected string workflowId = null!;
     [Parameter]
     public string? WorkflowInstanceId { get; set; } = null!;
+    protected string? workflowInstanceId = null!;
 
     protected IDisposable? workflowInstanceSubscription;
     protected IDisposable? workflowActivitySubscription;
@@ -161,7 +163,6 @@ else
                 this.instances = instances;
                 this.UpdateActivities();
             });
-
         this.workflowActivitySubscription = this.workflowActivityFeature
             .Subscribe(activities =>
             {
@@ -191,20 +192,29 @@ else
     protected override async Task OnParametersSetAsync()
     {
         await this.BreadcrumbService.Use(this.workflowBreadCrumbBase);
-        if (this.WorkflowInstanceId == null)
+        if (this.WorkflowId != this.workflowId)
         {
-            this.workflowInstance = null!;
+            this.workflowId = this.WorkflowId;
+            this.UpdateActivities();
         }
-        else
-        { 
-            this.workflowInstance = await this.SynapseApi.GetWorkflowInstanceByIdAsync(this.WorkflowInstanceId);
-            await this.BreadcrumbService.AddCurrentUri($"Instance {this.WorkflowInstanceId}");
+        if (this.WorkflowInstanceId != this.workflowInstanceId)
+        {
+            this.workflowInstanceId = this.WorkflowInstanceId;            
+            if (this.WorkflowInstanceId == null)
+            {
+                this.workflowInstance = null!;
+            }
+            else {
+                this.workflowInstance = /* await this.SynapseApi.GetWorkflowInstanceByIdAsync(this.WorkflowInstanceId); */ this.instances.FirstOrDefault(i => i.Id == this.WorkflowInstanceId);
+                await this.BreadcrumbService.AddCurrentUri($"Instance {this.WorkflowInstanceId}");
+            }
+            this.UpdateActivities();
         }
-        this.UpdateActivities();
     }
 
     protected void UpdateActivities()
     {
+        Console.WriteLine("Update started");
         if (this.WorkflowInstanceId == null)
         {
             this.sortedActivities = new List<V1WorkflowActivity>();
@@ -212,10 +222,12 @@ else
         }
         else
         {
-            this.sortedActivities = this.workflowInstance.Activities.OrderBy(a => a.CreatedAt).ToList();
+            this.sortedActivities = this.workflowInstance?.Activities != null ? this.workflowInstance.Activities.OrderBy(a => a.CreatedAt).ToList() : new List<V1WorkflowActivity>();
             if (this.workflowDiagram != null) this.workflowDiagram.DisplayActivityStatusFor(this.instances.Where(i => i.Id == this.WorkflowInstanceId));
         }
+        Console.WriteLine("Update done");
         this.StateHasChanged();
+        Console.WriteLine("Rendered");
     }
 
     protected string GetCssClassFor(V1WorkflowInstanceStatus workflowInstanceStatus)
