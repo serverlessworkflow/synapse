@@ -20,8 +20,12 @@
 
 @if (WorkflowInstance != null)
 {
+    if (Loading)
+    {
+        <Loader />
+    }
     <MonacoDiffEditor 
-        CssClass="monaco-normal" 
+        CssClass="@CssClass" 
         @ref="diffEditor" 
         ConstructionOptions="MonacoEditorHelper.GetDiffEditorConstructionOptions()"
         OnDidInit="OnEditorDidInitAsync"
@@ -33,6 +37,8 @@
     public V1WorkflowInstance WorkflowInstance { get; set; } = null!;
 
     protected MonacoDiffEditor diffEditor = null!;
+    protected bool Loading = true;
+    protected string CssClass => this.Loading ? "d-none" : "monaco-normal";
 
     protected async Task OnEditorDidInitAsync()
     {
@@ -52,6 +58,7 @@
             output = JsonConvert.SerializeObject(this.WorkflowInstance.Error, Formatting.Indented);
             outputModel = await MonacoEditorBase.CreateModel(output, "json");
         }
+        this.Loading = false;
         await this.diffEditor.SetModel(new DiffEditorModel
         {
             Original = inputModel,
