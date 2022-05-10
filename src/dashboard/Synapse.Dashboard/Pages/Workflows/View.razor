@@ -146,7 +146,7 @@ else
     protected IFeature<V1WorkflowInstanceCollectionState> workflowInstanceFeature = null!;
     protected IFeature<V1WorkflowActivityCollectionState> workflowActivityFeature = null!;
     protected V1Workflow workflow = null!;
-    protected V1WorkflowInstance workflowInstance = null!;
+    protected V1WorkflowInstance? workflowInstance = null;
     protected List<V1WorkflowActivity> sortedActivities = new List<V1WorkflowActivity>();
     protected List<V1WorkflowInstance> instances = new();
     protected IEnumerable<IBreadcrumbItem> workflowBreadCrumbBase = null!;
@@ -205,7 +205,7 @@ else
                 this.workflowInstance = null!;
             }
             else {
-                this.workflowInstance = /* await this.SynapseApi.GetWorkflowInstanceByIdAsync(this.WorkflowInstanceId); */ this.instances.FirstOrDefault(i => i.Id == this.WorkflowInstanceId);
+                this.workflowInstance = this.instances.FirstOrDefault(i => i.Id == this.WorkflowInstanceId);
                 await this.BreadcrumbService.AddCurrentUri($"Instance {this.WorkflowInstanceId}");
             }
             this.UpdateActivities();
@@ -214,7 +214,6 @@ else
 
     protected void UpdateActivities()
     {
-        Console.WriteLine("Update started");
         if (this.WorkflowInstanceId == null)
         {
             this.sortedActivities = new List<V1WorkflowActivity>();
@@ -225,9 +224,7 @@ else
             this.sortedActivities = this.workflowInstance?.Activities != null ? this.workflowInstance.Activities.OrderBy(a => a.CreatedAt).ToList() : new List<V1WorkflowActivity>();
             if (this.workflowDiagram != null) this.workflowDiagram.DisplayActivityStatusFor(this.instances.Where(i => i.Id == this.WorkflowInstanceId));
         }
-        Console.WriteLine("Update done");
         this.StateHasChanged();
-        Console.WriteLine("Rendered");
     }
 
     protected string GetCssClassFor(V1WorkflowInstanceStatus workflowInstanceStatus)
