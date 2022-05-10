@@ -78,6 +78,7 @@
 @code {
     [Parameter]
     public V1Workflow Workflow { get; set; } = null!;
+    protected V1Workflow workflow { get; set; } = null!;
 
     protected Modal errorModal = null!;
     protected Modal workflowInputModal = null!;
@@ -89,10 +90,9 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        if(this.workflowInputEditor != null)
-            await this.workflowInputEditor.SetValue("{}");
-        if (this.Workflow != null)
+        if (this.Workflow != null && this.workflow != this.Workflow)
         {
+            this.workflow = this.Workflow;
             await this.LoadDataInputSchemaAsync();
         }
     }
@@ -154,6 +154,7 @@
         }
         await this.workflowInputModal.HideAsync();
         this.inputValidationErrors = null;
+        this.StateHasChanged();
         if(this.workflowInputEditor != null)
             await this.workflowInputEditor.SetValue("{}");
         var inputData = await this.JsonSerializer.DeserializeAsync<DynamicObject>(json);
