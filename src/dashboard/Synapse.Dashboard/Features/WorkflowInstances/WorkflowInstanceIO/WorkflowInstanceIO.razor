@@ -58,11 +58,11 @@
             output = JsonConvert.SerializeObject(this.WorkflowInstance.Error, Formatting.Indented);
             outputModel = await MonacoEditorBase.CreateModel(output, "json");
         }
-        this.Loading = false;
         await this.diffEditor.SetModel(new DiffEditorModel
         {
             Original = inputModel,
             Modified = outputModel
         });
+        this.Loading = false;
     }
 }
