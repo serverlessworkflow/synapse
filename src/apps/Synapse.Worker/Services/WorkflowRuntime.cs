@@ -323,7 +323,7 @@ namespace Synapse.Worker.Services
             else
             {
                 if (processor.State.Transition != null
-                    && string.IsNullOrWhiteSpace(processor.State.TransitionToStateName))
+                    || !string.IsNullOrWhiteSpace(processor.State.TransitionToStateName))
                     await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Transition, e.Output!.ToObject()!, metadata, null, this.CancellationToken);
                 else if (processor.State.End != null
                     || processor.State.IsEnd)
