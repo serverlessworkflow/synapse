@@ -76,6 +76,13 @@ namespace Synapse.Dashboard
             context.Dispatcher.Dispatch(new SetV1WorkflowCollection(workflows));
         }
 
+        public static async Task OnGetV1WorkflowById(GetV1WorkflowById action, IEffectContext context)
+        {
+            var api = context.Services.GetRequiredService<ISynapseManagementApi>();
+            var workflow = await api.GetWorkflowByIdAsync(action.WorkflowId);
+            context.Dispatcher.Dispatch(new AddV1Workflow(workflow));
+        }
+
     }
 
     public class SetV1WorkflowCollection
@@ -118,6 +125,18 @@ namespace Synapse.Dashboard
     {
 
 
+
+    }
+
+    public class GetV1WorkflowById
+    {
+
+        public GetV1WorkflowById(string workflowId)
+        {
+            this.WorkflowId = workflowId;
+        }
+
+        public string WorkflowId { get; }
 
     }
 

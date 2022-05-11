@@ -15,16 +15,21 @@
  *
  */
 
-namespace Synapse.Integration.Models
+namespace Synapse.Dashboard.Services
 {
-
-    public partial class V1WorkflowInstance
+    /// <summary>
+    /// Defines the fundamentals of a service used 
+    /// </summary>
+    public interface IStyleManager
     {
 
         /// <summary>
-        /// Gets the workflow instance's duration
+        /// Gets the value of the variable with the specified name
         /// </summary>
-        public virtual TimeSpan? Duration => this.ExecutedAt.HasValue && this.StartedAt.HasValue ? this.ExecutedAt.Value.Subtract(this.StartedAt.Value) : null;
+        /// <param name="variableName">The variable to get the value of</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The value of the variable with the specified name</returns>
+        Task<string> GetVariableValueAsync(string variableName, CancellationToken cancellationToken = default);
 
     }
 

@@ -55,6 +55,8 @@ builder.Services.AddSingleton<IBreadcrumbService, BreadcrumbService>();
 builder.Services.AddSingleton<IDagreService, DagreService>();
 builder.Services.AddSingleton<IClonerService, ClonerService>();
 builder.Services.AddSingleton<IWorkflowGraphEventDispatcher, WorkflowGraphEventDispatcher>();
+builder.Services.AddSingleton<IChartService, ChartService>();
+builder.Services.AddScoped<IStyleManager, StyleManager>();
 builder.Services.AddScoped<WorkflowGraphBuilder>();
 builder.Services.AddFlux(flux =>
 {

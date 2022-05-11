@@ -213,6 +213,18 @@ namespace Synapse.Apis.Management
 
         #endregion
 
+        #region Metrics
+
+        /// <summary>
+        /// Gets the <see cref="V1ApplicationMetrics"/>
+        /// </summary>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The <see cref="V1ApplicationMetrics"/></returns>
+        [OperationContract]
+        Task<V1ApplicationMetrics> GetApplicationMetricsAsync(CancellationToken cancellationToken = default);
+
+        #endregion
+
     }
 
 }
