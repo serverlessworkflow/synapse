@@ -15,6 +15,7 @@
  *
  */
 
+using System.Diagnostics;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
 
@@ -58,6 +59,11 @@ namespace Synapse.Cli.Commands.Systems.Installs
         /// <returns>A new awaitable <see cref="Task"/></returns>
         public async Task HandleAsync(string directory)
         {
+            var process = Process.Start(new ProcessStartInfo("cmd.exe", @"/c echo ;%PATH%; | find /C /I ""synapse""") { RedirectStandardOutput = true });
+            var output = await process!.StandardOutput.ReadToEndAsync();
+            process.Dispose();
+            if (int.Parse(output.Trim()) > 0)
+                return; //already installed
             if (string.IsNullOrWhiteSpace(directory))
             {
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -72,6 +78,7 @@ namespace Synapse.Cli.Commands.Systems.Installs
             var directoryInfo = new DirectoryInfo(directory);
             if (!directoryInfo.Exists)
                 directoryInfo.Create();
+            await this.InstallJQIfNotExistsAsync();
             var target = null as string;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 target = "win-x64.zip";
@@ -109,6 +116,78 @@ namespace Synapse.Cli.Commands.Systems.Installs
                     using var archive = new ZipArchive(packageStream, ZipArchiveMode.Read);
                     archive.ExtractToDirectory(directoryInfo.FullName, true);
                 });
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                Environment.SetEnvironmentVariable("PATH", directoryInfo.FullName, EnvironmentVariableTarget.Machine);
+        }
+
+        /// <summary>
+        /// Installs JQ
+        /// </summary>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        protected virtual async Task InstallJQIfNotExistsAsync()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                var directory = new DirectoryInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "jq"));
+                if (directory.Exists)
+                    return; //already installed
+                directory.Create();
+                var process = Process.Start(new ProcessStartInfo("cmd.exe", @"/c echo ;%PATH%; | find /C /I ""jq""") { RedirectStandardOutput = true });
+                var output = await process!.StandardOutput.ReadToEndAsync();
+                process.Dispose();
+                if (int.Parse(output.Trim()) > 0)
+                    return; //already installed
+                using var stream = new MemoryStream();
+                await AnsiConsole.Progress()
+                    .Columns(new ProgressColumn[]
+                    {
+                        new TaskDescriptionColumn(),
+                        new ProgressBarColumn(),
+                        new PercentageColumn(),
+                        new RemainingTimeColumn(),
+                        new SpinnerColumn()
+                    })
+                    .HideCompleted(true)
+                    .StartAsync(async context =>
+                    {
+                        await Task.Run(async () =>
+                        {
+                            var task = context.AddTask($"Downloading [u]jq[/]", new ProgressTaskSettings
+                            {
+                                AutoStart = false
+                            });
+                            await this.HttpClient.DownloadAsync($"https://github.com/stedolan/jq/releases/latest/download/jq-win64.exe", stream, task);
+                        });
+                    });
+                var file = new FileInfo(Path.Combine(directory.FullName, "jq.exe"));
+                using var fileStream = file.Create();
+                stream.Position = 0;
+                await stream.CopyToAsync(fileStream);
+                await fileStream.FlushAsync();
+                Environment.SetEnvironmentVariable("PATH", directory.FullName, EnvironmentVariableTarget.Machine);
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                var process = Process.Start("bash", @"-c ""$ command -v foo >/dev/null 2>&1 || { echo 'I require foo but it's not installed.  Aborting.' >&2; exit 1; }""");
+                await process.WaitForExitAsync();
+                if (process.ExitCode == 0)
+                    return;
+                process.Dispose();
+                process = Process.Start("bash", @"-c ""apt-get update""");
+                await process.WaitForExitAsync();
+                process.Dispose();
+                process = Process.Start("bash", @"-c ""apt-get install jq -y""");
+                await process.WaitForExitAsync();
+                process.Dispose();
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                var process = Process.Start("brew install jq");
+                await process.WaitForExitAsync();
+                process.Dispose();
+            }
+            else
+                throw new PlatformNotSupportedException();
         }
 
         private static class CommandOptions

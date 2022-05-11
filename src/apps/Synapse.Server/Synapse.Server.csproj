@@ -24,7 +24,13 @@
 	<DockerfileTag>ghcr.io/serverlessworkflow/synapse</DockerfileTag>
 	<RuntimeIdentifiers>win10-x64;linux-x64;osx-x64</RuntimeIdentifiers>
     <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+    <AssemblyName>Synapse</AssemblyName>
+    <ApplicationIcon>synapse-icon.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="synapse-icon.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="6.0.4" />
