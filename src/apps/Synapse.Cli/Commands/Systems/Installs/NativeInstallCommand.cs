@@ -117,7 +117,13 @@ namespace Synapse.Cli.Commands.Systems.Installs
                     archive.ExtractToDirectory(directoryInfo.FullName, true);
                 });
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                Environment.SetEnvironmentVariable("PATH", directoryInfo.FullName, EnvironmentVariableTarget.Machine);
+            {
+                var pathValue = Environment.GetEnvironmentVariable("PATH")!;
+                if (!pathValue.Trim().EndsWith(';'))
+                    pathValue += ";";
+                pathValue += directoryInfo.FullName;
+                Environment.SetEnvironmentVariable("PATH", pathValue, EnvironmentVariableTarget.User);
+            }
         }
 
         /// <summary>
@@ -164,7 +170,11 @@ namespace Synapse.Cli.Commands.Systems.Installs
                 stream.Position = 0;
                 await stream.CopyToAsync(fileStream);
                 await fileStream.FlushAsync();
-                Environment.SetEnvironmentVariable("PATH", directory.FullName, EnvironmentVariableTarget.Machine);
+                var pathValue = Environment.GetEnvironmentVariable("PATH")!;
+                if (!pathValue.Trim().EndsWith(';'))
+                    pathValue += ";";
+                pathValue += directory.FullName;
+                Environment.SetEnvironmentVariable("PATH", pathValue, EnvironmentVariableTarget.User);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
