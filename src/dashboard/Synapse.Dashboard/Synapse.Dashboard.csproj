@@ -17,6 +17,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.4" PrivateAssets="all" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="6.0.4" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.NewtonsoftJson" Version="6.0.4" />
+    <PackageReference Include="Neuroglia.Blazor.Dagre" Version="2.0.1.61" />
 	<PackageReference Include="Neuroglia.Core" Version="2.0.1.59" />
 	<PackageReference Include="Neuroglia.Data.Flux" Version="2.0.1.59" />
 	<PackageReference Include="Neuroglia.Data.Flux.ReduxDevTools" Version="2.0.1.59" />
@@ -29,7 +30,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Neuroglia.Blazor.Dagre\Neuroglia.Blazor.Dagre.csproj" />
     <ProjectReference Include="..\..\apis\management\Synapse.Apis.Management.Http.Client\Synapse.Apis.Management.Http.Client.csproj" />
     <ProjectReference Include="..\..\apis\monitoring\Synapse.Apis.Monitoring.Core\Synapse.Apis.Monitoring.Core.csproj" />
   </ItemGroup>
