@@ -119,6 +119,8 @@ namespace Synapse.Worker.Services.Processors
                 .Where(a => a.Type == V1WorkflowActivityType.Action && a.Status == V1WorkflowActivityStatus.Completed)
                 .OrderBy(a => a.ExecutedAt))
             {
+                if (activity.Output == null)
+                    continue;
                 if (!activity.Metadata.TryGetValue(V1WorkflowActivityMetadata.Action, out var actionName))
                     throw new ArgumentException($"The specified activity '{activity.Id}' is missing the required metadata field '{V1WorkflowActivityMetadata.Action}'");
                 if (!this.State.TryGetAction(actionName, out var action))
