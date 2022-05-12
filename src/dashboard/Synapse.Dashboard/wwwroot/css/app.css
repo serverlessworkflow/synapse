@@ -12302,3 +12302,7 @@ input[type=time]::-webkit-clear-button {
   stroke-width: 2px;
   stroke-dasharray: 2;
 }
+
+table .details {
+  text-align: right;
+}

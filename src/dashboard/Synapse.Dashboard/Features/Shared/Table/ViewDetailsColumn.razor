@@ -17,7 +17,7 @@
 @namespace Synapse.Dashboard
 @typeparam T
 
-<Column T="T">
+<Column T="T" CssClass="details">
     <HeaderTemplate />
     <CellTemplate Context="context">
         <button @onclick="async () => await OnViewDetails.InvokeAsync(context.Item)" @onclick:stopPropagation="true" class="btn btn-outline-dark">Details <small class="oi oi-info"></small></button>
