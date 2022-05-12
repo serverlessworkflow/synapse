@@ -19,7 +19,7 @@
 
  @foreach(var column in Table.columns.Where(c => c.IsVisible))
 {
-    <td class="@Table.CellClass">
+    <td class="@(Table.CellClass + "" + column.CssClass)">
         @if(column.CellTemplate == null)
             @Table.DefaultCellTemplate(new(Table, column, Item))
         else

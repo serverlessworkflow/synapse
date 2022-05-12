@@ -37,17 +37,29 @@
                 <CellCollectionPresenter Item="@RenderContext.Item" />
             </Header>
             <Body>
-                <table class="table">
-                    <tbody>
-                        @foreach (var workflow in RenderContext.Item.Value)
-                        {
+                <td colspan="100">
+                    <Table Items="RenderContext.Item.Value" AutoGenerateColumns="false">
+                        <RowTemplate Context="SubRenderContext">
                             <tr>
-                                <td>@workflow.Definition.Version</td>
-                                <td>@workflow.CreatedAt</td>
+                                <CellCollectionPresenter Item="@SubRenderContext.Item" />
                             </tr>
-                        }
-                    </tbody>
-                </table>
+                        </RowTemplate>
+                        <Columns>                        
+                            <Column T="V1Workflow" 
+                                Name="Version"
+                                ValueProvider="workflow => workflow.Definition.Version" />
+                            <Column T="V1Workflow" 
+                                Name="CreatedAt"
+                                ValueProvider="workflow => workflow.CreatedAt" />
+                            <!--
+                            <Column T="V1Workflow" 
+                                Name="Instances"
+                                ValueProvider="workflow => workflow.TotalInstanceCount" />
+                            -->
+                            <ViewDetailsColumn T="V1Workflow" OnViewDetails="workflow => OnViewWorkflow(workflow)" />
+                        </Columns>
+                    </Table>
+                </td>
             </Body>
         </ExpandableDataRow>
     </RowTemplate>
@@ -58,6 +70,11 @@
         <Column T="KeyValuePair<string, List<V1Workflow>>" 
             Name="Versions"
             ValueProvider="g => g.Value.Count()" />
+        <!--
+        <Column T="KeyValuePair<string, List<V1Workflow>>" 
+            Name="Instances"
+            ValueProvider="g => g.Value.Sum(w => w.TotalInstanceCount)" />
+        -->
         <Column T="KeyValuePair<string, List<V1Workflow>>" 
             Name="Latest version"
             ValueProvider="g => g.Value.Max(w => w.Definition.Version)" />
