@@ -23,8 +23,6 @@ using Synapse.Domain.Models;
 using Synapse.Infrastructure.Services;
 using Synapse.Runtime.Docker;
 using Synapse.Runtime.Docker.Configuration;
-using System.Diagnostics;
-using System.Text;
 
 namespace Synapse.Runtime.Services
 {
@@ -97,7 +95,7 @@ namespace Synapse.Runtime.Services
         }
 
         /// <inheritdoc/>
-        public override async Task<string> StartAsync(V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default)
+        public override async Task<string> StartRuntimeAsync(V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default)
         {
             if (workflowInstance == null)
                 throw new ArgumentNullException(nameof(workflowInstance));
@@ -136,6 +134,31 @@ namespace Synapse.Runtime.Services
             var startContainerParameters = new ContainerStartParameters();
             await this.Docker.Containers.StartContainerAsync(createContainerResult.ID, startContainerParameters, cancellationToken);
             return createContainerResult.ID;
+        }
+
+        /// <inheritdoc/>
+        public override async Task<string> GetRuntimeLogsAsync(string runtimeIdentifier, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(runtimeIdentifier))
+                throw new ArgumentNullException(nameof(runtimeIdentifier));
+            var parameters = new ContainerLogsParameters()
+            {
+                ShowStderr = false,
+                ShowStdout = true
+            };
+            using var stream = await this.Docker.Containers.GetContainerLogsAsync(runtimeIdentifier, true, parameters, cancellationToken);
+            var result = await stream.ReadOutputToEndAsync(cancellationToken);
+            return result.stdout;
+        }
+
+        /// <inheritdoc/>
+        public override async Task DeleteRuntimeAsync(string runtimeIdentifier, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(runtimeIdentifier))
+                throw new ArgumentNullException(nameof(runtimeIdentifier));
+            await Task.Delay(500);
+            var parameters = new ContainerRemoveParameters();
+            await this.Docker.Containers.RemoveContainerAsync(runtimeIdentifier, parameters, cancellationToken);
         }
 
         /// <summary>

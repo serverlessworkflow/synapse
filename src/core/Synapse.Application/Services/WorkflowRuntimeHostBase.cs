@@ -40,7 +40,13 @@ namespace Synapse.Application.Services
         protected ILogger Logger { get; }
 
         /// <inheritdoc/>
-        public abstract Task<string> StartAsync(V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default);
+        public abstract Task<string> StartRuntimeAsync(V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default);
+
+        /// <inheritdoc/>
+        public abstract Task<string> GetRuntimeLogsAsync(string runtimeIdentifier, CancellationToken cancellationToken = default);
+
+        /// <inheritdoc/>
+        public abstract Task DeleteRuntimeAsync(string runtimeIdentifier, CancellationToken cancellationToken = default);
 
         /// <inheritdoc/>
         async ValueTask IAsyncDisposable.DisposeAsync()

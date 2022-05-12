@@ -32,7 +32,7 @@ namespace Synapse.Domain.Events.WorkflowInstances
         /// </summary>
         protected V1WorkflowInstanceCompletedDomainEvent()
         {
-
+            this.Logs = null!;
         }
 
         /// <summary>
@@ -40,16 +40,23 @@ namespace Synapse.Domain.Events.WorkflowInstances
         /// </summary>
         /// <param name="id">The id of the <see cref="V1WorkflowInstance"/> that ran to completion</param>
         /// <param name="output">The <see cref="V1WorkflowInstance"/>'s output</param>
-        public V1WorkflowInstanceCompletedDomainEvent(string id, object? output)
+        /// <param name="logs">The logs associated with the <see cref="V1WorkflowInstance"/>'s execution</param>
+        public V1WorkflowInstanceCompletedDomainEvent(string id, object? output, string logs)
             : base(id)
         {
             this.Output = output;
+            this.Logs = logs;
         }
 
         /// <summary>
         /// Gets the <see cref="V1WorkflowInstance"/>'s output
         /// </summary>
         public virtual object? Output { get; protected set; }
+
+        /// <summary>
+        /// Gets the logs associated with the <see cref="V1WorkflowInstance"/>'s execution
+        /// </summary>
+        public virtual string Logs { get; protected set; }
 
     }
 

@@ -86,6 +86,9 @@ namespace Synapse.Application.Events.Domain
             var instance = await this.GetOrReconcileProjectionAsync(e.AggregateId, cancellationToken);
             instance.LastModified = e.CreatedAt.UtcDateTime;
             instance.Status = V1WorkflowInstanceStatus.Starting;
+            if (instance.Sessions == null)
+                instance.Sessions = new List<Integration.Models.V1WorkflowRuntimeSession>();
+            instance.Sessions.Add(new() { StartedAt = e.CreatedAt.DateTime, RuntimeIdentifier = e.RuntimeIdentifier });
             await this.Projections.UpdateAsync(instance, cancellationToken);
             await this.Projections.SaveChangesAsync(cancellationToken);
             await this.PublishIntegrationEventAsync(e, cancellationToken);
@@ -120,6 +123,12 @@ namespace Synapse.Application.Events.Domain
             var instance = await this.GetOrReconcileProjectionAsync(e.AggregateId, cancellationToken);
             instance.LastModified = e.CreatedAt.UtcDateTime;
             instance.Status = V1WorkflowInstanceStatus.Suspended;
+            var session = instance.Sessions?.FirstOrDefault(s => s.IsActive);
+            if(session != null)
+            {
+                session.EndedAt = e.CreatedAt.UtcDateTime;
+                session.Logs = e.Logs;
+            }
             await this.Projections.UpdateAsync(instance, cancellationToken);
             await this.Projections.SaveChangesAsync(cancellationToken);
             await this.PublishIntegrationEventAsync(e, cancellationToken);
@@ -131,6 +140,9 @@ namespace Synapse.Application.Events.Domain
             var instance = await this.GetOrReconcileProjectionAsync(e.AggregateId, cancellationToken);
             instance.LastModified = e.CreatedAt.UtcDateTime;
             instance.Status = V1WorkflowInstanceStatus.Resuming;
+            if (instance.Sessions == null)
+                instance.Sessions = new List<Integration.Models.V1WorkflowRuntimeSession>();
+            instance.Sessions.Add(new() { StartedAt = e.CreatedAt.DateTime, RuntimeIdentifier = e.RuntimeIdentifier });
             await this.Projections.UpdateAsync(instance, cancellationToken);
             await this.Projections.SaveChangesAsync(cancellationToken);
             await this.PublishIntegrationEventAsync(e, cancellationToken);
@@ -155,6 +167,12 @@ namespace Synapse.Application.Events.Domain
             instance.ExecutedAt = e.CreatedAt.UtcDateTime;
             instance.Status = V1WorkflowInstanceStatus.Faulted;
             instance.Error = this.Mapper.Map<Integration.Models.Error>(e.Error);
+            var session = instance.Sessions?.FirstOrDefault(s => s.IsActive);
+            if (session != null)
+            {
+                session.EndedAt = e.CreatedAt.UtcDateTime;
+                session.Logs = e.Logs;
+            }
             await this.Projections.UpdateAsync(instance, cancellationToken);
             await this.Projections.SaveChangesAsync(cancellationToken);
             await this.PublishIntegrationEventAsync(e, cancellationToken);
@@ -178,6 +196,12 @@ namespace Synapse.Application.Events.Domain
             instance.LastModified = e.CreatedAt.UtcDateTime;
             instance.ExecutedAt = e.CreatedAt.UtcDateTime;
             instance.Status = V1WorkflowInstanceStatus.Cancelled;
+            var session = instance.Sessions?.FirstOrDefault(s => s.IsActive);
+            if (session != null)
+            {
+                session.EndedAt = e.CreatedAt.UtcDateTime;
+                session.Logs = e.Logs;
+            }
             await this.Projections.UpdateAsync(instance, cancellationToken);
             await this.Projections.SaveChangesAsync(cancellationToken);
             await this.PublishIntegrationEventAsync(e, cancellationToken);
@@ -195,6 +219,12 @@ namespace Synapse.Application.Events.Domain
                 && e.Output != null)
                 outputValue = Dynamic.FromObject(e.Output);
             instance.Output = outputValue;
+            var session = instance.Sessions?.FirstOrDefault(s => s.IsActive);
+            if (session != null)
+            {
+                session.EndedAt = e.CreatedAt.UtcDateTime;
+                session.Logs = e.Logs;
+            }
             await this.Projections.UpdateAsync(instance, cancellationToken);
             await this.Projections.SaveChangesAsync(cancellationToken);
             await this.PublishIntegrationEventAsync(e, cancellationToken);

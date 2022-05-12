@@ -52,6 +52,13 @@ namespace Synapse.Integration.Events.WorkflowInstances
 		[Description("The V1WorkflowInstance's output")]
 		public virtual Dynamic Output { get; set; }
 
+		/// <summary>
+		/// The logs associated with the V1WorkflowInstance's execution
+		/// </summary>
+		[DataMember(Name = "Logs", Order = 4)]
+		[Description("The logs associated with the V1WorkflowInstance's execution")]
+		public virtual string Logs { get; set; }
+
     }
 
 }

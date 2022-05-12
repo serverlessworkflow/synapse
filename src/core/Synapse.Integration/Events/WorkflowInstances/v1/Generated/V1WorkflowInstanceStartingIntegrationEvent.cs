@@ -45,6 +45,13 @@ namespace Synapse.Integration.Events.WorkflowInstances
 		[Description("Gets the date and time at which the event has been produced")]
 		public virtual DateTime CreatedAt { get; set; }
 
+		/// <summary>
+		/// The string used to uniquely identify the V1WorkflowInstance's runtime
+		/// </summary>
+		[DataMember(Name = "RuntimeIdentifier", Order = 3)]
+		[Description("The string used to uniquely identify the V1WorkflowInstance's runtime")]
+		public virtual string RuntimeIdentifier { get; set; }
+
     }
 
 }

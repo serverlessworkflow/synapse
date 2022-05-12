@@ -103,23 +103,37 @@ namespace Synapse.Integration.Models
 		public virtual V1CorrelationContext CorrelationContext { get; set; }
 
 		/// <summary>
+		/// An IReadOnlyCollection`1 containing the sessions the V1WorkflowInstance is made out of
+		/// </summary>
+		[DataMember(Name = "Sessions", Order = 11)]
+		[Description("An IReadOnlyCollection`1 containing the sessions the V1WorkflowInstance is made out of")]
+		public virtual ICollection<V1WorkflowRuntimeSession> Sessions { get; set; }
+
+		/// <summary>
+		/// The currently active V1WorkflowRuntimeSession, if any
+		/// </summary>
+		[DataMember(Name = "ActiveSession", Order = 12)]
+		[Description("The currently active V1WorkflowRuntimeSession, if any")]
+		public virtual V1WorkflowRuntimeSession ActiveSession { get; set; }
+
+		/// <summary>
 		/// An IReadOnlyCollection`1 containing the activities the V1WorkflowInstance is made out of
 		/// </summary>
-		[DataMember(Name = "Activities", Order = 11)]
+		[DataMember(Name = "Activities", Order = 13)]
 		[Description("An IReadOnlyCollection`1 containing the activities the V1WorkflowInstance is made out of")]
 		public virtual ICollection<V1WorkflowActivity> Activities { get; set; }
 
 		/// <summary>
 		/// The Error that caused the V1WorkflowInstance to end prematurily
 		/// </summary>
-		[DataMember(Name = "Error", Order = 12)]
+		[DataMember(Name = "Error", Order = 14)]
 		[Description("The Error that caused the V1WorkflowInstance to end prematurily")]
 		public virtual Error Error { get; set; }
 
 		/// <summary>
 		/// The V1WorkflowInstance's output
 		/// </summary>
-		[DataMember(Name = "Output", Order = 13)]
+		[DataMember(Name = "Output", Order = 15)]
 		[Description("The V1WorkflowInstance's output")]
 		public virtual Dynamic Output { get; set; }
 

@@ -65,30 +65,30 @@ namespace Synapse.Application.Commands.WorkflowInstances
     {
 
         /// <inheritdoc/>
-        public V1SetWorkflowInstanceOutputCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IRepository<Domain.Models.V1WorkflowInstance> workflowInstances)
+        public V1SetWorkflowInstanceOutputCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IRepository<V1WorkflowInstance> workflowInstances)
             : base(loggerFactory, mediator, mapper)
         {
             this.WorkflowInstances = workflowInstances;
         }
 
         /// <summary>
-        /// Gets the <see cref="IRepository"/> used to manage <see cref="Domain.Models.V1WorkflowInstance"/>s
+        /// Gets the <see cref="IRepository"/> used to manage <see cref="V1WorkflowInstance"/>s
         /// </summary>
-        protected IRepository<Domain.Models.V1WorkflowInstance> WorkflowInstances { get; }
+        protected IRepository<V1WorkflowInstance> WorkflowInstances { get; }
 
         /// <inheritdoc/>
         public virtual async Task<IOperationResult<Integration.Models.V1WorkflowInstance>> HandleAsync(V1SetWorkflowInstanceOutputCommand command, CancellationToken cancellationToken = default)
         {
             var workflowInstance = await this.WorkflowInstances.FindAsync(command.Id, cancellationToken);
             if (workflowInstance == null)
-                throw DomainException.NullReference(typeof(Domain.Models.V1WorkflowInstance), command.Id);
-            workflowInstance.SetOutput(command.Output);
+                throw DomainException.NullReference(typeof(V1WorkflowInstance), command.Id);
+            var logs = await this.Mediator.ExecuteAndUnwrapAsync(new V1CollectWorkflowInstanceLogsCommand(workflowInstance), cancellationToken);
+            workflowInstance.MarkAsCompleted(command.Output, logs);
             workflowInstance = await this.WorkflowInstances.UpdateAsync(workflowInstance, cancellationToken);
             await this.WorkflowInstances.SaveChangesAsync(cancellationToken);
             return this.Ok(this.Mapper.Map<Integration.Models.V1WorkflowInstance>(workflowInstance));
         }
 
     }
-
 
 }

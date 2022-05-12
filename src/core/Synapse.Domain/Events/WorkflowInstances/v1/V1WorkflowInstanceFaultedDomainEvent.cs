@@ -33,6 +33,7 @@ namespace Synapse.Domain.Events.WorkflowInstances
         protected V1WorkflowInstanceFaultedDomainEvent()
         {
             this.Error = null!;
+            this.Logs = null!;
         }
 
         /// <summary>
@@ -40,16 +41,23 @@ namespace Synapse.Domain.Events.WorkflowInstances
         /// </summary>
         /// <param name="id">The id of the <see cref="V1WorkflowInstance"/> that has faulted</param>
         /// <param name="error">The <see cref="Neuroglia.Error"/> that caused the <see cref="V1WorkflowInstance"/> to fault</param>
-        public V1WorkflowInstanceFaultedDomainEvent(string id, Neuroglia.Error error)
+        /// <param name="logs">The logs associated with the <see cref="V1WorkflowInstance"/>'s execution</param>
+        public V1WorkflowInstanceFaultedDomainEvent(string id, Neuroglia.Error error, string logs)
             : base(id)
         {
             this.Error = error;
+            this.Logs = logs;
         }
 
         /// <summary>
         /// Gets the <see cref="Neuroglia.Error"/> that caused the <see cref="V1WorkflowInstance"/> to fault
         /// </summary>
         public virtual Neuroglia.Error Error { get; protected set; }
+
+        /// <summary>
+        /// Gets the logs associated with the <see cref="V1WorkflowInstance"/>'s execution
+        /// </summary>
+        public virtual string Logs { get; protected set; }
 
     }
 

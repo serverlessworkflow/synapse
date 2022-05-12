@@ -32,18 +32,24 @@ namespace Synapse.Domain.Events.WorkflowInstances
         /// </summary>
         protected V1WorkflowInstanceResumingDomainEvent()
         {
-
+            this.RuntimeIdentifier = null!;
         }
 
         /// <summary>
         /// Initializes a new <see cref="V1WorkflowInstanceResumingDomainEvent"/>
         /// </summary>
         /// <param name="id">The id of the <see cref="V1WorkflowInstance"/> which's execution is resuming</param>
-        public V1WorkflowInstanceResumingDomainEvent(string id)
+        /// <param name="runtimeIdentifier">A string used to uniquely identify the runtime that will perform the execution of the resuming <see cref="V1WorkflowInstance"/></param>
+        public V1WorkflowInstanceResumingDomainEvent(string id, string runtimeIdentifier)
             : base(id)
         {
-
+            this.RuntimeIdentifier = runtimeIdentifier;
         }
+
+        /// <summary>
+        /// Gets a string used to uniquely identify the runtime that will perform the execution of the resuming <see cref="V1WorkflowInstance"/>
+        /// </summary>
+        public virtual string RuntimeIdentifier { get; protected set; }
 
     }
 

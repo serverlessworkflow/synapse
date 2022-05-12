@@ -78,7 +78,7 @@ namespace Synapse.Integration.Events.WorkflowActivities
 		/// </summary>
 		[DataMember(Name = "ParentId", Order = 7)]
 		[Description("The id of the newly created V1WorkflowActivity's parent, if any")]
-		public virtual string ParentId { get; set; }
+		public virtual string? ParentId { get; set; }
 
     }
 

@@ -102,6 +102,9 @@
     <Compile Update="Commands\WorkflowInstances\v1\Generated\V1CancelWorkflowInstanceCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\WorkflowInstances\v1\V1CancelWorkflowInstanceCommand.cs</CustomToolNamespace>
     </Compile>
+    <Compile Update="Commands\WorkflowInstances\v1\Generated\V1CollectWorkflowInstanceLogsCommand.cs">
+      <CustomToolNamespace>..\Synapse.Application\Commands\WorkflowInstances\v1\V1CollectWorkflowInstanceLogsCommand.cs</CustomToolNamespace>
+    </Compile>
     <Compile Update="Commands\WorkflowInstances\v1\Generated\V1ConsumeWorkflowInstancePendingEventCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\WorkflowInstances\v1\V1ConsumeWorkflowInstancePendingEventCommand.cs</CustomToolNamespace>
     </Compile>
@@ -305,6 +308,9 @@
     </Compile>
     <Compile Update="Models\v1\Generated\V1WorkflowInstance.cs">
       <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1WorkflowInstance.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Models\v1\Generated\V1WorkflowRuntimeSession.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1WorkflowRuntimeSession.cs</CustomToolNamespace>
     </Compile>
   </ItemGroup>
 

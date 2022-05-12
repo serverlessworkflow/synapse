@@ -89,8 +89,8 @@ namespace Synapse.Application.Commands.WorkflowInstances
             var workflowInstance = await this.WorkflowInstances.FindAsync(command.Id, cancellationToken);
             if (workflowInstance == null)
                 throw DomainException.NullReference(typeof(V1WorkflowInstance), command.Id);
-            var runtimeId = await this.RuntimeHost.StartAsync(workflowInstance, cancellationToken); //todo
-            workflowInstance.Start();
+            var runtimeId = await this.RuntimeHost.StartRuntimeAsync(workflowInstance, cancellationToken);
+            workflowInstance.Start(runtimeId);
             workflowInstance = await this.WorkflowInstances.UpdateAsync(workflowInstance, cancellationToken);
             await this.WorkflowInstances.SaveChangesAsync(cancellationToken);
             return this.Ok(this.Mapper.Map<Integration.Models.V1WorkflowInstance>(workflowInstance));

@@ -26,12 +26,28 @@ namespace Synapse.Infrastructure.Services
     {
 
         /// <summary>
-        /// Starts the execution of the specified <see cref="V1WorkflowInstance"/>
+        /// Creates the runtime and starts the execution of the specified <see cref="V1WorkflowInstance"/>
         /// </summary>
         /// <param name="workflowInstance">The <see cref="V1WorkflowInstance"/> to start the execution of</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>An id used to identify the <see cref="V1WorkflowInstance"/>'s runtime</returns>
-        Task<string> StartAsync(V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default);
+        Task<string> StartRuntimeAsync(V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Gets the logs associated to the execution of the specified <see cref="V1WorkflowInstance"/>
+        /// </summary>
+        /// <param name="runtimeIdentifier">A string used to uniquely identify the runtime to get the logs of</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The specified <see cref="V1WorkflowInstance"/>'s execution logs</returns>
+        Task<string> GetRuntimeLogsAsync(string runtimeIdentifier, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Deletes the runtime used for the execution of the specified <see cref="V1WorkflowInstance"/>
+        /// </summary>
+        /// <param name="runtimeIdentifier">A string used to uniquely identify the runtime to delete</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        Task DeleteRuntimeAsync(string runtimeIdentifier, CancellationToken cancellationToken = default);
 
     }
 

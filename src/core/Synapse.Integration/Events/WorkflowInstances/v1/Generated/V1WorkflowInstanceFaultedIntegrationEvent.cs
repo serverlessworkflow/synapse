@@ -52,6 +52,13 @@ namespace Synapse.Integration.Events.WorkflowInstances
 		[Description("The Error that caused the V1WorkflowInstance to fault")]
 		public virtual Error Error { get; set; }
 
+		/// <summary>
+		/// The logs associated with the V1WorkflowInstance's execution
+		/// </summary>
+		[DataMember(Name = "Logs", Order = 4)]
+		[Description("The logs associated with the V1WorkflowInstance's execution")]
+		public virtual string Logs { get; set; }
+
     }
 
 }

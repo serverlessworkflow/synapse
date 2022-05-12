@@ -53,16 +53,23 @@ namespace Synapse.Integration.Events.WorkflowInstances
 		public virtual V1WorkflowInstanceStatus Status { get; set; }
 
 		/// <summary>
+		/// The logs associated with the V1WorkflowInstance's execution
+		/// </summary>
+		[DataMember(Name = "Logs", Order = 4)]
+		[Description("The logs associated with the V1WorkflowInstance's execution")]
+		public virtual string Logs { get; set; }
+
+		/// <summary>
 		/// The V1WorkflowInstance's error, if any
 		/// </summary>
-		[DataMember(Name = "Error", Order = 4)]
+		[DataMember(Name = "Error", Order = 5)]
 		[Description("The V1WorkflowInstance's error, if any")]
 		public virtual Error Error { get; set; }
 
 		/// <summary>
 		/// The V1WorkflowInstance's output, if any
 		/// </summary>
-		[DataMember(Name = "Output", Order = 5)]
+		[DataMember(Name = "Output", Order = 6)]
 		[Description("The V1WorkflowInstance's output, if any")]
 		public virtual Dynamic Output { get; set; }
 

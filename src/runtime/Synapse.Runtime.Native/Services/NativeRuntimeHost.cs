@@ -120,7 +120,7 @@ namespace Synapse.Runtime.Services
         }
 
         /// <inheritdoc/>
-        public override async Task<string> StartAsync(V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default)
+        public override async Task<string> StartRuntimeAsync(V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default)
         {
             if (workflowInstance == null)
                 throw new ArgumentNullException(nameof(workflowInstance));
@@ -151,6 +151,18 @@ namespace Synapse.Runtime.Services
             process.Exited += (sender, e) => this.OnProcessExited(workflowInstance.Id, (Process)sender!);
             process.Start();
             return await Task.FromResult(process.Id.ToString());
+        }
+
+        /// <inheritdoc/>
+        public override async Task<string> GetRuntimeLogsAsync(string runtimeIdentifier, CancellationToken cancellationToken = default)
+        {
+            return await Task.FromResult(string.Empty); //todo
+        }
+
+        /// <inheritdoc/>
+        public override Task DeleteRuntimeAsync(string runtimeIdentifier, CancellationToken cancellationToken = default)
+        {
+            return Task.CompletedTask;
         }
 
         /// <summary>

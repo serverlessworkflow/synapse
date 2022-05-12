@@ -45,6 +45,13 @@ namespace Synapse.Integration.Events.WorkflowInstances
 		[Description("Gets the date and time at which the event has been produced")]
 		public virtual DateTime CreatedAt { get; set; }
 
+		/// <summary>
+		/// The logs associated to the suspended V1WorkflowInstance's execution
+		/// </summary>
+		[DataMember(Name = "Logs", Order = 3)]
+		[Description("The logs associated to the suspended V1WorkflowInstance's execution")]
+		public virtual string Logs { get; set; }
+
     }
 
 }
