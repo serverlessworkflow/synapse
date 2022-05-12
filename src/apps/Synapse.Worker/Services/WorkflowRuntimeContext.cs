@@ -175,7 +175,7 @@ namespace Synapse.Worker.Services
         {
             var args = new Dictionary<string, object>
             {
-                { "WORKFLOW", await this.BuildWorkflowExpressionContextArgumentAsync(cancellationToken) },
+                { "WORKFLOW", await this.BuildRuntimeExpressionWorkflowArgumentAsync(cancellationToken) },
                 { "CONST", await this.BuildRuntimeExpressionConstantsArgumentAsync(cancellationToken) },
                 { "SECRETS", await this.BuildRuntimeExpressionSecretsArgumentAsync(cancellationToken) }
             };
@@ -187,7 +187,7 @@ namespace Synapse.Worker.Services
         /// </summary>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>The runtime expression '$WORKFLOW' argument object</returns>
-        protected virtual async Task<object> BuildWorkflowExpressionContextArgumentAsync(CancellationToken cancellationToken)
+        protected virtual async Task<object> BuildRuntimeExpressionWorkflowArgumentAsync(CancellationToken cancellationToken)
         {
             return await Task.FromResult(new
             {
