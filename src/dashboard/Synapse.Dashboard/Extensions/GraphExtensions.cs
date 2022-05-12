@@ -67,7 +67,7 @@ namespace Synapse.Dashboard
         public static IWorkflowNodeViewModel? GetNodeFor(this IGraphViewModel graph, V1WorkflowActivity activity)
         {
             if (activity == null)
-                throw new ArgumentNullException(nameof(activity));
+                return null;
             switch (activity.Type)
             {
                 case V1WorkflowActivityType.Action:
@@ -95,7 +95,7 @@ namespace Synapse.Dashboard
                 case V1WorkflowActivityType.SubFlow:
                     throw new NotImplementedException(); //todo
                 default:
-                    throw new NotSupportedException($"The specified {nameof(V1WorkflowActivityType)} '{activity.Type}' is not supported");
+                    return null;
             }
         }
 
