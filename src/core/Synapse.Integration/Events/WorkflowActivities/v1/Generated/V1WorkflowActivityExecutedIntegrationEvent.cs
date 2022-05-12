@@ -24,7 +24,7 @@ namespace Synapse.Integration.Events.WorkflowActivities
 {
 
 	/// <summary>
-	/// Represents the IDomainEvent fired whenever the execution of a V1WorkflowActivity has been executed
+	/// Represents the IDomainEvent fired whenever a V1WorkflowActivity has been executed
 	/// </summary>
 	[DataContract]
 	public partial class V1WorkflowActivityExecutedIntegrationEvent

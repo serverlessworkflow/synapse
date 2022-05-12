@@ -27,31 +27,37 @@ namespace Synapse.Dashboard
         /// <summary>
         /// Gets/sets the <see cref="ChartDataset"/>'s <see cref="ChartType"/>, in case of mixed charts
         /// </summary>
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public virtual ChartType? Type { get; set; }
 
         /// <summary>
         /// Gets/sets the <see cref="ChartDataset"/>'s label
         /// </summary>
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         public virtual string? Label { get; set; }
 
         /// <summary>
         /// Gets/sets a <see cref="List{T}"/> containing the data the <see cref="ChartDataset"/> is made out of
         /// </summary>
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         public virtual List<object> Data { get; set; } = new();
 
         /// <summary>
         /// Gets/sets a <see cref="List{T}"/> containing the background colors to use when rendering the <see cref="ChartDataset"/>
         /// </summary>
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         public virtual List<string> BackgroundColor { get; set; } = new();
 
         /// <summary>
         /// Gets/sets the border color to use when rendering the <see cref="ChartDataset"/>
         /// </summary>
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         public virtual string? BorderColor { get; set; }
 
         /// <summary>
         /// Gets/sets the border width to use when rendering the <see cref="ChartDataset"/>
         /// </summary>
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         public virtual double? BorderWidth { get; set; }
 
     }

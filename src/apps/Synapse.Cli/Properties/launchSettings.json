@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Synapse.Cli": {
+      "commandName": "Project",
+      "commandLineArgs": "sys install native"
+    }
+  }
+}

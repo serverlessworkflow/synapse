@@ -242,8 +242,8 @@ namespace Synapse.Domain.Models
         /// <param name="e">The <see cref="V1WorkflowActivityFaultedDomainEvent"/> to handle</param>
         protected virtual void On(V1WorkflowActivityFaultedDomainEvent e)
         {
-            this.Error = e.Error;
             this.Status = V1WorkflowActivityStatus.Faulted;
+            this.Error = e.Error;
             this.On(this.RegisterEvent(new V1WorkflowActivityExecutedDomainEvent(this.Id, this.Status, this.Error)));
         }
 

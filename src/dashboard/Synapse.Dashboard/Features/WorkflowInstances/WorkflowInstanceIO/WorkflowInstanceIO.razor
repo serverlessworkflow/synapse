@@ -20,8 +20,12 @@
 
 @if (WorkflowInstance != null)
 {
+    if (Loading)
+    {
+        <Loader />
+    }
     <MonacoDiffEditor 
-        CssClass="monaco-normal" 
+        CssClass="@CssClass" 
         @ref="diffEditor" 
         ConstructionOptions="MonacoEditorHelper.GetDiffEditorConstructionOptions()"
         OnDidInit="OnEditorDidInitAsync"
@@ -33,6 +37,8 @@
     public V1WorkflowInstance WorkflowInstance { get; set; } = null!;
 
     protected MonacoDiffEditor diffEditor = null!;
+    protected bool Loading = true;
+    protected string CssClass => this.Loading ? "d-none" : "monaco-normal";
 
     protected async Task OnEditorDidInitAsync()
     {
@@ -57,5 +63,6 @@
             Original = inputModel,
             Modified = outputModel
         });
+        this.Loading = false;
     }
 }

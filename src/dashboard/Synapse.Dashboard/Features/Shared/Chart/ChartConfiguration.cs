@@ -26,16 +26,18 @@ namespace Synapse.Dashboard
         /// <summary>
         /// Gets/sets the <see cref="Chart"/>'s type
         /// </summary>
-        public virtual ChartType Type { get; set; }
+        public virtual ChartType Type { get; set; } = ChartType.Pie;
 
         /// <summary>
         /// Gets/sets the <see cref="Chart"/>'s options
         /// </summary>
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         public virtual object? Options { get; set; }
 
         /// <summary>
         /// Gets/sets the <see cref="Chart"/>'s data
         /// </summary>
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         public virtual ChartData Data { get; set; } = new();
 
     }

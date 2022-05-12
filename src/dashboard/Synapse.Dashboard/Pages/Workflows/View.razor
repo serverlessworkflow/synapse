@@ -1,12 +1,12 @@
 ﻿@* 
     Copyright © 2022-Present The Synapse Authors
-    <p>
+
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
-    <p>
+
     http://www.apache.org/licenses/LICENSE-2.0
-    <p>
+
     Unless required by applicable law or agreed to in writing, software
     distributed under the License is distributed on an "AS IS" BASIS,
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -135,14 +135,20 @@ else
 
     [Parameter]
     public string WorkflowId { get; set; } = null!;
+    protected string workflowId = null!;
     [Parameter]
     public string? WorkflowInstanceId { get; set; } = null!;
+    protected string? workflowInstanceId = null!;
 
+    protected IDisposable? workflowSubscription;
     protected IDisposable? workflowInstanceSubscription;
+    protected IDisposable? workflowActivitySubscription;
     protected WorkflowDiagram workflowDiagram = null!;
+    protected IFeature<V1WorkflowCollectionState> workflowFeature = null!;
     protected IFeature<V1WorkflowInstanceCollectionState> workflowInstanceFeature = null!;
-    protected V1Workflow workflow = null!;
-    protected V1WorkflowInstance workflowInstance = null!;
+    protected IFeature<V1WorkflowActivityCollectionState> workflowActivityFeature = null!;
+    protected V1Workflow? workflow = null;
+    protected V1WorkflowInstance? workflowInstance = null;
     protected List<V1WorkflowActivity> sortedActivities = new List<V1WorkflowActivity>();
     protected List<V1WorkflowInstance> instances = new();
     protected IEnumerable<IBreadcrumbItem> workflowBreadCrumbBase = null!;
@@ -150,14 +156,46 @@ else
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        this.workflow = await this.SynapseApi.GetWorkflowByIdAsync(this.WorkflowId);
+        this.workflowFeature = this.Store.GetFeature<V1WorkflowCollectionState>();
         this.workflowInstanceFeature = this.Store.GetFeature<V1WorkflowInstanceCollectionState>();
+        this.workflowActivityFeature = this.Store.GetFeature<V1WorkflowActivityCollectionState>();
+        this.workflowSubscription = this.workflowFeature
+            .Subscribe(workflows =>
+            {
+                this.workflow = workflows.FirstOrDefault(wf => wf.Id == this.WorkflowId);
+                this.UpdateActivities();
+            });
         this.workflowInstanceSubscription = this.workflowInstanceFeature
             .Subscribe(instances =>
             {
                 this.instances = instances;
-                this.StateHasChanged();;
+                this.UpdateActivities();
+                this.UpdateMetrics();
+                this.StateHasChanged();
             });
+        this.workflowActivitySubscription = this.workflowActivityFeature
+            .Subscribe(activities =>
+            {
+                if(this.instances == null || !this.instances.Any())
+                    return;
+                var foo = activities.ToList();
+                this.instances.ForEach(instance =>
+                {
+                    var instanceActivities = activities.Where(activity => activity.WorkflowInstanceId == instance.Id);
+                    if (instanceActivities.Any())
+                    {
+                        instance.Activities.Clear();
+                        foreach(var activity in instanceActivities)
+                        {
+                            instance.Activities.Add(activity);                        
+                        }
+                    }
+                });
+                this.UpdateActivities();
+                this.UpdateMetrics();
+                this.StateHasChanged();
+            });
+        this.Dispatcher.Dispatch(new GetV1WorkflowById(this.WorkflowId));
         this.Dispatcher.Dispatch(new ListV1WorkflowInstancesByDefinition(this.WorkflowId));
         await this.BreadcrumbService.Use(KnownBreadcrumbs.Workflows);
         await this.BreadcrumbService.AddCurrentUri(this.WorkflowId);
@@ -167,20 +205,55 @@ else
     protected override async Task OnParametersSetAsync()
     {
         await this.BreadcrumbService.Use(this.workflowBreadCrumbBase);
+        if (this.WorkflowId != this.workflowId)
+        {
+            this.workflowId = this.WorkflowId;
+            this.UpdateActivities();
+        }
+        if (this.WorkflowInstanceId != this.workflowInstanceId)
+        {
+            this.workflowInstanceId = this.WorkflowInstanceId;            
+            if (this.WorkflowInstanceId == null)
+            {
+                this.workflowInstance = null!;
+            }
+            else {
+                this.workflowInstance = this.instances.FirstOrDefault(i => i.Id == this.WorkflowInstanceId);
+                await this.BreadcrumbService.AddCurrentUri($"Instance {this.WorkflowInstanceId}");
+            }
+            this.UpdateActivities();
+        }
+    }
+
+    protected void UpdateActivities()
+    {
         if (this.WorkflowInstanceId == null)
         {
-            this.workflowInstance = null!;
             this.sortedActivities = new List<V1WorkflowActivity>();
             if (this.workflowDiagram != null) this.workflowDiagram.DisplayActivityStatusFor(this.instances);
         }
         else
         {
-            await this.BreadcrumbService.AddCurrentUri($"Instance {this.WorkflowInstanceId}");
-            this.workflowInstance = await this.SynapseApi.GetWorkflowInstanceByIdAsync(this.WorkflowInstanceId);
-            this.sortedActivities = this.workflowInstance.Activities.OrderBy(a => a.StartedAt).ToList();
+            this.sortedActivities = this.workflowInstance?.Activities != null ? this.workflowInstance.Activities.OrderBy(a => a.CreatedAt).ToList() : new List<V1WorkflowActivity>();
             if (this.workflowDiagram != null) this.workflowDiagram.DisplayActivityStatusFor(this.instances.Where(i => i.Id == this.WorkflowInstanceId));
         }
-        this.StateHasChanged();
+    }
+
+    protected void UpdateMetrics()
+    {
+        if (this.workflow != null && this.instances != null)
+        {
+            var durations = this.instances.Where(instances => instances.Duration.HasValue).Select(instance => instance.Duration!.Value);
+            this.workflow.TotalInstanceCount = this.instances.Count;
+            this.workflow.RunningInstanceCount = this.instances.Where(instance => instance.Status <= V1WorkflowInstanceStatus.Resuming).Count();
+            this.workflow.ExecutedInstanceCount = this.instances.Where(instance => instance.Status > V1WorkflowInstanceStatus.Resuming).Count();
+            this.workflow.CompletedInstanceCount = this.instances.Where(instance => instance.Status == V1WorkflowInstanceStatus.Completed).Count();
+            this.workflow.FaultedInstanceCount = this.instances.Where(instance => instance.Status == V1WorkflowInstanceStatus.Faulted).Count();
+            this.workflow.CancelledInstanceCount = this.instances.Where(instance => instance.Status == V1WorkflowInstanceStatus.Cancelled || instance.Status == V1WorkflowInstanceStatus.Cancelling).Count();
+            this.workflow.TotalInstanceExecutionTime = TimeSpan.FromMilliseconds(this.instances.Sum(instance => instance.Duration.HasValue ? instance.Duration.Value.TotalMilliseconds : 0));
+            this.workflow.ShortestInstanceDuration = durations.Any() ? durations.Min() : null;
+            this.workflow.LongestInstanceDuration = durations.Any() ? durations.Max() : null;
+        }
     }
 
     protected string GetCssClassFor(V1WorkflowInstanceStatus workflowInstanceStatus)
@@ -206,8 +279,21 @@ else
 
     public void Dispose()
     {
-        this.workflowInstanceSubscription?.Dispose();
-        this.workflowInstanceSubscription = null;
+        if (this.workflowSubscription != null)
+        {
+            this.workflowSubscription?.Dispose();
+            this.workflowSubscription = null;
+        }
+        if (this.workflowInstanceSubscription != null)
+        {
+            this.workflowInstanceSubscription?.Dispose();
+            this.workflowInstanceSubscription = null;
+        }
+        if (this.workflowActivitySubscription != null)
+        {
+            this.workflowActivitySubscription?.Dispose();
+            this.workflowActivitySubscription = null;
+        }
     }
 
 }

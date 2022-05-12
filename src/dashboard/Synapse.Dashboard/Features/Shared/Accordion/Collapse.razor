@@ -21,9 +21,12 @@
     <div @onclick="ToggleExpandAsync">
         @Header
     </div>
-    <div class="collapse @(IsExpanded ? "show" : "")">
-        @Body
-    </div>
+    @if (IsExpanded)
+    {
+        <div class="collapse show">
+            @Body
+        </div> 
+    }
 </div>
 
 @code 
@@ -53,7 +56,9 @@
     {
         this.IsExpanded = !this.IsExpanded;
         //this.StateHasChanged();
-        await this.OnToggleExpand.InvokeAsync(new() { Value = this.IsExpanded });
+        if (this.OnToggleExpand.HasDelegate) {
+            await this.OnToggleExpand.InvokeAsync(new() { Value = this.IsExpanded });
+        }
     }
 
 }

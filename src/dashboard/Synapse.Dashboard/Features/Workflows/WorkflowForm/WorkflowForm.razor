@@ -86,7 +86,9 @@
                 });
                 return;
             }
-            await this.OnSubmitWorkflowDefinition.InvokeAsync(definition);
+            if (this.OnSubmitWorkflowDefinition.HasDelegate) {
+                await this.OnSubmitWorkflowDefinition.InvokeAsync(definition);
+            }
         }
         catch(Exception ex)
         {

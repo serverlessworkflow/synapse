@@ -36,17 +36,19 @@ namespace Synapse.Dashboard
                         node.ActiveInstances.Add(instance);
                     continue;
                 }
-                foreach(var activity in instance.Activities.Where(a => a.Status == V1WorkflowActivityStatus.Running))
-                {
-                    var node = graph.GetNodeFor(activity);
-                    if(node != null)
-                        node.ActiveInstances.Add(instance);    
-                }
-                foreach (var activity in instance.Activities.Where(a => a.Status == V1WorkflowActivityStatus.Faulted))
-                {
-                    var node = graph.GetNodeFor(activity);
-                    if (node != null)
-                        node.FaultedInstances.Add(instance);
+                if (instance.Activities != null) { 
+                    foreach(var activity in instance.Activities.Where(a => a.Status == V1WorkflowActivityStatus.Pending || a.Status == V1WorkflowActivityStatus.Running))
+                    {
+                        var node = graph.GetNodeFor(activity);
+                        if(node != null)
+                            node.ActiveInstances.Add(instance);    
+                    }
+                    foreach (var activity in instance.Activities.Where(a => a.Status == V1WorkflowActivityStatus.Faulted))
+                    {
+                        var node = graph.GetNodeFor(activity);
+                        if (node != null)
+                            node.FaultedInstances.Add(instance);
+                    }
                 }
             }
         }
@@ -69,7 +71,7 @@ namespace Synapse.Dashboard
             switch (activity.Type)
             {
                 case V1WorkflowActivityType.Action:
-                    return null;
+                    return graph.GetActionNodeFor(activity);
                 case V1WorkflowActivityType.Function:
                     return graph.GetActionNodeFor(activity);
                 case V1WorkflowActivityType.Branch:
@@ -109,7 +111,7 @@ namespace Synapse.Dashboard
             var stateNode = (StateNodeViewModel)graph.GetStateNodeFor(activity)!;
             if (!activity.Metadata.TryGetValue("action", out var actionName))
                 throw new InvalidDataException($"The specified activity's metadata does not define a 'action' value");
-            return stateNode.Children.OfType<ActionNodeViewModel>().FirstOrDefault(a => a.Action.Name == actionName);
+            return stateNode.Children.Values.Where(node => typeof(IActionNodeViewModel).IsAssignableFrom(node.GetType())).Select(node => node as IActionNodeViewModel).FirstOrDefault(node => node != null && node.Action.Name == actionName);
         }
 
     }

@@ -24,15 +24,21 @@
 	<DockerfileTag>ghcr.io/serverlessworkflow/synapse</DockerfileTag>
 	<RuntimeIdentifiers>win10-x64;linux-x64;osx-x64</RuntimeIdentifiers>
     <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+    <AssemblyName>Synapse</AssemblyName>
+    <ApplicationIcon>synapse-icon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="6.0.4" />
+    <Content Include="synapse-icon.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="6.0.5" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.15.1" />
-    <PackageReference Include="Neuroglia.Caching.InMemory" Version="2.0.1.61" />
-    <PackageReference Include="Neuroglia.Data.Expressions.JQ" Version="2.0.1.61" />
-    <PackageReference Include="Neuroglia.Eventing.CloudEvents.AspNetCore" Version="2.0.1.61" />
-    <PackageReference Include="Neuroglia.Serialization.Json" Version="2.0.1.61" />
+    <PackageReference Include="Neuroglia.Caching.InMemory" Version="2.0.1.62" />
+    <PackageReference Include="Neuroglia.Data.Expressions.JQ" Version="2.0.1.62" />
+    <PackageReference Include="Neuroglia.Eventing.CloudEvents.AspNetCore" Version="2.0.1.62" />
+    <PackageReference Include="Neuroglia.Serialization.Json" Version="2.0.1.62" />
     <PackageReference Include="protobuf-net.Grpc.AspNetCore" Version="1.0.152" />
     <PackageReference Include="System.IO.FileSystem" Version="4.3.0" />
   </ItemGroup>

@@ -29,7 +29,7 @@ namespace Synapse.Dashboard
         /// </summary>
         /// <param name="data"></param>
         public InjectNodeViewModel(string data)
-            : base("", "inject-node", null, 40)
+            : base("", "inject-node", null, Neuroglia.Blazor.Dagre.Constants.NodeHeight * 1.5, Neuroglia.Blazor.Dagre.Constants.NodeHeight * 1.5)
         {
             this.Data = data;
             this.ComponentType = typeof(InjectNodeTemplate);

@@ -22,6 +22,8 @@
 <tr class="cursor-pointer" @onclick="Toggle">
     @Header
 </tr>
-<tr class="@(IsExpanded ? "" : "d-none")">
-    @Body
-</tr>
+@if (IsExpanded) {
+    <tr>
+        @Body
+    </tr>
+}

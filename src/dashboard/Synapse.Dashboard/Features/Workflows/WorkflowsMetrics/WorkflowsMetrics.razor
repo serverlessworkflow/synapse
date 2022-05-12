@@ -21,7 +21,7 @@
 {
     <div class="container-fluid">
         <div class="row">
-            <div class="col-md-2">
+            <div class="col-md-4">
                 <div class="card-metric info">
                     <span class="card-metric-value">@Workflow.RunningInstanceCount</span>
                     <span class="card-metric-name">Running instances</span>
@@ -39,7 +39,7 @@
                     <span class="card-metric-name">Cancelled instances</span>
                 </div>
             </div>
-            <div class="col-md-2">
+            <div class="col-md-4">
                 <div class="card-metric secondary">
                     <span class="card-metric-value">@Workflow.AverageInstanceDuration</span>
                     <span class="card-metric-name">Average instance duration</span>
@@ -53,7 +53,7 @@
                     <span class="card-metric-name">Longest instance duration</span>
                 </div>
             </div>
-            <div class="col-md-8">
+            <div class="col-md-4">
                <Chart Configuration="@executedInstancesChart" />
             </div>
         </div>

@@ -16,9 +16,11 @@
 
 @namespace Synapse.Dashboard
 @using System.Collections
-@inject IJSRuntime JSRuntime
+@inject IChartService ChartService
+@implements IDisposable
+@implements IAsyncDisposable
  
-<canvas id="@Id"></canvas>
+<canvas @ref="canvasRef" id="@Id"></canvas>
  
 @code {
 
@@ -27,10 +29,72 @@
 
     [Parameter]
     public ChartConfiguration Configuration { get; set; } = null!;
+    protected ChartConfiguration configuration { get; set; } = null!;
 
-    protected override async Task OnAfterRenderAsync(bool firstRender) 
+    protected ElementReference? canvasRef { get; set; }
+    protected IJSObjectReference? chart = null;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await this.JSRuntime.InvokeVoidAsync("renderChart", this.Id, this.Configuration);
+        await base.OnAfterRenderAsync(firstRender);
+        if(firstRender && this.chart == null && this.canvasRef != null)
+        {
+            this.chart = await this.ChartService.CreateChartAsync(this.canvasRef.Value, this.configuration);
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        if (this.configuration != this.Configuration)
+        {
+            this.configuration = this.Configuration;
+            if (this.chart != null)
+            {
+                await this.chart.InvokeVoidAsync("destroy");
+                await this.chart.DisposeAsync();
+                this.chart = null;
+            }
+            if (this.canvasRef.HasValue) {
+                this.chart = await this.ChartService.CreateChartAsync(this.canvasRef.Value, this.configuration);
+            }
+        }
+    }
+
+    private bool _Disposed;
+    public void Dispose()
+    {
+        this.Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+    
+
+    public async ValueTask DisposeAsync()
+    {
+        await this.DisposeAsyncCore().ConfigureAwait(false);
+
+        this.Dispose(disposing: false);
+#pragma warning disable CA1816 // Dispose methods should call SuppressFinalize
+        GC.SuppressFinalize(this);
+#pragma warning restore CA1816 // Dispose methods should call SuppressFinalize
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            (this.chart as IDisposable)?.Dispose();
+            this.chart = null;
+        }
+    }
+
+    protected virtual async ValueTask DisposeAsyncCore()
+    {
+        if (this.chart is not null)
+        {
+            await this.chart.DisposeAsync().ConfigureAwait(false);
+        }
+        this.chart = null;
     }
 
 }

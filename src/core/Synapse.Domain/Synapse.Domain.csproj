@@ -22,9 +22,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Neuroglia.Data" Version="2.0.1.61" />
-    <PackageReference Include="Neuroglia.Data.Kubernetes" Version="2.0.1.61" />
-    <PackageReference Include="ServerlessWorkflow.Sdk" Version="0.8.0.20" />
+    <PackageReference Include="Neuroglia.Data" Version="2.0.1.62" />
+    <PackageReference Include="Neuroglia.Data.Kubernetes" Version="2.0.1.62" />
+    <PackageReference Include="ServerlessWorkflow.Sdk" Version="0.8.0.21" />
   </ItemGroup>
 
   <ItemGroup>

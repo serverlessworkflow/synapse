@@ -27,11 +27,13 @@ namespace Synapse.Dashboard
         /// <summary>
         /// Gets/sets a <see cref="List{T}"/> containing the <see cref="Chart"/>'s labels
         /// </summary>
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         public virtual List<string> Labels { get; set; } = new();
 
         /// <summary>
         /// Gets/sets a <see cref="List{T}"/> containing the <see cref="Chart"/>'s <see cref="ChartDataset"/>s
         /// </summary>
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         public virtual List<ChartDataset> Datasets { get; set; } = new();
 
     }

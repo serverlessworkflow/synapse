@@ -30,7 +30,7 @@ namespace Synapse.Dashboard
         /// </summary>
         /// <param name="type">The gateway's type</param>
         public GatewayNodeViewModel(GatewayNodeType type)
-            : base("", "gateway-node", null, 40)
+            : base("", "gateway-node", null, Neuroglia.Blazor.Dagre.Constants.NodeHeight * 1.5, Neuroglia.Blazor.Dagre.Constants.NodeHeight * 1.5)
         {
             this.Type = type;
             this.ComponentType = typeof(GatewayNodeTemplate);

@@ -73,12 +73,90 @@ input[type=time]::-webkit-clear-button {
     width: 16px;
 }
 
+.toast-container {
+    z-index: 1 !important;
+    position: fixed !important;
+    width: 25rem !important;
+    top: 0px !important;
+    right: 0px !important;
+}
+
 .end-node circle {
     stroke-width: 3px;
 }
 
 .btn-outline-dark:hover {
     fill: white;
+}
+
+.node, .cluster {
+    .badge {
+        circle {
+            stroke-width: 0;
+            fill: var(--bs-primary);
+        }
+
+        foreignObject {
+            text-align: center;
+            font-size: 8px;
+            color: white;
+
+            div {
+                display: flex;
+                align-content: center;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+    }
+
+    .activity-badge {
+        circle {
+            stroke-width: 1;
+        }
+
+        &.activity-badge--active circle {
+            fill: var(--bs-success);
+        }
+
+        &.activity-badge--faulted circle {
+            fill: var(--bs-danger);
+        }
+    }
+
+    .add-state {
+        .add-state__label {
+            font-size: 12px;
+            font-weight: bold;
+        }
+    }
+}
+
+.toolbar {
+    .btn {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+}
+
+.edges {
+    pointer-events: none;
+}
+
+.ghost {
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.drop-destination {
+    rect,
+    circle,
+    ellipse {
+        stroke: red;
+        stroke-width: 2px;
+        stroke-dasharray: 2;
+    }
 }
 
 .card-metric {

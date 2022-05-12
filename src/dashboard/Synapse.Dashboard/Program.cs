@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.SignalR.Client;
 using Neuroglia.Blazor.Dagre;
 using Neuroglia.Data;
 using Neuroglia.Data.Flux;
+using Neuroglia.Mapping;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using ServerlessWorkflow.Sdk;
@@ -28,18 +29,21 @@ using Simple.OData.Client;
 using Synapse;
 using Synapse.Dashboard;
 using Synapse.Dashboard.Services;
+using System.Reflection;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
+var baseAddress = builder.HostEnvironment.BaseAddress;
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-builder.Services.AddScoped(provider => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
-builder.Services.AddSynapseRestApiClient(http => http.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
+builder.Services.AddScoped(provider => new HttpClient { BaseAddress = new Uri(baseAddress) });
+builder.Services.AddSynapseRestApiClient(http => http.BaseAddress = new Uri(baseAddress));
 builder.Services.AddServerlessWorkflow();
 builder.Services.AddPluralizer();
+builder.Services.AddMapper(typeof(Program).Assembly);
 builder.Services.AddSingleton<IODataClient>(new ODataClient(new ODataClientSettings()
 {
-    BaseUri = new($"http://localhost:42286/api/odata"),
+    BaseUri = new($"{baseAddress}api/odata"),
     PayloadFormat = ODataPayloadFormat.Json
 }));
 builder.Services.AddScoped<ILayoutService, LayoutService>();
@@ -49,6 +53,9 @@ builder.Services.AddSingleton<IIntegrationEventStream, IntegrationEventStream>()
 builder.Services.AddSingleton<IMonacoEditorHelper, MonacoEditorHelper>();
 builder.Services.AddSingleton<IBreadcrumbService, BreadcrumbService>();
 builder.Services.AddSingleton<IDagreService, DagreService>();
+builder.Services.AddSingleton<IClonerService, ClonerService>();
+builder.Services.AddSingleton<IWorkflowGraphEventDispatcher, WorkflowGraphEventDispatcher>();
+builder.Services.AddSingleton<IChartService, ChartService>();
 builder.Services.AddScoped<IStyleManager, StyleManager>();
 builder.Services.AddScoped<WorkflowGraphBuilder>();
 builder.Services.AddFlux(flux =>
@@ -60,7 +67,7 @@ builder.Services.AddFlux(flux =>
 builder.Services.AddSingleton(provider =>
 {
     return new HubConnectionBuilder()
-        .WithUrl($"http://localhost:42286/api/ws")
+        .WithUrl($"{baseAddress}api/ws")
         .WithAutomaticReconnect()
         .AddNewtonsoftJsonProtocol(options =>
         {

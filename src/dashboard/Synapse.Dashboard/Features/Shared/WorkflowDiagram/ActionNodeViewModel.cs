@@ -24,7 +24,7 @@ namespace Synapse.Dashboard
     /// Represents a <see cref="ActionDefinition"/> <see cref="NodeViewModel"/>
     /// </summary>
     public class ActionNodeViewModel
-        : LabeledNodeViewModel
+        : LabeledNodeViewModel, IActionNodeViewModel
     {
 
         /// <summary>
