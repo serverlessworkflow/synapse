@@ -32,7 +32,7 @@ namespace Synapse.Domain.Events.WorkflowInstances
         /// </summary>
         protected V1WorkflowInstanceExecutedDomainEvent()
         {
-            this.Logs = null!;
+            
         }
 
         /// <summary>
@@ -40,13 +40,11 @@ namespace Synapse.Domain.Events.WorkflowInstances
         /// </summary>
         /// <param name="id">The id of the <see cref="V1WorkflowInstance"/> that has been executed</param>
         /// <param name="status">The <see cref="V1WorkflowInstanceStatus"/> of the <see cref="V1WorkflowInstance"/> when it finished executing</param>
-        /// <param name="logs">The logs associated with the <see cref="V1WorkflowInstance"/>'s execution</param>
         /// <param name="error">The error that has occured during the <see cref="V1WorkflowInstance"/>'s execution</param>
-        public V1WorkflowInstanceExecutedDomainEvent(string id, V1WorkflowInstanceStatus status, string logs, Neuroglia.Error? error = null)
+        public V1WorkflowInstanceExecutedDomainEvent(string id, V1WorkflowInstanceStatus status, Neuroglia.Error? error = null)
             : base(id)
         {
             this.Status = status;
-            this.Logs = logs;
             this.Error = error;
         }
 
@@ -55,13 +53,11 @@ namespace Synapse.Domain.Events.WorkflowInstances
         /// </summary>
         /// <param name="id">The id of the <see cref="V1WorkflowInstance"/> that has been executed</param>
         /// <param name="status">The <see cref="V1WorkflowInstanceStatus"/> of the <see cref="V1WorkflowInstance"/> when it finished executing</param>
-        /// <param name="logs">The logs associated with the <see cref="V1WorkflowInstance"/>'s execution</param>
         /// <param name="output">The <see cref="V1WorkflowInstance"/>'s output</param>
-        public V1WorkflowInstanceExecutedDomainEvent(string id, V1WorkflowInstanceStatus status, string logs, object? output)
+        public V1WorkflowInstanceExecutedDomainEvent(string id, V1WorkflowInstanceStatus status, object? output)
             : base(id)
         {
             this.Status = status;
-            this.Logs = logs;
             this.Output = output;
         }
 
@@ -70,23 +66,16 @@ namespace Synapse.Domain.Events.WorkflowInstances
         /// </summary>
         /// <param name="id">The id of the <see cref="V1WorkflowInstance"/> that has been executed</param>
         /// <param name="status">The <see cref="V1WorkflowInstanceStatus"/> of the <see cref="V1WorkflowInstance"/> when it finished executing</param>
-        /// <param name="logs">The logs associated with the <see cref="V1WorkflowInstance"/>'s execution</param>
-        public V1WorkflowInstanceExecutedDomainEvent(string id, V1WorkflowInstanceStatus status, string logs)
+        public V1WorkflowInstanceExecutedDomainEvent(string id, V1WorkflowInstanceStatus status)
             : base(id)
         {
             this.Status = status;
-            this.Logs = logs;
         }
 
         /// <summary>
         /// Gets the <see cref="V1WorkflowInstanceStatus"/> of the <see cref="V1WorkflowInstance"/> when it finished executing
         /// </summary>
         public virtual V1WorkflowInstanceStatus Status { get; protected set; }
-
-        /// <summary>
-        /// Gets the logs associated with the <see cref="V1WorkflowInstance"/>'s execution
-        /// </summary>
-        public virtual string Logs { get; protected set; }
 
         /// <summary>
         /// Gets the <see cref="V1WorkflowInstance"/>'s error, if any

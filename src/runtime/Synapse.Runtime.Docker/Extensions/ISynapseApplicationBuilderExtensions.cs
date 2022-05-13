@@ -35,7 +35,7 @@ namespace Synapse.Runtime
     {
 
         /// <summary>
-        /// Uses a Docker-base <see cref="IWorkflowRuntimeHost"/>
+        /// Uses a Docker-base <see cref="IWorkflowRuntime"/>
         /// </summary>
         /// <param name="app">The <see cref="ISynapseApplicationBuilder"/> to configure</param>
         /// <returns>The configured <see cref="ISynapseApplicationBuilder"/></returns>
@@ -44,7 +44,7 @@ namespace Synapse.Runtime
             var runtimeHostOptions = new DockerRuntimeHostOptions();
             app.Configuration.Bind("docker", runtimeHostOptions);
             app.Services.AddSingleton<DockerRuntimeHost>();
-            app.Services.AddSingleton<IWorkflowRuntimeHost>(provider => provider.GetRequiredService<DockerRuntimeHost>());
+            app.Services.AddSingleton<IWorkflowRuntime>(provider => provider.GetRequiredService<DockerRuntimeHost>());
             app.Services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<DockerRuntimeHost>());
             app.Services.AddSingleton<IDockerClient>(provider =>
             {

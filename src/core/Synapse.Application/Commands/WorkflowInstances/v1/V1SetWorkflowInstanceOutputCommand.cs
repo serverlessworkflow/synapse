@@ -17,6 +17,7 @@
 
 namespace Synapse.Application.Commands.WorkflowInstances
 {
+
     /// <summary>
     /// Represents the <see cref="ICommand"/> used to complete and set the output of an existing <see cref="Domain.Models.V1WorkflowInstance"/>
     /// </summary>
@@ -36,8 +37,8 @@ namespace Synapse.Application.Commands.WorkflowInstances
         /// <summary>
         /// Initializes a new <see cref="V1SetWorkflowInstanceOutputCommand"/>
         /// </summary>
-        /// <param name="id">The id of the <see cref="Domain.Models.V1WorkflowInstance"/> to start</param>
-        /// <param name="output">The <see cref="Domain.Models.V1WorkflowInstance"/>'s output</param>
+        /// <param name="id">The id of the <see cref="V1WorkflowInstance"/> to start</param>
+        /// <param name="output">The <see cref="V1WorkflowInstance"/>'s output</param>
         public V1SetWorkflowInstanceOutputCommand(string id, object? output)
         {
             this.Id = id;
@@ -45,12 +46,12 @@ namespace Synapse.Application.Commands.WorkflowInstances
         }
 
         /// <summary>
-        /// Gets the id of the <see cref="Domain.Models.V1WorkflowInstance"/> to start
+        /// Gets the id of the <see cref="V1WorkflowInstance"/> to start
         /// </summary>
         public virtual string Id { get; protected set; }
 
         /// <summary>
-        /// Gets the <see cref="Domain.Models.V1WorkflowInstance"/>'s output
+        /// Gets the <see cref="V1WorkflowInstance"/>'s output
         /// </summary>
         public virtual object? Output { get; protected set; }
 
@@ -82,8 +83,7 @@ namespace Synapse.Application.Commands.WorkflowInstances
             var workflowInstance = await this.WorkflowInstances.FindAsync(command.Id, cancellationToken);
             if (workflowInstance == null)
                 throw DomainException.NullReference(typeof(V1WorkflowInstance), command.Id);
-            var logs = await this.Mediator.ExecuteAndUnwrapAsync(new V1CollectWorkflowInstanceLogsCommand(workflowInstance), cancellationToken);
-            workflowInstance.MarkAsCompleted(command.Output, logs);
+            workflowInstance.MarkAsCompleted(command.Output);
             workflowInstance = await this.WorkflowInstances.UpdateAsync(workflowInstance, cancellationToken);
             await this.WorkflowInstances.SaveChangesAsync(cancellationToken);
             return this.Ok(this.Mapper.Map<Integration.Models.V1WorkflowInstance>(workflowInstance));

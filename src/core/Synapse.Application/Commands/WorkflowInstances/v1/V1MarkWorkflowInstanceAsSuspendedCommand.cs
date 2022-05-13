@@ -76,8 +76,7 @@ namespace Synapse.Application.Commands.WorkflowInstances
             var instance = await this.WorkflowInstances.FindAsync(command.Id, cancellationToken);
             if (instance == null)
                 throw DomainException.NullReference(typeof(V1WorkflowInstance), command.Id);
-            var logs = await this.Mediator.ExecuteAndUnwrapAsync(new V1CollectWorkflowInstanceLogsCommand(instance), cancellationToken);
-            instance.MarkAsSuspended(logs);
+            instance.MarkAsSuspended();
             instance = await this.WorkflowInstances.UpdateAsync(instance, cancellationToken);
             await this.WorkflowInstances.SaveChangesAsync(cancellationToken);
             return this.Ok(this.Mapper.Map<Integration.Models.V1WorkflowInstance>(instance));

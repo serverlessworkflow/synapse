@@ -18,10 +18,8 @@
 using CloudNative.CloudEvents;
 using ConcurrentCollections;
 using Microsoft.Extensions.Hosting;
-using Newtonsoft.Json;
 using Synapse.Apis.Runtime;
 using Synapse.Integration.Events.WorkflowActivities;
-using Synapse.Worker.Services;
 using System.Reactive.Linq;
 
 namespace Synapse.Worker.Services

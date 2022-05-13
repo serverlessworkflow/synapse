@@ -36,7 +36,7 @@ namespace Synapse.Integration.Commands.WorkflowInstances
 		/// </summary>
 		[DataMember(Name = "Id", Order = 1)]
 		[Description("The id of the V1WorkflowInstance to get the logs of")]
-		public virtual string? Id { get; set; }
+		public virtual string Id { get; set; }
 
     }
 

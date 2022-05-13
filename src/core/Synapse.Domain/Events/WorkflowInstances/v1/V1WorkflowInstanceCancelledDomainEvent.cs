@@ -32,24 +32,18 @@ namespace Synapse.Domain.Events.WorkflowInstances
         /// </summary>
         protected V1WorkflowInstanceCancelledDomainEvent()
         {
-            this.Logs = null!;
+            
         }
 
         /// <summary>
         /// Initializes a new <see cref="V1WorkflowInstanceCancelledDomainEvent"/>
         /// </summary>
         /// <param name="id">The id of the <see cref="V1WorkflowInstance"/> which's execution has been cancelled</param>
-        /// <param name="logs">The logs associated with the <see cref="V1WorkflowInstance"/>'s execution</param>
-        public V1WorkflowInstanceCancelledDomainEvent(string id, string logs)
+        public V1WorkflowInstanceCancelledDomainEvent(string id)
             : base(id)
         {
-            this.Logs = logs;
-        }
 
-        /// <summary>
-        /// Gets the logs associated with the <see cref="V1WorkflowInstance"/>'s execution
-        /// </summary>
-        public virtual string Logs { get; protected set; }
+        }
 
     }
 

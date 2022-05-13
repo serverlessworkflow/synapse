@@ -19,10 +19,10 @@ namespace Synapse.Application.Services
 {
 
     /// <summary>
-    /// Represents the base class for all <see cref="IWorkflowRuntimeHost"/> implementations
+    /// Represents the base class for all <see cref="IWorkflowRuntime"/> implementations
     /// </summary>
     public abstract class WorkflowRuntimeHostBase
-        : BackgroundService, IWorkflowRuntimeHost
+        : BackgroundService, IWorkflowRuntime
     {
 
         /// <summary>
@@ -40,13 +40,7 @@ namespace Synapse.Application.Services
         protected ILogger Logger { get; }
 
         /// <inheritdoc/>
-        public abstract Task<string> StartRuntimeAsync(V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default);
-
-        /// <inheritdoc/>
-        public abstract Task<string> GetRuntimeLogsAsync(string runtimeIdentifier, CancellationToken cancellationToken = default);
-
-        /// <inheritdoc/>
-        public abstract Task DeleteRuntimeAsync(string runtimeIdentifier, CancellationToken cancellationToken = default);
+        public abstract Task<IWorkflowProcess> CreateProcessAsync(V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default);
 
         /// <inheritdoc/>
         async ValueTask IAsyncDisposable.DisposeAsync()

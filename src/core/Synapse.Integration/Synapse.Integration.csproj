@@ -273,6 +273,24 @@
     <Compile Update="Events\WorkflowInstances\v1\Generated\V1WorkflowInstanceSuspendingIntegrationEvent.cs">
       <CustomToolNamespace>..\Synapse.Domain\Events\WorkflowInstances\v1\V1WorkflowInstanceSuspendingDomainEvent.cs</CustomToolNamespace>
     </Compile>
+    <Compile Update="Events\WorkflowRuntimeSessions\v1\Generated\V1LogAppendedToWorkflowRuntimeSessionIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\WorkflowRuntimeSessions\v1\V1LogAppendedToWorkflowRuntimeSessionDomainEvent.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\WorkflowRuntimeSessions\v1\Generated\V1WorkflowProcessExitedIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\WorkflowRuntimeSessions\v1\V1WorkflowProcessExitedDomainEvent.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\WorkflowRuntimeSessions\v1\Generated\V1WorkflowProcessStartedIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\WorkflowRuntimeSessions\v1\V1WorkflowProcessStartedDomainEvent.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\WorkflowRuntimeSessions\v1\Generated\V1WorkflowRuntimeSessionEndedIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\WorkflowRuntimeSessions\v1\V1WorkflowRuntimeSessionEndedDomainEvent.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\WorkflowRuntimeSessions\v1\Generated\V1WorkflowRuntimeSessionLogAppendedIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\WorkflowRuntimeSessions\v1\V1WorkflowRuntimeSessionLogAppendedDomainEvent.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\WorkflowRuntimeSessions\v1\Generated\V1WorkflowRuntimeSessionStartedIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\WorkflowRuntimeSessions\v1\V1WorkflowRuntimeSessionStartedDomainEvent.cs</CustomToolNamespace>
+    </Compile>
     <Compile Update="Events\Workflows\v1\Generated\V1WorkflowCreatedIntegrationEvent.cs">
       <CustomToolNamespace>..\Synapse.Domain\Events\Workflows\v1\V1WorkflowCreatedDomainEvent.cs</CustomToolNamespace>
     </Compile>

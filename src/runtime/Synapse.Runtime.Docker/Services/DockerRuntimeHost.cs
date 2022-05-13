@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -28,7 +29,7 @@ namespace Synapse.Runtime.Services
 {
 
     /// <summary>
-    /// Represents the Docker implementation of the <see cref="IWorkflowRuntimeHost"/>
+    /// Represents the Docker implementation of the <see cref="IWorkflowRuntime"/>
     /// </summary>
     public class DockerRuntimeHost
         : WorkflowRuntimeHostBase
@@ -95,11 +96,11 @@ namespace Synapse.Runtime.Services
         }
 
         /// <inheritdoc/>
-        public override async Task<string> StartRuntimeAsync(V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default)
+        public override async Task<IWorkflowProcess> CreateProcessAsync(V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default)
         {
             if (workflowInstance == null)
                 throw new ArgumentNullException(nameof(workflowInstance));
-            await this.PullRuntimeExecutorImageAsync(cancellationToken);
+            await this.PullWorkerImageAsync(cancellationToken);
             var containerConfig = this.Options.Runtime.Container;
             containerConfig.AddOrUpdateEnvironmentVariable(EnvironmentVariables.Api.HostName.Name, EnvironmentVariables.Api.HostName.Value!); //todo: instead, fetch values from options
             containerConfig.AddOrUpdateEnvironmentVariable(EnvironmentVariables.Runtime.WorkflowInstanceId.Name, workflowInstance.Id.ToString()); //todo: instead, fetch values from options
@@ -131,42 +132,15 @@ namespace Synapse.Runtime.Services
             {
                 this.Logger.LogWarning(warning);
             }
-            var startContainerParameters = new ContainerStartParameters();
-            await this.Docker.Containers.StartContainerAsync(createContainerResult.ID, startContainerParameters, cancellationToken);
-            return createContainerResult.ID;
-        }
-
-        /// <inheritdoc/>
-        public override async Task<string> GetRuntimeLogsAsync(string runtimeIdentifier, CancellationToken cancellationToken = default)
-        {
-            if (string.IsNullOrWhiteSpace(runtimeIdentifier))
-                throw new ArgumentNullException(nameof(runtimeIdentifier));
-            var parameters = new ContainerLogsParameters()
-            {
-                ShowStderr = false,
-                ShowStdout = true
-            };
-            using var stream = await this.Docker.Containers.GetContainerLogsAsync(runtimeIdentifier, true, parameters, cancellationToken);
-            var result = await stream.ReadOutputToEndAsync(cancellationToken);
-            return result.stdout;
-        }
-
-        /// <inheritdoc/>
-        public override async Task DeleteRuntimeAsync(string runtimeIdentifier, CancellationToken cancellationToken = default)
-        {
-            if (string.IsNullOrWhiteSpace(runtimeIdentifier))
-                throw new ArgumentNullException(nameof(runtimeIdentifier));
-            await Task.Delay(500);
-            var parameters = new ContainerRemoveParameters();
-            await this.Docker.Containers.RemoveContainerAsync(runtimeIdentifier, parameters, cancellationToken);
+            return new DockerProcess(createContainerResult.ID, this.Docker);
         }
 
         /// <summary>
-        /// Pulls the configured Synapse runner image
+        /// Pulls the configured Synapse worker image
         /// </summary>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A new awaitable <see cref="Task"/></returns>
-        protected virtual async Task PullRuntimeExecutorImageAsync(CancellationToken cancellationToken)
+        protected virtual async Task PullWorkerImageAsync(CancellationToken cancellationToken)
         {
             if (this.Options.Runtime.ImagePullPolicy == ImagePullPolicy.Always)
             {

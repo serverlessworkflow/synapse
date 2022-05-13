@@ -20,14 +20,14 @@
  * -----------------------------------------------------------------------
  */
 
-namespace Synapse.Integration.Events.WorkflowInstances
+namespace Synapse.Integration.Events.WorkflowRuntimeSessions
 {
 
 	/// <summary>
-	/// Represents the IDomainEvent fired whenever the execution of a V1WorkflowInstance completes
+	/// Represents the IDomainEvent fired whenever a V1WorkflowRuntimeSession has been started
 	/// </summary>
 	[DataContract]
-	public partial class V1WorkflowInstanceCompletedIntegrationEvent
+	public partial class V1WorkflowRuntimeSessionStartedIntegrationEvent
 		: V1IntegrationEvent
 	{
 
@@ -46,11 +46,18 @@ namespace Synapse.Integration.Events.WorkflowInstances
 		public virtual DateTime CreatedAt { get; set; }
 
 		/// <summary>
-		/// The V1WorkflowInstance's output
+		/// The id of the process used to run the V1WorkflowInstance the V1WorkflowRuntimeSession relates to
 		/// </summary>
-		[DataMember(Name = "Output", Order = 3)]
-		[Description("The V1WorkflowInstance's output")]
-		public virtual Dynamic Output { get; set; }
+		[DataMember(Name = "WorkflowInstanceId", Order = 3)]
+		[Description("The id of the process used to run the V1WorkflowInstance the V1WorkflowRuntimeSession relates to")]
+		public virtual string WorkflowInstanceId { get; set; }
+
+		/// <summary>
+		/// The id of the process used to run the V1WorkflowInstance the V1WorkflowRuntimeSession relates to
+		/// </summary>
+		[DataMember(Name = "ProcessId", Order = 4)]
+		[Description("The id of the process used to run the V1WorkflowInstance the V1WorkflowRuntimeSession relates to")]
+		public virtual string ProcessId { get; set; }
 
     }
 

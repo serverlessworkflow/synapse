@@ -21,18 +21,21 @@ using Microsoft.Extensions.Options;
 using Synapse.Application.Configuration;
 using Synapse.Application.Services;
 using Synapse.Domain.Models;
+using Synapse.Infrastructure.Services;
 using Synapse.Runtime.Docker.Configuration;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO.Compression;
+using System.Linq;
+using System.Reactive.Linq;
 using System.Runtime.InteropServices;
 
 namespace Synapse.Runtime.Services
 {
 
     /// <summary>
-    /// Represents the native implementation of the <see cref="IWorkflowRuntimeHost"/>
+    /// Represents the native implementation of the <see cref="IWorkflowRuntime"/>
     /// </summary>
     public class NativeRuntimeHost
         : WorkflowRuntimeHostBase
@@ -120,11 +123,10 @@ namespace Synapse.Runtime.Services
         }
 
         /// <inheritdoc/>
-        public override async Task<string> StartRuntimeAsync(V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default)
+        public override Task<IWorkflowProcess> CreateProcessAsync(V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default)
         {
             if (workflowInstance == null)
                 throw new ArgumentNullException(nameof(workflowInstance));
-            var workerFileName = Path.Combine(this.Options.WorkerFileName);
             var fileName = this.Options.GetWorkerFileName();
             var args = null as string;
             if (this.Environment.IsDevelopment())
@@ -148,21 +150,7 @@ namespace Synapse.Runtime.Services
                 StartInfo = startInfo,
                 EnableRaisingEvents = true
             };
-            process.Exited += (sender, e) => this.OnProcessExited(workflowInstance.Id, (Process)sender!);
-            process.Start();
-            return await Task.FromResult(process.Id.ToString());
-        }
-
-        /// <inheritdoc/>
-        public override async Task<string> GetRuntimeLogsAsync(string runtimeIdentifier, CancellationToken cancellationToken = default)
-        {
-            return await Task.FromResult(string.Empty); //todo
-        }
-
-        /// <inheritdoc/>
-        public override Task DeleteRuntimeAsync(string runtimeIdentifier, CancellationToken cancellationToken = default)
-        {
-            return Task.CompletedTask;
+            return Task.FromResult<IWorkflowProcess>(new NativeProcess(process));
         }
 
         /// <summary>

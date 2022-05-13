@@ -33,24 +33,24 @@ namespace Synapse.Domain.Events.WorkflowInstances
         /// </summary>
         protected V1WorkflowInstanceStartingDomainEvent()
         {
-            this.RuntimeIdentifier = null!;
+            this.ProcessId = null!;
         }
 
         /// <summary>
         /// Initializes a new <see cref="V1WorkflowInstanceStartingDomainEvent"/>
         /// </summary>
         /// <param name="id">The id of the <see cref="V1WorkflowInstance"/> which's execution is starting</param>
-        /// <param name="runtimeIdentifier">The string used to uniquely identify the <see cref="V1WorkflowInstance"/>'s runtime</param>
-        public V1WorkflowInstanceStartingDomainEvent(string id, string runtimeIdentifier)
+        /// <param name="processId">The string used to uniquely identify the <see cref="V1WorkflowInstance"/>'s process</param>
+        public V1WorkflowInstanceStartingDomainEvent(string id, string processId)
             : base(id)
         {
-            this.RuntimeIdentifier = runtimeIdentifier;
+            this.ProcessId = processId;
         }
 
         /// <summary>
-        /// Gets the string used to uniquely identify the <see cref="V1WorkflowInstance"/>'s runtime
+        /// Gets the string used to uniquely identify the <see cref="V1WorkflowInstance"/>'s process
         /// </summary>
-        public virtual string RuntimeIdentifier { get; protected set; }
+        public virtual string ProcessId { get; protected set; }
 
     }
 

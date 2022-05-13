@@ -40,17 +40,11 @@ namespace Synapse.Domain.Events.WorkflowInstances
         /// Initializes a new <see cref="V1WorkflowInstanceSuspendedDomainEvent"/>
         /// </summary>
         /// <param name="id">The id of the <see cref="V1WorkflowInstance"/> which's execution has been suspended</param>
-        /// <param name="logs">The logs associated to the suspended <see cref="V1WorkflowInstance"/>'s execution</param>
-        public V1WorkflowInstanceSuspendedDomainEvent(string id, string logs)
+        public V1WorkflowInstanceSuspendedDomainEvent(string id)
             : base(id)
         {
-            this.Logs = logs;
+            
         }
-
-        /// <summary>
-        /// Gets the logs associated to the suspended <see cref="V1WorkflowInstance"/>'s execution
-        /// </summary>
-        public virtual string Logs { get; protected set; } = null!;
 
     }
 

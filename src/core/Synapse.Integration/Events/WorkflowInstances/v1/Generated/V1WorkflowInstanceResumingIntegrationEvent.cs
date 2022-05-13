@@ -46,11 +46,11 @@ namespace Synapse.Integration.Events.WorkflowInstances
 		public virtual DateTime CreatedAt { get; set; }
 
 		/// <summary>
-		/// A string used to uniquely identify the runtime that will perform the execution of the resuming V1WorkflowInstance
+		/// A string used to uniquely identify the resuming V1WorkflowInstance's process
 		/// </summary>
-		[DataMember(Name = "RuntimeIdentifier", Order = 3)]
-		[Description("A string used to uniquely identify the runtime that will perform the execution of the resuming V1WorkflowInstance")]
-		public virtual string RuntimeIdentifier { get; set; }
+		[DataMember(Name = "ProcessId", Order = 3)]
+		[Description("A string used to uniquely identify the resuming V1WorkflowInstance's process")]
+		public virtual string ProcessId { get; set; }
 
     }
 

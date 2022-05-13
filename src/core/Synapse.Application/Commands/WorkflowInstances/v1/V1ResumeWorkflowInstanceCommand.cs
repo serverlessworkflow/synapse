@@ -65,8 +65,8 @@ namespace Synapse.Application.Commands.WorkflowInstances
         /// <param name="mediator">The service used to mediate calls</param>
         /// <param name="mapper">The service used to map objects</param>
         /// <param name="workflowInstances">The <see cref="IRepository"/> used to manage <see cref="V1WorkflowInstance"/>s</param>
-        /// <param name="runtimeHost">The current <see cref="IWorkflowRuntimeHost"/></param>
-        public V1ResumeWorkflowInstanceCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IRepository<V1WorkflowInstance> workflowInstances, IWorkflowRuntimeHost runtimeHost)
+        /// <param name="runtimeHost">The current <see cref="IWorkflowRuntime"/></param>
+        public V1ResumeWorkflowInstanceCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IRepository<V1WorkflowInstance> workflowInstances, IWorkflowRuntime runtimeHost)
             : base(loggerFactory, mediator, mapper)
         {
             this.WorkflowInstances = workflowInstances;
@@ -79,9 +79,9 @@ namespace Synapse.Application.Commands.WorkflowInstances
         protected IRepository<V1WorkflowInstance> WorkflowInstances { get; }
 
         /// <summary>
-        /// Gets the current <see cref="IWorkflowRuntimeHost"/>
+        /// Gets the current <see cref="IWorkflowRuntime"/>
         /// </summary>
-        protected IWorkflowRuntimeHost RuntimeHost { get; }
+        protected IWorkflowRuntime RuntimeHost { get; }
 
         /// <inheritdoc/>
         public virtual async Task<IOperationResult<Integration.Models.V1WorkflowInstance>> HandleAsync(V1ResumeWorkflowInstanceCommand command, CancellationToken cancellationToken = default)
@@ -89,8 +89,10 @@ namespace Synapse.Application.Commands.WorkflowInstances
             var workflowInstance = await this.WorkflowInstances.FindAsync(command.WorkflowInstanceId, cancellationToken);
             if (workflowInstance == null)
                 throw DomainException.NullReference(typeof(V1WorkflowInstance), command.WorkflowInstanceId);
-            var runtimeIdentifier = await this.RuntimeHost.StartRuntimeAsync(workflowInstance, cancellationToken);
-            workflowInstance.Resume(runtimeIdentifier);
+            var process = await this.RuntimeHost.CreateProcessAsync(workflowInstance, cancellationToken);
+
+            await process.StartAsync(cancellationToken);
+            workflowInstance.Resume(process.Id);
             workflowInstance = await this.WorkflowInstances.UpdateAsync(workflowInstance, cancellationToken);
             await this.WorkflowInstances.SaveChangesAsync(cancellationToken);
             return this.Ok(this.Mapper.Map<Integration.Models.V1WorkflowInstance>(workflowInstance));
