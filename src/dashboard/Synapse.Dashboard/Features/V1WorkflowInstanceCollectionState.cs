@@ -71,6 +71,62 @@ namespace Synapse.Dashboard
             return state;
         }
 
+        public static V1WorkflowInstanceCollectionState OnMarkV1WorkflowInstanceAsSuspending(V1WorkflowInstanceCollectionState state, MarkV1WorkflowInstanceAsSuspending action)
+        {
+            var instance = state.FirstOrDefault(i => i.Id == action.Id);
+            if (instance != null)
+            {
+                instance.LastModified = action.SuspendingAt;
+                instance.Status = V1WorkflowInstanceStatus.Suspending;
+            }
+            return state;
+        }
+
+        public static V1WorkflowInstanceCollectionState OnMarkV1WorkflowInstanceAsSuspended(V1WorkflowInstanceCollectionState state, MarkV1WorkflowInstanceAsSuspended action)
+        {
+            var instance = state.FirstOrDefault(i => i.Id == action.Id);
+            if (instance != null)
+            {
+                instance.LastModified = action.SuspendedAt;
+                instance.Status = V1WorkflowInstanceStatus.Suspended;
+            }
+            return state;
+        }
+
+        public static V1WorkflowInstanceCollectionState OnMarkV1WorkflowInstanceAsResuming(V1WorkflowInstanceCollectionState state, MarkV1WorkflowInstanceAsResuming action)
+        {
+            var instance = state.FirstOrDefault(i => i.Id == action.Id);
+            if (instance != null)
+            {
+                instance.LastModified = action.ResumingAt;
+                instance.Status = V1WorkflowInstanceStatus.Resuming;
+            }
+            return state;
+        }
+
+
+        public static V1WorkflowInstanceCollectionState OnMarkV1WorkflowInstanceAsCancelling(V1WorkflowInstanceCollectionState state, MarkV1WorkflowInstanceAsCancelling action)
+        {
+            var instance = state.FirstOrDefault(i => i.Id == action.Id);
+            if (instance != null)
+            {
+                instance.LastModified = action.CancellingAt;
+                instance.Status = V1WorkflowInstanceStatus.Cancelling;
+            }
+            return state;
+        }
+
+        public static V1WorkflowInstanceCollectionState OnMarkV1WorkflowInstanceAsCancelled(V1WorkflowInstanceCollectionState state, MarkV1WorkflowInstanceAsCancelled action)
+        {
+            var instance = state.FirstOrDefault(i => i.Id == action.Id);
+            if (instance != null)
+            {
+                instance.LastModified = action.CancelledAt;
+                instance.Status = V1WorkflowInstanceStatus.Cancelled;
+            }
+            return state;
+        }
+
         public static V1WorkflowInstanceCollectionState OnMarkV1WorkflowInstanceAsFaulted(V1WorkflowInstanceCollectionState state, MarkV1WorkflowInstanceAsFaulted action)
         {
             var instance = state.FirstOrDefault(i => i.Id == action.Id);
@@ -116,6 +172,23 @@ namespace Synapse.Dashboard
             var api = context.Services.GetRequiredService<ISynapseManagementApi>();
             var workflowInstances = await api.GetWorkflowInstancesAsync($"$filter={nameof(V1WorkflowInstance.WorkflowId)} eq '{action.DefinitionId}'");
             context.Dispatcher.Dispatch(new SetV1WorkflowInstanceCollection(workflowInstances));
+        }
+
+        public static async Task OnSuspendV1WorkflowInstance(SuspendV1WorkflowInstance action, IEffectContext context)
+        {
+            var api = context.Services.GetRequiredService<ISynapseManagementApi>();
+            await api.SuspendWorkflowInstanceAsync(action.InstanceId);
+        }
+
+        public static async Task OnResumeV1WorkflowInstance(ResumeV1WorkflowInstance action, IEffectContext context)
+        {
+            var api = context.Services.GetRequiredService<ISynapseManagementApi>();
+            await api.ResumeWorkflowInstanceAsync(action.InstanceId);
+        }
+        public static async Task OnCancelV1WorkflowInstance(CancelV1WorkflowInstance action, IEffectContext context)
+        {
+            var api = context.Services.GetRequiredService<ISynapseManagementApi>();
+            await api.CancelWorkflowInstanceAsync(action.InstanceId);
         }
 
     }
@@ -171,6 +244,81 @@ namespace Synapse.Dashboard
         public string Id { get; }
 
         public DateTime StartedAt { get; }
+
+    }
+
+    public class MarkV1WorkflowInstanceAsSuspending
+    {
+
+        public MarkV1WorkflowInstanceAsSuspending(string id, DateTime suspendingAt)
+        {
+            this.Id = id;
+            this.SuspendingAt = suspendingAt;
+        }
+
+        public string Id { get; }
+
+        public DateTime SuspendingAt { get; }
+
+    }
+
+    public class MarkV1WorkflowInstanceAsSuspended
+    {
+
+        public MarkV1WorkflowInstanceAsSuspended(string id, DateTime suspendedAt)
+        {
+            this.Id = id;
+            this.SuspendedAt = suspendedAt;
+        }
+
+        public string Id { get; }
+
+        public DateTime SuspendedAt { get; }
+
+    }
+
+    public class MarkV1WorkflowInstanceAsResuming
+    {
+
+        public MarkV1WorkflowInstanceAsResuming(string id, DateTime resumingAt)
+        {
+            this.Id = id;
+            this.ResumingAt = resumingAt;
+        }
+
+        public string Id { get; }
+
+        public DateTime ResumingAt { get; }
+
+    }
+
+    public class MarkV1WorkflowInstanceAsCancelling
+    {
+
+        public MarkV1WorkflowInstanceAsCancelling(string id, DateTime cancellingAt)
+        {
+            this.Id = id;
+            this.CancellingAt = cancellingAt;
+        }
+
+        public string Id { get; }
+
+        public DateTime CancellingAt { get; }
+
+    }
+
+    public class MarkV1WorkflowInstanceAsCancelled
+    {
+
+        public MarkV1WorkflowInstanceAsCancelled(string id, DateTime cancelledAt)
+        {
+            this.Id = id;
+            this.CancelledAt = cancelledAt;
+        }
+
+        public string Id { get; }
+
+        public DateTime CancelledAt { get; }
 
     }
 
@@ -232,6 +380,39 @@ namespace Synapse.Dashboard
 
         public string DefinitionId { get; }
 
+    }
+
+    public class SuspendV1WorkflowInstance
+    {
+
+        public SuspendV1WorkflowInstance(string instanceId)
+        {
+            this.InstanceId = instanceId;
+        }
+
+        public string InstanceId { get; }
+    }
+
+    public class ResumeV1WorkflowInstance
+    {
+
+        public ResumeV1WorkflowInstance(string instanceId)
+        {
+            this.InstanceId = instanceId;
+        }
+
+        public string InstanceId { get; }
+    }
+
+    public class CancelV1WorkflowInstance
+    {
+
+        public CancelV1WorkflowInstance(string instanceId)
+        {
+            this.InstanceId = instanceId;
+        }
+
+        public string InstanceId { get; }
     }
 
 }
