@@ -12266,9 +12266,6 @@ input[type=time]::-webkit-clear-button {
   align-items: center;
   justify-content: center;
 }
-.node .activity-badge circle, .cluster .activity-badge circle {
-  stroke-width: 1;
-}
 .node .activity-badge.activity-badge--active circle, .cluster .activity-badge.activity-badge--active circle {
   fill: var(--bs-success);
 }
