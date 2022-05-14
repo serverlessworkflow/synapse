@@ -78,9 +78,9 @@ namespace Synapse.Runtime.Services
         }
 
         /// <summary>
-        /// Disposes of the <see cref="ProcessBase"/>
+        /// Disposes of the <see cref="IWorkflowProcess"/>
         /// </summary>
-        /// <param name="disposing">A boolean indicating whether or not the <see cref="ProcessBase"/> is being disposed of</param>
+        /// <param name="disposing">A boolean indicating whether or not the <see cref="IWorkflowProcess"/> is being disposed of</param>
         public virtual ValueTask DisposeAsync(bool disposing)
         {
             if (!this._Disposed)
@@ -101,9 +101,9 @@ namespace Synapse.Runtime.Services
         }
 
         /// <summary>
-        /// Disposes of the <see cref="ProcessBase"/>
+        /// Disposes of the <see cref="IWorkflowProcess"/>
         /// </summary>
-        /// <param name="disposing">A boolean indicating whether or not the <see cref="ProcessBase"/> is being disposed of</param>
+        /// <param name="disposing">A boolean indicating whether or not the <see cref="IWorkflowProcess"/> is being disposed of</param>
         protected virtual void Dispose(bool disposing)
         {
             if (!this._Disposed)

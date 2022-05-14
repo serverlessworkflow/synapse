@@ -20,37 +20,38 @@
  * -----------------------------------------------------------------------
  */
 
-namespace Synapse.Integration.Events.WorkflowRuntimeSessions
+namespace Synapse.Integration.Models
 {
 
 	/// <summary>
-	/// Represents the IDomainEvent fired whenever a new log has been outputed to a V1WorkflowRuntimeSession
+	/// Represents a process
 	/// </summary>
 	[DataContract]
-	public partial class V1LogAppendedToWorkflowRuntimeSessionIntegrationEvent
-		: V1IntegrationEvent
+	[Queryable]
+	public partial class V1WorkflowProcess
+		: Entity
 	{
 
 		/// <summary>
-		/// Gets the id of the aggregate that has produced the event
+		/// The date and time at which the V1WorkflowProcess has exited
 		/// </summary>
-		[DataMember(Name = "AggregateId", Order = 1)]
-		[Description("Gets the id of the aggregate that has produced the event")]
-		public virtual string AggregateId { get; set; }
+		[DataMember(Name = "ExitedAt", Order = 1)]
+		[Description("The date and time at which the V1WorkflowProcess has exited")]
+		public virtual DateTime? ExitedAt { get; set; }
 
 		/// <summary>
-		/// Gets the date and time at which the event has been produced
+		/// The logs associated to the V1WorkflowProcess
 		/// </summary>
-		[DataMember(Name = "CreatedAt", Order = 2)]
-		[Description("Gets the date and time at which the event has been produced")]
-		public virtual DateTime CreatedAt { get; set; }
+		[DataMember(Name = "Logs", Order = 2)]
+		[Description("The logs associated to the V1WorkflowProcess")]
+		public virtual string Logs { get; set; }
 
 		/// <summary>
-		/// The log outputed by the V1WorkflowRuntimeSession
+		/// The V1WorkflowProcess's exit code
 		/// </summary>
-		[DataMember(Name = "Log", Order = 3)]
-		[Description("The log outputed by the V1WorkflowRuntimeSession")]
-		public virtual string Log { get; set; }
+		[DataMember(Name = "ExitCode", Order = 3)]
+		[Description("The V1WorkflowProcess's exit code")]
+		public virtual long? ExitCode { get; set; }
 
     }
 

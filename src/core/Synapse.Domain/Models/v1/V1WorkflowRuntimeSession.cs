@@ -15,24 +15,20 @@
  *
  */
 
-using Synapse.Domain.Events.WorkflowRuntimeSessions;
-
 namespace Synapse.Domain.Models
 {
 
     /// <summary>
-    /// Represents one the processes associated to a <see cref="V1WorkflowInstance"/>
+    /// Represents a <see cref="V1WorkflowInstance"/>'s runtime sessions
     /// </summary>
     [DataTransferObjectType(typeof(Integration.Models.V1WorkflowRuntimeSession))]
     public class V1WorkflowRuntimeSession
-        : AggregateRoot<string>
     {
 
         /// <summary>
         /// Initializes a new <see cref="V1WorkflowRuntimeSession"/>
         /// </summary>
         protected V1WorkflowRuntimeSession()
-            : base(default!)
         {
 
         }
@@ -40,30 +36,28 @@ namespace Synapse.Domain.Models
         /// <summary>
         /// Initializes a new <see cref="V1WorkflowRuntimeSession"/>
         /// </summary>
-        /// <param name="workflowInstanceId">The id of the <see cref="V1WorkflowInstance"/> the <see cref="V1WorkflowRuntimeSession"/> relates to</param>
-        /// <param name="processId">The id of the process used to run the <see cref="V1WorkflowInstance"/> the <see cref="V1WorkflowRuntimeSession"/> relates to</param>
-        public V1WorkflowRuntimeSession(string workflowInstanceId, string processId)
-            : base($"{workflowInstanceId}-{processId}")
+        /// <param name="startedAt">The date and time at which the <see cref="V1WorkflowRuntimeSession"/> has started</param>
+        /// <param name="processId">The id used to uniquely identify the process the session is bound to</param>
+        public V1WorkflowRuntimeSession(DateTimeOffset startedAt, string processId)
         {
-            if (string.IsNullOrWhiteSpace(workflowInstanceId))
-                throw new ArgumentNullException(nameof(workflowInstanceId));
             if (string.IsNullOrWhiteSpace(processId))
                 throw new ArgumentNullException(nameof(processId));
-            this.On(this.RegisterEvent(new V1WorkflowRuntimeSessionStartedDomainEvent(this.Id, processId, workflowInstanceId)));
+            this.StartedAt = startedAt;
+            this.ProcessId = processId;
         }
 
         /// <summary>
-        /// Gets the id of the <see cref="V1WorkflowInstance"/> the <see cref="V1WorkflowRuntimeSession"/> relates to
-        /// </summary>
-        public virtual string WorkflowInstanceId { get; protected set; } = null!;
-
-        /// <summary>
-        /// Gets the id of the process used to run the <see cref="V1WorkflowInstance"/> the <see cref="V1WorkflowRuntimeSession"/> relates to
+        /// Gets the string used to uniquely identify the process the session is bound to
         /// </summary>
         public virtual string ProcessId { get; protected set; } = null!;
 
         /// <summary>
-        /// Gets the date and time at which the <see cref="V1WorkflowRuntimeSession"/> has exited
+        /// Gets the date and time at which the <see cref="V1WorkflowRuntimeSession"/> has started
+        /// </summary>
+        public virtual DateTimeOffset StartedAt { get; protected set; }
+
+        /// <summary>
+        /// Gets the date and time at which the <see cref="V1WorkflowRuntimeSession"/> has ended
         /// </summary>
         public virtual DateTimeOffset? EndedAt { get; protected set; }
 
@@ -71,11 +65,6 @@ namespace Synapse.Domain.Models
         /// Gets the logs associated to the <see cref="V1WorkflowRuntimeSession"/>
         /// </summary>
         public virtual string? Logs { get; protected set; }
-
-        /// <summary>
-        /// Gets the <see cref="V1WorkflowRuntimeSession"/>'s process exit code
-        /// </summary>
-        public virtual long? ProcessExitCode { get; protected set; }
 
         /// <summary>
         /// Gets a boolean indicating whether or not the <see cref="V1WorkflowRuntimeSession"/> is active
@@ -89,58 +78,24 @@ namespace Synapse.Domain.Models
         /// </summary>
         [Newtonsoft.Json.JsonIgnore]
         [System.Text.Json.Serialization.JsonIgnore]
-        public virtual TimeSpan? Duration => this.EndedAt.HasValue ? this.EndedAt.Value.Subtract(this.CreatedAt) : null;
+        public virtual TimeSpan? Duration => this.EndedAt.HasValue ? this.EndedAt.Value.Subtract(this.StartedAt) : null;
 
         /// <summary>
-        /// Appends the specified value to the <see cref="V1WorkflowRuntimeSession"/>'s logs
+        /// Sets the <see cref="V1WorkflowRuntimeSession"/>'s logs
         /// </summary>
-        /// <param name="log">The value to append to the <see cref="V1WorkflowRuntimeSession"/>'s logs</param>
-        public virtual void AppendLog(string log)
+        /// <param name="logs">The <see cref="V1WorkflowRuntimeSession"/>'s logs</param>
+        public virtual void SetLogs(string logs)
         {
-            this.On(this.RegisterEvent(new V1LogAppendedToWorkflowRuntimeSessionDomainEvent(this.Id, log)));
+            this.Logs = logs;
         }
 
         /// <summary>
-        /// Marks the <see cref="V1WorkflowRuntimeSession"/> as exited
+        /// Sets the date and time at which the <see cref="V1WorkflowRuntimeSession"/> ended
         /// </summary>
-        /// <param name="exitCode">The <see cref="V1WorkflowRuntimeSession"/>'s exit code</param>
-        public virtual void Exit(long exitCode)
+        /// <param name="endedAt">The date and time at which the <see cref="V1WorkflowRuntimeSession"/> ended</param>
+        public virtual void MarkAsEnded(DateTimeOffset endedAt)
         {
-            this.On(this.RegisterEvent(new V1WorkflowRuntimeSessionEndedDomainEvent(this.Id, exitCode)));
-        }
-
-        /// <summary>
-        /// Handles the specified <see cref="V1WorkflowRuntimeSessionStartedDomainEvent"/>
-        /// </summary>
-        /// <param name="e">The <see cref="V1WorkflowRuntimeSessionStartedDomainEvent"/> to handle</param>
-        protected virtual void On(V1WorkflowRuntimeSessionStartedDomainEvent e)
-        {
-            this.Id = e.AggregateId;
-            this.CreatedAt = e.CreatedAt;
-            this.LastModified = e.CreatedAt;
-            this.WorkflowInstanceId = e.WorkflowInstanceId;
-            this.ProcessId = e.ProcessId;
-        }
-
-        /// <summary>
-        /// Handles the specified <see cref="V1LogAppendedToWorkflowRuntimeSessionDomainEvent"/>
-        /// </summary>
-        /// <param name="e">The <see cref="V1LogAppendedToWorkflowRuntimeSessionDomainEvent"/> to handle</param>
-        protected virtual void On(V1LogAppendedToWorkflowRuntimeSessionDomainEvent e)
-        {
-            this.LastModified = e.CreatedAt;
-            this.Logs += e.Log;
-        }
-
-        /// <summary>
-        /// Handles the specified <see cref="V1WorkflowRuntimeSessionEndedDomainEvent"/>
-        /// </summary>
-        /// <param name="e">The <see cref="V1WorkflowRuntimeSessionEndedDomainEvent"/> to handle</param>
-        protected virtual void On(V1WorkflowRuntimeSessionEndedDomainEvent e)
-        {
-            this.LastModified = e.CreatedAt;
-            this.EndedAt = e.CreatedAt;
-            this.ProcessExitCode = e.ProcessExitCode;
+            this.EndedAt = endedAt;
         }
 
     }

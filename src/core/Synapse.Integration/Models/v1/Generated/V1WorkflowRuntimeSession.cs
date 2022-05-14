@@ -24,33 +24,31 @@ namespace Synapse.Integration.Models
 {
 
 	/// <summary>
-	/// Represents one the processes associated to a V1WorkflowInstance
+	/// Represents a V1WorkflowInstance's runtime sessions
 	/// </summary>
 	[DataContract]
-	[Queryable]
 	public partial class V1WorkflowRuntimeSession
-		: Entity
 	{
 
 		/// <summary>
-		/// The id of the V1WorkflowInstance the V1WorkflowRuntimeSession relates to
+		/// The string used to uniquely identify the process the session is bound to
 		/// </summary>
-		[DataMember(Name = "WorkflowInstanceId", Order = 1)]
-		[Description("The id of the V1WorkflowInstance the V1WorkflowRuntimeSession relates to")]
-		public virtual string WorkflowInstanceId { get; set; }
-
-		/// <summary>
-		/// The id of the process used to run the V1WorkflowInstance the V1WorkflowRuntimeSession relates to
-		/// </summary>
-		[DataMember(Name = "ProcessId", Order = 2)]
-		[Description("The id of the process used to run the V1WorkflowInstance the V1WorkflowRuntimeSession relates to")]
+		[DataMember(Name = "ProcessId", Order = 1)]
+		[Description("The string used to uniquely identify the process the session is bound to")]
 		public virtual string ProcessId { get; set; }
 
 		/// <summary>
-		/// The date and time at which the V1WorkflowRuntimeSession has exited
+		/// The date and time at which the V1WorkflowRuntimeSession has started
+		/// </summary>
+		[DataMember(Name = "StartedAt", Order = 2)]
+		[Description("The date and time at which the V1WorkflowRuntimeSession has started")]
+		public virtual DateTime StartedAt { get; set; }
+
+		/// <summary>
+		/// The date and time at which the V1WorkflowRuntimeSession has ended
 		/// </summary>
 		[DataMember(Name = "EndedAt", Order = 3)]
-		[Description("The date and time at which the V1WorkflowRuntimeSession has exited")]
+		[Description("The date and time at which the V1WorkflowRuntimeSession has ended")]
 		public virtual DateTime? EndedAt { get; set; }
 
 		/// <summary>
@@ -59,13 +57,6 @@ namespace Synapse.Integration.Models
 		[DataMember(Name = "Logs", Order = 4)]
 		[Description("The logs associated to the V1WorkflowRuntimeSession")]
 		public virtual string Logs { get; set; }
-
-		/// <summary>
-		/// The V1WorkflowRuntimeSession's process exit code
-		/// </summary>
-		[DataMember(Name = "ProcessExitCode", Order = 5)]
-		[Description("The V1WorkflowRuntimeSession's process exit code")]
-		public virtual long? ProcessExitCode { get; set; }
 
     }
 

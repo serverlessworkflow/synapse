@@ -17,6 +17,7 @@
 
 using k8s;
 using k8s.Models;
+using Synapse.Application.Services;
 using Synapse.Infrastructure.Services;
 
 namespace Synapse.Runtime.Kubernetes.Services
@@ -51,9 +52,9 @@ namespace Synapse.Runtime.Kubernetes.Services
         /// </summary>
         protected IKubernetes Kubernetes { get; }
 
-        private IObservable<string>? _Logs;
+        private IObservable<string> _Logs;
         /// <inheritdoc/>
-        public override IObservable<string>? Logs => this._Logs;
+        public override IObservable<string> Logs => this._Logs;
 
         private int? _ExitCode;
         /// <inheritdoc/>

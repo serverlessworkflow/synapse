@@ -30,11 +30,18 @@ namespace Synapse.Application.Services
         /// <summary>
         /// Initializes a new <see cref="WorkflowProcessManager"/>
         /// </summary>
+        /// <param name="serviceProvider">The current <see cref="IServiceProvider"/></param>
         /// <param name="runtime">The <see cref="IWorkflowRuntime"/> used to create <see cref="IWorkflowProcess"/>es</param>
-        public WorkflowProcessManager(IWorkflowRuntime runtime)
+        public WorkflowProcessManager(IServiceProvider serviceProvider, IWorkflowRuntime runtime)
         {
+            this.ServiceProvider = serviceProvider;
             this.Runtime = runtime;
         }
+
+        /// <summary>
+        /// Gets the current <see cref="IServiceProvider"/>
+        /// </summary>
+        protected IServiceProvider ServiceProvider { get; }
 
         /// <summary>
         /// Gets the <see cref="IWorkflowRuntime"/> used to create <see cref="IWorkflowProcess"/>es
@@ -90,10 +97,12 @@ namespace Synapse.Application.Services
         /// <returns>A new awaitable <see cref="Task"/></returns>
         protected virtual async Task OnProcessLogAsync(IWorkflowProcess process, string log)
         {
-            V1WorkflowRuntimeSession session = await sessions.FindAsync(process.Id);
-            session.AppendLog(log);
-            await sessions.UpdateAsync(session, this.CancellationTokenSource.Token);
-            await sessions.SaveChangesAsync(this.CancellationTokenSource.Token);
+            using var scope = this.ServiceProvider.CreateScope();
+            var processStates = scope.ServiceProvider.GetRequiredService<IRepository<V1WorkflowProcess>>();
+            var processState = await processStates.FindAsync(process.Id);
+            processState.AppendLog(log);
+            await processStates.UpdateAsync(processState, this.CancellationTokenSource.Token);
+            await processStates.SaveChangesAsync(this.CancellationTokenSource.Token);
         }
 
         /// <summary>

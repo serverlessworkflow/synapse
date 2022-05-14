@@ -15,31 +15,31 @@
  *
  */
 
-namespace Synapse.Domain.Events.WorkflowRuntimeSessions
+namespace Synapse.Domain.Events.V1WorkflowProcesses
 {
 
     /// <summary>
-    /// Represents the <see cref="IDomainEvent"/> fired whenever a new log has been outputed to a <see cref="V1WorkflowRuntimeSession"/>
+    /// Represents the <see cref="IDomainEvent"/> fired whenever a new log has been outputed to a <see cref="V1WorkflowProcess"/>
     /// </summary>
-    [DataTransferObjectType(typeof(Integration.Events.WorkflowRuntimeSessions.V1WorkflowRuntimeSessionLogAppendedIntegrationEvent))]
-    public class V1LogAppendedToWorkflowRuntimeSessionDomainEvent
-        : DomainEvent<Models.V1WorkflowRuntimeSession, string>
+    [DataTransferObjectType(typeof(Integration.Events.WorkflowProcesses.V1WorkflowProcessOutputtedLogIntegrationEvent))]
+    public class V1WorkflowProcessOutputtedLogDomainEvent
+        : DomainEvent<Models.V1WorkflowProcess, string>
     {
 
         /// <summary>
-        /// Initializes a new <see cref="V1LogAppendedToWorkflowRuntimeSessionDomainEvent"/>
+        /// Initializes a new <see cref="V1WorkflowProcessOutputtedLogDomainEvent"/>
         /// </summary>
-        protected V1LogAppendedToWorkflowRuntimeSessionDomainEvent()
+        protected V1WorkflowProcessOutputtedLogDomainEvent()
         {
 
         }
 
         /// <summary>
-        /// Initializes a new <see cref="V1LogAppendedToWorkflowRuntimeSessionDomainEvent"/>
+        /// Initializes a new <see cref="V1WorkflowProcessOutputtedLogDomainEvent"/>
         /// </summary>
         /// <param name="id">The id of the <see cref="V1WorkflowRuntimeSession"/> that has outputted the log</param>
         /// <param name="log">The log outputed by the <see cref="V1WorkflowRuntimeSession"/></param>
-        public V1LogAppendedToWorkflowRuntimeSessionDomainEvent(string id, string log)
+        public V1WorkflowProcessOutputtedLogDomainEvent(string id, string log)
             : base(id)
         {
             this.Log = log;

@@ -20,14 +20,14 @@
  * -----------------------------------------------------------------------
  */
 
-namespace Synapse.Integration.Events.WorkflowRuntimeSessions
+namespace Synapse.Integration.Events.WorkflowProcesses
 {
 
 	/// <summary>
-	/// Represents the IDomainEvent fired whenever a new log has been outputed to a V1WorkflowRuntimeSession
+	/// Represents the IDomainEvent fired whenever a V1WorkflowProcess has exited
 	/// </summary>
 	[DataContract]
-	public partial class V1WorkflowRuntimeSessionLogAppendedIntegrationEvent
+	public partial class V1WorkflowProcessExitedIntegrationEvent
 		: V1IntegrationEvent
 	{
 
@@ -46,11 +46,11 @@ namespace Synapse.Integration.Events.WorkflowRuntimeSessions
 		public virtual DateTime CreatedAt { get; set; }
 
 		/// <summary>
-		/// The log outputed by the V1WorkflowRuntimeSession
+		/// The id of the V1WorkflowProcess's exit code
 		/// </summary>
-		[DataMember(Name = "Log", Order = 3)]
-		[Description("The log outputed by the V1WorkflowRuntimeSession")]
-		public virtual string Log { get; set; }
+		[DataMember(Name = "ProcessExitCode", Order = 3)]
+		[Description("The id of the V1WorkflowProcess's exit code")]
+		public virtual long ProcessExitCode { get; set; }
 
     }
 

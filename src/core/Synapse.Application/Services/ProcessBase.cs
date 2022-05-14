@@ -27,6 +27,8 @@ namespace Synapse.Application.Services
 
         /// <inheritdoc/>
         public event EventHandler? Exited;
+        /// <inheritdoc/>
+        public event EventHandler? Disposed;
 
         private bool _Disposed;
 
@@ -78,7 +80,7 @@ namespace Synapse.Application.Services
             {
                 if (disposing)
                 {
-                  
+                    this.Disposed?.Invoke(this, new());
                 }
                 this._Disposed = true;
             }
@@ -101,7 +103,7 @@ namespace Synapse.Application.Services
             {
                 if (disposing)
                 {
-                   
+                    this.Disposed?.Invoke(this, new());
                 }
                 this._Disposed = true;
             }

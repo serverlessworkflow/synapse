@@ -20,14 +20,14 @@
  * -----------------------------------------------------------------------
  */
 
-namespace Synapse.Integration.Events.WorkflowRuntimeSessions
+namespace Synapse.Integration.Events.WorkflowProcesses
 {
 
 	/// <summary>
-	/// Represents the IDomainEvent fired whenever a V1WorkflowRuntimeSession has been started
+	/// Represents the IDomainEvent fired whenever a new log has been outputed to a V1WorkflowProcess
 	/// </summary>
 	[DataContract]
-	public partial class V1WorkflowProcessStartedIntegrationEvent
+	public partial class V1WorkflowProcessOutputtedLogIntegrationEvent
 		: V1IntegrationEvent
 	{
 
@@ -46,18 +46,11 @@ namespace Synapse.Integration.Events.WorkflowRuntimeSessions
 		public virtual DateTime CreatedAt { get; set; }
 
 		/// <summary>
-		/// The id of the process used to run the V1WorkflowInstance the V1WorkflowRuntimeSession relates to
+		/// The log outputed by the V1WorkflowRuntimeSession
 		/// </summary>
-		[DataMember(Name = "WorkflowInstanceId", Order = 3)]
-		[Description("The id of the process used to run the V1WorkflowInstance the V1WorkflowRuntimeSession relates to")]
-		public virtual string WorkflowInstanceId { get; set; }
-
-		/// <summary>
-		/// The id of the process used to run the V1WorkflowInstance the V1WorkflowRuntimeSession relates to
-		/// </summary>
-		[DataMember(Name = "ProcessId", Order = 4)]
-		[Description("The id of the process used to run the V1WorkflowInstance the V1WorkflowRuntimeSession relates to")]
-		public virtual string ProcessId { get; set; }
+		[DataMember(Name = "Log", Order = 3)]
+		[Description("The log outputed by the V1WorkflowRuntimeSession")]
+		public virtual string Log { get; set; }
 
     }
 
