@@ -21,52 +21,52 @@
 {
     <div class="add-state-contextual-menu border-dark d-flex flex-column" style="top: @(clientY)px; left: @(clientX)px;">
         <button class="btn btn-outline-dark" title="Inject state" @onclick="(async () => await Container.ShowEditor<InjectStateDefinition>(typeof(InjectStateModal), predecessor?.State.Name))">
-            Inject
             <svg width="16" height="16">
                 <use xlink:href="#inject-symbol" />
             </svg>
+            <span class="btn-label">&nbsp; Inject</span>
         </button>
         <button class="btn btn-outline-dark" title="Operation state">
-            Operation
             <svg width="16" height="16">
                 <use xlink:href="#operation-symbol" />
             </svg>
+            <span class="btn-label">&nbsp; Operation</span>
         </button>
         <button class="btn btn-outline-dark" title="Sleep state">
-            Sleep
             <svg width="16" height="16">
                 <use xlink:href="#sleep-symbol" />
             </svg>
+            <span class="btn-label">&nbsp; Sleep</span>
         </button>
         <button class="btn btn-outline-dark" title="Event state">
-            Event
             <svg width="16" height="16">
                 <use xlink:href="#event-symbol" />
             </svg>
+            <span class="btn-label">&nbsp; Event</span>
         </button>
         <button class="btn btn-outline-dark" title="Switch state">
-            Switch
             <svg width="16" height="16">
                 <use xlink:href="#switch-symbol" />
             </svg>
+            <span class="btn-label">&nbsp; Switch</span>
         </button>
         <button class="btn btn-outline-dark" title="Parallel state">
-            Parallel
             <svg width="16" height="16">
                 <use xlink:href="#parallel-symbol" />
             </svg>
+            <span class="btn-label">&nbsp; Parallel</span>
         </button>
         <button class="btn btn-outline-dark" title="ForEach state">
-            ForEach
             <svg width="16" height="16">
                 <use xlink:href="#foreach-symbol" />
             </svg>
+            <span class="btn-label">&nbsp; ForEach</span>
         </button>
         <button class="btn btn-outline-dark" title="Callback state">
-            Callback
             <svg width="16" height="16">
                 <use xlink:href="#callback-symbol" />
             </svg>
+            <span class="btn-label">&nbsp; Callback</span>
         </button>
     </div>
     <div class="add-state-contextual-menu__backdrop" @onclick="HideAsync"></div>
