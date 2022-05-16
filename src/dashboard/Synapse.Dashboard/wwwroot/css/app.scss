@@ -90,6 +90,12 @@ input[type=time]::-webkit-clear-button {
 }
 
 .node, .cluster {
+    &.active {
+        rect {
+            fill: rgba(var(--bs-info-rgb), .2);
+        }
+    }
+
     .badge {
         circle {
             stroke-width: 0;
