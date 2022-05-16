@@ -179,12 +179,14 @@ namespace Synapse.Apis.Management.Grpc
 
         #endregion
 
-        #region Metrics
+        #region OperationalReports
 
         /// <inheritdoc/>
-        public virtual async Task<GrpcApiResult<V1ApplicationMetrics>> GetApplicationMetricsAsync(CallContext context = default)
+        public virtual async Task<GrpcApiResult<V1OperationalReport>> GetOperationalReportAsync(DateTime? date = null, CallContext context = default)
         {
-            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new V1FindByIdQuery<V1ApplicationMetrics, string>(V1ApplicationMetrics.GetIdFor(DateTime.Now.Date)), context.CancellationToken));
+            if (!date.HasValue)
+                date = DateTime.Now;
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new V1FindByIdQuery<V1OperationalReport, string>(V1OperationalReport.GetIdFor(date.Value)), context.CancellationToken));
         }
 
         #endregion

@@ -17,6 +17,7 @@
 
 namespace Synapse
 {
+
     /// <summary>
     /// Defines extensions for strings
     /// </summary>
