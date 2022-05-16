@@ -313,6 +313,22 @@ namespace Synapse.Apis.Management.Http
 
         #endregion region
 
+        #region Metrics
+
+        /// <inheritdoc/>
+        public virtual async Task<V1ApplicationMetrics> GetApplicationMetricsAsync(CancellationToken cancellationToken = default)
+        {
+            using var request = this.CreateRequest(HttpMethod.Get, "/api/v1/metrics");
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while querying application metrics: {details}", json);
+            response.EnsureSuccessStatusCode();
+            return await this.Serializer.DeserializeAsync<V1ApplicationMetrics>(json, cancellationToken);
+        }
+
+        #endregion
+
     }
 
 }
