@@ -12251,6 +12251,9 @@ input[type=time]::-webkit-clear-button {
   fill: white;
 }
 
+.node.active rect, .cluster.active rect {
+  fill: rgba(var(--bs-info-rgb), 0.2);
+}
 .node .badge circle, .cluster .badge circle {
   stroke-width: 0;
   fill: var(--bs-primary);
@@ -12265,9 +12268,6 @@ input[type=time]::-webkit-clear-button {
   align-content: center;
   align-items: center;
   justify-content: center;
-}
-.node .activity-badge circle, .cluster .activity-badge circle {
-  stroke-width: 1;
 }
 .node .activity-badge.activity-badge--active circle, .cluster .activity-badge.activity-badge--active circle {
   fill: var(--bs-success);
@@ -12358,4 +12358,7 @@ input[type=time]::-webkit-clear-button {
   opacity: 0.5;
   display: block;
   font-size: 18px;
+
+table .details {
+  text-align: right;
 }

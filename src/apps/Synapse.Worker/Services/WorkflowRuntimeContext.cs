@@ -175,7 +175,7 @@ namespace Synapse.Worker.Services
         {
             var args = new Dictionary<string, object>
             {
-                { "CONTEXT", await this.BuildRuntimeExpressionContextArgumentAsync(cancellationToken) },
+                { "WORKFLOW", await this.BuildRuntimeExpressionWorkflowArgumentAsync(cancellationToken) },
                 { "CONST", await this.BuildRuntimeExpressionConstantsArgumentAsync(cancellationToken) },
                 { "SECRETS", await this.BuildRuntimeExpressionSecretsArgumentAsync(cancellationToken) }
             };
@@ -183,20 +183,20 @@ namespace Synapse.Worker.Services
         }
 
         /// <summary>
-        /// Builds the runtime expression '$CONTEXT' argument object
+        /// Builds the runtime expression '$WORKFLOW' argument object
         /// </summary>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-        /// <returns>The runtime expression '$CONTEXT' argument object</returns>
-        protected virtual async Task<object> BuildRuntimeExpressionContextArgumentAsync(CancellationToken cancellationToken)
+        /// <returns>The runtime expression '$WORKFLOW' argument object</returns>
+        protected virtual async Task<object> BuildRuntimeExpressionWorkflowArgumentAsync(CancellationToken cancellationToken)
         {
-            return new
+            return await Task.FromResult(new
             {
                 workflow = new
                 {
                     id = this.Workflow.Definition.GetUniqueIdentifier(),
                     instanceId = this.Workflow.Instance.Id
                 }
-            }; //todo
+            });
         }
 
         /// <summary>
@@ -206,10 +206,10 @@ namespace Synapse.Worker.Services
         /// <returns>The runtime expression '$CONST' argument object</returns>
         protected virtual async Task<object> BuildRuntimeExpressionConstantsArgumentAsync(CancellationToken cancellationToken)
         {
-            var constants = this.Workflow.Definition.Constants?.ToObject(); //todo
+            var constants = this.Workflow.Definition.Constants?.ToObject();
             if (constants == null)
                 constants = new();
-            return constants;
+            return await Task.FromResult(constants);
         }
 
         /// <summary>
