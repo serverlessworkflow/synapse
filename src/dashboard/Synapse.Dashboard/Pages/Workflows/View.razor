@@ -160,7 +160,7 @@ else
         this.workflowInstanceSubscription = this.workflowInstanceFeature
             .Subscribe(instances =>
             {
-                this.instances = instances;
+                this.instances = instances.Where(instance => instance.WorkflowId == this.WorkflowId).ToList();
                 this.UpdateActivities();
             });
         this.workflowActivitySubscription = this.workflowActivityFeature
@@ -222,7 +222,7 @@ else
         else
         {
             this.sortedActivities = this.workflowInstance?.Activities != null ? this.workflowInstance.Activities.OrderBy(a => a.CreatedAt).ToList() : new List<V1WorkflowActivity>();
-            if (this.workflowDiagram != null) this.workflowDiagram.DisplayActivityStatusFor(this.instances.Where(i => i.Id == this.WorkflowInstanceId));
+            if (this.workflowDiagram != null) this.workflowDiagram.DisplayActivityStatusFor(this.instances.Where(i => i.Id == this.WorkflowInstanceId), true);
         }
         this.StateHasChanged();
     }

@@ -12251,6 +12251,9 @@ input[type=time]::-webkit-clear-button {
   fill: white;
 }
 
+.node.active rect, .cluster.active rect {
+  fill: rgba(var(--bs-info-rgb), 0.2);
+}
 .node .badge circle, .cluster .badge circle {
   stroke-width: 0;
   fill: var(--bs-primary);

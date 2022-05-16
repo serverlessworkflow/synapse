@@ -46,10 +46,10 @@
         }
     }
       
-    public virtual void DisplayActivityStatusFor(IEnumerable<V1WorkflowInstance> instances)
+    public virtual void DisplayActivityStatusFor(IEnumerable<V1WorkflowInstance> instances, bool highlightPath = false)
     {
         if (this.graph != null) {
-            this.graph.DisplayActivityStatusFor(instances);
+            this.graph.DisplayActivityStatusFor(instances, highlightPath);
         }
     }
 
