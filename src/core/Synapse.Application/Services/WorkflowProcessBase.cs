@@ -21,7 +21,7 @@ namespace Synapse.Application.Services
     /// <summary>
     /// Represents a base class for all implementations of the <see cref="IWorkflowProcess"/> interface
     /// </summary>
-    public abstract class ProcessBase
+    public abstract class WorkflowProcessBase
         : IWorkflowProcess
     {
 
@@ -32,19 +32,8 @@ namespace Synapse.Application.Services
 
         private bool _Disposed;
 
-        /// <summary>
-        /// Initializes a new <see cref="ProcessBase"/>
-        /// </summary>
-        /// <param name="id">The <see cref="IWorkflowProcess"/>'s id</param>
-        public ProcessBase(string id)
-        {
-            if (string.IsNullOrWhiteSpace(id))
-                throw new ArgumentNullException(nameof(id));
-            this.Id = id;
-        }
-
         /// <inheritdoc/>
-        public string Id { get; }
+        public abstract string Id { get; }
 
         /// <inheritdoc/>
         public ProcessStatus Status { get; protected set; }
@@ -62,7 +51,7 @@ namespace Synapse.Application.Services
         public abstract ValueTask TerminateAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Handles the <see cref="ProcessBase"/>'s having exited
+        /// Handles the <see cref="WorkflowProcessBase"/>'s having exited
         /// </summary>
         protected virtual void OnExited()
         {
@@ -71,9 +60,9 @@ namespace Synapse.Application.Services
         }
 
         /// <summary>
-        /// Disposes of the <see cref="ProcessBase"/>
+        /// Disposes of the <see cref="WorkflowProcessBase"/>
         /// </summary>
-        /// <param name="disposing">A boolean indicating whether or not the <see cref="ProcessBase"/> is being disposed of</param>
+        /// <param name="disposing">A boolean indicating whether or not the <see cref="WorkflowProcessBase"/> is being disposed of</param>
         public virtual ValueTask DisposeAsync(bool disposing)
         {
             if (!this._Disposed)
@@ -94,9 +83,9 @@ namespace Synapse.Application.Services
         }
 
         /// <summary>
-        /// Disposes of the <see cref="ProcessBase"/>
+        /// Disposes of the <see cref="WorkflowProcessBase"/>
         /// </summary>
-        /// <param name="disposing">A boolean indicating whether or not the <see cref="ProcessBase"/> is being disposed of</param>
+        /// <param name="disposing">A boolean indicating whether or not the <see cref="WorkflowProcessBase"/> is being disposed of</param>
         protected virtual void Dispose(bool disposing)
         {
             if (!this._Disposed)

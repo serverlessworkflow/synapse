@@ -15,6 +15,7 @@
  *
  */
 
+using Synapse.Application.Services;
 using Synapse.Infrastructure.Services;
 using System.Diagnostics;
 
@@ -25,13 +26,8 @@ namespace Synapse.Runtime.Services
     /// Represents the native implementation of the <see cref="IWorkflowProcess"/>
     /// </summary>
     public class NativeProcess
-        : IWorkflowProcess
+        : WorkflowProcessBase
     {
-
-        /// <inheritdoc/>
-        public event EventHandler? Exited;
-
-        private bool _Disposed;
 
         /// <summary>
         /// Initializes a new <see cref="NativeProcess"/>
@@ -40,15 +36,12 @@ namespace Synapse.Runtime.Services
         public NativeProcess(Process process) 
         {
             this.Process = process;
-            this.Process.Exited += (sender, e) => this.Exited?.Invoke(this, new());
+            this.Process.Exited += (sender, e) => this.OnExited();
             this.Logs = this.Process.GetLogsAsObservable();
         }
 
         /// <inheritdoc/>
-        public string Id => this.Process.Id.ToString();
-
-        /// <inheritdoc/>
-        public ProcessStatus Status { get; protected set; }
+        public override string Id => this.Process.Id.ToString();
 
         /// <summary>
         /// Gets the underlying <see cref="System.Diagnostics.Process"/>
@@ -56,13 +49,13 @@ namespace Synapse.Runtime.Services
         protected Process Process { get; }
 
         /// <inheritdoc/>
-        public IObservable<string>? Logs { get; }
+        public override IObservable<string> Logs { get; }
 
         /// <inheritdoc/>
-        public long? ExitCode => this.Process.HasExited ? this.Process.ExitCode : null;
+        public override long? ExitCode => this.Process.HasExited ? this.Process.ExitCode : null;
 
         /// <inheritdoc/>
-        public virtual ValueTask StartAsync(CancellationToken cancellationToken = default)
+        public override ValueTask StartAsync(CancellationToken cancellationToken = default)
         {
             this.Process.Start();
             this.Process.BeginOutputReadLine();
@@ -71,56 +64,10 @@ namespace Synapse.Runtime.Services
         }
 
         /// <inheritdoc/>
-        public virtual ValueTask TerminateAsync(CancellationToken cancellationToken = default)
+        public override ValueTask TerminateAsync(CancellationToken cancellationToken = default)
         {
             this.Process.Close();
             return ValueTask.CompletedTask;
-        }
-
-        /// <summary>
-        /// Disposes of the <see cref="IWorkflowProcess"/>
-        /// </summary>
-        /// <param name="disposing">A boolean indicating whether or not the <see cref="IWorkflowProcess"/> is being disposed of</param>
-        public virtual ValueTask DisposeAsync(bool disposing)
-        {
-            if (!this._Disposed)
-            {
-                if (disposing)
-                {
-                    this.Process.Dispose();
-                }
-                this._Disposed = true;
-            }
-            return ValueTask.CompletedTask;
-        }
-
-        /// <inheritdoc/>
-        public ValueTask DisposeAsync()
-        {
-            return this.DisposeAsync(true);
-        }
-
-        /// <summary>
-        /// Disposes of the <see cref="IWorkflowProcess"/>
-        /// </summary>
-        /// <param name="disposing">A boolean indicating whether or not the <see cref="IWorkflowProcess"/> is being disposed of</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!this._Disposed)
-            {
-                if (disposing)
-                {
-                    this.Process.Dispose();
-                }
-                this._Disposed = true;
-            }
-        }
-
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            this.Dispose(disposing: true);
-            GC.SuppressFinalize(this);
         }
 
     }

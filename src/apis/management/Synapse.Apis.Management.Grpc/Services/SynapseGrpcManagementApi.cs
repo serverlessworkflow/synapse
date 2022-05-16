@@ -149,6 +149,12 @@ namespace Synapse.Apis.Management.Grpc
             return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new Application.Commands.WorkflowInstances.V1DeleteWorkflowInstanceCommand(id), context.CancellationToken));
         }
 
+        /// <inheritdoc/>
+        public virtual async Task<GrpcApiResult<string>> GetWorkflowInstanceLogsAsync(string id, CallContext context = default)
+        {
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new Application.Queries.WorkflowInstances.V1GetWorkflowInstanceLogsQuery(id), context.CancellationToken));
+        }
+
         #endregion
 
         #region Correlations
@@ -176,6 +182,7 @@ namespace Synapse.Apis.Management.Grpc
         {
             return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new V1DeleteCommand<V1Correlation, string>(id), context.CancellationToken));
         }
+
 
         #endregion
 

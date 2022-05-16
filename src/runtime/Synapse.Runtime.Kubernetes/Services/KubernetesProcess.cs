@@ -27,7 +27,7 @@ namespace Synapse.Runtime.Kubernetes.Services
     /// Represents a Kubernetes-native <see cref="IWorkflowProcess"/>
     /// </summary>
     public class KubernetesProcess
-        : ProcessBase
+        : WorkflowProcessBase
     {
 
         /// <summary>
@@ -36,11 +36,13 @@ namespace Synapse.Runtime.Kubernetes.Services
         /// <param name="pod">The managed <see cref="V1Pod"/></param>
         /// <param name="kubernetes">The service used to interact with the Kubernetes API</param>
         public KubernetesProcess(V1Pod pod, IKubernetes kubernetes) 
-            : base($"{pod.Name()}.{pod.Namespace()}")
         {
             this.Pod = pod;
             this.Kubernetes = kubernetes;
         }
+
+        /// <inheritdoc/>
+        public override string Id => $"{this.Pod.Name()}.{this.Pod.Namespace()}";
 
         /// <summary>
         /// Gets the managed <see cref="V1Pod"/>

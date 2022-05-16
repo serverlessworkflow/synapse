@@ -27,7 +27,7 @@ namespace Synapse.Integration.Events.WorkflowProcesses
 	/// Represents the IDomainEvent fired whenever a new log has been outputed to a V1WorkflowProcess
 	/// </summary>
 	[DataContract]
-	public partial class V1WorkflowProcessOutputtedLogIntegrationEvent
+	public partial class V1WorkflowProcessLogOutputIntegrationEvent
 		: V1IntegrationEvent
 	{
 

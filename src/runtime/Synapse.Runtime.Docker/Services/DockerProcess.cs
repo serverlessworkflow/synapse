@@ -24,7 +24,7 @@ namespace Synapse.Runtime.Services
     /// Represents the Docker implementation of the <see cref="IWorkflowProcess"/> interface
     /// </summary>
     public class DockerProcess
-        : ProcessBase
+        : WorkflowProcessBase
     {
 
         /// <summary>
@@ -33,10 +33,13 @@ namespace Synapse.Runtime.Services
         /// <param name="id">The <see cref="DockerProcess"/>'s id</param>
         /// <param name="docker">The service used to interact with the Docker API</param>
         public DockerProcess(string id, IDockerClient docker)
-            : base(id)
         {
+            this.Id = id;
             this.Docker = docker;
         }
+
+        /// <inheritdoc/>
+        public override string Id { get; }
 
         private IObservable<string>? _Logs;
         /// <inheritdoc/>

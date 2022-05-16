@@ -48,9 +48,9 @@ namespace Synapse.Integration.Events.WorkflowProcesses
 		/// <summary>
 		/// The id of the V1WorkflowProcess's exit code
 		/// </summary>
-		[DataMember(Name = "ProcessExitCode", Order = 3)]
+		[DataMember(Name = "ExitCode", Order = 3)]
 		[Description("The id of the V1WorkflowProcess's exit code")]
-		public virtual long ProcessExitCode { get; set; }
+		public virtual long ExitCode { get; set; }
 
     }
 

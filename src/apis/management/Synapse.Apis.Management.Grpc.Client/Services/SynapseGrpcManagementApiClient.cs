@@ -164,7 +164,18 @@ namespace Synapse.Apis.Management.Grpc
         /// <inheritdoc/>
         public virtual async Task DeleteWorkflowInstanceAsync(string id, CancellationToken cancellationToken = default)
         {
-            await this.DeleteWorkflowInstanceAsync(id, cancellationToken);
+            var result = await this.Adapter.DeleteWorkflowInstanceAsync(id, cancellationToken);
+            if(!result.Succeeded)
+                throw new SynapseApiException(result);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<string> GetWorkflowInstanceLogsAsync(string id, CancellationToken cancellationToken = default)
+        {
+            var result = await this.Adapter.GetWorkflowInstanceLogsAsync(id, cancellationToken);
+            if (!result.Succeeded)
+                throw new SynapseApiException(result);
+            return result.Data!;
         }
 
         #endregion

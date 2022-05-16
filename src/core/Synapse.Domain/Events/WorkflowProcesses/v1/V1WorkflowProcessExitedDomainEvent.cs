@@ -42,13 +42,13 @@ namespace Synapse.Domain.Events.V1WorkflowProcesses
         public V1WorkflowProcessExitedDomainEvent(string id, long exitCode)
             : base(id)
         {
-            this.ProcessExitCode = exitCode;
+            this.ExitCode = exitCode;
         }
 
         /// <summary>
         /// Gets the id of the <see cref="V1WorkflowProcess"/>'s exit code
         /// </summary>
-        public virtual long ProcessExitCode { get; protected set; }
+        public virtual long ExitCode { get; protected set; }
 
     }
 

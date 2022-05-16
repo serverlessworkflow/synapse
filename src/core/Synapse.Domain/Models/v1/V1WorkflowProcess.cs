@@ -82,7 +82,7 @@ namespace Synapse.Domain.Models
         /// <param name="log">The value to append to the <see cref="V1WorkflowRuntimeSession"/>'s logs</param>
         public virtual void AppendLog(string log)
         {
-            this.On(this.RegisterEvent(new V1WorkflowProcessOutputtedLogDomainEvent(this.Id, log)));
+            this.On(this.RegisterEvent(new V1WorkflowProcessLogOutputDomainEvent(this.Id, log)));
         }
 
         /// <summary>
@@ -106,13 +106,13 @@ namespace Synapse.Domain.Models
         }
 
         /// <summary>
-        /// Handles the specified <see cref="V1WorkflowProcessOutputtedLogDomainEvent"/>
+        /// Handles the specified <see cref="V1WorkflowProcessLogOutputDomainEvent"/>
         /// </summary>
-        /// <param name="e">The <see cref="V1WorkflowProcessOutputtedLogDomainEvent"/> to handle</param>
-        protected virtual void On(V1WorkflowProcessOutputtedLogDomainEvent e)
+        /// <param name="e">The <see cref="V1WorkflowProcessLogOutputDomainEvent"/> to handle</param>
+        protected virtual void On(V1WorkflowProcessLogOutputDomainEvent e)
         {
             this.LastModified = e.CreatedAt;
-            this.Logs += e.Log;
+            this.Logs += e.Log + Environment.NewLine;
         }
 
         /// <summary>
@@ -123,7 +123,7 @@ namespace Synapse.Domain.Models
         {
             this.LastModified = e.CreatedAt;
             this.ExitedAt = e.CreatedAt;
-            this.ExitCode = e.ProcessExitCode;
+            this.ExitCode = e.ExitCode;
         }
 
     }

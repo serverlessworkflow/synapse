@@ -76,6 +76,10 @@ namespace Synapse.Application.Services
             process.Disposed += (sender, e) => this.OnProcessDisposed((IWorkflowProcess)sender!);
             await process.StartAsync(cancellationToken);
             this.Processes.AddOrUpdate(process.Id, process, (key, existing) => throw new DuplicateWaitObjectException("process"));
+            using var scope = this.ServiceProvider.CreateScope();
+            var processStates = scope.ServiceProvider.GetRequiredService<IRepository<V1WorkflowProcess>>();
+            await processStates.AddAsync(new(process.Id), this.CancellationTokenSource.Token);
+            await processStates.SaveChangesAsync(cancellationToken);
             return process;
         }
 
@@ -111,7 +115,12 @@ namespace Synapse.Application.Services
         /// <param name="process">The <see cref="IWorkflowProcess"/> that has exited</param>
         protected virtual async void OnProcessExitedAsync(IWorkflowProcess process)
         {
-            this.Processes.TryRemove(process.Id, out _);
+            using var scope = this.ServiceProvider.CreateScope();
+            var processStates = scope.ServiceProvider.GetRequiredService<IRepository<V1WorkflowProcess>>();
+            var processState = await processStates.FindAsync(process.Id);
+            processState.Exit(process.ExitCode!.Value);
+            await processStates.UpdateAsync(processState, this.CancellationTokenSource.Token);
+            await processStates.SaveChangesAsync(this.CancellationTokenSource.Token);
             await process.DisposeAsync();
         }
 

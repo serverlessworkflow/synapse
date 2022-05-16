@@ -21,25 +21,25 @@ namespace Synapse.Domain.Events.V1WorkflowProcesses
     /// <summary>
     /// Represents the <see cref="IDomainEvent"/> fired whenever a new log has been outputed to a <see cref="V1WorkflowProcess"/>
     /// </summary>
-    [DataTransferObjectType(typeof(Integration.Events.WorkflowProcesses.V1WorkflowProcessOutputtedLogIntegrationEvent))]
-    public class V1WorkflowProcessOutputtedLogDomainEvent
+    [DataTransferObjectType(typeof(Integration.Events.WorkflowProcesses.V1WorkflowProcessLogOutputIntegrationEvent))]
+    public class V1WorkflowProcessLogOutputDomainEvent
         : DomainEvent<Models.V1WorkflowProcess, string>
     {
 
         /// <summary>
-        /// Initializes a new <see cref="V1WorkflowProcessOutputtedLogDomainEvent"/>
+        /// Initializes a new <see cref="V1WorkflowProcessLogOutputDomainEvent"/>
         /// </summary>
-        protected V1WorkflowProcessOutputtedLogDomainEvent()
+        protected V1WorkflowProcessLogOutputDomainEvent()
         {
 
         }
 
         /// <summary>
-        /// Initializes a new <see cref="V1WorkflowProcessOutputtedLogDomainEvent"/>
+        /// Initializes a new <see cref="V1WorkflowProcessLogOutputDomainEvent"/>
         /// </summary>
         /// <param name="id">The id of the <see cref="V1WorkflowRuntimeSession"/> that has outputted the log</param>
         /// <param name="log">The log outputed by the <see cref="V1WorkflowRuntimeSession"/></param>
-        public V1WorkflowProcessOutputtedLogDomainEvent(string id, string log)
+        public V1WorkflowProcessLogOutputDomainEvent(string id, string log)
             : base(id)
         {
             this.Log = log;

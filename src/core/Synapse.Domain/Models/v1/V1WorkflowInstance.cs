@@ -184,14 +184,14 @@ namespace Synapse.Domain.Models
         /// <summary>
         /// Starts the <see cref="V1WorkflowInstance"/>'s execution
         /// </summary>
-        /// <param name="runtimeIdentifier">A string used to uniquely identify the <see cref="V1WorkflowInstance"/>'s runtime</param>
-        public virtual void Start(string runtimeIdentifier)
+        /// <param name="processId">A string used to uniquely identify the <see cref="V1WorkflowInstance"/>'s process</param>
+        public virtual void Start(string processId)
         {
-            if(string.IsNullOrEmpty(runtimeIdentifier))
-                throw DomainException.ArgumentNull(nameof(runtimeIdentifier));
+            if(string.IsNullOrEmpty(processId))
+                throw DomainException.ArgumentNull(nameof(processId));
             if (this.Status > V1WorkflowInstanceStatus.Scheduled)
                 throw DomainException.UnexpectedState(typeof(V1WorkflowInstance), this.Id, this.Status);
-            this.On(this.RegisterEvent(new V1WorkflowInstanceStartingDomainEvent(this.Id, runtimeIdentifier)));
+            this.On(this.RegisterEvent(new V1WorkflowInstanceStartingDomainEvent(this.Id, processId)));
         }
 
         /// <summary>
