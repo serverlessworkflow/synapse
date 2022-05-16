@@ -161,6 +161,14 @@ else
             .Subscribe(instances =>
             {
                 this.instances = instances.Where(instance => instance.WorkflowId == this.WorkflowId).ToList();
+                if (this.WorkflowInstanceId == null)
+                {
+                    this.workflowInstance = null!;
+                }
+                else
+                {
+                    this.workflowInstance = this.instances.FirstOrDefault(i => i.Id == this.WorkflowInstanceId);
+                }
                 this.UpdateActivities();
             });
         this.workflowActivitySubscription = this.workflowActivityFeature
@@ -185,7 +193,7 @@ else
             });
         this.Dispatcher.Dispatch(new ListV1WorkflowInstancesByDefinition(this.WorkflowId));
         await this.BreadcrumbService.Use(KnownBreadcrumbs.Workflows);
-        await this.BreadcrumbService.AddCurrentUri(this.WorkflowId);
+        await this.BreadcrumbService.AddItem(new BreadcrumbItem(this.WorkflowId.ToString(), $"/workflows/{this.WorkflowId}"));
         this.workflowBreadCrumbBase = new List<IBreadcrumbItem>(this.BreadcrumbService.Items);
     }
 
