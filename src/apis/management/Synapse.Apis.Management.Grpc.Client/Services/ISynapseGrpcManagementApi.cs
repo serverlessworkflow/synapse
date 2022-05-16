@@ -191,12 +191,13 @@ namespace Synapse.Apis.Management.Grpc
         #region Metrics
 
         /// <summary>
-        /// Gets the <see cref="V1ApplicationMetrics"/>
+        /// Gets the <see cref="V1OperationalReport"/>
         /// </summary>
+        /// <param name="date">The date to get the report for. Defaults to today</param>
         /// <param name="context">The current <see cref="CallContext"/></param>
-        /// <returns>The <see cref="V1ApplicationMetrics"/></returns>
+        /// <returns>The <see cref="V1OperationalReport"/></returns>
         [OperationContract]
-        Task<GrpcApiResult<V1ApplicationMetrics>> GetApplicationMetricsAsync(CallContext context = default);
+        Task<GrpcApiResult<V1OperationalReport>> GetOperationalReportAsync(DateTime? date = null, CallContext context = default);
 
         #endregion
 

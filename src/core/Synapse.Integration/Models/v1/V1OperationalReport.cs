@@ -20,16 +20,16 @@ namespace Synapse.Integration.Models
 
     [ReadModel]
     [DataContract]
-    public class V1ApplicationMetrics
+    public class V1OperationalReport
         : IIdentifiable<string>
     {
 
-        protected V1ApplicationMetrics()
+        protected V1OperationalReport()
         {
 
         }
 
-        public V1ApplicationMetrics(DateTime date)
+        public V1OperationalReport(DateTime date)
         {
             this.Id = GetIdFor(date);
             this.Date = date;

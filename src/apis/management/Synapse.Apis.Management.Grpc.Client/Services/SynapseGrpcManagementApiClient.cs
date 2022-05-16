@@ -213,12 +213,12 @@ namespace Synapse.Apis.Management.Grpc
 
         #endregion region
 
-        #region Metrics
+        #region OperationalReports
 
         /// <inheritdoc/>
-        public virtual async Task<V1ApplicationMetrics> GetApplicationMetricsAsync(CancellationToken cancellationToken = default)
+        public virtual async Task<V1OperationalReport> GetOperationalReportAsync(DateTime? date = null, CancellationToken cancellationToken = default)
         {
-            var result = await this.Adapter.GetApplicationMetricsAsync(cancellationToken);
+            var result = await this.Adapter.GetOperationalReportAsync(date, cancellationToken);
             if (!result.Succeeded)
                 throw new SynapseApiException(result);
             return result.Data!;
