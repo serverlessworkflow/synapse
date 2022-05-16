@@ -160,7 +160,7 @@ else
         this.workflowInstanceSubscription = this.workflowInstanceFeature
             .Subscribe(instances =>
             {
-                this.instances = instances;
+                this.instances = instances.Where(instance => instance.WorkflowId == this.WorkflowId).ToList();
                 this.UpdateActivities();
             });
         this.workflowActivitySubscription = this.workflowActivityFeature
