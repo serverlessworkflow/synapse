@@ -117,10 +117,6 @@ input[type=time]::-webkit-clear-button {
     }
 
     .activity-badge {
-        circle {
-            stroke-width: 1;
-        }
-
         &.activity-badge--active circle {
             fill: var(--bs-success);
         }
