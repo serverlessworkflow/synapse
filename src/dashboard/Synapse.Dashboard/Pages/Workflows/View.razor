@@ -108,7 +108,7 @@
                                             <button @onclick="() => Dispatcher.Dispatch(new SuspendV1WorkflowInstance(((V1WorkflowInstance)context.Value!).Id))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><span class="oi oi-media-pause"></span><span class="btn-label">&nbsp; Suspend</span></button>
                                         }
                                         @if(((V1WorkflowInstance)context.Value!).Status == V1WorkflowInstanceStatus.Suspended) {
-                                            <button @onclick="() => Dispatcher.Dispatch(new ResumeV1WorkflowInstance(((V1WorkflowInstance)context.Value!).Id))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><span class="oi oi-media-pause"></span><span class="btn-label">&nbsp; Resume</span></button>
+                                            <button @onclick="() => Dispatcher.Dispatch(new ResumeV1WorkflowInstance(((V1WorkflowInstance)context.Value!).Id))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><span class="oi oi-media-play"></span><span class="btn-label">&nbsp; Resume</span></button>
                                         }
                                         @if (((V1WorkflowInstance)context.Value!).Status <= V1WorkflowInstanceStatus.Resuming) {
                                             <button @onclick="() => Dispatcher.Dispatch(new CancelV1WorkflowInstance(((V1WorkflowInstance)context.Value!).Id))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><span class="oi oi-media-stop"></span><span class="btn-label">&nbsp; Terminate</span></button>
