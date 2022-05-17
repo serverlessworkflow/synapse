@@ -172,7 +172,7 @@ namespace Synapse.Apis.Runtime.Grpc
         /// <inheritdoc/>
         public virtual async Task<GrpcApiResult<V1WorkflowInstance>> SuspendAsync(string workflowInstanceId, CallContext context = default)
         {
-            throw new NotImplementedException(); //todo: implement (URGENT)
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new Application.Commands.WorkflowInstances.V1SuspendWorkflowInstanceCommand(workflowInstanceId), context.CancellationToken));
         }
 
         /// <inheritdoc/>
