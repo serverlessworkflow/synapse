@@ -23,7 +23,7 @@ namespace Synapse.Dashboard
     public static class GraphExtensions
     {
 
-        public static void DisplayActivityStatusFor(this IGraphViewModel graph, IEnumerable<V1WorkflowInstance> instances)
+        public static void DisplayActivityStatusFor(this IGraphViewModel graph, IEnumerable<V1WorkflowInstance> instances, bool highlightPath = false)
         {
             graph.ClearActivityStatus();
             foreach (var instance in instances)
@@ -31,23 +31,37 @@ namespace Synapse.Dashboard
                 if(instance.Status == V1WorkflowInstanceStatus.Pending 
                     || instance.Status == V1WorkflowInstanceStatus.Starting)
                 {
-                    var node = graph.Nodes.OfType<StartNodeViewModel>().FirstOrDefault();
+                    var node = graph.Nodes.Values.OfType<StartNodeViewModel>().FirstOrDefault();
                     if(node != null)
                         node.ActiveInstances.Add(instance);
                     continue;
                 }
+                if (instance.Status == V1WorkflowInstanceStatus.Completed)
+                {
+                    var node = graph.Nodes.Values.OfType<EndNodeViewModel>().FirstOrDefault();
+                    if (node != null)
+                        node.ActiveInstances.Add(instance);
+                    continue;
+                }
                 if (instance.Activities != null) { 
-                    foreach(var activity in instance.Activities.Where(a => a.Status == V1WorkflowActivityStatus.Pending || a.Status == V1WorkflowActivityStatus.Running))
+                    foreach(var activity in instance.Activities)
                     {
                         var node = graph.GetNodeFor(activity);
                         if(node != null)
-                            node.ActiveInstances.Add(instance);    
-                    }
-                    foreach (var activity in instance.Activities.Where(a => a.Status == V1WorkflowActivityStatus.Faulted))
-                    {
-                        var node = graph.GetNodeFor(activity);
-                        if (node != null)
-                            node.FaultedInstances.Add(instance);
+                        {
+                            if (activity.Status == V1WorkflowActivityStatus.Pending || activity.Status == V1WorkflowActivityStatus.Running)
+                            {
+                                node.ActiveInstances.Add(instance);
+                            }
+                            else if (activity.Status == V1WorkflowActivityStatus.Faulted)
+                            {
+                                node.FaultedInstances.Add(instance);
+                            }
+                            if (highlightPath)
+                            {
+                                ((INodeViewModel)node).CssClass = (((INodeViewModel)node).CssClass ?? "") + " active" ;
+                            }
+                        }
                     }
                 }
             }
@@ -57,10 +71,14 @@ namespace Synapse.Dashboard
         {
             var nodes = graph.AllNodes.Values.ToList();
             nodes.AddRange(graph.AllClusters.Values);
-            foreach (var node in nodes.OfType<IWorkflowNodeViewModel>())
+            foreach (var node in nodes)
             {
-                node.ActiveInstances.Clear();
-                node.FaultedInstances.Clear();
+                if (node is IWorkflowNodeViewModel wfNode)
+                {
+                    wfNode.ActiveInstances.Clear();
+                    wfNode.FaultedInstances.Clear();
+                }
+                node.CssClass = node.CssClass?.Replace(" active", "");
             }
         }
 
@@ -79,7 +97,7 @@ namespace Synapse.Dashboard
                 case V1WorkflowActivityType.ConsumeEvent:
                     throw new NotImplementedException(); //todo
                 case V1WorkflowActivityType.End:
-                    return graph.Nodes.OfType<EndNodeViewModel>().FirstOrDefault();
+                    return graph.Nodes.Values.OfType<EndNodeViewModel>().FirstOrDefault();
                 case V1WorkflowActivityType.Error:
                     throw new NotImplementedException(); //todo
                 case V1WorkflowActivityType.EventTrigger:
@@ -89,7 +107,7 @@ namespace Synapse.Dashboard
                 case V1WorkflowActivityType.ProduceEvent:
                     throw new NotImplementedException(); //todo
                 case V1WorkflowActivityType.Start:
-                    return graph.Nodes.OfType<StartNodeViewModel>().FirstOrDefault();
+                    return graph.Nodes.Values.OfType<StartNodeViewModel>().FirstOrDefault();
                 case V1WorkflowActivityType.State:
                     return graph.GetStateNodeFor(activity);
                 case V1WorkflowActivityType.SubFlow:

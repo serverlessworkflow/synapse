@@ -313,6 +313,24 @@ namespace Synapse.Apis.Management.Http
 
         #endregion region
 
+        #region OperationalReports
+
+        /// <inheritdoc/>
+        public virtual async Task<V1OperationalReport> GetOperationalReportAsync(DateTime? date = null, CancellationToken cancellationToken = default)
+        {
+            if (date == null)
+                date = DateTime.Now;
+            using var request = this.CreateRequest(HttpMethod.Get, $"/api/v1/reports/operations?date={date}");
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while querying operation reports: {details}", json);
+            response.EnsureSuccessStatusCode();
+            return await this.Serializer.DeserializeAsync<V1OperationalReport>(json, cancellationToken);
+        }
+
+        #endregion
+
     }
 
 }
