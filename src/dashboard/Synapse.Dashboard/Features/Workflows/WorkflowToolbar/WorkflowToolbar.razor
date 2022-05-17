@@ -28,7 +28,7 @@
 @if (Workflow != null) 
 {
     <Toolbar>
-        <button @onclick="OnShowWorkflowInputModal" class="btn btn-outline-dark" title="Start workflow"><span class="oi oi-media-play"></span><span class="btn-label">&nbsp; Start workflow</span></button>
+        <button @onclick="async () => await OnShowWorkflowInputModal()" class="btn btn-outline-dark" title="Start workflow">Start workflow <span class="oi oi-media-play"></span></button>
     </Toolbar>
     
     <Modal @ref="errorModal">
@@ -109,11 +109,11 @@
         this.dataInputSchema = schema;
     }
 
-    protected async Task OnShowWorkflowInputModal()
+    public async Task OnShowWorkflowInputModal(string value = "{}")
     {
         this.inputValidationErrors = null;
         if(this.workflowInputEditor != null)
-            await this.workflowInputEditor.SetValue("{}");
+            await this.workflowInputEditor.SetValue(value);
         if(this.dataInputSchema != null
             && this.workflowInputEditor != null)
         {

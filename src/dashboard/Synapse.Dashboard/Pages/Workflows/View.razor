@@ -18,6 +18,7 @@
 @page "/workflows/{workflowId}/instance/{workflowInstanceId}"
 @using Microsoft.AspNetCore.SignalR.Client
 @using Neuroglia.Data.Flux
+@using Neuroglia.Serialization
 @using Newtonsoft.Json
 @using System.Text
 @implements IDisposable
@@ -26,13 +27,14 @@
 @inject ISynapseManagementApi SynapseApi
 @inject IMonacoEditorHelper MonacoEditorHelper
 @inject IBreadcrumbService BreadcrumbService
+@inject IJsonSerializer Serializer
 @inject HubConnection HubConnection
 @inject NavigationManager NavigationManager
 
 <PageTitle>@workflow?.Id</PageTitle>
 <AppRightSidebar>
     @if (workflow != null && workflowInstance == null) {
-        <WorkflowToolbar Workflow="workflow" />
+        <WorkflowToolbar @ref="workflowToolbar" Workflow="workflow" />
     }
     else if (workflow != null && workflowInstance != null)
     {
@@ -94,6 +96,26 @@
                                     ValueProvider="source => ((V1WorkflowInstance)source).Duration"
                                     IsSorteable="false"
                                     IsFilterable="false"/>
+
+                                <Column
+                                    T="V1WorkflowInstance"   
+                                    Name="Actions"
+                                    ValueProvider="source => source"
+                                    IsSorteable="false"
+                                    IsFilterable="false">                                
+                                    <CellTemplate Context="context">
+                                        @if(((V1WorkflowInstance)context.Value!).Status == V1WorkflowInstanceStatus.Running) {
+                                            <button @onclick="() => Dispatcher.Dispatch(new SuspendV1WorkflowInstance(((V1WorkflowInstance)context.Value!).Id))" @onclick:stopPropagation="true" class="btn btn-outline-dark">Suspend <span class="oi oi-media-pause"></span></button>
+                                        }
+                                        @if(((V1WorkflowInstance)context.Value!).Status == V1WorkflowInstanceStatus.Suspended) {
+                                            <button @onclick="() => Dispatcher.Dispatch(new ResumeV1WorkflowInstance(((V1WorkflowInstance)context.Value!).Id))" @onclick:stopPropagation="true" class="btn btn-outline-dark">Resume <span class="oi oi-media-pause"></span></button>
+                                        }
+                                        @if (((V1WorkflowInstance)context.Value!).Status <= V1WorkflowInstanceStatus.Resuming) {
+                                            <button @onclick="() => Dispatcher.Dispatch(new CancelV1WorkflowInstance(((V1WorkflowInstance)context.Value!).Id))" @onclick:stopPropagation="true" class="btn btn-outline-dark">Terminate <span class="oi oi-media-stop"></span></button>
+                                        }
+                                        <button @onclick="async () => await StartWith(((V1WorkflowInstance?)context.Value)?.Input)" @onclick:stopPropagation="true" class="btn btn-outline-dark">Play again <span class="oi oi-reload"></span></button>
+                                    </CellTemplate>
+                                </Column>
                                 <ViewDetailsColumn T="V1WorkflowInstance" OnViewDetails="OnViewWorkflowInstance" />
                             </Columns>
                         </Table>
@@ -152,6 +174,7 @@ else
     protected List<V1WorkflowActivity> sortedActivities = new List<V1WorkflowActivity>();
     protected List<V1WorkflowInstance> instances = new();
     protected IEnumerable<IBreadcrumbItem> workflowBreadCrumbBase = null!;
+    protected WorkflowToolbar? workflowToolbar = null;
 
     protected override async Task OnInitializedAsync()
     {
@@ -262,6 +285,14 @@ else
             this.workflow.ShortestInstanceDuration = durations.Any() ? durations.Min() : null;
             this.workflow.LongestInstanceDuration = durations.Any() ? durations.Max() : null;
         }
+    }
+
+    protected async Task StartWith(Neuroglia.Serialization.Dynamic? input)
+    {
+        if (this.workflowToolbar == null || input == null)
+            return;
+        var serializedInput = await this.Serializer.SerializeAsync(input);
+        await this.workflowToolbar.OnShowWorkflowInputModal(serializedInput);
     }
 
     protected string GetCssClassFor(V1WorkflowInstanceStatus workflowInstanceStatus)

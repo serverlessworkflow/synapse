@@ -121,6 +121,76 @@
                 }   
             });
         this.IntegrationEventStream
+            .Where(e => e.Type == "io.synapse/v1workflowinstance/suspending/v1")
+            .Subscribe(e =>
+            {
+                try
+                {
+                    var data = e.Data.ToObject<V1WorkflowInstanceSuspendingIntegrationEvent>();
+                    this.Dispatcher.Dispatch(new MarkV1WorkflowInstanceAsSuspending(data.AggregateId, data.CreatedAt));
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }   
+            });
+        this.IntegrationEventStream
+            .Where(e => e.Type == "io.synapse/v1workflowinstance/suspended/v1")
+            .Subscribe(e =>
+            {
+                try
+                {
+                    var data = e.Data.ToObject<V1WorkflowInstanceSuspendedIntegrationEvent>();
+                    this.Dispatcher.Dispatch(new MarkV1WorkflowInstanceAsSuspended(data.AggregateId, data.CreatedAt));
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }   
+            });
+        this.IntegrationEventStream
+            .Where(e => e.Type == "io.synapse/v1workflowinstance/resuming/v1")
+            .Subscribe(e =>
+            {
+                try
+                {
+                    var data = e.Data.ToObject<V1WorkflowInstanceResumingIntegrationEvent>();
+                    this.Dispatcher.Dispatch(new MarkV1WorkflowInstanceAsResuming(data.AggregateId, data.CreatedAt));
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }   
+            });
+        this.IntegrationEventStream
+            .Where(e => e.Type == "io.synapse/v1workflowinstance/cancelling/v1")
+            .Subscribe(e =>
+            {
+                try
+                {
+                    var data = e.Data.ToObject<V1WorkflowInstanceCancellingIntegrationEvent>();
+                    this.Dispatcher.Dispatch(new MarkV1WorkflowInstanceAsCancelling(data.AggregateId, data.CreatedAt));
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }   
+            });
+        this.IntegrationEventStream
+            .Where(e => e.Type == "io.synapse/v1workflowinstance/cancelled/v1")
+            .Subscribe(e =>
+            {
+                try
+                {
+                    var data = e.Data.ToObject<V1WorkflowInstanceCancelledIntegrationEvent>();
+                    this.Dispatcher.Dispatch(new MarkV1WorkflowInstanceAsCancelled(data.AggregateId, data.CreatedAt));
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }   
+            });
+        this.IntegrationEventStream
             .Where(e => e.Type == "io.synapse/v1workflowinstance/faulted/v1")
             .Subscribe(e =>
             {
