@@ -213,6 +213,19 @@ namespace Synapse.Apis.Management
 
         #endregion
 
+        #region Metrics
+
+        /// <summary>
+        /// Gets the <see cref="V1OperationalReport"/>
+        /// </summary>
+        /// <param name="date">The date to get the <see cref="V1OperationalReport"/> for</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The <see cref="V1OperationalReport"/></returns>
+        [OperationContract]
+        Task<V1OperationalReport> GetOperationalReportAsync(DateTime? date = null, CancellationToken cancellationToken = default);
+
+        #endregion
+
     }
 
 }

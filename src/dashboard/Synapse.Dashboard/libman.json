@@ -133,6 +133,15 @@
         "jq.wasm.js",
         "jq.wasm.wasm"
       ]
+    },
+    {
+      "provider": "unpkg",
+      "library": "chart.js@3.7.1",
+      "destination": "wwwroot/lib/chart.js/",
+      "files": [
+        "dist/chart.js",
+        "dist/chart.min.js"
+      ]
     }
   ]
 }

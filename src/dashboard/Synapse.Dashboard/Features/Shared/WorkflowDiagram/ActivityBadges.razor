@@ -77,10 +77,9 @@
         this.CountXY = (0 - radius).ToInvariantString();
     }
 
-
     protected override void OnParametersSet()
     {
-        double divider = 2;
+        double divider = this.Node.Shape == NodeShape.Circle || this.Node.Shape == NodeShape.Ellipse ? 1 : 2;
         double offset = Constants.GraphBagdesRadius * 4;
         if (this.ActiveInstances.Any() && this.FaultedInstances.Any())
         {

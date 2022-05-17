@@ -162,12 +162,14 @@ else
     public string? WorkflowInstanceId { get; set; } = null!;
     protected string? workflowInstanceId = null!;
 
+    protected IDisposable? workflowSubscription;
     protected IDisposable? workflowInstanceSubscription;
     protected IDisposable? workflowActivitySubscription;
     protected WorkflowDiagram workflowDiagram = null!;
+    protected IFeature<V1WorkflowCollectionState> workflowFeature = null!;
     protected IFeature<V1WorkflowInstanceCollectionState> workflowInstanceFeature = null!;
     protected IFeature<V1WorkflowActivityCollectionState> workflowActivityFeature = null!;
-    protected V1Workflow workflow = null!;
+    protected V1Workflow? workflow = null;
     protected V1WorkflowInstance? workflowInstance = null;
     protected List<V1WorkflowActivity> sortedActivities = new List<V1WorkflowActivity>();
     protected List<V1WorkflowInstance> instances = new();
@@ -177,14 +179,30 @@ else
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        this.workflow = await this.SynapseApi.GetWorkflowByIdAsync(this.WorkflowId);
+        this.workflowFeature = this.Store.GetFeature<V1WorkflowCollectionState>();
         this.workflowInstanceFeature = this.Store.GetFeature<V1WorkflowInstanceCollectionState>();
         this.workflowActivityFeature = this.Store.GetFeature<V1WorkflowActivityCollectionState>();
+        this.workflowSubscription = this.workflowFeature
+            .Subscribe(workflows =>
+            {
+                this.workflow = workflows.FirstOrDefault(wf => wf.Id == this.WorkflowId);
+                this.UpdateActivities();
+            });
         this.workflowInstanceSubscription = this.workflowInstanceFeature
             .Subscribe(instances =>
             {
-                this.instances = instances;
+                this.instances = instances.Where(instance => instance.WorkflowId == this.WorkflowId).ToList();
+                if (this.WorkflowInstanceId == null)
+                {
+                    this.workflowInstance = null!;
+                }
+                else
+                {
+                    this.workflowInstance = this.instances.FirstOrDefault(i => i.Id == this.WorkflowInstanceId);
+                }
                 this.UpdateActivities();
+                this.UpdateMetrics();
+                this.StateHasChanged();
             });
         this.workflowActivitySubscription = this.workflowActivityFeature
             .Subscribe(activities =>
@@ -205,10 +223,13 @@ else
                     }
                 });
                 this.UpdateActivities();
+                this.UpdateMetrics();
+                this.StateHasChanged();
             });
+        this.Dispatcher.Dispatch(new GetV1WorkflowById(this.WorkflowId));
         this.Dispatcher.Dispatch(new ListV1WorkflowInstancesByDefinition(this.WorkflowId));
         await this.BreadcrumbService.Use(KnownBreadcrumbs.Workflows);
-        await this.BreadcrumbService.AddCurrentUri(this.WorkflowId);
+        await this.BreadcrumbService.AddItem(new BreadcrumbItem(this.WorkflowId.ToString(), $"/workflows/{this.WorkflowId}"));
         this.workflowBreadCrumbBase = new List<IBreadcrumbItem>(this.BreadcrumbService.Items);
     }
 
@@ -245,9 +266,25 @@ else
         else
         {
             this.sortedActivities = this.workflowInstance?.Activities != null ? this.workflowInstance.Activities.OrderBy(a => a.CreatedAt).ToList() : new List<V1WorkflowActivity>();
-            if (this.workflowDiagram != null) this.workflowDiagram.DisplayActivityStatusFor(this.instances.Where(i => i.Id == this.WorkflowInstanceId));
+            if (this.workflowDiagram != null) this.workflowDiagram.DisplayActivityStatusFor(this.instances.Where(i => i.Id == this.WorkflowInstanceId), true);
         }
-        this.StateHasChanged();
+    }
+
+    protected void UpdateMetrics()
+    {
+        if (this.workflow != null && this.instances != null)
+        {
+            var durations = this.instances.Where(instances => instances.Duration.HasValue).Select(instance => instance.Duration!.Value);
+            this.workflow.TotalInstanceCount = this.instances.Count;
+            this.workflow.RunningInstanceCount = this.instances.Where(instance => instance.Status <= V1WorkflowInstanceStatus.Resuming).Count();
+            this.workflow.ExecutedInstanceCount = this.instances.Where(instance => instance.Status > V1WorkflowInstanceStatus.Resuming).Count();
+            this.workflow.CompletedInstanceCount = this.instances.Where(instance => instance.Status == V1WorkflowInstanceStatus.Completed).Count();
+            this.workflow.FaultedInstanceCount = this.instances.Where(instance => instance.Status == V1WorkflowInstanceStatus.Faulted).Count();
+            this.workflow.CancelledInstanceCount = this.instances.Where(instance => instance.Status == V1WorkflowInstanceStatus.Cancelled || instance.Status == V1WorkflowInstanceStatus.Cancelling).Count();
+            this.workflow.TotalInstanceExecutionTime = TimeSpan.FromMilliseconds(this.instances.Sum(instance => instance.Duration.HasValue ? instance.Duration.Value.TotalMilliseconds : 0));
+            this.workflow.ShortestInstanceDuration = durations.Any() ? durations.Min() : null;
+            this.workflow.LongestInstanceDuration = durations.Any() ? durations.Max() : null;
+        }
     }
 
     protected async Task StartWith(Neuroglia.Serialization.Dynamic? input)
@@ -281,6 +318,11 @@ else
 
     public void Dispose()
     {
+        if (this.workflowSubscription != null)
+        {
+            this.workflowSubscription?.Dispose();
+            this.workflowSubscription = null;
+        }
         if (this.workflowInstanceSubscription != null)
         {
             this.workflowInstanceSubscription?.Dispose();
