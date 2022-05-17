@@ -12358,6 +12358,7 @@ input[type=time]::-webkit-clear-button {
   opacity: 0.5;
   display: block;
   font-size: 18px;
+}
 
 table .details {
   text-align: right;
