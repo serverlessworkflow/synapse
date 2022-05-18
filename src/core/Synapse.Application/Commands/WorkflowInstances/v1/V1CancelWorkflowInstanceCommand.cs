@@ -90,11 +90,19 @@ namespace Synapse.Application.Commands.WorkflowInstances
             var workflowInstance = await this.WorkflowInstances.FindAsync(command.WorkflowInstanceId, cancellationToken);
             if (workflowInstance == null)
                 throw DomainException.NullReference(typeof(V1WorkflowInstance), command.WorkflowInstanceId);
-            workflowInstance.Cancel();
-            workflowInstance = await this.WorkflowInstances.UpdateAsync(workflowInstance, cancellationToken);
-            await this.WorkflowInstances.SaveChangesAsync(cancellationToken);
             if(this.RuntimeHostManager.TryGetProxy(command.WorkflowInstanceId, out var proxy))
+            {
+                workflowInstance.Cancel();
+                workflowInstance = await this.WorkflowInstances.UpdateAsync(workflowInstance, cancellationToken);
+                await this.WorkflowInstances.SaveChangesAsync(cancellationToken);
                 await proxy.CancelAsync(cancellationToken);
+            }
+            else
+            {
+                workflowInstance.Cancel();
+                workflowInstance.MarkAsCancelled();
+                workflowInstance = await this.WorkflowInstances.UpdateAsync(workflowInstance, cancellationToken);
+            }
             return this.Ok(this.Mapper.Map<Integration.Models.V1WorkflowInstance>(workflowInstance));
         }
 

@@ -172,7 +172,7 @@ namespace Synapse.Apis.Runtime.Grpc
         /// <inheritdoc/>
         public virtual async Task<GrpcApiResult<V1WorkflowInstance>> SuspendAsync(string workflowInstanceId, CallContext context = default)
         {
-            throw new NotImplementedException(); //todo: implement (URGENT)
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new Application.Commands.WorkflowInstances.V1MarkWorkflowInstanceAsSuspendedCommand(workflowInstanceId), context.CancellationToken));
         }
 
         /// <inheritdoc/>
@@ -184,7 +184,7 @@ namespace Synapse.Apis.Runtime.Grpc
         /// <inheritdoc/>
         public virtual async Task<GrpcApiResult<V1WorkflowInstance>> CancelAsync(string workflowInstanceId, CallContext context = default)
         {
-            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new Application.Commands.WorkflowInstances.V1CancelWorkflowInstanceCommand(workflowInstanceId), context.CancellationToken));
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new Application.Commands.WorkflowInstances.V1MarkWorkflowInstanceAsCancelledCommand(workflowInstanceId), context.CancellationToken));
         }
 
         /// <inheritdoc/>

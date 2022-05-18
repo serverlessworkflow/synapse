@@ -121,24 +121,13 @@ namespace Synapse.Worker.Services
                     case V1WorkflowInstanceStatus.Pending:
                     case V1WorkflowInstanceStatus.Scheduled:
                     case V1WorkflowInstanceStatus.Starting:
+                        await this.StartAsync();
+                        break;
                     case V1WorkflowInstanceStatus.Resuming:
-                        await this.Context.Workflow.StartAsync(this.CancellationToken);
-                        if (!this.Context.Workflow.Definition.TryGetStartState(out StateDefinition startState))
-                            throw new InvalidOperationException($"Failed to resolved the startup state for workflow '{this.Context.Workflow.Definition.Id}'");
-                        await this.Context.Workflow.TransitionToAsync(startState, this.CancellationToken);
-                        var metadata = new Dictionary<string, string>()
-                        {
-                            { V1WorkflowActivityMetadata.State, startState.Name }
-                        };
-                        await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.State, await this.Context.FilterInputAsync(startState, this.Context.Workflow.Instance.Input, this.CancellationToken), metadata, null, this.CancellationToken);
+                        await this.ResumeAsync();
                         break;
                     default:
                         throw new InvalidOperationException($"The workflow instance '{this.Context.Workflow.Instance.Id}' is in an unexpected state '{this.Context.Workflow.Instance.Status}'");
-                }
-                foreach (var activity in await this.Context.Workflow.GetOperativeActivitiesAsync(this.CancellationToken))
-                {
-                    var processor = this.CreateActivityProcessor(activity);
-                    await processor.ProcessAsync(this.CancellationToken);
                 }
             }
             catch (Exception ex)
@@ -156,6 +145,159 @@ namespace Synapse.Worker.Services
                 this.HostApplicationLifetime.StopApplication();
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Starts the <see cref="WorkflowRuntime"/>'s execution
+        /// </summary>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        protected virtual async Task StartAsync()
+        {
+            this.Logger.LogInformation("Starting the workflow's execution...");
+            await this.Context.Workflow.StartAsync(this.CancellationToken);
+            if (!this.Context.Workflow.Definition.TryGetStartState(out StateDefinition startState))
+                throw new InvalidOperationException($"Failed to resolved the startup state for workflow '{this.Context.Workflow.Definition.Id}'");
+            await this.Context.Workflow.TransitionToAsync(startState, this.CancellationToken);
+            var metadata = new Dictionary<string, string>() { { V1WorkflowActivityMetadata.State, startState.Name } };
+            var activity = await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.State, await this.Context.FilterInputAsync(startState, this.Context.Workflow.Instance.Input, this.CancellationToken), metadata, null, this.CancellationToken);
+            var processor = this.CreateActivityProcessor(activity);
+            await processor.ProcessAsync(this.CancellationToken);
+        }
+
+        /// <summary>
+        /// Resumes the <see cref="WorkflowRuntime"/>'s execution
+        /// </summary>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        protected virtual async Task ResumeAsync()
+        {
+            this.Logger.LogInformation("Resuming the workflow's execution...");
+            await this.Context.Workflow.StartAsync(this.CancellationToken);
+            var activities = await this.Context.Workflow.GetOperativeActivitiesAsync(this.CancellationToken);
+            if (!activities.Any())
+            {
+                activities = await this.Context.Workflow.GetActivitiesAsync(this.CancellationToken);
+                var lastTopLevelActivity = activities
+                    .OrderBy(a => a.CreatedAt)
+                    .LastOrDefault(a => a.Type == V1WorkflowActivityType.State || a.Type == V1WorkflowActivityType.Transition || a.Type == V1WorkflowActivityType.End);
+                if (lastTopLevelActivity == null)
+                {
+                    await this.StartAsync();
+                    return;
+                }
+                switch (lastTopLevelActivity.Type)
+                {
+                    case V1WorkflowActivityType.Start:
+                        await this.ResumeFromStartAsync(lastTopLevelActivity);
+                        break;
+                    case V1WorkflowActivityType.State:
+                        await this.ResumeFromStateAsync(lastTopLevelActivity);
+                        break;
+                    case V1WorkflowActivityType.Transition:
+                        await this.ResumeFromTransitionAsync(lastTopLevelActivity);
+                        break;
+                    case V1WorkflowActivityType.End:
+                        await this.ResumeFromEndAsync(lastTopLevelActivity);
+                        break;
+                    default:
+                        throw new NotSupportedException($"The specified {nameof(V1WorkflowActivityType)} '{nameof(lastTopLevelActivity.Type)}' is not supported in this context");
+                }
+            }
+            foreach(var activity in activities)
+            {
+                var processor = this.CreateActivityProcessor(activity);
+                await processor.ProcessAsync(this.CancellationToken);
+            }
+        }
+
+        /// <summary>
+        /// Resumes the execution of the workflow from the <see cref="StartDefinition"/>
+        /// </summary>
+        /// <param name="activity">The <see cref="V1WorkflowActivity"/> to resume from</param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        protected virtual Task ResumeFromStartAsync(V1WorkflowActivity activity)
+        {
+            if (activity == null)
+                throw new ArgumentNullException(nameof(activity));
+            //todo: implement
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Resumes the execution of the workflow from the specified <see cref="StateDefinition"/>
+        /// </summary>
+        /// <param name="activity">The <see cref="V1WorkflowActivity"/> to resume from</param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        protected virtual async Task ResumeFromStateAsync(V1WorkflowActivity activity)
+        {
+            if (activity == null)
+                throw new ArgumentNullException(nameof(activity));
+            if (!activity.Metadata.TryGetValue(V1WorkflowActivityMetadata.State, out var stateName))
+                throw new ArgumentException($"The specified activity '{activity.Id}' is missing the required metadata field '{V1WorkflowActivityMetadata.State}'");
+            if (!this.Context.Workflow.Definition.TryGetState(stateName, out var state))
+                throw new NullReferenceException($"Failed to find the workflow state with the specified name '{stateName}'");
+            V1WorkflowActivity nextActivity;
+            var metadata = new Dictionary<string, string>() { { V1WorkflowActivityMetadata.State, state.Name } };
+            if (state.Transition != null
+                || !string.IsNullOrWhiteSpace(state.TransitionToStateName))
+                nextActivity = await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Transition, activity.Output!.ToObject()!, metadata, null, this.CancellationToken);
+            else if (state.End != null
+                || state.IsEnd)
+                nextActivity = await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.End, activity.Output!.ToObject()!, metadata, null, this.CancellationToken);
+            else
+                throw new InvalidOperationException($"The state '{state.Name}' must declare a transition definition or an end definition for it is part of the main execution logic of the workflow '{this.Context.Workflow.Definition.Id}'");
+            var processor = this.CreateActivityProcessor(nextActivity);
+            await processor.ProcessAsync(this.CancellationToken);
+        }
+
+        /// <summary>
+        /// Resumes the execution of the workflow from the specified <see cref="TransitionDefinition"/>
+        /// </summary>
+        /// <param name="activity">The <see cref="V1WorkflowActivity"/> to resume from</param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        protected virtual async Task ResumeFromTransitionAsync(V1WorkflowActivity activity)
+        {
+            if (activity == null)
+                throw new ArgumentNullException(nameof(activity));
+            if (!activity.Metadata.TryGetValue(V1WorkflowActivityMetadata.State, out var stateName))
+                throw new ArgumentException($"The specified activity '{activity.Id}' is missing the required metadata field '{V1WorkflowActivityMetadata.State}'");
+            if (!this.Context.Workflow.Definition.TryGetState(stateName, out var state))
+                throw new NullReferenceException($"Failed to find the workflow state with the specified name '{stateName}'");
+            TransitionDefinition transition;
+            if (state is SwitchStateDefinition @switch)
+            {
+                if (!activity.Metadata.TryGetValue(V1WorkflowActivityMetadata.Case, out var caseName))
+                    throw new ArgumentException($"The specified activity '{activity.Id}' is missing the required metadata field '{V1WorkflowActivityMetadata.Case}'");
+                if (!@switch.TryGetCase(caseName, out SwitchCaseDefinition dataCondition))
+                    throw new NullReferenceException($"Failed to find a condition with the specified name '{caseName}'");
+                transition = dataCondition.Transition!;
+                if (transition == null)
+                    transition = new() { NextState = dataCondition.TransitionToStateName! };
+            }
+            else
+            {
+                transition = state.Transition!;
+                if (transition == null)
+                    transition = new() { NextState = state.TransitionToStateName! };
+            }
+            if (!this.Context.Workflow.Definition.TryGetState(transition.NextState, out StateDefinition nextState))
+                throw new NullReferenceException($"Failed to find a state with name '{transition.NextState}' in workflow '{this.Context.Workflow.Definition.Id} {this.Context.Workflow.Definition.Version}'");
+            await this.Context.Workflow.TransitionToAsync(nextState, this.CancellationToken);
+            var metadata = new Dictionary<string, string>() { { V1WorkflowActivityMetadata.State, nextState.Name } };
+            var nextActivity = await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.State, activity.Output, metadata, null, this.CancellationToken);
+            var processor = this.CreateActivityProcessor(nextActivity);
+            await processor.ProcessAsync(this.CancellationToken);
+        }
+
+        /// <summary>
+        /// Resumes the execution of the workflow from the <see cref="EndDefinition"/>
+        /// </summary>
+        /// <param name="activity">The <see cref="V1WorkflowActivity"/> to resume from</param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        protected virtual async Task ResumeFromEndAsync(V1WorkflowActivity activity)
+        {
+            if (activity == null)
+                throw new ArgumentNullException(nameof(activity));
+            await this.Context.Workflow.SetOutputAsync(activity.Output, this.CancellationToken);
         }
 
         /// <summary>
