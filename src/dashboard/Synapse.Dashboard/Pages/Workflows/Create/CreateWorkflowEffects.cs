@@ -27,6 +27,10 @@ namespace Synapse.Dashboard.Pages.Workflows.Create.Effects
     {
         public static async Task OnCreateWorkflow(CreateWorkflow action, IEffectContext context)
         {
+            var dispatcher = context.Services.GetRequiredService<IDispatcher>();
+            if (dispatcher == null)
+                throw new NullReferenceException("Unable to resolved service 'IDispatcher'.");
+            dispatcher.Dispatch(new DisableCreateButton());
             var api = context.Services.GetRequiredService<ISynapseManagementApi>();
             if (api == null)
                 throw new NullReferenceException("Unable to resolved service 'ISynapseManagementApi'.");
@@ -34,9 +38,17 @@ namespace Synapse.Dashboard.Pages.Workflows.Create.Effects
             {
                 Definition = action.Definition
             };
-            var workflow = await api.CreateWorkflowAsync(command);
-            if (workflow != null)
-                context.Dispatcher.Dispatch(new NavigateTo("workflows"));
+            try
+            {
+                var workflow = await api.CreateWorkflowAsync(command);
+                dispatcher.Dispatch(new EnableCreateButton());
+                if (workflow != null)
+                    context.Dispatcher.Dispatch(new NavigateTo("workflows"));
+            }
+            catch(Exception ex)
+            {
+                dispatcher.Dispatch(new EnableCreateButton());
+            }
         }
     }
 }

@@ -22,44 +22,46 @@
 @inject IMonacoEditorHelper MonacoEditorHelper
 @inject IWorkflowReader WorkflowReader
 @inject IWorkflowValidator WorkflowValidator
+@inject IDispatcher Dispatcher
 
 
-    <label class="form-form-label">Definition</label>
-    <div class="flex-grow d-flex flex-row w-100 h-100">
-        <div class="w-75 h-100 mh-100">
-            <MonacoEditor
-                @ref="editor"
-                Id="definition-editor"
-                CssClass="h-100"
-                ConstructionOptions="MonacoEditorHelper.GetStandaloneEditorConstructionOptions()"
-                OnDidInit="OnMonacoEditorDidInit"
-                OnDidChangeModelDecorations="OnMonacoEditorDidChangeModelDecorations"
-            />
-        </div>
-        <div class="w-25">            
-            @if(validationErrors != null && validationErrors.Any())
-            {
-                <div class="validation-errors alert alert-danger">
-                    <ul>
-                        @foreach (var error in validationErrors)
-                        {
-                            <li>@error.ToString()</li>
-                        }
-                    </ul>
-                </div>
-            }
-        </div>
+<label class="form-form-label">Definition</label>
+<div class="flex-grow d-flex flex-row w-100 h-100">
+    <div class="w-75 h-100 mh-100">
+        <MonacoEditor
+            @ref="editor"
+            Id="definition-editor"
+            CssClass="h-100"
+            ConstructionOptions="MonacoEditorHelper.GetStandaloneEditorConstructionOptions()"
+            OnDidInit="OnMonacoEditorDidInit"
+            OnDidChangeModelDecorations="OnMonacoEditorDidChangeModelDecorations"
+        />
     </div>
-    <button disabled="@IsCreateDisabled" @onclick="OnCreateWorkflow" type="button" class="btn btn-blockquote btn-dark">Create Workflow</button>
+    <div class="w-25">            
+        @if(validationErrors != null && validationErrors.Any())
+        {
+            <div class="validation-errors alert alert-danger">
+                <ul>
+                    @foreach (var error in validationErrors)
+                    {
+                        <li>@error.ToString()</li>
+                    }
+                </ul>
+            </div>
+        }
+    </div>
+</div>
+<button disabled="@CreateDisabled" @onclick="OnCreateWorkflow" type="button" class="btn btn-blockquote btn-dark">Create Workflow</button>
 
 
 @code {
 
     [Parameter]
     public EventCallback<WorkflowDefinition> OnSubmitWorkflowDefinition { get; set; }
+    [Parameter]
+    public bool CreateDisabled { get; set; }
     protected IList<string> validationErrors = new List<string>();
     protected MonacoEditor editor = null!;
-    protected bool IsCreateDisabled { get; set; } = true;
 
     async Task OnCreateWorkflow()
     {
@@ -113,7 +115,7 @@
     protected async Task Validate()
     {
         this.validationErrors.Clear();
-        this.IsCreateDisabled = false;
+        this.Dispatcher.Dispatch(new Pages.Workflows.Create.Actions.EnableCreateButton());
         var model = await this.editor.GetModel();
         var owner = await model.GetModeId();
         var markers = await model.jsRuntime.InvokeAsync<IEnumerable<MonacoEditorMarker>>("getModelMarkers" , owner);
@@ -121,7 +123,7 @@
         var rawDefinition = await this.editor.GetValue();
         if (severeMarkers.Any())
         {
-            this.IsCreateDisabled = true;
+            this.Dispatcher.Dispatch(new Pages.Workflows.Create.Actions.DisableCreateButton());
             severeMarkers.ToList().ForEach(marker =>
             {
                 this.validationErrors.Add($"{marker.Message} ");
@@ -130,7 +132,7 @@
         else if (String.IsNullOrEmpty(rawDefinition))
         {
             this.validationErrors.Add("The definition cannot be empty");
-            this.IsCreateDisabled = true;
+            this.Dispatcher.Dispatch(new Pages.Workflows.Create.Actions.DisableCreateButton());
         }
     }
 
