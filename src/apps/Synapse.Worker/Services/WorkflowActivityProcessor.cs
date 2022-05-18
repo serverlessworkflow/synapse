@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+
 using ConcurrentCollections;
 using Synapse.Integration.Events;
 using Synapse.Integration.Events.WorkflowActivities;
@@ -132,6 +133,10 @@ namespace Synapse.Worker.Services
         async Task IWorkflowActivityProcessor.SuspendAsync(CancellationToken cancellationToken)
         {
             this.Logger.LogInformation("Suspending activity '{activityId}' (type: '{activityType}')...", this.Activity.Id, this.Activity.Type);
+            foreach (var processor in this.Processors)
+            {
+                await processor.SuspendAsync(cancellationToken);
+            }
             await this.Context.Workflow.SuspendActivityAsync(this.Activity, this.CancellationTokenSource.Token);
             await this.SuspendAsync(cancellationToken);
             this.Logger.LogInformation("Activity '{activityId}' (type: '{activityType}') suspended", this.Activity.Id, this.Activity.Type);
@@ -150,6 +155,10 @@ namespace Synapse.Worker.Services
         async Task IWorkflowActivityProcessor.TerminateAsync(CancellationToken cancellationToken)
         {
             this.Logger.LogInformation("Terminating activity '{activityId}' (type: '{activityType}')...", this.Activity.Id, this.Activity.Type);
+            foreach(var processor in this.Processors)
+            {
+                await processor.TerminateAsync(cancellationToken);
+            }
             await this.Context.Workflow.CancelActivityAsync(this.Activity, this.CancellationTokenSource.Token);
             await this.TerminateAsync(cancellationToken);
             this.CancellationTokenSource?.Cancel();

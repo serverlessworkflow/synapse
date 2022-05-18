@@ -102,6 +102,7 @@ namespace Synapse.Application.Commands.WorkflowInstances
                 workflowInstance.Cancel();
                 workflowInstance.MarkAsCancelled();
                 workflowInstance = await this.WorkflowInstances.UpdateAsync(workflowInstance, cancellationToken);
+                await this.WorkflowInstances.SaveChangesAsync(cancellationToken);
             }
             return this.Ok(this.Mapper.Map<Integration.Models.V1WorkflowInstance>(workflowInstance));
         }

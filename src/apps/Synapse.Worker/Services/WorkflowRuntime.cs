@@ -114,7 +114,7 @@ namespace Synapse.Worker.Services
             {
                 await this.Context.InitializeAsync(this.CancellationToken);
                 this.ServerStream = this.RuntimeApi.Connect(this.Context.Workflow.Instance.Id).ToObservable();
-                this._ServerSignalStreamSubscription = this.ServerStream.SubscribeAsync(this.OnServerSignalAsync);
+                this._ServerSignalStreamSubscription = this.ServerStream.SubscribeAsync(this.OnServerSignalAsync, this.OnServerConnectionErrorAsync, this.OnDisconnectedFromServerAsync);
                 this._OutboundEventStreamSubscription = this.IntegrationEventBus.OutboundStream.SubscribeAsync(this.OnPublishEventAsync);
                 switch (this.Context.Workflow.Instance.Status)
                 {
@@ -409,6 +409,29 @@ namespace Synapse.Worker.Services
                 await this.Context.Workflow.FaultAsync(ex, this.CancellationToken);
                 this.HostApplicationLifetime.StopApplication();
             }
+        }
+
+        /// <summary>
+        /// Handles the specified <see cref="Exception"/> that occured during communication with the server
+        /// </summary>
+        /// <param name="ex">The <see cref="Exception"/> to handle</param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        protected virtual async Task OnServerConnectionErrorAsync(Exception ex)
+        {
+            this.Logger.LogCritical("The connection to the remote server has been lost");
+            this.HostApplicationLifetime.StopApplication();
+            await Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Handles the <see cref="WorkflowRuntime"/>'s disconnection from the server
+        /// </summary>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        protected virtual async Task OnDisconnectedFromServerAsync()
+        {
+            this.Logger.LogCritical("The connection to the remote server has been lost");
+            this.HostApplicationLifetime.StopApplication();
+            await Task.CompletedTask;
         }
 
         /// <summary>

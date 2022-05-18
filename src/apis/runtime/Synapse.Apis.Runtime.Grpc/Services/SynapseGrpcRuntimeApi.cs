@@ -25,6 +25,7 @@ using Synapse.Infrastructure.Services;
 using Synapse.Integration.Commands.WorkflowActivities;
 using Synapse.Integration.Commands.WorkflowInstances;
 using Synapse.Integration.Models;
+using System;
 using System.Threading.Channels;
 
 namespace Synapse.Apis.Runtime.Grpc
@@ -72,11 +73,22 @@ namespace Synapse.Apis.Runtime.Grpc
             var stream = Channel.CreateUnbounded<V1RuntimeSignal>();
             var streamWriter = new AsyncStreamWriter<V1RuntimeSignal>(stream.Writer);
             var runtime = RuntimeProxyManager.Register(this.RuntimeProxyFactory.CreateProxy(runtimeId, streamWriter));
-            await foreach (var message in stream.Reader.ReadAllAsync(context.CancellationToken))
+            var messages = stream.Reader.ReadAllAsync(context.CancellationToken);
+            await using var messageEnumerator = messages.GetAsyncEnumerator();
+            for (var canRead = true; canRead;)
             {
-                yield return message;
+                try
+                {
+                    canRead = await messageEnumerator.MoveNextAsync();
+                }
+                catch (Exception ex)
+                when(ex is TaskCanceledException || ex is OperationCanceledException)
+                {
+                    runtime.Dispose();
+                    break;
+                }
+                yield return messageEnumerator.Current;
             }
-            runtime.Dispose();
         }
 
         /// <inheritdoc/>
