@@ -229,7 +229,9 @@ namespace Synapse.Apis.Management.Grpc
         /// <inheritdoc/>
         public virtual async Task<V1OperationalReport> GetOperationalReportAsync(DateTime? date = null, CancellationToken cancellationToken = default)
         {
-            var result = await this.Adapter.GetOperationalReportAsync(date, cancellationToken);
+            if (!date.HasValue)
+                date = DateTime.Now;
+            var result = await this.Adapter.GetOperationalReportAsync(new(date.Value), cancellationToken);
             if (!result.Succeeded)
                 throw new SynapseApiException(result);
             return result.Data!;

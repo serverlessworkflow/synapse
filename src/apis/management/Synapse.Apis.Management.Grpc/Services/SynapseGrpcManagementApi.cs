@@ -19,6 +19,7 @@ using Microsoft.Extensions.Logging;
 using Neuroglia.Mapping;
 using Neuroglia.Mediation;
 using ProtoBuf.Grpc;
+using ProtoBuf.WellKnownTypes;
 using ServerlessWorkflow.Sdk.Models;
 using Synapse.Apis.Management.Grpc.Models;
 using Synapse.Application.Commands.Generic;
@@ -189,11 +190,9 @@ namespace Synapse.Apis.Management.Grpc
         #region OperationalReports
 
         /// <inheritdoc/>
-        public virtual async Task<GrpcApiResult<V1OperationalReport>> GetOperationalReportAsync(DateTime? date = null, CallContext context = default)
+        public virtual async Task<GrpcApiResult<V1OperationalReport>> GetOperationalReportAsync(GrpcApiRequest<DateTime> request, CallContext context = default)
         {
-            if (!date.HasValue)
-                date = DateTime.Now;
-            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new V1FindByIdQuery<V1OperationalReport, string>(V1OperationalReport.GetIdFor(date.Value)), context.CancellationToken));
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new V1FindByIdQuery<V1OperationalReport, string>(V1OperationalReport.GetIdFor(request.Data)), context.CancellationToken));
         }
 
         #endregion

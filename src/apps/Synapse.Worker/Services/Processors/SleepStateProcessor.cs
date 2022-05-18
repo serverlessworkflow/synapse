@@ -36,6 +36,11 @@ namespace Synapse.Worker.Services.Processors
         }
 
         /// <summary>
+        /// Gets the sleep duration
+        /// </summary>
+        protected TimeSpan Duration { get; private set; }
+
+        /// <summary>
         /// Gets the <see cref="System.Threading.Timer"/> used to delay the <see cref="SleepStateProcessor"/>'s execution
         /// </summary>
         protected Timer Timer { get; set; } = null!;
@@ -43,14 +48,18 @@ namespace Synapse.Worker.Services.Processors
         /// <inheritdoc/>
         protected override Task InitializeAsync(CancellationToken cancellationToken)
         {
+            if(this.Activity.Status == V1WorkflowActivityStatus.Suspended)
+                this.Duration = this.State.Duration.Subtract(this.Context.Workflow.Instance.Sessions.Last(s => !s.IsActive).EndedAt.Value.Subtract(this.Activity.StartedAt!.Value));
+            else
+                this.Duration = this.State.Duration;
             return Task.CompletedTask;
         }
 
         /// <inheritdoc/>
         protected override Task ProcessAsync(CancellationToken cancellationToken)
         {
-            var delay = this.State.Duration; //todo: substract activity's total execution time
-            this.Timer = new(async (state) => await this.OnDelayElapsedAsync(cancellationToken), delay, delay, Timeout.InfiniteTimeSpan);
+            var duration = this.Duration; //todo: substract activity's total execution time
+            this.Timer = new(async (state) => await this.OnDelayElapsedAsync(cancellationToken), duration, duration, Timeout.InfiniteTimeSpan);
             return Task.CompletedTask;
         }
 

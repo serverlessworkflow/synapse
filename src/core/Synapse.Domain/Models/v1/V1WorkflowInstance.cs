@@ -199,7 +199,8 @@ namespace Synapse.Domain.Models
         /// </summary>
         public virtual void MarkAsRunning()
         {
-            if (this.Status != V1WorkflowInstanceStatus.Starting)
+            if (this.Status != V1WorkflowInstanceStatus.Starting
+                && this.Status != V1WorkflowInstanceStatus.Resuming)
                 throw DomainException.UnexpectedState(typeof(V1WorkflowInstance), this.Id, this.Status);
             this.On(this.RegisterEvent(new V1WorkflowInstanceStartedDomainEvent(this.Id)));
         }
@@ -219,7 +220,8 @@ namespace Synapse.Domain.Models
         /// </summary>
         public virtual void MarkAsSuspended()
         {
-            if (this.Status != V1WorkflowInstanceStatus.Running)
+            if (this.Status != V1WorkflowInstanceStatus.Running
+                && this.Status != V1WorkflowInstanceStatus.Suspending)
                 throw DomainException.UnexpectedState(typeof(V1WorkflowInstance), this.Id, this.Status);
             this.On(this.RegisterEvent(new V1WorkflowInstanceSuspendedDomainEvent(this.Id)));
         }
@@ -304,7 +306,7 @@ namespace Synapse.Domain.Models
         /// </summary>
         public virtual void MarkAsCancelled()
         {
-            if (this.Status >= V1WorkflowInstanceStatus.Faulted)
+            if (this.Status != V1WorkflowInstanceStatus.Cancelling)
                 throw DomainException.UnexpectedState(typeof(V1WorkflowInstance), this.Id, this.Status);
             this.On(this.RegisterEvent(new V1WorkflowInstanceCancelledDomainEvent(this.Id)));
         }
