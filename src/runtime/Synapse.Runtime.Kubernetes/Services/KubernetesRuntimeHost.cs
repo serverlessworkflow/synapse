@@ -31,7 +31,7 @@ namespace Synapse.Runtime.Kubernetes.Services
 {
 
     /// <summary>
-    /// Represents the Kubernetes implementation of the <see cref="IWorkflowRuntimeHost"/>
+    /// Represents the Kubernetes implementation of the <see cref="IWorkflowRuntime"/>
     /// </summary>
     public class KubernetesRuntimeHost
         : WorkflowRuntimeHostBase
@@ -84,13 +84,12 @@ namespace Synapse.Runtime.Kubernetes.Services
         }
 
         /// <inheritdoc/>
-        public override async Task<string> StartAsync(V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default)
+        public override Task<IWorkflowProcess> CreateProcessAsync(V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default)
         {
-            if(workflowInstance == null)
+            if (workflowInstance == null)
                 throw new ArgumentNullException(nameof(workflowInstance));
             var pod = this.BuildWorkerPodFor(workflowInstance);
-            pod = await this.Kubernetes.CreateNamespacedPodAsync(pod, EnvironmentVariables.Kubernetes.Namespace.Value, cancellationToken: cancellationToken);
-            return pod.Name();
+            return Task.FromResult<IWorkflowProcess>(new KubernetesProcess(pod, this.Kubernetes));
         }
 
         /// <summary>

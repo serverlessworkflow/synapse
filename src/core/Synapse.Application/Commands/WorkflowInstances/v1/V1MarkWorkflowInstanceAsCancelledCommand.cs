@@ -19,7 +19,7 @@ namespace Synapse.Application.Commands.WorkflowInstances
 {
 
     /// <summary>
-    /// Represents the <see cref="ICommand"/> used to mark the execution of a <see cref="Domain.Models.V1WorkflowInstance"/> as cancelled
+    /// Represents the <see cref="ICommand"/> used to mark the execution of a <see cref="V1WorkflowInstance"/> as cancelled
     /// </summary>
     [DataTransferObjectType(typeof(Integration.Commands.WorkflowInstances.V1MarkWorkflowInstanceAsCancelledCommand))]
     public class V1MarkWorkflowInstanceAsCancelledCommand

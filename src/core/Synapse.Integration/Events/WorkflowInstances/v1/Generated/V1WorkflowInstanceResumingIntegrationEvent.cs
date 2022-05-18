@@ -45,6 +45,13 @@ namespace Synapse.Integration.Events.WorkflowInstances
 		[Description("Gets the date and time at which the event has been produced")]
 		public virtual DateTime CreatedAt { get; set; }
 
+		/// <summary>
+		/// A string used to uniquely identify the resuming V1WorkflowInstance's process
+		/// </summary>
+		[DataMember(Name = "ProcessId", Order = 3)]
+		[Description("A string used to uniquely identify the resuming V1WorkflowInstance's process")]
+		public virtual string ProcessId { get; set; }
+
     }
 
 }

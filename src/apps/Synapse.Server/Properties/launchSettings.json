@@ -39,7 +39,7 @@
         "SYNAPSE_PERSISTENCE_READMODEL_DEFAULT_REPOSITORY": "MongoDB",
         "SYNAPSE_API_HOSTNAME": "synapse"
       },
-      "DockerfileRunArguments": "--name synapse -e \\\"SYNAPSE_API_HOSTNAME=synapse\\\" -e \\\"DOCKER__SECRETS__DIRECTORY=C:\\\\Users\\\\Public\\\\secrets\\\" -v /var/run/docker.sock:/var/run/docker.sock --add-host=host.docker.internal:host-gateway -p 42286:42286 -p 41387:41387 -v C:\\\\Users\\\\Public\\\\Secrets:/run/secrets -v C:\\Users\\User\\Documents\\Plugins:/app/plugins",
+      "DockerfileRunArguments": "--name synapse -e \\\"SYNAPSE_API_HOSTNAME=synapse\\\" -e \\\"DOCKER__SECRETS__DIRECTORY=C:\\\\Users\\\\Public\\\\secrets\\\" -v /var/run/docker.sock:/var/run/docker.sock --add-host=host.docker.internal:host-gateway -p 42286:42286 -p 41387:41387",
       "publishAllPorts": true
     },
     "Bridge to Kubernetes": {

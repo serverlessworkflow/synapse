@@ -270,6 +270,9 @@
     <Compile Update="Events\WorkflowInstances\v1\Generated\V1WorkflowInstanceSuspendingIntegrationEvent.cs">
       <CustomToolNamespace>..\Synapse.Domain\Events\WorkflowInstances\v1\V1WorkflowInstanceSuspendingDomainEvent.cs</CustomToolNamespace>
     </Compile>
+    <Compile Update="Events\WorkflowProcesses\v1\Generated\V1WorkflowProcessExitedIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\WorkflowProcesses\v1\V1WorkflowProcessExitedDomainEvent.cs</CustomToolNamespace>
+    </Compile>
     <Compile Update="Events\Workflows\v1\Generated\V1WorkflowCreatedIntegrationEvent.cs">
       <CustomToolNamespace>..\Synapse.Domain\Events\Workflows\v1\V1WorkflowCreatedDomainEvent.cs</CustomToolNamespace>
     </Compile>

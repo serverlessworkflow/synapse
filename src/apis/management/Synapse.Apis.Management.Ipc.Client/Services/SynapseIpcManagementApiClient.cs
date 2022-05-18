@@ -173,6 +173,14 @@ namespace Synapse.Apis.Management.Ipc
         }
 
         /// <inheritdoc/>
+        public virtual async Task<string> GetWorkflowInstanceLogsAsync(string id, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                throw new ArgumentNullException(nameof(id));
+            return await this.Mediator.ExecuteAndUnwrapAsync(new Application.Queries.WorkflowInstances.V1GetWorkflowInstanceLogsQuery(id), cancellationToken);
+        }
+
+        /// <inheritdoc/>
         public virtual async Task DeleteWorkflowInstanceAsync(string id, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(id))

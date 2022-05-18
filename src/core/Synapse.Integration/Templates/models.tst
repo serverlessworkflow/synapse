@@ -85,19 +85,26 @@ ${
         switch(type.OriginalName)
         {
             case "Object":
+            case "Object?":
             case "object":
+            case "object?":
             case "TKey":
+            case "TKey?":
             case "JToken":
+            case "JToken?":
                 return "Dynamic";
             case "IDictionary<string, object>":
             case "IDictionary<string, object>?":
             case "Dictionary<string, object>":
             case "Dictionary<string, object>?":
             case "ExpandoObject":
+            case "ExpandoObject?":
                 return "DynamicObject";
             case "JArray":
+            case "JArray?":
                 return "DynamicArray";
             case "Error":
+            case "Error?":
                  return "Error";
             case "JsonPatchDocument":
                 return "JsonPatchDocument";

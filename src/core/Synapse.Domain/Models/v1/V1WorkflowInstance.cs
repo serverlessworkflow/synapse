@@ -87,11 +87,11 @@ namespace Synapse.Domain.Models
         /// </summary>
         public virtual object? Input { get; protected set; }
 
-        private List<V1Event>? _TriggerEvents;
+        private List<V1Event> _TriggerEvents = null!;
         /// <summary>
         /// Gets an <see cref="IReadOnlyCollection{T}"/> containing descriptors of the <see cref="CloudEvent"/>s that have triggered the <see cref="V1WorkflowInstance"/>
         /// </summary>
-        public virtual IReadOnlyCollection<V1Event>? TriggerEvents
+        public virtual IReadOnlyCollection<V1Event> TriggerEvents
         {
             get
             {
@@ -119,7 +119,24 @@ namespace Synapse.Domain.Models
         /// Gets the <see cref="V1WorkflowInstance"/>'s <see cref="V1CorrelationContext"/>
         /// </summary>
         public virtual V1CorrelationContext CorrelationContext { get; protected set; }
-        
+
+        private readonly List<V1WorkflowRuntimeSession> _Sessions = new();
+        /// <summary>
+        /// Gets an <see cref="IReadOnlyCollection{T}"/> containing the sessions the <see cref="V1WorkflowInstance"/> is made out of
+        /// </summary>
+        public virtual IReadOnlyCollection<V1WorkflowRuntimeSession> Sessions
+        {
+            get
+            {
+                return this._Sessions.AsReadOnly();
+            }
+        } 
+
+        /// <summary>
+        /// Gets the currently active <see cref="V1WorkflowRuntimeSession"/>, if any
+        /// </summary>
+        public virtual V1WorkflowRuntimeSession? ActiveSession => this.Sessions.FirstOrDefault(s => s.IsActive);
+
         private readonly List<V1WorkflowActivity> _Activities = new();
         /// <summary>
         /// Gets an <see cref="IReadOnlyCollection{T}"/> containing the activities the <see cref="V1WorkflowInstance"/> is made out of
@@ -167,11 +184,14 @@ namespace Synapse.Domain.Models
         /// <summary>
         /// Starts the <see cref="V1WorkflowInstance"/>'s execution
         /// </summary>
-        public virtual void Start()
+        /// <param name="processId">A string used to uniquely identify the <see cref="V1WorkflowInstance"/>'s process</param>
+        public virtual void Start(string processId)
         {
+            if(string.IsNullOrEmpty(processId))
+                throw DomainException.ArgumentNull(nameof(processId));
             if (this.Status > V1WorkflowInstanceStatus.Scheduled)
                 throw DomainException.UnexpectedState(typeof(V1WorkflowInstance), this.Id, this.Status);
-            this.On(this.RegisterEvent(new V1WorkflowInstanceStartingDomainEvent(this.Id)));
+            this.On(this.RegisterEvent(new V1WorkflowInstanceStartingDomainEvent(this.Id, processId)));
         }
 
         /// <summary>
@@ -207,11 +227,14 @@ namespace Synapse.Domain.Models
         /// <summary>
         /// Resumes the <see cref="V1WorkflowInstance"/>'s execution
         /// </summary>
-        public virtual void Resume()
+        /// <param name="processId">A string used to uniquely identify the <see cref="V1WorkflowInstance"/>'s process</param>
+        public virtual void Resume(string processId)
         {
+            if (string.IsNullOrEmpty(processId))
+                throw DomainException.ArgumentNull(nameof(processId));
             if (this.Status != V1WorkflowInstanceStatus.Suspended)
                 throw DomainException.UnexpectedState(typeof(V1WorkflowInstance), this.Id, this.Status);
-            this.On(this.RegisterEvent(new V1WorkflowInstanceResumingDomainEvent(this.Id)));
+            this.On(this.RegisterEvent(new V1WorkflowInstanceResumingDomainEvent(this.Id, processId)));
         }
 
         /// <summary>
@@ -290,7 +313,7 @@ namespace Synapse.Domain.Models
         /// Completes and sets the <see cref="V1WorkflowInstance"/>'s output 
         /// </summary>
         /// <param name="output">The <see cref="V1WorkflowInstance"/>'s output</param>
-        public virtual void SetOutput(object? output)
+        public virtual void MarkAsCompleted(object? output)
         {
             if (this.Status >= V1WorkflowInstanceStatus.Faulted)
                 throw DomainException.UnexpectedState(typeof(V1WorkflowInstance), this.Id, this.Status);
@@ -357,6 +380,7 @@ namespace Synapse.Domain.Models
         {
             this.LastModified = e.CreatedAt;
             this.Status = V1WorkflowInstanceStatus.Starting;
+            this._Sessions.Add(new(e.CreatedAt, e.ProcessId));
         }
 
         /// <summary>
@@ -386,7 +410,10 @@ namespace Synapse.Domain.Models
         protected virtual void On(V1WorkflowInstanceSuspendedDomainEvent e)
         {
             this.LastModified = e.CreatedAt;
-            this.Status = V1WorkflowInstanceStatus.Suspended; //todo: keep track of runtime sessions
+            this.Status = V1WorkflowInstanceStatus.Suspended;
+            var session = this.Sessions.FirstOrDefault(s => s.IsActive);
+            if (session != null)
+                session.MarkAsEnded(e.CreatedAt);
         }
 
         /// <summary>
@@ -397,6 +424,7 @@ namespace Synapse.Domain.Models
         {
             this.LastModified = e.CreatedAt;
             this.Status = V1WorkflowInstanceStatus.Resuming;
+            this._Sessions.Add(new(e.CreatedAt, e.ProcessId));
         }
 
         /// <summary>
@@ -479,6 +507,9 @@ namespace Synapse.Domain.Models
         {
             this.LastModified = e.CreatedAt;
             this.ExecutedAt = e.CreatedAt;
+            var session = this.Sessions.FirstOrDefault(s => s.IsActive);
+            if (session != null)
+                session.MarkAsEnded(e.CreatedAt);
         }
 
         /// <summary>

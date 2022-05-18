@@ -137,6 +137,15 @@ namespace Synapse.Apis.Management.Grpc
         Task<GrpcApiResult> CancelWorkflowInstanceAsync(string id, CallContext context = default);
 
         /// <summary>
+        /// Gets the logs of the <see cref="V1WorkflowInstance"/> with the specified id
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1WorkflowInstance"/> to get the logs of</param>
+        /// <param name="context">The current <see cref="CallContext" /></param>
+        /// <returns>A new object that describes the result of the operation</returns>
+        [OperationContract]
+        Task<GrpcApiResult<string>> GetWorkflowInstanceLogsAsync(string id, CallContext context = default);
+
+        /// <summary>
         /// Deletes the workflow instance with the specified id
         /// </summary>
         /// <param name="id">The id of the workflow instance to delete</param>
