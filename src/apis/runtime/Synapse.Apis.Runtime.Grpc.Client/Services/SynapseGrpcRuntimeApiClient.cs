@@ -55,9 +55,23 @@ namespace Synapse.Apis.Runtime.Grpc
         protected ISynapseGrpcRuntimeApi RuntimeApi { get; }
 
         /// <inheritdoc/>
-        public virtual IAsyncEnumerable<V1RuntimeSignal> Connect(string workflowInstanceId)
+        public virtual async IAsyncEnumerable<V1RuntimeSignal> Connect(string workflowInstanceId)
         {
-            return this.RuntimeApi.Connect(workflowInstanceId);
+            var messages = this.RuntimeApi.Connect(workflowInstanceId);
+            await using var messageEnumerator = messages.GetAsyncEnumerator();
+            for (var canRead = true; canRead;)
+            {
+                try
+                {
+                    canRead = await messageEnumerator.MoveNextAsync();
+                }
+                catch (Exception ex)
+                when (ex is TaskCanceledException || ex is OperationCanceledException)
+                {
+                    break;
+                }
+                yield return messageEnumerator.Current;
+            }
         }
 
         /// <inheritdoc/>
