@@ -32,7 +32,7 @@ namespace Synapse.Domain.Events.WorkflowInstances
         /// </summary>
         protected V1WorkflowInstanceCompletedDomainEvent()
         {
-
+            
         }
 
         /// <summary>

@@ -233,8 +233,21 @@ namespace Synapse.Apis.Management.Http
             using var response = await this.HttpClient.SendAsync(request, cancellationToken);
             var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
             if (!response.IsSuccessStatusCode)
-                this.Logger.LogError("An error occured while cancelling the execution of the workflow with the specified id '{id}': {details}", id, json);
+                this.Logger.LogError("An error occured while cancelling the execution of the workflow instance with the specified id '{id}': {details}", id, json);
             response.EnsureSuccessStatusCode();
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<string> GetWorkflowInstanceLogsAsync(string id, CancellationToken cancellationToken = default)
+        {
+            var requestUri = $"/api/v1/workflow-instances/{id}/logs";
+            using var request = this.CreateRequest(HttpMethod.Get, requestUri);
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while querying the log of the workflow instance with the specified id '{id}': {details}", id, json);
+            response.EnsureSuccessStatusCode();
+            return json;
         }
 
         /// <inheritdoc/>

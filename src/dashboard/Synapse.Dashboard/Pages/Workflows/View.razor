@@ -143,6 +143,9 @@
                     <TabPage Header="Activities">
                         <WorkflowInstanceActivitiesList Activities="sortedActivities" />
                     </TabPage>
+                    <TabPage Header="Logs">
+                        <WorkflowInstanceLogs WorkflowInstance="workflowInstance" />
+                    </TabPage>
                 </TabControl>
             }
         </div>
@@ -187,6 +190,8 @@ else
             {
                 this.workflow = workflows.FirstOrDefault(wf => wf.Id == this.WorkflowId);
                 this.UpdateActivities();
+                this.UpdateMetrics();
+                this.StateHasChanged();
             });
         this.workflowInstanceSubscription = this.workflowInstanceFeature
             .Subscribe(instances =>

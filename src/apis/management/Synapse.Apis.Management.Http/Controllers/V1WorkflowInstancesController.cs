@@ -147,7 +147,7 @@ namespace Synapse.Apis.Management.Http.Controllers
         /// <summary>
         /// Cancels the execution of an existing workflow instance
         /// </summary>
-        /// <param name="id">The id of the workflow definition to cancel the execution of</param>
+        /// <param name="id">The id of the workflow instance to cancel the execution of</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A new <see cref="IActionResult"/></returns>
         [HttpPut("{id}/cancel")]
@@ -158,6 +158,22 @@ namespace Synapse.Apis.Management.Http.Controllers
         public async Task<IActionResult> Cancel(string id, CancellationToken cancellationToken)
         {
             return this.Process(await this.Mediator.ExecuteAsync(new Application.Commands.WorkflowInstances.V1CancelWorkflowInstanceCommand(id), cancellationToken));
+        }
+
+        /// <summary>
+        /// Gets the aggregated logs of the specified workflow instance
+        /// </summary>
+        /// <param name="id">The id of the workflow instance to get the logs of</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new <see cref="IActionResult"/></returns>
+        [HttpGet("{id}/logs")]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.Forbidden)]
+        public async Task<IActionResult> GetLogs(string id, CancellationToken cancellationToken)
+        {
+            return this.Process(await this.Mediator.ExecuteAsync(new Application.Queries.WorkflowInstances.V1GetWorkflowInstanceLogsQuery(id), cancellationToken));
         }
 
         /// <summary>

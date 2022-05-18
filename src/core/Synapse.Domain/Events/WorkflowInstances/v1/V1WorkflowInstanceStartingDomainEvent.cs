@@ -19,6 +19,7 @@ using Synapse.Integration.Events.WorkflowInstances;
 
 namespace Synapse.Domain.Events.WorkflowInstances
 {
+
     /// <summary>
     /// Represents the <see cref="IDomainEvent"/> fired whenever the execution of a <see cref="V1WorkflowInstance"/> is starting
     /// </summary>
@@ -32,18 +33,24 @@ namespace Synapse.Domain.Events.WorkflowInstances
         /// </summary>
         protected V1WorkflowInstanceStartingDomainEvent()
         {
-
+            this.ProcessId = null!;
         }
 
         /// <summary>
         /// Initializes a new <see cref="V1WorkflowInstanceStartingDomainEvent"/>
         /// </summary>
         /// <param name="id">The id of the <see cref="V1WorkflowInstance"/> which's execution is starting</param>
-        public V1WorkflowInstanceStartingDomainEvent(string id)
+        /// <param name="processId">The string used to uniquely identify the <see cref="V1WorkflowInstance"/>'s process</param>
+        public V1WorkflowInstanceStartingDomainEvent(string id, string processId)
             : base(id)
         {
-
+            this.ProcessId = processId;
         }
+
+        /// <summary>
+        /// Gets the string used to uniquely identify the <see cref="V1WorkflowInstance"/>'s process
+        /// </summary>
+        public virtual string ProcessId { get; protected set; }
 
     }
 

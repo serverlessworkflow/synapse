@@ -43,7 +43,7 @@ namespace Synapse.Domain.Events.WorkflowInstances
         public V1WorkflowInstanceSuspendedDomainEvent(string id)
             : base(id)
         {
-
+            
         }
 
     }

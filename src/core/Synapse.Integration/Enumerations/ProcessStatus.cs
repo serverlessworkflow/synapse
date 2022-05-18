@@ -15,24 +15,30 @@
  *
  */
 
-namespace Synapse.Infrastructure.Services
+namespace Synapse
 {
-
     /// <summary>
-    /// Defines the fundamentals of a service used to host workflow runtimes
+    /// Enumerates all the statuses of a process
     /// </summary>
-    public interface IWorkflowRuntimeHost
-        : IDisposable, IAsyncDisposable
+    [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
+    [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.StringEnumConverterFactory))]
+    public enum ProcessStatus
     {
-
         /// <summary>
-        /// Starts the execution of the specified <see cref="V1WorkflowInstance"/>
+        /// Indicates that the process is pending startup
         /// </summary>
-        /// <param name="workflowInstance">The <see cref="V1WorkflowInstance"/> to start the execution of</param>
-        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-        /// <returns>An id used to identify the <see cref="V1WorkflowInstance"/>'s runtime</returns>
-        Task<string> StartAsync(V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default);
-
+        [EnumMember(Value = "pending")]
+        Pending,
+        /// <summary>
+        /// Indicates that the process is running
+        /// </summary>
+        [EnumMember(Value = "running")]
+        Running,
+        /// <summary>
+        /// Indicates that the process has exited
+        /// </summary>
+        [EnumMember(Value = "exited")]
+        Exited
     }
 
 }

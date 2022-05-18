@@ -74,8 +74,8 @@ namespace Synapse.Application.Commands.Workflows
         /// <param name="mapper">The service used to map objects</param>
         /// <param name="workflowValidator">The service used to validate <see cref="WorkflowDefinition"/>s</param>
         /// <param name="workflows">The <see cref="IRepository"/> used to manage <see cref="V1Workflow"/>s</param>
-        /// <param name="runtimeHost">The current <see cref="IWorkflowRuntimeHost"/></param>
-        public V1CreateWorkflowCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IWorkflowValidator workflowValidator, IRepository<V1Workflow> workflows, IWorkflowRuntimeHost runtimeHost) 
+        /// <param name="runtimeHost">The current <see cref="IWorkflowRuntime"/></param>
+        public V1CreateWorkflowCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IWorkflowValidator workflowValidator, IRepository<V1Workflow> workflows, IWorkflowRuntime runtimeHost) 
             : base(loggerFactory, mediator, mapper)
         {
             this.WorkflowValidator = workflowValidator;
@@ -94,9 +94,9 @@ namespace Synapse.Application.Commands.Workflows
         protected IRepository<V1Workflow> Workflows { get; }
 
         /// <summary>
-        /// Gets the current <see cref="IWorkflowRuntimeHost"/>
+        /// Gets the current <see cref="IWorkflowRuntime"/>
         /// </summary>
-        protected IWorkflowRuntimeHost RuntimeHost { get; }
+        protected IWorkflowRuntime RuntimeHost { get; }
 
         /// <inheritdoc/>
         public virtual async Task<IOperationResult<Integration.Models.V1Workflow>> HandleAsync(V1CreateWorkflowCommand command, CancellationToken cancellationToken = default)

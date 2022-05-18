@@ -154,6 +154,15 @@ namespace Synapse.Apis.Management
         Task CancelWorkflowInstanceAsync(string id, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Gets the logs of the <see cref="V1WorkflowInstance"/> with the specified id
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1WorkflowInstance"/> to get the logs of</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The logs of the specified <see cref="V1WorkflowInstance"/></returns>
+        [OperationContract]
+        Task<string> GetWorkflowInstanceLogsAsync(string id, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Deletes the <see cref="V1WorkflowInstance"/> with the specified id
         /// </summary>
         /// <param name="id">The id of the <see cref="V1WorkflowInstance"/> to delete</param>
