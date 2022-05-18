@@ -29,4 +29,9 @@ namespace Synapse.Dashboard.Pages.Workflows.Create.Actions
     }
 
     public class ToggleVisualEditor { }
+    
+    public class EnableCreateButton { }
+
+    public class DisableCreateButton { }
+
 }
