@@ -96,7 +96,6 @@
                                     ValueProvider="source => ((V1WorkflowInstance)source).Duration"
                                     IsSorteable="false"
                                     IsFilterable="false"/>
-
                                 <Column
                                     T="V1WorkflowInstance"   
                                     Name="Actions"
@@ -113,10 +112,10 @@
                                         @if (((V1WorkflowInstance)context.Value!).Status <= V1WorkflowInstanceStatus.Resuming) {
                                             <button @onclick="() => Dispatcher.Dispatch(new CancelV1WorkflowInstance(((V1WorkflowInstance)context.Value!).Id))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><span class="oi oi-media-stop"></span><span class="btn-label">&nbsp; Terminate</span></button>
                                         }
-                                        <button @onclick="async () => await StartWith(((V1WorkflowInstance?)context.Value)?.Input)" @onclick:stopPropagation="true" class="btn btn-outline-dark"><span class="oi oi-reload"></span><span class="btn-label">&nbsp; Play again</span></button>
+                                        <button @onclick="async () => await StartWith(((V1WorkflowInstance?)context.Value)?.Input)" @onclick:stopPropagation="true" class="btn btn-outline-dark"><span class="oi oi-reload"></span><span class="btn-label">&nbsp; Start new</span></button>
+                                        <button @onclick="async () => OnViewWorkflowInstance(context.Item)" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-info"></small><span class="btn-label">&nbsp; Details</span></button>
                                     </CellTemplate>
                                 </Column>
-                                <ViewDetailsColumn T="V1WorkflowInstance" OnViewDetails="OnViewWorkflowInstance" />
                             </Columns>
                         </Table>
                     </TabPage>
@@ -311,6 +310,8 @@ else
             V1WorkflowInstanceStatus.Running => "bg-primary",
             V1WorkflowInstanceStatus.Suspended => "bg-warning",
             V1WorkflowInstanceStatus.Faulted => "bg-danger",
+            V1WorkflowInstanceStatus.Cancelling => "border-danger text-primary",
+            V1WorkflowInstanceStatus.Cancelled => "bg-danger",
             V1WorkflowInstanceStatus.Completed => "bg-success",
             _ => string.Empty
         };

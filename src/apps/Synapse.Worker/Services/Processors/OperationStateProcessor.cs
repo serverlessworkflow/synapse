@@ -59,43 +59,111 @@ namespace Synapse.Worker.Services.Processors
         protected override async Task InitializeAsync(CancellationToken cancellationToken)
         {
             if (this.Activity.Status == V1WorkflowActivityStatus.Pending)
+                await this.StartAsync();
+            else
+                await this.ResumeAsync();
+        }
+
+        /// <summary>
+        /// Starts the <see cref="OperationStateProcessor"/>'s execution
+        /// </summary>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        protected virtual async Task StartAsync()
+        {
+            var input = null as object;
+            var metadata = null as Dictionary<string, string>;
+            switch (this.State.ActionMode)
             {
-                var input = null as object;
-                var metadata = null as Dictionary<string, string>;
-                switch (this.State.ActionMode)
-                {
-                    case ActionExecutionMode.Parallel:
-                        foreach (var action in this.State.Actions)
-                        {
-                            input = await this.Context.FilterInputAsync(action, this.Activity.Input, cancellationToken);
-                            metadata = new() 
+                case ActionExecutionMode.Parallel:
+                    foreach (var action in this.State.Actions)
+                    {
+                        input = await this.Context.FilterInputAsync(action, this.Activity.Input, this.CancellationTokenSource.Token);
+                        metadata = new()
                             {
                                 { V1WorkflowActivityMetadata.State, this.State.Name! },
-                                { V1WorkflowActivityMetadata.Action, action.Name! } 
+                                { V1WorkflowActivityMetadata.Action, action.Name! }
                             };
-                            await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Action, input, metadata, this.Activity, cancellationToken);
-                        }
-                        break;
-                    case ActionExecutionMode.Sequential:
-                        var firstAction = this.State.Actions.First();
-                        input = await this.Context.FilterInputAsync(firstAction, this.Activity.Input, cancellationToken);
-                        metadata = new()
+                        await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Action, input, metadata, this.Activity, this.CancellationTokenSource.Token);
+                    }
+                    break;
+                case ActionExecutionMode.Sequential:
+                    var firstAction = this.State.Actions.First();
+                    input = await this.Context.FilterInputAsync(firstAction, this.Activity.Input, this.CancellationTokenSource.Token);
+                    metadata = new()
                         {
                             { V1WorkflowActivityMetadata.State, this.State.Name! },
                             { V1WorkflowActivityMetadata.Action, firstAction.Name! }
                         };
-                        await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Action, input, metadata, this.Activity, cancellationToken);
-                        break;
-                    default:
-                        throw new NotSupportedException($"The specified {nameof(ActionExecutionMode)} '{this.State.ActionMode}' is not supported");
-                }
+                    await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Action, input, metadata, this.Activity, this.CancellationTokenSource.Token);
+                    break;
+                default:
+                    throw new NotSupportedException($"The specified {nameof(ActionExecutionMode)} '{this.State.ActionMode}' is not supported");
             }
-            foreach (var activity in await this.Context.Workflow.GetOperativeActivitiesAsync(this.Activity, cancellationToken))
+            foreach (var activity in await this.Context.Workflow.GetOperativeActivitiesAsync(this.Activity, this.CancellationTokenSource.Token))
             {
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                 this.CreateProcessorFor(activity);
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             }
+        }
+
+        /// <summary>
+        /// Resumes the <see cref="OperationStateProcessor"/>'s execution
+        /// </summary>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        protected virtual async Task ResumeAsync()
+        {
+            var activities = await this.Context.Workflow.GetOperativeActivitiesAsync(this.Activity, this.CancellationTokenSource.Token);
+            if (activities.Any())
+            {
+                foreach (var activity in activities)
+                {
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                    this.CreateProcessorFor(activity);
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                }
+            }
+            else
+            {
+                switch (this.State.ActionMode)
+                {
+                    case ActionExecutionMode.Parallel:
+                        var output = await this.AggregateActionOutputsAsync(this.CancellationTokenSource.Token);
+                        await this.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, output), this.CancellationTokenSource.Token);
+                        await this.OnCompletedAsync(this.CancellationTokenSource.Token);
+                        break;
+                    case ActionExecutionMode.Sequential:
+                        activities = await this.Context.Workflow.GetActivitiesAsync(this.Activity, this.CancellationTokenSource.Token);
+                        var lastActivity = activities.LastOrDefault(a => a.Type == V1WorkflowActivityType.Action);
+                        if (lastActivity == null)
+                        {
+                            await this.StartAsync();
+                            return;
+                        }
+                        if (!this.State.TryGetAction(lastActivity.Metadata, out var lastAction))
+                            throw new NullReferenceException($"Failed to find an action that matches the metadata specified by the activity with id '{lastActivity.Id}'");
+                        if (!this.State.TryGetNextAction(lastAction.Name!, out var nextAction))
+                        {
+                            output = await this.AggregateActionOutputsAsync(this.CancellationTokenSource.Token);
+                            await this.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, output), this.CancellationTokenSource.Token);
+                            await this.OnCompletedAsync(this.CancellationTokenSource.Token);
+                            return;
+                        }
+                        var metadata = new Dictionary<string, string>()
+                        {
+                            { V1WorkflowActivityMetadata.State, this.State.Name! },
+                            { V1WorkflowActivityMetadata.Action, nextAction.Name! }
+                        };
+                        var activity = await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Action, await this.Context.FilterInputAsync(nextAction, lastActivity.Output, this.CancellationTokenSource.Token), metadata, this.Activity, this.CancellationTokenSource.Token);
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                        this.CreateProcessorFor(activity);
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                        break;
+                    default:
+                        throw new NotSupportedException($"The specified {nameof(ActionExecutionMode)} '{this.State.ActionMode}' is not supported");
+                }
+            }
+
         }
 
         /// <inheritdoc/>
@@ -208,7 +276,7 @@ namespace Synapse.Worker.Services.Processors
         {
             using (await this.Lock.LockAsync(this.CancellationTokenSource.Token))
             {
-                foreach(var childProcessor in this.Processors)
+                foreach (var childProcessor in this.Processors)
                 {
                     if (childProcessor == processor)
                         continue;
