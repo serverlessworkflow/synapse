@@ -186,6 +186,18 @@ namespace Synapse.Apis.Management.Grpc
 
         #endregion
 
+        #region OperationalReports
+
+        /// <inheritdoc/>
+        public virtual async Task<GrpcApiResult<V1OperationalReport>> GetOperationalReportAsync(DateTime? date = null, CallContext context = default)
+        {
+            if (!date.HasValue)
+                date = DateTime.Now;
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new V1FindByIdQuery<V1OperationalReport, string>(V1OperationalReport.GetIdFor(date.Value)), context.CancellationToken));
+        }
+
+        #endregion
+
     }
 
 }

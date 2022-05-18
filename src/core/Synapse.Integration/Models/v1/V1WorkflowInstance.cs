@@ -17,6 +17,7 @@
 
 namespace Synapse.Integration.Models
 {
+
     public partial class V1WorkflowInstance
     {
 
@@ -24,7 +25,6 @@ namespace Synapse.Integration.Models
         /// Gets the workflow instance's duration
         /// </summary>
         public virtual TimeSpan? Duration => this.ExecutedAt.HasValue && this.StartedAt.HasValue ? this.ExecutedAt.Value.Subtract(this.StartedAt.Value) : null;
-
 
     }
 

@@ -87,12 +87,13 @@ namespace Synapse.Application.Configuration
                 return settings;
             };
 
-            List<Type> writeModelTypes = TypeCacheUtil.FindFilteredTypes("domain:aggregates", t => t.IsClass && !t.IsAbstract && typeof(IAggregateRoot).IsAssignableFrom(t), typeof(V1Workflow).Assembly).ToList();
-            List<Type> readModelTypes = writeModelTypes
+            var writeModelTypes = TypeCacheUtil.FindFilteredTypes("syn:models-write", t => t.IsClass && !t.IsAbstract && typeof(IAggregateRoot).IsAssignableFrom(t), typeof(V1Workflow).Assembly).ToList();
+            var readModelTypes = writeModelTypes
                 .Where(t => t.TryGetCustomAttribute<DataTransferObjectTypeAttribute>(out _))
                 .Select(t => t.GetCustomAttribute<DataTransferObjectTypeAttribute>()!.Type)
                 .ToList();
-
+            readModelTypes.AddRange(TypeCacheUtil.FindFilteredTypes("syn:models-read", t => t.IsClass && !t.IsAbstract && t.TryGetCustomAttribute<ReadModelAttribute>(out _)));
+            readModelTypes = readModelTypes.Distinct().ToList();
             SynapseApplicationOptions options = new();
             this.Configuration.Bind(options);
 

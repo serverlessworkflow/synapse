@@ -15,9 +15,11 @@
  *
  */
 
+using ServerlessWorkflow.Sdk;
 using ServerlessWorkflow.Sdk.Models;
 using ServerlessWorkflow.Sdk.Services.Validation;
 using Synapse.Application.Commands.Correlations;
+using Synapse.Application.Queries.Workflows;
 using System.ComponentModel.DataAnnotations;
 
 namespace Synapse.Application.Commands.Workflows
@@ -99,10 +101,18 @@ namespace Synapse.Application.Commands.Workflows
         /// <inheritdoc/>
         public virtual async Task<IOperationResult<Integration.Models.V1Workflow>> HandleAsync(V1CreateWorkflowCommand command, CancellationToken cancellationToken = default)
         {
-            //todo: validate. ignored so far because of minor bugs in the current state of the spec (not allowing object-based dataInputSchema, for one)
-            //var validationResult = await this.WorkflowValidator.ValidateAsync(command.Definition, true, true, cancellationToken); 
-            //if (!validationResult.IsValid)
-            //    return this.Invalid(validationResult.AsErrors().ToArray());
+            var validationResult = await this.WorkflowValidator.ValidateAsync(command.Definition, true, true, cancellationToken);
+            if (!validationResult.IsValid)
+                return this.Invalid(validationResult.AsErrors().ToArray());
+            foreach(var subflowRef in command.Definition.GetSubflowReferences())
+            {
+                var reference = subflowRef.WorkflowId;
+                if(!string.IsNullOrWhiteSpace(subflowRef.Version))
+                    reference += $":{subflowRef.Version}";
+                var subflow = await this.Mediator.ExecuteAndUnwrapAsync(new V1GetWorkflowByIdQuery(subflowRef.WorkflowId, subflowRef.Version), cancellationToken);
+                if (subflow == null)
+                    throw DomainException.NullReference(typeof(V1Workflow), $"Failed to find the referenced workflow '{reference}'");
+            }
             while (await this.Workflows.ContainsAsync(command.Definition.GetUniqueIdentifier(), cancellationToken))
             {
                 var version = Version.Parse(command.Definition.Version);

@@ -162,7 +162,7 @@ namespace Synapse.Apis.Management.Grpc
         /// Creates a new <see cref="V1Correlation"/>
         /// </summary>
         /// <param name="command">The object that describes the command to execute</param>
-        /// <param name="context">A <see cref="CallContext"/></param>
+        /// <param name="context">The current <see cref="CallContext"/></param>
         /// <returns>A new object that describes the result of the operation</returns>
         [OperationContract]
         Task<GrpcApiResult<V1Correlation>> CreateCorrelationAsync(V1CreateCorrelationCommand command, CallContext context = default);
@@ -171,7 +171,7 @@ namespace Synapse.Apis.Management.Grpc
         /// Gets the <see cref="V1Correlation"/> with the specified id
         /// </summary>
         /// <param name="id">The id of the <see cref="V1Correlation"/> to get</param>
-        /// <param name="context">A <see cref="CallContext"/></param>
+        /// <param name="context">The current <see cref="CallContext"/></param>
         /// <returns>A new object that describes the result of the operation</returns>
 
         [OperationContract]
@@ -181,7 +181,7 @@ namespace Synapse.Apis.Management.Grpc
         /// Lists existing <see cref="V1Correlation"/>s
         /// </summary>
         /// <param name="query">The OData query string</param>
-        /// <param name="context">A <see cref="CallContext"/></param>
+        /// <param name="context">The current <see cref="CallContext"/></param>
         /// <returns>A new object that describes the result of the operation</returns>
         [OperationContract]
         Task<GrpcApiResult<List<V1Correlation>>> GetCorrelationsAsync(string query, CallContext context = default);
@@ -190,10 +190,23 @@ namespace Synapse.Apis.Management.Grpc
         /// Deletes the <see cref="V1Correlation"/> with the specified id
         /// </summary>
         /// <param name="id">The id of the <see cref="V1Correlation"/> to delete</param>
-        /// <param name="context">A <see cref="CallContext"/></param>
+        /// <param name="context">The current <see cref="CallContext"/></param>
         /// <returns>A new object that describes the result of the operation</returns>
         [OperationContract]
         Task<GrpcApiResult> DeleteCorrelationAsync(string id, CallContext context = default);
+
+        #endregion
+
+        #region Metrics
+
+        /// <summary>
+        /// Gets the <see cref="V1OperationalReport"/>
+        /// </summary>
+        /// <param name="date">The date to get the report for. Defaults to today</param>
+        /// <param name="context">The current <see cref="CallContext"/></param>
+        /// <returns>The <see cref="V1OperationalReport"/></returns>
+        [OperationContract]
+        Task<GrpcApiResult<V1OperationalReport>> GetOperationalReportAsync(DateTime? date = null, CallContext context = default);
 
         #endregion
 

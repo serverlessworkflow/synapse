@@ -23,7 +23,7 @@ namespace Synapse.Apis.Management.Grpc
 {
 
     /// <summary>
-    /// Represents a GRPC-based client for the <see cref="ISynapseApi"/>
+    /// Represents a GRPC-based client for the <see cref="ISynapseManagementApi"/>
     /// </summary>
     public class SynapseGrpcManagementApiClient
         : ISynapseManagementApi
@@ -221,7 +221,21 @@ namespace Synapse.Apis.Management.Grpc
             await this.Adapter.DeleteCorrelationAsync(id, cancellationToken);
         }
 
+
         #endregion region
+
+        #region OperationalReports
+
+        /// <inheritdoc/>
+        public virtual async Task<V1OperationalReport> GetOperationalReportAsync(DateTime? date = null, CancellationToken cancellationToken = default)
+        {
+            var result = await this.Adapter.GetOperationalReportAsync(date, cancellationToken);
+            if (!result.Succeeded)
+                throw new SynapseApiException(result);
+            return result.Data!;
+        }
+
+        #endregion
 
     }
 
