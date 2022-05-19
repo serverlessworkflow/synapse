@@ -26,7 +26,7 @@ namespace Synapse.Application.Commands.Workflows
 {
 
     /// <summary>
-    /// Represents the <see cref="ICommand"/> used to create a new <see cref="Domain.Models.V1Workflow"/>
+    /// Represents the <see cref="ICommand"/> used to create a new <see cref="V1Workflow"/>
     /// </summary>
     [DataTransferObjectType(typeof(Integration.Commands.Workflows.V1CreateWorkflowCommand))]
     public class V1CreateWorkflowCommand
@@ -44,17 +44,24 @@ namespace Synapse.Application.Commands.Workflows
         /// <summary>
         /// Initializes a new <see cref="V1CreateWorkflowCommand"/>
         /// </summary>
-        /// <param name="definition">The definition of the <see cref="Domain.Models.V1Workflow"/> to create</param>
-        public V1CreateWorkflowCommand(WorkflowDefinition definition)
+        /// <param name="definition">The definition of the <see cref="V1Workflow"/> to create</param>
+        /// <param name="ifNotExists">A boolean indicating whether the <see cref="V1Workflow"/> should be created only if it does not already exist. Defaults to false, in which case the <see cref="Definition"/> is automatically versionned
+        public V1CreateWorkflowCommand(WorkflowDefinition definition, bool ifNotExists)
         {
             this.Definition = definition;
+            this.IfNotExists = ifNotExists;
         }
 
         /// <summary>
-        /// Gets the definition of the <see cref="Domain.Models.V1Workflow"/> to create
+        /// Gets the definition of the <see cref="V1Workflow"/> to create
         /// </summary>
         [Required]
         public virtual WorkflowDefinition Definition { get; protected set; }
+
+        /// <summary>
+        /// Gets a boolean indicating whether the <see cref="V1Workflow"/> should be created only if it does not already exist. Defaults to false, in which case the <see cref="Definition"/> is automatically versionned
+        /// </summary>
+        public virtual bool IfNotExists { get; protected set; }
 
     }
 
@@ -113,11 +120,19 @@ namespace Synapse.Application.Commands.Workflows
                 if (subflow == null)
                     throw DomainException.NullReference(typeof(V1Workflow), $"Failed to find the referenced workflow '{reference}'");
             }
-            while (await this.Workflows.ContainsAsync(command.Definition.GetUniqueIdentifier(), cancellationToken))
+            if (command.IfNotExists
+                && await this.Workflows.ContainsAsync(command.Definition.GetUniqueIdentifier(), cancellationToken))
             {
-                var version = Version.Parse(command.Definition.Version);
-                version = new Version(version.Major, version.Minor, version.Build == -1 ? 1 : version.Build + 1);
-                command.Definition.Version = version.ToString(3);
+                return this.NotModified();
+            }
+            else
+            {
+                while (await this.Workflows.ContainsAsync(command.Definition.GetUniqueIdentifier(), cancellationToken))
+                {
+                    var version = Version.Parse(command.Definition.Version);
+                    version = new Version(version.Major, version.Minor, version.Build == -1 ? 1 : version.Build + 1);
+                    command.Definition.Version = version.ToString(3);
+                }
             }
             var workflow = await this.Workflows.AddAsync(new(command.Definition), cancellationToken);
             await this.Workflows.SaveChangesAsync(cancellationToken);
