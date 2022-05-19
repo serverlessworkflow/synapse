@@ -100,29 +100,28 @@
                                     T="V1WorkflowInstance"   
                                     ValueProvider="source => source"
                                     IsSorteable="false"
-                                    IsFilterable="false">                                
+                                    IsFilterable="false"
+                                    CssClass="d-flex justify-content-end gap-1">                                
                                     <CellTemplate Context="context">
-                                        <div class="text-end">
                                             @if(((V1WorkflowInstance)context.Value!).Status == V1WorkflowInstanceStatus.Running) 
                                             {
-                                                <button @onclick="() => Dispatcher.Dispatch(new SuspendV1WorkflowInstance(((V1WorkflowInstance)context.Value!).Id))" @onclick:stopPropagation="true" class="btn btn-outline-dark mx-1"><small class="oi oi-media-pause"></small><span class="btn-label">&nbsp; Suspend</span></button>
+                                                <button @onclick="() => Dispatcher.Dispatch(new SuspendV1WorkflowInstance(((V1WorkflowInstance)context.Value!).Id))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-media-pause"></small><span class="btn-label">&nbsp; Suspend</span></button>
                                             }
                                             @if(((V1WorkflowInstance)context.Value!).Status == V1WorkflowInstanceStatus.Suspended) 
                                             {
-                                                <button @onclick="() => Dispatcher.Dispatch(new ResumeV1WorkflowInstance(((V1WorkflowInstance)context.Value!).Id))" @onclick:stopPropagation="true" class="btn btn-outline-dark mx-1"><small class="oi oi-media-play"></small><span class="btn-label">&nbsp; Resume</span></button>
+                                                <button @onclick="() => Dispatcher.Dispatch(new ResumeV1WorkflowInstance(((V1WorkflowInstance)context.Value!).Id))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-media-play"></small><span class="btn-label">&nbsp; Resume</span></button>
                                             }
                                             @if (((V1WorkflowInstance)context.Value!).Status <= V1WorkflowInstanceStatus.Resuming) 
                                             {
-                                                <button @onclick="() => Dispatcher.Dispatch(new CancelV1WorkflowInstance(((V1WorkflowInstance)context.Value!).Id))" @onclick:stopPropagation="true" class="btn btn-outline-dark mx-1"><small class="oi oi-media-stop"></small><span class="btn-label">&nbsp; Cancel</span></button>
+                                                <button @onclick="() => Dispatcher.Dispatch(new CancelV1WorkflowInstance(((V1WorkflowInstance)context.Value!).Id))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-media-stop"></small><span class="btn-label">&nbsp; Cancel</span></button>
                                             }
-                                            <button @onclick="async () => await StartWith(((V1WorkflowInstance?)context.Value)?.Input)" @onclick:stopPropagation="true" class="btn btn-outline-dark mx-1"><small class="oi oi-reload"></small><span class="btn-label">&nbsp; Start new</span></button><button @onclick="async () => OnViewWorkflowInstance(context.Item)" @onclick:stopPropagation="true" class="btn btn-outline-dark mx-1"><small class="oi oi-info"></small><span class="btn-label">&nbsp; Details</span></button>
+                                            <button @onclick="async () => await StartWith(((V1WorkflowInstance?)context.Value)?.Input)" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-reload"></small><span class="btn-label">&nbsp; Start new</span></button><button @onclick="async () => OnViewWorkflowInstance(context.Item)" @onclick:stopPropagation="true" class="btn btn-outline-dark mx-1"><small class="oi oi-info"></small><span class="btn-label">&nbsp; Details</span></button>
                                             @if (((V1WorkflowInstance)context.Value!).Status == V1WorkflowInstanceStatus.Faulted
                                                 || ((V1WorkflowInstance)context.Value!).Status == V1WorkflowInstanceStatus.Cancelled
                                                 || ((V1WorkflowInstance)context.Value!).Status == V1WorkflowInstanceStatus.Completed) 
                                             {
-                                                <button @onclick="() => OnDeleteWorkflowInstanceAsync(((V1WorkflowInstance)context.Value!).Id)" @onclick:stopPropagation="true" class="btn btn-outline-dark mx-1"><small class="oi oi-trash"></small><span class="btn-label">&nbsp; Delete</span></button>
+                                                <button @onclick="() => OnDeleteWorkflowInstanceAsync(((V1WorkflowInstance)context.Value!).Id)" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small><span class="btn-label">&nbsp; Delete</span></button>
                                             }
-                                        </div>
                                     </CellTemplate>
                                 </Column>
                             </Columns>
@@ -351,7 +350,7 @@ else
     {
         await this.deleteWorkflowDialog.HideAsync();
         await this.SynapseApi.DeleteWorkflowInstanceAsync(this.selectedWorkflowInstanceId!);
-        this.Dispatcher.Dispatch(new DeleteV1WorkflowInstance(this.selectedWorkflowInstanceId!));
+        //this.Dispatcher.Dispatch(new DeleteV1WorkflowInstance(this.selectedWorkflowInstanceId!));
     }
 
     private async Task OnDownloadWorkflowInstanceArtifactsAsync()
