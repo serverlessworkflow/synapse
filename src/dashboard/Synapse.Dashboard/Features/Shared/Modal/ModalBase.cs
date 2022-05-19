@@ -31,6 +31,12 @@ namespace Synapse.Dashboard
         [Parameter]
         public virtual EventCallback<bool> OnActiveChange { get; set; }
 
+        [Parameter]
+        public virtual EventCallback OnShow { get; set; }
+
+        [Parameter]
+        public virtual EventCallback OnHide { get; set; }
+
         public virtual bool Active { get; set; } = false;
 
         protected virtual string modalSizeClass => this.Size switch
@@ -46,18 +52,22 @@ namespace Synapse.Dashboard
         {
             this.Active = !this.Active;
             await this.OnActiveChange.InvokeAsync(this.Active);
+            if (!this.Active)
+                await this.OnHide.InvokeAsync();
         }
 
         public virtual async Task ShowAsync()
         {
             this.Active = true;
             await this.OnActiveChange.InvokeAsync(this.Active);
+            await this.OnShow.InvokeAsync();
         }
 
         public virtual async Task HideAsync()
         {
             this.Active = false;
             await this.OnActiveChange.InvokeAsync(this.Active);
+            await this.OnHide.InvokeAsync();
         }
     }
 }
