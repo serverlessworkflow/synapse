@@ -56,6 +56,11 @@ namespace Synapse.Application.Configuration
         public virtual PluginsOptions Plugins { get; set; } = new();
 
         /// <summary>
+        /// Gets/sets the path to the directory used to monitor workflow definition files
+        /// </summary>
+        public virtual string DefinitionsDirectory { get; set; } = Path.Combine(AppContext.BaseDirectory, "data", "definitions");
+
+        /// <summary>
         /// Gets/sets a boolean indicating whether or not to skip certificate validation when performing http requests
         /// </summary>
         public virtual bool SkipCertificateValidation { get; set; }

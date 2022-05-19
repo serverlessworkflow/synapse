@@ -119,6 +119,7 @@ namespace Synapse.Application.Configuration
             this.Services.AddSingleton<IWorkflowRuntimeProxyManager, WorkflowRuntimeProxyManager>();
             this.Services.AddSingleton<ICronJobScheduler, CronJobScheduler>();
             this.Services.AddHostedService<WorkflowScheduler>();
+            this.Services.AddHostedService<WorkflowDefinitionFileMonitor>();
             this.Services.AddTransient(provider => provider.GetRequiredService<IEdmModelBuilder>().Build());
             this.Services.AddNewtonsoftJsonSerializer(options =>
             {
