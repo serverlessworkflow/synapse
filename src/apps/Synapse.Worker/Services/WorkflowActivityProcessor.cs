@@ -133,10 +133,12 @@ namespace Synapse.Worker.Services
         async Task IWorkflowActivityProcessor.SuspendAsync(CancellationToken cancellationToken)
         {
             this.Logger.LogInformation("Suspending activity '{activityId}' (type: '{activityType}')...", this.Activity.Id, this.Activity.Type);
+            var tasks = new List<Task>(this.Processors.Count);
             foreach (var processor in this.Processors)
             {
-                await processor.SuspendAsync(cancellationToken);
+                tasks.Add(processor.SuspendAsync(cancellationToken));
             }
+            try { await Task.WhenAll(tasks); } catch { }
             await this.Context.Workflow.SuspendActivityAsync(this.Activity, this.CancellationTokenSource.Token);
             await this.SuspendAsync(cancellationToken);
             this.Logger.LogInformation("Activity '{activityId}' (type: '{activityType}') suspended", this.Activity.Id, this.Activity.Type);
@@ -155,10 +157,12 @@ namespace Synapse.Worker.Services
         async Task IWorkflowActivityProcessor.TerminateAsync(CancellationToken cancellationToken)
         {
             this.Logger.LogInformation("Terminating activity '{activityId}' (type: '{activityType}')...", this.Activity.Id, this.Activity.Type);
-            foreach(var processor in this.Processors)
+            var tasks = new List<Task>(this.Processors.Count);
+            foreach (var processor in this.Processors)
             {
-                await processor.TerminateAsync(cancellationToken);
+                tasks.Add(processor.TerminateAsync(cancellationToken));
             }
+            try { await Task.WhenAll(tasks); } catch { }
             await this.Context.Workflow.CancelActivityAsync(this.Activity, this.CancellationTokenSource.Token);
             await this.TerminateAsync(cancellationToken);
             this.CancellationTokenSource?.Cancel();
