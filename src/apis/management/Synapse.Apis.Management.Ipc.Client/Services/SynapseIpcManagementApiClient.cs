@@ -180,6 +180,15 @@ namespace Synapse.Apis.Management.Ipc
             return await this.Mediator.ExecuteAndUnwrapAsync(new Application.Queries.WorkflowInstances.V1GetWorkflowInstanceLogsQuery(id), cancellationToken);
         }
 
+
+        /// <inheritdoc/>
+        public virtual async Task<Stream> ArchiveWorkflowInstanceAsync(string id, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                throw new ArgumentNullException(nameof(id));
+            return await this.Mediator.ExecuteAndUnwrapAsync(new Application.Commands.WorkflowInstances.V1ArchiveWorkflowInstanceCommand(id), cancellationToken);
+        }
+
         /// <inheritdoc/>
         public virtual async Task DeleteWorkflowInstanceAsync(string id, CancellationToken cancellationToken = default)
         {

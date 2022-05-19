@@ -146,6 +146,15 @@ namespace Synapse.Apis.Management.Grpc
         Task<GrpcApiResult<string>> GetWorkflowInstanceLogsAsync(string id, CallContext context = default);
 
         /// <summary>
+        /// Gets the id of the <see cref="V1WorkflowInstance"/> to archive
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1WorkflowInstance"/> to archive</param>
+        /// <param name="context">The current <see cref="CallContext"/></param>
+        /// <returns>A new <see cref="Stream"/> containing the archived <see cref="V1WorkflowInstance"/></returns>
+        [OperationContract]
+        Task<GrpcApiResult<byte[]>> ArchiveWorkflowInstanceAsync(string id, CallContext context = default);
+
+        /// <summary>
         /// Deletes the workflow instance with the specified id
         /// </summary>
         /// <param name="id">The id of the workflow instance to delete</param>

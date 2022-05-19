@@ -16,6 +16,7 @@
  */
 
 using Microsoft.Extensions.Logging;
+using Neuroglia;
 using Neuroglia.Mapping;
 using Neuroglia.Mediation;
 using ProtoBuf.Grpc;
@@ -142,6 +143,18 @@ namespace Synapse.Apis.Management.Grpc
         public virtual async Task<GrpcApiResult> CancelWorkflowInstanceAsync(string id, CallContext context = default)
         {
             return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new Application.Commands.WorkflowInstances.V1CancelWorkflowInstanceCommand(id), context.CancellationToken));
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<GrpcApiResult<byte[]>> ArchiveWorkflowInstanceAsync(string id, CallContext context = default)
+        {
+            var result = await this.Mediator.ExecuteAsync(new Application.Commands.WorkflowInstances.V1ArchiveWorkflowInstanceCommand(id), context.CancellationToken);
+            OperationResult<byte[]> toReturn;
+            if (result.Succeeded)
+                toReturn = new(((MemoryStream)result.Data!).ToArray());
+            else
+                toReturn = new(result.Code, result.Errors?.ToArray());
+            return GrpcApiResult.CreateFor(toReturn);
         }
 
         /// <inheritdoc/>
