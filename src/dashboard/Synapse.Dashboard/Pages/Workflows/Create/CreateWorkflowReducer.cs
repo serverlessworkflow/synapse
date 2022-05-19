@@ -21,11 +21,25 @@ namespace Synapse.Dashboard.Pages.Workflows.Create.Reducer
     [Reducer]
     public static class CreateWorkflowReducer
     {
-        public static State.CreateWorkflowState ToggleEditorVisibility(State.CreateWorkflowState state, Actions.ToggleVisualEditor action)
+        public static State.CreateWorkflowState OnToggleEditorVisibility(State.CreateWorkflowState state, Actions.ToggleVisualEditor action)
         {
             return state with
             {
                 ShowVisualEditor = !state.ShowVisualEditor
+            };
+        }
+        public static State.CreateWorkflowState OnEnableCreateButton(State.CreateWorkflowState state, Actions.EnableCreateButton action)
+        {
+            return state with
+            {
+                CreateDisabled = false
+            };
+        }
+        public static State.CreateWorkflowState OnDisableCreateButton(State.CreateWorkflowState state, Actions.DisableCreateButton action)
+        {
+            return state with
+            {
+                CreateDisabled = true
             };
         }
     }
