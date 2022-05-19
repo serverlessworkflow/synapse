@@ -15,6 +15,8 @@
  *
  */
 
+using System.Net.Mime;
+
 namespace Synapse.Apis.Management.Http.Controllers
 {
 
@@ -158,6 +160,25 @@ namespace Synapse.Apis.Management.Http.Controllers
         public async Task<IActionResult> Cancel(string id, CancellationToken cancellationToken)
         {
             return this.Process(await this.Mediator.ExecuteAsync(new Application.Commands.WorkflowInstances.V1CancelWorkflowInstanceCommand(id), cancellationToken));
+        }
+
+        /// <summary>
+        /// Donwloads the archive of an existing workflow instance
+        /// </summary>
+        /// <param name="id">The id of the workflow instance to archive</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new <see cref="IActionResult"/></returns>
+        [HttpGet("{id}/archive")]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.Forbidden)]
+        public async Task<IActionResult> Archive(string id, CancellationToken cancellationToken)
+        {
+            var result = await this.Mediator.ExecuteAsync(new Application.Commands.WorkflowInstances.V1ArchiveWorkflowInstanceCommand(id), cancellationToken);
+            if (!result.Succeeded)
+                return this.Process(result);
+            return this.File(result.Data, MediaTypeNames.Application.Zip, $"{id}.zip");
         }
 
         /// <summary>

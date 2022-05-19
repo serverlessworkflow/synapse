@@ -251,6 +251,13 @@ namespace Synapse.Apis.Management.Http
         }
 
         /// <inheritdoc/>
+        public virtual async Task<Stream> ArchiveWorkflowInstanceAsync(string id, CancellationToken cancellationToken = default)
+        {
+            var requestUri = $"/api/v1/workflow-instances/{id}/logs";
+            return await this.HttpClient.GetStreamAsync(requestUri, cancellationToken);
+        }
+
+        /// <inheritdoc/>
         public virtual async Task DeleteWorkflowInstanceAsync(string id, CancellationToken cancellationToken = default)
         {
             using var request = this.CreateRequest(HttpMethod.Delete, $"/api/v1/workflow-instances/{id}");

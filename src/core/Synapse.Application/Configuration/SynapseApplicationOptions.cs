@@ -36,6 +36,11 @@ namespace Synapse.Application.Configuration
         }
 
         /// <summary>
+        /// Gets/sets the options used to configure the way Synapse archives <see cref="V1WorkflowInstance"/>s
+        /// </summary>
+        public virtual ArchivingOptions Archiving { get; set; } = new();
+
+        /// <summary>
         /// Gets/sets the options used to configure the application's cloud eventss
         /// </summary>
         public virtual CloudEventOptions CloudEvents { get; set; } = new();
