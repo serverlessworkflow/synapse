@@ -36,13 +36,6 @@ namespace Synapse.Dashboard
                         node.ActiveInstances.Add(instance);
                     continue;
                 }
-                if (instance.Status == V1WorkflowInstanceStatus.Completed)
-                {
-                    var node = graph.Nodes.Values.OfType<EndNodeViewModel>().FirstOrDefault();
-                    if (node != null)
-                        node.ActiveInstances.Add(instance);
-                    continue;
-                }
                 if (instance.Activities != null) { 
                     foreach(var activity in instance.Activities)
                     {
@@ -63,6 +56,12 @@ namespace Synapse.Dashboard
                             }
                         }
                     }
+                }
+                if (instance.Status == V1WorkflowInstanceStatus.Completed)
+                {
+                    var node = graph.Nodes.Values.OfType<EndNodeViewModel>().FirstOrDefault();
+                    if (node != null)
+                        node.ActiveInstances.Add(instance);
                 }
             }
         }
@@ -92,6 +91,8 @@ namespace Synapse.Dashboard
                     return graph.GetActionNodeFor(activity);
                 case V1WorkflowActivityType.Function:
                     return graph.GetActionNodeFor(activity);
+                case V1WorkflowActivityType.Transition:
+                    return graph.GetTransitionNodeFor(activity);
                 case V1WorkflowActivityType.Branch:
                     throw new NotImplementedException(); //todo
                 case V1WorkflowActivityType.ConsumeEvent:
@@ -131,6 +132,15 @@ namespace Synapse.Dashboard
                 throw new InvalidDataException($"The specified activity's metadata does not define a 'action' value");
             return stateNode.Children.Values.Where(node => typeof(IActionNodeViewModel).IsAssignableFrom(node.GetType())).Select(node => node as IActionNodeViewModel).FirstOrDefault(node => node != null && node.Action.Name == actionName);
         }
+
+        private static IWorkflowNodeViewModel? GetTransitionNodeFor(this IGraphViewModel graph, V1WorkflowActivity activity)
+        {
+            var stateNode = (StateNodeViewModel)graph.GetStateNodeFor(activity)!;
+            if (!activity.Metadata.TryGetValue("case", out var caseName))
+                return null;
+            return stateNode.Children.Values.OfType<DataCaseNodeViewModel>().FirstOrDefault(node => node != null && node.DataCaseName == caseName);
+        }
+
 
     }
 
