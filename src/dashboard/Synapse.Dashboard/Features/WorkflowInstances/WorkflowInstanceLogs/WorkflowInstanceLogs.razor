@@ -35,12 +35,12 @@
         this.logs = new((await this.SynapseManagementApi.GetWorkflowInstanceLogsAsync(this.WorkflowInstance.Id))
             .Replace("\r\n", "<br/>")
             .Replace("\n", "<br/>")
-            .Replace("trace:", @"<span class=""text-muted"">trace</span>:")
-            .Replace("debug:", @"<span class=""text-secondary"">debug</span>:")
-            .Replace("info:", @"<span class=""text-info"">info</span>:")
-            .Replace("warn:", @"<span class=""text-warning"">warning</span>:")
-            .Replace("error:", @"<span class=""text-danger"">error</span>:")
-            .Replace("crit:", @"<span class=""text-danger"">critical</span>:"));
+            .Replace("trace:", @"<b><span class=""text-muted"">trace</span>:</b>")
+            .Replace("debug:", @"<b><span class=""text-secondary"">debug</span>:</b>")
+            .Replace("info:", @"<b><span class=""text-info"">info</span>:</b>")
+            .Replace("warn:", @"<b><span class=""text-warning"">warning</span>:</b>")
+            .Replace("error:", @"<b><span class=""text-danger"">error</span>:</b>")
+            .Replace("crit:", @"<b><span class=""text-danger"">critical</span>:</b>"));
     }
 
 }

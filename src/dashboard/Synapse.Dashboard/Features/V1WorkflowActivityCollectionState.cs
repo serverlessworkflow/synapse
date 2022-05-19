@@ -73,6 +73,21 @@ namespace Synapse.Dashboard
 
     }
 
+    public class MarkV1WorkflowActivityAsSuspended
+    {
+
+        public MarkV1WorkflowActivityAsSuspended(string id, DateTime suspendedAt)
+        {
+            this.Id = id;
+            this.SuspendedAt = suspendedAt;
+        }
+
+        public string Id { get; }
+
+        public DateTime SuspendedAt { get; }
+
+    }
+
     public class MarkV1WorkflowActivityAsFaulted
     {
 
@@ -88,6 +103,21 @@ namespace Synapse.Dashboard
         public DateTime FaultedAt { get; }
 
         public Error Error { get; }
+
+    }
+
+    public class MarkV1WorkflowActivityAsCancelled
+    {
+
+        public MarkV1WorkflowActivityAsCancelled(string id, DateTime cancelledAt)
+        {
+            this.Id = id;
+            this.CancelledAt = cancelledAt;
+        }
+
+        public string Id { get; }
+
+        public DateTime CancelledAt { get; }
 
     }
 
@@ -177,6 +207,17 @@ namespace Synapse.Dashboard
             return state;
         }
 
+        public static V1WorkflowActivityCollectionState OnMarkV1WorkflowActivityAsSuspended(V1WorkflowActivityCollectionState state, MarkV1WorkflowActivityAsSuspended action)
+        {
+            var activity = state.FirstOrDefault(a => a.Id == action.Id);
+            if (activity != null)
+            {
+                activity.LastModified = action.SuspendedAt;
+                activity.Status = V1WorkflowActivityStatus.Suspended;
+            }
+            return state;
+        }
+
         public static V1WorkflowActivityCollectionState OnMarkV1WorkflowActivityAsFaulted(V1WorkflowActivityCollectionState state, MarkV1WorkflowActivityAsFaulted action)
         {
             var activity = state.FirstOrDefault(a => a.Id == action.Id);
@@ -185,6 +226,18 @@ namespace Synapse.Dashboard
                 activity.LastModified = action.FaultedAt;
                 activity.Error = action.Error;
                 activity.Status = V1WorkflowActivityStatus.Faulted;
+            }
+            return state;
+        }
+
+        public static V1WorkflowActivityCollectionState OnMarkV1WorkflowActivityAsCancelled(V1WorkflowActivityCollectionState state, MarkV1WorkflowActivityAsCancelled action)
+        {
+            var activity = state.FirstOrDefault(a => a.Id == action.Id);
+            if (activity != null)
+            {
+                activity.LastModified = action.CancelledAt;
+                activity.ExecutedAt = action.CancelledAt;
+                activity.Status = V1WorkflowActivityStatus.Cancelled;
             }
             return state;
         }

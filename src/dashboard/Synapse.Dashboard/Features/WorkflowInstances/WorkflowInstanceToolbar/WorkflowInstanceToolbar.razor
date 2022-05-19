@@ -15,12 +15,25 @@
 *@
 
 @namespace Synapse.Dashboard
+@inject IDispatcher Dispatcher
 @inject NavigationManager NavigationManager
 
 @if (WorkflowInstance != null)
 {
     <Toolbar>
-        <button @onclick="OnNavigateToWorkflow" class="btn btn-outline-dark" title="Back to list"><span class="oi oi-arrow-left"></span><span class="btn-label">&nbsp; Back to list</span></button>
+        <button @onclick="OnNavigateToWorkflow" class="btn btn-outline-dark" title="Back to list"><small class="oi oi-arrow-left"></small><span class="btn-label">&nbsp; Back to list</span></button>
+        @if(WorkflowInstance.Status == V1WorkflowInstanceStatus.Running) 
+        {
+            <button @onclick="() => Dispatcher.Dispatch(new SuspendV1WorkflowInstance(WorkflowInstance.Id))" @onclick:stopPropagation="true" class="btn btn-outline-dark mx-1"><small class="oi oi-media-pause"></small><span class="btn-label">&nbsp; Suspend</span></button>
+        }
+        @if(WorkflowInstance.Status == V1WorkflowInstanceStatus.Suspended) 
+        {
+            <button @onclick="() => Dispatcher.Dispatch(new ResumeV1WorkflowInstance(WorkflowInstance.Id))" @onclick:stopPropagation="true" class="btn btn-outline-dark mx-1"><small class="oi oi-media-play"></small><span class="btn-label">&nbsp; Resume</span></button>
+        }
+        @if (WorkflowInstance.Status <= V1WorkflowInstanceStatus.Resuming) 
+        {
+            <button @onclick="() => Dispatcher.Dispatch(new CancelV1WorkflowInstance(WorkflowInstance.Id))" @onclick:stopPropagation="true" class="btn btn-outline-dark mx-1"><small class="oi oi-media-stop"></small><span class="btn-label">&nbsp; Cancel</span></button>
+        }
     </Toolbar>
 }
 
@@ -32,4 +45,5 @@
     {
         this.NavigationManager.NavigateTo($"/workflows/{this.WorkflowInstance.WorkflowId}");
     }
+
 }
