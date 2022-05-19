@@ -185,10 +185,17 @@ namespace Synapse.Dashboard
             var api = context.Services.GetRequiredService<ISynapseManagementApi>();
             await api.ResumeWorkflowInstanceAsync(action.InstanceId);
         }
+        
         public static async Task OnCancelV1WorkflowInstance(CancelV1WorkflowInstance action, IEffectContext context)
         {
             var api = context.Services.GetRequiredService<ISynapseManagementApi>();
             await api.CancelWorkflowInstanceAsync(action.InstanceId);
+        }
+
+        public static async Task OnDeleteV1WorkflowInstance(DeleteV1WorkflowInstance action, IEffectContext context)
+        {
+            var api = context.Services.GetRequiredService<ISynapseManagementApi>();
+            await api.DeleteWorkflowInstanceAsync(action.InstanceId);
         }
 
     }
@@ -413,6 +420,18 @@ namespace Synapse.Dashboard
         }
 
         public string InstanceId { get; }
+    }
+
+    public class DeleteV1WorkflowInstance
+    {
+
+        public DeleteV1WorkflowInstance(string instanceId)
+        {
+            this.InstanceId = instanceId;
+        }
+
+        public string InstanceId { get; }
+
     }
 
 }
