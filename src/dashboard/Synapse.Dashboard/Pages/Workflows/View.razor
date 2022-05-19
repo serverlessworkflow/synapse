@@ -162,7 +162,7 @@
         <Title>Confirm workflow instance deletion</Title>
         <Body>
             <p>Are you sure you want to delete the workflow instance <a href="@($"/workflows/{workflowId}/instance/{selectedWorkflowInstanceId}")" target="_blank">@selectedWorkflowInstanceId</a>?</p>
-            <p class="text-warning">Because <strong>deletion cannot be reversed</strong>, make sure to <a href="#" @onclick="OnDownloadWorkflowInstanceArtifactsAsync" @onclick:stopPropagation="true" @onclick:preventDefault>download the instance artifacts</a> before proceeding</p>
+            <p class="text-warning">Because <strong>deletion cannot be reversed</strong>, make sure to <a href="@($"/api/v1/workflow-instances/{selectedWorkflowInstanceId}/archive")" target="_blank">download the instance artifacts</a> before proceeding</p>
         </Body>
         <Footer>
           <button @onclick="deleteWorkflowDialog.HideAsync" class="btn btn-secondary">No</button>
@@ -350,14 +350,7 @@ else
     {
         await this.deleteWorkflowDialog.HideAsync();
         await this.SynapseApi.DeleteWorkflowInstanceAsync(this.selectedWorkflowInstanceId!);
-        //this.Dispatcher.Dispatch(new DeleteV1WorkflowInstance(this.selectedWorkflowInstanceId!));
-    }
-
-    private async Task OnDownloadWorkflowInstanceArtifactsAsync()
-    {
-        using var stream = await this.SynapseApi.ArchiveWorkflowInstanceAsync(this.selectedWorkflowInstanceId!);
-        using var streamRef = new DotNetStreamReference(stream: stream);
-        await this.JS.InvokeVoidAsync("downloadFileFromStream", $"{this.selectedWorkflowInstanceId}.zip", streamRef);
+        this.Dispatcher.Dispatch(new DeleteV1WorkflowInstance(this.selectedWorkflowInstanceId!));
     }
 
     private void OnViewWorkflowInstance(V1WorkflowInstance workflowInstance)
