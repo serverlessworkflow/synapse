@@ -351,7 +351,7 @@ else
     {
         await this.deleteWorkflowDialog.HideAsync();
         await this.SynapseApi.DeleteWorkflowInstanceAsync(this.selectedWorkflowInstanceId!);
-        this.Dispatcher.Dispatch(new DeleteV1WorkflowInstance(this.selectedWorkflowInstanceId!));
+        //this.Dispatcher.Dispatch(new DeleteV1WorkflowInstance(this.selectedWorkflowInstanceId!));
     }
 
     private async Task OnDownloadWorkflowInstanceArtifactsAsync()
