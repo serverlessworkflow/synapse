@@ -24,9 +24,9 @@ namespace Synapse.Application.Events.Domain
 {
 
     /// <summary>
-    /// Represents the service used to handle <see cref="IDomainEvent"/>s projected by <see cref="V1ApplicationMetrics"/>
+    /// Represents the service used to handle <see cref="IDomainEvent"/>s projected by <see cref="V1OperationalReport"/>
     /// </summary>
-    public class V1RuntimemetricsDomainEventHandler
+    public class V1OperationalReportDomainEventHandler
         : DomainEventHandlerBase,
         INotificationHandler<V1WorkflowCreatedDomainEvent>,
         INotificationHandler<V1WorkflowInstanceCreatedDomainEvent>,
@@ -38,7 +38,7 @@ namespace Synapse.Application.Events.Domain
     {
 
         /// <summary>
-        /// Initializes a new <see cref="V1RuntimemetricsDomainEventHandler"/>
+        /// Initializes a new <see cref="V1OperationalReportDomainEventHandler"/>
         /// </summary>
         /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
         /// <param name="mapper">The service used to map objects</param>
@@ -46,7 +46,7 @@ namespace Synapse.Application.Events.Domain
         /// <param name="integrationEventBus">The service used to publish <see cref="IIntegrationEvent"/>s</param>
         /// <param name="applicationOptions">The current <see cref="SynapseApplicationOptions"/></param>
         /// <param name="operationalReports">The <see cref="IRepository"/> used to manage <see cref="V1OperationalReport"/>s</param>
-        public V1RuntimemetricsDomainEventHandler(ILoggerFactory loggerFactory, IMapper mapper, IMediator mediator, IIntegrationEventBus integrationEventBus, 
+        public V1OperationalReportDomainEventHandler(ILoggerFactory loggerFactory, IMapper mapper, IMediator mediator, IIntegrationEventBus integrationEventBus, 
             IOptions<SynapseApplicationOptions> applicationOptions, IRepository<V1OperationalReport> operationalReports) 
             : base(loggerFactory, mapper, mediator, integrationEventBus, applicationOptions)
         {
