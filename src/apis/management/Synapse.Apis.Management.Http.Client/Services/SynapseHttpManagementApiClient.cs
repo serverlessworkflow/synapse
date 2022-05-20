@@ -93,6 +93,26 @@ namespace Synapse.Apis.Management.Http
         }
 
         /// <inheritdoc/>
+        public virtual async Task<V1Workflow> UploadWorkflowAsync(V1UploadWorkflowCommand command, CancellationToken cancellationToken = default)
+        {
+            var requestUri = "/api/v1/workflows/upload";
+            using var content = new MultipartFormDataContent();
+            content.Add(new StreamContent(command.DefinitionFile.OpenReadStream()), nameof(V1UploadWorkflowCommand.DefinitionFile), command.DefinitionFile.FileName);
+            foreach (var resourceFile in command.ResourceFiles)
+            {
+                content.Add(new StreamContent(resourceFile.OpenReadStream()), nameof(V1UploadWorkflowCommand.ResourceFiles), resourceFile.FileName);
+            }
+            using var request = this.CreateRequest(HttpMethod.Post, requestUri);
+            request.Content = content;
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while creating a new workflow: {details}", json);
+            response.EnsureSuccessStatusCode();
+            return await this.Serializer.DeserializeAsync<V1Workflow>(json, cancellationToken);
+        }
+
+        /// <inheritdoc/>
         public virtual async Task<List<V1Workflow>> GetWorkflowsAsync(string? query, CancellationToken cancellationToken = default)
         {
             var requestUri = "/api/v1/workflows";

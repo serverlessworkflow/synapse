@@ -1,4 +1,5 @@
-﻿global using Microsoft.AspNetCore.JsonPatch;
+﻿global using Microsoft.AspNetCore.Http;
+global using Microsoft.AspNetCore.JsonPatch;
 global using Neuroglia;
 global using Neuroglia.Serialization;
 global using ServerlessWorkflow.Sdk.Models;

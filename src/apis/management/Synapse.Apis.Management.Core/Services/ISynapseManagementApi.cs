@@ -43,6 +43,15 @@ namespace Synapse.Apis.Management
         Task<V1Workflow> CreateWorkflowAsync(V1CreateWorkflowCommand command, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Uploads a new <see cref="V1Workflow"/>
+        /// </summary>
+        /// <param name="command">The object that describes the command to execute</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The newly created <see cref="V1Workflow"/></returns>
+        [OperationContract]
+        Task<V1Workflow> UploadWorkflowAsync(V1UploadWorkflowCommand command, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Gets the <see cref="V1Workflow"/> with the specified id
         /// </summary>
         /// <param name="id">The id of the <see cref="V1Workflow"/> to get</param>

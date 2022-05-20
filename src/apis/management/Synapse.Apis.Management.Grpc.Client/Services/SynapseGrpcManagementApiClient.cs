@@ -62,6 +62,15 @@ namespace Synapse.Apis.Management.Grpc
         }
 
         /// <inheritdoc/>
+        public virtual async Task<V1Workflow> UploadWorkflowAsync(V1UploadWorkflowCommand command, CancellationToken cancellationToken = default)
+        {
+            var result = await this.Adapter.UploadWorkflowAsync(command, cancellationToken);
+            if (!result.Succeeded)
+                throw new SynapseApiException(result);
+            return result.Data!;
+        }
+
+        /// <inheritdoc/>
         public virtual async Task<List<V1Workflow>> GetWorkflowsAsync(string query, CancellationToken cancellationToken = default)
         {
             var result = await this.Adapter.GetWorkflowsAsync(query, cancellationToken);
