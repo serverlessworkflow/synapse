@@ -18,6 +18,7 @@
 using Neuroglia.Data.Expressions;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
+using Synapse.Application.Queries.Workflows;
 
 namespace Synapse.Application.Commands.WorkflowInstances
 {
@@ -131,9 +132,15 @@ namespace Synapse.Application.Commands.WorkflowInstances
         /// <inheritdoc/>
         public virtual async Task<IOperationResult<Integration.Models.V1WorkflowInstance>> HandleAsync(V1CreateWorkflowInstanceCommand command, CancellationToken cancellationToken = default)
         {
-            var workflow = await this.Workflows.FindAsync(command.WorkflowId, cancellationToken);
+            var workflowIdComponents = command.WorkflowId.Split(':', StringSplitOptions.RemoveEmptyEntries);
+            var id = workflowIdComponents[0];
+            var version = string.Empty;
+            if (workflowIdComponents.Length > 1)
+                version = workflowIdComponents[1];
+            var workflowId = (await this.Mediator.ExecuteAndUnwrapAsync(new V1GetWorkflowByIdQuery(id, version), cancellationToken)).Id;
+            var workflow = await this.Workflows.FindAsync(workflowId, cancellationToken);
             if(workflow == null)
-                throw DomainException.NullReference(typeof(V1Workflow), command.WorkflowId);
+                throw DomainException.NullReference(typeof(V1Workflow), workflowId);
             var parent = null as V1WorkflowInstance;
             if (!string.IsNullOrWhiteSpace(command.ParentId))
             {
