@@ -20,12 +20,12 @@ using Neuroglia;
 using Neuroglia.Mapping;
 using Neuroglia.Mediation;
 using ProtoBuf.Grpc;
-using ProtoBuf.WellKnownTypes;
 using ServerlessWorkflow.Sdk.Models;
 using Synapse.Apis.Management.Grpc.Models;
 using Synapse.Application.Commands.Generic;
 using Synapse.Application.Queries.Generic;
 using Synapse.Application.Services;
+using Synapse.Integration.Commands.Workflows;
 using Synapse.Integration.Models;
 
 namespace Synapse.Apis.Management.Grpc
@@ -76,9 +76,15 @@ namespace Synapse.Apis.Management.Grpc
         #region Workflows
 
         /// <inheritdoc/>
-        public virtual async Task<GrpcApiResult<V1Workflow>> CreateWorkflowAsync(Integration.Commands.Workflows.V1CreateWorkflowCommand command, CallContext context = default)
+        public virtual async Task<GrpcApiResult<V1Workflow>> CreateWorkflowAsync(V1CreateWorkflowCommand command, CallContext context = default)
         {
             return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(this.Mapper.Map<Application.Commands.Workflows.V1CreateWorkflowCommand>(command), context.CancellationToken));
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<GrpcApiResult<V1Workflow>> UploadWorkflowAsync(V1UploadWorkflowCommand command, CallContext context = default)
+        {
+            throw new NotSupportedException();
         }
 
         /// <inheritdoc/>

@@ -81,6 +81,14 @@ namespace Synapse.Apis.Management.Ipc
         }
 
         /// <inheritdoc/>
+        public virtual async Task<V1Workflow> UploadWorkflowAsync(V1UploadWorkflowCommand command, CancellationToken cancellationToken = default)
+        {
+            if (command == null)
+                throw new ArgumentNullException(nameof(command));
+            return await this.Mediator.ExecuteAndUnwrapAsync(this.Mapper.Map<Application.Commands.Workflows.V1UploadWorkflowCommand>(command), cancellationToken);
+        }
+
+        /// <inheritdoc/>
         public virtual async Task<List<V1Workflow>> GetWorkflowsAsync(string? query, CancellationToken cancellationToken = default)
         {
             return await this.Mediator.ExecuteAndUnwrapAsync(new Application.Queries.Generic.V1FilterQuery<V1Workflow>(this.QueryOptionsParser.Parse<V1Workflow>(query)), cancellationToken);

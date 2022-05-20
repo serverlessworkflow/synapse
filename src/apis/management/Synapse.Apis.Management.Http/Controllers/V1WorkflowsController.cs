@@ -50,6 +50,22 @@ namespace Synapse.Apis.Management.Http.Controllers
         }
 
         /// <summary>
+        /// Uploads a new workflow
+        /// </summary>
+        /// <param name="command">An object that represents the command to execute</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new <see cref="IActionResult"/></returns>
+        [HttpPost("upload")]
+        [ProducesResponseType(typeof(Integration.Models.V1Workflow), (int)HttpStatusCode.Created)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.Forbidden)]
+        public async Task<IActionResult> Upload([FromForm] Integration.Commands.Workflows.V1UploadWorkflowCommand command, CancellationToken cancellationToken)
+        {
+            return this.Process(await this.Mediator.ExecuteAsync(this.Mapper.Map<Application.Commands.Workflows.V1UploadWorkflowCommand>(command), cancellationToken), (int)HttpStatusCode.Created);
+        }
+
+        /// <summary>
         /// Gets the workflow with the specified id.
         /// </summary>
         /// <param name="id">The id of the workflow to find</param>

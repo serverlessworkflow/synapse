@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+
 using ProtoBuf.Grpc;
 using Synapse.Integration.Commands.Correlations;
 using Synapse.Integration.Commands.WorkflowInstances;
@@ -39,6 +40,15 @@ namespace Synapse.Apis.Management.Grpc
         /// <returns>A new object that describes the result of the operation</returns>
         [OperationContract]
         Task<GrpcApiResult<V1Workflow>> CreateWorkflowAsync(V1CreateWorkflowCommand command, CallContext context = default);
+
+        /// <summary>
+        /// Uploads a new workflow
+        /// </summary>
+        /// <param name="command">The object that describes the command to execute</param>
+        /// <param name="context">A <see cref="CancellationToken"/></param>
+        /// <returns>A new object that describes the result of the operation</returns>
+        //[OperationContract] //todo: uncomment
+        Task<GrpcApiResult<V1Workflow>> UploadWorkflowAsync(V1UploadWorkflowCommand command, CallContext context = default); //todo: implement
 
         /// <summary>
         /// Gets the workflow with the specified id
