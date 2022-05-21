@@ -15,7 +15,6 @@
  *
  */
 
-
 using Neuroglia.Data.EventSourcing;
 using Neuroglia.Serialization;
 using System.IO.Compression;
