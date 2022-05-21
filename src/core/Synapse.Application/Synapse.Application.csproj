@@ -33,7 +33,6 @@
 	<PackageReference Include="Neuroglia.AspNetCore.JsonPatch" Version="2.0.1.63" />
 	<PackageReference Include="Neuroglia.Data.DistributedCache" Version="2.0.1.63" />
 	<PackageReference Include="Neuroglia.Mediation.FluentValidation" Version="2.0.1.63" />
-	<PackageReference Include="ServerlessWorkflow.Sdk" Version="0.8.1.6" />
   </ItemGroup>
 
 </Project>
