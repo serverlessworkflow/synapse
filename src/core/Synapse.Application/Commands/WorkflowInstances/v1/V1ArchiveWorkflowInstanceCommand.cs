@@ -15,7 +15,6 @@
  *
  */
 
-
 using Neuroglia.Serialization;
 using System.IO.Compression;
 
