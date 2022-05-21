@@ -32,7 +32,9 @@
 	<PackageReference Include="Microsoft.OData.ModelBuilder" Version="1.0.8" />
 	<PackageReference Include="Neuroglia.AspNetCore.JsonPatch" Version="2.0.1.63" />
 	<PackageReference Include="Neuroglia.Data.DistributedCache" Version="2.0.1.63" />
+	<PackageReference Include="Neuroglia.Data.EventSourcing" Version="2.0.1.63" />
 	<PackageReference Include="Neuroglia.Mediation.FluentValidation" Version="2.0.1.63" />
+	<PackageReference Include="System.Linq.Async" Version="6.0.1" />
   </ItemGroup>
 
 </Project>
