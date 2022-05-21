@@ -16,6 +16,7 @@
  */
 
 
+using Neuroglia.Data.EventSourcing;
 using Neuroglia.Serialization;
 using System.IO.Compression;
 
@@ -65,6 +66,7 @@ namespace Synapse.Application.Commands.WorkflowInstances
         /// <summary>
         /// Initializes a new <see cref="V1ArchiveWorkflowInstanceCommandHandler"/>
         /// </summary>
+        /// <param name="serviceProvider">The current <see cref="IServiceProvider"/></param>
         /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
         /// <param name="mediator">The service used to mediate calls</param>
         /// <param name="mapper">The service used to map objects</param>
@@ -73,12 +75,13 @@ namespace Synapse.Application.Commands.WorkflowInstances
         /// <param name="workflows">The <see cref="IRepository"/> used to manage <see cref="V1Workflow"/>s</param>
         /// <param name="workflowInstances">The <see cref="IRepository"/> used to manage <see cref="V1WorkflowInstance"/>s</param>
         /// <param name="workflowProcesses">The <see cref="IRepository"/> used to manage <see cref="V1WorkflowProcess"/>es</param>
-        public V1ArchiveWorkflowInstanceCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IOptions<SynapseApplicationOptions> options, 
-            ISerializerProvider serializerProvider, IRepository<V1Workflow> workflows, IRepository<V1WorkflowInstance> workflowInstances, IRepository<V1WorkflowProcess> workflowProcesses) 
+        public V1ArchiveWorkflowInstanceCommandHandler(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IOptions<SynapseApplicationOptions> options, 
+            ISerializerProvider serializerProvider, IRepository<Integration.Models.V1Workflow> workflows, IRepository<Integration.Models.V1WorkflowInstance> workflowInstances, IRepository<Integration.Models.V1WorkflowProcess> workflowProcesses) 
             : base(loggerFactory, mediator, mapper)
         {
             this.Options = options.Value;
             this.Serializer = serializerProvider.GetSerializer(this.Options.Archiving.SerializerType);
+            this.EventStore = serviceProvider.GetService<IEventStore>();
             this.Workflows = workflows;
             this.WorkflowInstances = workflowInstances;
             this.WorkflowProcesses = workflowProcesses;
@@ -95,19 +98,24 @@ namespace Synapse.Application.Commands.WorkflowInstances
         protected ISerializer Serializer { get; }
 
         /// <summary>
+        /// Gets the service used to store events
+        /// </summary>
+        protected IEventStore? EventStore { get; }
+
+        /// <summary>
         /// Gets the <see cref="IRepository"/> used to manage <see cref="V1Workflow"/>s
         /// </summary>
-        protected IRepository<V1Workflow> Workflows { get; }
+        protected IRepository<Integration.Models.V1Workflow> Workflows { get; }
 
         /// <summary>
         /// Gets the <see cref="IRepository"/> used to manage <see cref="V1WorkflowInstance"/>s
         /// </summary>
-        protected IRepository<V1WorkflowInstance> WorkflowInstances { get; }
+        protected IRepository<Integration.Models.V1WorkflowInstance> WorkflowInstances { get; }
 
         /// <summary>
         /// Gets the <see cref="IRepository"/> used to manage <see cref="V1WorkflowProcess"/>es
         /// </summary>
-        protected IRepository<V1WorkflowProcess> WorkflowProcesses { get; }
+        protected IRepository<Integration.Models.V1WorkflowProcess> WorkflowProcesses { get; }
 
         /// <inheritdoc/>
         public virtual async Task<IOperationResult<Stream>> HandleAsync(V1ArchiveWorkflowInstanceCommand command, CancellationToken cancellationToken = default)
@@ -123,9 +131,19 @@ namespace Synapse.Application.Commands.WorkflowInstances
                 directory.Delete(true);
             directory.Create();
             var buffer = await this.Serializer.SerializeAsync(workflow.Definition, cancellationToken);
-            await File.WriteAllBytesAsync(Path.Combine(directory.FullName, $"definition.{this.Options.Archiving.FileExtension}"), buffer, cancellationToken);
+            await File.WriteAllBytesAsync(Path.Combine(directory.FullName, $"definition{this.Options.Archiving.FileExtension}"), buffer, cancellationToken);
             buffer = await this.Serializer.SerializeAsync(this.Mapper.Map<Integration.Models.V1WorkflowInstance>(workflowInstance), cancellationToken);
-            await File.WriteAllBytesAsync(Path.Combine(directory.FullName, $"instance.{this.Options.Archiving.FileExtension}"), buffer, cancellationToken);
+            await File.WriteAllBytesAsync(Path.Combine(directory.FullName, $"snapshot{this.Options.Archiving.FileExtension}"), buffer, cancellationToken);
+            if(this.EventStore != null)
+            {
+                var eventStream = await this.EventStore.GetStreamAsync($"{typeof(V1WorkflowInstance).Name.ToLower()}-{workflowInstance.Id}", cancellationToken); //todo: ATTENTION: we should not be building that key ourselves here. A service should take care of that. Possibly fix/change the way the EventSourcingRepository works
+                if(eventStream != null)
+                {
+                    var events = await eventStream.ToListAsync(cancellationToken);
+                    buffer = await this.Serializer.SerializeAsync(events, cancellationToken);
+                    await File.WriteAllBytesAsync(Path.Combine(directory.FullName, $"stream{this.Options.Archiving.FileExtension}"), buffer, cancellationToken);
+                }
+            }
             var processesDirectory = new DirectoryInfo(Path.Combine(directory.FullName, "processes"));
             if (!processesDirectory.Exists)
                 processesDirectory.Create();
@@ -135,7 +153,7 @@ namespace Synapse.Application.Commands.WorkflowInstances
                 if (process == null)
                     throw DomainException.NullReference(typeof(V1WorkflowProcess), processId);
                 buffer = await this.Serializer.SerializeAsync(this.Mapper.Map<Integration.Models.V1WorkflowProcess>(process), cancellationToken);
-                await File.WriteAllBytesAsync(Path.Combine(processesDirectory.FullName, $"{processId}.{this.Options.Archiving.FileExtension}"), buffer, cancellationToken);
+                await File.WriteAllBytesAsync(Path.Combine(processesDirectory.FullName, $"{processId}{this.Options.Archiving.FileExtension}"), buffer, cancellationToken);
             }
             var archiveFilePath = Path.Combine(Path.GetTempPath(), $"{workflowInstance.Id}.zip");
             ZipFile.CreateFromDirectory(directory.FullName, archiveFilePath, CompressionLevel.Fastest, true);
