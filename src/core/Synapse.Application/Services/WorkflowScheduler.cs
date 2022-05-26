@@ -64,8 +64,8 @@ namespace Synapse.Application.Services
             var workflows = scope.ServiceProvider.GetRequiredService<IRepository<Integration.Models.V1Workflow>>();
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
             foreach(var workflow in workflows.AsQueryable()
-                .Where(w => w.Definition.Start != null && w.Definition.Start.Schedule != null)
                 .ToList()
+                .Where(w => w.Definition.Start != null && w.Definition.Start.Schedule != null)
                 .GroupBy(w => w.Definition.Id)
                 .Select(w => w.OrderByDescending(w => w.Definition.Version).First()))
             {
