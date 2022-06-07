@@ -35,13 +35,14 @@ namespace Synapse.Runtime.Services
         /// <param name="process">The underlying <see cref="System.Diagnostics.Process"/></param>
         public NativeProcess(Process process) 
         {
+            this.Id = Guid.NewGuid().ToString();
             this.Process = process;
             this.Process.Exited += (sender, e) => this.OnExited();
             this.Logs = this.Process.GetLogsAsObservable();
         }
 
         /// <inheritdoc/>
-        public override string Id => this.Process.Id.ToString();
+        public override string Id { get; }
 
         /// <summary>
         /// Gets the underlying <see cref="System.Diagnostics.Process"/>

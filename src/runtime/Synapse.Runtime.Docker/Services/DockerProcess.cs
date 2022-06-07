@@ -20,6 +20,7 @@ using System.Reactive.Linq;
 
 namespace Synapse.Runtime.Services
 {
+
     /// <summary>
     /// Represents the Docker implementation of the <see cref="IWorkflowProcess"/> interface
     /// </summary>
@@ -35,11 +36,20 @@ namespace Synapse.Runtime.Services
         public DockerProcess(string id, IDockerClient docker)
         {
             this.Id = id;
+            this.LogProgress = new();
+            this._Logs = Observable.FromEventPattern<string?>(handler => this.LogProgress.ProgressChanged += handler, handler => this.LogProgress.ProgressChanged -= handler)
+                .Where(l => !string.IsNullOrWhiteSpace(l.EventArgs))
+                .Select(l => l.EventArgs!);
             this.Docker = docker;
         }
 
         /// <inheritdoc/>
         public override string Id { get; }
+
+        /// <summary>
+        /// Gets a service used to monitor the <see cref="DockerProcess"/>'s logs
+        /// </summary>
+        protected Progress<string> LogProgress { get; } = new();
 
         private IObservable<string>? _Logs;
         /// <inheritdoc/>
@@ -60,15 +70,12 @@ namespace Synapse.Runtime.Services
         protected CancellationTokenSource CancellationTokenSource { get; } = new();
 
         /// <inheritdoc/>
-        public override async ValueTask StartAsync(CancellationToken cancellationToken = default)
+        public override ValueTask StartAsync(CancellationToken cancellationToken = default)
         {
-            await this.Docker.Containers.StartContainerAsync(this.Id, new(), cancellationToken);
-            var progress = new Progress<string>();
-            await this.Docker.Containers.GetContainerLogsAsync(Id, new() { Follow = true, ShowStdout = true, ShowStderr = true }, this.CancellationTokenSource.Token, progress);
-            this._Logs = Observable.FromEventPattern<string?>(handler => progress.ProgressChanged += handler, handler => progress.ProgressChanged -= handler)
-                .Where(l => !string.IsNullOrWhiteSpace(l.EventArgs))
-                .Select(l => l.EventArgs!);
-            _ = Task.Run(async () => await this.WaitForExitAsync());
+            _ = Task.Run(() => this.Docker.Containers.StartContainerAsync(this.Id, new(), cancellationToken)
+                .ContinueWith(t => this.Docker.Containers.GetContainerLogsAsync(Id, new() { Follow = true, ShowStdout = true, ShowStderr = true }, this.CancellationTokenSource.Token, this.LogProgress))
+                .ContinueWith(t => this.WaitForExitAsync()));
+            return ValueTask.CompletedTask;
         }
 
         /// <inheritdoc/>

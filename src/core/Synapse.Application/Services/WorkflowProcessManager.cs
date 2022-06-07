@@ -74,12 +74,12 @@ namespace Synapse.Application.Services
             process.Logs.SubscribeAsync(async log => await this.OnProcessLogAsync(process, log));
             process.Exited += (sender, e) => this.OnProcessExitedAsync((IWorkflowProcess)sender!);
             process.Disposed += (sender, e) => this.OnProcessDisposed((IWorkflowProcess)sender!);
-            await process.StartAsync(cancellationToken);
-            this.Processes.AddOrUpdate(process.Id, process, (key, existing) => throw new DuplicateWaitObjectException("process"));
+            this.Processes.AddOrUpdate(process.Id, process, (key, existing) => throw new DuplicateWaitObjectException(nameof(key)));
             using var scope = this.ServiceProvider.CreateScope();
             var processStates = scope.ServiceProvider.GetRequiredService<IRepository<V1WorkflowProcess>>();
             await processStates.AddAsync(new(process.Id), this.CancellationTokenSource.Token);
             await processStates.SaveChangesAsync(cancellationToken);
+            await process.StartAsync(cancellationToken);
             return process;
         }
 
