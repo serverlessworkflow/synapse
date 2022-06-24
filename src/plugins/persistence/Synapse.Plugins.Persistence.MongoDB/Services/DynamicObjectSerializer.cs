@@ -23,6 +23,7 @@ using Newtonsoft.Json;
 
 namespace Synapse.Plugins.Persistence.MongoDB.Services
 {
+
     /// <summary>
     /// Represents an <see cref="IBsonSerializer"/> implementation used to serialize and deserialize <see cref="DynamicObject"/>s
     /// </summary>

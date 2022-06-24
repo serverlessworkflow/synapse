@@ -20,6 +20,7 @@ using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
+using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using Neuroglia;
@@ -121,6 +122,7 @@ namespace Synapse.Plugins.Persistence.MongoDB
             }
 
             BsonSerializer.RegisterGenericSerializerDefinition(typeof(OneOf<,>), typeof(OneOfSerializer<,>));
+            BsonSerializer.RegisterSerializer(typeof(Dynamic), new DynamicSerializer());
             BsonSerializer.RegisterSerializer(typeof(DynamicObject), new DynamicObjectSerializer());
 
             var conventionPack = new ConventionPack
@@ -140,7 +142,7 @@ namespace Synapse.Plugins.Persistence.MongoDB
                         cm.UnmapMember(property);
                     }
                 }),
-                new EnumRepresentationConvention(BsonType.String)
+                new EnumRepresentationConvention(BsonType.Int32)
             };
             ConventionRegistry.Remove("synapse");
             ConventionRegistry.Register("synapse", conventionPack, t => true);
