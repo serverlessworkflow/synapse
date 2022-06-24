@@ -16,6 +16,7 @@
  */
 
 using Microsoft.AspNetCore.OData.Query;
+using System.Collections;
 
 namespace Synapse.Application.Queries.WorkflowActivities
 {
@@ -100,7 +101,7 @@ namespace Synapse.Application.Queries.WorkflowActivities
                 var results = activities as IQueryable;
                 if (query.Options != null)
                     results = query.Options.ApplyTo(activities);
-                return this.Ok(results.OfType<Integration.Models.V1WorkflowActivity>().ToList());
+                return this.Ok(results.ToList().OfType<Integration.Models.V1WorkflowActivity>().ToList());
             }, cancellationToken);
         }
 
