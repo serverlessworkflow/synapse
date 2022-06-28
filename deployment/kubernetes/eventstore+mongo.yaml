@@ -171,7 +171,7 @@ metadata:
     rbac.authorization.k8s.io/aggregate-to-edit: "true"
 rules:
 - apiGroups: [""]
-  resources: ["pods"]
+  resources: ["pods", "pods/log"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
   
 ---
