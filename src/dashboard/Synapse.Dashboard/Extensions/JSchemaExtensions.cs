@@ -73,6 +73,29 @@ namespace Synapse.Dashboard
             }
         }
 
+        /// <summary>
+        /// Generates the default value for the <see cref="JSchema"/>
+        /// </summary>
+        /// <param name="schema">The <see cref="JSchema"/> to generate the default value for</param>
+        /// <returns>A new default value for the <see cref="JSchema"/></returns>
+        public static object? GenerateDefault(this JSchema schema)
+        {
+            if (schema.Default != null)
+                return schema.Default.ToObject<object>();
+            if(schema.Type == JSchemaType.Object)
+            {
+                IDictionary<string, object> dyn = new ExpandoObject()!;
+                foreach (var property in schema.Properties)
+                {
+                    var value = property.Value.GenerateDefault();
+                    if(value != null)
+                        dyn.Add(property.Key, value);
+                }
+                return dyn;
+            }
+            return default;
+        }
+
     }
 
 }

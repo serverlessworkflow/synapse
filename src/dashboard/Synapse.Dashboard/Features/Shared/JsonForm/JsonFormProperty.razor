@@ -20,7 +20,7 @@
 @if(!string.IsNullOrWhiteSpace(Name) 
     && Schema != null)
 {
-    <div>
+    <div class="mb-3">
         @switch (Schema.Type)
         {
             case JSchemaType.Array:
@@ -28,27 +28,31 @@
                 break;
             case JSchemaType.Boolean:
                 <div class="form-check">
-                    <input name="@Name" class="form-check-input" type="checkbox" value="@Value">
-                    <label for="@Name" class="form-check-label">@displayName</label>
+                    <input name="@Name" class="form-check-input" type="checkbox" value="@Value" @onchange="OnInputValueChanged">
+                    <label for="@Name" class="form-check-label">@displayName@RequiredPropertySuffix</label>
                 </div>
                 break;
             case JSchemaType.Integer:
-                <label for="@Name" class="form-label">@displayName</label>
-                <input name="@Name" title="@Schema.Description" placeholder="@displayName" min="@Schema.Minimum" max="@Schema.Maximum" multiple="@Schema.MultipleOf" required="@Schema.Required" value="@Value" class="form-control" />
+                <label for="@Name" class="form-label">@displayName@RequiredPropertySuffix</label>
+                <input name="@Name" title="@Schema.Description" placeholder="@displayName" min="@Schema.Minimum" max="@Schema.Maximum" multiple="@Schema.MultipleOf" required="@IsRequired" value="@Value" class="form-control" @onchange="OnInputValueChanged" />
                 break;
             case JSchemaType.Number:
-                <label for="@Name" class="form-label">@displayName</label>    
-                <input name="@Name" title="@Schema.Description" placeholder="@displayName" min="@Schema.Minimum" max="@Schema.Maximum" multiple="@Schema.MultipleOf" required="@Schema.Required" value="@Value" class="form-control" />
+                <label for="@Name" class="form-label">@displayName@RequiredPropertySuffix</label>    
+                <input name="@Name" title="@Schema.Description" placeholder="@displayName" min="@Schema.Minimum" max="@Schema.Maximum" multiple="@Schema.MultipleOf" required="@IsRequired" value="@Value" class="form-control" @onchange="OnInputValueChanged" />
                 break;
             case JSchemaType.Object:
-                <label for="@Name" class="form-label">@displayName</label>    
-                <JsonForm Schema="@Schema" Model="@Value" />
+                <div class="card">
+                    <div class="card-header">@displayName</div>
+                    <div class="card-body">
+                        <JsonForm Schema="@Schema" Value="@Value" OnValueChanged="OnInputValueChanged" />
+                    </div>
+                </div>
                 break;
             case JSchemaType.String:
-                <label for="@Name" class="form-label">@displayName</label>
+                <label for="@Name" class="form-label">@displayName@RequiredPropertySuffix</label>
                 @if(Schema.Enum != null && Schema.Enum.Any())
                 {
-                    <select name="@Name" title="@Schema.Description" readonly="@Schema.ReadOnly" value="@Value" class="form-control" >
+                    <select name="@Name" title="@Schema.Description" readonly="@Schema.ReadOnly" value="@Value" class="form-control" required="@IsRequired" @onchange="OnInputValueChanged">
                         @foreach (var option in Schema.Enum)
                         {
                             <option value="@option">@option</option>
@@ -57,7 +61,7 @@
                 }
                 else
                 {
-                    <input name="@Name" title="@Schema.Description" placeholder="@displayName" maxlength="@Schema.MaximumLength" pattern="@Schema.Pattern" required="@Schema.Required" readonly="@Schema.ReadOnly" value="@Value" class="form-control" />
+                    <input name="@Name" title="@Schema.Description" placeholder="@displayName" type="@Format" maxlength="@Schema.MaximumLength" pattern="@Schema.Pattern" required="@IsRequired" readonly="@Schema.ReadOnly" value="@Value" class="form-control" @onchange="OnInputValueChanged" />
                 }
                 break;
         }
@@ -79,12 +83,28 @@
     [Parameter]
     public object Value { get; set; }
 
+    [Parameter]
+    public bool IsRequired { get; set; }
+
+    [Parameter]
+    public EventCallback<ChangeEventArgs> OnValueChanged { get; set; }
+
+    string RequiredPropertySuffix => this.IsRequired ? " *" : "";
+
+    string Format => string.IsNullOrWhiteSpace(this.Schema.Format) ? "text" : this.Schema.Format;
+
     private string displayName => string.IsNullOrWhiteSpace(this.Schema.Title) ? this.Name : this.Schema.Title;
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
         this.Form.AddProperty(this);
+    }
+
+    private async Task OnInputValueChanged(ChangeEventArgs e)
+    {
+        this.Value = e.Value;
+        await this.OnValueChanged.InvokeAsync(new() { Value = this.Value });
     }
 
 }
