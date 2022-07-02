@@ -150,6 +150,15 @@
         else
         {
             var value = await this.jsonForm.GetValueAsync();
+            if(this.dataInputSchema != null)
+            {
+                var jobj = JObject.FromObject(value);
+                if(!jobj.IsValid(this.dataInputSchema, out IList<ValidationError> errors))
+                {
+                    this.inputValidationErrors = errors;
+                    return;
+                }
+            }
             json = await this.JsonSerializer.SerializeAsync(value);
         }
         await this.workflowInputModal.HideAsync();
