@@ -121,6 +121,8 @@ namespace Synapse.Runtime.Kubernetes.Services
                 container.AddOrUpdateEnvironmentVariable(new(EnvironmentVariables.Runtime.WorkflowInstanceId.Name, workflowInstance.Id));
                 container.AddOrUpdateEnvironmentVariable(new(EnvironmentVariables.Kubernetes.Namespace.Name, valueFrom: new V1EnvVarSource() { FieldRef = new V1ObjectFieldSelector("metadata.namespace") }));
                 container.AddOrUpdateEnvironmentVariable(new(EnvironmentVariables.Kubernetes.PodName.Name, valueFrom: new V1EnvVarSource() { FieldRef = new V1ObjectFieldSelector("metadata.name") }));
+                if (this.ApplicationOptions.SkipCertificateValidation)
+                    container.AddOrUpdateEnvironmentVariable(new(EnvironmentVariables.SkipCertificateValidation.Name, "true"));
             }
             return pod;
         }
