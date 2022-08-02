@@ -213,10 +213,22 @@ namespace Synapse.Worker.Services.Processors
                     }
                     else
                     {
-                        if (this.Parameters.Count == 1)
-                            this.Body = this.Parameters.First().Value;
-                        else if (this.Parameters.TryGetValue("body", out var bodyValue))
+                        if (this.Parameters.TryGetValue("body", out var bodyValue))
+                        {
                             this.Body = await this.Context.EvaluateAsync(".body", this.Parameters, cancellationToken);
+                        }
+                        else
+                        {
+                            if(this.Parameters is not ExpandoObject expando)
+                            {
+                                expando = new ExpandoObject();
+                                foreach (var param in this.Parameters)
+                                {
+                                    expando.TryAdd(param.Key, param.Value);
+                                }
+                            }
+                            this.Body = expando;
+                        }  
                     }
                     if (this.Body == null && operation.Value.RequestBody.Required)
                         throw new NullReferenceException($"Failed to determine the required body parameter for the function with name '{this.Function.Name}'");
@@ -266,6 +278,12 @@ namespace Synapse.Worker.Services.Processors
             this.Parameters = JsonConvert.DeserializeObject<ExpandoObject>(jsonArgs)!;
         }
 
+        /// <summary>
+        /// Attempts to retrieve the specified parameter
+        /// </summary>
+        /// <param name="expression">A runtime expression used to reference the parameter to retrieve</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A tuple containing both a boolean indicating if the specified parameter could be found and the parameter's value, if any</returns>
         protected virtual async Task<(bool HasMatch, string Value)> TryGetParameterAsync(string expression, CancellationToken cancellationToken)
         {
             var value = null as string;
