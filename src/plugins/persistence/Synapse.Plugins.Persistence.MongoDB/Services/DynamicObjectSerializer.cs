@@ -16,6 +16,7 @@
  */
 
 using MongoDB.Bson;
+using MongoDB.Bson.IO;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
 using Neuroglia.Serialization;
@@ -34,7 +35,7 @@ namespace Synapse.Plugins.Persistence.MongoDB.Services
         /// <inheritdoc/>
         public override void Serialize(BsonSerializationContext context, BsonSerializationArgs args, DynamicObject value)
         {
-            var jsonDocument = JsonConvert.SerializeObject(value);
+            var jsonDocument = Newtonsoft.Json.JsonConvert.SerializeObject(value);
             var bsonDocument = value == null ? null : BsonSerializer.Deserialize<BsonDocument>(jsonDocument);
             var serializer = new BsonValueCSharpNullSerializer<BsonDocument>(BsonSerializer.LookupSerializer<BsonDocument>());
             serializer.Serialize(context, bsonDocument!);
@@ -48,8 +49,8 @@ namespace Synapse.Plugins.Persistence.MongoDB.Services
             var bsonDocument = document.ToBsonDocument();
             if (bsonDocument == null)
                 return null!;
-            var result = bsonDocument.ToJson();
-            var expando = JsonConvert.DeserializeObject<System.Dynamic.ExpandoObject>(result)!;
+            var result = bsonDocument.ToJson(new() { OutputMode = JsonOutputMode.RelaxedExtendedJson });
+            var expando = Newtonsoft.Json.JsonConvert.DeserializeObject<System.Dynamic.ExpandoObject>(result)!;
             return DynamicObject.FromObject(expando)!;
         }
 
