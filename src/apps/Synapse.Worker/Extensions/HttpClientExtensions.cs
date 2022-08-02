@@ -16,6 +16,7 @@
  */
 
 using Microsoft.Extensions.DependencyInjection;
+using Neuroglia.Data.Expressions;
 using System.Net.Http.Headers;
 using System.Text;
 
@@ -40,12 +41,16 @@ namespace Synapse.Worker
         {
             if (authentication == null)
                 return;
+            var evaluator = serviceProvider.GetRequiredService<IExpressionEvaluator>();
             var scheme = null as string;
             var value = null as string;
             switch (authentication.Properties)
             {
                 case BasicAuthenticationProperties basic:
                     scheme = "Basic";
+                    var username = basic.Username;
+                    var password = basic.Password;
+
                     value = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{basic.Username}:{basic.Password}"));
                     break;
                 case BearerAuthenticationProperties bearer:

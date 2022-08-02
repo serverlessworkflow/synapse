@@ -168,11 +168,19 @@ namespace Synapse.Application.Events.Domain
         protected virtual async ValueTask UpdateParentWorkflowInstanceAsync(Integration.Models.V1WorkflowActivity activity, CancellationToken cancellationToken)
         {
             var instance = await this.WorkflowInstances.FindAsync(activity.WorkflowInstanceId, cancellationToken);
-            var existingActivity = instance.Activities.FirstOrDefault(a => a.Id == activity.Id);
+            Integration.Models.V1WorkflowActivity existingActivity = instance.Activities.FirstOrDefault(a => a.Id == activity.Id)!;
             if (existingActivity == null)
+            {
                 instance.Activities.Add(activity);
+            } 
             else
-                this.Mapper.Map(activity, existingActivity);
+            {
+                var list = instance.Activities.ToList();
+                var index = list.IndexOf(existingActivity);
+                existingActivity = this.Mapper.Map(activity, existingActivity);
+                list[index] = existingActivity;
+                instance.Activities = list;
+            }
             await this.WorkflowInstances.UpdateAsync(instance, cancellationToken);
             await this.WorkflowInstances.SaveChangesAsync(cancellationToken);
         }
