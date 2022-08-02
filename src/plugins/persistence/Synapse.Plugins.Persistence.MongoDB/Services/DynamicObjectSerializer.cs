@@ -20,7 +20,6 @@ using MongoDB.Bson.IO;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
 using Neuroglia.Serialization;
-using Newtonsoft.Json;
 
 namespace Synapse.Plugins.Persistence.MongoDB.Services
 {
