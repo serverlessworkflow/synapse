@@ -128,10 +128,17 @@ namespace Synapse.Worker.Services.Processors
             {
                 await base.InitializeAsync(cancellationToken);
                 await this.HttpClient.ConfigureAuthorizationAsync(this.ServiceProvider, this.Authentication, cancellationToken);
-                var operationComponents = this.Function.Operation.Split('#');
+                var openApiUriString = this.Function.Operation;
+                if (openApiUriString.IsWorkflowExpression())
+                {
+                    var evaluationResult = (string?)await this.Context.EvaluateAsync(openApiUriString, this.Activity.Input, cancellationToken);
+                    if (!string.IsNullOrWhiteSpace(evaluationResult))
+                        openApiUriString = evaluationResult;
+                }
+                var operationComponents = openApiUriString.Split('#');
                 if (operationComponents.Length != 2)
                     throw new FormatException($"The 'operation' property of the Open API function with name '{this.Function.Name}' has an invalid value '{this.Function.Operation}'. Open API functions expect a value in the following format: <url_to_openapi_endpoint>#<operation_id>");
-                var openApiUriString = operationComponents.First();
+                openApiUriString = operationComponents.First();
                 if (openApiUriString.IsWorkflowExpression())
                 {
                     var evaluationResult = (string?)await this.Context.EvaluateAsync(openApiUriString, this.Activity.Input, cancellationToken);
