@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
-	  <VersionPrefix>0.1.5</VersionPrefix>
+	<VersionPrefix>0.1.11</VersionPrefix>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
 	<Authors>The Synapse Authors</Authors>
 	<Company>Cloud Native Computing Foundation</Company>
@@ -14,12 +14,22 @@
     <PackageProjectUrl>https://github.com/serverlessworkflow/synapse</PackageProjectUrl>
     <PackageTags>synapse integration</PackageTags>
     <NeutralLanguage>en</NeutralLanguage>
+	<IsPackable>true</IsPackable>
 	<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
 	<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+	<PackageIcon>synapse-headless.png</PackageIcon>
     <AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
     <FileVersion>$(VersionPrefix).0</FileVersion>
 	<DebugType>embedded</DebugType>
+	<Description>This package contains everything you need to integrate Synapse WFMS and its APIs</Description>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\..\assets\images\synapse-headless.png" Link="synapse-headless.png">
+      <PackagePath>\</PackagePath>
+      <Pack>True</Pack>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" />
