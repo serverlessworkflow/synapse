@@ -15,13 +15,24 @@
 	<PackageProjectUrl>https://github.com/serverlessworkflow/synapse</PackageProjectUrl>
 	<PackageTags>synapse management api core</PackageTags>
 	<NeutralLanguage>en</NeutralLanguage>
+	<IsPackable>true</IsPackable>
+	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 	<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
 	<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+	<PackageIcon>synapse-headless.png</PackageIcon>
 	<AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
 	<FileVersion>$(VersionPrefix).0</FileVersion>
 	<OutputType>Library</OutputType>
 	<DebugType>embedded</DebugType>
+	<Description>This package contains abstractions for the management API of Synapse WFMS</Description>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\..\..\assets\images\synapse-headless.png" Link="synapse-headless.png">
+      <PackagePath>\</PackagePath>
+      <Pack>True</Pack>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\core\Synapse.Integration\Synapse.Integration.csproj" />
