@@ -1,27 +1,37 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
-		<RootNamespace>$(MSBuildProjectName.Replace(" ", "_").Replace(".Client", ""))</RootNamespace>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-		<VersionPrefix>0.1.5</VersionPrefix>
-		<GenerateDocumentationFile>True</GenerateDocumentationFile>
-		<Authors>The Synapse Authors</Authors>
-		<Company>Cloud Native Computing Foundation</Company>
-		<Copyright>Copyright © 2022-Present The Synapse Authors. All Rights Reserved.</Copyright>
-		<RepositoryUrl>https://github.com/serverlessworkflow/synapse</RepositoryUrl>
-		<RepositoryType>git</RepositoryType>
-		<PackageProjectUrl>https://github.com/serverlessworkflow/synapse</PackageProjectUrl>
-		<PackageTags>synapse management api grpc client</PackageTags>
-		<NeutralLanguage>en</NeutralLanguage>
-		<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
-		<AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
-		<FileVersion>$(VersionPrefix).0</FileVersion>
-		<OutputType>Library</OutputType>
-		<DebugType>embedded</DebugType>
-	</PropertyGroup>
+  <PropertyGroup>
+	<TargetFramework>net6.0</TargetFramework>
+	<RootNamespace>$(MSBuildProjectName.Replace(" ", "_").Replace(".Client", ""))</RootNamespace>
+	<ImplicitUsings>enable</ImplicitUsings>
+	<Nullable>enable</Nullable>
+	<VersionPrefix>0.1.11</VersionPrefix>
+	<GenerateDocumentationFile>True</GenerateDocumentationFile>
+	<Authors>The Synapse Authors</Authors>
+	<Company>Cloud Native Computing Foundation</Company>
+	<Copyright>Copyright © 2022-Present The Synapse Authors. All Rights Reserved.</Copyright>
+	<RepositoryUrl>https://github.com/serverlessworkflow/synapse</RepositoryUrl>
+	<RepositoryType>git</RepositoryType>
+	<PackageProjectUrl>https://github.com/serverlessworkflow/synapse</PackageProjectUrl>
+	<PackageTags>synapse management api grpc client</PackageTags>
+	<NeutralLanguage>en</NeutralLanguage>
+	<IsPackable>true</IsPackable>
+	<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+	<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+	<PackageIcon>synapse-headless.png</PackageIcon>
+	<AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
+	<FileVersion>$(VersionPrefix).0</FileVersion>
+	<OutputType>Library</OutputType>
+	<DebugType>embedded</DebugType>
+	<Description>This package contains the GRPC client for the Synapse WFMS </Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\..\..\assets\images\synapse-headless.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Synapse.Apis.Management.Core\Synapse.Apis.Management.Core.csproj" />
