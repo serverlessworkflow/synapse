@@ -16,6 +16,7 @@
 	<PackageTags>synapse management api grpc client</PackageTags>
 	<NeutralLanguage>en</NeutralLanguage>
 	<IsPackable>true</IsPackable>
+	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 	<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
 	<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 	<PackageIcon>synapse-headless.png</PackageIcon>
