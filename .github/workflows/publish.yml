@@ -9,6 +9,23 @@ env:
 
 jobs:
 
+  release-packages:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+    - name: Restore dependencies
+      run: dotnet restore "./Synapse.sln"
+    - name: Build
+      run: dotnet build "./Synapse.sln" --configuration Release --no-restore 
+    - name: Push1
+      run: dotnet nuget push "./src/*/*/bin/Release/*.nupkg" --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+    - name: Push2
+      run: dotnet nuget push "./src/*/*/*/bin/Release/*.nupkg" --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+
   release-server-image:
     runs-on: ubuntu-latest
     steps:
