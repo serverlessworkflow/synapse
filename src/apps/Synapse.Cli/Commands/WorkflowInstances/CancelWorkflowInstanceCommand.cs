@@ -38,7 +38,7 @@ namespace Synapse.Cli.Commands.WorkflowInstances
             : base(serviceProvider, loggerFactory, synapseManagementApi, CommandName, CommandDescription)
         {
             this.Add(new Argument<string>("id") { Description = "The id of the workflow instance to cancel the execution of (ex: myworkflow-XqGg49onskelivig7ND6ig)" });
-            this.Handler = CommandHandler.Create<string, bool>(this.HandleAsync);
+            this.Handler = CommandHandler.Create<string>(this.HandleAsync);
         }
 
         /// <summary>
@@ -46,7 +46,7 @@ namespace Synapse.Cli.Commands.WorkflowInstances
         /// </summary>
         /// <param name="id">The id of the workflow instance to cancel the execution of</param>
         /// <returns>A new awaitable <see cref="Task"/></returns>
-        public async Task HandleAsync(string id, bool y)
+        public async Task HandleAsync(string id)
         {
             await this.SynapseManagementApi.CancelWorkflowInstanceAsync(id);
             Console.WriteLine($"The execution of the workflow instance with id '{id}' has been successfully cancelled");

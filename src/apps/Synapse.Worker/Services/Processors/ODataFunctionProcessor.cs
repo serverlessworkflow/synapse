@@ -37,7 +37,6 @@ namespace Synapse.Worker.Services.Processors
         /// <param name="activityProcessorFactory">The service used to create <see cref="IWorkflowActivityProcessor"/>s</param>
         /// <param name="httpClientFactory">The service used to create <see cref="System.Net.Http.HttpClient"/>s</param>
         /// <param name="serializerProvider">The service used to provide <see cref="ISerializer"/>s</param>
-        /// <param name="oauth2TokenManager">The service used to manahge <see cref="OAuth2Token"/>s</param>
         /// <param name="options">The service used to access the current <see cref="ApplicationOptions"/></param>
         /// <param name="activity">The <see cref="V1WorkflowActivity"/> to process</param>
         /// <param name="action">The <see cref="ActionDefinition"/> to process</param>

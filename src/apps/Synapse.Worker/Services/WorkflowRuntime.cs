@@ -444,6 +444,7 @@ namespace Synapse.Worker.Services
             try
             {
                 //todo: publish the event to the server
+                await Task.CompletedTask;
             }
             catch(Exception ex)
             {
@@ -467,18 +468,12 @@ namespace Synapse.Worker.Services
                 if (!switchState.TryGetCase(caseName, out SwitchCaseDefinition switchCase))
                     throw new InvalidOperationException($"Failed to find a case with name '{caseName}' in the state '{processor.State.Name}' of workflow '{this.Context.Workflow.Definition.Id}'");
                 metadata.Add(V1WorkflowActivityMetadata.Case, caseName);
-                var activity = null as V1WorkflowActivity;
-                switch (switchCase.Type)
+                V1WorkflowActivity activity = switchCase.Type switch
                 {
-                    case ConditionType.End:
-                        activity = await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.End, e.Output, metadata, null, this.CancellationToken);
-                        break;
-                    case ConditionType.Transition:
-                        activity = await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Transition, e.Output, metadata, null, this.CancellationToken);
-                        break;
-                    default:
-                        throw new NotSupportedException($"The specified condition type '{switchCase.Type}' is not supported in this context");
-                }
+                    ConditionType.End => await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.End, e.Output, metadata, null, this.CancellationToken),
+                    ConditionType.Transition => await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Transition, e.Output, metadata, null, this.CancellationToken),
+                    _ => throw new NotSupportedException($"The specified condition type '{switchCase.Type}' is not supported in this context"),
+                };
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                 this.CreateActivityProcessor(activity);
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
@@ -580,7 +575,9 @@ namespace Synapse.Worker.Services
         }
 
         /// <inheritdoc/>
+#pragma warning disable CA1816 // Dispose methods should call SuppressFinalize
         public override void Dispose()
+#pragma warning restore CA1816 // Dispose methods should call SuppressFinalize
         {
             this._ServerSignalStreamSubscription?.Dispose();
             this._OutboundEventStreamSubscription?.Dispose();

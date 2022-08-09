@@ -201,7 +201,7 @@ namespace Synapse.Worker.Services
         /// <summary>
         /// Handles the <see cref="V1WorkflowActivity"/>'s <see cref="IV1WorkflowActivityIntegrationEvent"/>
         /// </summary>
-        /// <param name="e">The <see cref="IWorkflowActivityEvent"/> to handle</param>
+        /// <param name="e">The <see cref="IV1WorkflowActivityIntegrationEvent"/> to handle</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A new awaitable <see cref="Task"/></returns>
         protected virtual async Task OnNextAsync(IV1WorkflowActivityIntegrationEvent e, CancellationToken cancellationToken)

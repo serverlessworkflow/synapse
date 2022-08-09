@@ -125,7 +125,6 @@ namespace Synapse.Worker.Services.Processors
         /// Handles an incoming <see cref="CloudEvent"/>
         /// </summary>
         /// <param name="e">The <see cref="CloudEvent"/> to handle</param>
-        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A new awaitable <see cref="Task"/></returns>
         protected virtual async Task OnEventAsync(CloudEvent e)
         {

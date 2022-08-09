@@ -12,6 +12,9 @@ namespace Synapse.Worker.Services
         : BackgroundService, ISecretManager
     {
 
+        /// <summary>
+        /// Gets the default directory for file-based secrets
+        /// </summary>
         public static string DefaultSecretDirectory
         {
             get

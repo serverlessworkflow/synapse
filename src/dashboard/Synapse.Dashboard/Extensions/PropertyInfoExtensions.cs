@@ -34,7 +34,7 @@ namespace Synapse.Dashboard
         /// <returns>The property's display name</returns>
         public static string GetDisplayName(this PropertyInfo property)
         {
-            string name = null;
+            var name = null as string;
             if (property.TryGetCustomAttribute(out DisplayAttribute displayAttribute))
                 name = displayAttribute.Name;
             if (string.IsNullOrWhiteSpace(name))

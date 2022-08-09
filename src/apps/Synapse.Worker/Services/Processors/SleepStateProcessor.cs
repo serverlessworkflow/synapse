@@ -49,7 +49,7 @@ namespace Synapse.Worker.Services.Processors
         protected override Task InitializeAsync(CancellationToken cancellationToken)
         {
             if(this.Activity.Status == V1WorkflowActivityStatus.Suspended)
-                this.Duration = this.State.Duration.Subtract(this.Context.Workflow.Instance.Sessions.Last(s => !s.IsActive).EndedAt.Value.Subtract(this.Activity.StartedAt!.Value));
+                this.Duration = this.State.Duration.Subtract(this.Context.Workflow.Instance.Sessions.Last(s => !s.IsActive).EndedAt!.Value.Subtract(this.Activity.StartedAt!.Value));
             else
                 this.Duration = this.State.Duration;
             return Task.CompletedTask;
