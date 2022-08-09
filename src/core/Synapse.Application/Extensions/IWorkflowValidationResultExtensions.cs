@@ -26,10 +26,10 @@ namespace Synapse
     {
 
         /// <summary>
-        /// Converts the <see cref="IWorkflowValidationResult"/> into a new <see cref="IEnumerable{T}"/> of <see cref="Error"/>s
+        /// Converts the <see cref="IWorkflowValidationResult"/> into a new <see cref="IEnumerable{T}"/> of <see cref="Neuroglia.Error"/>s
         /// </summary>
         /// <param name="validationResult">The <see cref="IWorkflowValidationResult"/> to convert</param>
-        /// <returns>A new <see cref="IEnumerable{T}"/> of <see cref="Error"/>s</returns>
+        /// <returns>A new <see cref="IEnumerable{T}"/> of <see cref="Neuroglia.Error"/>s</returns>
         public static IEnumerable<Error> AsErrors(this IWorkflowValidationResult validationResult)
         {
             List<Error> errors = new(validationResult.SchemaValidationErrors.Count() + validationResult.DslValidationErrors.Count());

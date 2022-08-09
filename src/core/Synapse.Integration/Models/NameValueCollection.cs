@@ -180,6 +180,7 @@ namespace Synapse.Integration.Models
             return new KeyValuePair<string, TValue>(item.Key, (TValue)item.Value);
         }
 
+        /// <inheritdoc/>
         public void CopyTo(Array array, int index)
         {
             throw new NotImplementedException();

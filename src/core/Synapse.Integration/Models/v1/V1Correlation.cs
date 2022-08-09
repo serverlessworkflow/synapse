@@ -17,6 +17,7 @@
 
 namespace Synapse.Integration.Models
 {
+
     public partial class V1Correlation
     {
 
@@ -37,7 +38,7 @@ namespace Synapse.Integration.Models
         /// </summary>
         /// <param name="e">The <see cref="V1Event"/> to get the <see cref="V1CorrelationCondition"/> for</param>
         /// <returns>The first matching <see cref="V1CorrelationCondition"/> for the specified <see cref="V1Event"/>, if any</returns>
-        public virtual V1CorrelationCondition? GetMatchingConditionFor(V1Event e)
+        public virtual V1CorrelationCondition GetMatchingConditionFor(V1Event e)
         {
             if (e == null)
                 throw new ArgumentNullException(nameof(e));

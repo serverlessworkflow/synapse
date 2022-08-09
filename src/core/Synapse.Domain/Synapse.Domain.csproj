@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	  <VersionPrefix>0.1.11</VersionPrefix>
+	  <VersionPrefix>0.1.12</VersionPrefix>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
 	<Authors>The Synapse Authors</Authors>
 	<Company>Cloud Native Computing Foundation</Company>
@@ -22,8 +22,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Neuroglia.Data" Version="2.0.1.63" />
-    <PackageReference Include="Neuroglia.Data.Kubernetes" Version="2.0.1.63" />
+    <PackageReference Include="Neuroglia.Data" Version="2.0.1.67" />
+    <PackageReference Include="Neuroglia.Data.Kubernetes" Version="2.0.1.67" />
   </ItemGroup>
 
   <ItemGroup>

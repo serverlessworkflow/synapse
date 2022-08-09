@@ -24,7 +24,7 @@ namespace Synapse.Infrastructure.Services
     /// Defines the fundamentals of a service used to manage <see cref="IWorkflowProcess"/>es
     /// </summary>
     public interface IWorkflowProcessManager
-        : IHostedService
+        : IHostedService, IDisposable
     {
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace Synapse.Infrastructure.Services
         /// <param name="id">The id of the <see cref="IWorkflowProcess"/> to get</param>
         /// <returns>The <see cref="IWorkflowProcess"/> with the specified id</returns>
         IWorkflowProcess GetProcessById(string id);
-        void Dispose();
+    
     }
 
 }

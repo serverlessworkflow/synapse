@@ -36,7 +36,7 @@ namespace Synapse.Apis.Management.Grpc
         /// Creates a new workflow
         /// </summary>
         /// <param name="command">The object that describes the command to execute</param>
-        /// <param name="context">The current <see</param>
+        /// <param name="context">The current</param>
         /// <returns>A new object that describes the result of the operation</returns>
         [OperationContract]
         Task<GrpcApiResult<V1Workflow>> CreateWorkflowAsync(V1CreateWorkflowCommand command, CallContext context = default);

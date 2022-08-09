@@ -66,7 +66,7 @@ namespace Synapse.Runtime.Kubernetes.Services
         /// </summary>
         protected Progress<string> LogProgress { get; } = new();
 
-        private IObservable<string> _Logs;
+        private readonly IObservable<string> _Logs;
         /// <inheritdoc/>
         public override IObservable<string> Logs => this._Logs;
 
@@ -103,7 +103,7 @@ namespace Synapse.Runtime.Kubernetes.Services
             using (cancellationToken.Register(() => tcs.TrySetCanceled(cancellationToken)))
             {
                 string line;
-                while ((line = await await Task.WhenAny(reader.ReadLineAsync(), tcs.Task)) != null)
+                while ((line = await await Task.WhenAny(reader.ReadLineAsync()!, tcs.Task)) != null)
                 {
                     ((IProgress<string>)this.LogProgress).Report(line);
                 }

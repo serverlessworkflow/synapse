@@ -4,7 +4,7 @@
 		<TargetFramework>net6.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<VersionPrefix>0.1.11</VersionPrefix>
+		<VersionPrefix>0.1.12</VersionPrefix>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<Authors>The Synapse Authors</Authors>
 		<Company>Cloud Native Computing Foundation</Company>
@@ -24,7 +24,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
-		<PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.NewtonsoftJson" Version="6.0.5" />
+		<PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.NewtonsoftJson" Version="6.0.7" />
 	</ItemGroup>
 
 	<ItemGroup>

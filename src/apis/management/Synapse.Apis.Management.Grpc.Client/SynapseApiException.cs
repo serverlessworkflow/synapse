@@ -28,7 +28,7 @@ namespace Synapse.Apis.Management
         /// <summary>
         /// Initializes a new <see cref="SynapseApiException"/>
         /// </summary>
-        /// <param name="result">The <see cref="V1GrpcApiResult"/> which is the cause of the <see cref="SynapseApiException"/></param>
+        /// <param name="result">The <see cref="GrpcApiResult"/> which is the cause of the <see cref="SynapseApiException"/></param>
         public SynapseApiException(GrpcApiResult result)
             : base($"The Synapse API responded with a non-success result code '{result.Code}'.{Environment.NewLine}Errors: {(result.Errors == null ? "" : string.Join(Environment.NewLine, result.Errors.Select(e => $"{e.Code}: {e.Message}")))}")
         {

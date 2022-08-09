@@ -112,18 +112,7 @@ namespace Synapse.Apis.Management.Http.Controllers
         [ProducesResponseType((int)HttpStatusCode.Forbidden)]
         public async Task<IActionResult> Get(CancellationToken cancellationToken)
         {
-            var res = await this.Mediator.ExecuteAsync(new Application.Queries.Generic.V1ListQuery<Integration.Models.V1Workflow>(), cancellationToken);//todo: cleanup test
-            try
-            {
-                var json = JsonConvert.SerializeObject(res.Data);
-
-                return this.Process(res); //todo: cleanup test
-            }
-            catch(Exception ex)
-            {
-                throw;
-            }
-
+            return this.Process(await this.Mediator.ExecuteAsync(new Application.Queries.Generic.V1ListQuery<Integration.Models.V1Workflow>(), cancellationToken));
         }
 
         /// <summary>

@@ -45,7 +45,7 @@ namespace Synapse.Application.Commands.Workflows
         /// Initializes a new <see cref="V1CreateWorkflowCommand"/>
         /// </summary>
         /// <param name="definition">The definition of the <see cref="V1Workflow"/> to create</param>
-        /// <param name="ifNotExists">A boolean indicating whether the <see cref="V1Workflow"/> should be created only if it does not already exist. Defaults to false, in which case the <see cref="Definition"/> is automatically versionned
+        /// <param name="ifNotExists">A boolean indicating whether the <see cref="V1Workflow"/> should be created only if it does not already exist. Defaults to false, in which case the <see cref="Definition"/> is automatically versionned</param>
         public V1CreateWorkflowCommand(WorkflowDefinition definition, bool ifNotExists)
         {
             this.Definition = definition;
@@ -154,7 +154,7 @@ namespace Synapse.Application.Commands.Workflows
                     conditions.Add(new(filters.ToArray()));
                 }
                 var outcome = new V1CorrelationOutcome(V1CorrelationOutcomeType.Start, workflow.Id);
-                await this.Mediator.ExecuteAndUnwrapAsync(new V1CreateCorrelationCommand(lifetime, conditionType, conditions, outcome, null));
+                await this.Mediator.ExecuteAndUnwrapAsync(new V1CreateCorrelationCommand(lifetime, conditionType, conditions, outcome, null), cancellationToken: cancellationToken);
             }
             else if (!string.IsNullOrWhiteSpace(workflow.Definition.Start?.Schedule?.Cron?.Expression)) 
             {

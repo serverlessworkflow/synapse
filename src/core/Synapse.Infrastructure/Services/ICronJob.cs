@@ -26,7 +26,7 @@ namespace Synapse.Infrastructure.Services
     {
 
         /// <summary>
-        /// Gets the event fired whenever the <see cref="CronJob"/> expires
+        /// Gets the event fired whenever the <see cref="ICronJob"/> expires
         /// </summary>
         event EventHandler Expired;
 

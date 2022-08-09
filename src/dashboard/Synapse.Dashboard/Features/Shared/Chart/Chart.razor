@@ -67,16 +67,13 @@
         this.Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
-    
+
 
     public async ValueTask DisposeAsync()
     {
         await this.DisposeAsyncCore().ConfigureAwait(false);
-
-        this.Dispose(disposing: false);
-#pragma warning disable CA1816 // Dispose methods should call SuppressFinalize
+        this.Dispose(true);
         GC.SuppressFinalize(this);
-#pragma warning restore CA1816 // Dispose methods should call SuppressFinalize
     }
 
     protected virtual void Dispose(bool disposing)
@@ -85,6 +82,7 @@
         {
             (this.chart as IDisposable)?.Dispose();
             this.chart = null;
+            this._Disposed = true;
         }
     }
 
