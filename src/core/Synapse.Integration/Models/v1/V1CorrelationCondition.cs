@@ -37,7 +37,7 @@ namespace Synapse.Integration.Models
         /// </summary>
         /// <param name="e">The <see cref="V1Event"/> to get the matching <see cref="V1EventFilter"/> for</param>
         /// <returns>The matching <see cref="V1EventFilter"/> for the specified <see cref="V1Event"/>, if any</returns>
-        public virtual V1EventFilter? GetMatchingFilterFor(V1Event e)
+        public virtual V1EventFilter GetMatchingFilterFor(V1Event e)
         {
             if (e == null)
                 throw new ArgumentNullException(nameof(e));

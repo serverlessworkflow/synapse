@@ -71,6 +71,9 @@ namespace Synapse.Apis.Runtime.Grpc.Models
         [ProtoMember(2)]
         public IEnumerable<Error>? Errors { get; internal set; }
 
+        /// <summary>
+        /// Gets a boolean indicating whether or not the operation was successfull
+        /// </summary>
         [ProtoIgnore]
         [IgnoreDataMember]
         public virtual bool Succeeded => this.Errors == null || !this.Errors.Any();

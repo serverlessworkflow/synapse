@@ -82,7 +82,7 @@ namespace Synapse.Apis.Management.Grpc
         }
 
         /// <inheritdoc/>
-        public virtual async Task<GrpcApiResult<V1Workflow>> UploadWorkflowAsync(V1UploadWorkflowCommand command, CallContext context = default)
+        public virtual Task<GrpcApiResult<V1Workflow>> UploadWorkflowAsync(V1UploadWorkflowCommand command, CallContext context = default)
         {
             throw new NotSupportedException();
         }

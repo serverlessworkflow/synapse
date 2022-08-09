@@ -95,7 +95,7 @@ namespace Synapse.Domain.Models
         {
             get
             {
-                return this._TriggerEvents?.AsReadOnly();
+                return this._TriggerEvents?.AsReadOnly()!;
             }
         }
 
