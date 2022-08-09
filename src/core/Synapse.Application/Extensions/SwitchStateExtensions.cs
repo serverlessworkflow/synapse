@@ -42,13 +42,13 @@ namespace Synapse
                     if (caseName == "default")
                         @case = new DataCaseDefinition() { Name = "default", Transition = state.DefaultCondition.Transition, End = state.DefaultCondition.End };
                     else
-                        @case = state.DataConditions.Single(c => c.Name == caseName);
+                        @case = state.DataConditions?.Single(c => c.Name == caseName)!;
                     break;
                 case SwitchStateType.Event:
                     if (caseName == "default")
                         @case = new EventCaseDefinition() { Name = "default", Transition = state.DefaultCondition.Transition, End = state.DefaultCondition.End };
                     else
-                        @case = state.EventConditions.Single(c => c.Name == caseName);
+                        @case = state.EventConditions?.Single(c => c.Name == caseName)!;
                     break;
                 default:
                     throw new NotSupportedException($"The specified switch state type '{state.SwitchType}' is not supported in this context");

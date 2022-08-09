@@ -88,10 +88,10 @@ namespace Synapse.Worker.Services.Processors
                         else
                         {
                             if (value.IsWorkflowExpression())
-                                value = (await this.Context.EvaluateAsync(value, await this.Context.Workflow.GetActivityStateDataAsync(this.Activity, cancellationToken))!)!.ToString();
+                                value = (await this.Context.EvaluateAsync(value, await this.Context.Workflow.GetActivityStateDataAsync(this.Activity, cancellationToken), cancellationToken)!)!.ToString();
                             await this.Context.Workflow.SetCorrelationMappingAsync(correlation.ContextAttributeName, value!, cancellationToken);
                         }
-                        e.SetAttributeFromString(correlation.ContextAttributeName, value);
+                        e.SetAttributeFromString(correlation.ContextAttributeName, value!);
                     }
                 }
                 this.IntegrationEventBus.OutboundStream.OnNext(e);

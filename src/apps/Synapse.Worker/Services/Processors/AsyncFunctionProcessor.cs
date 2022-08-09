@@ -130,7 +130,7 @@ namespace Synapse.Worker.Services.Processors
         /// <summary>
         /// Handles the next <see cref="V1WorkflowActivityCompletedIntegrationEvent"/> of a <see cref="ProduceEventProcessor"/>
         /// </summary>
-        /// <param name="result">The <see cref="V1WorkflowActivityCompletedIntegrationEvent"/> to handle</param>
+        /// <param name="e">The <see cref="V1WorkflowActivityCompletedIntegrationEvent"/> to handle</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A new awaitable <see cref="Task"/></returns>
         protected virtual async Task OnProduceEventResultAsync(V1WorkflowActivityCompletedIntegrationEvent e, CancellationToken cancellationToken)
@@ -174,7 +174,7 @@ namespace Synapse.Worker.Services.Processors
         {
             if (e is V1WorkflowActivityCompletedIntegrationEvent completedEvent)
             {
-                var output = await this.Context.FilterOutputAsync(this.Action, completedEvent.Output);
+                var output = await this.Context.FilterOutputAsync(this.Action, completedEvent.Output, cancellationToken);
                 if (output == null)
                     output = new();
                 await this.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, output), cancellationToken);

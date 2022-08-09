@@ -134,6 +134,7 @@ namespace Synapse.Worker.Services
             if (activity == null)
                 throw new ArgumentNullException(nameof(activity));
             //await this.SynapseRuntimeApi.InitializeActivityAsync(activity.Id, cancellationToken);
+            await Task.CompletedTask;
         }
 
         /// <inheritdoc/>
@@ -240,6 +241,7 @@ namespace Synapse.Worker.Services
         public virtual async Task TransitionToAsync(StateDefinition state, CancellationToken cancellationToken = default)
         {
             //await this.Synapse.TransitionWorkflowInstanceToAsync(this.Instance.Id, state.Name, cancellationToken); //todo
+            await Task.CompletedTask;
         }
 
         /// <inheritdoc/>

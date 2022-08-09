@@ -66,7 +66,7 @@ namespace Synapse.Worker.Services.Processors
                         //Do nothing
                         break;
                     case SwitchStateType.Event:
-                        foreach (var eventConditionDefinition in this.State.EventConditions)
+                        foreach (var eventConditionDefinition in this.State.EventConditions!)
                         {
                             var metadata = new Dictionary<string, string>()
                             {
@@ -95,7 +95,7 @@ namespace Synapse.Worker.Services.Processors
             {
                 case SwitchStateType.Data:
                     bool caseMatched = false;
-                    foreach (var caseDefinition in State.DataConditions)
+                    foreach (var caseDefinition in State.DataConditions!)
                     {
                         if(await this.Context.EvaluateConditionAsync(caseDefinition.Condition, this.Activity.Input!.ToObject()!, cancellationToken))
                         {

@@ -43,6 +43,10 @@ namespace Synapse.Worker.Services
 
         ISubject<CloudEvent> IIntegrationEventBus.InboundStream => this.InboundStream;
 
+        /// <summary>
+        /// Disposes of the <see cref="IntegrationEventBus"/>
+        /// </summary>
+        /// <param name="disposing">A boolean indicating whether or not the <see cref="IntegrationEventBus"/> is being disposed of</param>
         protected virtual void Dispose(bool disposing)
         {
             if (!this._Disposed)

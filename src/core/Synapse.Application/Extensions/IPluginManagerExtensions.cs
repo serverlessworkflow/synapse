@@ -52,7 +52,7 @@ namespace Synapse
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException(nameof(name));
-            return (TPlugin)pluginManager.GetPlugin(name);
+            return (TPlugin)pluginManager.GetPlugin(name)!;
         }
 
         /// <summary>

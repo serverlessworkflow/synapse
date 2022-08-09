@@ -136,7 +136,7 @@ namespace Synapse.Worker.Services
                     throw new NullReferenceException($"Failed to find a function with the specified name '{functionName}' in the workflow '{this.Workflow}'");
                 if (function.Type != FunctionType.Expression)
                     throw new InvalidOperationException($"The function with name '{function.Name}' is of type '{EnumHelper.Stringify(function.Type)}' and cannot be called in an expression");
-                var value = this.ExpressionEvaluator.Evaluate(function.Operation, data, args);
+                var value = this.ExpressionEvaluator.Evaluate(function.Operation, data!, args);
                 var serializedValue = null as string;
                 if (value != null)
                     serializedValue = JsonConvert.SerializeObject(value, Formatting.None);
@@ -153,17 +153,13 @@ namespace Synapse.Worker.Services
             var secrets = await this.SecretManager.GetSecretsAsync(cancellationToken);
             if (!secrets.TryGetValue(secret, out var secretValue))
                 throw new NullReferenceException($"Failed to find the specified secret '{secret}'");
-            switch (secretValue)
+            return secretValue switch
             {
-                case T t:
-                    return t;
-                case DynamicObject dyn:
-                    return dyn.ToObject<T>();
-                case JObject jobj:
-                    return jobj.ToObject<T>()!;
-                default:
-                    throw new InvalidCastException();
-            }
+                T t => t,
+                DynamicObject dyn => dyn.ToObject<T>(),
+                JObject jobj => jobj.ToObject<T>()!,
+                _ => throw new InvalidCastException(),
+            };
         }
 
         /// <summary>
@@ -219,8 +215,7 @@ namespace Synapse.Worker.Services
         /// <returns>The runtime expression '$SECRETS' argument object</returns>
         protected virtual async Task<object> BuildRuntimeExpressionSecretsArgumentAsync(CancellationToken cancellationToken)
         {
-            var secrets = await this.SecretManager.GetSecretsAsync(cancellationToken) as object;
-            if (secrets == null)
+            if (await this.SecretManager.GetSecretsAsync(cancellationToken) is not object secrets)
                 secrets = new();
             return secrets;
         }

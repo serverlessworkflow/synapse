@@ -30,10 +30,10 @@ namespace Synapse.Dashboard
     {
 
         private static readonly MethodInfo WhereMethod = typeof(Queryable).GetMethods().First(m => m.Name == nameof(Queryable.Where));
-        private static readonly MethodInfo SkipMethod = typeof(Queryable).GetMethod(nameof(Queryable.Skip));
+        private static readonly MethodInfo SkipMethod = typeof(Queryable).GetMethod(nameof(Queryable.Skip))!;
         private static readonly MethodInfo TakeMethod = typeof(Queryable).GetMethods().First(m => m.Name == nameof(Queryable.Take));
-        private static readonly MethodInfo ToListMethod = typeof(Enumerable).GetMethod(nameof(Enumerable.ToList));
-        private static readonly MethodInfo ToListAsyncMethod = typeof(AsyncEnumerable).GetMethod(nameof(AsyncEnumerable.ToListAsync));
+        private static readonly MethodInfo ToListMethod = typeof(Enumerable).GetMethod(nameof(Enumerable.ToList))!;
+        private static readonly MethodInfo ToListAsyncMethod = typeof(AsyncEnumerable).GetMethod(nameof(AsyncEnumerable.ToListAsync))!;
 
         public static IQueryable Where(this IQueryable queryable, LambdaExpression lambda)
         {

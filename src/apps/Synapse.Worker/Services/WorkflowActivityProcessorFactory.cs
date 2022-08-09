@@ -52,7 +52,7 @@ namespace Synapse.Worker.Services
         protected ILogger Logger { get; }
 
         /// <summary>
-        /// Gets the current <see cref="IWorkflowExecutionContext"/>
+        /// Gets the current <see cref="IWorkflowRuntimeContext"/>
         /// </summary>
         protected IWorkflowRuntimeContext Context { get; }
 

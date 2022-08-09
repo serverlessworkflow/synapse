@@ -39,12 +39,12 @@ namespace Synapse.Worker.Services.Processors
         /// <summary>
         /// Initializes a new <see cref="GraphQLFunctionProcessor"/>
         /// </summary>
+        /// <param name="serviceProvider">The current <see cref="ISerializerProvider"/></param>
         /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
         /// <param name="context">The current <see cref="IWorkflowRuntimeContext"/></param>
         /// <param name="activityProcessorFactory">The service used to create <see cref="IWorkflowActivityProcessor"/>s</param>
         /// <param name="httpClientFactory">The service used to create <see cref="System.Net.Http.HttpClient"/>s</param>
         /// <param name="serializer">The service used to serialize and deserialize GraphQL requests/responses</param>
-        /// <param name="oauth2TokenManager">The service used to manahge <see cref="OAuth2Token"/>s</param>
         /// <param name="options">The service used to access the current <see cref="ApplicationOptions"/></param>
         /// <param name="activity">The <see cref="V1WorkflowActivity"/> to process</param>
         /// <param name="action">The <see cref="ActionDefinition"/> to process</param>
@@ -157,6 +157,11 @@ namespace Synapse.Worker.Services.Processors
             this.Arguments = string.Join(", ", args.Select(a => $"{a.Key}: {this.SerializeToGraphQL(a.Value)}"));
         }
 
+        /// <summary>
+        /// Serializes the specified value to GraphQL
+        /// </summary>
+        /// <param name="value">The value to serialize to GraphQL</param>
+        /// <returns>The serialized value</returns>
         protected virtual string? SerializeToGraphQL(object? value)
         {
             if (value == null)
@@ -231,10 +236,7 @@ namespace Synapse.Worker.Services.Processors
         protected override void Dispose(bool disposing)
         {
             if (disposing)
-            {
-                this.GraphQLClient.Dispose();
                 this.HttpClient.Dispose();
-            }
         }
 
     }
