@@ -34,12 +34,12 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" />
-    <PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="6.0.5" />
-    <PackageReference Include="Neuroglia.Serialization.Dynamic" Version="2.0.1.63" />
-    <PackageReference Include="Neuroglia.Serialization.Json" Version="2.0.1.63" />
-    <PackageReference Include="Neuroglia.Serialization.NewtonsoftJson" Version="2.0.1.63" />
-    <PackageReference Include="Neuroglia.Serialization.Protobuf" Version="2.0.1.63" />
-    <PackageReference Include="ServerlessWorkflow.Sdk" Version="0.8.1.6" />
+    <PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="6.0.7" />
+    <PackageReference Include="Neuroglia.Serialization.Dynamic" Version="2.0.1.67" />
+    <PackageReference Include="Neuroglia.Serialization.Json" Version="2.0.1.67" />
+    <PackageReference Include="Neuroglia.Serialization.NewtonsoftJson" Version="2.0.1.67" />
+    <PackageReference Include="Neuroglia.Serialization.Protobuf" Version="2.0.1.67" />
+    <PackageReference Include="ServerlessWorkflow.Sdk" Version="0.8.1.7" />
     <PackageReference Include="System.ServiceModel.Primitives" Version="4.9.0" />
   </ItemGroup>
 
