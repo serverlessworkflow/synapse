@@ -49,8 +49,8 @@ namespace Synapse.Runtime.Kubernetes.Configuration
                 {
                     new V1Container("synapse-worker")
                     {
-                        Image = "ghcr.io/serverlessworkflow/synapse-worker:latest",
-                        ImagePullPolicy = "IfNotPresent",
+                        Image = $"ghcr.io/serverlessworkflow/synapse-worker:{typeof(KubernetesRuntimeOptions).Assembly.GetName().Version!.ToString(3)}",
+                        ImagePullPolicy = "Always",
                         Ports = new List<V1ContainerPort>()
                         {
                             new V1ContainerPort()
