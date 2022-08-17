@@ -173,7 +173,9 @@ namespace Synapse.Worker.Services.Processors
                     .Single(p => p.Value.Operations.Any(o => o.Value.OperationId == operation.Value.OperationId));
                 this.Path = path.Key;
                 await this.BuildParametersAsync(cancellationToken);
-                foreach (OpenApiParameter param in this.Operation.Parameters
+                var parameters = path.Value.Parameters.ToList();
+                parameters.AddRange(this.Operation.Parameters);
+                foreach (OpenApiParameter param in parameters
                     .Where(p => p.In == ParameterLocation.Cookie)
                     .GroupBy(p => p.Name))
                 {
@@ -183,7 +185,7 @@ namespace Synapse.Worker.Services.Processors
                     else if (param.Required)
                         throw new NullReferenceException($"Failed to find the definition of the required parameter '{param.Name}' in the function definition with name '{this.Function.Name}'");
                 }
-                foreach (OpenApiParameter param in this.Operation.Parameters
+                foreach (OpenApiParameter param in parameters
                     .Where(p => p.In == ParameterLocation.Header))
                 {
                     var match = await this.TryGetParameterAsync($@".""{param.Name}""", cancellationToken);
@@ -192,7 +194,7 @@ namespace Synapse.Worker.Services.Processors
                     else if (param.Required)
                         throw new NullReferenceException($"Failed to find the definition of the required parameter '{param.Name}' in the function definition with name '{this.Function.Name}'");
                 }
-                foreach (OpenApiParameter param in this.Operation.Parameters
+                foreach (OpenApiParameter param in parameters
                     .Where(p => p.In == ParameterLocation.Path))
                 {
                     var match = await this.TryGetParameterAsync($@".""{param.Name}""", cancellationToken);
@@ -202,7 +204,7 @@ namespace Synapse.Worker.Services.Processors
                         throw new NullReferenceException($"Failed to find the definition of the required parameter '{param.Name}' in the function definition with name '{this.Function.Name}'");
                 }
                 Dictionary<string, string> queryParameters = new();
-                foreach (OpenApiParameter param in this.Operation.Parameters
+                foreach (OpenApiParameter param in parameters
                     .Where(p => p.In == ParameterLocation.Query))
                 {
                     var match = await this.TryGetParameterAsync($@".""{param.Name}""", cancellationToken);
