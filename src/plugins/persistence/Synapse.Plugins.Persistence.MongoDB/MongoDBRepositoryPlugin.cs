@@ -123,6 +123,7 @@ namespace Synapse.Plugins.Persistence.MongoDB
 
             BsonSerializer.RegisterGenericSerializerDefinition(typeof(OneOf<,>), typeof(OneOfSerializer<,>));
             BsonSerializer.RegisterSerializer(typeof(Dynamic), new DynamicSerializer());
+            BsonSerializer.RegisterSerializer(typeof(DynamicArray), new DynamicArraySerializer());
             BsonSerializer.RegisterSerializer(typeof(DynamicObject), new DynamicObjectSerializer());
 
             var conventionPack = new ConventionPack

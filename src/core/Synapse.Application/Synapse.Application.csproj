@@ -28,12 +28,12 @@
 
   <ItemGroup>
 	<PackageReference Include="CloudNative.CloudEvents.NewtonsoftJson" Version="2.3.1" />
-	<PackageReference Include="Microsoft.AspNetCore.OData" Version="8.0.10" />
+	<PackageReference Include="Microsoft.AspNetCore.OData" Version="8.0.11" />
 	<PackageReference Include="Microsoft.OData.ModelBuilder" Version="1.0.9" />
-	<PackageReference Include="Neuroglia.AspNetCore.JsonPatch" Version="2.0.1.68" />
-	<PackageReference Include="Neuroglia.Data.DistributedCache" Version="2.0.1.68" />
-	<PackageReference Include="Neuroglia.Data.EventSourcing" Version="2.0.1.68" />
-	<PackageReference Include="Neuroglia.Mediation.FluentValidation" Version="2.0.1.68" />
+	<PackageReference Include="Neuroglia.AspNetCore.JsonPatch" Version="2.0.1.69" />
+	<PackageReference Include="Neuroglia.Data.DistributedCache" Version="2.0.1.69" />
+	<PackageReference Include="Neuroglia.Data.EventSourcing" Version="2.0.1.69" />
+	<PackageReference Include="Neuroglia.Mediation.FluentValidation" Version="2.0.1.69" />
 	<PackageReference Include="System.Linq.Async" Version="6.0.1" />
   </ItemGroup>
 
