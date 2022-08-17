@@ -44,7 +44,7 @@ namespace Synapse.Plugins.Persistence.MongoDB.Services
                 switch (value)
                 {
                     case DynamicArray array:
-                        //todo
+                        serializer = BsonSerializer.LookupSerializer<DynamicArray>();
                         break;
                     case DynamicObject obj:
                         serializer = BsonSerializer.LookupSerializer<DynamicObject>();
@@ -63,10 +63,11 @@ namespace Synapse.Plugins.Persistence.MongoDB.Services
             switch (context.Reader.CurrentBsonType)
             {
                 case BsonType.Array:
-                    return base.Deserialize(context, args);  //todo
+                    var arraySerializer = BsonSerializer.LookupSerializer<DynamicArray>();
+                    return arraySerializer.Deserialize(context, args);
                 case BsonType.Document:
-                    var serializer = BsonSerializer.LookupSerializer<DynamicObject>();
-                    return serializer.Deserialize(context, args);
+                    var documentSerializer = BsonSerializer.LookupSerializer<DynamicObject>();
+                    return documentSerializer.Deserialize(context, args);
                 default:
                     var deserializer = BsonSerializer.LookupSerializer(typeof(object));
                     var deserialized = deserializer.Deserialize(context, args);
