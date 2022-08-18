@@ -31,11 +31,16 @@ namespace Synapse.Worker.Services.Processors
 
         /// <inheritdoc/>
         public ForEachStateProcessor(ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory,
-            IOptions<ApplicationOptions> options, V1WorkflowActivity activity, ForEachStateDefinition state)
+            IJsonSerializer jsonSerializer, IOptions<ApplicationOptions> options, V1WorkflowActivity activity, ForEachStateDefinition state)
             : base(loggerFactory, context, activityProcessorFactory, options, activity, state)
         {
-
+            this.JsonSerializer = jsonSerializer;
         }
+
+        /// <summary>
+        /// Gets the service used to serialize/deserialize to/from JSON
+        /// </summary>
+        protected IJsonSerializer JsonSerializer { get; }
 
         /// <inheritdoc/>
         protected override IWorkflowActivityProcessor CreateProcessorFor(V1WorkflowActivity activity)
@@ -65,7 +70,10 @@ namespace Synapse.Worker.Services.Processors
                 }
                 var iterationParamValue = inputCollection.First();
                 var input = (DynamicObject)this.Activity.Input!;
-                input.Set(this.State.IterationParameter!, iterationParamValue);
+                var iterationParam = this.State.IterationParameter;
+                if (string.IsNullOrWhiteSpace(iterationParam))
+                    iterationParam = "item";
+                input.Set(iterationParam, iterationParamValue);
                 var metadata = new Dictionary<string, string>()
                 {
                     { V1WorkflowActivityMetadata.State, this.State.Name! },
@@ -141,13 +149,31 @@ namespace Synapse.Worker.Services.Processors
                || inputCollection.Count() - 1 <= iterationIndex)
             {
                 var outputCollection = await this.GetOutputCollectionAsync(cancellationToken);
-                foreach (var itarationActivity in (await this.Context.Workflow.GetActivitiesAsync(this.Activity, cancellationToken))
-                    .Where(a => a.Type == V1WorkflowActivityType.Iteration && a.Status == V1WorkflowActivityStatus.Completed)
+                foreach (var iterationActivity in (await this.Context.Workflow.GetActivitiesAsync(this.Activity, cancellationToken))
+                    .Where(a => a.Type == V1WorkflowActivityType.Iteration && a.Status == V1WorkflowActivityStatus.Completed && a.Output != null)
                     .ToList())
                 {
-                    outputCollection.Add(itarationActivity.Output!.ToObject()!);
+                    outputCollection.Add(iterationActivity.Output!.ToObject()!);
                 }
-                await this.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, outputCollection), cancellationToken);
+                var output = this.Activity.Input.ToObject();
+                var expression = this.State.IterationParameter;
+                if (string.IsNullOrWhiteSpace(expression))
+                    expression = "item";
+                if (expression.StartsWith("${"))
+                    expression = expression[2..^1];
+                expression = $". |= del(.{expression})";
+                if (output != null)
+                    output = await this.Context.EvaluateAsync(expression, output, cancellationToken);
+                if (!string.IsNullOrWhiteSpace(this.State.OutputCollection))
+                {
+                    expression = this.State.OutputCollection.Trim();
+                    var outputCollectionJson = await this.JsonSerializer.SerializeAsync(outputCollection, cancellationToken);
+                    if (expression.StartsWith("${"))
+                        expression = expression[2..^1];
+                    expression = $"{expression} = {outputCollectionJson}";
+                    output = await this.Context.EvaluateAsync(expression, output, cancellationToken);
+                }
+                await this.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, output), cancellationToken);
                 return;
             }
             iterationIndex += 1;
