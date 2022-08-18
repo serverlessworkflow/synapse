@@ -263,7 +263,7 @@ namespace Synapse.Worker.Services.Processors
             var jsonArgs = JsonConvert.SerializeObject(this.FunctionReference.Arguments);
             foreach (Match match in Regex.Matches(jsonArgs, @"""\$\{.+?\}"""))
             {
-                var expression = match.Value[3..^2].Trim();
+                var expression = match.Value[3..^2].Trim().Replace(@"\""", @"""");
                 var evaluationResult = await this.Context.EvaluateAsync(expression, this.Activity.Input!.ToObject()!, cancellationToken);
                 if(evaluationResult == null)
                 {
