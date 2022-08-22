@@ -85,7 +85,7 @@ To get started, just download the appropriate [release](https://github.com/serve
 dotnet run ./Synapse.Server.dll
 ```
 
-For more information on how to configure a Native Synapse Server, please read the [docs]().
+For more information on how to configure a Native Synapse Server, please read the [docs](https://github.com/serverlessworkflow/synapse/wiki).
 
 #### Docker
 
@@ -145,7 +145,7 @@ The `Dashboard` is a Blazor Web Assembly (WASM) Graphical User Interface (GUI) t
 
 To get started, simply open a web browser and navigate to the Synapse Server's base url.
 
-For more information on how to use the `Dashboard`, please read the [docs]().
+For more information on how to use the `Dashboard`, please read the [docs](https://github.com/serverlessworkflow/synapse/wiki).
 
 ### CLI
 
@@ -157,7 +157,7 @@ To get started, just download the appropriate [release](https://github.com/serve
 synctl --help
 ```
 
-For more information on how to use `synctl`, please read the [docs]().
+For more information on how to use `synctl`, please read the [docs](https://github.com/serverlessworkflow/synapse/wiki).
 
 ## Application Programing Interfaces
 
