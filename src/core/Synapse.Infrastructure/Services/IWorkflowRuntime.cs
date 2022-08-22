@@ -28,10 +28,11 @@ namespace Synapse.Infrastructure.Services
         /// <summary>
         /// Creates a new <see cref="IWorkflowProcess"/> for the specified <see cref="V1WorkflowInstance"/>
         /// </summary>
+        /// <param name="workflow">The instanciated <see cref="V1Workflow"/> to start a new <see cref="IWorkflowProcess"/> for</param>
         /// <param name="workflowInstance">The <see cref="V1WorkflowInstance"/> to create a new <see cref="IWorkflowProcess"/> for</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A new <see cref="IWorkflowProcess"/></returns>
-        Task<IWorkflowProcess> CreateProcessAsync(V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default);
+        Task<IWorkflowProcess> CreateProcessAsync(V1Workflow workflow, V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default);
 
     }
 

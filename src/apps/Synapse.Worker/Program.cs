@@ -36,7 +36,7 @@ using var host = Host.CreateDefaultBuilder(args)
     .ConfigureAppConfiguration(config =>
     {
         config.AddJsonFile("appsettings.json", true, true);
-        config.AddKeyPerFile("/run/secrets", true, true);
+        config.AddKeyPerFile("/run/secrets/synapse", true, true);
     })
     .ConfigureServices((context, services) =>
     {

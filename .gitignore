@@ -230,3 +230,4 @@ _Pvt_Extensions
 
 # FAKE - F# Make
 .fake/
+/deployment/docker-compose/secrets/basic.json

@@ -40,7 +40,7 @@ namespace Synapse.Application.Services
         protected ILogger Logger { get; }
 
         /// <inheritdoc/>
-        public abstract Task<IWorkflowProcess> CreateProcessAsync(V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default);
+        public abstract Task<IWorkflowProcess> CreateProcessAsync(V1Workflow workflow, V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default);
 
         /// <inheritdoc/>
         async ValueTask IAsyncDisposable.DisposeAsync()

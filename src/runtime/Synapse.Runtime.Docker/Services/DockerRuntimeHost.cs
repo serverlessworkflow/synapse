@@ -90,13 +90,13 @@ namespace Synapse.Runtime.Services
             }
             finally
             {
-                if (response == null ? true : !response!.Containers.ContainsKey(containerId))
+                if (response == null || !response!.Containers.ContainsKey(containerId))
                     await this.Docker.Networks.ConnectNetworkAsync(this.Options.Network, new NetworkConnectParameters() { Container = containerId }, stoppingToken);
             }
         }
 
         /// <inheritdoc/>
-        public override async Task<IWorkflowProcess> CreateProcessAsync(V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default)
+        public override async Task<IWorkflowProcess> CreateProcessAsync(V1Workflow workflow, V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default)
         {
             if (workflowInstance == null)
                 throw new ArgumentNullException(nameof(workflowInstance));
@@ -117,7 +117,7 @@ namespace Synapse.Runtime.Services
                 {
                     Type = "bind",
                     Source = this.Options.Secrets.Directory,
-                    Target = "/run/secrets"
+                    Target = "/run/secrets/synapse"
                 });
             }
             var createContainerParameters = new CreateContainerParameters(containerConfig)

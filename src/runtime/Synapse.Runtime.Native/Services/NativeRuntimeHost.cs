@@ -105,8 +105,8 @@ namespace Synapse.Runtime.Services
             {
                 this.Logger.LogInformation("Worker app already present locally. Skipping download."); //todo: config based: the user might want to get latest every time
                 return;
-            } 
-            var target = null as string;
+            }
+            string? target;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 target = "win-x64.zip";
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
@@ -116,15 +116,17 @@ namespace Synapse.Runtime.Services
             else
                 throw new PlatformNotSupportedException();
             using var packageStream = await this.HttpClient.GetStreamAsync($"https://github.com/serverlessworkflow/synapse/releases/download/{typeof(NativeRuntimeHost).Assembly.GetName().Version!.ToString(3)!}/synapse-worker-{target}", cancellationToken); //todo: config based
-            using ZipArchive archive = new ZipArchive(packageStream, ZipArchiveMode.Read);
+            using ZipArchive archive = new(packageStream, ZipArchiveMode.Read);
             this.Logger.LogInformation("Worker app successfully downloaded. Extracting...");
             archive.ExtractToDirectory(workerDirectory.FullName, true);
             this.Logger.LogInformation("Worker app successfully extracted");
         }
 
         /// <inheritdoc/>
-        public override Task<IWorkflowProcess> CreateProcessAsync(V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default)
+        public override Task<IWorkflowProcess> CreateProcessAsync(V1Workflow workflow, V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default)
         {
+            if (workflow == null)
+                throw new ArgumentNullException(nameof(workflow));
             if (workflowInstance == null)
                 throw new ArgumentNullException(nameof(workflowInstance));
             var fileName = this.Options.GetWorkerFileName();
@@ -188,6 +190,7 @@ namespace Synapse.Runtime.Services
             }
             this.Processes.Clear();
             base.Dispose();
+            GC.SuppressFinalize(this);
         }
 
     }
