@@ -28,31 +28,35 @@ namespace Synapse.Dashboard
             graph.ClearActivityStatus();
             foreach (var instance in instances)
             {
-                if(instance.Status == V1WorkflowInstanceStatus.Pending 
+                if (instance.Status == V1WorkflowInstanceStatus.Pending
                     || instance.Status == V1WorkflowInstanceStatus.Starting)
                 {
                     var node = graph.Nodes.Values.OfType<StartNodeViewModel>().FirstOrDefault();
-                    if(node != null)
+                    if (node != null)
                         node.ActiveInstances.Add(instance);
                     continue;
                 }
-                if (instance.Activities != null) { 
-                    foreach(var activity in instance.Activities)
+                if (instance.Activities != null)
+                {
+                    foreach (var activity in instance.Activities)
                     {
-                        var node = graph.GetNodeFor(activity);
-                        if(node != null)
+                        var nodes = graph.GetNodesFor(activity);
+                        if (nodes != null && nodes.Any())
                         {
                             if (activity.Status == V1WorkflowActivityStatus.Pending || activity.Status == V1WorkflowActivityStatus.Running)
                             {
-                                node.ActiveInstances.Add(instance);
+                                nodes.ToList().ForEach(node => node.ActiveInstances.Add(instance));
                             }
                             else if (activity.Status == V1WorkflowActivityStatus.Faulted)
                             {
-                                node.FaultedInstances.Add(instance);
+                                nodes.ToList().ForEach(node => node.FaultedInstances.Add(instance));
                             }
                             if (highlightPath)
                             {
-                                ((INodeViewModel)node).CssClass = (((INodeViewModel)node).CssClass ?? "") + " active" ;
+                                nodes.ToList().ForEach(node =>
+                                {
+                                    ((INodeViewModel)node).CssClass = (((INodeViewModel)node).CssClass ?? "") + " active";
+                                });
                             }
                         }
                     }
@@ -81,36 +85,36 @@ namespace Synapse.Dashboard
             }
         }
 
-        public static IWorkflowNodeViewModel? GetNodeFor(this IGraphViewModel graph, V1WorkflowActivity activity)
+        public static IEnumerable<IWorkflowNodeViewModel>? GetNodesFor(this IGraphViewModel graph, V1WorkflowActivity activity)
         {
             if (activity == null)
                 return null;
             switch (activity.Type)
             {
                 case V1WorkflowActivityType.Action:
-                    return graph.GetActionNodeFor(activity);
+                    return graph.GetActionNodesFor(activity);
                 case V1WorkflowActivityType.Function:
-                    return graph.GetActionNodeFor(activity);
+                    return graph.GetActionNodesFor(activity);
                 case V1WorkflowActivityType.Transition:
-                    return graph.GetTransitionNodeFor(activity);
+                    return graph.GetTransitionNodesFor(activity);
                 case V1WorkflowActivityType.Branch:
                     throw new NotImplementedException(); //todo
                 case V1WorkflowActivityType.ConsumeEvent:
                     throw new NotImplementedException(); //todo
                 case V1WorkflowActivityType.End:
-                    return graph.Nodes.Values.OfType<EndNodeViewModel>().FirstOrDefault();
+                    return graph.Nodes.Values.OfType<EndNodeViewModel>();
                 case V1WorkflowActivityType.Error:
                     throw new NotImplementedException(); //todo
                 case V1WorkflowActivityType.EventTrigger:
                     throw new NotImplementedException(); //todo
                 case V1WorkflowActivityType.Iteration:
-                    throw new NotImplementedException(); //todo
+                    return graph.GetIterationNodesFor(activity);
                 case V1WorkflowActivityType.ProduceEvent:
                     throw new NotImplementedException(); //todo
                 case V1WorkflowActivityType.Start:
-                    return graph.Nodes.Values.OfType<StartNodeViewModel>().FirstOrDefault();
+                    return graph.Nodes.Values.OfType<StartNodeViewModel>();
                 case V1WorkflowActivityType.State:
-                    return graph.GetStateNodeFor(activity);
+                    return graph.GetStateNodesFor(activity);
                 case V1WorkflowActivityType.SubFlow:
                     throw new NotImplementedException(); //todo
                 default:
@@ -118,27 +122,39 @@ namespace Synapse.Dashboard
             }
         }
 
-        private static IWorkflowNodeViewModel? GetStateNodeFor(this IGraphViewModel graph, V1WorkflowActivity activity)
+        private static IEnumerable<StateNodeViewModel> GetStateNodesFor(this IGraphViewModel graph, V1WorkflowActivity activity)
         {
             if (!activity.Metadata.TryGetValue("state", out var stateName))
                 throw new InvalidDataException($"The specified activity's metadata does not define a 'state' value");
-            return graph.Clusters.Values.OfType<StateNodeViewModel>().FirstOrDefault(g => g.State.Name == stateName);
+            return graph.Clusters.Values.OfType<StateNodeViewModel>().Where(g => g.State.Name == stateName);
         }
 
-        private static IWorkflowNodeViewModel? GetActionNodeFor(this IGraphViewModel graph, V1WorkflowActivity activity)
+        private static IEnumerable<IWorkflowNodeViewModel>? GetActionNodesFor(this IGraphViewModel graph, V1WorkflowActivity activity)
         {
-            var stateNode = (StateNodeViewModel)graph.GetStateNodeFor(activity)!;
+            var stateNodes = graph.GetStateNodesFor(activity);               
             if (!activity.Metadata.TryGetValue("action", out var actionName))
                 throw new InvalidDataException($"The specified activity's metadata does not define a 'action' value");
-            return stateNode.Children.Values.Where(node => typeof(IActionNodeViewModel).IsAssignableFrom(node.GetType())).Select(node => node as IActionNodeViewModel).FirstOrDefault(node => node != null && node.Action.Name == actionName);
+            return stateNodes.SelectMany(node => node.Children.Values
+                .Where(node => typeof(IActionNodeViewModel).IsAssignableFrom(node.GetType()))
+                .Select(node => node as IActionNodeViewModel)
+                .Where(node => node != null && node.Action.Name == actionName)
+            );
         }
 
-        private static IWorkflowNodeViewModel? GetTransitionNodeFor(this IGraphViewModel graph, V1WorkflowActivity activity)
+        private static IEnumerable<IWorkflowNodeViewModel>? GetTransitionNodesFor(this IGraphViewModel graph, V1WorkflowActivity activity)
         {
-            var stateNode = (StateNodeViewModel)graph.GetStateNodeFor(activity)!;
+            var stateNodes = graph.GetStateNodesFor(activity);
             if (!activity.Metadata.TryGetValue("case", out var caseName))
                 return null;
-            return stateNode.Children.Values.OfType<DataCaseNodeViewModel>().FirstOrDefault(node => node != null && node.DataCaseName == caseName);
+            return stateNodes.SelectMany(node => 
+                node.Children.Values.OfType<DataCaseNodeViewModel>().Where(node => node != null && node.DataCaseName == caseName)
+            );
+        }
+
+        private static IEnumerable<IWorkflowNodeViewModel>? GetIterationNodesFor(this IGraphViewModel graph, V1WorkflowActivity activity)
+        {
+            var stateNodes = graph.GetStateNodesFor(activity);
+            return stateNodes.SelectMany(node => node.Children.Values.OfType<ForEachNodeViewModel>());
         }
 
 
