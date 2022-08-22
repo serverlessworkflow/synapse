@@ -66,11 +66,13 @@ namespace Synapse.Application.Services
         }
 
         /// <inheritdoc/>
-        public virtual async Task<IWorkflowProcess> StartProcessAsync(V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default)
+        public virtual async Task<IWorkflowProcess> StartProcessAsync(V1Workflow workflow, V1WorkflowInstance workflowInstance, CancellationToken cancellationToken = default)
         {
+            if (workflow == null)
+                throw new ArgumentNullException(nameof(workflow));
             if (workflowInstance == null)
                 throw new ArgumentNullException(nameof(workflowInstance));
-            var process = await this.Runtime.CreateProcessAsync(workflowInstance, cancellationToken);
+            var process = await this.Runtime.CreateProcessAsync(workflow, workflowInstance, cancellationToken);
             process.Logs.SubscribeAsync(async log => await this.OnProcessLogAsync(process, log));
             process.Exited += (sender, e) => this.OnProcessExitedAsync((IWorkflowProcess)sender!);
             process.Disposed += (sender, e) => this.OnProcessDisposed((IWorkflowProcess)sender!);
