@@ -156,11 +156,37 @@ namespace Synapse.Worker.Services.Processors
                     || (consumeEventActivities.All(p => p.Status == V1WorkflowActivityStatus.Completed) && consumeEventActivities.Count == this.Trigger.Events.Count && !this._Triggered))
                 {
                     this._Triggered = true;
-                    var input = this.Activity.Input.ToObject();
-                    foreach (var consumeEventActivity in consumeEventActivities
-                        .Where(p => p.Status == V1WorkflowActivityStatus.Completed && p.Output != null))
+                    var output = this.Activity.Input.ToObject();
+                    if (this.Trigger.DataFilter != null
+                        && this.Trigger.DataFilter.UseData)
                     {
-                        input = input.Merge(consumeEventActivity.Output.ToObject());
+                        foreach (var consumeEventActivity in consumeEventActivities
+                            .Where(p => p.Status == V1WorkflowActivityStatus.Completed && p.Output != null))
+                        {
+                            var eventOutput = consumeEventActivity.Output.ToObject();
+                            if (!string.IsNullOrWhiteSpace(this.Trigger.DataFilter.Data))
+                                eventOutput = await this.Context.EvaluateAsync(this.Trigger.DataFilter.Data, eventOutput, cancellationToken);
+                            if(string.IsNullOrWhiteSpace(this.Trigger.DataFilter.ToStateData))
+                            {
+                                output = output.Merge(eventOutput);
+                            }
+                            else
+                            {
+                                var expression = this.Trigger.DataFilter.ToStateData.Trim();
+                                var json = await this.JsonSerializer.SerializeAsync(eventOutput, cancellationToken);
+                                if (expression.StartsWith("${"))
+                                    expression = expression[2..^1];
+                                expression = $"{expression} = {json}";
+                                output = await this.Context.EvaluateAsync(expression, output, cancellationToken);
+                            }
+                        }
+                    }
+                    if(this.Trigger.Actions == null
+                        || !this.Trigger.Actions.Any())
+                    {
+                        await this.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, output), cancellationToken);
+                        await this.OnCompletedAsync(cancellationToken);
+                        return;
                     }
                     var metadata = new Dictionary<string, string>()
                     {
@@ -173,13 +199,13 @@ namespace Synapse.Worker.Services.Processors
                             foreach (ActionDefinition triggerAction in this.Trigger.Actions)
                             {
                                 metadata[V1WorkflowActivityMetadata.Action] = triggerAction.Name!;
-                                await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Action, await this.Context.FilterInputAsync(triggerAction, input!), metadata, this.Activity, cancellationToken);
+                                await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Action, await this.Context.FilterInputAsync(triggerAction, output!), metadata, this.Activity, cancellationToken);
                             }
                             break;
                         case ActionExecutionMode.Sequential:
                             var action = this.Trigger.Actions.First();
                             metadata[V1WorkflowActivityMetadata.Action] = action.Name!;
-                            await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Action, await this.Context.FilterInputAsync(action, input!), metadata, this.Activity, cancellationToken);
+                            await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Action, await this.Context.FilterInputAsync(action, output!), metadata, this.Activity, cancellationToken);
                             break;
                         default:
                             throw new NotSupportedException($"The specified {nameof(ActionExecutionMode)} '{this.Trigger.ActionMode}' is not supported");
