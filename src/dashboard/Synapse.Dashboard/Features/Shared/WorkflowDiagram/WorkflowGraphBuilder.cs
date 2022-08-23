@@ -105,6 +105,10 @@ namespace Synapse.Dashboard
                                     await stateNodeGroup.AddChildAsync(eventNode);
                                     await this.BuildEdgeBetween(graph, gatewayIn, eventNode);
                                     await this.BuildEdgeBetween(graph, eventNode, gatewayOut);
+                                    if (trigger.Actions == null || !trigger.Actions.Any())
+                                    {
+                                        await this.BuildEdgeBetween(graph, gatewayOut, lastNode);
+                                    }
                                 }
                                 foreach (var action in trigger.Actions)
                                 {

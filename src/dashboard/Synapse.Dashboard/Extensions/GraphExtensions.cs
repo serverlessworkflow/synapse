@@ -106,7 +106,7 @@ namespace Synapse.Dashboard
                 case V1WorkflowActivityType.Error:
                     throw new NotImplementedException(); //todo
                 case V1WorkflowActivityType.EventTrigger:
-                    throw new NotImplementedException(); //todo
+                    return graph.GetEventTriggerNodesFor(activity);
                 case V1WorkflowActivityType.Iteration:
                     return graph.GetIterationNodesFor(activity);
                 case V1WorkflowActivityType.ProduceEvent:
@@ -131,7 +131,7 @@ namespace Synapse.Dashboard
 
         private static IEnumerable<IWorkflowNodeViewModel>? GetActionNodesFor(this IGraphViewModel graph, V1WorkflowActivity activity)
         {
-            var stateNodes = graph.GetStateNodesFor(activity);               
+            var stateNodes = graph.GetStateNodesFor(activity);
             if (!activity.Metadata.TryGetValue("action", out var actionName))
                 throw new InvalidDataException($"The specified activity's metadata does not define a 'action' value");
             return stateNodes.SelectMany(node => node.Children.Values
@@ -155,6 +155,16 @@ namespace Synapse.Dashboard
         {
             var stateNodes = graph.GetStateNodesFor(activity);
             return stateNodes.SelectMany(node => node.Children.Values.OfType<ForEachNodeViewModel>());
+        }
+
+        private static IEnumerable<IWorkflowNodeViewModel>? GetEventTriggerNodesFor(this IGraphViewModel graph, V1WorkflowActivity activity)
+        {
+            var stateNodes = graph.GetStateNodesFor(activity);
+            if (!activity.Metadata.TryGetValue("trigger", out var eventName))
+                throw new InvalidDataException($"The specified activity's metadata does not define a 'trigger' value");
+            return stateNodes.SelectMany(node => node.Children.Values.OfType<EventNodeViewModel>()
+                .Where(eventNode => eventNode.RefName == eventName /* && eventNode.Kind == ServerlessWorkflow.Sdk.EventKind.Consumed */)
+            );
         }
 
 
