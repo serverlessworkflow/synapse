@@ -22,8 +22,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Neuroglia.Data" Version="2.0.1.69" />
-    <PackageReference Include="Neuroglia.Data.Kubernetes" Version="2.0.1.69" />
+    <PackageReference Include="Neuroglia.Data" Version="2.0.1.70" />
+    <PackageReference Include="Neuroglia.Data.Kubernetes" Version="2.0.1.70" />
   </ItemGroup>
 
   <ItemGroup>
