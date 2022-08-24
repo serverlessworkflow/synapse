@@ -50,6 +50,7 @@ namespace Synapse.Plugins.Persistence.MongoDB.Services
                         serializer = BsonSerializer.LookupSerializer<DynamicObject>();
                         break;
                     case DynamicValue val:
+                        toSerialize = val.ToObject();
                         serializer = BsonSerializer.LookupSerializer(DynamicHelper.GetClrType(val.Type));
                         break;
                 }
