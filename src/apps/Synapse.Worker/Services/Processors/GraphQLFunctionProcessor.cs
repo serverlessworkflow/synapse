@@ -129,7 +129,7 @@ namespace Synapse.Worker.Services.Processors
                 args = new Dictionary<string, object>();
             if (this.FunctionReference.Arguments == null)
                 return;
-            string json = JsonConvert.SerializeObject(this.FunctionReference.Arguments);
+            string json = JsonConvert.SerializeObject(this.FunctionReference.Arguments, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
             foreach (Match match in Regex.Matches(json, @"""\$\{.+?\}"""))
             {
                 var expression = match.Value[3..^2].Trim();
@@ -168,7 +168,7 @@ namespace Synapse.Worker.Services.Processors
                 return null!;
             var valueType = value.GetType();
             if (valueType.IsPrimitiveType())
-                return JsonConvert.SerializeObject(value);
+                return JsonConvert.SerializeObject(value, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
             if (value is IEnumerable enumerable
                 && !typeof(IDictionary<string, object>).IsAssignableFrom(valueType))
             {

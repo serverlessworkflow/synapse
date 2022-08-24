@@ -20,6 +20,7 @@ using MongoDB.Bson.IO;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
 using Neuroglia.Serialization;
+using Newtonsoft.Json;
 
 namespace Synapse.Plugins.Persistence.MongoDB.Services
 {
@@ -33,7 +34,7 @@ namespace Synapse.Plugins.Persistence.MongoDB.Services
         /// <inheritdoc/>
         public override void Serialize(BsonSerializationContext context, BsonSerializationArgs args, DynamicArray value)
         {
-            var jsonDocument = Newtonsoft.Json.JsonConvert.SerializeObject(value);
+            var jsonDocument = Newtonsoft.Json.JsonConvert.SerializeObject(value, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
             var bsonDocument = value == null ? null : BsonSerializer.Deserialize<BsonArray>(jsonDocument);
             var serializer = new BsonValueCSharpNullSerializer<BsonArray>(BsonSerializer.LookupSerializer<BsonArray>());
             serializer.Serialize(context, bsonDocument!);
