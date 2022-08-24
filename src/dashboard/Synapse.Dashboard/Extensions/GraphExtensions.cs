@@ -100,7 +100,7 @@ namespace Synapse.Dashboard
                 case V1WorkflowActivityType.Branch:
                     throw new NotImplementedException(); //todo
                 case V1WorkflowActivityType.ConsumeEvent:
-                    throw new NotImplementedException(); //todo
+                    return graph.GetConsumeEventNodesFor(activity);
                 case V1WorkflowActivityType.End:
                     return graph.Nodes.Values.OfType<EndNodeViewModel>();
                 case V1WorkflowActivityType.Error:
@@ -162,6 +162,16 @@ namespace Synapse.Dashboard
             var stateNodes = graph.GetStateNodesFor(activity);
             if (!activity.Metadata.TryGetValue("trigger", out var eventName))
                 throw new InvalidDataException($"The specified activity's metadata does not define a 'trigger' value");
+            return stateNodes.SelectMany(node => node.Children.Values.OfType<EventNodeViewModel>()
+                .Where(eventNode => eventNode.RefName == eventName /* && eventNode.Kind == ServerlessWorkflow.Sdk.EventKind.Consumed */)
+            );
+        }
+
+        private static IEnumerable<IWorkflowNodeViewModel>? GetConsumeEventNodesFor(this IGraphViewModel graph, V1WorkflowActivity activity)
+        {
+            var stateNodes = graph.GetStateNodesFor(activity);
+            if (!activity.Metadata.TryGetValue("event", out var eventName))
+                throw new InvalidDataException($"The specified activity's metadata does not define a 'event' value");
             return stateNodes.SelectMany(node => node.Children.Values.OfType<EventNodeViewModel>()
                 .Where(eventNode => eventNode.RefName == eventName /* && eventNode.Kind == ServerlessWorkflow.Sdk.EventKind.Consumed */)
             );
