@@ -167,7 +167,7 @@ namespace Synapse.Worker.Services.Processors
                 this.Payload = new Dictionary<string, object>();
             if (this.FunctionReference.Arguments == null)
                 return;
-            var json = JsonConvert.SerializeObject(this.FunctionReference.Arguments);
+            var json = JsonConvert.SerializeObject(this.FunctionReference.Arguments, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
             foreach (Match match in Regex.Matches(json, @"""\$\{.+?\}"""))
             {
                 var expression = match.Value[3..^2].Trim();

@@ -43,14 +43,14 @@ namespace Synapse.Plugins.Persistence.MongoDB.Services
             {
                 switch (value)
                 {
-                    case DynamicArray array:
+                    case DynamicArray:
                         serializer = BsonSerializer.LookupSerializer<DynamicArray>();
                         break;
-                    case DynamicObject obj:
+                    case DynamicObject:
                         serializer = BsonSerializer.LookupSerializer<DynamicObject>();
                         break;
                     case DynamicValue val:
-                        //todo
+                        serializer = BsonSerializer.LookupSerializer(DynamicHelper.GetClrType(val.Type));
                         break;
                 }
             }

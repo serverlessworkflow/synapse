@@ -15,6 +15,7 @@
  *
  */
 
+using Newtonsoft.Json;
 using Synapse.Integration.Events;
 using Synapse.Integration.Events.WorkflowActivities;
 using System.Reactive.Linq;
@@ -196,7 +197,7 @@ namespace Synapse.Worker.Services.Processors
                 if (action.UseResults())
                 {
                     var expression = action.ActionDataFilter?.ToStateData?.Trim();
-                    var json = await this.JsonSerializer.SerializeAsync(activity.Output, cancellationToken);
+                    var json = JsonConvert.SerializeObject(activity.Output, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
                     if (string.IsNullOrWhiteSpace(expression))
                     {
                         expression = json;

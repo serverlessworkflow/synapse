@@ -259,8 +259,8 @@ namespace Synapse.Worker.Services.Processors
                 this.Parameters = new Dictionary<string, object>();
             if (this.FunctionReference.Arguments == null)
                 return;
-            var jsonInput = JsonConvert.SerializeObject(this.Activity.Input!.ToObject()!);
-            var jsonArgs = JsonConvert.SerializeObject(this.FunctionReference.Arguments);
+            var jsonInput = JsonConvert.SerializeObject(this.Activity.Input!.ToObject()!, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
+            var jsonArgs = JsonConvert.SerializeObject(this.FunctionReference.Arguments, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
             foreach (Match match in Regex.Matches(jsonArgs, @"""\$\{.+?\}"""))
             {
                 var expression = match.Value[3..^2].Trim().Replace(@"\""", @"""");

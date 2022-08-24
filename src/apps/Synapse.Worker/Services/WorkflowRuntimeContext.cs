@@ -139,7 +139,7 @@ namespace Synapse.Worker.Services
                 var value = this.ExpressionEvaluator.Evaluate(function.Operation, data!, args);
                 var serializedValue = null as string;
                 if (value != null)
-                    serializedValue = JsonConvert.SerializeObject(value, Formatting.None);
+                    serializedValue = JsonConvert.SerializeObject(value, Formatting.None, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
                 runtimeExpression = runtimeExpression.Replace(functionMatch.Value, serializedValue);
             }
             return this.ExpressionEvaluator.Evaluate(runtimeExpression, data!, args);
