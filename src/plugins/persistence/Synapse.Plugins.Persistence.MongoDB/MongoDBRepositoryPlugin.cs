@@ -17,10 +17,10 @@
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
-using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using Neuroglia;
@@ -54,6 +54,7 @@ namespace Synapse.Plugins.Persistence.MongoDB
             ConfigureBsonSerialization();
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile(Path.Combine(Path.GetDirectoryName(typeof(MongoDBRepositoryPlugin).Assembly.Location)!, "settings.plugin.json"), true, true)
+                .AddEnvironmentVariables()
                 .Build();
             var mongoSettings = MongoClientSettings.FromConnectionString(configuration.GetConnectionString("MongoDB"));
             mongoSettings.LinqProvider = LinqProvider.V3;
