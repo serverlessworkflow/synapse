@@ -72,6 +72,8 @@ namespace Synapse.Domain.Models
         /// <summary>
         /// Gets an <see cref="IReadOnlyCollection{T}"/> containing the <see cref="V1Correlation"/>'s conditions
         /// </summary>
+        [Newtonsoft.Json.JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public IReadOnlyCollection<V1CorrelationCondition> Conditions => this._Conditions.AsReadOnly();
 
         /// <summary>
@@ -85,6 +87,8 @@ namespace Synapse.Domain.Models
         /// <summary>
         /// Gets an <see cref="IReadOnlyCollection{T}"/> containing the <see cref="V1CorrelationContext"/>s affected by the <see cref="V1Correlation"/>
         /// </summary>
+        [Newtonsoft.Json.JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public virtual IReadOnlyCollection<V1CorrelationContext> Contexts => this._Contexts.AsReadOnly();
 
         /// <summary>
