@@ -95,9 +95,13 @@ namespace Synapse.Integration.Models
                 Time = cloudEvent.Time?.DateTime,
                 Data = cloudEvent.Data == null ? null : Dynamic.FromObject(cloudEvent.Data)
             };
-            foreach (var extensionsAttribute in cloudEvent.ExtensionAttributes)
+            if(cloudEvent.ExtensionAttributes != null)
             {
-                e.Extensions.Add(extensionsAttribute.Name, Dynamic.FromObject(extensionsAttribute.Format(cloudEvent[extensionsAttribute]!)));
+                e.Extensions = new();
+                foreach (var extensionsAttribute in cloudEvent.ExtensionAttributes)
+                {
+                    e.Extensions.Add(extensionsAttribute.Name, Dynamic.FromObject(extensionsAttribute.Format(cloudEvent[extensionsAttribute]!)));
+                }
             }
             return e;
         }
@@ -117,13 +121,13 @@ namespace Synapse.Integration.Models
                 Time = this.Time,
                 DataContentType = this.DataContentType,
                 DataSchema = this.DataSchema,
-                Data = this.Data.ToObject()
+                Data = this.Data?.ToObject()
             };
             if(this.Extensions != null)
             {
                 foreach (var attribute in this.Extensions)
                 {
-                    e[attribute.Key] = attribute.Value;
+                    e[attribute.Key] = attribute.Value.ToObject();
                 }
             }
             return e;
