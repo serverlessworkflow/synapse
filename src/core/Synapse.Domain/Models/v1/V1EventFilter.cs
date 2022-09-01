@@ -72,7 +72,7 @@ namespace Synapse.Domain.Models
             {
                 if (!e.TryGetAttribute(attribute.Key, out var value))
                     return false;
-                if (!Regex.IsMatch(attribute.Value, value, RegexOptions.IgnoreCase))
+                if (!Regex.IsMatch(value, attribute.Value, RegexOptions.IgnoreCase))
                     return false;
             }
             return true;
