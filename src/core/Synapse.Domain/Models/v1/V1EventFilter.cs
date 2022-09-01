@@ -99,7 +99,7 @@ namespace Synapse.Domain.Models
                 {
                     var value = null as string;
                     if (!string.IsNullOrWhiteSpace(mapping.ContextAttributeValue)
-                        && !mapping.ContextAttributeValue.IsWorkflowExpression())
+                        && !mapping.ContextAttributeValue.IsRuntimeExpression())
                         value = mapping.ContextAttributeValue;
                     correlationMappings.Add(mapping.ContextAttributeName, value!);
                 }

@@ -110,7 +110,7 @@ namespace Synapse.Apis.Runtime.Grpc
         }
 
         /// <inheritdoc/>
-        public virtual async Task<GrpcApiResult> SetCorrelationMappingAsync(V1SetWorkflowInstanceCorrelationMappingCommand command, CallContext context = default)
+        public virtual async Task<GrpcApiResult<V1WorkflowInstance>> SetCorrelationMappingAsync(V1SetWorkflowInstanceCorrelationMappingCommand command, CallContext context = default)
         {
             return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(Mapper.Map<Application.Commands.WorkflowInstances.V1SetWorkflowInstanceCorrelationMappingCommand>(command), context.CancellationToken));
         }

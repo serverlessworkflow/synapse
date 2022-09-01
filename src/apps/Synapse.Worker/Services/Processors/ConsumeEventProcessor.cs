@@ -68,9 +68,19 @@ namespace Synapse.Worker.Services.Processors
         protected Timer IdleTimer { get; private set; } = null!;
 
         /// <inheritdoc/>
-        protected override Task InitializeAsync(CancellationToken cancellationToken)
+        protected override async Task InitializeAsync(CancellationToken cancellationToken)
         {
-            return Task.CompletedTask;
+            if (this.EventDefinition.Correlations != null)
+            {
+                foreach(var correlation in this.EventDefinition.Correlations)
+                {
+                    var value = correlation.ContextAttributeValue;
+                    if (!string.IsNullOrWhiteSpace(value)
+                        && value.IsRuntimeExpression())
+                        value = (await this.Context.EvaluateAsync(value, this.Activity.Input.ToObject()!, cancellationToken))!.ToString();
+                    await this.Context.Workflow.SetCorrelationMappingAsync(correlation.ContextAttributeName, value!, cancellationToken);
+                }
+            }
         }
 
         /// <inheritdoc/>
