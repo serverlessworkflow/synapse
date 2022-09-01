@@ -85,7 +85,7 @@ namespace Synapse.Worker.Services
         }
 
         /// <inheritdoc/>
-        public virtual async Task<bool> TryCorrelateAsync(V1Event e, IEnumerable<string> mappingKeys, CancellationToken cancellationToken = default)
+        public virtual async Task<bool> TryCorrelateAsync(V1Event e, IEnumerable<string>? mappingKeys, CancellationToken cancellationToken = default)
         {
             if (e == null)
                 throw new ArgumentNullException(nameof(e));
