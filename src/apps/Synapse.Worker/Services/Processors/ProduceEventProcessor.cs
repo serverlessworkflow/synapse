@@ -87,7 +87,7 @@ namespace Synapse.Worker.Services.Processors
                         }
                         else
                         {
-                            if (value.IsWorkflowExpression())
+                            if (value.IsRuntimeExpression())
                                 value = (await this.Context.EvaluateAsync(value, await this.Context.Workflow.GetActivityStateDataAsync(this.Activity, cancellationToken), cancellationToken)!)!.ToString();
                             await this.Context.Workflow.SetCorrelationMappingAsync(correlation.ContextAttributeName, value!, cancellationToken);
                         }

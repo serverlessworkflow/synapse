@@ -86,7 +86,7 @@ namespace Synapse.Worker.Services
         /// <param name="contextAttributes">An <see cref="IEnumerable{T}"/> containing the context attributes used to correlate the specified <see cref="V1Event"/></param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A boolean indicating whether or not the specified <see cref="V1Event"/> could be correlated</returns>
-        Task<bool> TryCorrelateAsync(V1Event e, IEnumerable<string> contextAttributes, CancellationToken cancellationToken = default);
+        Task<bool> TryCorrelateAsync(V1Event e, IEnumerable<string>? contextAttributes, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Gets all the activities (including non-operative ones) of the current workflow

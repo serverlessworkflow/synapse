@@ -29,7 +29,7 @@ namespace Synapse
         /// </summary>
         /// <param name="text">The string to test</param>
         /// <returns>A boolean indicating whether or not the string is a workflow expression</returns>
-        public static bool IsWorkflowExpression(this string text)
+        public static bool IsRuntimeExpression(this string text)
         {
             if (string.IsNullOrWhiteSpace(text))
                 return false;

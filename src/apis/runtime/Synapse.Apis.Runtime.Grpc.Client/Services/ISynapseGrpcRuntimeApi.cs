@@ -78,7 +78,7 @@ namespace Synapse.Apis.Runtime.Grpc
         /// <param name="context">The current <see cref="CallContext"/></param>
         /// <returns>A new object that describes the result of the operation</returns>
         [OperationContract]
-        Task<GrpcApiResult> SetCorrelationMappingAsync(V1SetWorkflowInstanceCorrelationMappingCommand command, CallContext context = default);
+        Task<GrpcApiResult<V1WorkflowInstance>> SetCorrelationMappingAsync(V1SetWorkflowInstanceCorrelationMappingCommand command, CallContext context = default);
 
         /// <summary>
         /// Gets the activities (including non-operative ones) of the specified workflow instance

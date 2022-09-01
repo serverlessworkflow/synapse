@@ -64,7 +64,10 @@ namespace Synapse.Worker.Services
             if (oauthProperties == null)
                 throw new ArgumentNullException(nameof(oauthProperties));
             var tokenKey = $"{oauthProperties.ClientId}@{oauthProperties.Authority}";
-            var properties = oauthProperties.ToDictionary();
+            var json = await this.JsonSerializer.SerializeAsync(oauthProperties, cancellationToken);
+            var properties = await this.JsonSerializer.DeserializeAsync<Dictionary<string, string>>(json, cancellationToken);
+            properties = properties.Where(kvp => !string.IsNullOrWhiteSpace(kvp.Value)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            properties.Remove("authority");
             if(this.Tokens.TryGetValue(tokenKey, out var token)
                 && token != null)
             {
@@ -84,7 +87,7 @@ namespace Synapse.Worker.Services
                 Content = new FormUrlEncodedContent(properties)
             };
             using var response = await this.HttpClient.SendAsync(request, cancellationToken);
-            var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
             if (!response.IsSuccessStatusCode)
             {
                 this.Logger.LogError("An error occured while generating a new JWT token: {details}", json);

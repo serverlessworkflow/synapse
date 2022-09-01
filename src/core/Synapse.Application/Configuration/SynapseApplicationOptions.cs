@@ -30,6 +30,9 @@ namespace Synapse.Application.Configuration
         public SynapseApplicationOptions()
         {
             var env = EnvironmentVariables.SkipCertificateValidation.Value;
+
+            var x = bool.TryParse(env, out _);
+
             if (!string.IsNullOrWhiteSpace(env)
                 && bool.TryParse(env, out var skipCertificateValidation))
                 this.SkipCertificateValidation = skipCertificateValidation;
