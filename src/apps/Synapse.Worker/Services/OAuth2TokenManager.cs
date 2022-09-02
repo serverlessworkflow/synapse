@@ -15,6 +15,8 @@
  *
  */
 
+using IdentityModel.Client;
+
 namespace Synapse.Worker.Services
 {
 
@@ -82,7 +84,8 @@ namespace Synapse.Worker.Services
                     return token;
                 }
             }
-            using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(oauthProperties.Authority, "/connect/token/"))
+            var discoveryDocument = await this.HttpClient.GetDiscoveryDocumentAsync(oauthProperties.Authority.ToString(), cancellationToken);
+            using var request = new HttpRequestMessage(HttpMethod.Post, discoveryDocument.TokenEndpoint)
             {
                 Content = new FormUrlEncodedContent(properties)
             };

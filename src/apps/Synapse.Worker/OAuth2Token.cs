@@ -29,7 +29,7 @@ namespace Synapse.Worker
         /// </summary>
         protected OAuth2Token()
         {
-
+            this.CreatedAt = DateTime.UtcNow;
         }
 
         /// <summary>
@@ -38,23 +38,45 @@ namespace Synapse.Worker
         public virtual DateTime CreatedAt { get; protected set; }
 
         /// <summary>
+        /// Gets the OAUTH2 token type
+        /// </summary>
+        [Newtonsoft.Json.JsonProperty("token_type")]
+        [System.Text.Json.Serialization.JsonPropertyName("token_type")]
+        public virtual string? TokenType { get; protected set; }
+
+        /// <summary>
+        /// Gets the OAUTH2 token id
+        /// </summary>
+        [Newtonsoft.Json.JsonProperty("token_id")]
+        [System.Text.Json.Serialization.JsonPropertyName("token_id")]
+        public virtual string? TokenId { get; protected set; }
+
+        /// <summary>
         /// Gets the OAUTH2 access token
         /// </summary>
+        [Newtonsoft.Json.JsonProperty("access_token")]
+        [System.Text.Json.Serialization.JsonPropertyName("access_token")]
         public virtual string? AccessToken { get; protected set; }
 
         /// <summary>
         /// Gets the OAUTH2 refresh token
         /// </summary>
+        [Newtonsoft.Json.JsonProperty("refresh_token")]
+        [System.Text.Json.Serialization.JsonPropertyName("refresh_token")]
         public virtual string? RefreshToken { get; protected set; }
 
         /// <summary>
         /// Gets the <see cref="OAuth2Token"/> Time To Live, in seconds
         /// </summary>
+        [Newtonsoft.Json.JsonProperty("expires_in")]
+        [System.Text.Json.Serialization.JsonPropertyName("expires_in")]
         public virtual int Ttl { get; protected set; }
 
         /// <summary>
         /// Gets the UTC date and time at which the <see cref="OAuth2Token"/> expires
         /// </summary>
+        [Newtonsoft.Json.JsonProperty("expires_on")]
+        [System.Text.Json.Serialization.JsonPropertyName("expires_on")]
         public virtual DateTime ExpiresAt { get; protected set; }
 
         /// <summary>
