@@ -22,6 +22,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Neuroglia;
 using Neuroglia.K8s;
+using Newtonsoft.Json;
 using Synapse.Application.Configuration;
 using Synapse.Application.Services;
 using Synapse.Domain.Models;
@@ -107,9 +108,9 @@ namespace Synapse.Runtime.Kubernetes.Services
                 throw new ArgumentNullException(nameof(workflow));
             if (workflowInstance == null)
                 throw new ArgumentNullException(nameof(workflowInstance));
-            var pod = this.Options.WorkerPod;
-            if (pod == null)
+            if (this.Options.WorkerPod == null)
                 throw new Exception($"The '{nameof(KubernetesRuntimeOptions)}.{nameof(KubernetesRuntimeOptions.WorkerPod)}' property must be set and cannot be null");
+            var pod = JsonConvert.DeserializeObject<V1Pod>(JsonConvert.SerializeObject(this.Options.WorkerPod))!;
             if (pod.Metadata == null)
                 pod.Metadata = new();
             pod.Metadata.Name = workflowInstance.Id;
