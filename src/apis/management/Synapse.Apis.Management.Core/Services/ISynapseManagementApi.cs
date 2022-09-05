@@ -79,6 +79,16 @@ namespace Synapse.Apis.Management
         Task<List<V1Workflow>> GetWorkflowsAsync(string query, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Gets the id of the <see cref="V1Workflow"/> to archive
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1Workflow"/> to archive</param>
+        /// <param name="version">The version of the <see cref="V1Workflow"/> to achieve</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new <see cref="Stream"/> containing the archived <see cref="V1Workflow"/></returns>
+        [OperationContract]
+        Task<Stream> ArchiveWorkflowAsync(string id, string? version = null, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Deletes the <see cref="V1Workflow"/> with the specified id
         /// </summary>
         /// <param name="id">The id of the <see cref="V1Workflow"/> to delete</param>
