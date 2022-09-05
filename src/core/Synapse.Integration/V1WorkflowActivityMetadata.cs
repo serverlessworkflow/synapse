@@ -20,6 +20,10 @@
         /// </summary>
         public const string Case = "case";
         /// <summary>
+        /// Gets the name of the 'compensation' metadata, used to define the compensation to perform upon transition
+        /// </summary>
+        public const string Compensation = "compensation";
+        /// <summary>
         /// Gets the name of the 'event' metadata, used to store the name of the action the activity belongs to
         /// </summary>
         public const string Event = "event";

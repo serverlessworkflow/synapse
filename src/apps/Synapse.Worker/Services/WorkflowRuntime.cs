@@ -347,7 +347,7 @@ namespace Synapse.Worker.Services
                     processor.OfType<V1WorkflowActivityCompletedIntegrationEvent>().SubscribeAsync
                     (
                         async e => await this.OnStateCompletedAsync(stateProcessor, e),
-                        async ex => await this.OnActivityProcessingErrorAsync(stateProcessor, ex),
+                        async ex => await this.OnStateProcessingErrorAsync(stateProcessor, ex),
                         async () => await this.OnActivityProcessingCompletedAsync(stateProcessor)
                     );
                     break;
@@ -498,6 +498,33 @@ namespace Synapse.Worker.Services
         }
 
         /// <summary>
+        /// Handles an <see cref="Exception"/> that has occured during the processing of a <see cref="StateDefinition"/>
+        /// </summary>
+        /// <param name="processor">The <see cref="IWorkflowActivityProcessor"/> that has thrown the <see cref="Exception"/> to handle</param>
+        /// <param name="ex">The <see cref="Exception"/> to handle</param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        protected virtual async Task OnStateProcessingErrorAsync(IStateProcessor processor, Exception ex)
+        {
+            if (processor.State.CompensatedBy != null
+             || !string.IsNullOrWhiteSpace(processor.State.CompensatedBy))
+            {
+                var metadata = new Dictionary<string, string>()
+                {
+                    { V1WorkflowActivityMetadata.State, processor.State.Name },
+                    { V1WorkflowActivityMetadata.Compensation, processor.State.CompensatedBy }
+                };
+                await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Transition, await this.Context.Workflow.GetActivityStateDataAsync(processor.Activity, this.CancellationToken), metadata, null, this.CancellationToken);
+            }
+            foreach (var activity in await this.Context.Workflow.GetOperativeActivitiesAsync(this.CancellationToken))
+            {
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                this.CreateActivityProcessor(activity);
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                await this.OnActivityProcessingCompletedAsync(processor);
+            }
+        }
+
+        /// <summary>
         /// Handles the next <see cref="V1WorkflowActivityCompletedIntegrationEvent"/>
         /// </summary>
         /// <param name="processor">The <see cref="IWorkflowActivityProcessor"/> that has produced an <see cref="V1WorkflowActivityCompletedIntegrationEvent"/></param>
@@ -505,8 +532,11 @@ namespace Synapse.Worker.Services
         /// <returns>A new awaitable <see cref="Task"/></returns>
         protected virtual async Task OnTransitionCompletedAsync(ITransitionProcessor processor, V1WorkflowActivityCompletedIntegrationEvent e)
         {
-            if (!this.Context.Workflow.Definition.TryGetState(processor.Transition.NextState, out StateDefinition nextState))
-                throw new NullReferenceException($"Failed to find a state with name '{processor.Transition.NextState}' in workflow '{this.Context.Workflow.Definition.Id} {this.Context.Workflow.Definition.Version}'");
+            var nextStateName = processor.Transition.NextState;
+            if (processor.Activity.Metadata.TryGetValue(V1WorkflowActivityMetadata.Compensation, out var compensateWith))
+                nextStateName = compensateWith;
+            if (!this.Context.Workflow.Definition.TryGetState(nextStateName, out StateDefinition nextState))
+                throw new NullReferenceException($"Failed to find a state with name '{nextStateName}' in workflow '{this.Context.Workflow.Definition.Id} {this.Context.Workflow.Definition.Version}'");
             await this.Context.Workflow.TransitionToAsync(nextState, this.CancellationToken);
             var metadata = new Dictionary<string, string>() { { V1WorkflowActivityMetadata.State, nextState.Name } };
             var activity = await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.State, e.Output, metadata, null, this.CancellationToken);
