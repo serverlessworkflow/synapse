@@ -132,9 +132,10 @@ namespace Synapse.Worker.Services.Processors
                     using HttpResponseMessage response = await this.HttpClient.SendAsync(request, cancellationToken);
                     if (!response.IsSuccessStatusCode)
                     {
+                        var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
                         this.Logger.LogInformation("Failed to retrieve the Async API document at location '{uri}'. The remote server responded with a non-success status code '{statusCode}'.", asyncApiUri, response.StatusCode);
-                        this.Logger.LogDebug("Response content:/r/n{responseContent}", response.Content == null ? "None" : await response.Content.ReadAsStringAsync(cancellationToken));
-                        response.EnsureSuccessStatusCode();
+                        this.Logger.LogDebug("Response content:/r/n{responseContent}", response.Content == null ? "None" : responseContent);
+                        response.EnsureSuccessStatusCode(responseContent);
                     }
                     using Stream responseStream = await response.Content!.ReadAsStreamAsync(cancellationToken)!;
                     this.Document = await this.AsyncApiReader.ReadAsync(responseStream, cancellationToken);

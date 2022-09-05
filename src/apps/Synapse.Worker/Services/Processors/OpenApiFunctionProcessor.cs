@@ -150,13 +150,14 @@ namespace Synapse.Worker.Services.Processors
                 using (HttpRequestMessage request = new(HttpMethod.Get, openApiUri))
                 {
                     using HttpResponseMessage response = await this.HttpClient.SendAsync(request, cancellationToken);
+                    var responseContent = response.Content == null ? null : await response.Content.ReadAsStringAsync(cancellationToken);
                     if (!response.IsSuccessStatusCode)
                     {
                         this.Logger.LogInformation("Failed to retrieve the Open API document at location '{uri}'. The remote server responded with a non-success status code '{statusCode}'.", openApiUri, response.StatusCode);
-                        this.Logger.LogDebug("Response content:\r\n{responseContent}", response.Content == null ? "None" : await response.Content.ReadAsStringAsync(cancellationToken));
-                        response.EnsureSuccessStatusCode();
+                        this.Logger.LogDebug("Response content:\r\n{responseContent}", responseContent ?? "None");
+                        response.EnsureSuccessStatusCode(responseContent);
                     }
-                    using Stream responseStream = await response.Content!.ReadAsStreamAsync(cancellationToken)!;
+                    using var responseStream = await response.Content!.ReadAsStreamAsync(cancellationToken)!;
                     this.Document = new OpenApiStreamReader().Read(responseStream, out var diagnostic);
                 }
                 var operation = this.Document.Paths
@@ -342,7 +343,7 @@ namespace Synapse.Worker.Services.Processors
                     {
                         this.Logger.LogInformation("Failed to execute the Open API operation '{operationId}' at '{uri}'. The remote server responded with a non-success status code '{statusCode}'.", this.Operation.OperationId, response.RequestMessage!.RequestUri, response.StatusCode);
                         this.Logger.LogDebug("Response content:\r\n{responseContent}", contentString ?? "None");
-                        response.EnsureSuccessStatusCode();
+                        response.EnsureSuccessStatusCode(contentString);
                     }
                     if (rawContent!= null)
                     {

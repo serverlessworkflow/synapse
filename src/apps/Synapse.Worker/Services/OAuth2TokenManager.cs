@@ -94,7 +94,7 @@ namespace Synapse.Worker.Services
             if (!response.IsSuccessStatusCode)
             {
                 this.Logger.LogError("An error occured while generating a new JWT token: {details}", json);
-                response.EnsureSuccessStatusCode();
+                response.EnsureSuccessStatusCode(json);
             }
             token = await this.JsonSerializer.DeserializeAsync<OAuth2Token>(json, cancellationToken);
             this.Tokens[tokenKey] = token;
