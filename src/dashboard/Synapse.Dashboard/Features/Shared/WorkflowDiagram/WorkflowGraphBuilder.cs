@@ -126,21 +126,41 @@ namespace Synapse.Dashboard
                         }
                     case ForEachStateDefinition foreachState:
                         {
-                            firstNode = this.BuildForEachNode(foreachState);
-                            lastNode = this.BuildForEachNode(foreachState);
-                            await stateNodeGroup.AddChildAsync(firstNode);
-                            await this.BuildEdgeBetween(graph, previousNode, firstNode);
-                            foreach (var action in foreachState.Actions)
+                            switch(foreachState.Mode)
                             {
-                                var actionNodes = await this.BuildActionNodes(graph, action);
-                                foreach (var actionNode in actionNodes)
-                                {
-                                    await stateNodeGroup.AddChildAsync(actionNode);
-                                }
-                                await this.BuildEdgeBetween(graph, firstNode, actionNodes.First());
-                                await this.BuildEdgeBetween(graph, actionNodes.Last(), lastNode);
+                                case ActionExecutionMode.Parallel:
+                                    firstNode = this.BuildForEachNode(foreachState);
+                                    lastNode = this.BuildForEachNode(foreachState);
+                                    await stateNodeGroup.AddChildAsync(firstNode);
+                                    await this.BuildEdgeBetween(graph, previousNode, firstNode);
+                                    foreach (var action in foreachState.Actions)
+                                    {
+                                        var actionNodes = await this.BuildActionNodes(graph, action);
+                                        foreach (var actionNode in actionNodes)
+                                        {
+                                            await stateNodeGroup.AddChildAsync(actionNode);
+                                        }
+                                        await this.BuildEdgeBetween(graph, firstNode, actionNodes.First());
+                                        await this.BuildEdgeBetween(graph, actionNodes.Last(), lastNode);
+                                    }
+                                    await stateNodeGroup.AddChildAsync(lastNode);
+                                    break;
+                                case ActionExecutionMode.Sequential:
+                                    lastNode = previousNode;
+                                    foreach (var action in foreachState.Actions)
+                                    {
+                                        var actionNodes = await this.BuildActionNodes(graph, action);
+                                        foreach (var actionNode in actionNodes)
+                                        {
+                                            await stateNodeGroup.AddChildAsync(actionNode);
+                                        }
+                                        await this.BuildEdgeBetween(graph, lastNode, actionNodes.First());
+                                        lastNode = actionNodes.Last();
+                                    }
+                                    break;
+                                default:
+                                    throw new Exception($"The specified action execution mode '{foreachState.Mode}' is not supported for a 'foreach' state");
                             }
-                            await stateNodeGroup.AddChildAsync(lastNode);
                             break;
                         }
                     case InjectStateDefinition injectState:
@@ -185,7 +205,7 @@ namespace Synapse.Dashboard
                                     }
                                     break;
                                 default:
-                                    throw new Exception($"The specified action execution mode '{operationState.ActionMode}' is not supported");
+                                    throw new Exception($"The specified action execution mode '{operationState.ActionMode}' is not supported for an 'operation' state");
                             }
                             break;
                         }
