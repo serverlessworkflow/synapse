@@ -197,7 +197,8 @@ namespace Synapse.Worker.Services.Processors
                                 if (processor.Activity.Metadata.TryGetValue(V1WorkflowActivityMetadata.Action, out var currentActionName)
                                      && this.State.TryGetNextAction(currentActionName, out ActionDefinition nextAction))
                                 {
-                                    var input = await this.Context.FilterInputAsync(nextAction, output, cancellationToken);
+                                    var input = (object)this.Activity.Input.ToObject().Merge(output);
+                                    input = await this.Context.FilterInputAsync(nextAction, input, cancellationToken);
                                     var metadata = new Dictionary<string, string>()
                                     {
                                         { V1WorkflowActivityMetadata.State, this.State.Name! },

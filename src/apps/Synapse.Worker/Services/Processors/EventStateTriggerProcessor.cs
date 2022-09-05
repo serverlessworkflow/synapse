@@ -244,13 +244,14 @@ namespace Synapse.Worker.Services.Processors
             {
                 if (this.Trigger.TryGetNextAction(processor.Action.Name!, out ActionDefinition action))
                 {
+                    var input = this.Activity.Input.ToObject().Merge(e.Output);
                     var metadata = new Dictionary<string, string>()
                     {
                         { V1WorkflowActivityMetadata.State, this.State.Name! },
                         { V1WorkflowActivityMetadata.Trigger, this.State.Triggers.IndexOf(this.Trigger).ToString() },
                         { V1WorkflowActivityMetadata.Action, action.Name! }
                     };
-                    var activity = await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Action, await this.Context.FilterInputAsync(action, e.Output, cancellationToken), metadata, this.Activity, cancellationToken);
+                    var activity = await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Action, await this.Context.FilterInputAsync(action, input, cancellationToken), metadata, this.Activity, cancellationToken);
                     var subProcessor = this.CreateProcessorFor(activity);
                     await subProcessor.ProcessAsync(cancellationToken);
                 }
