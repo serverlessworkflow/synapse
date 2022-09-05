@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
-	<VersionPrefix>0.1.22</VersionPrefix>
+	<VersionPrefix>0.1.23</VersionPrefix>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
 	<Authors>The Synapse Authors</Authors>
 	<Company>Cloud Native Computing Foundation</Company>
@@ -161,6 +161,9 @@
     </Compile>
     <Compile Update="Commands\WorkflowInstances\v1\Generated\V1TryCorrelateWorkflowInstanceCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\WorkflowInstances\v1\V1TryCorrelateWorkflowInstanceCommand.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Commands\Workflows\v1\Generated\V1ArchiveWorkflowCommand.cs">
+      <CustomToolNamespace>..\Synapse.Application\Commands\Workflows\v1\V1ArchiveWorkflowCommand.cs</CustomToolNamespace>
     </Compile>
     <Compile Update="Commands\Workflows\v1\Generated\V1CreateWorkflowCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\Workflows\v1\V1CreateWorkflowCommand.cs</CustomToolNamespace>

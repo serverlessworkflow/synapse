@@ -68,6 +68,15 @@ namespace Synapse.Apis.Management.Grpc
         [OperationContract]
         Task<GrpcApiResult<List<V1Workflow>>> GetWorkflowsAsync(string? query = null, CallContext context = default);
 
+        /// <summary>
+        /// Gets the id of the <see cref="V1Workflow"/> to archive
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1Workflow"/> to archive</param>
+        /// <param name="version">The version of the <see cref="V1Workflow"/> to archive</param>
+        /// <param name="context">The current <see cref="CallContext" /></param>
+        /// <returns>A new <see cref="Stream"/> containing the archived <see cref="V1WorkflowInstance"/></returns>
+        [OperationContract]
+        Task<GrpcApiResult<byte[]>> ArchiveWorkflowAsync(string id, string? version = null, CallContext context = default);
 
         /// <summary>
         /// Deletes the workflow with the specified id

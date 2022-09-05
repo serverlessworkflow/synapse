@@ -95,6 +95,15 @@ namespace Synapse.Apis.Management.Grpc
         }
 
         /// <inheritdoc/>
+        public virtual async Task<Stream> ArchiveWorkflowAsync(string id, string? version = null, CancellationToken cancellationToken = default)
+        {
+            var result = await this.Adapter.ArchiveWorkflowAsync(id, version, cancellationToken);
+            if (!result.Succeeded)
+                throw new SynapseApiException(result);
+            return new MemoryStream(result.Data!);
+        }
+
+        /// <inheritdoc/>
         public virtual async Task DeleteWorkflowAsync(string id, CancellationToken cancellationToken = default)
         {
             await this.Adapter.DeleteWorkflowAsync(id, cancellationToken);

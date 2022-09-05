@@ -15,7 +15,7 @@
  *
  */
 
-using Newtonsoft.Json;
+using System.Net.Mime;
 
 namespace Synapse.Apis.Management.Http.Controllers
 {
@@ -130,6 +130,26 @@ namespace Synapse.Apis.Management.Http.Controllers
         public async Task<IActionResult> Patch([FromBody] Integration.Commands.Generic.V1PatchCommand command, CancellationToken cancellationToken)
         {
             return this.Process(await this.Mediator.ExecuteAsync(this.Mapper.Map<Application.Commands.Generic.V1PatchCommand<Domain.Models.V1Workflow, string>>(command), cancellationToken));
+        }
+
+        /// <summary>
+        /// Donwloads the archive of an existing workflow
+        /// </summary>
+        /// <param name="id">The id of the workflow to archive</param>
+        /// <param name="version">The version of the workflow to archive</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new <see cref="IActionResult"/></returns>
+        [HttpGet("{id}/archive")]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.Forbidden)]
+        public async Task<IActionResult> Archive(string id, string? version, CancellationToken cancellationToken)
+        {
+            var result = await this.Mediator.ExecuteAsync(new Application.Commands.Workflows.V1ArchiveWorkflowCommand(id, version), cancellationToken);
+            if (!result.Succeeded)
+                return this.Process(result);
+            return this.File(result.Data, MediaTypeNames.Application.Zip, $"{id}.zip");
         }
 
         /// <summary>

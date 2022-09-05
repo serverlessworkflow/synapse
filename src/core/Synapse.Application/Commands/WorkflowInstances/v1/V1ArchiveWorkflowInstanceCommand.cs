@@ -144,8 +144,9 @@ namespace Synapse.Application.Commands.WorkflowInstances
                 }
             }
             var processesDirectory = new DirectoryInfo(Path.Combine(directory.FullName, "processes"));
-            if (!processesDirectory.Exists)
-                processesDirectory.Create();
+            if (processesDirectory.Exists)
+                processesDirectory.Delete(true);
+            processesDirectory.Create();
             foreach (var processId in workflowInstance.Sessions.Select(s => s.ProcessId))
             {
                 var process = await this.WorkflowProcesses.FindAsync(processId, cancellationToken);
@@ -158,7 +159,7 @@ namespace Synapse.Application.Commands.WorkflowInstances
             ZipFile.CreateFromDirectory(directory.FullName, archiveFilePath, CompressionLevel.Fastest, true);
             using var fileStream = File.OpenRead(archiveFilePath);
             var stream = new MemoryStream();
-            await fileStream.CopyToAsync(stream);
+            await fileStream.CopyToAsync(stream, cancellationToken);
             await stream.FlushAsync(cancellationToken);
             stream.Position = 0;
             return this.Ok(stream);
