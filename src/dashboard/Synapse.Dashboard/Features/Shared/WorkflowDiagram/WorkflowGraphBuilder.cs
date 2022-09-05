@@ -270,6 +270,10 @@ namespace Synapse.Dashboard
                                                 throw new Exception($"Failed to find a state with name '{nextStateName}' in definition '{definition.GetUniqueIdentifier()}");
                                             var nextStateNode = await this.BuildStateNodes(definition, graph, nextState, endNode, defaultCaseNode);
                                             lastNode = nextStateNode.Children.Values.OfType<NodeViewModel>().Last();
+                                            if (string.IsNullOrWhiteSpace(state.TransitionToStateName) && state.Transition == null)
+                                            {
+                                                await this.BuildEdgeBetween(graph, defaultCaseNode, lastNode);
+                                            }
                                         }
                                     }
                                     break;
@@ -319,6 +323,10 @@ namespace Synapse.Dashboard
                                                 throw new Exception($"Failed to find a state with name '{nextStateName}' in definition '{definition.GetUniqueIdentifier()}");
                                             var nextStateNode = await this.BuildStateNodes(definition, graph, nextState, endNode, defaultCaseNode);
                                             lastNode = nextStateNode.Children.Values.OfType<NodeViewModel>().Last();
+                                            if (string.IsNullOrWhiteSpace(state.TransitionToStateName) && state.Transition == null)
+                                            {
+                                                await this.BuildEdgeBetween(graph, defaultCaseNode, lastNode);
+                                            }
                                         }
                                     }
                                     break;
