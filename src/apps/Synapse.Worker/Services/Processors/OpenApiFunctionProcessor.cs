@@ -153,7 +153,7 @@ namespace Synapse.Worker.Services.Processors
                     if (!response.IsSuccessStatusCode)
                     {
                         this.Logger.LogInformation("Failed to retrieve the Open API document at location '{uri}'. The remote server responded with a non-success status code '{statusCode}'.", openApiUri, response.StatusCode);
-                        this.Logger.LogDebug("Response content:/r/n{responseContent}", response.Content == null ? "None" : await response.Content.ReadAsStringAsync(cancellationToken));
+                        this.Logger.LogDebug("Response content:\r\n{responseContent}", response.Content == null ? "None" : await response.Content.ReadAsStringAsync(cancellationToken));
                         response.EnsureSuccessStatusCode();
                     }
                     using Stream responseStream = await response.Content!.ReadAsStreamAsync(cancellationToken)!;
@@ -341,7 +341,7 @@ namespace Synapse.Worker.Services.Processors
                     if (!response.IsSuccessStatusCode)
                     {
                         this.Logger.LogInformation("Failed to execute the Open API operation '{operationId}' at '{uri}'. The remote server responded with a non-success status code '{statusCode}'.", this.Operation.OperationId, response.RequestMessage!.RequestUri, response.StatusCode);
-                        this.Logger.LogDebug("Response content:/r/n{responseContent}", contentString ?? "None");
+                        this.Logger.LogDebug("Response content:\r\n{responseContent}", contentString ?? "None");
                         response.EnsureSuccessStatusCode();
                     }
                     if (rawContent!= null)
