@@ -24,11 +24,9 @@
  
 @code {
 
-    [Parameter]
-    public string Id { get; set; } = Guid.NewGuid().ToString("N").ToLowerInvariant();
+    [Parameter] public string Id { get; set; } = Guid.NewGuid().ToString("N").ToLowerInvariant();
 
-    [Parameter]
-    public ChartConfiguration Configuration { get; set; } = null!;
+    [Parameter] public ChartConfiguration Configuration { get; set; } = null!;
     protected ChartConfiguration configuration { get; set; } = null!;
 
     protected ElementReference? canvasRef { get; set; }

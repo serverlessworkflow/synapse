@@ -19,23 +19,24 @@
 
 
 @if (graph != null) {
-    <DagreGraph @ref="dagre" Graph="graph" />
+    <DagreGraph @ref="dagre" Graph="graph" OnMouseUp="async (GraphEventArgs<MouseEventArgs> e) => await this.OnMouseUp.InvokeAsync(e)" />
 }
 
 @code {
 
-    [Parameter]
-    public WorkflowDefinition WorkflowDefinition { get; set; } = null!;
+    [Parameter] public WorkflowDefinition WorkflowDefinition { get; set; } = null!;
     protected WorkflowDefinition workflowDefinition { get; set; } = null!;
 
-    [Parameter]
-    public bool EditMode { get; set; } = false;
+    [Parameter] public bool EditMode { get; set; } = false;
+
+    [Parameter] public EventCallback<GraphEventArgs<MouseEventArgs>> OnMouseUp { get; set; }
 
     protected IGraphViewModel? graph { get; set; }
     protected DagreGraph? dagre { get; set;  }
 
     protected override async Task OnParametersSetAsync()
     {
+        Console.WriteLine("OnParametersSetAsync");
         await base.OnParametersSetAsync();
         if (this.WorkflowDefinition != null && this.WorkflowDefinition != this.workflowDefinition) {
             this.workflowDefinition = this.WorkflowDefinition;

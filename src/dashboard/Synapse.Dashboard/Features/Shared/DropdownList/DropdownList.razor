@@ -33,26 +33,20 @@
 @code
 {
 
-    [Parameter]
-    public EventCallback<bool> OnToggleExpand { get; set; }
+    [Parameter] public EventCallback<bool> OnToggleExpand { get; set; }
 
-    [Parameter]
-    public EventCallback<TItem> OnSelectItem { get; set; }
+    [Parameter] public EventCallback<TItem> OnSelectItem { get; set; }
 
-    [Parameter]
-    public EventCallback<ChangeEventArgs> OnChange { get; set; }
+    [Parameter] public EventCallback<ChangeEventArgs> OnChange { get; set; }
 
-    [Parameter]
-    public Func<TItem, string> NameProvider { get; set; } = elem => elem.ToString();
+    [Parameter] public Func<TItem, string> NameProvider { get; set; } = elem => elem.ToString();
 
-    [Parameter]
-    public Func<TItem, object> ValueProvider { get; set; } = elem => elem;
+    [Parameter] public Func<TItem, object> ValueProvider { get; set; } = elem => elem;
 
     /// <summary>
     /// Gets/sets the <see cref="DropdownList{TItem}"/>'s header template <see cref="RenderFragment"/>
     /// </summary>
-    [Parameter]
-    public RenderFragment<DropdownList<TItem>> HeaderTemplate { get; set; } = context =>
+    [Parameter] public RenderFragment<DropdownList<TItem>> HeaderTemplate { get; set; } = context =>
     {
         return @<div class="dropdown-toggle btn btn-outline-secondary">
                     @if (context.SelectedItem == null)
@@ -65,21 +59,17 @@
     /// <summary>
     /// Gets/sets the <see cref="DropdownList{TItem}"/>'s placeholder
     /// </summary>
-    [Parameter]
-    public string Placeholder { get; set; }
+    [Parameter] public string Placeholder { get; set; }
 
-    [Parameter]
-    public RenderFragment<ItemRenderContext<TItem>> ItemTemplate { get; set; } = context =>
+    [Parameter] public RenderFragment<ItemRenderContext<TItem>> ItemTemplate { get; set; } = context =>
     {
         return @<div class="dropdown-item">@context.Name</div>
     ;
     };
 
-    [Parameter]
-    public IEnumerable<TItem> Items { get; set; }
+    [Parameter] public IEnumerable<TItem> Items { get; set; }
 
-    [Parameter]
-    public TItem SelectedItem { get; set; }
+    [Parameter] public TItem SelectedItem { get; set; }
 
     public object SelectedValue { get; private set; }
 

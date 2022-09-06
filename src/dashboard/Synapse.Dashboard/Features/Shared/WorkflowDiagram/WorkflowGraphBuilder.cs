@@ -38,7 +38,7 @@ namespace Synapse.Dashboard
         {
             var isEmpty = definition.States == null || !definition.States.Any();
             var graph = new GraphViewModel();
-            //graph.RegisterBehavior(new DragAndDropNodeBehavior(graph, this.jSRuntime));
+            graph.RegisterBehavior(new DragAndDropNodeBehavior(graph, this.jSRuntime));
             var startNode = this.BuildStartNode(!isEmpty);
             var endNode = this.BuildEndNode();
             await graph.AddElementAsync(startNode);

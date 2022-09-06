@@ -19,14 +19,11 @@
     <DynamicComponent @ref="modal" Type="Type" Parameters="Parameters" />
 </CascadingValue>
 @code {
-    [CascadingParameter]
-    public virtual ICollection<StateDefinition> States { get; set; } = null!;
+    [CascadingParameter] public virtual ICollection<StateDefinition> States { get; set; } = null!;
 
-    [Parameter]
-    public virtual Type Type { get; set; } = null!;
+    [Parameter] public virtual Type Type { get; set; } = null!;
 
-    [Parameter]
-    public virtual IDictionary<string, object> Parameters { get; set; } = null!;
+    [Parameter] public virtual IDictionary<string, object> Parameters { get; set; } = null!;
 
     public object? Instance => this.modal.Instance;
 

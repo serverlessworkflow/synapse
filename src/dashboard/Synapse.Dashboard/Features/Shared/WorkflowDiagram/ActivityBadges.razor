@@ -51,14 +51,11 @@
 }
 
 @code {
-    [CascadingParameter(Name = "ActiveInstances")]
-    public ObservableCollection<V1WorkflowInstance> ActiveInstances { get; set; } = new();
+    [CascadingParameter(Name = "ActiveInstances")] public ObservableCollection<V1WorkflowInstance> ActiveInstances { get; set; } = new();
 
-    [CascadingParameter(Name = "FaultedInstances")]
-    public ObservableCollection<V1WorkflowInstance> FaultedInstances { get; set; } = new();
+    [CascadingParameter(Name = "FaultedInstances")] public ObservableCollection<V1WorkflowInstance> FaultedInstances { get; set; } = new();
 
-    [CascadingParameter(Name = "Node")]
-    public INodeViewModel Node { get; set; } = null!;
+    [CascadingParameter(Name = "Node")] public INodeViewModel Node { get; set; } = null!;
 
     protected virtual string ActivityRadius { get; set; } = "";
     protected virtual string ActiveX { get; set; } = "";

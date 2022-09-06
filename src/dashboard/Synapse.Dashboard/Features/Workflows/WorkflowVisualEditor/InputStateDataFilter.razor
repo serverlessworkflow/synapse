@@ -52,22 +52,16 @@
 
 @code {
 
-    [Parameter] 
-    public StateDataFilterDefinition? Value { get; set; }
+    [Parameter] public StateDataFilterDefinition? Value { get; set; }
     protected StateDataFilterDefinition? value { get; set; }
-    [Parameter] 
-    public EventCallback<StateDataFilterDefinition?> ValueChanged { get; set; }
+    [Parameter] public EventCallback<StateDataFilterDefinition?> ValueChanged { get; set; }
 
-    [Parameter]
-    public Expression<Func<StateDataFilterDefinition?>> ValueExpression { get; set; } = null!;
+    [Parameter] public Expression<Func<StateDataFilterDefinition?>> ValueExpression { get; set; } = null!;
     [Parameter, EditorRequired] 
     public Expression<Func<StateDataFilterDefinition?>> ValidationFor { get; set; } = default!;
-    [Parameter] 
-    public string? Id { get; set; }
-    [Parameter]
-    public string? Label { get; set; }
-    [CascadingParameter] 
-    protected EditContext CascadedEditContext  { get; set; } = null!;
+    [Parameter] public string? Id { get; set; }
+    [Parameter] public string? Label { get; set; }
+    [CascadingParameter] protected EditContext CascadedEditContext  { get; set; } = null!;
 
     protected bool _hasInitializedParameters;
     protected FieldIdentifier fieldIdentifier;

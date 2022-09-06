@@ -56,7 +56,7 @@
 {
     <div class="container-fluid h-100">
         <div class="row h-50 position-relative">
-            <WorkflowDiagram @ref="workflowDiagram" WorkflowDefinition="workflow.Definition" />
+            <WorkflowDiagram @ref="workflowDiagram" WorkflowDefinition="workflow.Definition" OnMouseUp="HandleNodeClick" />
         </div>
         <div class="row h-50">            
             @if (workflowInstance == null)
@@ -116,7 +116,7 @@
                                             {
                                                 <button @onclick="() => Dispatcher.Dispatch(new CancelV1WorkflowInstance(((V1WorkflowInstance)context.Value!).Id))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-media-stop"></small><span class="btn-label">&nbsp; Cancel</span></button>
                                             }
-                                            <button @onclick="async () => await StartWith(((V1WorkflowInstance?)context.Value)?.Input)" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-reload"></small><span class="btn-label">&nbsp; Start new</span></button><button @onclick="async () => OnViewWorkflowInstance(context.Item)" @onclick:stopPropagation="true" class="btn btn-outline-dark mx-1"><small class="oi oi-info"></small><span class="btn-label">&nbsp; Details</span></button>
+                                            <button @onclick="async () => await StartWith(((V1WorkflowInstance?)context.Value)?.Input)" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-reload"></small><span class="btn-label">&nbsp; Start new</span></button><button @onclick="async () => await ViewWorkflowInstance(context.Item)" @onclick:stopPropagation="true" class="btn btn-outline-dark mx-1"><small class="oi oi-info"></small><span class="btn-label">&nbsp; Details</span></button>
                                             @if (((V1WorkflowInstance)context.Value!).Status == V1WorkflowInstanceStatus.Faulted
                                                 || ((V1WorkflowInstance)context.Value!).Status == V1WorkflowInstanceStatus.Cancelled
                                                 || ((V1WorkflowInstance)context.Value!).Status == V1WorkflowInstanceStatus.Completed) 
@@ -177,11 +177,9 @@ else
 @code
 {
 
-    [Parameter]
-    public string WorkflowId { get; set; } = null!;
+    [Parameter] public string WorkflowId { get; set; } = null!;
     protected string workflowId = null!;
-    [Parameter]
-    public string? WorkflowInstanceId { get; set; } = null!;
+    [Parameter] public string? WorkflowInstanceId { get; set; } = null!;
     protected string? workflowInstanceId = null!;
 
     private Modal deleteWorkflowDialog = null!;
@@ -353,9 +351,25 @@ else
         this.Dispatcher.Dispatch(new DeleteV1WorkflowInstance(this.selectedWorkflowInstanceId!));
     }
 
-    private void OnViewWorkflowInstance(V1WorkflowInstance workflowInstance)
+    private async Task ViewWorkflowInstance(V1WorkflowInstance workflowInstance)
     {
         this.NavigationManager.NavigateTo($"/workflows/{this.WorkflowId}/instance/{workflowInstance.Id}");
+        await Task.CompletedTask;
+    }
+
+    private async Task HandleNodeClick(GraphEventArgs<MouseEventArgs> e)
+    {
+        if (e.GraphElement != null)
+        {
+            switch (e.GraphElement) {
+                case SubflowRefNodeViewModel:
+                    break;
+                case InjectNodeViewModel:
+                    Console.WriteLine("inject clicked");
+                    break;
+            }
+        }
+        await Task.CompletedTask;
     }
 
     public void Dispose()

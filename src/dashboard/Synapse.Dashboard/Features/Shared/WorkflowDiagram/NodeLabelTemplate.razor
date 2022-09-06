@@ -30,8 +30,7 @@
 }   
 
 @code {
-    [CascadingParameter(Name = "Node")]
-    public INodeViewModel Node { get; set; } = null!;
+    [CascadingParameter(Name = "Node")] public INodeViewModel Node { get; set; } = null!;
 
     protected virtual string LabelX { get; set; } = "0";
     protected virtual string LabelY { get; set; } = "0";
