@@ -31,36 +31,36 @@ namespace Synapse.Dashboard
             this.Graph.MouseUp += this.OnMouseUpAsync;
         }
 
-        protected virtual async Task OnMouseEnterAsync(ElementReference sender, MouseEventArgs e, IGraphElement? element)
+        protected virtual async Task OnMouseEnterAsync(GraphEventArgs<MouseEventArgs> e)
         {
-            if (element == null || element is not INodeViewModel || element is StartNodeViewModel || element is EndNodeViewModel  || this._source == null || this._source == element)
+            if (e.GraphElement == null || e.GraphElement is not INodeViewModel || e.GraphElement is StartNodeViewModel || e.GraphElement is EndNodeViewModel  || this._source == null || this._source == e.GraphElement)
                 return;
-            this._destination = element as INodeViewModel;
+            this._destination = e.GraphElement as INodeViewModel;
             this._destination.CssClass = (this._destination.CssClass ?? "") + " drop-destination";
         }
 
-        protected virtual async Task OnMouseLeaveAsync(ElementReference sender, MouseEventArgs e, IGraphElement? element)
+        protected virtual async Task OnMouseLeaveAsync(GraphEventArgs<MouseEventArgs> e)
         {
-            if (element == null || element is not INodeViewModel || element is StartNodeViewModel || element is EndNodeViewModel || this._destination != element)
+            if (e.GraphElement == null || e.GraphElement is not INodeViewModel || e.GraphElement is StartNodeViewModel || e.GraphElement is EndNodeViewModel || this._destination != e.GraphElement)
                 return;
             this._destination.CssClass = (this._destination.CssClass ?? "").Replace(" drop-destination", "");
             this._destination = null;
         }
 
-        protected virtual async Task OnMouseMoveAsync(ElementReference sender, MouseEventArgs e, IGraphElement? element)
+        protected virtual async Task OnMouseMoveAsync(GraphEventArgs<MouseEventArgs> e)
         {
             if (this._nodeGhost == null)
                 return;
-            this._movementX = e.ClientX - this._previousX;
-            this._movementY = e.ClientY - this._previousY;
+            this._movementX = e.BaseEvent.ClientX - this._previousX;
+            this._movementY = e.BaseEvent.ClientY - this._previousY;
             await this.UpdatedPosition();
         }
 
-        protected virtual async Task OnMouseDownAsync(ElementReference sender, MouseEventArgs e, IGraphElement? element)
+        protected virtual async Task OnMouseDownAsync(GraphEventArgs<MouseEventArgs> e)
         {
-            if (element == null || element is not INodeViewModel)
+            if (e.GraphElement == null || e.GraphElement is not INodeViewModel)
                 return;
-            if (element is StartNodeViewModel || element is EndNodeViewModel)
+            if (e.GraphElement is StartNodeViewModel || e.GraphElement is EndNodeViewModel)
                 return;
             if (this._nodeGhostModule == null)
             {
@@ -70,17 +70,17 @@ namespace Synapse.Dashboard
             {
                 throw new NullReferenceException("Unable to load JS module './js/node-ghost.js'");
             }
-            this._nodeGhost = await this._nodeGhostModule.InvokeAsync<IJSObjectReference>("createNodeGhost", sender);
+            this._nodeGhost = await this._nodeGhostModule.InvokeAsync<IJSObjectReference>("createNodeGhost", e.Component);
             if (this._nodeGhost == null)
             {
                 throw new NullReferenceException("Unable to create new ghost node");
             }
-            this._source = element as INodeViewModel;
-            this._previousX = e.ClientX;
-            this._previousY = e.ClientY;
+            this._source = e.GraphElement as INodeViewModel;
+            this._previousX = e.BaseEvent.ClientX;
+            this._previousY = e.BaseEvent.ClientY;
         }
 
-        protected virtual async Task OnMouseUpAsync(ElementReference sender, MouseEventArgs e, IGraphElement? element)
+        protected virtual async Task OnMouseUpAsync(GraphEventArgs<MouseEventArgs> e)
         {
             if (this._nodeGhost == null)
                 return;
