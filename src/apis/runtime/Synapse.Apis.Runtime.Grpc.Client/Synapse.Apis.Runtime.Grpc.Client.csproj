@@ -5,7 +5,7 @@
 	<RootNamespace>$(MSBuildProjectName.Replace(" ", "_").Replace(".Client", ""))</RootNamespace>
 	<ImplicitUsings>enable</ImplicitUsings>
 	<Nullable>enable</Nullable>
-	<VersionPrefix>0.1.23</VersionPrefix>
+	<VersionPrefix>0.1.24</VersionPrefix>
 	<GenerateDocumentationFile>True</GenerateDocumentationFile>
 	<Authors>The Synapse Authors</Authors>
 	<Company>Cloud Native Computing Foundation</Company>
