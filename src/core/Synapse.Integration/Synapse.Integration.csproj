@@ -90,11 +90,20 @@
     <Compile Update="Commands\WorkflowActivities\v1\Generated\V1CancelWorkflowActivityCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\WorkflowActivities\v1\V1CancelWorkflowActivityCommand.cs</CustomToolNamespace>
     </Compile>
+    <Compile Update="Commands\WorkflowActivities\v1\Generated\V1CompensateActivityCommand.cs">
+      <CustomToolNamespace>..\Synapse.Application\Commands\WorkflowActivities\v1\V1CompensateActivityCommand.cs</CustomToolNamespace>
+    </Compile>
     <Compile Update="Commands\WorkflowActivities\v1\Generated\V1CreateWorkflowActivityCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\WorkflowActivities\v1\V1CreateWorkflowActivityCommand.cs</CustomToolNamespace>
     </Compile>
     <Compile Update="Commands\WorkflowActivities\v1\Generated\V1FaultWorkflowActivityCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\WorkflowActivities\v1\V1FaultWorkflowActivityCommand.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Commands\WorkflowActivities\v1\Generated\V1MarkActivityAsCompensateCommand.cs">
+      <CustomToolNamespace>..\Synapse.Application\Commands\WorkflowActivities\v1\V1MarkActivityAsCompensateCommand.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Commands\WorkflowActivities\v1\Generated\V1MarkActivityAsCompensatedCommand.cs">
+      <CustomToolNamespace>..\Synapse.Application\Commands\WorkflowActivities\v1\V1MarkActivityAsCompensatedCommand.cs</CustomToolNamespace>
     </Compile>
     <Compile Update="Commands\WorkflowActivities\v1\Generated\V1SetWorkflowActivityMetadataCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\WorkflowActivities\v1\V1SetWorkflowActivityMetadataCommand.cs</CustomToolNamespace>
@@ -191,6 +200,12 @@
     </Compile>
     <Compile Update="Events\WorkflowActivities\v1\Generated\V1WorkflowActivityCancelledIntegrationEvent.cs">
       <CustomToolNamespace>..\Synapse.Domain\Events\WorkflowActivities\v1\V1WorkflowActivityCancelledDomainEvent.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\WorkflowActivities\v1\Generated\V1WorkflowActivityCompensatedIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\WorkflowActivities\v1\V1WorkflowActivityCompensatedDomainEvent.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\WorkflowActivities\v1\Generated\V1WorkflowActivityCompensatingIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\WorkflowActivities\v1\V1WorkflowActivityCompensatingDomainEvent.cs</CustomToolNamespace>
     </Compile>
     <Compile Update="Events\WorkflowActivities\v1\Generated\V1WorkflowActivityCompletedIntegrationEvent.cs">
       <CustomToolNamespace>..\Synapse.Domain\Events\WorkflowActivities\v1\V1WorkflowActivityCompletedDomainEvent.cs</CustomToolNamespace>

@@ -151,6 +151,26 @@ namespace Synapse.Domain.Models
         }
 
         /// <summary>
+        /// Compensates the <see cref="V1WorkflowInstance"/>
+        /// </summary>
+        public virtual void Compensate()
+        {
+            if (this.Status > V1WorkflowActivityStatus.Faulted)
+                throw DomainException.UnexpectedState(typeof(V1WorkflowActivity), this.Id, this.Status);
+            this.On(this.RegisterEvent(new V1WorkflowActivityCompensatingDomainEvent(this.Id)));
+        }
+
+        /// <summary>
+        /// Marks the <see cref="V1WorkflowInstance"/> as compensated
+        /// </summary>
+        public virtual void MarkAsCompensated()
+        {
+            if (this.Status != V1WorkflowActivityStatus.Compensating)
+                throw DomainException.UnexpectedState(typeof(V1WorkflowActivity), this.Id, this.Status);
+            this.On(this.RegisterEvent(new V1WorkflowActivityCompensatedDomainEvent(this.Id)));
+        }
+
+        /// <summary>
         /// Cancels the <see cref="V1WorkflowActivity"/>
         /// </summary>
         public virtual void Cancel()
@@ -245,6 +265,26 @@ namespace Synapse.Domain.Models
             this.Status = V1WorkflowActivityStatus.Faulted;
             this.Error = e.Error;
             this.On(this.RegisterEvent(new V1WorkflowActivityExecutedDomainEvent(this.Id, this.Status, this.Error)));
+        }
+
+        /// <summary>
+        /// Handles the specified <see cref="V1WorkflowActivityCompensatingDomainEvent"/>
+        /// </summary>
+        /// <param name="e">The <see cref="V1WorkflowActivityCompensatingDomainEvent"/> to handle</param>
+        protected virtual void On(V1WorkflowActivityCompensatingDomainEvent e)
+        {
+            this.LastModified = e.CreatedAt;
+            this.Status = V1WorkflowActivityStatus.Compensating;
+        }
+
+        /// <summary>
+        /// Handles the specified <see cref="V1WorkflowActivityCompensatedDomainEvent"/>
+        /// </summary>
+        /// <param name="e">The <see cref="V1WorkflowActivityCompensatedDomainEvent"/> to handle</param>
+        protected virtual void On(V1WorkflowActivityCompensatedDomainEvent e)
+        {
+            this.LastModified = e.CreatedAt;
+            this.Status = V1WorkflowActivityStatus.Compensated;
         }
 
         /// <summary>

@@ -46,6 +46,16 @@ namespace Synapse
         [EnumMember(Value = "faulted")]
         Faulted,
         /// <summary>
+        /// Indicates that the activity is being compensated
+        /// </summary>
+        [EnumMember(Value = "compensating")]
+        Compensating,
+        /// <summary>
+        /// Indicates that the activity has been compensated
+        /// </summary>
+        [EnumMember(Value = "compensated")]
+        Compensated,
+        /// <summary>
         /// Indicates that the activity has been cancelled
         /// </summary>
         [EnumMember(Value = "cancelled")]

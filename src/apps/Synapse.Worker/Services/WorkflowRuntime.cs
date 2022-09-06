@@ -461,6 +461,8 @@ namespace Synapse.Worker.Services
         protected virtual async Task OnStateCompletedAsync(IStateProcessor processor, V1WorkflowActivityCompletedIntegrationEvent e)
         {
             var metadata = new Dictionary<string, string>() { { V1WorkflowActivityMetadata.State, processor.State.Name } };
+            if (processor.Activity.Metadata.TryGetValue(V1WorkflowActivityMetadata.CompensationSource, out var compensationSource))
+                metadata.Add(V1WorkflowActivityMetadata.CompensationSource, compensationSource);
             if (processor.State is SwitchStateDefinition switchState)
             {
                 if (!processor.Activity.Metadata.TryGetValue(V1WorkflowActivityMetadata.Case, out var caseName))
@@ -505,23 +507,23 @@ namespace Synapse.Worker.Services
         /// <returns>A new awaitable <see cref="Task"/></returns>
         protected virtual async Task OnStateProcessingErrorAsync(IStateProcessor processor, Exception ex)
         {
-            if (processor.State.CompensatedBy != null
-             || !string.IsNullOrWhiteSpace(processor.State.CompensatedBy))
+            if (string.IsNullOrWhiteSpace(processor.State.CompensatedBy))
             {
-                var metadata = new Dictionary<string, string>()
-                {
-                    { V1WorkflowActivityMetadata.State, processor.State.Name },
-                    { V1WorkflowActivityMetadata.Compensation, processor.State.CompensatedBy }
-                };
-                await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Transition, await this.Context.Workflow.GetActivityStateDataAsync(processor.Activity, this.CancellationToken), metadata, null, this.CancellationToken);
+                await this.OnActivityProcessingErrorAsync(processor, ex);
+                return;
             }
-            foreach (var activity in await this.Context.Workflow.GetOperativeActivitiesAsync(this.CancellationToken))
+            await this.Context.Workflow.CompensateActivityAsync(processor.Activity, this.CancellationToken);
+            var metadata = new Dictionary<string, string>()
             {
+                { V1WorkflowActivityMetadata.State, processor.State.Name },
+                { V1WorkflowActivityMetadata.NextState, processor.State.CompensatedBy },
+                { V1WorkflowActivityMetadata.CompensationSource, processor.Activity.Id }
+            };
+            var activity = await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Transition, await this.Context.Workflow.GetActivityStateDataAsync(processor.Activity, this.CancellationToken), metadata, null, this.CancellationToken);
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-                this.CreateActivityProcessor(activity);
+            this.CreateActivityProcessor(activity);
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-                await this.OnActivityProcessingCompletedAsync(processor);
-            }
+            await this.OnActivityProcessingCompletedAsync(processor);
         }
 
         /// <summary>
@@ -532,13 +534,15 @@ namespace Synapse.Worker.Services
         /// <returns>A new awaitable <see cref="Task"/></returns>
         protected virtual async Task OnTransitionCompletedAsync(ITransitionProcessor processor, V1WorkflowActivityCompletedIntegrationEvent e)
         {
-            var nextStateName = processor.Transition.NextState;
-            if (processor.Activity.Metadata.TryGetValue(V1WorkflowActivityMetadata.Compensation, out var compensateWith))
-                nextStateName = compensateWith;
-            if (!this.Context.Workflow.Definition.TryGetState(nextStateName, out StateDefinition nextState))
-                throw new NullReferenceException($"Failed to find a state with name '{nextStateName}' in workflow '{this.Context.Workflow.Definition.Id} {this.Context.Workflow.Definition.Version}'");
+            if (!this.Context.Workflow.Definition.TryGetState(processor.Transition.NextState, out StateDefinition nextState))
+                throw new NullReferenceException($"Failed to find a state with name '{processor.Transition.NextState}' in workflow '{this.Context.Workflow.Definition.Id} {this.Context.Workflow.Definition.Version}'");
             await this.Context.Workflow.TransitionToAsync(nextState, this.CancellationToken);
-            var metadata = new Dictionary<string, string>() { { V1WorkflowActivityMetadata.State, nextState.Name } };
+            var metadata = new Dictionary<string, string>() 
+            { 
+                { V1WorkflowActivityMetadata.State, nextState.Name }
+            };
+            if (processor.Activity.Metadata.TryGetValue(V1WorkflowActivityMetadata.CompensationSource, out var compensationSource))
+                metadata.Add(V1WorkflowActivityMetadata.CompensationSource, compensationSource);
             var activity = await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.State, e.Output, metadata, null, this.CancellationToken);
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             this.CreateActivityProcessor(activity);
@@ -553,6 +557,8 @@ namespace Synapse.Worker.Services
         /// <returns>A new awaitable <see cref="Task"/></returns>
         protected virtual async Task OnEndCompletedAsync(IEndProcessor processor, V1WorkflowActivityCompletedIntegrationEvent e)
         {
+            if (processor.Activity.Metadata.TryGetValue(V1WorkflowActivityMetadata.CompensationSource, out var compensationSource))
+                await this.Context.Workflow.MarkActivityAsCompensatedAsync(compensationSource, this.CancellationToken);
             await this.Context.Workflow.SetOutputAsync(e.Output, this.CancellationToken);
         }
 

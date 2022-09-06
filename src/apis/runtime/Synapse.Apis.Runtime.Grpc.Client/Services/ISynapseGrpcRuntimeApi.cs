@@ -144,6 +144,24 @@ namespace Synapse.Apis.Runtime.Grpc
         Task<GrpcApiResult<V1WorkflowActivity>> FaultActivityAsync(V1FaultWorkflowActivityCommand command, CallContext context = default);
 
         /// <summary>
+        /// Compensates the specified workflow activity
+        /// </summary>
+        /// <param name="command">An object that describes the command to execute</param>
+        /// <param name="context">The current server call context</param>
+        /// <returns>A new object that describes the result of the operation</returns>
+        [OperationContract]
+        Task<GrpcApiResult<V1WorkflowActivity>> CompensateActivityAsync(V1CompensateActivityCommand command, CallContext context = default);
+
+        /// <summary>
+        /// Marks the specified workflow activity as compensated
+        /// </summary>
+        /// <param name="command">An object that describes the command to execute</param>
+        /// <param name="context">The current server call context</param>
+        /// <returns>A new object that describes the result of the operation</returns>
+        [OperationContract]
+        Task<GrpcApiResult<V1WorkflowActivity>> MarkActivityAsCompensatedAsync(V1MarkActivityAsCompensatedCommand command, CallContext context = default);
+
+        /// <summary>
         /// Cancels the specified workflow activity
         /// </summary>
         /// <param name="activityId">The id of the workflow activity to cancel</param>

@@ -190,6 +190,22 @@ namespace Synapse.Worker.Services
         }
 
         /// <inheritdoc/>
+        public virtual async Task CompensateActivityAsync(V1WorkflowActivity activity, CancellationToken cancellationToken = default)
+        {
+            if (activity == null)
+                throw new ArgumentNullException(nameof(activity));
+            await this.SynapseRuntimeApi.CompensateActivityAsync(new() { Id = activity.Id }, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task MarkActivityAsCompensatedAsync(string activityId, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(activityId))
+                throw new ArgumentNullException(nameof(activityId));
+            await this.SynapseRuntimeApi.MarkActivityAsCompensatedAsync(new() { Id = activityId }, cancellationToken);
+        }
+
+        /// <inheritdoc/>
         public virtual async Task CancelActivityAsync(V1WorkflowActivity activity, CancellationToken cancellationToken = default)
         {
             if (activity == null)
