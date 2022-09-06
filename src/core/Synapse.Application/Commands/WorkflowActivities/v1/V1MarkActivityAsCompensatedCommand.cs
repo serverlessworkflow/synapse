@@ -17,49 +17,49 @@
 
 namespace Synapse.Application.Commands.WorkflowActivities
 {
-
     /// <summary>
-    /// Represents the <see cref="ICommand"/> used to cancel a <see cref="V1WorkflowActivity"/>
+    /// Represents the <see cref="ICommand"/> used to mark a <see cref="V1WorkflowActivity"/> as compensated
     /// </summary>
-    [DataTransferObjectType(typeof(Integration.Commands.WorkflowActivities.V1CancelWorkflowActivityCommand))]
-    public class V1CancelWorkflowActivityCommand
+    [DataTransferObjectType(typeof(Integration.Commands.WorkflowActivities.V1MarkActivityAsCompensatedCommand))]
+    public class V1MarkActivityAsCompensatedCommand
         : Command<Integration.Models.V1WorkflowActivity>
     {
 
+
         /// <summary>
-        /// Initializes a new <see cref="V1CancelWorkflowActivityCommand"/>
+        /// Initializes a new <see cref="V1MarkActivityAsCompensatedCommand"/>
         /// </summary>
-        protected V1CancelWorkflowActivityCommand()
+        protected V1MarkActivityAsCompensatedCommand()
         {
             this.Id = null!;
         }
 
         /// <summary>
-        /// Initializes a new <see cref="V1CancelWorkflowActivityCommand"/>
+        /// Initializes a new <see cref="V1MarkActivityAsCompensatedCommand"/>
         /// </summary>
-        /// <param name="id">The id of the <see cref="V1WorkflowActivity"/> to cancel</param>
-        public V1CancelWorkflowActivityCommand(string id)
+        /// <param name="id">The id of the <see cref="V1WorkflowActivity"/> to mark as compensated</param>
+        public V1MarkActivityAsCompensatedCommand(string id)
         {
             this.Id = id;
         }
 
         /// <summary>
-        /// Gets the id of the <see cref="V1WorkflowActivity"/> to cancel
+        /// Gets the id of the <see cref="V1WorkflowActivity"/> to mark as compensated
         /// </summary>
         public virtual string Id { get; protected set; }
 
     }
 
     /// <summary>
-    /// Represents the service used to handle <see cref="V1CancelWorkflowActivityCommand"/>s
+    /// Represents the service used to handle <see cref="V1MarkActivityAsCompensatedCommand"/>s
     /// </summary>
-    public class V1CancelWorkflowActivityCommandHandler
+    public class V1MarkActivityAsCompensatedCommandHandler
         : CommandHandlerBase,
-        ICommandHandler<V1CancelWorkflowActivityCommand, Integration.Models.V1WorkflowActivity>
+        ICommandHandler<V1MarkActivityAsCompensatedCommand, Integration.Models.V1WorkflowActivity>
     {
 
         /// <inheritdoc/>
-        public V1CancelWorkflowActivityCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IRepository<V1WorkflowActivity> activities) 
+        public V1MarkActivityAsCompensatedCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IRepository<V1WorkflowActivity> activities)
             : base(loggerFactory, mediator, mapper)
         {
             this.Activities = activities;
@@ -71,12 +71,12 @@ namespace Synapse.Application.Commands.WorkflowActivities
         protected IRepository<V1WorkflowActivity> Activities { get; }
 
         /// <inheritdoc/>
-        public virtual async Task<IOperationResult<Integration.Models.V1WorkflowActivity>> HandleAsync(V1CancelWorkflowActivityCommand command, CancellationToken cancellationToken = default)
+        public virtual async Task<IOperationResult<Integration.Models.V1WorkflowActivity>> HandleAsync(V1MarkActivityAsCompensatedCommand command, CancellationToken cancellationToken = default)
         {
             var activity = await this.Activities.FindAsync(command.Id, cancellationToken);
             if (activity == null)
                 throw DomainException.NullReference(typeof(V1WorkflowActivity), command.Id);
-            activity.Cancel();
+            activity.MarkAsCompensated();
             activity = await this.Activities.UpdateAsync(activity, cancellationToken);
             await this.Activities.SaveChangesAsync(cancellationToken);
             return this.Ok(this.Mapper.Map<Integration.Models.V1WorkflowActivity>(activity));

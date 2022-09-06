@@ -17,49 +17,49 @@
 
 namespace Synapse.Application.Commands.WorkflowActivities
 {
-
     /// <summary>
-    /// Represents the <see cref="ICommand"/> used to cancel a <see cref="V1WorkflowActivity"/>
+    /// Represents the <see cref="ICommand"/> used to compensate a <see cref="V1WorkflowActivity"/>
     /// </summary>
-    [DataTransferObjectType(typeof(Integration.Commands.WorkflowActivities.V1CancelWorkflowActivityCommand))]
-    public class V1CancelWorkflowActivityCommand
+    [DataTransferObjectType(typeof(Integration.Commands.WorkflowActivities.V1CompensateActivityCommand))]
+    public class V1CompensateActivityCommand
         : Command<Integration.Models.V1WorkflowActivity>
     {
 
+
         /// <summary>
-        /// Initializes a new <see cref="V1CancelWorkflowActivityCommand"/>
+        /// Initializes a new <see cref="V1CompensateActivityCommand"/>
         /// </summary>
-        protected V1CancelWorkflowActivityCommand()
+        protected V1CompensateActivityCommand()
         {
             this.Id = null!;
         }
 
         /// <summary>
-        /// Initializes a new <see cref="V1CancelWorkflowActivityCommand"/>
+        /// Initializes a new <see cref="V1CompensateActivityCommand"/>
         /// </summary>
-        /// <param name="id">The id of the <see cref="V1WorkflowActivity"/> to cancel</param>
-        public V1CancelWorkflowActivityCommand(string id)
+        /// <param name="id">The id of the <see cref="V1WorkflowActivity"/> to compensate</param>
+        public V1CompensateActivityCommand(string id)
         {
             this.Id = id;
         }
 
         /// <summary>
-        /// Gets the id of the <see cref="V1WorkflowActivity"/> to cancel
+        /// Gets the id of the <see cref="V1WorkflowActivity"/> to compensate
         /// </summary>
         public virtual string Id { get; protected set; }
 
     }
 
     /// <summary>
-    /// Represents the service used to handle <see cref="V1CancelWorkflowActivityCommand"/>s
+    /// Represents the service used to handle <see cref="V1CompensateActivityCommand"/>s
     /// </summary>
-    public class V1CancelWorkflowActivityCommandHandler
+    public class V1CompensateActivityCommandHandler
         : CommandHandlerBase,
-        ICommandHandler<V1CancelWorkflowActivityCommand, Integration.Models.V1WorkflowActivity>
+        ICommandHandler<V1CompensateActivityCommand, Integration.Models.V1WorkflowActivity>
     {
 
         /// <inheritdoc/>
-        public V1CancelWorkflowActivityCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IRepository<V1WorkflowActivity> activities) 
+        public V1CompensateActivityCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IRepository<V1WorkflowActivity> activities)
             : base(loggerFactory, mediator, mapper)
         {
             this.Activities = activities;
@@ -71,12 +71,12 @@ namespace Synapse.Application.Commands.WorkflowActivities
         protected IRepository<V1WorkflowActivity> Activities { get; }
 
         /// <inheritdoc/>
-        public virtual async Task<IOperationResult<Integration.Models.V1WorkflowActivity>> HandleAsync(V1CancelWorkflowActivityCommand command, CancellationToken cancellationToken = default)
+        public virtual async Task<IOperationResult<Integration.Models.V1WorkflowActivity>> HandleAsync(V1CompensateActivityCommand command, CancellationToken cancellationToken = default)
         {
             var activity = await this.Activities.FindAsync(command.Id, cancellationToken);
             if (activity == null)
                 throw DomainException.NullReference(typeof(V1WorkflowActivity), command.Id);
-            activity.Cancel();
+            activity.Compensate();
             activity = await this.Activities.UpdateAsync(activity, cancellationToken);
             await this.Activities.SaveChangesAsync(cancellationToken);
             return this.Ok(this.Mapper.Map<Integration.Models.V1WorkflowActivity>(activity));

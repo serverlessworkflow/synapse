@@ -234,6 +234,22 @@ namespace Synapse.Apis.Runtime.Ipc
         }
 
         /// <inheritdoc/>
+        public virtual async Task<V1WorkflowActivity> CompensateActivityAsync(V1CompensateActivityCommand command, CancellationToken cancellationToken = default)
+        {
+            if (command == null)
+                throw new ArgumentNullException(nameof(command));
+            return await this.Mediator.ExecuteAndUnwrapAsync(this.Mapper.Map<Application.Commands.WorkflowActivities.V1CompensateActivityCommand>(command), cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<V1WorkflowActivity> MarkActivityAsCompensatedAsync(V1MarkActivityAsCompensatedCommand command, CancellationToken cancellationToken = default)
+        {
+            if (command == null)
+                throw new ArgumentNullException(nameof(command));
+            return await this.Mediator.ExecuteAndUnwrapAsync(this.Mapper.Map<Application.Commands.WorkflowActivities.V1MarkActivityAsCompensatedCommand>(command), cancellationToken);
+        }
+
+        /// <inheritdoc/>
         public virtual async Task<V1WorkflowInstance> SuspendAsync(string workflowInstanceId, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(workflowInstanceId))

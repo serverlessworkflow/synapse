@@ -158,6 +158,18 @@ namespace Synapse.Apis.Runtime.Grpc
         }
 
         /// <inheritdoc/>
+        public virtual async Task<GrpcApiResult<V1WorkflowActivity>> CompensateActivityAsync(V1CompensateActivityCommand command, CallContext context = default)
+        {
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(Mapper.Map<Application.Commands.WorkflowActivities.V1CompensateActivityCommand>(command), context.CancellationToken));
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<GrpcApiResult<V1WorkflowActivity>> MarkActivityAsCompensatedAsync(V1MarkActivityAsCompensatedCommand command, CallContext context = default)
+        {
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(Mapper.Map<Application.Commands.WorkflowActivities.V1MarkActivityAsCompensatedCommand>(command), context.CancellationToken));
+        }
+
+        /// <inheritdoc/>
         public virtual async Task<GrpcApiResult<V1WorkflowActivity>> CancelActivityAsync(string activityId, CallContext context = default)
         {
             return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new Application.Commands.WorkflowActivities.V1CancelWorkflowActivityCommand(activityId), context.CancellationToken));
