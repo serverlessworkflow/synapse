@@ -21,7 +21,7 @@ namespace Synapse.Apis.Management.Http.Controllers
 {
 
     /// <summary>
-    /// Represents the <see cref="ApiController"/> used to manage workflow definitions
+    /// Represents the <see cref="ApiController"/> used to manage workflow instances
     /// </summary>
     [Route("api/v1/workflow-instances")]
     public class V1WorkflowInstancesController
