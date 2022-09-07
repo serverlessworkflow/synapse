@@ -25,6 +25,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using ServerlessWorkflow.Sdk;
 using Synapse.Infrastructure;
+using Synapse.Integration.Serialization.Converters;
 using System.Reactive.Subjects;
 using System.Reflection;
 
@@ -82,7 +83,9 @@ namespace Synapse.Application.Configuration
                 var settings = new JsonSerializerSettings()
                 {
                     ContractResolver = new NonPublicSetterContractResolver(),
-                    NullValueHandling = NullValueHandling.Ignore
+                    Converters = new[] { new FilteredExpandoObjectConverter() },
+                    NullValueHandling = NullValueHandling.Ignore,
+                    DefaultValueHandling = DefaultValueHandling.Ignore
                 };
                 return settings;
             };
@@ -124,9 +127,11 @@ namespace Synapse.Application.Configuration
             this.Services.AddNewtonsoftJsonSerializer(options =>
             {
                 options.ContractResolver = new NonPublicSetterContractResolver();
-                options.NullValueHandling = NullValueHandling.Include;
+                options.NullValueHandling = NullValueHandling.Ignore;
+                options.DefaultValueHandling = DefaultValueHandling.Ignore;
                 options.ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor;
                 options.Converters.Add(new AbstractClassConverterFactory());
+                options.Converters.Add(new FilteredExpandoObjectConverter());
             });
             this.Services.AddSingleton<CloudEventFormatter, JsonEventFormatter>();
             this.Services.AddCloudEventBus(builder =>

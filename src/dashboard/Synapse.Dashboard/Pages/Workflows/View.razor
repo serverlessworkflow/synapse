@@ -21,6 +21,7 @@
 @using Neuroglia.Serialization
 @using Newtonsoft.Json
 @using System.Text
+@using Newtonsoft.Json.Serialization
 @implements IDisposable
 @inject IStore Store
 @inject IDispatcher Dispatcher
@@ -133,7 +134,7 @@
                         {
                             <MonacoEditor
                                 CssClass="h-100 flex-grow"
-                                ConstructionOptions="MonacoEditorHelper.GetStandaloneEditorConstructionOptions(JsonConvert.SerializeObject(workflow.Definition, Formatting.Indented), true)"/>
+                                ConstructionOptions="MonacoEditorHelper.GetStandaloneEditorConstructionOptions(JsonConvert.SerializeObject(workflow.Definition, Formatting.Indented, new JsonSerializerSettings(){ ContractResolver = new NonPublicSetterContractResolver() }), true)"/>
                         }
                     </TabPage>
                     <TabPage Header="Metrics">
