@@ -19,7 +19,7 @@
 
 
 @if (graph != null) {
-    <DagreGraph @ref="dagre" Graph="graph" OnMouseUp="async (GraphEventArgs<MouseEventArgs> e) => await this.OnMouseUp.InvokeAsync(e)" />
+    <DagreGraph @ref="dagre" Graph="graph" OnMouseUp="OnMouseUp" />
 }
 
 @code {
@@ -36,7 +36,6 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        Console.WriteLine("OnParametersSetAsync");
         await base.OnParametersSetAsync();
         if (this.WorkflowDefinition != null && this.WorkflowDefinition != this.workflowDefinition) {
             this.workflowDefinition = this.WorkflowDefinition;

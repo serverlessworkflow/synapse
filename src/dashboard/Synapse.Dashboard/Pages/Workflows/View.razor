@@ -357,19 +357,30 @@ else
         await Task.CompletedTask;
     }
 
-    private async Task HandleNodeClick(GraphEventArgs<MouseEventArgs> e)
+    private void HandleNodeClick(GraphEventArgs<MouseEventArgs> e)
     {
         if (e.GraphElement != null)
         {
             switch (e.GraphElement) {
                 case SubflowRefNodeViewModel:
+                    var subFlowNode = (SubflowRefNodeViewModel)e.GraphElement;
+                    if (this.WorkflowInstanceId == null)
+                    {
+                        this.NavigationManager.NavigateTo($"/workflows/{subFlowNode.Subflow.WorkflowId}:{subFlowNode.Subflow.Version}");
+                    }
+                    else
+                    {
+                        // Match the activity and find the subflow instance id
+                        this.NavigationManager.NavigateTo($"/workflows/{subFlowNode.Subflow.WorkflowId}:{subFlowNode.Subflow.Version}/instance/!!TODO!!");
+                    }
+                    this.StateHasChanged();
                     break;
                 case InjectNodeViewModel:
                     Console.WriteLine("inject clicked");
                     break;
             }
         }
-        await Task.CompletedTask;
+        //await Task.CompletedTask;
     }
 
     public void Dispose()
