@@ -80,7 +80,7 @@ namespace Synapse.Apis.Management.Http.Controllers
         [ProducesResponseType((int)HttpStatusCode.Forbidden)]
         public async Task<IActionResult> GetById(string id, CancellationToken cancellationToken)
         {
-            return this.Process(await this.Mediator.ExecuteAsync(new Application.Queries.Generic.V1FindByIdQuery<Integration.Models.V1Workflow, string>(id), cancellationToken));
+            return this.Process(await this.Mediator.ExecuteAsync(Application.Queries.Workflows.V1GetWorkflowByIdQuery.Parse(id), cancellationToken));
         }
 
         /// <summary>
