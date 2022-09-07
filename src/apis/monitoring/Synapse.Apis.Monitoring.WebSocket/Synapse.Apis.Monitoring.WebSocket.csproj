@@ -4,7 +4,7 @@
 		<TargetFramework>net6.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<VersionPrefix>0.1.24</VersionPrefix>
+		<VersionPrefix>0.1.25</VersionPrefix>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<Authors>The Synapse Authors</Authors>
 		<Company>Cloud Native Computing Foundation</Company>
