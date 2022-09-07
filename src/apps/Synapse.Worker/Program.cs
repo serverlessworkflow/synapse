@@ -23,8 +23,10 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Http;
 using Neuroglia.AsyncApi;
 using Neuroglia.Data.Expressions.JQ;
+using Newtonsoft.Json;
 using Synapse.Apis.Management.Grpc;
 using Synapse.Apis.Runtime.Grpc;
+using Synapse.Integration.Serialization.Converters;
 using System.Diagnostics;
 
 if (args.Any() 
@@ -58,7 +60,12 @@ using var host = Host.CreateDefaultBuilder(args)
         services.AddSynapseGrpcManagementApiClient();
         services.AddSynapseGrpcRuntimeApiClient();
 
-        services.AddNewtonsoftJsonSerializer();
+        services.AddNewtonsoftJsonSerializer(settings =>
+        {
+            settings.Converters.Add(new FilteredExpandoObjectConverter());
+            settings.NullValueHandling = NullValueHandling.Ignore;
+            settings.DefaultValueHandling = DefaultValueHandling.Ignore;
+        });
         services.AddServerlessWorkflow();
         services.AddJQExpressionEvaluator();
         services.AddHttpClient();

@@ -47,6 +47,7 @@ namespace Synapse.Apis.Management.Http
                     options.SerializerSettings.ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor;
                     options.SerializerSettings.ContractResolver = new Newtonsoft.Json.Serialization.NonPublicSetterContractResolver();
                     options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                    options.SerializerSettings.DefaultValueHandling = DefaultValueHandling.Ignore;
                     options.SerializerSettings.DateFormatHandling = DateFormatHandling.IsoDateFormat;
                 })
                 .AddOData((options, provider) =>

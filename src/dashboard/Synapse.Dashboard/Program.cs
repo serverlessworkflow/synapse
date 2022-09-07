@@ -29,7 +29,19 @@ using Simple.OData.Client;
 using Synapse;
 using Synapse.Dashboard;
 using Synapse.Dashboard.Services;
-using System.Reflection;
+
+JsonConvert.DefaultSettings = () =>
+{
+    return new JsonSerializerSettings()
+    {
+        ContractResolver = new NonPublicSetterContractResolver(),
+        NullValueHandling = NullValueHandling.Ignore,
+        DefaultValueHandling = DefaultValueHandling.Ignore,
+        DateFormatHandling = DateFormatHandling.IsoDateFormat,
+        DateParseHandling = DateParseHandling.DateTime,
+        DateTimeZoneHandling = DateTimeZoneHandling.Utc
+    };
+};
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 var baseAddress = builder.HostEnvironment.BaseAddress;
@@ -75,6 +87,7 @@ builder.Services.AddSingleton(provider =>
             {
                 ContractResolver = new NonPublicSetterContractResolver(),
                 NullValueHandling = NullValueHandling.Ignore,
+                DefaultValueHandling = DefaultValueHandling.Ignore,
                 DateFormatHandling = DateFormatHandling.IsoDateFormat,
                 DateParseHandling = DateParseHandling.DateTime,
                 DateTimeZoneHandling = DateTimeZoneHandling.Utc
