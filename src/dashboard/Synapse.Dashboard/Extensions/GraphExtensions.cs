@@ -47,6 +47,10 @@ namespace Synapse.Dashboard
                             {
                                 nodes.ToList().ForEach(node => node.ActiveInstances.Add(instance));
                             }
+                            else if(activity.Status == V1WorkflowActivityStatus.Compensated)
+                            {
+                                nodes.ToList().ForEach(node => node.CompensatedInstances.Add(instance));
+                            }
                             else if (activity.Status == V1WorkflowActivityStatus.Faulted)
                             {
                                 nodes.ToList().ForEach(node => node.FaultedInstances.Add(instance));
@@ -80,6 +84,7 @@ namespace Synapse.Dashboard
                 {
                     wfNode.ActiveInstances.Clear();
                     wfNode.FaultedInstances.Clear();
+                    wfNode.CompensatedInstances.Clear();
                 }
                 node.CssClass = node.CssClass?.Replace(" active", "");
             }
