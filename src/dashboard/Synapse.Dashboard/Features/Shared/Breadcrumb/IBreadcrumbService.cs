@@ -68,5 +68,12 @@ namespace Synapse.Dashboard
         /// <param name="list"></param>
         /// <returns></returns>
         Task Use(IEnumerable<IBreadcrumbItem> list);
+
+        /// <summary>
+        /// Navigate to the provided item and set the breadcrumb state accordingly
+        /// </summary>
+        /// <param name="breadcrumbItem"></param>
+        /// <returns></returns>
+        Task NavigateTo(IBreadcrumbItem breadcrumbItem);
     }
 }

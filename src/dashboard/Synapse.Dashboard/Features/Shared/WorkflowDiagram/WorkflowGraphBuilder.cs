@@ -394,7 +394,7 @@ namespace Synapse.Dashboard
                 case ActionType.Function:
                     return new() { this.BuildFunctionNode(action, action.Function!) };
                 case ActionType.Subflow:
-                    return new() { this.BuildSubflowNode(action.Subflow!) };
+                    return new() { this.BuildSubflowNode(action, action.Subflow!) };
                 case ActionType.Trigger:
                     var triggerEventNode = this.BuildProduceEventNode(action.Event!.ProduceEvent);
                     var resultEventNode = this.BuildConsumeEventNode(action.Event!.ResultEvent);
@@ -410,9 +410,9 @@ namespace Synapse.Dashboard
             return new(action, function);
         }
 
-        protected SubflowRefNodeViewModel BuildSubflowNode(SubflowReference subflowRef)
+        protected SubflowRefNodeViewModel BuildSubflowNode(ActionDefinition action, SubflowReference subflowRef)
         {
-            return new(subflowRef);
+            return new(action, subflowRef);
         }
 
         protected EventNodeViewModel BuildProduceEventNode(string refName)

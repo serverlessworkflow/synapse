@@ -118,6 +118,15 @@ namespace Synapse.Dashboard
             }
         }
 
+        ///<inheritdoc/>
+        public async Task NavigateTo(IBreadcrumbItem breadcrumbItem)
+        {
+            var itemIndex = this.Items.IndexOf(breadcrumbItem);
+            var newState = new List<IBreadcrumbItem>(this.Items.Take(itemIndex+1));
+            await this.Use(newState);
+            this.NavigationManager.NavigateTo(breadcrumbItem.Link);
+        }
+
         /// <summary>
         /// Notifies a change
         /// </summary>

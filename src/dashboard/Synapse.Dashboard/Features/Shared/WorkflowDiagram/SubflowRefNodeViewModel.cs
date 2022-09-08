@@ -23,15 +23,15 @@ namespace Synapse.Dashboard
     /// Represents a <see cref="SubflowReference"/> <see cref="NodeViewModel"/>
     /// </summary>
     public class SubflowRefNodeViewModel
-        : LabeledNodeViewModel
+        : ActionNodeViewModel
     {
 
         /// <summary>
         /// Initializes a new <see cref="SubflowRefNodeViewModel"/>
         /// </summary>
         /// <param name="subflow">The <see cref="SubflowReference"/> the <see cref="SubflowRefNodeViewModel"/> represents</param>
-        public SubflowRefNodeViewModel(SubflowReference subflow)
-            : base($"{subflow.WorkflowId}{(string.IsNullOrEmpty(subflow.Version) ? "" : $":{subflow.Version}")}", "subflow-node")
+        public SubflowRefNodeViewModel(ActionDefinition action, SubflowReference subflow)
+            : base(action, $"{subflow.WorkflowId}:{subflow.Version ?? "latest"}", "subflow-node")
         {
             this.Subflow = subflow;
         }

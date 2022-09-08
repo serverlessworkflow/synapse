@@ -21,6 +21,7 @@
 @using Neuroglia.Serialization
 @using Newtonsoft.Json
 @using System.Text
+@using Synapse.Integration.Events.WorkflowInstances
 @implements IDisposable
 @inject IStore Store
 @inject IDispatcher Dispatcher
@@ -56,7 +57,7 @@
 {
     <div class="container-fluid h-100">
         <div class="row h-50 position-relative">
-            <WorkflowDiagram @ref="workflowDiagram" WorkflowDefinition="workflow.Definition" OnMouseUp="HandleNodeClick" />
+            <WorkflowDiagram @ref="workflowDiagram" WorkflowDefinition="workflow.Definition" OnMouseUp="@(async (e) => await HandleNodeClick(e))" />
         </div>
         <div class="row h-50">            
             @if (workflowInstance == null)
@@ -196,7 +197,6 @@ else
     protected V1WorkflowInstance? workflowInstance = null;
     protected List<V1WorkflowActivity> sortedActivities = new List<V1WorkflowActivity>();
     protected List<V1WorkflowInstance> instances = new();
-    protected IEnumerable<IBreadcrumbItem> workflowBreadCrumbBase = null!;
     protected WorkflowToolbar? workflowToolbar = null;
 
     protected override async Task OnInitializedAsync()
@@ -251,18 +251,16 @@ else
                 this.UpdateMetrics();
                 this.StateHasChanged();
             });
-        this.Dispatcher.Dispatch(new GetV1WorkflowById(this.WorkflowId));
-        this.Dispatcher.Dispatch(new ListV1WorkflowInstancesByDefinition(this.WorkflowId));
         await this.BreadcrumbService.Use(KnownBreadcrumbs.Workflows);
         await this.BreadcrumbService.AddItem(new BreadcrumbItem(this.WorkflowId.ToString(), $"/workflows/{this.WorkflowId}"));
-        this.workflowBreadCrumbBase = new List<IBreadcrumbItem>(this.BreadcrumbService.Items);
     }
 
     protected override async Task OnParametersSetAsync()
     {
-        await this.BreadcrumbService.Use(this.workflowBreadCrumbBase);
         if (this.WorkflowId != this.workflowId)
         {
+            this.Dispatcher.Dispatch(new GetV1WorkflowById(this.WorkflowId));
+            this.Dispatcher.Dispatch(new ListV1WorkflowInstancesByDefinition(this.WorkflowId));
             this.workflowId = this.WorkflowId;
             this.UpdateActivities();
         }
@@ -275,7 +273,10 @@ else
             }
             else {
                 this.workflowInstance = this.instances.FirstOrDefault(i => i.Id == this.WorkflowInstanceId);
-                await this.BreadcrumbService.AddCurrentUri($"Instance {this.WorkflowInstanceId}");
+                if (!this.BreadcrumbService.Items.Any(i => i.Link == new Uri(this.NavigationManager.Uri).PathAndQuery))
+                {
+                    await this.BreadcrumbService.AddCurrentUri($"Instance {this.WorkflowInstanceId}");
+                }
             }
             this.UpdateActivities();
         }
@@ -353,25 +354,49 @@ else
 
     private async Task ViewWorkflowInstance(V1WorkflowInstance workflowInstance)
     {
-        this.NavigationManager.NavigateTo($"/workflows/{this.WorkflowId}/instance/{workflowInstance.Id}");
-        await Task.CompletedTask;
+        var destination = $"/workflows/{this.WorkflowId}/instance/{workflowInstance.Id}";
+        await this.BreadcrumbService.AddItem(new BreadcrumbItem($"Instance {workflowInstance.Id}", destination));
+        this.NavigationManager.NavigateTo(destination);
     }
 
-    private void HandleNodeClick(GraphEventArgs<MouseEventArgs> e)
+    private async Task HandleNodeClick(GraphEventArgs<MouseEventArgs> e)
     {
         if (e.GraphElement != null)
         {
             switch (e.GraphElement) {
                 case SubflowRefNodeViewModel:
                     var subFlowNode = (SubflowRefNodeViewModel)e.GraphElement;
+                    var subFlowId = $"{subFlowNode.Subflow.WorkflowId}:{subFlowNode.Subflow.Version ?? "latest"}";
                     if (this.WorkflowInstanceId == null)
                     {
-                        this.NavigationManager.NavigateTo($"/workflows/{subFlowNode.Subflow.WorkflowId}:{subFlowNode.Subflow.Version}");
+                        var destination = $"/workflows/{subFlowId}";
+                        await this.BreadcrumbService.AddItem(new BreadcrumbItem($"Subflow {subFlowId}", destination));
+                        this.NavigationManager.NavigateTo(destination);
                     }
                     else
                     {
-                        // Match the activity and find the subflow instance id
-                        this.NavigationManager.NavigateTo($"/workflows/{subFlowNode.Subflow.WorkflowId}:{subFlowNode.Subflow.Version}/instance/!!TODO!!");
+                        var destination = $"/workflows/{subFlowId}";
+                        await this.BreadcrumbService.AddItem(new BreadcrumbItem($"Subflow {subFlowId}", destination));
+                        var stateNode = this.workflowDiagram.Graph?.AllClusters[subFlowNode.ParentId!.Value] as StateNodeViewModel;
+                        if (stateNode != null)
+                        {
+                            var activity = this.sortedActivities?.FirstOrDefault(activity =>
+                                activity.Type == V1WorkflowActivityType.Action
+                                && activity.Metadata["state"] == stateNode.State.Name
+                                && activity.Metadata["action"] == subFlowNode.Action.Name
+                            );
+                            if (activity?.Output != null)
+                            {
+                                var output = activity.Output.ToObject<V1WorkflowInstanceExecutedIntegrationEvent>();
+                                var instanceId = output?.AggregateId;
+                                if (instanceId != null)
+                                {
+                                    destination += $"/instance/{instanceId}";
+                                    await this.BreadcrumbService.AddItem(new BreadcrumbItem($"Instance {instanceId}", destination));
+                                }
+                            }
+                        }
+                        this.NavigationManager.NavigateTo(destination);
                     }
                     this.StateHasChanged();
                     break;
