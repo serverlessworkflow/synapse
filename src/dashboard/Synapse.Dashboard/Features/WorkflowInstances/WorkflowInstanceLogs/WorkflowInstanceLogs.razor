@@ -24,8 +24,7 @@
 
     private MarkupString logs;
 
-    [Parameter]
-    public V1WorkflowInstance WorkflowInstance { get; set; } = null!;
+    [Parameter] public V1WorkflowInstance WorkflowInstance { get; set; } = null!;
 
     protected override async Task OnParametersSetAsync()
     {

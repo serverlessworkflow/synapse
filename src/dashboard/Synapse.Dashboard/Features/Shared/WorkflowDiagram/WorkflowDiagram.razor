@@ -18,20 +18,20 @@
 @inject WorkflowGraphBuilder WorkflowGraphBuilder 
 
 
-@if (graph != null) {
-    <DagreGraph @ref="dagre" Graph="graph" />
+@if (Graph != null) {
+    <DagreGraph @ref="dagre" Graph="Graph" OnMouseUp="OnMouseUp" />
 }
 
 @code {
 
-    [Parameter]
-    public WorkflowDefinition WorkflowDefinition { get; set; } = null!;
+    [Parameter] public WorkflowDefinition WorkflowDefinition { get; set; } = null!;
     protected WorkflowDefinition workflowDefinition { get; set; } = null!;
 
-    [Parameter]
-    public bool EditMode { get; set; } = false;
+    [Parameter] public bool EditMode { get; set; } = false;
 
-    protected IGraphViewModel? graph { get; set; }
+    [Parameter] public EventCallback<GraphEventArgs<MouseEventArgs>> OnMouseUp { get; set; }
+
+    public IGraphViewModel? Graph { get; set; }
     protected DagreGraph? dagre { get; set;  }
 
     protected override async Task OnParametersSetAsync()
@@ -42,14 +42,14 @@
             var graph = await this.WorkflowGraphBuilder.BuildGraph(this.workflowDefinition);
             graph.Metadata = graph.Metadata ?? new Dictionary<string, object>();
             graph.Metadata.Add("EditMode", this.EditMode);
-            this.graph = graph;
+            this.Graph = graph;
         }
     }
       
     public virtual void DisplayActivityStatusFor(IEnumerable<V1WorkflowInstance> instances, bool highlightPath = false)
     {
-        if (this.graph != null) {
-            this.graph.DisplayActivityStatusFor(instances, highlightPath);
+        if (this.Graph != null) {
+            this.Graph.DisplayActivityStatusFor(instances, highlightPath);
         }
     }
 

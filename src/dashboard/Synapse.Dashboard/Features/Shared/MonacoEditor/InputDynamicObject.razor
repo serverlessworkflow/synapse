@@ -38,10 +38,8 @@
 
     [Parameter, EditorRequired] 
     public Expression<Func<DynamicObject>> ValidationFor { get; set; } = default!;
-    [Parameter] 
-    public string? Id { get; set; }
-    [Parameter] 
-    public string? Label { get; set; }
+    [Parameter] public string? Id { get; set; }
+    [Parameter] public string? Label { get; set; }
 
     protected string ComputedCssClass => "monaco-small " + this.CssClass;
     protected MonacoEditor editor = null!;

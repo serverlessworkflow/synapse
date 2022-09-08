@@ -16,12 +16,12 @@
 
 @namespace Synapse.Dashboard
 @inject IDispatcher Dispatcher
-@inject NavigationManager NavigationManager
+@inject IBreadcrumbService BreadcrumbService
 
 @if (WorkflowInstance != null)
 {
     <Toolbar>
-        <button @onclick="OnNavigateToWorkflow" class="btn btn-outline-dark" title="Back to list"><small class="oi oi-arrow-left"></small><span class="btn-label">&nbsp; Back to list</span></button>
+        <button @onclick="@(async () => await OnNavigateToWorkflow())" class="btn btn-outline-dark" title="Back to list"><small class="oi oi-arrow-left"></small><span class="btn-label">&nbsp; Back to list</span></button>
         @if(WorkflowInstance.Status == V1WorkflowInstanceStatus.Running) 
         {
             <button @onclick="() => Dispatcher.Dispatch(new SuspendV1WorkflowInstance(WorkflowInstance.Id))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-media-pause"></small><span class="btn-label">&nbsp; Suspend</span></button>
@@ -38,12 +38,12 @@
 }
 
 @code {
-    [Parameter]
-    public V1WorkflowInstance WorkflowInstance { get; set; } = null!;
+    [Parameter] public V1WorkflowInstance WorkflowInstance { get; set; } = null!;
 
-    protected void OnNavigateToWorkflow()
+    protected async Task OnNavigateToWorkflow()
     {
-        this.NavigationManager.NavigateTo($"/workflows/{this.WorkflowInstance.WorkflowId}");
+        var workflowItem = this.BreadcrumbService.Items.Take(this.BreadcrumbService.Items.Count - 1).Last();
+        await this.BreadcrumbService.NavigateTo(workflowItem);
     }
 
 }

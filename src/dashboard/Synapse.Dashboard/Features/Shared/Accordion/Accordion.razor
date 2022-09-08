@@ -39,26 +39,22 @@
     /// <summary>
     /// Gets/sets the title of the accordion
     /// </summary>
-    [Parameter]
-    public RenderFragment? Header { get; set; }
+    [Parameter] public RenderFragment? Header { get; set; }
 
     /// <summary>
     /// Gets/sets the content of the accordion
     /// </summary>
-    [Parameter]
-    public RenderFragment? Body { get; set; }
+    [Parameter] public RenderFragment? Body { get; set; }
 
     /// <summary>
     /// Gets/sets if the accordion is opened
     /// </summary>
-    [Parameter]
-    public bool IsExpanded { get; set; } = false;
+    [Parameter] public bool IsExpanded { get; set; } = false;
 
     /// <summary>
     /// Gets/sets if the accordion can be opened at the same time than others
     /// </summary>
-    [Parameter]
-    public bool AllowsMultiple { get; set; } = true;
+    [Parameter] public bool AllowsMultiple { get; set; } = true;
 
     /// <summary>
     /// Register the accordion

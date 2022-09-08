@@ -32,7 +32,7 @@ namespace Synapse.Dashboard
         /// <param name="action">The <see cref="ActionDefinition"/> the <see cref="FunctionRefNodeViewModel"/> represents</param>
         /// <param name="function">The <see cref="FunctionReference"/> the <see cref="FunctionRefNodeViewModel"/> represents</param>
         public FunctionRefNodeViewModel(ActionDefinition action, FunctionReference function) 
-            : base(action, "function-node")
+            : base(action, function.RefName, "function-node")
         {
             this.Function = function;
         }
