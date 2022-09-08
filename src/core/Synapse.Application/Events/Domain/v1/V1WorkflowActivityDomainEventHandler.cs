@@ -29,6 +29,8 @@ namespace Synapse.Application.Events.Domain
         INotificationHandler<V1WorkflowActivitySuspendedDomainEvent>,
         INotificationHandler<V1WorkflowActivityResumedDomainEvent>,
         INotificationHandler<V1WorkflowActivityFaultedDomainEvent>,
+        INotificationHandler<V1WorkflowActivityCompensatingDomainEvent>,
+        INotificationHandler<V1WorkflowActivityCompensatedDomainEvent>,
         INotificationHandler<V1WorkflowActivityCancelledDomainEvent>,
         INotificationHandler<V1WorkflowActivitySkippedDomainEvent>,
         INotificationHandler<V1WorkflowActivityCompletedDomainEvent>,
@@ -109,6 +111,30 @@ namespace Synapse.Application.Events.Domain
         }
 
         /// <inheritdoc/>
+        public virtual async Task HandleAsync(V1WorkflowActivityCompensatingDomainEvent e, CancellationToken cancellationToken = default)
+        {
+            var activity = await this.GetOrReconcileProjectionAsync(e.AggregateId, cancellationToken);
+            activity.LastModified = e.CreatedAt.UtcDateTime;
+            activity.Status = V1WorkflowActivityStatus.Compensating;
+            await this.Projections.UpdateAsync(activity, cancellationToken);
+            await this.Projections.SaveChangesAsync(cancellationToken);
+            await this.UpdateParentWorkflowInstanceAsync(activity, cancellationToken);
+            await this.PublishIntegrationEventAsync(e, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task HandleAsync(V1WorkflowActivityCompensatedDomainEvent e, CancellationToken cancellationToken = default)
+        {
+            var activity = await this.GetOrReconcileProjectionAsync(e.AggregateId, cancellationToken);
+            activity.LastModified = e.CreatedAt.UtcDateTime;
+            activity.Status = V1WorkflowActivityStatus.Compensated;
+            await this.Projections.UpdateAsync(activity, cancellationToken);
+            await this.Projections.SaveChangesAsync(cancellationToken);
+            await this.UpdateParentWorkflowInstanceAsync(activity, cancellationToken);
+            await this.PublishIntegrationEventAsync(e, cancellationToken);
+        }
+
+        /// <inheritdoc/>
         public virtual async Task HandleAsync(V1WorkflowActivityCancelledDomainEvent e, CancellationToken cancellationToken = default)
         {
             var activity = await this.GetOrReconcileProjectionAsync(e.AggregateId, cancellationToken);
@@ -157,7 +183,6 @@ namespace Synapse.Application.Events.Domain
         {
             await this.PublishIntegrationEventAsync(e, cancellationToken);
         }
-
 
         /// <summary>
         /// Updates the specified <see cref="Integration.Models.V1WorkflowActivity"/> parent <see cref="V1WorkflowInstance"/>

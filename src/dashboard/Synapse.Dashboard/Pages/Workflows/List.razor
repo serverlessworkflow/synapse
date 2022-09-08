@@ -77,8 +77,8 @@
         -->
         <Column T="KeyValuePair<string, List<V1Workflow>>" 
             Name="Latest version"
-            ValueProvider="g => g.Value.Max(w => w.Definition.Version)" />
-        <ViewDetailsColumn T="KeyValuePair<string, List<V1Workflow>>" OnViewDetails="kvp => OnViewWorkflow(kvp.Value.OrderBy(w => w.Definition.Version).Last())" />
+            ValueProvider="g => g.Value.Max(w => new Version(w.Definition.Version))" />
+        <ViewDetailsColumn T="KeyValuePair<string, List<V1Workflow>>" OnViewDetails="kvp => OnViewWorkflow(kvp.Value.OrderBy(w => new Version(w.Definition.Version)).Last())" />
     </Columns>
 </Table>
 

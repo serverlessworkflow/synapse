@@ -40,6 +40,10 @@ namespace Synapse.Dashboard
             this.State = state;
             this.IsFirst = isFirst;
             this.ComponentType = typeof(StateNodeTemplate);
+            if (this.State.UsedForCompensation)
+            {
+                this.CssClass = (this.CssClass ?? "") + " used-for-compensation";
+            }
         }
 
         /// <summary>
@@ -59,6 +63,9 @@ namespace Synapse.Dashboard
 
         /// <inheritdoc/>
         public ObservableCollection<V1WorkflowInstance> FaultedInstances { get; } = new();
+
+        /// <inheritdoc/>
+        public ObservableCollection<V1WorkflowInstance> CompensatedInstances { get; } = new();
 
     }
 

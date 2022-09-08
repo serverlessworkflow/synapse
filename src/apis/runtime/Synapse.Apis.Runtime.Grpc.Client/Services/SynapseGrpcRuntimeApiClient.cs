@@ -245,6 +245,24 @@ namespace Synapse.Apis.Runtime.Grpc
         }
 
         /// <inheritdoc/>
+        public virtual async Task<V1WorkflowActivity> CompensateActivityAsync(V1CompensateActivityCommand command, CancellationToken cancellationToken = default)
+        {
+            var result = await this.RuntimeApi.CompensateActivityAsync(command, cancellationToken);
+            if (!result.Succeeded)
+                throw new OperationResultException(new OperationResult(result.Code, result.Errors?.Select(e => new Neuroglia.Error(e.Code, e.Message))?.ToArray()));
+            return result.Data!;
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<V1WorkflowActivity> MarkActivityAsCompensatedAsync(V1MarkActivityAsCompensatedCommand command, CancellationToken cancellationToken = default)
+        {
+            var result = await this.RuntimeApi.MarkActivityAsCompensatedAsync(command, cancellationToken);
+            if (!result.Succeeded)
+                throw new OperationResultException(new OperationResult(result.Code, result.Errors?.Select(e => new Neuroglia.Error(e.Code, e.Message))?.ToArray()));
+            return result.Data!;
+        }
+
+        /// <inheritdoc/>
         public virtual async Task<V1WorkflowInstance> SuspendAsync(string workflowInstanceId, CancellationToken cancellationToken = default)
         {
             var result = await this.RuntimeApi.SuspendAsync(workflowInstanceId, cancellationToken);

@@ -185,6 +185,22 @@ namespace Synapse.Worker.Services
         Task FaultActivityAsync(V1WorkflowActivity activity, Integration.Models.Error error, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Compensates the specified <see cref="V1WorkflowActivity"/>
+        /// </summary>
+        /// <param name="activity">The <see cref="V1WorkflowActivity"/> to compensate</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        Task CompensateActivityAsync(V1WorkflowActivity activity, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Marks the specified <see cref="V1WorkflowActivity"/> as compensated
+        /// </summary>
+        /// <param name="activityId">The id of the <see cref="V1WorkflowActivity"/> to mark as compensated</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        Task MarkActivityAsCompensatedAsync(string activityId, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Gets the data of the <see cref="StateDefinition"/> the specified <see cref="V1WorkflowActivity"/> belongs to
         /// </summary>
         /// <param name="activity">The <see cref="V1WorkflowActivity"/> to get the <see cref="StateDefinition"/> data for</param>

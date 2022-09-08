@@ -169,6 +169,24 @@ namespace Synapse.Apis.Runtime
         Task<V1WorkflowActivity> FaultActivityAsync(V1FaultWorkflowActivityCommand command, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Compensates the specified activity
+        /// </summary>
+        /// <param name="command">The object that describes the command to execute</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The compensated activity</returns>
+        [OperationContract]
+        Task<V1WorkflowActivity> CompensateActivityAsync(V1CompensateActivityCommand command, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Martks the specified activity as compensated
+        /// </summary>
+        /// <param name="command">The object that describes the command to execute</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The compensated activity</returns>
+        [OperationContract]
+        Task<V1WorkflowActivity> MarkActivityAsCompensatedAsync(V1MarkActivityAsCompensatedCommand command, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Cancels the specified activity
         /// </summary>
         /// <param name="activityId">The id of the activity to cancel</param>

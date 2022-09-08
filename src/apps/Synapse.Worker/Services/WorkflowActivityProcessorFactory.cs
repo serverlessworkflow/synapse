@@ -255,7 +255,8 @@ namespace Synapse.Worker.Services
         /// <returns>A new <see cref="IWorkflowActivityProcessor"/></returns>
         protected virtual IWorkflowActivityProcessor CreateTransitionActivityProcessor(StateDefinition state, V1WorkflowActivity activity)
         {
-            var transition = null as TransitionDefinition;
+            activity.Metadata.TryGetValue(V1WorkflowActivityMetadata.NextState, out var transitionTo);
+            TransitionDefinition? transition;
             if (state is SwitchStateDefinition @switch)
             {
                 if (!activity.Metadata.TryGetValue(V1WorkflowActivityMetadata.Case, out var caseName))
@@ -264,13 +265,22 @@ namespace Synapse.Worker.Services
                     throw new NullReferenceException($"Failed to find a condition with the specified name '{caseName}'");
                 transition = dataCondition.Transition;
                 if (transition == null)
-                    transition = new() { NextState = dataCondition.TransitionToStateName! };
+                {
+                    if (string.IsNullOrWhiteSpace(transitionTo))
+                        transitionTo = dataCondition.TransitionToStateName!;
+                    transition = new() { NextState = transitionTo };
+                }
             }
             else
             {
                 transition = state.Transition;
                 if (transition == null)
-                    transition = new() { NextState = state.TransitionToStateName! };
+                {
+                    if (string.IsNullOrWhiteSpace(transitionTo))
+                        transitionTo = state.TransitionToStateName!;
+                    transition = new() { NextState = transitionTo };
+                }
+
             }
             return ActivatorUtilities.CreateInstance<TransitionProcessor>(this.ServiceProvider, activity, state, transition);
         }

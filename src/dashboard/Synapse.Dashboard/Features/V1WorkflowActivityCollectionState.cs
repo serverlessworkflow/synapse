@@ -145,6 +145,36 @@ namespace Synapse.Dashboard
 
     }
 
+    public class MarkV1WorkflowActivityAsCompensating
+    {
+
+        public MarkV1WorkflowActivityAsCompensating(string id, DateTime compensatingAt)
+        {
+            this.Id = id;
+            this.CompensatingAt = compensatingAt;
+        }
+
+        public string Id { get; }
+
+        public DateTime CompensatingAt { get; }
+
+    }
+
+    public class MarkV1WorkflowActivityAsCompensated
+    {
+
+        public MarkV1WorkflowActivityAsCompensated(string id, DateTime compensatedAt)
+        {
+            this.Id = id;
+            this.CompensatedAt = compensatedAt;
+        }
+
+        public string Id { get; }
+
+        public DateTime CompensatedAt { get; }
+
+    }
+
     public class RemoveV1WorkflowActivity
     {
 
@@ -252,6 +282,27 @@ namespace Synapse.Dashboard
                 activity.Error = action.Error;
                 activity.Output = action.Output;
                 activity.Status = action.Status;
+            }
+            return state;
+        }
+
+        public static V1WorkflowActivityCollectionState OnMarkV1WorkflowActivityAsCompensating(V1WorkflowActivityCollectionState state, MarkV1WorkflowActivityAsCompensating action)
+        {
+            var activity = state.FirstOrDefault(a => a.Id == action.Id);
+            if (activity != null)
+            {
+                activity.LastModified = action.CompensatingAt;
+            }
+            return state;
+        }
+
+        public static V1WorkflowActivityCollectionState OnMarkV1WorkflowActivityAsCompensated(V1WorkflowActivityCollectionState state, MarkV1WorkflowActivityAsCompensated action)
+        {
+            var activity = state.FirstOrDefault(a => a.Id == action.Id);
+            if (activity != null)
+            {
+                activity.LastModified = action.CompensatedAt;
+                activity.Status = V1WorkflowActivityStatus.Compensated;
             }
             return state;
         }

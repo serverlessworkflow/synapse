@@ -36,6 +36,11 @@ namespace Synapse.Dashboard
         /// </summary>
         ObservableCollection<V1WorkflowInstance> FaultedInstances { get; }
 
+
+        /// <summary>
+        /// Gets an <see cref="ObservableCollection{T}"/> containing the compensated <see cref="V1WorkflowInstance"/>s for which the activity described by the node is active
+        /// </summary>
+        ObservableCollection<V1WorkflowInstance> CompensatedInstances { get; }
     }
 
 }

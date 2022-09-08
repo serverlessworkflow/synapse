@@ -17,10 +17,13 @@
 
 using Microsoft.AspNetCore.OData;
 using Microsoft.AspNetCore.OData.NewtonsoftJson;
+using Microsoft.AspNetCore.OData.Query.Expressions;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using Synapse.Apis.Management.Http.Services;
 using Synapse.Application.Configuration;
 using Synapse.Application.Services;
 
@@ -42,21 +45,22 @@ namespace Synapse.Apis.Management.Http
         {
             synapse.Services
                 .AddControllers()
-                .AddNewtonsoftJson(options =>
-                {
-                    options.SerializerSettings.ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor;
-                    options.SerializerSettings.ContractResolver = new Newtonsoft.Json.Serialization.NonPublicSetterContractResolver();
-                    options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
-                    options.SerializerSettings.DateFormatHandling = DateFormatHandling.IsoDateFormat;
-                })
                 .AddOData((options, provider) =>
                 {
                     IEdmModelBuilder builder = provider.GetRequiredService<IEdmModelBuilder>();
-                    options.AddRouteComponents("api/odata", builder.Build())
+                    options.AddRouteComponents("api/odata", builder.Build(), services => services.AddSingleton<ISearchBinder, ODataSearchBinder>())
                         .EnableQueryFeatures(50);
                     options.RouteOptions.EnableControllerNameCaseInsensitive = true;
                 })
                 .AddODataNewtonsoftJson()
+                .AddNewtonsoftJson(options =>
+                {
+                    options.SerializerSettings.ContractResolver = new NonPublicSetterContractResolver();
+                    options.SerializerSettings.ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor;
+                    options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                    options.SerializerSettings.DefaultValueHandling = DefaultValueHandling.Ignore;
+                    options.SerializerSettings.DateFormatHandling = DateFormatHandling.IsoDateFormat;
+                })
                 .AddApplicationPart(typeof(ISynapseApplicationBuilderExtensions).Assembly)
                 .AddApplicationPart(typeof(MetadataController).Assembly);
             synapse.Services.AddSwaggerGen(builder =>

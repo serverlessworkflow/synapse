@@ -54,6 +54,23 @@ namespace Synapse.Application.Queries.Workflows
         /// </summary>
         public virtual string? Version { get; protected set; } = null!;
 
+        /// <summary>
+        /// Parses the specified reference into a new <see cref="V1GetWorkflowByIdQuery"/>
+        /// </summary>
+        /// <param name="reference">The reference to parse</param>
+        /// <returns>A new <see cref="V1GetWorkflowByIdQuery"/></returns>
+        public static V1GetWorkflowByIdQuery Parse(string reference)
+        {
+            if (string.IsNullOrEmpty(reference))
+                throw new ArgumentNullException(nameof(reference));
+            var components = reference.Split(':', StringSplitOptions.RemoveEmptyEntries);
+            var id = components.First();
+            string? version = null;
+            if (components.Length == 2)
+                version = components.Last();
+            return new(id, version);
+        }
+
     }
 
     /// <summary>
