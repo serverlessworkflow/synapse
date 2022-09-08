@@ -47,7 +47,7 @@ namespace Synapse.Dashboard
                             {
                                 nodes.ToList().ForEach(node => node.ActiveInstances.Add(instance));
                             }
-                            else if(activity.Status == V1WorkflowActivityStatus.Compensated)
+                            else if(activity.Status == V1WorkflowActivityStatus.Compensating)
                             {
                                 nodes.ToList().ForEach(node => node.CompensatedInstances.Add(instance));
                             }
@@ -119,7 +119,7 @@ namespace Synapse.Dashboard
                 case V1WorkflowActivityType.Start:
                     return graph.Nodes.Values.OfType<StartNodeViewModel>();
                 case V1WorkflowActivityType.State:
-                    return graph.GetStateNodesFor(activity);
+                    return graph.GetInnerStateNodesFor(activity);
                 case V1WorkflowActivityType.SubFlow:
                     throw new NotImplementedException(); //todo
                 default:
@@ -132,6 +132,15 @@ namespace Synapse.Dashboard
             if (!activity.Metadata.TryGetValue("state", out var stateName))
                 throw new InvalidDataException($"The specified activity's metadata does not define a 'state' value");
             return graph.Clusters.Values.OfType<StateNodeViewModel>().Where(g => g.State.Name == stateName);
+        }
+
+        private static IEnumerable<IWorkflowNodeViewModel> GetInnerStateNodesFor(this IGraphViewModel graph, V1WorkflowActivity activity)
+        {
+            var stateNodes = graph.GetStateNodesFor(activity);
+            return stateNodes
+                .Concat(stateNodes.SelectMany(node => node.Children.Values.OfType<InjectNodeViewModel>()) as IEnumerable<IWorkflowNodeViewModel>)
+                .Concat(stateNodes.SelectMany(node => node.Children.Values.OfType<SleepNodeViewModel>()) as IEnumerable<IWorkflowNodeViewModel>)
+            ;
         }
 
         private static IEnumerable<IWorkflowNodeViewModel>? GetActionNodesFor(this IGraphViewModel graph, V1WorkflowActivity activity)

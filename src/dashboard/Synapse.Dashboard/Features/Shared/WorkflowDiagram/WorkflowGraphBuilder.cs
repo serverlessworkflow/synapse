@@ -363,22 +363,13 @@ namespace Synapse.Dashboard
             {
                 throw new Exception($"Unable to define a last node for state '{state.Name}'. Every switch case should provide a last node.");
             }
-            if (!string.IsNullOrWhiteSpace(state.CompensatedBy))
-            {
-                var compensationState = definition.GetState(state.CompensatedBy);
-                if (compensationState == null)
-                    throw new Exception($"Failed to find a state with name '{state.CompensatedBy}' in definition '{definition.GetUniqueIdentifier()}'");
-                var compensationStateNode = await this.BuildStateNodes(definition, graph, compensationState, endNode, lastNode);
-                await this.BuildEdgeBetween(graph, lastNode, compensationStateNode.Children.Values.OfType<NodeViewModel>().First(), true);
-            }
             if (state.IsEnd
                 || state.End != null)
             {
                 //Console.WriteLine($"State '{state.Name}' ends");
                 await this.BuildEdgeBetween(graph, lastNode, endNode, state.UsedForCompensation);
-                return stateNodeGroup;
             }
-            if (!string.IsNullOrWhiteSpace(state.TransitionToStateName)
+            else if (!string.IsNullOrWhiteSpace(state.TransitionToStateName)
                 || state.Transition != null)
             {
                 var nextStateName = state.Transition == null ? state.TransitionToStateName! : state.Transition!.NextState;
@@ -388,7 +379,14 @@ namespace Synapse.Dashboard
                     throw new Exception($"Failed to find a state with name '{nextStateName}' in definition '{definition.GetUniqueIdentifier()}'");
                 var nextStateNode = await this.BuildStateNodes(definition, graph, nextState, endNode, lastNode);
                 await this.BuildEdgeBetween(graph, lastNode, nextStateNode.Children.Values.OfType<NodeViewModel>().First(), state.UsedForCompensation);
-                return stateNodeGroup;
+            }
+            if (!string.IsNullOrWhiteSpace(state.CompensatedBy))
+            {
+                var compensationState = definition.GetState(state.CompensatedBy);
+                if (compensationState == null)
+                    throw new Exception($"Failed to find a state with name '{state.CompensatedBy}' in definition '{definition.GetUniqueIdentifier()}'");
+                var compensationStateNode = await this.BuildStateNodes(definition, graph, compensationState, endNode, lastNode);
+                await this.BuildEdgeBetween(graph, lastNode, compensationStateNode.Children.Values.OfType<NodeViewModel>().First(), true);
             }
             //Console.WriteLine($"No transition for state '{state.Name}'");
             //Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(state));
