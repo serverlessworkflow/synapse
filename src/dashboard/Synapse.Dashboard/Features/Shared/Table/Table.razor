@@ -50,56 +50,44 @@
     private IEnumerable<T>? items;
     private Column<T>? draggedColumn;
 
-    [Parameter]
-    public string? TableClass { get; set; } = "table table-stripped table-hover";
+    [Parameter] public string? TableClass { get; set; } = "table table-stripped table-hover";
 
-    [Parameter]
-    public string? HeaderRowClass { get; set; }
+    [Parameter] public string? HeaderRowClass { get; set; }
 
-    [Parameter]
-    public string? HeaderClass { get; set; }
+    [Parameter] public string? HeaderClass { get; set; }
 
-    [Parameter]
-    public string? RowClass { get; set; }
+    [Parameter] public string? RowClass { get; set; }
 
-    [Parameter]
-    public string? CellClass { get; set; }
+    [Parameter] public string? CellClass { get; set; }
 
-    [Parameter]
-    public RenderFragment Columns { get; set; } = null!;
+    [Parameter] public RenderFragment Columns { get; set; } = null!;
 
-    [Parameter]
-    public bool AutoGenerateColumns { get; set; } = true;
+    [Parameter] public bool AutoGenerateColumns { get; set; } = true;
 
-    [Parameter]
-    public RenderFragment<ColumnHeaderRenderingContext<T>> DefaultHeaderTemplate { get; set; } = context => __builder =>
+    [Parameter] public RenderFragment<ColumnHeaderRenderingContext<T>> DefaultHeaderTemplate { get; set; } = context => __builder =>
     {
         __builder.OpenComponent(0, typeof(ColumnHeader<T>));
         __builder.AddAttribute(0, nameof(ColumnHeader<T>.RenderContext), context);
         __builder.CloseComponent();
     };
 
-    [Parameter]
-    public RenderFragment<RowRenderingContext<T>> RowTemplate { get; set; } = context => __builder =>
+    [Parameter] public RenderFragment<RowRenderingContext<T>> RowTemplate { get; set; } = context => __builder =>
     {
         __builder.OpenComponent(0, typeof(Row<T>));
         __builder.AddAttribute(0, nameof(Row<T>.RenderContext), context);
         __builder.CloseComponent();
     };
 
-    [Parameter]
-    public RenderFragment<CellRenderingContext<T>> DefaultCellTemplate { get; set; } = context => __builder =>
+    [Parameter] public RenderFragment<CellRenderingContext<T>> DefaultCellTemplate { get; set; } = context => __builder =>
     {
         __builder.OpenComponent(0, typeof(Cell<T>));
         __builder.AddAttribute(0, nameof(Cell<T>.RenderContext), context);
         __builder.CloseComponent();
     };
 
-    [Parameter]
-    public IEnumerable<T>? Items { get; set; }
+    [Parameter] public IEnumerable<T>? Items { get; set; }
 
-    [Parameter]
-    public EventCallback<Column<T>> OnOrderBy { get; set; }
+    [Parameter] public EventCallback<Column<T>> OnOrderBy { get; set; }
 
     public void AddColumn(Column<T> column)
     {

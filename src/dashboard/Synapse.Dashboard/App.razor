@@ -289,7 +289,7 @@
                 }   
             });
         this.IntegrationEventStream
-            .Where(e => e.Type == "io.synapse/v1workflowactivity/faulted/v1")
+            .Where(e => e.Type == "io.synapse/v1workflowactivity/cancelled/v1")
             .Subscribe(e =>
             {
                 try
@@ -310,6 +310,34 @@
                 {
                     var data = e.Data.ToObject<V1WorkflowActivityExecutedIntegrationEvent>();
                     this.Dispatcher.Dispatch(new MarkV1WorkflowActivityAsExecuted(data.AggregateId, data.CreatedAt, data.Status, data.Error, data.Output));
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }   
+            });
+        this.IntegrationEventStream
+            .Where(e => e.Type == "io.synapse/v1workflowactivity/compensating/v1")
+            .Subscribe(e =>
+            {
+                try
+                {
+                    var data = e.Data.ToObject<V1WorkflowActivityCompensatingIntegrationEvent>();
+                    this.Dispatcher.Dispatch(new MarkV1WorkflowActivityAsCompensating(data.AggregateId, data.CreatedAt));
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }   
+            });
+        this.IntegrationEventStream
+            .Where(e => e.Type == "io.synapse/v1workflowactivity/compensated/v1")
+            .Subscribe(e =>
+            {
+                try
+                {
+                    var data = e.Data.ToObject<V1WorkflowActivityCompensatedIntegrationEvent>();
+                    this.Dispatcher.Dispatch(new MarkV1WorkflowActivityAsCompensated(data.AggregateId, data.CreatedAt));
                 }
                 catch(Exception ex)
                 {

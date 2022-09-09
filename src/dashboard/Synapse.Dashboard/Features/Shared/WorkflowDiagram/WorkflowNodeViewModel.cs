@@ -37,6 +37,9 @@ namespace Synapse.Dashboard
         /// <inheritdoc/>
         public ObservableCollection<V1WorkflowInstance> FaultedInstances { get; } = new();
 
+        /// <inheritdoc/>
+        public ObservableCollection<V1WorkflowInstance> CompensatedInstances { get; } = new();
+
         public WorkflowNodeViewModel(
             string? label = "",
             string? cssClass = null,

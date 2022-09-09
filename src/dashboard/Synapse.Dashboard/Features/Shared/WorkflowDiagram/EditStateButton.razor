@@ -31,11 +31,9 @@
 </g>
 
 @code {
-    [CascadingParameter(Name = "Node")]
-    public INodeViewModel Node { get; set; } = null!;
+    [CascadingParameter(Name = "Node")] public INodeViewModel Node { get; set; } = null!;
 
-    [Parameter]
-    public EventCallback<MouseEventArgs> OnEditState { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> OnEditState { get; set; }
     
     protected virtual string X => ((this.Node.BBox?.Width ?? 0) / 2).ToInvariantString();
     protected virtual string Y { get; set; } = "0";

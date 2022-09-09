@@ -71,23 +71,17 @@
 @code 
 {
 
-    [CascadingParameter]
-    private JsonForm Form { get; set; }
+    [CascadingParameter] private JsonForm Form { get; set; }
 
-    [Parameter]
-    public string Name { get; set; }
+    [Parameter] public string Name { get; set; }
 
-    [Parameter]
-    public JSchema Schema { get; set; }
+    [Parameter] public JSchema Schema { get; set; }
 
-    [Parameter]
-    public object Value { get; set; }
+    [Parameter] public object Value { get; set; }
 
-    [Parameter]
-    public bool IsRequired { get; set; }
+    [Parameter] public bool IsRequired { get; set; }
 
-    [Parameter]
-    public EventCallback<ChangeEventArgs> OnValueChanged { get; set; }
+    [Parameter] public EventCallback<ChangeEventArgs> OnValueChanged { get; set; }
 
     string RequiredPropertySuffix => this.IsRequired ? " *" : "";
 

@@ -73,8 +73,7 @@
 }
 
 @code {
-    [CascadingParameter]
-    public virtual WorkflowVisualEditor? Container { get; set; }
+    [CascadingParameter] public virtual WorkflowVisualEditor? Container { get; set; }
 
     protected virtual StateNodeViewModel? predecessor { get; set; }
 

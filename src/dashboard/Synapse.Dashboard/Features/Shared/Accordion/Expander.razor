@@ -27,23 +27,19 @@
 @code
 {
 
-    [Parameter]
-    public string HeaderContainerTagName { get; set; } = "div";
+    [Parameter] public string HeaderContainerTagName { get; set; } = "div";
 
-    [Parameter]
-    public string BodyContainerTagName { get; set; } = "div";
+    [Parameter] public string BodyContainerTagName { get; set; } = "div";
 
     /// <summary>
     /// Gets the <see cref="Expander"/>'s header <see cref="RenderFragment"/>
     /// </summary>
-    [Parameter]
-    public RenderFragment Header { get; set; }
+    [Parameter] public RenderFragment Header { get; set; }
 
     /// <summary>
     /// Gets the <see cref="Expander"/>'s header template <see cref="RenderFragment"/>
     /// </summary>
-    [Parameter]
-    public RenderFragment<Expander> HeaderTemplate { get; set; } = context =>
+    [Parameter] public RenderFragment<Expander> HeaderTemplate { get; set; } = context =>
     {
         return 
     @<div class="row align-items-center no-gutters @(context.IsExpanded ? "" : "border-bottom border-muted") pb-2">
@@ -62,14 +58,12 @@
     /// <summary>
     /// Gets the <see cref="Expander"/>'s body <see cref="RenderFragment"/>
     /// </summary>
-    [Parameter]
-    public RenderFragment Body { get; set; }
+    [Parameter] public RenderFragment Body { get; set; }
 
     /// <summary>
     /// Gets a boolean indicating whether or not the <see cref="Expander"/> is expanded
     /// </summary>
-    [Parameter]
-    public bool IsExpanded { get; set; }
+    [Parameter] public bool IsExpanded { get; set; }
 
 
     public bool AllowsMultiple { get; set; } = true;
@@ -82,8 +76,7 @@
     /// <summary>
     /// Gets the <see cref="EventCallback"/> to invoke whenever the <see cref="Expander"/> is being expanded or collapsed
     /// </summary>
-    [Parameter]
-    public EventCallback<bool> OnToggleExpand { get; set; }
+    [Parameter] public EventCallback<bool> OnToggleExpand { get; set; }
 
     public async Task ToggleExpandAsync()
     {

@@ -31,8 +31,8 @@ namespace Synapse.Dashboard
         /// Initializes a new <see cref="ActionNodeViewModel"/>
         /// </summary>
         /// <param name="action">The <see cref="ActionDefinition"/> the <see cref="ActionNodeViewModel"/> represents</param>
-        public ActionNodeViewModel(ActionDefinition action, string? cssClass = "action-node")
-            : base(action.Name ?? action.Function?.RefName ?? action.Subflow?.WorkflowId ?? action.RetryRef, cssClass)
+        public ActionNodeViewModel(ActionDefinition action, string? label = null, string? cssClass = "action-node")
+            : base(label ?? action.Name, cssClass)
         {
             this.Action = action;
         }

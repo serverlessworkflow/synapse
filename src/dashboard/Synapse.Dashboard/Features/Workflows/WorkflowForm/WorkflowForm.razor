@@ -56,10 +56,8 @@
 
 @code {
 
-    [Parameter]
-    public EventCallback<WorkflowDefinition> OnSubmitWorkflowDefinition { get; set; }
-    [Parameter]
-    public bool CreateDisabled { get; set; }
+    [Parameter] public EventCallback<WorkflowDefinition> OnSubmitWorkflowDefinition { get; set; }
+    [Parameter] public bool CreateDisabled { get; set; }
     protected IList<string> validationErrors = new List<string>();
     protected MonacoEditor editor = null!;
 

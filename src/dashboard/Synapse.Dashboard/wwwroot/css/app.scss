@@ -144,6 +144,12 @@ input[type=time]::-webkit-clear-button {
 
 .edges {
     pointer-events: none;
+
+    .used-for-compensation {
+        path {
+            stroke-dasharray: 4;
+        }
+    }
 }
 
 .ghost {

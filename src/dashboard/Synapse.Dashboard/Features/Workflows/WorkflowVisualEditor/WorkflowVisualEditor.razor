@@ -34,10 +34,8 @@
 </div>
 
 @code {
-    [Parameter]
-    public virtual EventCallback<WorkflowDefinition> OnSubmitWorkflowDefinition { get; set; }
-    [Parameter]
-    public bool CreateDisabled { get; set; }
+    [Parameter] public virtual EventCallback<WorkflowDefinition> OnSubmitWorkflowDefinition { get; set; }
+    [Parameter] public bool CreateDisabled { get; set; }
 
     protected WorkflowDefinition workflowDefinition = new WorkflowDefinition();
 

@@ -52,10 +52,8 @@
 
     [Parameter, EditorRequired] 
     public Expression<Func<string?>> ValidationFor { get; set; } = default!;
-    [Parameter] 
-    public string? Id { get; set; }
-    [Parameter] 
-    public string? Label { get; set; }
+    [Parameter] public string? Id { get; set; }
+    [Parameter] public string? Label { get; set; }
 
     protected MonacoEditor editor = null!;
     protected string editorId = Guid.NewGuid().ToString();

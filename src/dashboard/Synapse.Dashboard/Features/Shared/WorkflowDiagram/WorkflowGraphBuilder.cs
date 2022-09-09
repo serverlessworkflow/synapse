@@ -36,9 +36,9 @@ namespace Synapse.Dashboard
         /// <inheritdoc/>
         public async Task<IGraphViewModel> BuildGraph(WorkflowDefinition definition)
         {
-            var isEmpty = definition.States == null || !definition.States.Any();
+            var isEmpty = definition.States == null || !definition.States.Any(s => !s.UsedForCompensation);
             var graph = new GraphViewModel();
-            //graph.RegisterBehavior(new DragAndDropNodeBehavior(graph, this.jSRuntime));
+            graph.RegisterBehavior(new DragAndDropNodeBehavior(graph, this.jSRuntime));
             var startNode = this.BuildStartNode(!isEmpty);
             var endNode = this.BuildEndNode();
             await graph.AddElementAsync(startNode);
@@ -48,7 +48,7 @@ namespace Synapse.Dashboard
             }
             else
             {
-                await this.BuildEdgeBetween(graph, startNode, endNode);
+                await this.BuildEdgeBetween(graph, startNode, endNode, false);
             }
             await graph.AddElementAsync(endNode);
             return await Task.FromResult(graph);
@@ -75,14 +75,14 @@ namespace Synapse.Dashboard
                 {
                     case CallbackStateDefinition callbackState:
                         {
-                            var actionNodes = await this.BuildActionNodes(graph, callbackState.Action!);
+                            var actionNodes = await this.BuildActionNodes(graph, callbackState.Action!, state.UsedForCompensation);
                             lastNode = this.BuildConsumeEventNode(callbackState.Event!);
                             foreach (var actionNode in actionNodes)
                             {
                                 await stateNodeGroup.AddChildAsync(actionNode);
                             }
-                            await this.BuildEdgeBetween(graph, previousNode, actionNodes.First());
-                            await this.BuildEdgeBetween(graph, actionNodes.Last(), lastNode);
+                            await this.BuildEdgeBetween(graph, previousNode, actionNodes.First(), state.UsedForCompensation);
+                            await this.BuildEdgeBetween(graph, actionNodes.Last(), lastNode, state.UsedForCompensation);
                             await stateNodeGroup.AddChildAsync(lastNode);
                             break;
                         }
@@ -91,34 +91,34 @@ namespace Synapse.Dashboard
                             firstNode = this.BuildParellelNode();
                             lastNode = this.BuildParellelNode();
                             await stateNodeGroup.AddChildAsync(firstNode);
-                            await this.BuildEdgeBetween(graph, previousNode, firstNode);
+                            await this.BuildEdgeBetween(graph, previousNode, firstNode, state.UsedForCompensation);
                             foreach (var trigger in eventState.Triggers)
                             {
                                 var gatewayIn = this.BuildGatewayNode(eventState.Exclusive ? GatewayNodeType.Xor : GatewayNodeType.And);
                                 var gatewayOut = this.BuildGatewayNode(eventState.Exclusive ? GatewayNodeType.Xor : GatewayNodeType.And);
                                 await stateNodeGroup.AddChildAsync(gatewayIn);
                                 await stateNodeGroup.AddChildAsync(gatewayOut);
-                                await this.BuildEdgeBetween(graph, firstNode, gatewayIn);
+                                await this.BuildEdgeBetween(graph, firstNode, gatewayIn, state.UsedForCompensation);
                                 foreach (var eventName in trigger.Events)
                                 {
                                     var eventNode = this.BuildConsumeEventNode(eventName);
                                     await stateNodeGroup.AddChildAsync(eventNode);
-                                    await this.BuildEdgeBetween(graph, gatewayIn, eventNode);
-                                    await this.BuildEdgeBetween(graph, eventNode, gatewayOut);
+                                    await this.BuildEdgeBetween(graph, gatewayIn, eventNode, state.UsedForCompensation);
+                                    await this.BuildEdgeBetween(graph, eventNode, gatewayOut, state.UsedForCompensation);
                                     if (trigger.Actions == null || !trigger.Actions.Any())
                                     {
-                                        await this.BuildEdgeBetween(graph, gatewayOut, lastNode);
+                                        await this.BuildEdgeBetween(graph, gatewayOut, lastNode, state.UsedForCompensation);
                                     }
                                 }
                                 foreach (var action in trigger.Actions)
                                 {
-                                    var actionsNodes = await this.BuildActionNodes(graph, action);
+                                    var actionsNodes = await this.BuildActionNodes(graph, action, state.UsedForCompensation);
                                     foreach (var actionNode in actionsNodes)
                                     {
                                         await stateNodeGroup.AddChildAsync(actionNode);
                                     }
-                                    await this.BuildEdgeBetween(graph, gatewayOut, actionsNodes.First());
-                                    await this.BuildEdgeBetween(graph, actionsNodes.Last(), lastNode);
+                                    await this.BuildEdgeBetween(graph, gatewayOut, actionsNodes.First(), state.UsedForCompensation);
+                                    await this.BuildEdgeBetween(graph, actionsNodes.Last(), lastNode, state.UsedForCompensation);
                                 }
                             }
                             await stateNodeGroup.AddChildAsync(lastNode);
@@ -132,16 +132,16 @@ namespace Synapse.Dashboard
                                     firstNode = this.BuildForEachNode(foreachState);
                                     lastNode = this.BuildForEachNode(foreachState);
                                     await stateNodeGroup.AddChildAsync(firstNode);
-                                    await this.BuildEdgeBetween(graph, previousNode, firstNode);
+                                    await this.BuildEdgeBetween(graph, previousNode, firstNode, state.UsedForCompensation);
                                     foreach (var action in foreachState.Actions)
                                     {
-                                        var actionNodes = await this.BuildActionNodes(graph, action);
+                                        var actionNodes = await this.BuildActionNodes(graph, action, state.UsedForCompensation);
                                         foreach (var actionNode in actionNodes)
                                         {
                                             await stateNodeGroup.AddChildAsync(actionNode);
                                         }
-                                        await this.BuildEdgeBetween(graph, firstNode, actionNodes.First());
-                                        await this.BuildEdgeBetween(graph, actionNodes.Last(), lastNode);
+                                        await this.BuildEdgeBetween(graph, firstNode, actionNodes.First(), state.UsedForCompensation);
+                                        await this.BuildEdgeBetween(graph, actionNodes.Last(), lastNode, state.UsedForCompensation);
                                     }
                                     await stateNodeGroup.AddChildAsync(lastNode);
                                     break;
@@ -149,12 +149,12 @@ namespace Synapse.Dashboard
                                     lastNode = previousNode;
                                     foreach (var action in foreachState.Actions)
                                     {
-                                        var actionNodes = await this.BuildActionNodes(graph, action);
+                                        var actionNodes = await this.BuildActionNodes(graph, action, state.UsedForCompensation);
                                         foreach (var actionNode in actionNodes)
                                         {
                                             await stateNodeGroup.AddChildAsync(actionNode);
                                         }
-                                        await this.BuildEdgeBetween(graph, lastNode, actionNodes.First());
+                                        await this.BuildEdgeBetween(graph, lastNode, actionNodes.First(), state.UsedForCompensation);
                                         lastNode = actionNodes.Last();
                                     }
                                     break;
@@ -167,7 +167,7 @@ namespace Synapse.Dashboard
                         {
                             lastNode = this.BuildInjectNode(injectState);
                             await stateNodeGroup.AddChildAsync(lastNode);
-                            await this.BuildEdgeBetween(graph, previousNode, lastNode);
+                            await this.BuildEdgeBetween(graph, previousNode, lastNode, state.UsedForCompensation);
                             break;
                         }
                     case OperationStateDefinition operationState:
@@ -178,16 +178,16 @@ namespace Synapse.Dashboard
                                     firstNode = this.BuildParellelNode();
                                     lastNode = this.BuildParellelNode();
                                     await stateNodeGroup.AddChildAsync(firstNode);
-                                    await this.BuildEdgeBetween(graph, previousNode, firstNode);
+                                    await this.BuildEdgeBetween(graph, previousNode, firstNode, state.UsedForCompensation);
                                     foreach (var action in operationState.Actions)
                                     {
-                                        var actionNodes = await this.BuildActionNodes(graph, action);
+                                        var actionNodes = await this.BuildActionNodes(graph, action, state.UsedForCompensation);
                                         foreach (var actionNode in actionNodes)
                                         {
                                             await stateNodeGroup.AddChildAsync(actionNode);
                                         }
-                                        await this.BuildEdgeBetween(graph, firstNode, actionNodes.First());
-                                        await this.BuildEdgeBetween(graph, actionNodes.Last(), lastNode);
+                                        await this.BuildEdgeBetween(graph, firstNode, actionNodes.First(), state.UsedForCompensation);
+                                        await this.BuildEdgeBetween(graph, actionNodes.Last(), lastNode, state.UsedForCompensation);
                                     }
                                     await stateNodeGroup.AddChildAsync(lastNode);
                                     break;
@@ -195,12 +195,12 @@ namespace Synapse.Dashboard
                                     lastNode = previousNode;
                                     foreach (var action in operationState.Actions)
                                     {
-                                        var actionNodes = await this.BuildActionNodes(graph, action);
+                                        var actionNodes = await this.BuildActionNodes(graph, action, state.UsedForCompensation);
                                         foreach (var actionNode in actionNodes)
                                         {
                                             await stateNodeGroup.AddChildAsync(actionNode);
                                         }
-                                        await this.BuildEdgeBetween(graph, lastNode, actionNodes.First());
+                                        await this.BuildEdgeBetween(graph, lastNode, actionNodes.First(), state.UsedForCompensation);
                                         lastNode = actionNodes.Last();
                                     }
                                     break;
@@ -214,18 +214,18 @@ namespace Synapse.Dashboard
                             firstNode = parallelState.CompletionType == ParallelCompletionType.AllOf ? this.BuildParellelNode() : this.BuildGatewayNode(GatewayNodeType.N);
                             lastNode = parallelState.CompletionType == ParallelCompletionType.AllOf ? this.BuildParellelNode() : this.BuildGatewayNode(GatewayNodeType.N);
                             await stateNodeGroup.AddChildAsync(firstNode);
-                            await this.BuildEdgeBetween(graph, previousNode, firstNode);
+                            await this.BuildEdgeBetween(graph, previousNode, firstNode, state.UsedForCompensation);
                             foreach (var branch in parallelState.Branches)
                             {
                                 foreach (var action in branch.Actions)
                                 {
-                                    var actionNodes = await this.BuildActionNodes(graph, action);
+                                    var actionNodes = await this.BuildActionNodes(graph, action, state.UsedForCompensation);
                                     foreach (var actionNode in actionNodes)
                                     {
                                         await stateNodeGroup.AddChildAsync(actionNode);
                                     }
-                                    await this.BuildEdgeBetween(graph, firstNode, actionNodes.First());
-                                    await this.BuildEdgeBetween(graph, actionNodes.Last(), lastNode);
+                                    await this.BuildEdgeBetween(graph, firstNode, actionNodes.First(), state.UsedForCompensation);
+                                    await this.BuildEdgeBetween(graph, actionNodes.Last(), lastNode, state.UsedForCompensation);
                                 }
                             }
                             await stateNodeGroup.AddChildAsync(lastNode);
@@ -235,29 +235,29 @@ namespace Synapse.Dashboard
                         {
                             lastNode = this.BuildSleepNode(sleepState);
                             await stateNodeGroup.AddChildAsync(lastNode);
-                            await this.BuildEdgeBetween(graph, previousNode, lastNode);
+                            await this.BuildEdgeBetween(graph, previousNode, lastNode, state.UsedForCompensation);
                             break;
                         }
                     case SwitchStateDefinition switchState:
                         {
                             firstNode = this.BuildGatewayNode(GatewayNodeType.Xor);
                             await stateNodeGroup.AddChildAsync(firstNode);
-                            await this.BuildEdgeBetween(graph, previousNode, firstNode);
+                            await this.BuildEdgeBetween(graph, previousNode, firstNode, state.UsedForCompensation);
                             switch (switchState.SwitchType)
                             {
                                 case SwitchStateType.Data:
                                     {
-                                        foreach (var condition in switchState.DataConditions!)
+                                        foreach (var condition in switchState.DataConditions)
                                         {
                                             var caseNode = this.BuildDataConditionNode(condition.Name!); // todo: should be a labeled edge, not a node?
                                             await stateNodeGroup.AddChildAsync(caseNode);
-                                            await this.BuildEdgeBetween(graph, firstNode, caseNode);
-                                            switch (condition.OutcomeType)
+                                            await this.BuildEdgeBetween(graph, firstNode, caseNode, state.UsedForCompensation);
+                                            switch (condition.Type)
                                             {
-                                                case SwitchCaseOutcomeType.End:
-                                                    await this.BuildEdgeBetween(graph, caseNode, endNode);
+                                                case ConditionType.End:
+                                                    await this.BuildEdgeBetween(graph, caseNode, endNode, state.UsedForCompensation);
                                                     break;
-                                                case SwitchCaseOutcomeType.Transition:
+                                                case ConditionType.Transition:
                                                     var nextStateName = condition.Transition == null ? condition.TransitionToStateName : condition.Transition.NextState;
                                                     var nextState = definition.GetState(nextStateName!);
                                                     if (nextState == null)
@@ -266,19 +266,19 @@ namespace Synapse.Dashboard
                                                     lastNode = nextStateNode.Children.Values.OfType<NodeViewModel>().Last();
                                                     break;
                                                 default:
-                                                    throw new Exception($"The specified condition type '${condition.OutcomeType}' is not supported");
+                                                    throw new Exception($"The specified condition type '${condition.Type}' is not supported");
                                             }
                                         }
                                         var defaultCaseNode = this.BuildDataConditionNode("default");
                                         await stateNodeGroup.AddChildAsync(defaultCaseNode);
-                                        await this.BuildEdgeBetween(graph, firstNode, defaultCaseNode);
+                                        await this.BuildEdgeBetween(graph, firstNode, defaultCaseNode, state.UsedForCompensation);
                                         if (switchState.DefaultCondition.IsEnd
                                             || switchState.DefaultCondition.End != null)
                                         {
                                             lastNode = defaultCaseNode;
                                             if (!state.IsEnd && state.End == null)
                                             {
-                                                await this.BuildEdgeBetween(graph, lastNode, endNode);
+                                                await this.BuildEdgeBetween(graph, lastNode, endNode, state.UsedForCompensation);
                                             }
                                         }
                                         else if (!string.IsNullOrWhiteSpace(switchState.DefaultCondition.TransitionToStateName)
@@ -292,25 +292,25 @@ namespace Synapse.Dashboard
                                             lastNode = nextStateNode.Children.Values.OfType<NodeViewModel>().Last();
                                             if (string.IsNullOrWhiteSpace(state.TransitionToStateName) && state.Transition == null)
                                             {
-                                                await this.BuildEdgeBetween(graph, defaultCaseNode, lastNode);
+                                                await this.BuildEdgeBetween(graph, defaultCaseNode, lastNode, state.UsedForCompensation);
                                             }
                                         }
                                     }
                                     break;
                                 case SwitchStateType.Event:
                                     {
-                                        foreach (var condition in switchState.EventConditions!)
+                                        foreach (var condition in switchState.EventConditions)
                                         {
                                             Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(condition));
                                             var caseNode = this.BuildDataConditionNode(condition.Name ?? condition.Event); // todo: should be a labeled edge, not a node?
                                             await stateNodeGroup.AddChildAsync(caseNode);
-                                            await this.BuildEdgeBetween(graph, firstNode, caseNode);
-                                            switch (condition.OutcomeType)
+                                            await this.BuildEdgeBetween(graph, firstNode, caseNode, state.UsedForCompensation);
+                                            switch (condition.Type)
                                             {
-                                                case SwitchCaseOutcomeType.End:
-                                                    await this.BuildEdgeBetween(graph, caseNode, endNode);
+                                                case ConditionType.End:
+                                                    await this.BuildEdgeBetween(graph, caseNode, endNode, state.UsedForCompensation);
                                                     break;
-                                                case SwitchCaseOutcomeType.Transition:
+                                                case ConditionType.Transition:
                                                     var nextStateName = condition.Transition == null ? condition.TransitionToStateName : condition.Transition.NextState;
                                                     var nextState = definition.GetState(nextStateName!);
                                                     if (nextState == null)
@@ -319,19 +319,19 @@ namespace Synapse.Dashboard
                                                     lastNode = nextStateNode.Children.Values.OfType<NodeViewModel>().Last();
                                                     break;
                                                 default:
-                                                    throw new Exception($"The specified condition type '${condition.OutcomeType}' is not supported");
+                                                    throw new Exception($"The specified condition type '${condition.Type}' is not supported");
                                             }
                                         }
                                         var defaultCaseNode = this.BuildDataConditionNode("default");
                                         await stateNodeGroup.AddChildAsync(defaultCaseNode);
-                                        await this.BuildEdgeBetween(graph, firstNode, defaultCaseNode);
+                                        await this.BuildEdgeBetween(graph, firstNode, defaultCaseNode, state.UsedForCompensation);
                                         if (switchState.DefaultCondition.IsEnd
                                             || switchState.DefaultCondition.End != null)
                                         {
                                             lastNode = defaultCaseNode;
                                             if (!state.IsEnd && state.End == null)
                                             {
-                                                await this.BuildEdgeBetween(graph, lastNode, endNode);
+                                                await this.BuildEdgeBetween(graph, lastNode, endNode, state.UsedForCompensation);
                                             }
                                         }
                                         else if (!string.IsNullOrWhiteSpace(switchState.DefaultCondition.TransitionToStateName)
@@ -345,7 +345,7 @@ namespace Synapse.Dashboard
                                             lastNode = nextStateNode.Children.Values.OfType<NodeViewModel>().Last();
                                             if (string.IsNullOrWhiteSpace(state.TransitionToStateName) && state.Transition == null)
                                             {
-                                                await this.BuildEdgeBetween(graph, defaultCaseNode, lastNode);
+                                                await this.BuildEdgeBetween(graph, defaultCaseNode, lastNode, state.UsedForCompensation);
                                             }
                                         }
                                     }
@@ -367,10 +367,9 @@ namespace Synapse.Dashboard
                 || state.End != null)
             {
                 //Console.WriteLine($"State '{state.Name}' ends");
-                await this.BuildEdgeBetween(graph, lastNode, endNode);
-                return stateNodeGroup;
+                await this.BuildEdgeBetween(graph, lastNode, endNode, state.UsedForCompensation);
             }
-            if (!string.IsNullOrWhiteSpace(state.TransitionToStateName)
+            else if (!string.IsNullOrWhiteSpace(state.TransitionToStateName)
                 || state.Transition != null)
             {
                 var nextStateName = state.Transition == null ? state.TransitionToStateName! : state.Transition!.NextState;
@@ -379,26 +378,33 @@ namespace Synapse.Dashboard
                 if (nextState == null)
                     throw new Exception($"Failed to find a state with name '{nextStateName}' in definition '{definition.GetUniqueIdentifier()}'");
                 var nextStateNode = await this.BuildStateNodes(definition, graph, nextState, endNode, lastNode);
-                await this.BuildEdgeBetween(graph, lastNode, nextStateNode.Children.Values.OfType<NodeViewModel>().First());
-                return stateNodeGroup;
+                await this.BuildEdgeBetween(graph, lastNode, nextStateNode.Children.Values.OfType<NodeViewModel>().First(), state.UsedForCompensation);
+            }
+            if (!string.IsNullOrWhiteSpace(state.CompensatedBy))
+            {
+                var compensationState = definition.GetState(state.CompensatedBy);
+                if (compensationState == null)
+                    throw new Exception($"Failed to find a state with name '{state.CompensatedBy}' in definition '{definition.GetUniqueIdentifier()}'");
+                var compensationStateNode = await this.BuildStateNodes(definition, graph, compensationState, endNode, lastNode);
+                await this.BuildEdgeBetween(graph, lastNode, compensationStateNode.Children.Values.OfType<NodeViewModel>().First(), true);
             }
             //Console.WriteLine($"No transition for state '{state.Name}'");
             //Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(state));
             return stateNodeGroup;
         }
 
-        protected async Task<List<NodeViewModel>> BuildActionNodes(GraphViewModel graph, ActionDefinition action)
+        protected async Task<List<NodeViewModel>> BuildActionNodes(GraphViewModel graph, ActionDefinition action, bool usedForCompensation)
         {
             switch (action.Type)
             {
                 case ActionType.Function:
                     return new() { this.BuildFunctionNode(action, action.Function!) };
                 case ActionType.Subflow:
-                    return new() { this.BuildSubflowNode(action.Subflow!) };
+                    return new() { this.BuildSubflowNode(action, action.Subflow!) };
                 case ActionType.Trigger:
                     var triggerEventNode = this.BuildProduceEventNode(action.Event!.ProduceEvent);
                     var resultEventNode = this.BuildConsumeEventNode(action.Event!.ResultEvent);
-                    await this.BuildEdgeBetween(graph, triggerEventNode, resultEventNode);
+                    await this.BuildEdgeBetween(graph, triggerEventNode, resultEventNode, usedForCompensation);
                     return new() { triggerEventNode, resultEventNode };
                 default:
                     throw new NotSupportedException($"The specified action type '{action.Type}' is not supported");
@@ -410,9 +416,9 @@ namespace Synapse.Dashboard
             return new(action, function);
         }
 
-        protected SubflowRefNodeViewModel BuildSubflowNode(SubflowReference subflowRef)
+        protected SubflowRefNodeViewModel BuildSubflowNode(ActionDefinition action, SubflowReference subflowRef)
         {
-            return new(subflowRef);
+            return new(action, subflowRef);
         }
 
         protected EventNodeViewModel BuildProduceEventNode(string refName)
@@ -473,9 +479,9 @@ namespace Synapse.Dashboard
         /// <param name="source">The edge's source node</param>
         /// <param name="target">The edge's target node</param>
         /// <returns></returns>
-        protected async Task BuildEdgeBetween(GraphViewModel graph, NodeViewModel source, NodeViewModel target)
+        protected async Task BuildEdgeBetween(GraphViewModel graph, NodeViewModel source, NodeViewModel target, bool compensationEdge)
         {
-            await graph.AddElementAsync(new EdgeViewModel(source.Id, target.Id));
+            await graph.AddElementAsync(new EdgeViewModel(source.Id, target.Id, null, compensationEdge ? "used-for-compensation" : ""));
         }
 
 

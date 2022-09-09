@@ -21,7 +21,7 @@
     <ul class="breadcrumb">
         @foreach(var item in BreadcrumbService.Items) {
             <li class="breadcrumb-item">
-                <a href="@item.Link">
+                <a href="" @onclick="@(async() => await BreadcrumbService.NavigateTo(item))" @onclick:preventDefault>
                     @if (!String.IsNullOrWhiteSpace(item.Icon))
                     {
                         <small class="oi @item.Icon" aria-hidden="true"></small>
@@ -44,7 +44,7 @@
     {
         this.StateHasChanged();
     }
-    
+
 
     public void Dispose()
     {

@@ -23,8 +23,10 @@
         <NodeShapeTemplate />
         <NodeLabelTemplate /> 
         <CascadingValue Name="ActiveInstances" Value="WorkflowNode.ActiveInstances">
-            <CascadingValue Name="FaultedInstances" Value="WorkflowNode.FaultedInstances">
-                <ActivityBadges />
+            <CascadingValue Name="CompensatedInstances" Value="WorkflowNode.CompensatedInstances">
+                <CascadingValue Name="FaultedInstances" Value="WorkflowNode.FaultedInstances">
+                    <ActivityBadges />
+                </CascadingValue>
             </CascadingValue>
         </CascadingValue>
         @if (Graph.ShowConstruction) {

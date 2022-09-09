@@ -33,14 +33,11 @@
 @code 
 {
 
-    [Parameter]
-    public JSchema Schema { get; set; } = null!;
+    [Parameter] public JSchema Schema { get; set; } = null!;
 
-    [Parameter]
-    public object? Value { get; set; }
+    [Parameter] public object? Value { get; set; }
 
-    [Parameter]
-    public EventCallback<ChangeEventArgs> OnValueChanged { get; set; }
+    [Parameter] public EventCallback<ChangeEventArgs> OnValueChanged { get; set; }
 
     private IDictionary<string, object> modelProperties = null!;
     private List<JsonFormProperty> formProperties = new();
