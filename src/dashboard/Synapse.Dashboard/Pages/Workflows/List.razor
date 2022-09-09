@@ -28,6 +28,7 @@
 <AppRightSidebar>
     <Toolbar>
         <button @onclick="OnNewWorkflow" class="btn btn-outline-dark" title="New workflow"><small class="oi oi-plus"></small><span class="btn-label">&nbsp; New workflow</span></button>
+        <button @onclick="OnUploadWorkflow" class="btn btn-outline-dark" title="Upload workflow"><small class="oi oi-data-transfer-upload"></small><span class="btn-label">&nbsp; Upload workflow</span></button>
     </Toolbar>
 </AppRightSidebar>
 <Table Items="workflows" AutoGenerateColumns="false">
@@ -105,6 +106,11 @@
     void OnNewWorkflow()
     {
         this.NavigationManager.NavigateTo("/workflows/new");
+    }
+
+    void OnUploadWorkflow()
+    {
+        this.NavigationManager.NavigateTo("/workflows/upload");
     }
 
     void OnViewWorkflow(V1Workflow workflow)
