@@ -128,12 +128,12 @@ namespace Synapse.Worker.Services
             if (runtimeExpression.StartsWith("${"))
                 runtimeExpression = runtimeExpression[2..^1].Trim();
             var args = await this.BuildRuntimExpressionArgumentsAsync(cancellationToken);
-            foreach (Match functionMatch in Regex.Matches(runtimeExpression, @"(fn:\w*)"))
+            foreach (Match functionMatch in Regex.Matches(runtimeExpression, @"(fn:[\w\-_]*)"))
             {
                 var functionName = functionMatch.Value.Trim();
                 functionName = functionName[3..];
                 if (!this.Workflow.Definition.TryGetFunction(functionName, out var function))
-                    throw new NullReferenceException($"Failed to find a function with the specified name '{functionName}' in the workflow '{this.Workflow}'");
+                    throw new NullReferenceException($"Failed to find a function with the specified name '{functionName}' in the workflow '{this.Workflow.Definition}'");
                 if (function.Type != FunctionType.Expression)
                     throw new InvalidOperationException($"The function with name '{function.Name}' is of type '{EnumHelper.Stringify(function.Type)}' and cannot be called in an expression");
                 var value = this.ExpressionEvaluator.Evaluate(function.Operation, data!, args);
