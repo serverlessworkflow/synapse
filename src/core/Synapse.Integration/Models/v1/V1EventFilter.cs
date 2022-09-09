@@ -38,6 +38,13 @@ namespace Synapse.Integration.Models
                 if (!Regex.IsMatch(value, attribute.Value, RegexOptions.IgnoreCase))
                     return false;
             }
+            foreach (var mapping in this.CorrelationMappings)
+            {
+                if (!e.TryGetAttribute(mapping.Key, out var value))
+                    return false;
+                if (!mapping.Value.Equals(value, StringComparison.OrdinalIgnoreCase))
+                    return false;
+            }
             return true;
         }
 
