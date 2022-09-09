@@ -4,7 +4,7 @@
 		<TargetFramework>net6.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<VersionPrefix>0.1.25</VersionPrefix>
+		<VersionPrefix>0.1.26</VersionPrefix>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<Authors>The Synapse Authors</Authors>
 		<Company>Cloud Native Computing Foundation</Company>
@@ -31,7 +31,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.OData" Version="8.0.11" />
     <PackageReference Include="Microsoft.AspNetCore.OData.NewtonsoftJson" Version="8.0.4" />
-    <PackageReference Include="Neuroglia.Mediation.AspNetCore" Version="2.0.1.79" />
+    <PackageReference Include="Neuroglia.Mediation.AspNetCore" Version="2.0.1.82" />
 	<PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.4.0" />
 	<PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.4.0" />
   </ItemGroup>
