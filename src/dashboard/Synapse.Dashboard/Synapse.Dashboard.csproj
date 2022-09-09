@@ -18,11 +18,11 @@
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="6.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.NewtonsoftJson" Version="6.0.8" />
     <PackageReference Include="Neuroglia.Blazor.Dagre" Version="2.0.1.79" />
-    <PackageReference Include="Neuroglia.Core" Version="2.0.1.79" />
-    <PackageReference Include="Neuroglia.Data.Flux" Version="2.0.1.79" />
-    <PackageReference Include="Neuroglia.Data.Flux.ReduxDevTools" Version="2.0.1.79" />
-    <PackageReference Include="Neuroglia.Data.OData" Version="2.0.1.79" />
-    <PackageReference Include="Neuroglia.Mapping" Version="2.0.1.79" />
+	<PackageReference Include="Neuroglia.Core" Version="2.0.1.79" />
+	<PackageReference Include="Neuroglia.Data.Flux" Version="2.0.1.79" />
+	<PackageReference Include="Neuroglia.Data.Flux.ReduxDevTools" Version="2.0.1.79" />
+	<PackageReference Include="Neuroglia.Data.OData" Version="2.0.1.79" />
+	<PackageReference Include="Neuroglia.Mapping" Version="2.0.1.79" />
   </ItemGroup>
 
   <ItemGroup>

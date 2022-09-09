@@ -39,7 +39,7 @@
     <PackageReference Include="Neuroglia.Serialization.Json" Version="2.0.1.79" />
     <PackageReference Include="Neuroglia.Serialization.NewtonsoftJson" Version="2.0.1.79" />
     <PackageReference Include="Neuroglia.Serialization.Protobuf" Version="2.0.1.79" />
-    <PackageReference Include="ServerlessWorkflow.Sdk" Version="0.8.1.13" />
+    <PackageReference Include="ServerlessWorkflow.Sdk" Version="0.8.1.14" />
     <PackageReference Include="System.ServiceModel.Primitives" Version="4.10.0" />
   </ItemGroup>
 
