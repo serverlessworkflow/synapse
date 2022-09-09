@@ -247,17 +247,17 @@ namespace Synapse.Dashboard
                             {
                                 case SwitchStateType.Data:
                                     {
-                                        foreach (var condition in switchState.DataConditions)
+                                        foreach (var condition in switchState.DataConditions!)
                                         {
                                             var caseNode = this.BuildDataConditionNode(condition.Name!); // todo: should be a labeled edge, not a node?
                                             await stateNodeGroup.AddChildAsync(caseNode);
                                             await this.BuildEdgeBetween(graph, firstNode, caseNode);
-                                            switch (condition.Type)
+                                            switch (condition.OutcomeType)
                                             {
-                                                case ConditionType.End:
+                                                case SwitchCaseOutcomeType.End:
                                                     await this.BuildEdgeBetween(graph, caseNode, endNode);
                                                     break;
-                                                case ConditionType.Transition:
+                                                case SwitchCaseOutcomeType.Transition:
                                                     var nextStateName = condition.Transition == null ? condition.TransitionToStateName : condition.Transition.NextState;
                                                     var nextState = definition.GetState(nextStateName!);
                                                     if (nextState == null)
@@ -266,7 +266,7 @@ namespace Synapse.Dashboard
                                                     lastNode = nextStateNode.Children.Values.OfType<NodeViewModel>().Last();
                                                     break;
                                                 default:
-                                                    throw new Exception($"The specified condition type '${condition.Type}' is not supported");
+                                                    throw new Exception($"The specified condition type '${condition.OutcomeType}' is not supported");
                                             }
                                         }
                                         var defaultCaseNode = this.BuildDataConditionNode("default");
@@ -299,18 +299,18 @@ namespace Synapse.Dashboard
                                     break;
                                 case SwitchStateType.Event:
                                     {
-                                        foreach (var condition in switchState.EventConditions)
+                                        foreach (var condition in switchState.EventConditions!)
                                         {
                                             Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(condition));
                                             var caseNode = this.BuildDataConditionNode(condition.Name ?? condition.Event); // todo: should be a labeled edge, not a node?
                                             await stateNodeGroup.AddChildAsync(caseNode);
                                             await this.BuildEdgeBetween(graph, firstNode, caseNode);
-                                            switch (condition.Type)
+                                            switch (condition.OutcomeType)
                                             {
-                                                case ConditionType.End:
+                                                case SwitchCaseOutcomeType.End:
                                                     await this.BuildEdgeBetween(graph, caseNode, endNode);
                                                     break;
-                                                case ConditionType.Transition:
+                                                case SwitchCaseOutcomeType.Transition:
                                                     var nextStateName = condition.Transition == null ? condition.TransitionToStateName : condition.Transition.NextState;
                                                     var nextState = definition.GetState(nextStateName!);
                                                     if (nextState == null)
@@ -319,7 +319,7 @@ namespace Synapse.Dashboard
                                                     lastNode = nextStateNode.Children.Values.OfType<NodeViewModel>().Last();
                                                     break;
                                                 default:
-                                                    throw new Exception($"The specified condition type '${condition.Type}' is not supported");
+                                                    throw new Exception($"The specified condition type '${condition.OutcomeType}' is not supported");
                                             }
                                         }
                                         var defaultCaseNode = this.BuildDataConditionNode("default");
