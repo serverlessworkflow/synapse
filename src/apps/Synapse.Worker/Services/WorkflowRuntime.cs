@@ -474,7 +474,7 @@ namespace Synapse.Worker.Services
                 {
                     SwitchCaseOutcomeType.End => await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.End, e.Output, metadata, null, this.CancellationToken),
                     SwitchCaseOutcomeType.Transition => await this.Context.Workflow.CreateActivityAsync(V1WorkflowActivityType.Transition, e.Output, metadata, null, this.CancellationToken),
-                    _ => throw new NotSupportedException($"The specified condition type '{switchCase.OutcomeType}' is not supported in this context"),
+                    _ => throw new NotSupportedException($"The specified condition type '{switchCase.OutcomeType}' is not supported in this context")
                 };
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                 this.CreateActivityProcessor(activity);
