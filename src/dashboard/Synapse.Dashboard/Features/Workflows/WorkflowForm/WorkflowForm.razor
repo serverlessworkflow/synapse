@@ -25,13 +25,13 @@
 @inject IDispatcher Dispatcher
 
 
-<label class="form-form-label">Definition</label>
+<label class="form-form-label">Definition</label>     
+<div class="form-check form-switch">
+    <input class="form-check-input" type="checkbox" role="switch" id="toggle-language" checked='language == "json"' @onchange="ToggleLanguage">
+    <label class="form-check-label" for="toggle-language">Language: @this.language</label>
+</div>
 <div class="flex-grow d-flex flex-row w-100 h-100">
-    <div class="w-75 h-100 mh-100">        
-        <div class="form-check form-switch align-self-end">
-            <input class="form-check-input" type="checkbox" role="switch" id="toggle-language" checked='language == "json"' @onchange="ToggleLanguage">
-            <label class="form-check-label" for="toggle-language">Language: @this.language</label>
-        </div>
+    <div class="w-75 h-100 mh-100">   
         @if (language == "json")
         {            
             <MonacoEditor
@@ -85,6 +85,7 @@
 
     protected virtual void ToggleLanguage()
     {
+        // TODO : convert editor value ?
         this.language = this.language == "json" ? "yaml" : "json";
     }
 
