@@ -22,6 +22,7 @@ namespace Synapse.Dashboard
         public static IEnumerable<IBreadcrumbItem> Home = new List<IBreadcrumbItem>() { new BreadcrumbItem("Home", "/", "oi-clipboard") };
         public static IEnumerable<IBreadcrumbItem> Workflows = new List<IBreadcrumbItem>(KnownBreadcrumbs.Home) { new BreadcrumbItem("Workflows", "/workflows", "oi-cog") };
         public static IEnumerable<IBreadcrumbItem> CreateWorkflow = new List<IBreadcrumbItem>(KnownBreadcrumbs.Workflows) { new BreadcrumbItem("Create Workflow", "/workflows/new") };
+        public static IEnumerable<IBreadcrumbItem> UploadWorkflow = new List<IBreadcrumbItem>(KnownBreadcrumbs.Workflows) { new BreadcrumbItem("Upload Workflow", "/workflows/upload") };
         public static IEnumerable<IBreadcrumbItem> Correlations = new List<IBreadcrumbItem>(KnownBreadcrumbs.Home) { new BreadcrumbItem("Correlations", "/correlations", "oi-link-intact") };
     }
 }
