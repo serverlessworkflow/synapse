@@ -23,17 +23,15 @@
 @inject IWorkflowReader WorkflowReader
 @inject IWorkflowValidator WorkflowValidator
 @inject IDispatcher Dispatcher
+@inject IYamlService YamlService
 
 
-<label class="form-form-label">Definition</label>     
-<div class="form-check form-switch">
-    <input class="form-check-input" type="checkbox" role="switch" id="toggle-language" checked='language == "json"' @onchange="ToggleLanguage">
-    <label class="form-check-label" for="toggle-language">Language: @this.language</label>
-</div>
+<label class="form-form-label">Definition</label>
+<PreferedLanguageSelector PreferedLanguageChange="ToggleLanguage" />
 <div class="flex-grow d-flex flex-row w-100 h-100">
     <div class="w-75 h-100 mh-100">   
-        @if (language == "json")
-        {            
+        @if (MonacoEditorHelper.PreferedLanguage == "json")
+        {   
             <MonacoEditor
                 @ref="jsonEditor"
                 Id="json-definition-editor"
@@ -41,10 +39,10 @@
                 ConstructionOptions='MonacoEditorHelper.GetStandaloneEditorConstructionOptions()'
                 OnDidInit="OnMonacoEditorDidInit"
                 OnDidChangeModelDecorations="OnMonacoEditorDidChangeModelDecorations"
-            />
+            />    
         }
-        @if (language == "yaml")
-        {            
+        @if (MonacoEditorHelper.PreferedLanguage == "yaml")
+        {  
             <MonacoEditor
                 @ref="yamlEditor"
                 Id="yaml-definition-editor"
@@ -77,16 +75,33 @@
     [Parameter] public EventCallback<WorkflowDefinition> OnSubmitWorkflowDefinition { get; set; }
     [Parameter] public bool CreateDisabled { get; set; }
     protected IList<string> validationErrors = new List<string>();
+    protected string editorValueBuffer = "";
     protected MonacoEditor jsonEditor = null!;
     protected MonacoEditor yamlEditor = null!;
-    protected MonacoEditor editor { get => this.language == "json" ? this.jsonEditor : this.yamlEditor; }
-    protected string language = "json";
+    protected MonacoEditor editor { get => this.MonacoEditorHelper.PreferedLanguage == "json" ? this.jsonEditor : this.yamlEditor; }
 
-
-    protected virtual void ToggleLanguage()
+    protected virtual async Task ToggleLanguage(string newLanguage)
     {
-        // TODO : convert editor value ?
-        this.language = this.language == "json" ? "yaml" : "json";
+        string text = "";
+        try
+        {
+            if (newLanguage == "yaml") {
+                text = await this.jsonEditor.GetValue();
+                this.editorValueBuffer = await this.YamlService.JsonToYaml(text);
+            }
+            else
+            {
+                text = await this.yamlEditor.GetValue();
+                this.editorValueBuffer = await this.YamlService.YamlToJson(text);
+            }
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            this.editorValueBuffer = text;
+            await this.MonacoEditorHelper.ChangePreferedLanguage(newLanguage == "json" ? "yaml" : "json");
+        }
+        this.StateHasChanged();
     }
 
     async Task OnCreateWorkflow()
@@ -129,8 +144,9 @@
     protected async Task OnMonacoEditorDidInit(MonacoEditorBase editorBase)
     {
         var model = await this.editor.GetModel();
-        await this.editor.SetValue("");
-        if (this.language == "json") await model.jsRuntime.InvokeVoidAsync("enableJsonValidation08" , model.Uri);
+        await this.editor.SetValue(this.editorValueBuffer);
+        //if (this.language == "json") 
+        await model.jsRuntime.InvokeVoidAsync("enableJsonValidation08" , model.Uri);
     }
 
     protected async Task OnMonacoEditorDidChangeModelDecorations(ModelDecorationsChangedEvent modelDecorationsChangedEvent)

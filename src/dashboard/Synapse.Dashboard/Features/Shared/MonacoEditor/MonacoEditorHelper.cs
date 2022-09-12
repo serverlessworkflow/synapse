@@ -16,12 +16,18 @@
  */
 
 using BlazorMonaco;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace Synapse.Dashboard
 {
     public class MonacoEditorHelper
         : IMonacoEditorHelper
     {
+        public string PreferedLanguage { get; protected set; } = "json";
+
+        public event PreferedLanguageChangedEventHandler? PreferedLanguageChanged;
+
         public Func<MonacoEditor, StandaloneEditorConstructionOptions> GetStandaloneEditorConstructionOptions(string value = "", bool readOnly = false, string language = "json") {
             return (MonacoEditor editor) => new StandaloneEditorConstructionOptions
             {
@@ -33,7 +39,6 @@ namespace Synapse.Dashboard
             };
         }
 
-
         public Func<MonacoDiffEditor, DiffEditorConstructionOptions> GetDiffEditorConstructionOptions(bool readOnly = true)
         {
             return (MonacoDiffEditor editor) => new DiffEditorConstructionOptions
@@ -42,6 +47,24 @@ namespace Synapse.Dashboard
                 Minimap = new EditorMinimapOptions { Enabled = false },
                 ReadOnly = readOnly
             };
+        }
+
+        public async Task ChangePreferedLanguage(string language)
+        {
+            if (!string.IsNullOrEmpty(language) && language != this.PreferedLanguage)
+            {
+                this.PreferedLanguage = language;
+                await this.OnPreferedLanguageChange(language);
+            }
+        }
+
+        protected async Task OnPreferedLanguageChange(string language)
+        {
+            if (this.PreferedLanguageChanged != null)
+            {
+                await this.PreferedLanguageChanged.Invoke(language);
+            }
+            await Task.CompletedTask;
         }
     }
 }
