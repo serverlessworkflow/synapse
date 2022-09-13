@@ -238,3 +238,7 @@ input[type=time]::-webkit-clear-button {
 table .details {
     text-align: right;
 }
+
+.upload-page {
+    gap: var(--bs-gutter-x);
+}
