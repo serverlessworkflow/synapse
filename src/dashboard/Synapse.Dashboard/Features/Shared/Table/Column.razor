@@ -97,7 +97,15 @@
     {
         if (this.ValueProvider == null)
             this.BuildValueProvider();
-        var value = this.ValueProvider!.Compile().Invoke(item)!;
+        var valueProvider = this.ValueProvider!.Compile();
+        object? value = null;
+        try
+        {
+            value = valueProvider.Invoke(item);
+        }
+        catch { }
+        if (value == null)
+            return null;
         if (string.IsNullOrWhiteSpace(this.Format)
             || value is not IFormattable formattable)
             return value;

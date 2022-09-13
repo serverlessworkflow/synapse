@@ -25,6 +25,27 @@ namespace Synapse.Integration.Models
         /// <summary>
         /// Initializes a new <see cref="NameValueCollection{TValue}"/>
         /// </summary>
+        /// <param name="items">An array containing the items the <see cref="NameValueCollection{TValue}"/> is made out of</param>
+        /// <remarks>This constructor is a quick, dirty turn around a 'Simple.OData.Client' <see href="https://github.com/simple-odata-client/Simple.OData.Client/issues/878">issue</see></remarks>
+        public NameValueCollection(IEnumerable<string> items)
+        {
+            //todo: remove once Simple.OData.Client issue has been fixed
+            this.Items = items.Select(str => str[1..^1].Split(',', StringSplitOptions.RemoveEmptyEntries))
+                .ToDictionary(cpn => cpn.First(), cpn => (object)string.Join(',', cpn.Skip(1)));
+        }
+
+        /// <summary>
+        /// Initializes a new <see cref="NameValueCollection{TValue}"/>
+        /// </summary>
+        /// <param name="items">An <see cref="IDictionary{TKey, TValue}"/> containing the items the <see cref="NameValueCollection{TValue}"/> is made out of</param>
+        public NameValueCollection(IEnumerable<KeyValuePair<string, TValue>> items)
+        {
+            this.Items = items.ToDictionary(kvp => kvp.Key, kvp => kvp.Value as object);
+        }
+
+        /// <summary>
+        /// Initializes a new <see cref="NameValueCollection{TValue}"/>
+        /// </summary>
         /// <param name="items">An <see cref="IDictionary{TKey, TValue}"/> containing the items the <see cref="NameValueCollection{TValue}"/> is made out of</param>
         public NameValueCollection(IDictionary<string, TValue> items)
         {

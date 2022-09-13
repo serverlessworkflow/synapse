@@ -134,6 +134,21 @@ namespace Synapse.Apis.Management.Http
         }
 
         /// <inheritdoc/>
+        public virtual async Task<List<V1Workflow>> SearchWorkflowsAsync(string term, string? query = null, CancellationToken cancellationToken = default)
+        {
+            var requestUri = "/api/odata/v1workflows";
+            if (!string.IsNullOrWhiteSpace(query))
+                requestUri += $"?$search={term}{(string.IsNullOrWhiteSpace(query) ? string.Empty : $"&{query}")}";
+            using var request = this.CreateRequest(HttpMethod.Get, requestUri);
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while querying workflows: {details}", json);
+            response.EnsureSuccessStatusCode();
+            return await this.Serializer.DeserializeAsync<List<V1Workflow>>(json, cancellationToken);
+        }
+
+        /// <inheritdoc/>
         public virtual async Task<V1Workflow> GetWorkflowByIdAsync(string id, CancellationToken cancellationToken = default)
         {
             using var request = this.CreateRequest(HttpMethod.Get, $"/api/v1/workflows/{id}");

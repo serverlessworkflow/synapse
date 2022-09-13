@@ -27,6 +27,7 @@ namespace Synapse.Application.Events.Domain
         : DomainEventHandlerBase<V1Correlation, Integration.Models.V1Correlation, string>,
         INotificationHandler<V1CorrelationCreatedDomainEvent>,
         INotificationHandler<V1ContextAddedToCorrelationDomainEvent>,
+        INotificationHandler<V1EventCorrelatedDomainEvent>,
         INotificationHandler<V1CorrelationContextReleasedDomainEvent>,
         INotificationHandler<V1CorrelationDeletedDomainEvent>
     {
@@ -55,6 +56,24 @@ namespace Synapse.Application.Events.Domain
             correlation.Contexts.Add(this.Mapper.Map<Integration.Models.V1CorrelationContext>(e.Context));
             await this.Projections.UpdateAsync(correlation, cancellationToken);
             await this.Projections.SaveChangesAsync(cancellationToken);
+            await this.PublishIntegrationEventAsync(e, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task HandleAsync(V1EventCorrelatedDomainEvent e, CancellationToken cancellationToken = default)
+        {
+            var correlation = await this.GetOrReconcileProjectionAsync(e.AggregateId, cancellationToken);
+            var context = correlation.Contexts.FirstOrDefault(c => c.Id == e.ContextId);
+            if (context == null)
+                return;
+            if (context.PendingEvents == null)
+                context.PendingEvents = new List<Integration.Models.V1Event>();
+            if (context.PendingEvents.Any(evt => evt.Id == e.Event.Id))
+                return;
+            context.PendingEvents.Add(this.Mapper.Map< Integration.Models.V1Event>(e.Event));
+            await this.Projections.UpdateAsync(correlation, cancellationToken);
+            await this.Projections.SaveChangesAsync(cancellationToken);
+            await this.PublishIntegrationEventAsync(e, cancellationToken);
         }
 
         /// <inheritdoc/>
@@ -69,6 +88,7 @@ namespace Synapse.Application.Events.Domain
             correlation.Contexts.Remove(context);
             await this.Projections.UpdateAsync(correlation, cancellationToken);
             await this.Projections.SaveChangesAsync(cancellationToken);
+            await this.PublishIntegrationEventAsync(e, cancellationToken);
         }
 
         /// <inheritdoc/>
@@ -77,6 +97,7 @@ namespace Synapse.Application.Events.Domain
             var correlation = await this.GetOrReconcileProjectionAsync(e.AggregateId, cancellationToken);
             await this.Projections.RemoveAsync(correlation, cancellationToken);
             await this.Projections.SaveChangesAsync(cancellationToken);
+            await this.PublishIntegrationEventAsync(e, cancellationToken);
         }
 
     }

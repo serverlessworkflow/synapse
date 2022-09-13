@@ -34,4 +34,10 @@
     <ProjectReference Include="..\..\apis\monitoring\Synapse.Apis.Monitoring.Core\Synapse.Apis.Monitoring.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="Pages\Correlations\View.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+  </ItemGroup>
+
 </Project>

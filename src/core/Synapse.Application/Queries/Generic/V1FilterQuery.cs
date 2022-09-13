@@ -73,15 +73,13 @@ namespace Synapse.Application.Queries.Generic
         /// <inheritdoc/>
         public virtual async Task<IOperationResult<List<TEntity>>> HandleAsync(V1FilterQuery<TEntity> query, CancellationToken cancellationToken = default)
         {
-            return await Task.Run(() =>
-            {
-                var toFilter = this.Repository.AsQueryable();
+                var toFilter = (await this.Repository.ToListAsync(cancellationToken)).AsQueryable();
                 var filtered = query.Options?.ApplyTo(toFilter);
                 if (filtered == null)
                     filtered = toFilter;
                 return this.Ok(filtered.OfType<TEntity>().ToList());
-            }, cancellationToken);
         }
 
     }
+
 }

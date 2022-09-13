@@ -78,7 +78,8 @@ namespace Synapse.Worker.Services.Processors
                     if (!string.IsNullOrWhiteSpace(value)
                         && value.IsRuntimeExpression())
                         value = (await this.Context.EvaluateAsync(value, this.Activity.Input.ToObject()!, cancellationToken))!.ToString();
-                    await this.Context.Workflow.SetCorrelationMappingAsync(correlation.ContextAttributeName, value!, cancellationToken);
+                    if(!string.IsNullOrWhiteSpace(value))
+                        await this.Context.Workflow.SetCorrelationMappingAsync(correlation.ContextAttributeName, value!, cancellationToken);
                 }
             }
         }

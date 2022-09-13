@@ -247,7 +247,6 @@ else
             {
                 if(this.instances == null || !this.instances.Any())
                     return;
-                var foo = activities.ToList();
                 this.instances.ForEach(instance =>
                 {
                     var instanceActivities = activities.Where(activity => activity.WorkflowInstanceId == instance.Id);

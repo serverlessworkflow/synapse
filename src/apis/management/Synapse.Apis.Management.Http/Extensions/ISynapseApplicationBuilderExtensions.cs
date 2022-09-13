@@ -26,6 +26,7 @@ using Newtonsoft.Json.Serialization;
 using Synapse.Apis.Management.Http.Services;
 using Synapse.Application.Configuration;
 using Synapse.Application.Services;
+using Synapse.Integration.Serialization.Converters;
 
 namespace Synapse.Apis.Management.Http
 {
@@ -51,6 +52,8 @@ namespace Synapse.Apis.Management.Http
                     options.AddRouteComponents("api/odata", builder.Build(), services => services.AddSingleton<ISearchBinder, ODataSearchBinder>())
                         .EnableQueryFeatures(50);
                     options.RouteOptions.EnableControllerNameCaseInsensitive = true;
+                    options.RouteOptions.EnableActionNameCaseInsensitive = true;
+                    options.RouteOptions.EnablePropertyNameCaseInsensitive = true;
                 })
                 .AddODataNewtonsoftJson()
                 .AddNewtonsoftJson(options =>
@@ -60,6 +63,8 @@ namespace Synapse.Apis.Management.Http
                     options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
                     options.SerializerSettings.DefaultValueHandling = DefaultValueHandling.Ignore;
                     options.SerializerSettings.DateFormatHandling = DateFormatHandling.IsoDateFormat;
+                    options.SerializerSettings.Converters.Add(new AbstractClassConverterFactory());
+                    options.SerializerSettings.Converters.Add(new FilteredExpandoObjectConverter());
                 })
                 .AddApplicationPart(typeof(ISynapseApplicationBuilderExtensions).Assembly)
                 .AddApplicationPart(typeof(MetadataController).Assembly);

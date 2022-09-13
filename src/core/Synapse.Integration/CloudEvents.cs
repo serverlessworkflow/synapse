@@ -32,6 +32,29 @@ namespace Synapse
         public static Uri Source = new("https://synapse.io/runtime/events");
 
         /// <summary>
+        /// Gets the <see cref="CloudEvent"/> path for the specified event CLR type
+        /// </summary>
+        /// <param name="eventType">The event type to get the <see cref="CloudEvent"/> path of</param>
+        /// <param name="aggregateType">The type of aggregate that has produced the event</param>
+        /// <returns>The <see cref="CloudEvent"/> path</returns>
+        public static string LogicalPathOf(Type eventType, Type aggregateType)
+        {
+            if (eventType == null)
+                throw new ArgumentNullException(nameof(eventType));
+            if (aggregateType == null)
+                throw new ArgumentNullException(nameof(aggregateType));
+            var aggregateName = AggregateHelper.NameOf(aggregateType);
+            var version = AggregateHelper.VersionOf(aggregateType);
+            var actionName = eventType.Name
+                .Replace(aggregateName, string.Empty, StringComparison.OrdinalIgnoreCase)
+                .Replace("v1", string.Empty, StringComparison.OrdinalIgnoreCase)
+                .Replace("DomainEvent", string.Empty, StringComparison.OrdinalIgnoreCase)
+                .Replace("IntegrationEvent", string.Empty, StringComparison.OrdinalIgnoreCase)
+                .ToLower();
+            return $"/{aggregateName}/{version}/{actionName}";
+        }
+
+        /// <summary>
         /// Gets the <see cref="CloudEvent"/> type for the specified event CLR type
         /// </summary>
         /// <param name="eventType">The event type to get the <see cref="CloudEvent"/> type of</param>
@@ -39,14 +62,11 @@ namespace Synapse
         /// <returns>The <see cref="CloudEvent"/> type</returns>
         public static string TypeOf(Type eventType, Type aggregateType)
         {
-            var aggregateName = aggregateType.Name.ToLower();
-            var actionName = eventType.Name
-                .Replace(aggregateName, string.Empty, StringComparison.OrdinalIgnoreCase)
-                .Replace("v1", string.Empty, StringComparison.OrdinalIgnoreCase)
-                .Replace("DomainEvent", string.Empty, StringComparison.OrdinalIgnoreCase)
-                .Replace("IntegrationEvent", string.Empty, StringComparison.OrdinalIgnoreCase)
-                .ToLower();
-            return $"io.synapse/{aggregateName}/{actionName}/v1";
+            if (eventType == null)
+                throw new ArgumentNullException(nameof(eventType));
+            if (aggregateType == null)
+                throw new ArgumentNullException(nameof(aggregateType));
+            return $"io.synapse{LogicalPathOf(eventType, aggregateType)}";
         }
 
         /// <summary>
@@ -57,14 +77,19 @@ namespace Synapse
         /// <returns>The <see cref="CloudEvent"/> schema <see cref="Uri"/></returns>
         public static Uri SchemaOf(Type eventType, Type aggregateType)
         {
-            var aggregateName = aggregateType.Name.ToLower();
+            if (eventType == null)
+                throw new ArgumentNullException(nameof(eventType));
+            if (aggregateType == null)
+                throw new ArgumentNullException(nameof(aggregateType));
+            var aggregateName = AggregateHelper.NameOf(aggregateType);
+            var version = AggregateHelper.VersionOf(aggregateType);
             var actionName = eventType.Name
                 .Replace(aggregateName, string.Empty, StringComparison.OrdinalIgnoreCase)
                 .Replace("v1", string.Empty, StringComparison.OrdinalIgnoreCase)
                 .Replace("DomainEvent", string.Empty, StringComparison.OrdinalIgnoreCase)
                 .Replace("IntegrationEvent", string.Empty, StringComparison.OrdinalIgnoreCase)
                 .ToLower();
-            return new($"https://synapse.io/events/{aggregateName}/{actionName}/v1");
+            return new($"https://synapse.io/events{LogicalPathOf(eventType, aggregateType)}");
         }
 
     }
