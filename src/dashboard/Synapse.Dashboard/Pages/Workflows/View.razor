@@ -31,6 +31,7 @@
 @inject IBreadcrumbService BreadcrumbService
 @inject IJsonSerializer Serializer
 @inject IJSRuntime JS
+@inject IYamlService YamlService
 @inject HubConnection HubConnection
 @inject NavigationManager NavigationManager
 
@@ -56,14 +57,14 @@
 
 @if (workflow != null)
 {
-    <div class="container-fluid h-100">
+    <div class="container-fluid h-100 d-flex flex-column">
         <div class="row h-50 position-relative">
             <WorkflowDiagram @ref="workflowDiagram" WorkflowDefinition="workflow.Definition" OnMouseUp="@(async (e) => await HandleNodeClick(e))" />
         </div>
-        <div class="row h-50">            
+        <div class="row h-50 mh-50">            
             @if (workflowInstance == null)
             {
-                <TabControl>
+                <TabControl ContainerCssClass="mh-100">
                     <TabPage Header="Instances">
                         <Table Items="instances" AutoGenerateColumns="false">
                             <Columns>
@@ -133,9 +134,19 @@
                     <TabPage Header="Definition">
                         @if (workflow?.Definition != null)
                         {
-                            <MonacoEditor
-                                CssClass="h-100 flex-grow"
-                                ConstructionOptions="MonacoEditorHelper.GetStandaloneEditorConstructionOptions(JsonConvert.SerializeObject(workflow.Definition, Formatting.Indented, new JsonSerializerSettings(){ ContractResolver = new NonPublicSetterContractResolver() }), true)"/>
+                            <div class="h-100 mh-100 flex-grow d-flex flex-column justify-content-between align-items-start">
+                                <PreferedLanguageSelector PreferedLanguageChange="ToggleLanguage" />
+                                <div class="flex-grow d-flex flex-row w-100">
+                                    <div class="w-100 h-100 mh-100">
+                                        <MonacoEditor
+                                            @ref="editor"
+                                            CssClass="h-100"
+                                            ConstructionOptions="MonacoEditorHelper.GetStandaloneEditorConstructionOptions(string.Empty, true, MonacoEditorHelper.PreferedLanguage)"
+                                            OnDidInit="OnMonacoEditorDidInit"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
                         }
                     </TabPage>
                     <TabPage Header="Metrics">
@@ -145,7 +156,7 @@
             }
             else if(workflowInstance != null)
             {
-                <TabControl>
+                <TabControl ContainerCssClass="mh-100">
                     <TabPage Header="Input/Output">
                         <WorkflowInstanceIO WorkflowInstance="workflowInstance" />
                     </TabPage>
@@ -186,7 +197,8 @@ else
 
     private Modal deleteWorkflowDialog = null!;
     private string? selectedWorkflowInstanceId;
-
+    
+    protected MonacoEditor editor = null!;
     protected IDisposable? workflowSubscription;
     protected IDisposable? workflowInstanceSubscription;
     protected IDisposable? workflowActivitySubscription;
@@ -314,6 +326,12 @@ else
         }
     }
 
+    protected virtual async Task ToggleLanguage(string language)
+    {
+        await this.OnMonacoEditorDidInit(this.editor as MonacoEditorBase);
+        this.StateHasChanged();
+    }
+
     protected async Task StartWith(Neuroglia.Serialization.Dynamic? input)
     {
         if (this.workflowToolbar == null || input == null)
@@ -407,6 +425,18 @@ else
             }
         }
         //await Task.CompletedTask;
+    }
+
+    protected async Task OnMonacoEditorDidInit(MonacoEditorBase editor)
+    {
+        var model = await (editor as MonacoEditor)!.GetModel();
+        await MonacoEditorBase.SetModelLanguage(model, this.MonacoEditorHelper.PreferedLanguage);
+        var text = JsonConvert.SerializeObject(this.workflow!.Definition, Formatting.Indented, new JsonSerializerSettings(){ ContractResolver = new NonPublicSetterContractResolver() });
+        if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)
+        {
+            text = await this.YamlService.JsonToYaml(text);
+        }
+        await (editor as MonacoEditor)!.SetValue(text);
     }
 
     public void Dispose()

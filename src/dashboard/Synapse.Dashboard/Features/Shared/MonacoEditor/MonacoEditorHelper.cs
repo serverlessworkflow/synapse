@@ -16,8 +16,6 @@
  */
 
 using BlazorMonaco;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 
 namespace Synapse.Dashboard
 {

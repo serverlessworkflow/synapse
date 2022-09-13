@@ -27,28 +27,14 @@
     <label for="@Id" class="form-label">@Label</label>
 }
 <PreferedLanguageSelector PreferedLanguageChange="ToggleLanguage" />
-@if (MonacoEditorHelper.PreferedLanguage == "json")
-{   
-    <MonacoEditor
-        @ref="jsonEditor"
-        Id="@jsonEditorId"
-        CssClass="@ComputedCssClass"
-        ConstructionOptions='MonacoEditorHelper.GetStandaloneEditorConstructionOptions()'
-        OnDidInit="OnEditorInit"
-        OnDidChangeModelContent="OnEditorChange"
-    />    
-}
-@if (MonacoEditorHelper.PreferedLanguage == "yaml")
-{  
-    <MonacoEditor
-        @ref="yamlEditor"
-        Id="@yamlEditorId"
-        CssClass="@ComputedCssClass"
-        ConstructionOptions='MonacoEditorHelper.GetStandaloneEditorConstructionOptions("", false, "yaml")'
-        OnDidInit="OnEditorInit"
-        OnDidChangeModelContent="OnEditorChange"
-    />
-}
+<MonacoEditor
+    @ref="editor"
+    Id="@editorId"
+    CssClass="@ComputedCssClass"
+    ConstructionOptions='MonacoEditorHelper.GetStandaloneEditorConstructionOptions()'
+    OnDidInit="OnEditorInit"
+    OnDidChangeModelContent="OnEditorChange"
+/>
 <ValidationMessage For="@ValidationFor" class="form-text" />
 
 @code {
@@ -59,34 +45,28 @@
 
     protected string ComputedCssClass => "monaco-small " + this.CssClass;
     protected DynamicObject lastParsed = null!;
-    protected string editorValueBuffer = "";
-    protected string jsonEditorId => this.Id + "-json";
-    protected string yamlEditorId => this.Id + "-yaml";
-    protected MonacoEditor jsonEditor = null!;
-    protected MonacoEditor yamlEditor = null!;
-    protected MonacoEditor editor { get => this.MonacoEditorHelper.PreferedLanguage == "json" ? this.jsonEditor : this.yamlEditor; }
+    protected string editorId => this.Id + "-json";
+    protected MonacoEditor editor = null!;
 
-    protected virtual async Task ToggleLanguage(string newLanguage)
+    protected virtual async Task ToggleLanguage(string language)
     {
-        string text = "";
+        string text = await this.editor!.GetValue();
         try
         {
-            if (newLanguage == "yaml") {
-                text = await this.jsonEditor.GetValue();
-                this.editorValueBuffer = await this.YamlService.JsonToYaml(text);
+            if (language == PreferedLanguage.YAML) {
+                await this.YamlService.JsonToYaml(text);
             }
             else
             {
-                text = await this.yamlEditor.GetValue();
-                this.editorValueBuffer = await this.YamlService.YamlToJson(text);
+                await this.YamlService.YamlToJson(text);
             }
         }
         catch(Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            this.editorValueBuffer = text;
-            await this.MonacoEditorHelper.ChangePreferedLanguage(newLanguage == "json" ? "yaml" : "json");
+            await this.MonacoEditorHelper.ChangePreferedLanguage(language == PreferedLanguage.JSON ? PreferedLanguage.YAML : PreferedLanguage.JSON);
         }
+        await this.OnEditorInit(this.editor);
         this.StateHasChanged();
     }
 
@@ -116,12 +96,14 @@
 
     protected async Task OnEditorInit(MonacoEditorBase editorBase)
     {
+        var model = await (editor as MonacoEditor)!.GetModel();
+        await MonacoEditorBase.SetModelLanguage(model, this.MonacoEditorHelper.PreferedLanguage);
         string value = "{}";
         if (!string.IsNullOrWhiteSpace(this.CurrentValueAsString))
         {
             value = this.CurrentValueAsString;
         }
-        if (this.MonacoEditorHelper.PreferedLanguage == "yaml")
+        if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)
         {
             value = await this.YamlService.JsonToYaml(value);
         }
@@ -131,7 +113,7 @@
     protected async Task OnEditorChange(ModelContentChangedEvent e)
     {
         string value = await this.editor.GetValue();
-        if (this.MonacoEditorHelper.PreferedLanguage == "yaml")
+        if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)
         {
             value = await this.YamlService.YamlToJson(value);
         }

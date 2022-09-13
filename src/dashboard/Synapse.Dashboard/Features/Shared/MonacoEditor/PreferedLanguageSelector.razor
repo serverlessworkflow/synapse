@@ -15,6 +15,7 @@
 *@
 @namespace Synapse.Dashboard
 @inject IMonacoEditorHelper MonacoEditorHelper
+@implements IDisposable
 
 <div class="form-check form-switch">
     <input class="form-check-input" type="checkbox" role="switch" id="toggle-language" checked="@isJsonSelected" @onchange="ToggleLanguage">
@@ -30,17 +31,17 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        this.isJsonSelected = this.MonacoEditorHelper.PreferedLanguage == "json";
+        this.isJsonSelected = this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.JSON;
     }
 
     protected virtual async Task ToggleLanguage(ChangeEventArgs e)
     {
-        if (this.MonacoEditorHelper.PreferedLanguage == "json") {
-            await this.MonacoEditorHelper.ChangePreferedLanguage("yaml");
+        if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.JSON) {
+            await this.MonacoEditorHelper.ChangePreferedLanguage(PreferedLanguage.YAML);
         }
         else
         {
-            await this.MonacoEditorHelper.ChangePreferedLanguage("json");
+            await this.MonacoEditorHelper.ChangePreferedLanguage(PreferedLanguage.JSON);
         }
     }
 
@@ -52,7 +53,7 @@
 
     protected async Task HandlePreferedLanguageChange(string language)
     {
-        this.isJsonSelected = this.MonacoEditorHelper.PreferedLanguage == "json";
+        this.isJsonSelected = this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.JSON;
         await this.PreferedLanguageChange.InvokeAsync(language);
         this.StateHasChanged();
     }

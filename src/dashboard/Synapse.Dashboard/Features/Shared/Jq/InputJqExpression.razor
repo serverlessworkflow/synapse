@@ -19,6 +19,7 @@
 @inherits InputBase<string?>
 @inject IMonacoEditorHelper MonacoEditorHelper
 @inject IJSRuntime JsRuntime
+@inject IYamlService YamlService
 
 @if (!string.IsNullOrWhiteSpace(Label))
 {
@@ -32,11 +33,13 @@
     </Header>
     <Body>
         <div class="row">
+            <PreferedLanguageSelector PreferedLanguageChange="ToggleLanguage" />
             <MonacoEditor
                 @ref="editor"
                 Id="@editorId"
                 CssClass="monaco-small col-6"
                 ConstructionOptions='MonacoEditorHelper.GetStandaloneEditorConstructionOptions("{}")'
+                OnDidInit="OnMonacoEditorDidInit"
             />
             <div class="col-6 flex-grow-1">
                 @output
@@ -54,9 +57,35 @@
     [Parameter] public string? Id { get; set; }
     [Parameter] public string? Label { get; set; }
 
+    protected string uid = Guid.NewGuid().ToString();
+    protected string editorId => this.Id + "-json-" + this.uid;
+    protected string editorValueBuffer = "";
     protected MonacoEditor editor = null!;
-    protected string editorId = Guid.NewGuid().ToString();
     protected string output = "";
+
+    protected virtual async Task ToggleLanguage(string language)
+    {
+        string text = await this.editor!.GetValue();
+        try
+        {
+            if (language == PreferedLanguage.YAML) {
+                this.editorValueBuffer = await this.YamlService.JsonToYaml(text);
+            }
+            else
+            {
+                this.editorValueBuffer = await this.YamlService.YamlToJson(text);
+            }
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            await this.MonacoEditorHelper.ChangePreferedLanguage(language == PreferedLanguage.JSON ? PreferedLanguage.YAML : PreferedLanguage.JSON);
+            this.editorValueBuffer = text;
+        }
+        await this.OnMonacoEditorDidInit(this.editor);
+        this.StateHasChanged();
+    }
+
 
     protected override bool TryParseValueFromString(string? value, [MaybeNullWhen(false)] out string? result, [NotNullWhen(false)] out string? validationErrorMessage)
     {
@@ -65,11 +94,22 @@
         return true;
     }
 
+    protected async Task OnMonacoEditorDidInit(MonacoEditorBase editorBase)
+    {
+        var model = await (editor as MonacoEditor)!.GetModel();
+        await MonacoEditorBase.SetModelLanguage(model, this.MonacoEditorHelper.PreferedLanguage);
+        await (editor as MonacoEditor)!.SetValue(this.editorValueBuffer);
+    }
+
     protected virtual async Task ProcessExpression()
     {
         if (string.IsNullOrWhiteSpace(this.CurrentValue))
             return;
         var json = await this.editor.GetValue();
+        if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)
+        {
+            json = await this.YamlService.YamlToJson(json);
+        }
         this.output = await this.JsRuntime.InvokeAsync<string>("jq.raw", json, this.CurrentValue);
         // todo: try/catch, display error ?
     }

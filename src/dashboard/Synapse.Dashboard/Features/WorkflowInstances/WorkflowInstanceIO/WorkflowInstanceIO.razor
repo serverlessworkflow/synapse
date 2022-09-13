@@ -17,6 +17,7 @@
 @namespace Synapse.Dashboard
 @using Newtonsoft.Json
 @inject IMonacoEditorHelper MonacoEditorHelper
+@inject IYamlService YamlService
 
 @if (WorkflowInstance != null)
 {
@@ -24,9 +25,10 @@
     {
         <Loader />
     }
-    <MonacoDiffEditor 
-        CssClass="@CssClass" 
+    <PreferedLanguageSelector PreferedLanguageChange="ToggleLanguage" />
+    <MonacoDiffEditor
         @ref="diffEditor" 
+        CssClass="@CssClass"
         ConstructionOptions="MonacoEditorHelper.GetDiffEditorConstructionOptions()"
         OnDidInit="OnEditorDidInitAsync"
     ></MonacoDiffEditor>
@@ -39,23 +41,41 @@
     protected bool Loading = true;
     protected string CssClass => this.Loading ? "d-none" : "monaco-normal";
 
+    protected virtual async Task ToggleLanguage(string language)
+    {
+        await this.OnEditorDidInitAsync();
+        this.StateHasChanged();
+    }
+
     protected async Task OnEditorDidInitAsync()
     {
         var input = string.Empty;
         var output = string.Empty;        
-        TextModel inputModel = await MonacoEditorBase.CreateModel("", "json");
-        TextModel outputModel = await MonacoEditorBase.CreateModel("", "json");
+        TextModel inputModel = await MonacoEditorBase.CreateModel("", this.MonacoEditorHelper.PreferedLanguage);
+        TextModel outputModel = await MonacoEditorBase.CreateModel("", this.MonacoEditorHelper.PreferedLanguage);
         if (this.WorkflowInstance.Input != null) {
             input = JsonConvert.SerializeObject(this.WorkflowInstance.Input, Formatting.Indented);
-            inputModel = await MonacoEditorBase.CreateModel(input, "json");
+            if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)
+            {
+                input = await this.YamlService.JsonToYaml(input);
+            }
+            inputModel = await MonacoEditorBase.CreateModel(input, this.MonacoEditorHelper.PreferedLanguage);
         }
         if (this.WorkflowInstance.Output != null) {
             output = JsonConvert.SerializeObject(this.WorkflowInstance.Output, Formatting.Indented);
-            outputModel = await MonacoEditorBase.CreateModel(output, "json");
+            if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)
+            {
+                output = await this.YamlService.JsonToYaml(output);
+            }
+            outputModel = await MonacoEditorBase.CreateModel(output, this.MonacoEditorHelper.PreferedLanguage);
         }
         if (this.WorkflowInstance.Error != null) {
             output = JsonConvert.SerializeObject(this.WorkflowInstance.Error, Formatting.Indented);
-            outputModel = await MonacoEditorBase.CreateModel(output, "json");
+            if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)
+            {
+                output = await this.YamlService.JsonToYaml(output);
+            }
+            outputModel = await MonacoEditorBase.CreateModel(output, this.MonacoEditorHelper.PreferedLanguage);
         }
         await this.diffEditor.SetModel(new DiffEditorModel
         {
