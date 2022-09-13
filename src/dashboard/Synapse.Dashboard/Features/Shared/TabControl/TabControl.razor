@@ -16,9 +16,9 @@
 
 @namespace Synapse.Dashboard
 
-<div class="container d-flex flex-column">    
+<div class="container d-flex flex-column @ContainerCssClass">    
     <div class="row">
-        <ul class="nav nav-tabs">
+        <ul class="nav nav-tabs @NavCssClass">
             @foreach (TabPage tabPage in Pages)
             {
                 <li class="nav-item cursor-pointer">
@@ -27,7 +27,7 @@
             }
         </ul>
     </div>
-    <div class="row flex-grow-1 d-block">
+    <div class="row flex-grow-1 d-block tab-page @PageCssClass">
         <CascadingValue Value="this">
             @ChildContent
         </CascadingValue>
@@ -37,8 +37,10 @@
 @code 
 {
 
-    [Parameter]
-    public RenderFragment ChildContent { get; set; }
+    [Parameter] public RenderFragment ChildContent { get; set; }
+    [Parameter] public string ContainerCssClass { get; set; }
+    [Parameter] public string NavCssClass { get; set; }
+    [Parameter] public string PageCssClass { get; set; }
 
     public TabPage ActivePage { get; set; }
 
