@@ -79,7 +79,8 @@ namespace Synapse.Domain.Models
             {
                 if (!e.TryGetAttribute(mapping.Key, out var value))
                     return false;
-                if (!mapping.Value.Equals(value, StringComparison.OrdinalIgnoreCase))
+                if (!string.IsNullOrWhiteSpace(mapping.Value)
+                    && !mapping.Value.Equals(value, StringComparison.OrdinalIgnoreCase))
                     return false;
             }
             return true;

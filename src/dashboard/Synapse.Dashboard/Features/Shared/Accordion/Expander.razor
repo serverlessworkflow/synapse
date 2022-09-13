@@ -43,12 +43,12 @@
     {
         return 
     @<div class="row align-items-center no-gutters @(context.IsExpanded ? "" : "border-bottom border-muted") pb-2">
-        <div class="col-auto mr-auto">
-            <div class="form-control border border-mute rounded">
+        <div class="col-11">
+            <div>
                 @context.Header
             </div>
         </div>
-        <div class="col-auto">
+        <div class="col-1">
             <span class="ml-2 text-secondary oi @(context.IsExpanded ? "oi-caret-top" : "oi-caret-bottom")"></span>
         </div>
     </div>

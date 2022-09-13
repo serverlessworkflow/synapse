@@ -19,6 +19,7 @@
 @using Neuroglia.Data.Flux.Components
 @using System.Reactive.Linq
 @using Newtonsoft.Json.Linq
+@using Synapse.Integration.Events.Correlations
 @using Synapse.Integration.Events.WorkflowActivities
 @using Synapse.Integration.Events.WorkflowInstances
 @using Synapse.Integration.Events.Workflows
@@ -50,7 +51,7 @@
 
         //todo: should probably move this somewhere else, for example in a dedicated class (ex: V1WorkflowSubscriber), or within concerned components
         this.IntegrationEventStream
-            .Where(e => e.Type == "io.synapse/v1workflow/created/v1")
+            .Where(e => e.Type == "io.synapse/workflow/v1/created")
             .Subscribe(e =>
             {
                 try
@@ -64,7 +65,7 @@
                 }   
             });
         this.IntegrationEventStream
-            .Where(e => e.Type == "io.synapse/v1workflow/deleted/v1")
+            .Where(e => e.Type == "io.synapse/workflow/v1/deleted")
             .Subscribe(e =>
             {
                 try
@@ -77,9 +78,8 @@
                     Console.WriteLine(ex.ToString());
                 }   
             });
-
         this.IntegrationEventStream
-            .Where(e => e.Type == "io.synapse/v1workflowinstance/created/v1")
+            .Where(e => e.Type == "io.synapse/workflowinstance/v1/created")
             .Subscribe(e =>
             {
                 try
@@ -93,7 +93,7 @@
                 }   
             });
         this.IntegrationEventStream
-            .Where(e => e.Type == "io.synapse/v1workflowinstance/starting/v1")
+            .Where(e => e.Type == "io.synapse/workflowinstance/v1/starting")
             .Subscribe(e =>
             {
                 try
@@ -107,7 +107,7 @@
                 }   
             });
         this.IntegrationEventStream
-            .Where(e => e.Type == "io.synapse/v1workflowinstance/started/v1")
+            .Where(e => e.Type == "io.synapse/workflowinstance/v1/started")
             .Subscribe(e =>
             {
                 try
@@ -121,7 +121,7 @@
                 }   
             });
         this.IntegrationEventStream
-            .Where(e => e.Type == "io.synapse/v1workflowinstance/suspending/v1")
+            .Where(e => e.Type == "io.synapse/workflowinstance/v1/suspending")
             .Subscribe(e =>
             {
                 try
@@ -135,7 +135,7 @@
                 }   
             });
         this.IntegrationEventStream
-            .Where(e => e.Type == "io.synapse/v1workflowinstance/suspended/v1")
+            .Where(e => e.Type == "io.synapse/workflowinstance/v1/suspended")
             .Subscribe(e =>
             {
                 try
@@ -149,7 +149,7 @@
                 }   
             });
         this.IntegrationEventStream
-            .Where(e => e.Type == "io.synapse/v1workflowinstance/resuming/v1")
+            .Where(e => e.Type == "io.synapse/workflowinstance/v1/resuming")
             .Subscribe(e =>
             {
                 try
@@ -163,7 +163,7 @@
                 }   
             });
         this.IntegrationEventStream
-            .Where(e => e.Type == "io.synapse/v1workflowinstance/cancelling/v1")
+            .Where(e => e.Type == "io.synapse/workflowinstance/v1/cancelling")
             .Subscribe(e =>
             {
                 try
@@ -177,7 +177,7 @@
                 }   
             });
         this.IntegrationEventStream
-            .Where(e => e.Type == "io.synapse/v1workflowinstance/cancelled/v1")
+            .Where(e => e.Type == "io.synapse/workflowinstance/v1/cancelled")
             .Subscribe(e =>
             {
                 try
@@ -191,7 +191,7 @@
                 }   
             });
         this.IntegrationEventStream
-            .Where(e => e.Type == "io.synapse/v1workflowinstance/faulted/v1")
+            .Where(e => e.Type == "io.synapse/workflowinstance/v1/faulted")
             .Subscribe(e =>
             {
                 try
@@ -205,7 +205,7 @@
                 }   
             });
         this.IntegrationEventStream
-            .Where(e => e.Type == "io.synapse/v1workflowinstance/completed/v1")
+            .Where(e => e.Type == "io.synapse/workflowinstance/v1/completed")
             .Subscribe(e =>
             {
                 try
@@ -219,7 +219,7 @@
                 }   
             });
         this.IntegrationEventStream
-            .Where(e => e.Type == "io.synapse/v1workflowinstance/deleted/v1")
+            .Where(e => e.Type == "io.synapse/workflowinstance/v1/deleted")
             .Subscribe(e =>
             {
                 try
@@ -233,7 +233,7 @@
                 }   
             });
         this.IntegrationEventStream
-            .Where(e => e.Type == "io.synapse/v1workflowactivity/created/v1")
+            .Where(e => e.Type == "io.synapse/workflowactivity/v1/created")
             .Subscribe(e =>
             {
                 try
@@ -247,7 +247,7 @@
                 }   
             });
         this.IntegrationEventStream
-            .Where(e => e.Type == "io.synapse/v1workflowactivity/started/v1")
+            .Where(e => e.Type == "io.synapse/workflowactivity/v1/started")
             .Subscribe(e =>
             {
                 try
@@ -261,7 +261,7 @@
                 }   
             });
         this.IntegrationEventStream
-            .Where(e => e.Type == "io.synapse/v1workflowactivity/suspended/v1")
+            .Where(e => e.Type == "io.synapse/workflowactivity/v1/suspended")
             .Subscribe(e =>
             {
                 try
@@ -275,7 +275,7 @@
                 }   
             });
         this.IntegrationEventStream
-            .Where(e => e.Type == "io.synapse/v1workflowactivity/faulted/v1")
+            .Where(e => e.Type == "io.synapse/workflowactivity/v1/faulted")
             .Subscribe(e =>
             {
                 try
@@ -289,7 +289,7 @@
                 }   
             });
         this.IntegrationEventStream
-            .Where(e => e.Type == "io.synapse/v1workflowactivity/cancelled/v1")
+            .Where(e => e.Type == "io.synapse/workflowactivity/v1/cancelled")
             .Subscribe(e =>
             {
                 try
@@ -303,7 +303,7 @@
                 }   
             });
         this.IntegrationEventStream
-            .Where(e => e.Type == "io.synapse/v1workflowactivity/executed/v1")
+            .Where(e => e.Type == "io.synapse/workflowactivity/v1/executed")
             .Subscribe(e =>
             {
                 try
@@ -317,7 +317,7 @@
                 }   
             });
         this.IntegrationEventStream
-            .Where(e => e.Type == "io.synapse/v1workflowactivity/compensating/v1")
+            .Where(e => e.Type == "io.synapse/workflowactivity/v1/compensating")
             .Subscribe(e =>
             {
                 try
@@ -331,7 +331,7 @@
                 }   
             });
         this.IntegrationEventStream
-            .Where(e => e.Type == "io.synapse/v1workflowactivity/compensated/v1")
+            .Where(e => e.Type == "io.synapse/workflowactivity/v1/compensated")
             .Subscribe(e =>
             {
                 try
@@ -344,7 +344,48 @@
                     Console.WriteLine(ex.ToString());
                 }   
             });
-
+        this.IntegrationEventStream
+            .Where(e => e.Type == "io.synapse/correlation/v1/contextaddedto")
+            .Subscribe(e =>
+            {
+                try
+                {
+                    var data = e.Data.ToObject<V1ContextAddedToCorrelationIntegrationEvent>();
+                    this.Dispatcher.Dispatch(new AddContextToV1Correlation(data.AggregateId, data.Context));
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }   
+            });
+        this.IntegrationEventStream
+            .Where(e => e.Type == "io.synapse/correlation/v1/contextremovedfrom")
+            .Subscribe(e =>
+            {
+                 try
+                {
+                    var data = e.Data.ToObject<V1CorrelationContextReleasedIntegrationEvent>();
+                    this.Dispatcher.Dispatch(new RemoveContextFromV1Correlation(data.AggregateId, data.ContextId));
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }   
+            });
+        this.IntegrationEventStream
+            .Where(e => e.Type == "io.synapse/correlation/v1/eventcorrelated")
+            .Subscribe(e =>
+            {
+                 try
+                {
+                    var data = e.Data.ToObject<V1EventCorrelatedIntegrationEvent>();
+                    this.Dispatcher.Dispatch(new CorrelateV1Event(data.AggregateId, data.ContextId, data.Event));
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }   
+            });
         await this.HubConnection.StartAsync();
     }
 

@@ -118,7 +118,7 @@
 
     protected override async Task OnParametersSetAsync()
     {
-         if(this.Items is IAsyncEnumerable<T> asyncEnumerable)
+        if(this.Items is IAsyncEnumerable<T> asyncEnumerable)
             this.items = await asyncEnumerable.ToListAsync();
         else
             this.items = this.Items; 
