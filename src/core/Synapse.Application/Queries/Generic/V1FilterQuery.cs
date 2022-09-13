@@ -16,6 +16,9 @@
  */
 
 using Microsoft.AspNetCore.OData.Query;
+using Microsoft.AspNetCore.OData.Query.Expressions;
+using Microsoft.OData.Edm;
+using System.Linq.Expressions;
 
 namespace Synapse.Application.Queries.Generic
 {
@@ -64,20 +67,36 @@ namespace Synapse.Application.Queries.Generic
     {
 
         /// <inheritdoc/>
-        public V1FilterQueryHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IRepository<TEntity> repository) 
+        public V1FilterQueryHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IRepository<TEntity> repository, ISearchBinder searchBinder, IEdmModel edmModel) 
             : base(loggerFactory, mediator, mapper, repository)
         {
-
+            this.SearchBinder = searchBinder;
+            this.EdmModel = edmModel;
         }
+
+        /// <summary>
+        /// Gets the service used to bind ODATA searches
+        /// </summary>
+        protected ISearchBinder SearchBinder { get; }
+
+        /// <summary>
+        /// Gets the current <see cref="IEdmModel"/>
+        /// </summary>
+        protected IEdmModel EdmModel { get; }
 
         /// <inheritdoc/>
         public virtual async Task<IOperationResult<List<TEntity>>> HandleAsync(V1FilterQuery<TEntity> query, CancellationToken cancellationToken = default)
         {
-                var toFilter = (await this.Repository.ToListAsync(cancellationToken)).AsQueryable();
-                var filtered = query.Options?.ApplyTo(toFilter);
-                if (filtered == null)
-                    filtered = toFilter;
-                return this.Ok(filtered.OfType<TEntity>().ToList());
+            var toFilter = (await this.Repository.ToListAsync(cancellationToken)).AsQueryable();
+            if (query.Options?.Search != null)
+            {
+                var searchExpression = (Expression<Func<TEntity, bool>>)this.SearchBinder.BindSearch(query.Options.Search.SearchClause, new(this.EdmModel, new(), typeof(TEntity)));
+                toFilter = toFilter.Where(searchExpression);
+            }
+            var filtered = query.Options?.ApplyTo(toFilter);
+            if (filtered == null)
+                filtered = toFilter;
+            return this.Ok(filtered.OfType<TEntity>().ToList());
         }
 
     }

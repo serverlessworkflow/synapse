@@ -20,6 +20,9 @@ namespace Synapse.Apis.Management.Http.Services
             { BinaryOperatorKind.Or, ExpressionType.OrElse },
         };
 
+        private static readonly MethodInfo FilterWorkflowMethod = typeof(ODataSearchBinder).GetMethod(nameof(FilterWorkflow), BindingFlags.Static | BindingFlags.NonPublic)!;
+        private static readonly MethodInfo FilterWorkflowInstanceMethod = typeof(ODataSearchBinder).GetMethod(nameof(FilterWorkflowInstance), BindingFlags.Static | BindingFlags.NonPublic)!;
+        private static readonly MethodInfo FilterWorkflowActivityMethod = typeof(ODataSearchBinder).GetMethod(nameof(FilterWorkflowActivity), BindingFlags.Static | BindingFlags.NonPublic)!;
         private static readonly MethodInfo FilterCorrelationMethod = typeof(ODataSearchBinder).GetMethod(nameof(FilterCorrelation), BindingFlags.Static | BindingFlags.NonPublic)!;
 
         /// <inheritdoc/>
@@ -91,14 +94,7 @@ namespace Synapse.Apis.Management.Http.Services
         protected virtual Expression BindWorkflowSearchTerm(SearchTermNode searchTermNode, QueryBinderContext context)
         {
             var searchTerm = searchTermNode.Text.ToLowerInvariant();
-            Expression<Func<Integration.Models.V1Workflow, bool>> searchQuery = wf =>
-                wf.Id.ToLower().Contains(searchTerm)
-                || (!string.IsNullOrWhiteSpace(wf.Definition.Id) && wf.Definition.Id.ToLowerInvariant().Contains(searchTerm))
-                || wf.Definition.Name.ToLowerInvariant().Contains(searchTerm)
-                || (!string.IsNullOrWhiteSpace(wf.Definition.Description) && wf.Definition.Description.ToLowerInvariant().Contains(searchTerm))
-                || wf.Definition.Version.ToLowerInvariant().Contains(searchTerm)
-                || wf.Definition.SpecVersion.ToLowerInvariant().Contains(searchTerm)
-                || (wf.Definition.Annotations != null && wf.Definition.Annotations.Any(a => a.ToLowerInvariant() == searchTerm));
+            var searchQuery = Expression.IsTrue(Expression.Call(null, FilterWorkflowMethod, context.CurrentParameter, Expression.Constant(searchTerm)));
             return searchQuery;
         }
 
@@ -111,13 +107,7 @@ namespace Synapse.Apis.Management.Http.Services
         protected virtual Expression BindWorkflowInstanceSearchTerm(SearchTermNode searchTermNode, QueryBinderContext context)
         {
             var searchTerm = searchTermNode.Text.ToLowerInvariant();
-            Expression<Func<Integration.Models.V1WorkflowInstance, bool>> searchQuery = wfi =>
-                wfi.Id.ToLower().Contains(searchTerm)
-                || wfi.WorkflowId.ToLowerInvariant().Contains(searchTerm)
-                || wfi.Key.ToLowerInvariant().Contains(searchTerm)
-                || (!string.IsNullOrWhiteSpace(wfi.ParentId) && wfi.ParentId.ToLowerInvariant().Contains(searchTerm))
-                || EnumHelper.Stringify(wfi.ActivationType).ToLowerInvariant().Contains(searchTerm)
-                || EnumHelper.Stringify(wfi.Status).ToLowerInvariant().Contains(searchTerm);
+            var searchQuery = Expression.IsTrue(Expression.Call(null, FilterWorkflowInstanceMethod, context.CurrentParameter, Expression.Constant(searchTerm)));
             return searchQuery;
         }
 
@@ -130,12 +120,7 @@ namespace Synapse.Apis.Management.Http.Services
         protected virtual Expression BindWorkflowActivitySearchTerm(SearchTermNode searchTermNode, QueryBinderContext context)
         {
             var searchTerm = searchTermNode.Text.ToLowerInvariant();
-            Expression<Func<Integration.Models.V1WorkflowActivity, bool>> searchQuery = wa =>
-                wa.Id.ToLower().Contains(searchTerm)
-                || (wa.Error != null && (wa.Error.Code.ToLowerInvariant().Contains(searchTerm) || wa.Error.Message.ToLowerInvariant().Contains(searchTerm)))
-                || (!string.IsNullOrWhiteSpace(wa.ParentId) && wa.ParentId.ToLowerInvariant().Contains(searchTerm))
-                || EnumHelper.Stringify(wa.Type).ToLowerInvariant().Contains(searchTerm)
-                || EnumHelper.Stringify(wa.Status).ToLowerInvariant().Contains(searchTerm);
+            var searchQuery = Expression.IsTrue(Expression.Call(null, FilterWorkflowActivityMethod, context.CurrentParameter, Expression.Constant(searchTerm)));
             return searchQuery;
         }
 
@@ -152,18 +137,48 @@ namespace Synapse.Apis.Management.Http.Services
             return searchQuery;
         }
 
-        static bool FilterCorrelation(Integration.Models.V1Correlation crl, string searchTerm)
+        static bool FilterWorkflow(Integration.Models.V1Workflow workflow, string searchTerm)
         {
-            return crl.Id.ToLower().Contains(searchTerm)
-                || (crl.Conditions != null && crl.Conditions.Any(c =>
+            return workflow.Id.ToLower().Contains(searchTerm)
+                || (!string.IsNullOrWhiteSpace(workflow.Definition.Id) && workflow.Definition.Id.ToLowerInvariant().Contains(searchTerm))
+                || workflow.Definition.Name.ToLowerInvariant().Contains(searchTerm)
+                || (!string.IsNullOrWhiteSpace(workflow.Definition.Description) && workflow.Definition.Description.ToLowerInvariant().Contains(searchTerm))
+                || workflow.Definition.Version.ToLowerInvariant().Contains(searchTerm)
+                || workflow.Definition.SpecVersion.ToLowerInvariant().Contains(searchTerm)
+                || (workflow.Definition.Annotations != null && workflow.Definition.Annotations.Any(a => a.ToLowerInvariant() == searchTerm));
+        }
+
+        static bool FilterWorkflowInstance(Integration.Models.V1WorkflowInstance workflowInstance, string searchTerm)
+        {
+            return workflowInstance.Id.ToLower().Contains(searchTerm)
+                || workflowInstance.WorkflowId.ToLowerInvariant().Contains(searchTerm)
+                || workflowInstance.Key.ToLowerInvariant().Contains(searchTerm)
+                || (!string.IsNullOrWhiteSpace(workflowInstance.ParentId) && workflowInstance.ParentId.ToLowerInvariant().Contains(searchTerm))
+                || EnumHelper.Stringify(workflowInstance.ActivationType).ToLowerInvariant().Contains(searchTerm)
+                || EnumHelper.Stringify(workflowInstance.Status).ToLowerInvariant().Contains(searchTerm);
+        }
+
+        static bool FilterWorkflowActivity(Integration.Models.V1WorkflowActivity workflowActivity, string searchTerm)
+        {
+            return workflowActivity.Id.ToLower().Contains(searchTerm)
+                || (workflowActivity.Error != null && (workflowActivity.Error.Code.ToLowerInvariant().Contains(searchTerm) || workflowActivity.Error.Message.ToLowerInvariant().Contains(searchTerm)))
+                || (!string.IsNullOrWhiteSpace(workflowActivity.ParentId) && workflowActivity.ParentId.ToLowerInvariant().Contains(searchTerm))
+                || EnumHelper.Stringify(workflowActivity.Type).ToLowerInvariant().Contains(searchTerm)
+                || EnumHelper.Stringify(workflowActivity.Status).ToLowerInvariant().Contains(searchTerm);
+        }
+
+        static bool FilterCorrelation(Integration.Models.V1Correlation correlation, string searchTerm)
+        {
+            return correlation.Id.ToLower().Contains(searchTerm)
+                || (correlation.Conditions != null && correlation.Conditions.Any(c =>
                     c.Filters != null
                     && (c.Filters.Any(f =>
                         (f.Attributes != null && f.Attributes.Any(kvp => kvp.Key.ToLower().Contains(searchTerm) || kvp.Value.ToLower().Contains(searchTerm)))
                         || (f.CorrelationMappings != null && f.CorrelationMappings.Any(kvp => kvp.Key.ToLower().Contains(searchTerm) || (!string.IsNullOrWhiteSpace(kvp.Value) && kvp.Value.ToLower().Contains(searchTerm))))))))
-                || (crl.Contexts != null && crl.Contexts.Any(c => c.Id.Contains(searchTerm)))
-                || (crl.Contexts != null && crl.Contexts.Any(c => c.Mappings != null && (c.Mappings.Any(kvp => kvp.Key.ToLower().Contains(searchTerm) || kvp.Value.ToLower().Contains(searchTerm)))))
-                || EnumHelper.Stringify(crl.Lifetime).ToLowerInvariant().Contains(searchTerm)
-                || EnumHelper.Stringify(crl.ConditionType).ToLowerInvariant().Contains(searchTerm);
+                || (correlation.Contexts != null && correlation.Contexts.Any(c => c.Id.Contains(searchTerm)))
+                || (correlation.Contexts != null && correlation.Contexts.Any(c => c.Mappings != null && (c.Mappings.Any(kvp => kvp.Key.ToLower().Contains(searchTerm) || kvp.Value.ToLower().Contains(searchTerm)))))
+                || EnumHelper.Stringify(correlation.Lifetime).ToLowerInvariant().Contains(searchTerm)
+                || EnumHelper.Stringify(correlation.ConditionType).ToLowerInvariant().Contains(searchTerm);
         }
 
     }

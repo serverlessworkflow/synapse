@@ -104,15 +104,16 @@ namespace Synapse.Apis.Management.Http.Controllers
         /// Queries workflows
         /// <para>This endpoint supports ODATA.</para>
         /// </summary>
+        /// <param name="queryOptions">The options of the ODATA query to perform</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A new <see cref="IActionResult"/></returns>
         [HttpGet, EnableQuery]
         [ProducesResponseType(typeof(IEnumerable<Integration.Models.V1Workflow>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.Forbidden)]
-        public async Task<IActionResult> Get(CancellationToken cancellationToken)
+        public async Task<IActionResult> Get(ODataQueryOptions<Integration.Models.V1Workflow> queryOptions, CancellationToken cancellationToken)
         {
-            return this.Process(await this.Mediator.ExecuteAsync(new Application.Queries.Generic.V1ListQuery<Integration.Models.V1Workflow>(), cancellationToken));
+            return this.Process(await this.Mediator.ExecuteAsync(new Application.Queries.Generic.V1FilterQuery<Integration.Models.V1Workflow>(queryOptions), cancellationToken));
         }
 
         /// <summary>
