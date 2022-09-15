@@ -65,7 +65,7 @@ namespace Synapse.Infrastructure.Services
         /// Gets all <see cref="IPlugin"/>s of the specified type
         /// </summary>
         /// <typeparam name="TPlugin">The type of the <see cref="IPlugin"/>s to get</typeparam>
-        /// <returns>The <see cref="IPlugin"/> of the specified type</returns>
+        /// <returns>A new <see cref="IEnumerable{T}"/> containing the <see cref="IPlugin"/>s of the specified type</returns>
         IEnumerable<TPlugin> GetPlugins<TPlugin>()
             where TPlugin : IPlugin;
 

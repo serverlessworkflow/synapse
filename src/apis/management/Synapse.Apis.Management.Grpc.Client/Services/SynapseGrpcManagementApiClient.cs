@@ -50,6 +50,19 @@ namespace Synapse.Apis.Management.Grpc
         /// </summary>
         protected ISynapseGrpcManagementApi Adapter { get; }
 
+        #region Application
+
+        /// <inheritdoc/>
+        public virtual async Task<V1ApplicationInfo> GetApplicationInfoAsync(CancellationToken cancellationToken = default)
+        {
+            var result = await this.Adapter.GetApplicationInfoAsync(cancellationToken);
+            if (!result.Succeeded)
+                throw new SynapseApiException(result);
+            return result.Data!;
+        }
+
+        #endregion
+
         #region Workflows
 
         /// <inheritdoc/>

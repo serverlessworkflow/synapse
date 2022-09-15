@@ -75,7 +75,7 @@ namespace Synapse.Plugins.Persistence.EventStore
             });
             services.AddNewtonsoftJsonSerializer(options =>
             {
-                options.ContractResolver = new NonPublicSetterContractResolver();
+                options.ContractResolver = new NonPublicSetterContractResolver() { NamingStrategy = new CamelCaseNamingStrategy() { ProcessDictionaryKeys = false, OverrideSpecifiedNames = false, ProcessExtensionDataNames = false } };
                 options.NullValueHandling = NullValueHandling.Ignore;
             });
             this.ServiceProvider = services.BuildServiceProvider();

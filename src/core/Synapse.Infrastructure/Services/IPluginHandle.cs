@@ -16,6 +16,7 @@
  */
 
 using Synapse.Infrastructure.Plugins;
+using Synapse.Integration.Models;
 
 namespace Synapse.Infrastructure.Services
 {
@@ -45,7 +46,7 @@ namespace Synapse.Infrastructure.Services
         /// <summary>
         /// Gets an object used to describe the handled <see cref="IPlugin"/>
         /// </summary>
-        PluginMetadata Metadata { get; }
+        V1PluginMetadata Metadata { get; }
 
         /// <summary>
         /// Loads and initializes the <see cref="IPlugin"/>

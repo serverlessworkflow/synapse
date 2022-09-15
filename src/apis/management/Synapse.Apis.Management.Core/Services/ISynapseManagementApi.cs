@@ -31,6 +31,18 @@ namespace Synapse.Apis.Management
     public interface ISynapseManagementApi
     {
 
+        #region Application
+
+        /// <summary>
+        /// Gets informations about the running Synapse application
+        /// </summary>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        [OperationContract]
+        Task<V1ApplicationInfo> GetApplicationInfoAsync(CancellationToken cancellationToken = default);
+
+        #endregion
+
         #region Workflows
 
         /// <summary>

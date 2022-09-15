@@ -25,48 +25,41 @@
 @inject NavigationManager NavigationManager
 
 <PageTitle>Correlations</PageTitle>
-@if(correlations != null)
-{
-    <Table Items="correlations" AutoGenerateColumns="false">
-        <Columns>
+<Table Items="correlations" AutoGenerateColumns="false">
+    <Columns>
+        <Column T="V1Correlation"
+            Name="Outcome Type"
+            ValueProvider="c => EnumHelper.Stringify(c.Outcome.Type)">
+            <CellTemplate Context="correl">
+                <span class="badge bg-secondary">@EnumHelper.Stringify(correl.Item.Outcome.Type)</span>
+            </CellTemplate>
+        </Column>
+        <Column T="V1Correlation"
+            Name="Target"
+            ValueProvider="c => c.Outcome.Target"/>
+        <Column T="V1Correlation"
+            Name="Condition Type"
+            ValueProvider="c => EnumHelper.Stringify(c.ConditionType)">
+            <CellTemplate Context="correl">
+                <span class="badge bg-secondary">@EnumHelper.Stringify(correl.Item.ConditionType)</span>
+            </CellTemplate>
+        </Column>
             <Column T="V1Correlation"
-                Name="Outcome Type"
-                ValueProvider="c => EnumHelper.Stringify(c.Outcome.Type)">
-             <CellTemplate Context="correl">
-                    <span class="badge bg-secondary">@EnumHelper.Stringify(correl.Item.Outcome.Type)</span>
-                </CellTemplate>
-            </Column>
-            <Column T="V1Correlation"
-                Name="Target"
-                ValueProvider="c => c.Outcome.Target"/>
-            <Column T="V1Correlation"
-                Name="Condition Type"
-                ValueProvider="c => EnumHelper.Stringify(c.ConditionType)">
-                <CellTemplate Context="correl">
-                    <span class="badge bg-secondary">@EnumHelper.Stringify(correl.Item.ConditionType)</span>
-                </CellTemplate>
-            </Column>
-             <Column T="V1Correlation"
-                Name="Lifetime"
-                ValueProvider="c => EnumHelper.Stringify(c.Lifetime)">
-                <CellTemplate Context="correl">
-                    <span class="badge bg-secondary">@EnumHelper.Stringify(correl.Item.Lifetime)</span>
-                </CellTemplate>
-            </Column>
-            <Column T="V1Correlation"
-                Name="Conditions"
-                ValueProvider="c => c.Conditions == null ? 0 : c.Conditions.Count"/>
-            <Column T="V1Correlation" 
-                Name="Contexts"
-                ValueProvider="c => c.Contexts == null ? 0 : c.Contexts.Count" />
-            <ViewDetailsColumn T="V1Correlation" OnViewDetails="OnViewCorrelation" />
-        </Columns>
-    </Table>
-}
-else
-{
-    <Loader />
-}
+            Name="Lifetime"
+            ValueProvider="c => EnumHelper.Stringify(c.Lifetime)">
+            <CellTemplate Context="correl">
+                <span class="badge bg-secondary">@EnumHelper.Stringify(correl.Item.Lifetime)</span>
+            </CellTemplate>
+        </Column>
+        <Column T="V1Correlation"
+            Name="Conditions"
+            ValueProvider="c => c.Conditions == null ? 0 : c.Conditions.Count"/>
+        <Column T="V1Correlation" 
+            Name="Contexts"
+            ValueProvider="c => c.Contexts == null ? 0 : c.Contexts.Count" />
+        <ViewDetailsColumn T="V1Correlation" OnViewDetails="OnViewCorrelation" />
+    </Columns>
+</Table>
 
 @code {
 

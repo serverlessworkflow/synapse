@@ -21,15 +21,15 @@ namespace Synapse.Application.Services
     /// <summary>
     /// Represents the base class for all <see cref="IWorkflowRuntime"/> implementations
     /// </summary>
-    public abstract class WorkflowRuntimeHostBase
+    public abstract class WorkflowRuntimeBase
         : BackgroundService, IWorkflowRuntime
     {
 
         /// <summary>
-        /// Initializes a new <see cref="WorkflowRuntimeHostBase"/>
+        /// Initializes a new <see cref="WorkflowRuntimeBase"/>
         /// </summary>
         /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
-        protected WorkflowRuntimeHostBase(ILoggerFactory loggerFactory)
+        protected WorkflowRuntimeBase(ILoggerFactory loggerFactory)
         {
             this.Logger = loggerFactory.CreateLogger(this.GetType());
         }
@@ -50,7 +50,7 @@ namespace Synapse.Application.Services
         }
 
         /// <summary>
-        /// Disposes of the <see cref="WorkflowRuntimeHostBase"/>
+        /// Disposes of the <see cref="WorkflowRuntimeBase"/>
         /// </summary>
         /// <returns>A new awaitable <see cref="ValueTask"/></returns>
         protected virtual ValueTask DisposeAsync()

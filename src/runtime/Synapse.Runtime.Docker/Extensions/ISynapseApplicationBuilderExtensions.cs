@@ -39,13 +39,13 @@ namespace Synapse.Runtime
         /// </summary>
         /// <param name="app">The <see cref="ISynapseApplicationBuilder"/> to configure</param>
         /// <returns>The configured <see cref="ISynapseApplicationBuilder"/></returns>
-        public static ISynapseApplicationBuilder UseDockerRuntimeHost(this ISynapseApplicationBuilder app)
+        public static ISynapseApplicationBuilder UseDockerRuntime(this ISynapseApplicationBuilder app)
         {
             var runtimeHostOptions = new DockerRuntimeHostOptions();
             app.Configuration.Bind("docker", runtimeHostOptions);
-            app.Services.AddSingleton<DockerRuntimeHost>();
-            app.Services.AddSingleton<IWorkflowRuntime>(provider => provider.GetRequiredService<DockerRuntimeHost>());
-            app.Services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<DockerRuntimeHost>());
+            app.Services.AddSingleton<DockerRuntime>();
+            app.Services.AddSingleton<IWorkflowRuntime>(provider => provider.GetRequiredService<DockerRuntime>());
+            app.Services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<DockerRuntime>());
             app.Services.AddSingleton<IDockerClient>(provider =>
             {
                 return new DockerClientConfiguration(new Uri("unix:///var/run/docker.sock")).CreateClient();

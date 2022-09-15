@@ -75,6 +75,23 @@ namespace Synapse.Apis.Management.Http
             return request;
         }
 
+        #region Application
+
+        /// <inheritdoc/>
+        public virtual async Task<V1ApplicationInfo> GetApplicationInfoAsync(CancellationToken cancellationToken = default)
+        {
+            var requestUri = "/api/v1/application/info";
+            using var request = this.CreateRequest(HttpMethod.Get, requestUri);
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while retrieving information about the running Synapse application: {details}", json);
+            response.EnsureSuccessStatusCode();
+            return await this.Serializer.DeserializeAsync<V1ApplicationInfo>(json, cancellationToken);
+        }
+
+        #endregion
+
         #region Workflows
 
         /// <inheritdoc/>

@@ -82,7 +82,7 @@ namespace Synapse.Application.Configuration
             {
                 var settings = new JsonSerializerSettings()
                 {
-                    ContractResolver = new NonPublicSetterContractResolver(),
+                    ContractResolver = new NonPublicSetterContractResolver() { NamingStrategy = new CamelCaseNamingStrategy() { ProcessDictionaryKeys = false, OverrideSpecifiedNames = false, ProcessExtensionDataNames = false } },
                     Converters = new[] { new FilteredExpandoObjectConverter() },
                     NullValueHandling = NullValueHandling.Ignore,
                     DefaultValueHandling = DefaultValueHandling.Ignore
@@ -126,7 +126,7 @@ namespace Synapse.Application.Configuration
             this.Services.AddTransient(provider => provider.GetRequiredService<IEdmModelBuilder>().Build());
             this.Services.AddNewtonsoftJsonSerializer(options =>
             {
-                options.ContractResolver = new NonPublicSetterContractResolver();
+                options.ContractResolver = new NonPublicSetterContractResolver() { NamingStrategy = new CamelCaseNamingStrategy() { ProcessDictionaryKeys = false, OverrideSpecifiedNames = false, ProcessExtensionDataNames = false } };
                 options.NullValueHandling = NullValueHandling.Ignore;
                 options.DefaultValueHandling = DefaultValueHandling.Ignore;
                 options.ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor;

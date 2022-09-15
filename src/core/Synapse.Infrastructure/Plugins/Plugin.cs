@@ -15,10 +15,9 @@
  *
  */
 
-using Microsoft.Extensions.DependencyInjection;
-
 namespace Synapse.Infrastructure.Plugins
 {
+
     /// <summary>
     /// Represents a base class for <see cref="IPlugin"/> implementations
     /// </summary>

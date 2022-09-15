@@ -37,13 +37,13 @@ namespace Synapse.Runtime
         /// </summary>
         /// <param name="app">The <see cref="ISynapseApplicationBuilder"/> to configure</param>
         /// <returns>The configured <see cref="ISynapseApplicationBuilder"/></returns>
-        public static ISynapseApplicationBuilder UseNativeRuntimeHost(this ISynapseApplicationBuilder app)
+        public static ISynapseApplicationBuilder UseNativeRuntime(this ISynapseApplicationBuilder app)
         {
             var runtimeHostOptions = new NativeRuntimeOptions();
             app.Configuration.Bind("native", runtimeHostOptions);
-            app.Services.AddSingleton<NativeRuntimeHost>();
-            app.Services.AddSingleton<IWorkflowRuntime>(provider => provider.GetRequiredService<NativeRuntimeHost>());
-            app.Services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<NativeRuntimeHost>());
+            app.Services.AddSingleton<NativeRuntime>();
+            app.Services.AddSingleton<IWorkflowRuntime>(provider => provider.GetRequiredService<NativeRuntime>());
+            app.Services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<NativeRuntime>());
             return app;
         }
 

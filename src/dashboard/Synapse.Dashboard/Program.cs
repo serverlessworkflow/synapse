@@ -34,7 +34,7 @@ JsonConvert.DefaultSettings = () =>
 {
     return new JsonSerializerSettings()
     {
-        ContractResolver = new NonPublicSetterContractResolver(),
+        ContractResolver = new NonPublicSetterContractResolver() { NamingStrategy = new CamelCaseNamingStrategy() { ProcessDictionaryKeys = false, OverrideSpecifiedNames = false, ProcessExtensionDataNames = false } },
         NullValueHandling = NullValueHandling.Ignore,
         DefaultValueHandling = DefaultValueHandling.Ignore,
         DateFormatHandling = DateFormatHandling.IsoDateFormat,
@@ -86,7 +86,7 @@ builder.Services.AddSingleton(provider =>
         {
             options.PayloadSerializerSettings = new()
             {
-                ContractResolver = new NonPublicSetterContractResolver(),
+                ContractResolver = new NonPublicSetterContractResolver() { NamingStrategy = new CamelCaseNamingStrategy() { ProcessDictionaryKeys = false, OverrideSpecifiedNames = false, ProcessExtensionDataNames = false } },
                 NullValueHandling = NullValueHandling.Ignore,
                 DefaultValueHandling = DefaultValueHandling.Ignore,
                 DateFormatHandling = DateFormatHandling.IsoDateFormat,

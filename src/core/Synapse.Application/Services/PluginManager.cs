@@ -17,6 +17,7 @@
 
 using Neuroglia.Serialization;
 using Synapse.Infrastructure.Plugins;
+using Synapse.Integration.Models;
 using System.IO.Compression;
 
 namespace Synapse.Application.Services
@@ -174,7 +175,7 @@ namespace Synapse.Application.Services
             if (file.Name != PluginMetadataFileName)
                 throw new Exception($"The specified file '{metadataFilePath}' is not a valid plugin metadata file");
             using var fileStream = file.OpenRead();
-            var pluginMetadata = await this.JsonSerializer.DeserializeAsync<PluginMetadata>(fileStream, this.CancellationTokenSource.Token);
+            var pluginMetadata = await this.JsonSerializer.DeserializeAsync<V1PluginMetadata>(fileStream, this.CancellationTokenSource.Token);
             plugin = ActivatorUtilities.CreateInstance<PluginHandle>(this.ServiceProvider, pluginMetadata, metadataFilePath);
             plugin.Disposed += (sender, e) => this.OnPluginHandleDisposed((IPluginHandle)sender!);
             this.Plugins.Add(plugin);
