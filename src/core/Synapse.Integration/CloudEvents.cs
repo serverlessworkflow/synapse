@@ -70,6 +70,17 @@ namespace Synapse
         }
 
         /// <summary>
+        /// Gets the <see cref="CloudEvent"/> type for the specified event CLR type
+        /// </summary>
+        /// <typeparam name="TEvent">The event type to get the <see cref="CloudEvent"/> type of</typeparam>
+        /// <typeparam name="TAggregate">The type of aggregate that has produced the event</typeparam>
+        /// <returns>The <see cref="CloudEvent"/> type</returns>
+        public static string TypeOf<TEvent, TAggregate>()
+        {
+            return TypeOf(typeof(TEvent), typeof(TAggregate));
+        }
+
+        /// <summary>
         /// Gets the <see cref="CloudEvent"/> schema <see cref="Uri"/> for the specified event CLR type
         /// </summary>
         /// <param name="eventType">The event type to get the <see cref="CloudEvent"/> schema <see cref="Uri"/> for</param>

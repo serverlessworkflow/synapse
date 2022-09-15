@@ -57,7 +57,7 @@ static IServiceProvider BuildServiceProvider()
     services.AddLogging();
     services.AddNewtonsoftJsonSerializer(settings =>
     {
-        settings.ContractResolver = new NonPublicSetterContractResolver();
+        settings.ContractResolver = new NonPublicSetterContractResolver() { NamingStrategy = new CamelCaseNamingStrategy() { ProcessDictionaryKeys = false, OverrideSpecifiedNames = false, ProcessExtensionDataNames = false } };
         settings.NullValueHandling = NullValueHandling.Ignore;
     });
     services.AddServerlessWorkflow();

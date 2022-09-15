@@ -32,19 +32,19 @@ namespace Synapse.Runtime.Services
     /// <summary>
     /// Represents the Docker implementation of the <see cref="IWorkflowRuntime"/>
     /// </summary>
-    public class DockerRuntimeHost
-        : WorkflowRuntimeHostBase
+    public class DockerRuntime
+        : WorkflowRuntimeBase
     {
 
         /// <summary>
-        /// Initializes a new <see cref="DockerRuntimeHost"/>
+        /// Initializes a new <see cref="DockerRuntime"/>
         /// </summary>
         /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
         /// <param name="environment">The current <see cref="IHostEnvironment"/></param>
         /// <param name="applicationOptions">The service used to access the current <see cref="SynapseApplicationOptions"/></param>
         /// <param name="options">The service used to access the current <see cref="DockerRuntimeHostOptions"/></param>
         /// <param name="docker">The service used to interact with the Docker API</param>
-        public DockerRuntimeHost(ILoggerFactory loggerFactory, IHostEnvironment environment, IOptions<SynapseApplicationOptions> applicationOptions, IOptions<DockerRuntimeHostOptions> options, IDockerClient docker)
+        public DockerRuntime(ILoggerFactory loggerFactory, IHostEnvironment environment, IOptions<SynapseApplicationOptions> applicationOptions, IOptions<DockerRuntimeHostOptions> options, IDockerClient docker)
             : base(loggerFactory)
         {
             this.Environment = environment;

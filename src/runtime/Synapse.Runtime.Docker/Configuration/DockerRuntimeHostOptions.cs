@@ -21,7 +21,7 @@ namespace Synapse.Runtime.Docker.Configuration
 {
 
     /// <summary>
-    /// Represents the options used to configure a <see cref="DockerRuntimeHost"/>
+    /// Represents the options used to configure a <see cref="DockerRuntime"/>
     /// </summary>
     public class DockerRuntimeHostOptions
     {
@@ -37,7 +37,7 @@ namespace Synapse.Runtime.Docker.Configuration
         public virtual DockerRuntimeOptions Runtime { get; set; } = new();
 
         /// <summary>
-        /// Gets/sets the options used to configure how a <see cref="DockerRuntimeHost"/> should manage secrets
+        /// Gets/sets the options used to configure how a <see cref="DockerRuntime"/> should manage secrets
         /// </summary>
         public virtual DockerSecretsOptions Secrets { get; set; } = new();
 

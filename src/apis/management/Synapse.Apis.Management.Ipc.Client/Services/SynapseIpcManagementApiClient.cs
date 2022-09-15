@@ -70,6 +70,16 @@ namespace Synapse.Apis.Management.Ipc
         /// </summary>
         protected IODataQueryOptionsParser QueryOptionsParser { get; }
 
+        #region Application
+
+        /// <inheritdoc/>
+        public virtual async Task<V1ApplicationInfo> GetApplicationInfoAsync(CancellationToken cancellationToken = default)
+        {
+            return await this.Mediator.ExecuteAndUnwrapAsync(new Application.Queries.Application.V1GetApplicationInfoQuery(), cancellationToken);
+        }
+
+        #endregion
+
         #region Workflows
 
         /// <inheritdoc/>

@@ -44,11 +44,6 @@ namespace Synapse.Dashboard
     public static class V1CorrelationCollectionReducers
     {
 
-        public static V1CorrelationCollectionState OnGetCorrelationsFromApiSucceeded(V1CorrelationCollectionState state, SetV1CorrelationCollection action)
-        {
-            return new(action.Correlations);
-        }
-
         public static V1CorrelationCollectionState OnAddV1Correlation(V1CorrelationCollectionState state, AddV1Correlation action)
         {
             state.Add(action.Correlation);

@@ -45,11 +45,11 @@ builder.Services.AddSynapse(builder.Configuration, synapse =>
         .UseHttpManagementApi()
         .UseWebSocketMonitoringApi();
     if (builder.Environment.RunsInKubernetes())
-        synapse.UseKubernetesRuntimeHost();
+        synapse.UseKubernetesRuntime();
     else if (builder.Environment.RunsInDocker())
-        synapse.UseDockerRuntimeHost();
+        synapse.UseDockerRuntime();
     else
-        synapse.UseNativeRuntimeHost();
+        synapse.UseNativeRuntime();
 });
 builder.Services.AddJQExpressionEvaluator();
 using var app = builder.Build();

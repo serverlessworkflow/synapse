@@ -20,8 +20,9 @@ namespace Synapse.Dashboard
     public static class KnownBreadcrumbs
     {
         public static IEnumerable<IBreadcrumbItem> Home = new List<IBreadcrumbItem>() { new BreadcrumbItem("Home", "/", "oi-clipboard") };
-        public static IEnumerable<IBreadcrumbItem> Workflows = new List<IBreadcrumbItem>(KnownBreadcrumbs.Home) { new BreadcrumbItem("Workflows", "/workflows", "oi-cog") };
-        public static IEnumerable<IBreadcrumbItem> CreateWorkflow = new List<IBreadcrumbItem>(KnownBreadcrumbs.Workflows) { new BreadcrumbItem("Create Workflow", "/workflows/new") };
-        public static IEnumerable<IBreadcrumbItem> Correlations = new List<IBreadcrumbItem>(KnownBreadcrumbs.Home) { new BreadcrumbItem("Correlations", "/correlations", "oi-link-intact") };
+        public static IEnumerable<IBreadcrumbItem> Workflows = new List<IBreadcrumbItem>(Home) { new BreadcrumbItem("Workflows", "/workflows", "oi-cog") };
+        public static IEnumerable<IBreadcrumbItem> CreateWorkflow = new List<IBreadcrumbItem>(Workflows) { new BreadcrumbItem("Create Workflow", "/workflows/new") };
+        public static IEnumerable<IBreadcrumbItem> Correlations = new List<IBreadcrumbItem>(Home) { new BreadcrumbItem("Correlations", "/correlations", "oi-link-intact") };
+        public static IEnumerable<IBreadcrumbItem> System = new List<IBreadcrumbItem>(Home) { new BreadcrumbItem("System", "/system/info", "oi-monitor") };
     }
 }

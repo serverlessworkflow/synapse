@@ -73,6 +73,16 @@ namespace Synapse.Apis.Management.Grpc
         /// </summary>
         protected IODataQueryOptionsParser QueryOptionsParser { get; }
 
+        #region Application
+
+        /// <inheritdoc/>
+        public virtual async Task<GrpcApiResult<V1ApplicationInfo>> GetApplicationInfoAsync(CallContext context = default)
+        {
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new Application.Queries.Application.V1GetApplicationInfoQuery(), context.CancellationToken));
+        }
+
+        #endregion
+
         #region Workflows
 
         /// <inheritdoc/>

@@ -16,6 +16,7 @@
  */
 
 using Synapse.Infrastructure.Plugins;
+using Synapse.Integration.Models;
 using System.Reflection;
 using System.Runtime.Loader;
 
@@ -40,7 +41,7 @@ namespace Synapse.Application.Services
         /// <param name="serviceProvider">The current <see cref="IServiceProvider"/></param>
         /// <param name="metadata">An object used to describe the handled <see cref="IPlugin"/></param>
         /// <param name="metadataFilePath">The path to the handled <see cref="IPlugin"/> <see cref="System.Reflection.Assembly"/> file</param>
-        public PluginHandle(IServiceProvider serviceProvider, PluginMetadata metadata, string metadataFilePath)
+        public PluginHandle(IServiceProvider serviceProvider, V1PluginMetadata metadata, string metadataFilePath)
         {
             this.ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
             this.Metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
@@ -61,13 +62,13 @@ namespace Synapse.Application.Services
         protected IServiceScope ServiceScope { get; private set; } = null!;
 
         /// <inheritdoc/>
-        public virtual PluginMetadata Metadata { get; }
+        public virtual V1PluginMetadata Metadata { get; }
 
         /// <inheritdoc/>
         public virtual bool IsLoaded { get; protected set; }
 
         /// <summary>
-        /// Gets the path to the <see cref="IPlugin"/>'s <see cref="PluginMetadata"/> file
+        /// Gets the path to the <see cref="IPlugin"/>'s <see cref="V1PluginMetadata"/> file
         /// </summary>
         public virtual string MetadataFilePath { get; }
 

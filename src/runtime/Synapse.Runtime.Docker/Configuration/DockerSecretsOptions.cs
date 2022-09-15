@@ -20,7 +20,7 @@ using Synapse.Runtime.Services;
 namespace Synapse.Runtime.Docker.Configuration
 {
     /// <summary>
-    /// Represents the options used to configure how a <see cref="DockerRuntimeHost"/> should manage secrets
+    /// Represents the options used to configure how a <see cref="DockerRuntime"/> should manage secrets
     /// </summary>
     public class DockerSecretsOptions
     {

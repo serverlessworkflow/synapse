@@ -37,19 +37,19 @@ namespace Synapse.Runtime.Services
     /// <summary>
     /// Represents the native implementation of the <see cref="IWorkflowRuntime"/>
     /// </summary>
-    public class NativeRuntimeHost
-        : WorkflowRuntimeHostBase
+    public class NativeRuntime
+        : WorkflowRuntimeBase
     {
 
         /// <summary>
-        /// Initializes a new <see cref="NativeRuntimeHost"/>
+        /// Initializes a new <see cref="NativeRuntime"/>
         /// </summary>
         /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
         /// <param name="environment">The current <see cref="IHostEnvironment"/></param>
         /// <param name="httpClientFactory">The service used to create <see cref="System.Net.Http.HttpClient"/>s</param>
         /// <param name="applicationOptions">The service used to access the current <see cref="SynapseApplicationOptions"/></param>
         /// <param name="options">The service used to access the current <see cref="NativeRuntimeOptions"/></param>
-        public NativeRuntimeHost(ILoggerFactory loggerFactory, IHostEnvironment environment, IHttpClientFactory httpClientFactory, 
+        public NativeRuntime(ILoggerFactory loggerFactory, IHostEnvironment environment, IHttpClientFactory httpClientFactory, 
             IOptions<SynapseApplicationOptions> applicationOptions, IOptions<NativeRuntimeOptions> options)
             : base(loggerFactory)
         {
@@ -115,7 +115,7 @@ namespace Synapse.Runtime.Services
                 target = "osx-x64.tar.gz";
             else
                 throw new PlatformNotSupportedException();
-            using var packageStream = await this.HttpClient.GetStreamAsync($"https://github.com/serverlessworkflow/synapse/releases/download/{typeof(NativeRuntimeHost).Assembly.GetName().Version!.ToString(3)!}/synapse-worker-{target}", cancellationToken); //todo: config based
+            using var packageStream = await this.HttpClient.GetStreamAsync($"https://github.com/serverlessworkflow/synapse/releases/download/{typeof(NativeRuntime).Assembly.GetName().Version!.ToString(3)!}/synapse-worker-{target}", cancellationToken); //todo: config based
             using ZipArchive archive = new(packageStream, ZipArchiveMode.Read);
             this.Logger.LogInformation("Worker app successfully downloaded. Extracting...");
             archive.ExtractToDirectory(workerDirectory.FullName, true);

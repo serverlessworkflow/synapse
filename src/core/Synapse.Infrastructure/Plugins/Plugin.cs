@@ -15,8 +15,6 @@
  *
  */
 
-using Microsoft.Extensions.DependencyInjection;
-
 namespace Synapse.Infrastructure.Plugins
 {
     /// <summary>

@@ -44,7 +44,7 @@ namespace Synapse.Apis.Monitoring.WebSocket
                 {
                     options.PayloadSerializerSettings = new()
                     {
-                        ContractResolver = new NonPublicSetterContractResolver(),
+                        ContractResolver = new NonPublicSetterContractResolver() { NamingStrategy = new CamelCaseNamingStrategy() { ProcessDictionaryKeys = false, OverrideSpecifiedNames = false, ProcessExtensionDataNames = false } },
                         NullValueHandling = NullValueHandling.Ignore
                     };
                 });

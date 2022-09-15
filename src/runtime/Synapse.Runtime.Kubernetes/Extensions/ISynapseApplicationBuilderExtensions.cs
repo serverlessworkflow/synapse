@@ -41,13 +41,13 @@ namespace Synapse.Runtime
         /// </summary>
         /// <param name="app">The <see cref="ISynapseApplicationBuilder"/> to configure</param>
         /// <returns>The configured <see cref="ISynapseApplicationBuilder"/></returns>
-        public static ISynapseApplicationBuilder UseKubernetesRuntimeHost(this ISynapseApplicationBuilder app)
+        public static ISynapseApplicationBuilder UseKubernetesRuntime(this ISynapseApplicationBuilder app)
         {
             var runtimeHostOptions = new KubernetesRuntimeOptions();
             app.Configuration.Bind("kubernetes", runtimeHostOptions);
-            app.Services.AddSingleton<KubernetesRuntimeHost>();
-            app.Services.AddSingleton<IWorkflowRuntime>(provider => provider.GetRequiredService<KubernetesRuntimeHost>());
-            app.Services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<KubernetesRuntimeHost>());
+            app.Services.AddSingleton<KubernetesRuntime>();
+            app.Services.AddSingleton<IWorkflowRuntime>(provider => provider.GetRequiredService<KubernetesRuntime>());
+            app.Services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<KubernetesRuntime>());
             var config = null as KubernetesClientConfiguration;
             if (KubernetesClientConfiguration.IsInCluster())
                 config = KubernetesClientConfiguration.InClusterConfig();

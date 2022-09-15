@@ -35,19 +35,19 @@ namespace Synapse.Runtime.Kubernetes.Services
     /// <summary>
     /// Represents the Kubernetes implementation of the <see cref="IWorkflowRuntime"/>
     /// </summary>
-    public class KubernetesRuntimeHost
-        : WorkflowRuntimeHostBase
+    public class KubernetesRuntime
+        : WorkflowRuntimeBase
     {
 
         /// <summary>
-        /// Initializes a new <see cref="KubernetesRuntimeHost"/>
+        /// Initializes a new <see cref="KubernetesRuntime"/>
         /// </summary>
         /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
         /// <param name="environment">The current <see cref="IHostEnvironment"/></param>
         /// <param name="applicationOptions">The service used to access the current <see cref="SynapseApplicationOptions"/></param>
         /// <param name="options">The service used to access the current <see cref="KubernetesRuntimeOptions"/></param>
         /// <param name="kubernetes">The service used to interact with the Kubernetes API</param>
-        public KubernetesRuntimeHost(ILoggerFactory loggerFactory, IHostEnvironment environment, 
+        public KubernetesRuntime(ILoggerFactory loggerFactory, IHostEnvironment environment, 
             IOptions<SynapseApplicationOptions> applicationOptions, IOptions<KubernetesRuntimeOptions> options, IKubernetes kubernetes)
             : base(loggerFactory)
         {
@@ -164,7 +164,7 @@ namespace Synapse.Runtime.Kubernetes.Services
         }
 
         /// <summary>
-        /// Exposes constants used by the <see cref="KubernetesRuntimeHost"/>
+        /// Exposes constants used by the <see cref="KubernetesRuntime"/>
         /// </summary>
         public static class Constants
         {
