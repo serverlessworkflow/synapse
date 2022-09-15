@@ -12251,6 +12251,18 @@ input[type=time]::-webkit-clear-button {
   fill: white;
 }
 
+.mh-50 {
+  max-height: 50% !important;
+}
+
+.overflow-y-scroll {
+  overflow-y: scroll;
+}
+
+.tab-page {
+  max-height: calc(100% - 42px);
+}
+
 .node.active rect, .cluster.active rect {
   fill: rgba(var(--bs-info-rgb), 0.2);
 }
@@ -12365,4 +12377,8 @@ input[type=time]::-webkit-clear-button {
 
 table .details {
   text-align: right;
+}
+
+.upload-page {
+  gap: var(--bs-gutter-x);
 }

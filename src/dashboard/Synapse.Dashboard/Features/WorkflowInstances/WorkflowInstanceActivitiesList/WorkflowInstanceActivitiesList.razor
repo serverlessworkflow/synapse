@@ -15,9 +15,7 @@
 *@
 
 @namespace Synapse.Dashboard
-@using Newtonsoft.Json
-@using System.Text
-@inject IMonacoEditorHelper MonacoEditorHelper
+
 @if(Activities != null)
 {
     <table class="table">
@@ -67,49 +65,7 @@
                         <td>@(activity.Duration?.ToString() ?? "")</td>
                     </Header>
                     <Body>
-                    <td colspan="7">
-                        <div class="row">
-                            @if (activity.Type == V1WorkflowActivityType.State)
-                            {
-                                <div class="col">
-                                    <MonacoDiffEditor                                                    
-                                        CssClass="monaco-small"
-                                        ConstructionOptions="MonacoEditorHelper.GetDiffEditorConstructionOptions()"
-                                        OnDidInit="OnActivityDiffEditorDidInit(JsonConvert.SerializeObject(
-                                            activity.Input, Formatting.Indented), 
-                                            activity.Output != null ? JsonConvert.SerializeObject(activity.Output, Formatting.Indented) : JsonConvert.SerializeObject(activity.Error, Formatting.Indented)
-                                        )"
-                                    />
-                                </div>
-                            } 
-                            else {
-                                    <div class="col-6">
-                                    <p class="font-weight-bold">Input</p>
-                                    @if(activity.Input != null)
-                                    {
-                                        <MonacoEditor 
-                                            CssClass="monaco-small"
-                                            ConstructionOptions="MonacoEditorHelper.GetStandaloneEditorConstructionOptions(JsonConvert.SerializeObject(activity.Input, Formatting.Indented), true)" />
-                                    }
-                                </div>
-                                <div class="col-6">
-                                    <p class="font-weight-bold">Output</p>
-                                    @if(activity.Output != null)
-                                    {
-                                        <MonacoEditor 
-                                            CssClass="monaco-small"
-                                            ConstructionOptions="MonacoEditorHelper.GetStandaloneEditorConstructionOptions(JsonConvert.SerializeObject(activity.Output, Formatting.Indented), true)" />
-                                    }
-                                    @if(activity.Error != null)
-                                    {
-                                        <MonacoEditor                                                 
-                                            CssClass="monaco-small"
-                                            ConstructionOptions="MonacoEditorHelper.GetStandaloneEditorConstructionOptions(JsonConvert.SerializeObject(activity.Error, Formatting.Indented), true)" />
-                                    }
-                                </div>
-                            }
-                        </div>
-                    </td>
+                        <WorkflowInstanceActivitiesRow Activity="activity" />
                     </Body>
                 </ExpandableDataRow>
             }
@@ -119,29 +75,6 @@
 
 @code {
     [Parameter] public List<V1WorkflowActivity> Activities { get; set; } = new List<V1WorkflowActivity>();
-    
-    protected Dictionary<int, ExpandableDataRow> rows = new Dictionary<int, ExpandableDataRow>();    
 
-    protected Func<MonacoEditorBase, Task> OnActivityDiffEditorDidInit(string original, string modified)
-    {
-        return async (MonacoEditorBase editor) =>
-        {
-            var diffEditor = (MonacoDiffEditor)editor;    
-            TextModel inputModel = await MonacoEditorBase.CreateModel("", "json");
-            TextModel outputModel = await MonacoEditorBase.CreateModel("", "json");
-            if (!string.IsNullOrWhiteSpace(original))
-            {
-                inputModel = await MonacoEditorBase.CreateModel(original, "json");
-            }
-            if (!string.IsNullOrWhiteSpace(modified))
-            {
-                outputModel = await MonacoEditorBase.CreateModel(modified, "json");
-            }
-            await diffEditor.SetModel(new DiffEditorModel
-            {
-                Original = inputModel,
-                Modified = outputModel
-            });
-        };
-    }
+    protected Dictionary<int, ExpandableDataRow> rows = new Dictionary<int, ExpandableDataRow>();
 }

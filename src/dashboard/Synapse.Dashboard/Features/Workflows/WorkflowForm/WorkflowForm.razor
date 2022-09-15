@@ -23,19 +23,21 @@
 @inject IWorkflowReader WorkflowReader
 @inject IWorkflowValidator WorkflowValidator
 @inject IDispatcher Dispatcher
+@inject IYamlService YamlService
 
 
 <label class="form-form-label">Definition</label>
+<PreferedLanguageSelector PreferedLanguageChange="ToggleLanguage" />
 <div class="flex-grow d-flex flex-row w-100 h-100">
-    <div class="w-75 h-100 mh-100">
+    <div class="w-75 h-100 mh-100">   
         <MonacoEditor
             @ref="editor"
             Id="definition-editor"
             CssClass="h-100"
-            ConstructionOptions="MonacoEditorHelper.GetStandaloneEditorConstructionOptions()"
+            ConstructionOptions='MonacoEditorHelper.GetStandaloneEditorConstructionOptions()'
             OnDidInit="OnMonacoEditorDidInit"
             OnDidChangeModelDecorations="OnMonacoEditorDidChangeModelDecorations"
-        />
+        />    
     </div>
     <div class="w-25">            
         @if(validationErrors != null && validationErrors.Any())
@@ -59,7 +61,32 @@
     [Parameter] public EventCallback<WorkflowDefinition> OnSubmitWorkflowDefinition { get; set; }
     [Parameter] public bool CreateDisabled { get; set; }
     protected IList<string> validationErrors = new List<string>();
+    protected string editorValueBuffer = "";
     protected MonacoEditor editor = null!;
+
+    protected virtual async Task ToggleLanguage(string language)
+    {
+        string text = await this.editor!.GetValue();
+        try
+        {
+            if (language == PreferedLanguage.YAML) {
+                this.editorValueBuffer = await this.YamlService.JsonToYaml(text);
+            }
+            else
+            {
+                this.editorValueBuffer = await this.YamlService.YamlToJson(text);
+            }
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            await this.MonacoEditorHelper.ChangePreferedLanguage(language == PreferedLanguage.JSON ? PreferedLanguage.YAML : PreferedLanguage.JSON);
+            this.editorValueBuffer = text;
+        }
+        await this.OnMonacoEditorDidInit(this.editor);
+        await this.Validate();
+        this.StateHasChanged();
+    }
 
     async Task OnCreateWorkflow()
     {
@@ -68,6 +95,9 @@
         if (string.IsNullOrWhiteSpace(rawDefinition))
         {
             return;
+        }                    
+        if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML) {
+            rawDefinition = await this.YamlService.YamlToJson(rawDefinition);
         }
         try
         {
@@ -100,9 +130,13 @@
 
     protected async Task OnMonacoEditorDidInit(MonacoEditorBase editorBase)
     {
-        var model = await this.editor.GetModel();
-        await this.editor.SetValue("");
-        await model.jsRuntime.InvokeVoidAsync("enableJsonValidation08" , model.Uri);
+        var model = await (editor as MonacoEditor)!.GetModel();
+        await MonacoEditorBase.SetModelLanguage(model, this.MonacoEditorHelper.PreferedLanguage);
+        await (editor as MonacoEditor)!.SetValue(this.editorValueBuffer);
+        if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.JSON)
+        {
+            await model.jsRuntime.InvokeVoidAsync("enableJsonValidation08" , model.Uri);            
+        }
     }
 
     protected async Task OnMonacoEditorDidChangeModelDecorations(ModelDecorationsChangedEvent modelDecorationsChangedEvent)

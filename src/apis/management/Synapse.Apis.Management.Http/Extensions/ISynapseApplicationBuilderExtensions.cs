@@ -44,12 +44,14 @@ namespace Synapse.Apis.Management.Http
         /// <returns>The configured <see cref="ISynapseApplicationBuilder"/></returns>
         public static ISynapseApplicationBuilder UseHttpManagementApi(this ISynapseApplicationBuilder synapse)
         {
+            var searchBinder = new ODataSearchBinder();
+            synapse.Services.AddSingleton<ISearchBinder>(searchBinder);
             synapse.Services
                 .AddControllers()
                 .AddOData((options, provider) =>
                 {
                     IEdmModelBuilder builder = provider.GetRequiredService<IEdmModelBuilder>();
-                    options.AddRouteComponents("api/odata", builder.Build(), services => services.AddSingleton<ISearchBinder, ODataSearchBinder>())
+                    options.AddRouteComponents("api/odata", builder.Build(), services => services.AddSingleton<ISearchBinder>(searchBinder))
                         .EnableQueryFeatures(50);
                     options.RouteOptions.EnableControllerNameCaseInsensitive = true;
                     options.RouteOptions.EnableActionNameCaseInsensitive = true;

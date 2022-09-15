@@ -20,30 +20,55 @@
 @inherits InputBase<DynamicObject>
 @inject IMonacoEditorHelper MonacoEditorHelper
 @inject IJsonSerializer Serializer
+@inject IYamlService YamlService
 
 @if (!string.IsNullOrWhiteSpace(Label))
 {
     <label for="@Id" class="form-label">@Label</label>
 }
+<PreferedLanguageSelector PreferedLanguageChange="ToggleLanguage" />
 <MonacoEditor
     @ref="editor"
-    Id="@Id"
+    Id="@editorId"
     CssClass="@ComputedCssClass"
-    ConstructionOptions='MonacoEditorHelper.GetStandaloneEditorConstructionOptions("{}")'
+    ConstructionOptions='MonacoEditorHelper.GetStandaloneEditorConstructionOptions()'
     OnDidInit="OnEditorInit"
-    OnDidChangeModelContent="OnEditorChange"/>
+    OnDidChangeModelContent="OnEditorChange"
+/>
 <ValidationMessage For="@ValidationFor" class="form-text" />
 
 @code {
 
-    [Parameter, EditorRequired] 
-    public Expression<Func<DynamicObject>> ValidationFor { get; set; } = default!;
+    [Parameter, EditorRequired] public Expression<Func<DynamicObject>> ValidationFor { get; set; } = default!;
     [Parameter] public string? Id { get; set; }
     [Parameter] public string? Label { get; set; }
 
     protected string ComputedCssClass => "monaco-small " + this.CssClass;
-    protected MonacoEditor editor = null!;
     protected DynamicObject lastParsed = null!;
+    protected string editorId => this.Id + "-json";
+    protected MonacoEditor editor = null!;
+
+    protected virtual async Task ToggleLanguage(string language)
+    {
+        string text = await this.editor!.GetValue();
+        try
+        {
+            if (language == PreferedLanguage.YAML) {
+                await this.YamlService.JsonToYaml(text);
+            }
+            else
+            {
+                await this.YamlService.YamlToJson(text);
+            }
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            await this.MonacoEditorHelper.ChangePreferedLanguage(language == PreferedLanguage.JSON ? PreferedLanguage.YAML : PreferedLanguage.JSON);
+        }
+        await this.OnEditorInit(this.editor);
+        this.StateHasChanged();
+    }
 
     protected override bool TryParseValueFromString(string? value, [MaybeNullWhen(false)] out DynamicObject result, [NotNullWhen(false)] out string? validationErrorMessage)
     {
@@ -71,10 +96,16 @@
 
     protected async Task OnEditorInit(MonacoEditorBase editorBase)
     {
+        var model = await (editor as MonacoEditor)!.GetModel();
+        await MonacoEditorBase.SetModelLanguage(model, this.MonacoEditorHelper.PreferedLanguage);
         string value = "{}";
         if (!string.IsNullOrWhiteSpace(this.CurrentValueAsString))
         {
             value = this.CurrentValueAsString;
+        }
+        if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)
+        {
+            value = await this.YamlService.JsonToYaml(value);
         }
         await this.editor.SetValue(value);
     }
@@ -82,6 +113,10 @@
     protected async Task OnEditorChange(ModelContentChangedEvent e)
     {
         string value = await this.editor.GetValue();
+        if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)
+        {
+            value = await this.YamlService.YamlToJson(value);
+        }
         if (this.CurrentValueAsString != value) 
         {
             this.CurrentValueAsString = value;

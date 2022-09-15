@@ -23,6 +23,7 @@
 @inject ISynapseManagementApi SynapseApi
 @inject IJsonSerializer JsonSerializer
 @inject IMonacoEditorHelper MonacoEditorHelper
+@inject IYamlService YamlService
 @inject HttpClient HttpClient
 
 @if (Workflow != null) 
@@ -51,10 +52,13 @@
             else
             {
                 <p>Input de JSON payload to start the workflow with:</p>
+                <PreferedLanguageSelector PreferedLanguageChange="ToggleLanguage" />
                 <MonacoEditor
                     @ref="workflowInputEditor"
                     CssClass="monaco-small"
-                    ConstructionOptions='MonacoEditorHelper.GetStandaloneEditorConstructionOptions("{}")'/>
+                    ConstructionOptions="MonacoEditorHelper.GetStandaloneEditorConstructionOptions(string.Empty, false, MonacoEditorHelper.PreferedLanguage)"
+                    OnDidInit="OnMonacoEditorDidInit"
+                />
             }
             @if (inputValidationErrors != null)
             {
@@ -86,6 +90,30 @@
     protected string error = null!;
     protected JSchema? dataInputSchema;
     protected IList<ValidationError>? inputValidationErrors;
+    protected string editorValueBuffer = "";
+
+    protected virtual async Task ToggleLanguage(string language)
+    {
+        string text = await this.workflowInputEditor!.GetValue();
+        try
+        {
+            if (language == PreferedLanguage.YAML) {
+                this.editorValueBuffer = await this.YamlService.JsonToYaml(text);
+            }
+            else
+            {
+                this.editorValueBuffer = await this.YamlService.YamlToJson(text);
+            }
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            await this.MonacoEditorHelper.ChangePreferedLanguage(language == PreferedLanguage.JSON ? PreferedLanguage.YAML : PreferedLanguage.JSON);
+            this.editorValueBuffer = text;
+        }
+        await this.OnMonacoEditorDidInit(this.workflowInputEditor);
+        this.StateHasChanged();
+    }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -106,6 +134,13 @@
             schema = JSchema.Parse(json);
         }
         this.dataInputSchema = schema;
+    }
+
+    protected async Task OnMonacoEditorDidInit(MonacoEditorBase editor)
+    {
+        var model = await (editor as MonacoEditor)!.GetModel();
+        await MonacoEditorBase.SetModelLanguage(model, this.MonacoEditorHelper.PreferedLanguage);
+        await (editor as MonacoEditor)!.SetValue(this.editorValueBuffer);
     }
 
     public async Task OnShowWorkflowInputModal(string value = "{}")
@@ -131,7 +166,10 @@
         var json = string.Empty;
         if(this.workflowInputEditor != null)
         {
-            json = await this.workflowInputEditor.GetValue();
+            json = await this.workflowInputEditor.GetValue();            
+            if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML) {
+                json = await this.YamlService.YamlToJson(json);
+            }
             if(this.dataInputSchema != null)
             {
                 var jobj = null as JObject;
