@@ -104,7 +104,7 @@ namespace Synapse.Application.Queries.Application
             var environmentVariables = System.Environment.GetEnvironmentVariables(EnvironmentVariableTarget.Process)
                 .OfType<DictionaryEntry>()
                 .ToDictionary(kvp => kvp.Key.ToString()!, kvp => kvp.Value!.ToString()!);
-            var plugins = this.PluginManager.Plugins.Select(p => p.Metadata);
+            var plugins = this.PluginManager.Plugins.Select(p => new V1PluginInfo(new FileInfo(p.MetadataFilePath).Directory!.FullName, p.Metadata, p.IsLoaded));
             var info = new V1ApplicationInfo(name, version, osDescription, frameworkDescription, serverlessWorkflowSdkVersion, environmentName,
                 workflowRuntimeName, supportedRuntimeExpressionLanguages, environmentVariables, plugins);
             return await Task.FromResult(this.Ok(info));

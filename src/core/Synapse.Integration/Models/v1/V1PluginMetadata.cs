@@ -27,6 +27,13 @@ namespace Synapse.Integration.Models
     {
 
         /// <summary>
+        /// Gets the plugin's type
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("type")]
+        [Newtonsoft.Json.JsonProperty("type")]
+        public virtual V1PluginType Type { get; set; } = V1PluginType.Generic;
+
+        /// <summary>
         /// Gets the plugin's name
         /// </summary>
         [Required, MinLength(1)]
@@ -39,7 +46,7 @@ namespace Synapse.Integration.Models
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("description")]
         [Newtonsoft.Json.JsonProperty("description")]
-        public virtual string? Description { get; protected set; }
+        public virtual string Description { get; protected set; }
 
         /// <summary>
         /// Gets the plugin's version

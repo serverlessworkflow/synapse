@@ -46,7 +46,7 @@ namespace Synapse.Integration.Models
         /// <param name="environmentVariables">An <see cref="IDictionary{TKey, TValue}"/> containing the Synapse application's environment variables</param>
         /// <param name="plugins">A collection containing the metadata of all installed plugins</param>
         public V1ApplicationInfo(string name, string version, string osDescription, string frameworkDescription, string serverlessWorkflowSdkVersion, string environmentName, 
-            string workflowRuntime, IEnumerable<string> supportedRuntimeExpressionLanguages, IDictionary<string, string> environmentVariables, IEnumerable<V1PluginMetadata> plugins)
+            string workflowRuntime, IEnumerable<string> supportedRuntimeExpressionLanguages, IDictionary<string, string> environmentVariables, IEnumerable<V1PluginInfo> plugins)
         {
             this.Name = name;
             this.Version = version;
@@ -108,7 +108,7 @@ namespace Synapse.Integration.Models
         /// <summary>
         /// Gets a collection containing installed plugins
         /// </summary>
-        public virtual ICollection<V1PluginMetadata> Plugins { get; set; }
+        public virtual ICollection<V1PluginInfo> Plugins { get; set; }
 
     }
 

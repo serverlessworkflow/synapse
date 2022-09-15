@@ -1,4 +1,5 @@
 ﻿{
+  "type": "repository",
   "name": "MongoDB",
   "description": "The official Synapse plugin for MongoDB",
   "tags": [ "persistence", "repository", "mongo" ],

@@ -100,64 +100,76 @@
                 {
                     <div class="border border-secondary rounded-2 my-3 p-3">
                         <Expander>
-                        <Header><b>@plugin.Name</b><span class="badge bg-secondary ms-2">@plugin.Version</span></Header>
+                        <Header><b>@plugin.Metadata.Name</b><span class="badge bg-secondary ms-2">@plugin.Metadata.Version</span><span class="badge bg-primary ms-2 ">@EnumHelper.Stringify(plugin.Metadata.Type)</span><span class="ms-2 oi @(plugin.IsLoaded ? "oi-circle-check text-success": "oi:x text-danger")"></span></Header>
                         <Body>
                             <table class="table table-striped table-bordered my-3">
-                            <tbody>
-                                <tr>
-                                    <td>Name</td>
-                                    <td><span class="badge bg-secondary">@plugin.Name</span></td>
-                                </tr>
-                                <tr>
-                                    <td>Description</td>
-                                    <td><span class="badge bg-secondary">@plugin.Description</span></td>
-                                </tr>
-                                <tr>
-                                    <td>Version</td>
-                                    <td><span class="badge bg-secondary">@plugin.Version</span></td>
-                                </tr>
-                                <tr>
-                                    <td>Authors</td>
-                                    <td><span class="badge bg-secondary">@plugin.Authors</span></td>
-                                </tr>
-                                <tr>
-                                    <td>Copyright</td>
-                                    <td><span class="badge bg-secondary">@plugin.Copyright</span></td>
-                                </tr>
-                                <tr>
-                                    <td>Tags</td>
-                                    <td>@((MarkupString)string.Join(',', plugin.Tags.Select(l => $@"<span class=""badge bg-secondary"">{l}</span>")))</td>
-                                </tr>
-                                 @if(plugin.LicenseUri != null)
-                                {
+                                <tbody>
                                     <tr>
-                                        <td>License</td>
-                                        <td><a href="@plugin.LicenseUri">@plugin.LicenseUri</a></td>
+                                        <td>Type</td>
+                                        <td><span class="badge bg-secondary">@EnumHelper.Stringify(plugin.Metadata.Type)</span></td>
                                     </tr>
-                                }
-                                @if(plugin.ReadmeUri != null)
-                                {
                                     <tr>
-                                        <td>Readme</td>
-                                        <td><a href="@plugin.ReadmeUri">@plugin.ReadmeUri</a></td>
-                                    </tr> 
-                                }
-                                @if(plugin.WebsiteUri != null)
-                                {
+                                        <td>Name</td>
+                                        <td>@plugin.Metadata.Name</td>
+                                    </tr>
                                     <tr>
-                                        <td>Website</td>
-                                        <td><a href="@plugin.WebsiteUri">@plugin.WebsiteUri</a></td>
-                                    </tr> 
-                                }
-                                @if(plugin.RepositoryUri != null)
-                                {
+                                        <td>Description</td>
+                                        <td>@plugin.Metadata.Description</td>
+                                    </tr>
                                     <tr>
-                                        <td>Repository</td>
-                                        <td><a href="@plugin.RepositoryUri">@plugin.RepositoryUri</a></td>
-                                    </tr> 
-                                }
-                            </tbody>
-                        </table>
+                                        <td>Version</td>
+                                        <td><span class="badge bg-secondary">@plugin.Metadata.Version</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Authors</td>
+                                        <td>@plugin.Metadata.Authors</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Copyright</td>
+                                        <td>@plugin.Metadata.Copyright</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tags</td>
+                                        <td>@((MarkupString)string.Join(',', plugin.Metadata.Tags.Select(l => $@"<span class=""badge bg-secondary"">{l}</span>")))</td>
+                                    </tr>
+                                                                        <tr>
+                                        <td>Location</td>
+                                        <td><span class="badge bg-secondary">@plugin.Location</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Loaded</td>
+                                        <td><span class="badge bg-secondary">@plugin.IsLoaded</span></td>
+                                    </tr>
+                                     @if(plugin.Metadata.LicenseUri != null)
+                                    {
+                                        <tr>
+                                            <td>License</td>
+                                            <td><a href="@plugin.Metadata.LicenseUri" target="_blank">@plugin.Metadata.LicenseUri</a></td>
+                                        </tr>
+                                    }
+                                    @if(plugin.Metadata.ReadmeUri != null)
+                                    {
+                                        <tr>
+                                            <td>Readme</td>
+                                            <td><a href="@plugin.Metadata.ReadmeUri" target="_blank">@plugin.Metadata.ReadmeUri</a></td>
+                                        </tr> 
+                                    }
+                                    @if(plugin.Metadata.WebsiteUri != null)
+                                    {
+                                        <tr>
+                                            <td>Website</td>
+                                            <td><a href="@plugin.Metadata.WebsiteUri" target="_blank">@plugin.Metadata.WebsiteUri</a></td>
+                                        </tr> 
+                                    }
+                                    @if(plugin.Metadata.RepositoryUri != null)
+                                    {
+                                        <tr>
+                                            <td>Repository</td>
+                                            <td><a href="@plugin.Metadata.RepositoryUri" target="_blank">@plugin.Metadata.RepositoryUri</a></td>
+                                        </tr> 
+                                    }
+                                </tbody>
+                            </table>
                         </Body>
                     </Expander>
                     </div>

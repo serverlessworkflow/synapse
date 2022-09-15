@@ -1,4 +1,5 @@
 ﻿{
+  "type": "repository",
   "name": "EventStore",
   "description": "The official Synapse plugin for EventStore",
   "tags": [ "persistence", "repository", "eventstore" ],
