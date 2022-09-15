@@ -31,6 +31,12 @@
         <button @onclick="OnUploadWorkflow" class="btn btn-outline-dark" title="Upload workflow"><small class="oi oi-data-transfer-upload"></small><span class="btn-label">&nbsp; Upload workflow</span></button>
     </Toolbar>
 </AppRightSidebar>
+<div class="row">
+    <div class="col-3">
+        <SearchBox PlaceHolder="Search workflows..." OnSearch="OnSearchWorkflows" OnClear="OnClearWorkflowSearch" />
+    </div>
+</div>
+
 <Table Items="workflows" AutoGenerateColumns="false">
     <RowTemplate Context="RenderContext">
         <ExpandableDataRow>
@@ -100,6 +106,16 @@
                     .ToDictionary(g => g.Key, g => g.ToList())!;
                 this.StateHasChanged();
             });
+        this.Dispatcher.Dispatch(new ListV1Workflows());
+    }
+
+    void OnSearchWorkflows(string term)
+    {
+        this.Dispatcher.Dispatch(new SearchV1Workflows(term));
+    }
+
+    void OnClearWorkflowSearch()
+    {
         this.Dispatcher.Dispatch(new ListV1Workflows());
     }
 

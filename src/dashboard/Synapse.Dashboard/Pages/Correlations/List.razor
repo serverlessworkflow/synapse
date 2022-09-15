@@ -25,6 +25,11 @@
 @inject NavigationManager NavigationManager
 
 <PageTitle>Correlations</PageTitle>
+<div class="row">
+    <div class="col-3">
+        <SearchBox PlaceHolder="Search correlations..." OnSearch="OnSearchCorrelations" OnClear="OnClearCorrelationSearch" />
+    </div>
+</div>
 <Table Items="correlations" AutoGenerateColumns="false">
     <Columns>
         <Column T="V1Correlation"
@@ -76,6 +81,16 @@
                 this.correlations = correlations;
                 this.StateHasChanged();
             });
+        this.Dispatcher.Dispatch(new ListV1Correlations());
+    }
+
+    void OnSearchCorrelations(string term)
+    {
+        this.Dispatcher.Dispatch(new SearchV1Correlations(term));
+    }
+
+    void OnClearCorrelationSearch()
+    {
         this.Dispatcher.Dispatch(new ListV1Correlations());
     }
 
