@@ -44,6 +44,12 @@ namespace Synapse.Dashboard
     public static class V1CorrelationCollectionReducers
     {
 
+        public static V1CorrelationCollectionState OnSetV1CorrelationCollection(V1CorrelationCollectionState state, SetV1CorrelationCollection action)
+        {
+            state = new(action.Correlations);
+            return state;
+        }
+
         public static V1CorrelationCollectionState OnAddV1Correlation(V1CorrelationCollectionState state, AddV1Correlation action)
         {
             state.Add(action.Correlation);
@@ -103,6 +109,13 @@ namespace Synapse.Dashboard
             context.Dispatcher.Dispatch(new SetV1CorrelationCollection(correlations));
         }
 
+        public static async Task OnSearchV1Correlations(SearchV1Correlations action, IEffectContext context)
+        {
+            var api = context.Services.GetRequiredService<ISynapseManagementApi>();
+            var correlations = await api.GetCorrelationsAsync($"$search={action.Term}");
+            context.Dispatcher.Dispatch(new SetV1CorrelationCollection(correlations));
+        }
+
         public static async Task OnGetV1WorkflowById(GetV1CorrelationById action, IEffectContext context)
         {
             var api = context.Services.GetRequiredService<ISynapseManagementApi>();
@@ -128,6 +141,18 @@ namespace Synapse.Dashboard
     {
 
 
+
+    }
+
+    public class SearchV1Correlations
+    {
+
+        public SearchV1Correlations(string term)
+        {
+            this.Term = term;
+        }
+
+        public string Term { get; }
 
     }
 

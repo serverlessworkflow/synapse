@@ -76,6 +76,13 @@ namespace Synapse.Dashboard
             context.Dispatcher.Dispatch(new SetV1WorkflowCollection(workflows));
         }
 
+        public static async Task OnSearchV1Workflows(SearchV1Workflows action, IEffectContext context)
+        {
+            var api = context.Services.GetRequiredService<ISynapseManagementApi>();
+            var workflows = await api.GetWorkflowsAsync($"$search={action.Term}");
+            context.Dispatcher.Dispatch(new SetV1WorkflowCollection(workflows));
+        }
+
         public static async Task OnGetV1WorkflowById(GetV1WorkflowById action, IEffectContext context)
         {
             var api = context.Services.GetRequiredService<ISynapseManagementApi>();
@@ -125,6 +132,18 @@ namespace Synapse.Dashboard
     {
 
 
+
+    }
+
+    public class SearchV1Workflows
+    {
+
+        public SearchV1Workflows(string term)
+        {
+            this.Term = term;
+        }
+
+        public string Term { get; }
 
     }
 
