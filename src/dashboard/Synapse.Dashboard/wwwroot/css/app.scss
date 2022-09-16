@@ -97,8 +97,12 @@ input[type=time]::-webkit-clear-button {
     overflow-y: scroll;
 }
 
-.tab-page {
-    max-height: calc(100% - 42px);
+.tab-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
 }
 
 .node, .cluster {
