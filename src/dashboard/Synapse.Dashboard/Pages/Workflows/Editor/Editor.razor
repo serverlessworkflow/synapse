@@ -1,0 +1,94 @@
+﻿@* 
+    Copyright © 2022-Present The Synapse Authors
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*@
+
+@page "/workflows/editor"
+@using Neuroglia.Data
+@using Neuroglia.Data.Flux
+@using Neuroglia.Serialization
+@using Newtonsoft.Json
+@using Newtonsoft.Json.Serialization
+@using Synapse.Integration.Models
+@using System.Reactive.Linq
+@using System.Dynamic
+@inject IServiceProvider ServiceProvider
+@inject IBreadcrumbService BreadcrumbService
+@inject IMonacoEditorHelper MonacoEditorHelper
+@inject IJsonSerializer JsonSerializer
+@inject IYamlConverter YamlConverter
+@inject NavigationManager NavigationManager
+
+<PageTitle>Workflow editor</PageTitle>
+
+<div class="row">
+    <div class="col-4">
+        <WorkflowEditor @ref="formBasedEditor" 
+            Definition="definition" 
+            OnPropertyChanged="OnWorkflowDefinitionChanged" />
+    </div>
+    <div class="col-8">
+        <PreferedLanguageSelector PreferedLanguageChange="ToggletextBasedEditorLanguage" />
+        <MonacoEditor @ref="textBasedEditor"
+            CssClass="vh-85"
+            ConstructionOptions="MonacoEditorHelper.GetStandaloneEditorConstructionOptions()"
+            OnDidChangeModelContent="OnTextBasedDefinitionChanged"/>
+    </div>
+</div>
+
+@code{
+
+    private WorkflowDefinition definition = new(){ Id = "new-workflow", Name = "New workflow", Version = "0.1.0" };
+    private WorkflowEditor formBasedEditor = null!;
+    private MonacoEditor textBasedEditor = null!;
+
+    async Task OnWorkflowDefinitionChanged()
+    {
+        string code = JsonConvert.SerializeObject(this.definition, Formatting.Indented, new JsonSerializerSettings(){ ContractResolver = new NonPublicSetterContractResolver() });
+        if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)
+            code = await this.YamlConverter.JsonToYaml(code);
+        await this.textBasedEditor.SetValue(code);
+    }
+
+    protected virtual async Task ToggletextBasedEditorLanguage(string language)
+    {
+        await this.OnTextBasedEditorInit(this.textBasedEditor as MonacoEditorBase);
+        if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.JSON)
+        {
+            var model = await this.textBasedEditor.GetModel();
+            await model.jsRuntime.InvokeVoidAsync("enableJsonValidation08" , model.Uri);  
+        }
+        this.StateHasChanged();
+    }
+
+    protected async Task OnTextBasedEditorInit(MonacoEditorBase editor)
+    {
+        var model = await (editor as MonacoEditor)!.GetModel();
+        await MonacoEditorBase.SetModelLanguage(model, this.MonacoEditorHelper.PreferedLanguage);
+        var code = JsonConvert.SerializeObject(this.definition, Formatting.Indented, new JsonSerializerSettings(){ ContractResolver = new NonPublicSetterContractResolver() });
+        if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)
+            code = await this.YamlConverter.JsonToYaml(code);
+        await (editor as MonacoEditor)!.SetValue(code);
+    }
+
+    async Task OnTextBasedDefinitionChanged(ModelContentChangedEvent e)
+    {
+        var json = await this.textBasedEditor.GetValue();
+        if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)
+            json = await this.YamlConverter.YamlToJson(json);
+        this.definition = await this.JsonSerializer.DeserializeAsync<WorkflowDefinition>(json);
+        this.StateHasChanged();
+    }
+
+}

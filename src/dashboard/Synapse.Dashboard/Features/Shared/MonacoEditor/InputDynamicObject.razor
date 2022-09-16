@@ -13,6 +13,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 *@
+
 @namespace Synapse.Dashboard
 @using Neuroglia.Serialization
 @using System.Linq.Expressions
@@ -20,7 +21,7 @@
 @inherits InputBase<DynamicObject>
 @inject IMonacoEditorHelper MonacoEditorHelper
 @inject IJsonSerializer Serializer
-@inject IYamlService YamlService
+@inject IYamlConverter YamlService
 
 @if (!string.IsNullOrWhiteSpace(Label))
 {

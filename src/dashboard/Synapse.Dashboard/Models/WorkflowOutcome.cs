@@ -14,27 +14,37 @@
  * limitations under the License.
  *
  */
-using System.Linq.Expressions;
 
 namespace Synapse.Dashboard
 {
-
     /// <summary>
-    /// Defines extensions for <see cref="Expression"/>s
+    /// Represents a workflow activity outcome
     /// </summary>
-    public static class ExpressionExtensions
+    public class WorkflowOutcome
     {
 
         /// <summary>
-        /// Combines the <see cref="Expression"/> with the specified one
+        /// Initializes a new <see cref="WorkflowOutcome"/>
         /// </summary>
-        /// <param name="left">The <see cref="Expression"/></param>
-        /// <param name="right">The <see cref="Expression"/> to combine</param>
-        /// <returns>A new <see cref="Expression"/></returns>
-        public static Expression CombineWith(this Expression left, Expression right)
+        /// <param name="type">The outcome type</param>
+        /// <param name="definition">The outcome definition object</param>
+        public WorkflowOutcome(WorkflowOutcomeType type, object? definition = null)
         {
-            return Expression.And(left, right);
+            this.Type = type;
+            this.Definition = definition;
         }
+
+
+
+        /// <summary>
+        /// Gets the outcome type
+        /// </summary>
+        public WorkflowOutcomeType Type { get; }
+
+        /// <summary>
+        /// Gets the outcome definition object
+        /// </summary>
+        public object? Definition { get; }
 
     }
 

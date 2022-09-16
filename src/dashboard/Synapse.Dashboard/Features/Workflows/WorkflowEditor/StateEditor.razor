@@ -1,0 +1,131 @@
+﻿@* 
+    Copyright © 2022-Present The Synapse Authors
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*@
+
+@namespace Synapse.Dashboard
+
+<div>
+    <table class="table table-striped">
+        <tbody>
+            <tr>
+                <td>Name</td>
+                <td>
+                    <input name="name" type="text" placeholder="Name" required class="form-control" value="@State.Name"
+                    @onchange="async e => await OnPropertyChangedAsync(nameof(State.Name), s => s.Name = (string)e.Value!)"/>
+                </td>
+            </tr>
+            <tr>
+                <td>Type</td>
+                <td>
+                    <select class="form-control bg-secondary text-white"
+                    @onchange="async e => await OnStateTypeChangedAsync(EnumHelper.Parse<StateType>((string)e.Value!))">
+                        @foreach(var type in Enum.GetValues<StateType>())
+                        {
+                            var typeStr = @EnumHelper.Stringify(type);
+                            if(State.Type == type)
+                            {
+                                <option value="@typeStr" selected>@typeStr</option>
+                            }
+                            else
+                            {
+                                <option value="@typeStr">@typeStr</option>
+                            }
+                        }
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>Data input schema</td>
+                <td>
+                    <input name="name" type="url" placeholder="Data input schema uri" class="form-control" value="@State.DataInputSchemaUri"/>
+                </td>
+            </tr>
+            <ExpandableDataRow>
+                <Header>
+                    <td colspan="2">Data filter</td>
+                </Header>
+                <Body>
+                    <td colspan="2">
+                            
+                    </td>
+                </Body>
+            </ExpandableDataRow>
+            <ExpandableDataRow>
+                <Header>
+                    <td colspan="2">Metadata</td>
+                </Header>
+                <Body>
+                    <td colspan="2">
+                            
+                    </td>
+                </Body>
+            </ExpandableDataRow>
+            <tr>
+                <td>Compensated by</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Used for compensation</td>
+                <td><input type="checkbox" placeholder="0.1.0" required value="@State.UsedForCompensation" @onchange="async e => await OnPropertyChangedAsync(nameof(State.UsedForCompensation), d => d.UsedForCompensation = (bool)e.Value!)" class="form-check-input" /></td>
+            </tr>
+            <ExpandableDataRow IsExpanded="true">
+                <Header>
+                    <td colspan="2">Outcome</td>
+                </Header>
+                <Body>
+                    <td colspan="2">
+                        <OutcomeEditor Outcome="@(State.GetOutcome())" ForbiddenTransitions="new List<StateDefinition>() { State }" OnChange="async outcome => await this.OnPropertyChangedAsync(nameof(outcome.Type), d => State.SetOutcome(outcome))" />
+                    </td>
+                </Body>
+            </ExpandableDataRow>
+                
+        </tbody>
+    </table>
+</div>
+
+@code {
+
+    [CascadingParameter] public WorkflowDefinition Workflow { get; set; } = null!;
+
+    [Parameter] public StateDefinition State { get; set; } = null!;
+
+    [Parameter] public EventCallback<string> OnPropertyChanged { get; set; }
+
+    protected virtual async Task OnStateTypeChangedAsync(StateType stateType)
+    {
+        var stateIndex = this.Workflow.States.IndexOf(this.State);
+        if (this.Workflow.States.Remove(this.State))
+        {
+            if (stateIndex >= this.Workflow.States.Count)
+                stateIndex = this.Workflow.States.Count - 1;
+        }
+        else
+        {
+            stateIndex = this.Workflow.States.Count - 1;
+        }
+        if (stateIndex < 0)
+            stateIndex = 0;
+        this.State = this.State.OfType(stateType);  
+        this.Workflow.States.Insert(stateIndex, this.State);
+        await this.OnPropertyChangedAsync(nameof(State.Type), _ => { });
+    }
+
+    protected virtual async Task OnPropertyChangedAsync(string property, Action<StateDefinition> patchAction)
+    {
+        patchAction(this.State);
+        await this.OnPropertyChanged.InvokeAsync(property);
+    }
+
+}

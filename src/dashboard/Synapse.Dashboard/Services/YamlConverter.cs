@@ -3,13 +3,13 @@
 namespace Synapse.Dashboard.Services
 {
     /// <inheritdoc/>
-    public class YamlService
-        : IYamlService
+    public class YamlConverter
+        : IYamlConverter
     {
         protected readonly IJSRuntime jsRuntime;
         protected IJSInProcessObjectReference? yamlModule = null;
 
-        public YamlService(IJSRuntime jSRuntime)
+        public YamlConverter(IJSRuntime jSRuntime)
         {
             this.jsRuntime = jSRuntime;
         }

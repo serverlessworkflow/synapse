@@ -14,28 +14,26 @@
  * limitations under the License.
  *
  */
-using System.Linq.Expressions;
+
+using System.Runtime.Serialization;
 
 namespace Synapse.Dashboard
 {
-
     /// <summary>
-    /// Defines extensions for <see cref="Expression"/>s
+    /// Enumerates all supported workflow outcomes
     /// </summary>
-    public static class ExpressionExtensions
+    public enum WorkflowOutcomeType
     {
-
         /// <summary>
-        /// Combines the <see cref="Expression"/> with the specified one
+        /// Indicates the end of the workflow
         /// </summary>
-        /// <param name="left">The <see cref="Expression"/></param>
-        /// <param name="right">The <see cref="Expression"/> to combine</param>
-        /// <returns>A new <see cref="Expression"/></returns>
-        public static Expression CombineWith(this Expression left, Expression right)
-        {
-            return Expression.And(left, right);
-        }
-
+        [EnumMember(Value = "end")]
+        End,
+        /// <summary>
+        /// Indicates a transition to another state
+        /// </summary>
+        [EnumMember(Value = "transition")]
+        Transition
     }
 
 }

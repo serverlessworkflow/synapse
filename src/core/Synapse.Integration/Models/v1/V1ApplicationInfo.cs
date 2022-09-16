@@ -21,6 +21,7 @@ namespace Synapse.Integration.Models
     /// <summary>
     /// Describes the running Synapse instance
     /// </summary>
+    [DataContract]
     public class V1ApplicationInfo
     {
 
@@ -63,51 +64,61 @@ namespace Synapse.Integration.Models
         /// <summary>
         /// Gets the Synapse application's name
         /// </summary>
+        [DataMember(Order = 1)]
         public virtual string Name { get; set; }
 
         /// <summary>
         /// Gets the version of Synapse 
         /// </summary>
+        [DataMember(Order = 2)]
         public virtual string Version { get; set; }
 
         /// <summary>
         /// Gets the description of the OS the Synapse application is running on
         /// </summary>
+        [DataMember(Order = 3)]
         public virtual string OSDescription { get; set; }
 
         /// <summary>
         /// Gets the description of the .NET Framework the Synapse application is running on
         /// </summary>
+        [DataMember(Order = 4)]
         public virtual string FrameworkDescription { get; set; }
 
         /// <summary>
         /// Gets the version of the Serverless Workflow SDK used by the Synapse application
         /// </summary>
+        [DataMember(Order = 5)]
         public virtual string ServerlessWorkflowSdkVersion { get; set; }
 
         /// <summary>
         /// Gets the name of the Synapse application's environment
         /// </summary>
+        [DataMember(Order = 6)]
         public virtual string EnvironmentName { get; set; }
 
         /// <summary>
         /// Gets the name of the Synapse workflow runtime
         /// </summary>
+        [DataMember(Order = 7)]
         public virtual string WorkflowRuntimeName { get; set; }
 
         /// <summary>
         /// Gets a list containing all supported runtime expression languages
         /// </summary>
+        [DataMember(Order = 8)]
         public virtual List<string> SupportedRuntimeExpressionLanguages { get; set; }
 
         /// <summary>
         /// Gets the Synapse application's environment variables
         /// </summary>
+        [DataMember(Order = 9)]
         public virtual IDictionary<string, string> EnvironmentVariables { get; set; }
 
         /// <summary>
         /// Gets a collection containing installed plugins
         /// </summary>
+        [DataMember(Order = 10)]
         public virtual ICollection<V1PluginInfo> Plugins { get; set; }
 
     }

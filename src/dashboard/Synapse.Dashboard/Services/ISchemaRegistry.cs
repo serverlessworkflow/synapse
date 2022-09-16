@@ -1,12 +1,12 @@
 ﻿/*
  * Copyright © 2022-Present The Synapse Authors
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,27 +14,25 @@
  * limitations under the License.
  *
  */
-using System.Linq.Expressions;
 
-namespace Synapse.Dashboard
+using Newtonsoft.Json.Schema;
+
+namespace Synapse.Dashboard.Services
 {
 
     /// <summary>
-    /// Defines extensions for <see cref="Expression"/>s
+    /// Defines the fundamentals of a service used to manage schemas
     /// </summary>
-    public static class ExpressionExtensions
+    public interface ISchemaRegistry
     {
 
         /// <summary>
-        /// Combines the <see cref="Expression"/> with the specified one
+        /// Gets the <see cref="JSchema"/> at the specified <see cref="Uri"/>
         /// </summary>
-        /// <param name="left">The <see cref="Expression"/></param>
-        /// <param name="right">The <see cref="Expression"/> to combine</param>
-        /// <returns>A new <see cref="Expression"/></returns>
-        public static Expression CombineWith(this Expression left, Expression right)
-        {
-            return Expression.And(left, right);
-        }
+        /// <param name="schemaUri">The <see cref="Uri"/> referencing the <see cref="JSchema"/> to get</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The <see cref="JSchema"/> at the specified <see cref="Uri"/></returns>
+        Task<JSchema> GetJsonSchemaAsync(string schemaUri, CancellationToken cancellationToken = default);
 
     }
 

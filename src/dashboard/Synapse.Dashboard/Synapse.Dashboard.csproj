@@ -40,4 +40,9 @@
     </Content>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\Workflows\WorkflowEditor\ActionEditors\" />
+    <Folder Include="Features\Workflows\WorkflowEditor\StateEditors\" />
+  </ItemGroup>
+
 </Project>

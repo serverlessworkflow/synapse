@@ -5,7 +5,7 @@ namespace Synapse.Dashboard.Services
     /// <summary>
     /// A service used to manipulate YAML
     /// </summary>
-    public interface IYamlService
+    public interface IYamlConverter
     {
         /// <summary>
         /// Converts the provided JSON string to YAML

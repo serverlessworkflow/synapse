@@ -58,6 +58,7 @@ builder.Services.AddSingleton<IODataClient>(new ODataClient(new ODataClientSetti
     BaseUri = new($"{baseAddress}api/odata"),
     PayloadFormat = ODataPayloadFormat.Json
 }));
+builder.Services.AddSingleton<ISchemaRegistry, SchemaRegistry>();
 builder.Services.AddScoped<ILayoutService, LayoutService>();
 builder.Services.AddSingleton<IToastManager, ToastManager>();
 builder.Services.AddSingleton<IAccordionManager, AccordionManager>();
@@ -65,10 +66,10 @@ builder.Services.AddSingleton<IIntegrationEventStream, IntegrationEventStream>()
 builder.Services.AddSingleton<IMonacoEditorHelper, MonacoEditorHelper>();
 builder.Services.AddSingleton<IBreadcrumbService, BreadcrumbService>();
 builder.Services.AddSingleton<IDagreService, DagreService>();
-builder.Services.AddSingleton<IClonerService, ClonerService>();
+builder.Services.AddSingleton<ICloner, Cloner>();
 builder.Services.AddSingleton<IWorkflowGraphEventDispatcher, WorkflowGraphEventDispatcher>();
 builder.Services.AddSingleton<IChartService, ChartService>();
-builder.Services.AddSingleton<IYamlService, YamlService>();
+builder.Services.AddSingleton<IYamlConverter, YamlConverter>();
 builder.Services.AddScoped<IStyleManager, StyleManager>();
 builder.Services.AddScoped<WorkflowGraphBuilder>();
 builder.Services.AddFlux(flux =>

@@ -3,7 +3,7 @@
 @using ServerlessWorkflow.Sdk.Services.FluentBuilders
 @inject Neuroglia.Mapping.IMapper Mapper
 @inject IWorkflowGraphEventDispatcher WorkflowGraphEventDispatcher
-@inject IClonerService Cloner
+@inject ICloner Cloner
 @implements IDisposable
 
 <WorkflowSummaryModal @ref="workflowSummaryModal" Model="workflowSummary" OnSaveModel="OnSaveSummaryModel" />
