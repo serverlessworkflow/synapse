@@ -27,10 +27,12 @@
             }
         </ul>
     </div>
-    <div class="row flex-grow-1 d-block tab-page @PageCssClass">
-        <CascadingValue Value="this">
-            @ChildContent
-        </CascadingValue>
+    <div class="row flex-grow-1 position-relative @PageCssClass">
+        <div class="tab-content overflow-y-scroll">
+            <CascadingValue Value="this">
+                @ChildContent
+            </CascadingValue>
+        </div>
     </div>
 </div>
 
