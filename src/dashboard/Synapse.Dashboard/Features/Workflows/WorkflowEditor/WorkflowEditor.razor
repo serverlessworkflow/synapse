@@ -19,29 +19,29 @@
 @using System.Dynamic
 @implements IDisposable
 
-@if(Definition != null)
+@if(Workflow != null)
 {
 
-    <CascadingValue Value="Definition">
+    <CascadingValue Value="Workflow">
         <div class="border border-secondary rounded-2 p-3 mb-3">
             <Expander IsExpanded="true">
                 <Header>
-                    <h5>General</h5>
+                    <h5><span class="oi oi-info me-2"></span>General</h5>
                 </Header>
                 <Body>
                     <table class="table">
                         <tbody>
-                            <tr><td>Spec version</td><td><select required value="@Definition.SpecVersion" @onchange="async e => await OnPropertyChangedAsync(nameof(Definition.SpecVersion), d => d.SpecVersion = (string)e.Value!)" class="form-control">
+                            <tr><td>Spec version</td><td><select required value="@Workflow.SpecVersion" @onchange="async e => await OnPropertyChangedAsync(nameof(Workflow.SpecVersion), d => d.SpecVersion = (string)e.Value!)" class="form-control bg-secondary text-white">
                                 <option value="0.8">0.8</option>
                             </select></td></tr>
-                            <tr><td>Id</td><td><input type="text" placeholder="Id" required value="@Definition.Id" @onchange="async e => await OnPropertyChangedAsync(nameof(Definition.Id), d => d.Id = (string)e.Value!)" class="form-control" /></td></tr>
-                            <tr><td>Version</td><td><input type="text" placeholder="Version" required value="@Definition.Version" @onchange="async e => await OnPropertyChangedAsync(nameof(Definition.Version), d => d.Version = (string)e.Value!)" class="form-control" /></td></tr>
-                            <tr><td>Name</td><td><input type="text" placeholder="Name" required value="@Definition.Name" @onchange="async e => await OnPropertyChangedAsync(nameof(Definition.Name), d => d.Name = (string)e.Value!)" class="form-control" /></td></tr>
-                            <tr><td>Description</td><td><textarea type="text" placeholder="Description" value="@Definition.Description" @onchange="async e => await OnPropertyChangedAsync(nameof(Definition.Description), d => d.Description = (string)e.Value!)" class="form-control"></textarea></td></tr>
-                            <tr><td>Expression language</td><td><select required @onchange="async e => await OnPropertyChangedAsync(nameof(Definition.ExpressionLanguage), d => d.ExpressionLanguage = (string)e.Value!)" class="form-control">
+                            <tr><td>Id</td><td><input type="text" placeholder="Id" required value="@Workflow.Id" @onchange="async e => await OnPropertyChangedAsync(nameof(Workflow.Id), d => d.Id = (string)e.Value!)" class="form-control" /></td></tr>
+                            <tr><td>Version</td><td><input type="text" placeholder="Version" required value="@Workflow.Version" @onchange="async e => await OnPropertyChangedAsync(nameof(Workflow.Version), d => d.Version = (string)e.Value!)" class="form-control" /></td></tr>
+                            <tr><td>Name</td><td><input type="text" placeholder="Name" required value="@Workflow.Name" @onchange="async e => await OnPropertyChangedAsync(nameof(Workflow.Name), d => d.Name = (string)e.Value!)" class="form-control" /></td></tr>
+                            <tr><td>Description</td><td><textarea type="text" placeholder="Description" value="@Workflow.Description" @onchange="async e => await OnPropertyChangedAsync(nameof(Workflow.Description), d => d.Description = (string)e.Value!)" class="form-control"></textarea></td></tr>
+                            <tr><td>Expression language</td><td><select required @onchange="async e => await OnPropertyChangedAsync(nameof(Workflow.ExpressionLanguage), d => d.ExpressionLanguage = (string)e.Value!)" class="form-control bg-secondary text-white">
                                 <option value="jq">jq</option>
                             </select></td></tr>
-                            <tr><td>Keep active</td><td><input type="checkbox" placeholder="0.1.0" required value="@Definition.KeepActive" @onchange="async e => await OnPropertyChangedAsync(nameof(Definition.KeepActive), d => d.KeepActive = (bool)e.Value!)" class="form-check-input" /></td></tr>
+                            <tr><td>Keep active</td><td><input type="checkbox" placeholder="0.1.0" required value="@Workflow.KeepActive" @onchange="async e => await OnPropertyChangedAsync(nameof(Workflow.KeepActive), d => d.KeepActive = (bool)e.Value!)" class="form-check-input" /></td></tr>
                         </tbody>
                     </table>
                 </Body>
@@ -51,10 +51,10 @@
         <div class="border border-secondary rounded-2 p-3 mb-3">
             <Expander IsExpanded="true">
                 <Header>
-                    <h5>States</h5>
+                    <h5><span class="oi oi-fork me-2"></span>States</h5>
                 </Header>
                 <Body>
-                    @if(Definition.States.Any())
+                    @if(Workflow.States.Any())
                     {
                         <table class="table">
                             <thead>
@@ -66,7 +66,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                    @foreach (var state in Definition.States)
+                                    @foreach (var state in Workflow.States)
                                     {
                                         <ExpandableDataRow>
                                             <Header>
@@ -74,7 +74,7 @@
                                                 <td><span class="badge bg-secondary">@EnumHelper.Stringify(state.Type)</span></td>
                                                 <td>@(state.IsEnd ? "End workflow" : $"Transition to '{state.TransitionToStateName}'")</td>
                                                 <td>
-                                                    @if(state == Definition.GetStartState())
+                                                    @if(state == Workflow.GetStartState())
                                                     {
                                                         <span class="badge bg-success text-white mx-1" title="First state in the workflow">start</span>
                                                     }
@@ -92,11 +92,11 @@
                                                         <span class="badge bg-danger text-white mx-1" title="Is fault tolerant and handles defined errors">fault</span>
                                                     }
                                                 </td>
-                                                <td><button @onclick="async () => await OnPropertyChangedAsync(nameof(Definition.States), d => d.States?.Remove(state))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
+                                                <td><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.States), d => d.States?.Remove(state))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
                                             </Header>
                                             <Body>
                                                 <td colspan="5">
-                                                    <StateEditor State="@state" OnPropertyChanged="async prop => await OnStatePropertyChangedAsync(state, prop)" />
+                                                    <StateEditor State="@state" OnChange="async () => await OnStatePropertyChangedAsync(state)" />
                                                 </td>
                                             </Body>
                                         </ExpandableDataRow>
@@ -112,115 +112,10 @@
             </Expander>
         </div>
 
-         <div class="border border-secondary rounded-2 p-3 mb-3">
-            <Expander>
-                <Header>
-                    <h5>Annotations</h5>
-                </Header>
-                <Body>
-                    <table class="table">
-                        <tbody>
-                            @if(Definition.Annotations != null)
-                            {
-                                @foreach (var annotation in Definition.Annotations)
-                                {
-                                    <tr>
-                                        <td>@annotation</td>
-                                        <td><button @onclick="async () => await OnPropertyChangedAsync(nameof(Definition.Annotations), d => d.Annotations?.Remove(annotation))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
-                                    </tr>
-                                }
-                            }
-                        </tbody>
-                    </table>
-                </Body>
-            </Expander>
-        </div>
-
         <div class="border border-secondary rounded-2 p-3 mb-3">
             <Expander>
                 <Header>
-                    <h5>Metadata</h5>
-                </Header>
-                <Body>
-                    <table class="table">
-                        <tbody>
-                            @if(Definition.Metadata != null)
-                            {
-                                var expando = (IDictionary<string, object>)Definition.Metadata.ToObject()!;
-                                @foreach (var metadata in expando)
-                                {
-                                    <tr>
-                                        <td>@metadata.Key</td>
-                                       @* <td><button @onclick="async () => await OnPropertyChanged(nameof(Definition.Version), d => d.Metadata?.Remove(metadata.Key))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>*@
-                                    </tr>
-                                }
-                            }
-                        </tbody>
-                    </table>
-                </Body>
-            </Expander>
-        </div>
-
-        <div class="border border-secondary rounded-2 p-3 mb-3">
-            <Expander>
-                <Header>
-                    <h5>Secrets</h5>
-                </Header>
-                <Body>
-                    <table class="table">
-                        <tbody>
-                            @if(Definition.Secrets != null)
-                            {
-                                @foreach (var secret in Definition.Secrets)
-                                {
-                                    <tr>
-                                        <td>@secret</td>
-                                        <td><button @onclick="async () => await OnPropertyChangedAsync(nameof(Definition.Secrets), d => d.Secrets?.Remove(secret))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
-                                    </tr>
-                                }
-                            }
-                        </tbody>
-                    </table>
-                </Body>
-            </Expander>
-        </div>
-
-        <div class="border border-secondary rounded-2 p-3 mb-3">
-            <Expander>
-                <Header>
-                    <h5>Authentication</h5>
-                </Header>
-                <Body>
-                    <table class="table">
-                         <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Scheme</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if(Definition.Auth != null)
-                            {
-                                @foreach (var auth in Definition.Auth)
-                                {
-                                    <tr>
-                                        <td>@auth.Name</td>
-                                        <td><span class="badge bg-secondary">@EnumHelper.Stringify(auth.Scheme)</span></td>
-                                        <td><button @onclick="async () => await OnPropertyChangedAsync(nameof(Definition.Auth), d => d.Auth?.Remove(auth))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
-                                    </tr>
-                                }
-                            }
-                        </tbody>
-                    </table>
-                </Body>
-            </Expander>
-        </div>
-
-        <div class="border border-secondary rounded-2 p-3 mb-3">
-            <Expander>
-                <Header>
-                    <h5>Events</h5>
+                    <h5><span class="oi oi-cloud me-2"></span>Events</h5>
                 </Header>
                 <Body>
                     <table class="table">
@@ -234,16 +129,16 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @if(Definition.Events != null)
+                            @if(Workflow.Events != null)
                             {
-                                @foreach (var e in Definition.Events)
+                                @foreach (var e in Workflow.Events)
                                 {
                                     <tr>
                                         <td>@e.Name</td>
                                         <td><span class="badge bg-secondary">@EnumHelper.Stringify(e.Kind)</span></td>
                                         <td>@e.Source</td>
                                         <td>@e.Type</td>
-                                        <td><button @onclick="async () => await OnPropertyChangedAsync(nameof(Definition.Events), d => d.Events?.Remove(e))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
+                                        <td><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Events), d => d.Events?.Remove(e))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
                                     </tr>
                                 }
                             }
@@ -256,7 +151,7 @@
         <div class="border border-secondary rounded-2 p-3 mb-3">
             <Expander>
                 <Header>
-                    <h5>Functions</h5>
+                    <h5><span class="oi oi-terminal me-2"></span>Functions</h5>
                 </Header>
                 <Body>
                     <table class="table">
@@ -269,15 +164,128 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @if(Definition.Functions != null)
+                            @if(Workflow.Functions != null)
                             {
-                                @foreach (var func in Definition.Functions)
+                                @foreach (var function in Workflow.Functions)
+                                {
+                                    <ExpandableDataRow>
+                                        <Header>
+                                            <td>@function.Name</td>
+                                            <td><span class="badge bg-secondary">@EnumHelper.Stringify(function.Type)</span></td>
+                                            <td>@function.Operation</td>
+                                            <td><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Functions), d => d.Functions?.Remove(function))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
+                                        </Header>
+                                        <Body>
+                                            <td colspan="4">
+                                                <FunctionEditor Function="@function" OnChange="OnPropertyChanged" />
+                                            </td>
+                                        </Body>
+                                    </ExpandableDataRow>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                    <button class="btn btn-block btn-warning text-white w-100" @onclick="OnCreateFunctionAsync">Create new function</button>
+                </Body>
+            </Expander>
+        </div>
+
+        <div class="border border-secondary rounded-2 p-3 mb-3">
+            <Expander>
+                <Header>
+                    <h5><span class="oi oi-key me-2"></span>Secrets</h5>
+                </Header>
+                <Body>
+                    <table class="table">
+                        <tbody>
+                            @if(Workflow.Secrets != null)
+                            {
+                                @foreach (var secret in Workflow.Secrets)
                                 {
                                     <tr>
-                                        <td>@func.Name</td>
-                                        <td><span class="badge bg-secondary">@EnumHelper.Stringify(func.Type)</span></td>
-                                        <td>@func.Operation</td>
-                                        <td><button @onclick="async () => await OnPropertyChangedAsync(nameof(Definition.Functions), d => d.Functions?.Remove(func))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
+                                        <td>@secret</td>
+                                        <td><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Secrets), d => d.Secrets?.Remove(secret))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </Body>
+            </Expander>
+        </div>
+
+        <div class="border border-secondary rounded-2 p-3 mb-3">
+            <Expander>
+                <Header>
+                    <h5><span class="oi oi-lock-locked me-2"></span>Authentication</h5>
+                </Header>
+                <Body>
+                    <table class="table">
+                         <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Scheme</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if(Workflow.Auth != null)
+                            {
+                                @foreach (var auth in Workflow.Auth)
+                                {
+                                    <tr>
+                                        <td>@auth.Name</td>
+                                        <td><span class="badge bg-secondary">@EnumHelper.Stringify(auth.Scheme)</span></td>
+                                        <td><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Auth), d => d.Auth?.Remove(auth))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </Body>
+            </Expander>
+        </div>
+
+        <div class="border border-secondary rounded-2 p-3 mb-3">
+            <Expander>
+                <Header>
+                    <h5><span class="oi oi-pencil me-2"></span>Annotations</h5>
+                </Header>
+                <Body>
+                    <table class="table">
+                        <tbody>
+                            @if(Workflow.Annotations != null)
+                            {
+                                @foreach (var annotation in Workflow.Annotations)
+                                {
+                                    <tr>
+                                        <td>@annotation</td>
+                                        <td><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Annotations), d => d.Annotations?.Remove(annotation))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </Body>
+            </Expander>
+        </div>
+
+        <div class="border border-secondary rounded-2 p-3 mb-3">
+            <Expander>
+                <Header>
+                    <h5><span class="oi oi-puzzle-piece me-2"></span>Metadata</h5>
+                </Header>
+                <Body>
+                    <table class="table">
+                        <tbody>
+                            @if(Workflow.Metadata != null)
+                            {
+                                var expando = (IDictionary<string, object>)Workflow.Metadata.ToObject()!;
+                                @foreach (var metadata in expando)
+                                {
+                                    <tr>
+                                        <td>@metadata.Key</td>
+                                       @* <td><button @onclick="async () => await OnPropertyChanged(nameof(Definition.Version), d => d.Metadata?.Remove(metadata.Key))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>*@
                                     </tr>
                                 }
                             }
@@ -297,8 +305,8 @@ else
 
 @code {
 
-    [Parameter] public WorkflowDefinition Definition { get; set; }
-    [Parameter] public EventCallback<string> OnPropertyChanged { get; set; }
+    [Parameter] public WorkflowDefinition? Workflow { get; set; }
+    [Parameter] public EventCallback OnPropertyChanged { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -307,22 +315,41 @@ else
 
     protected virtual async Task OnCreateStateAsync()
     {
+        if (this.Workflow == null)
+            return;
         var state = new OperationStateDefinition()
         {
-            Name = $"state-{Definition.States.Count + 1}",
+            Name = $"state-{Workflow.States.Count + 1}",
             IsEnd = true
         };
-        await this.OnPropertyChangedAsync(nameof(Definition.States), d => d.States.Add(state));
+        await this.OnPropertyChangedAsync(nameof(Workflow.States), d => d.States.Add(state));
     }
 
-    protected virtual async Task OnStatePropertyChangedAsync(StateDefinition state, string property)
+    protected virtual async Task OnCreateFunctionAsync()
     {
-        await this.OnPropertyChangedAsync(nameof(Definition.States), _ => { });
+        if (this.Workflow == null)
+            return;
+        var function = new FunctionDefinition();
+        await this.OnPropertyChangedAsync(nameof(Workflow.Functions), d =>
+        {
+            if (d.Functions == null)
+                d.Functions = new();
+            d.Functions.Add(function);
+        });
+    }
+
+    protected virtual async Task OnStatePropertyChangedAsync(StateDefinition state)
+    {
+        if (this.Workflow == null)
+            return;
+        await this.OnPropertyChangedAsync(nameof(Workflow.States), _ => { });
     }
 
     protected virtual async Task OnPropertyChangedAsync(string property, Action<WorkflowDefinition> patchAction)
     {
-        patchAction(this.Definition);
+        if (this.Workflow == null)
+            return;
+        patchAction(this.Workflow);
         await this.OnPropertyChanged.InvokeAsync(property);
     }
 

@@ -89,10 +89,15 @@
                         <OutcomeEditor Outcome="@(State.GetOutcome())" ForbiddenTransitions="new List<StateDefinition>() { State }" OnChange="async outcome => await this.OnPropertyChangedAsync(nameof(outcome.Type), d => State.SetOutcome(outcome))" />
                     </td>
                 </Body>
-            </ExpandableDataRow>
-                
+            </ExpandableDataRow>   
         </tbody>
     </table>
+    @switch (State)
+    {
+        case OperationStateDefinition operationState:
+            <OperationStateEditor State="operationState" OnChange="OnChange" />
+            break;
+    }
 </div>
 
 @code {
@@ -101,7 +106,7 @@
 
     [Parameter] public StateDefinition State { get; set; } = null!;
 
-    [Parameter] public EventCallback<string> OnPropertyChanged { get; set; }
+    [Parameter] public EventCallback OnChange { get; set; }
 
     protected virtual async Task OnStateTypeChangedAsync(StateType stateType)
     {
@@ -125,7 +130,7 @@
     protected virtual async Task OnPropertyChangedAsync(string property, Action<StateDefinition> patchAction)
     {
         patchAction(this.State);
-        await this.OnPropertyChanged.InvokeAsync(property);
+        await this.OnChange.InvokeAsync();
     }
 
 }

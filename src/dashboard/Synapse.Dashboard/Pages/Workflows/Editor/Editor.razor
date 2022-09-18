@@ -35,7 +35,7 @@
 <div class="row">
     <div class="col-4">
         <WorkflowEditor @ref="formBasedEditor" 
-            Definition="definition" 
+            Workflow="workflow" 
             OnPropertyChanged="OnWorkflowDefinitionChanged" />
     </div>
     <div class="col-8">
@@ -49,13 +49,13 @@
 
 @code{
 
-    private WorkflowDefinition definition = new(){ Id = "new-workflow", Name = "New workflow", Version = "0.1.0" };
+    private WorkflowDefinition workflow = new(){ Id = "new-workflow", Name = "New workflow", Version = "0.1.0" };
     private WorkflowEditor formBasedEditor = null!;
     private MonacoEditor textBasedEditor = null!;
 
     async Task OnWorkflowDefinitionChanged()
     {
-        string code = JsonConvert.SerializeObject(this.definition, Formatting.Indented, new JsonSerializerSettings(){ ContractResolver = new NonPublicSetterContractResolver() });
+        string code = JsonConvert.SerializeObject(this.workflow, Formatting.Indented, new JsonSerializerSettings(){ ContractResolver = new NonPublicSetterContractResolver() });
         if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)
             code = await this.YamlConverter.JsonToYaml(code);
         await this.textBasedEditor.SetValue(code);
@@ -76,7 +76,7 @@
     {
         var model = await (editor as MonacoEditor)!.GetModel();
         await MonacoEditorBase.SetModelLanguage(model, this.MonacoEditorHelper.PreferedLanguage);
-        var code = JsonConvert.SerializeObject(this.definition, Formatting.Indented, new JsonSerializerSettings(){ ContractResolver = new NonPublicSetterContractResolver() });
+        var code = JsonConvert.SerializeObject(this.workflow, Formatting.Indented, new JsonSerializerSettings(){ ContractResolver = new NonPublicSetterContractResolver() });
         if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)
             code = await this.YamlConverter.JsonToYaml(code);
         await (editor as MonacoEditor)!.SetValue(code);
@@ -87,7 +87,7 @@
         var json = await this.textBasedEditor.GetValue();
         if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)
             json = await this.YamlConverter.YamlToJson(json);
-        this.definition = await this.JsonSerializer.DeserializeAsync<WorkflowDefinition>(json);
+        this.workflow = await this.JsonSerializer.DeserializeAsync<WorkflowDefinition>(json);
         this.StateHasChanged();
     }
 

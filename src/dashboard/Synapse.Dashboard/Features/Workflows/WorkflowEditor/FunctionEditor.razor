@@ -1,0 +1,174 @@
+﻿@* 
+    Copyright © 2022-Present The Synapse Authors
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*@
+
+@namespace Synapse.Dashboard
+@using Microsoft.OpenApi.Readers
+@inject HttpClient HttpClient
+@inject ILogger<FunctionEditor> Logger
+
+@if(Function != null)
+{
+    <table class="table table-striped">
+    <tbody>
+        <tr>
+            <td>Name</td>
+            <td><input name="@nameof(Function.Name)" type="text" required placeholder="Function name" class="form-control" value="@Function.Name"
+                @onchange="async e => await OnPropertyChanged(nameof(Function.Name), f => f.Name = (string)e.Value!)" /></td>
+        </tr>
+        <tr>
+            <td>Type</td>
+            <td>
+                <select name="@nameof(Function.Type)" required class="form-control bg-secondary text-white" 
+                @onchange="async e => await OnPropertyChanged(nameof( Function.Type), f => f.Type = EnumHelper.Parse<FunctionType>((string)e.Value!))">
+                    @foreach (FunctionType functionType in Enum.GetValues(typeof(FunctionType)))
+                    {
+                        var functionTypeStr = @EnumHelper.Stringify(functionType);
+                        if(Function.Type == functionType)
+                        {
+                            <option value="@functionTypeStr" selected>@functionTypeStr</option>
+                        }
+                        else
+                        {
+                            <option value="@functionTypeStr">@functionTypeStr</option>
+                        }
+                    }
+                </select>
+           </td>
+        </tr>
+        <tr>
+            <td>Operation</td>
+            <td>
+                <div class="input-group">
+                    @{
+                        string[] operationComponents = null!;
+                        var resourceUri = string.Empty;
+                        var operationId = string.Empty;
+                        if (!string.IsNullOrWhiteSpace(Function.Operation))
+                        {
+                            operationComponents = Function.Operation.Split('#', StringSplitOptions.RemoveEmptyEntries);
+                            resourceUri = operationComponents[0];
+                            if(operationComponents.Length == 2)
+                                operationId = operationComponents[1];
+                        }    
+                    }
+                    <input name="@nameof(Function.Operation)" type="url" required placeholder="Resource URI (ex: https://petstore.swagger.io/v2/swagger.json)" class="form-control" value="@Function.Operation"
+                    @onchange="async e => await OnResourceUriChangedAsync((string)e.Value!)"/>
+                    <select required class="form-control" 
+                    @onchange="async e => await OnOperationChangedAsync(resourceUri, (string)e.Value!)">
+                        @if(operationComponents == null)
+                        {
+                            <option disabled selected value> -- select an operation -- </option>
+                        }
+                        else
+                        {
+                            <option disabled value> -- select an operation -- </option>
+                        }
+                        @if(operations != null)
+                        {
+                            @foreach(var operation in operations!)
+                            {
+                                if(operation.Id == operationId)
+                                {
+                                    <option value="@operation.Id" selected title="@operation.Description">@operation.Id</option>
+                                }
+                                else
+                                {
+                                    <option value="@operation.Id" title="@operation.Description">@operation.Id</option>
+                                }
+                            }
+                        }
+                    </select>
+                </div>
+            </td>
+        </tr>
+    </tbody>
+</table>
+}
+
+@code {
+
+    private List<OperationDescriptor> operations = null!;
+
+    [Parameter] public FunctionDefinition? Function { get; set; }
+
+    [Parameter] public EventCallback<FunctionDefinition?> OnChange { get; set; }
+
+    protected virtual async Task FetchAsyncApiOperationsAsync(string openApiResourceUri)
+    {
+        using (HttpRequestMessage request = new(HttpMethod.Get, openApiResourceUri))
+        {
+            using HttpResponseMessage response = await this.HttpClient.SendAsync(request);
+            var responseContent = response.Content == null ? null : await response.Content.ReadAsStringAsync();
+            if (!response.IsSuccessStatusCode)
+            {
+                this.Logger.LogInformation("Failed to retrieve the Open API document at location '{uri}'. The remote server responded with a non-success status code '{statusCode}'.", openApiResourceUri, response.StatusCode);
+                this.Logger.LogDebug("Response content:\r\n{responseContent}", responseContent ?? "None");
+                response.EnsureSuccessStatusCode();
+            }
+            using var responseStream = await response.Content!.ReadAsStreamAsync()!;
+            var document = new OpenApiStreamReader().Read(responseStream, out var diagnostic);
+            this.operations = document.Paths.Values
+                .SelectMany(p => p.Operations.Values).Select(o => new OperationDescriptor(o.OperationId, o.Summary))
+                .OrderBy(o => o.Id)
+                .ToList();
+        }
+    }
+
+    protected virtual async Task OnResourceUriChangedAsync(string resourceUri)
+    {
+        if (this.Function == null)
+            return;
+        switch (this.Function.Type)
+        {
+            case FunctionType.Rest:
+                await this.FetchAsyncApiOperationsAsync(resourceUri);
+                break;
+        }
+        await this.OnPropertyChanged(nameof(Function.Operation), f => f.Operation = resourceUri);
+        this.StateHasChanged();
+    }
+
+    protected virtual async Task OnOperationChangedAsync(string resourceUri,string operationId)
+    {
+        await this.OnPropertyChanged(nameof(Function.Operation), f => f.Operation = $"{resourceUri}#{operationId}");
+        this.StateHasChanged();
+    }
+
+    protected virtual async Task OnPropertyChanged(string property, Action<FunctionDefinition> patch)
+    {
+        if (this.Function == null)
+            return;
+        patch(this.Function);
+        await this.OnChange.InvokeAsync(this.Function);
+        this.StateHasChanged();
+    }
+
+    class OperationDescriptor
+    {
+
+        public OperationDescriptor(string id, string? description = null)
+        {
+            this.Id = id;
+            this.Description = description;
+        }
+
+        public string Id { get; }
+
+        public string? Description { get; }
+
+    }
+
+}

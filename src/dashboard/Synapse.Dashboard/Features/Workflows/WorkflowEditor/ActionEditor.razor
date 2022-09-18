@@ -1,0 +1,158 @@
+﻿@* 
+    Copyright © 2022-Present The Synapse Authors
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*@
+
+@namespace Synapse.Dashboard
+
+@if(Action != null)
+{
+    <table class="table table-striped">
+        <tbody>
+            <tr>
+                <td>Name</td>
+                <td><input type="text" placeholder="Name" title="The action's name" required class="form-control" value="@Action.Name" @onchange="async e => await OnPropertyChangedAsync(nameof(Action.Name), a => a.Name = (string)e.Value!)"/></td>
+            </tr>
+            <tr>
+                <td>Type</td>
+                <td>
+                    <select class="form-control bg-secondary text-white" title="The type of the action to perform" required @onchange="async e => await OnActionTypeChangedAsync(EnumHelper.Parse<ActionType>((string)e.Value!))">
+                        <option value="@EnumHelper.Stringify(ActionType.Function)">@EnumHelper.Stringify(ActionType.Function)</option>
+                        <option value="@EnumHelper.Stringify(ActionType.Subflow)">@EnumHelper.Stringify(ActionType.Subflow)</option>
+                        <option value="@EnumHelper.Stringify(ActionType.Trigger)">@EnumHelper.Stringify(ActionType.Trigger)</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>Retry policy</td>
+                <td>
+                    <select class="form-control" title="The retry policy associated to the action, if any">
+                        
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>Data filter</td>
+                <td>
+
+                </td>
+            </tr>
+            <tr>
+                <td>Sleep</td>
+                <td>
+                    
+                </td>
+            </tr>
+            <tr>
+                <td>Condition</td>
+                <td>
+                    <input type="text" title="A runtime expression that determines whether or not to run the action" placeholder=".age > 18" class="form-control" />
+                </td>
+            </tr>
+            @switch (Action.Type) 
+            {
+                case ActionType.Function:
+                    <ExpandableDataRow IsExpanded="true">
+                        <Header>
+                            <td colspan="2"><b>Function</b></td>
+                        </Header>
+                        <Body>
+                            <td colspan="2">
+                                <table class="table table-striped">
+                                    <tbody>
+                                        <tr>
+                                            <td>Function</td>
+                                            <td>
+                                                <FunctionSelector 
+                                                    Functions="Workflow.Functions"
+                                                    Selected="string.IsNullOrWhiteSpace(Action.Function?.RefName) ? null : Workflow.GetFunction(Action.Function.RefName)"
+                                                    OnChange="async e => await OnPropertyChangedAsync(nameof(Action.Function), a => a.Function!.RefName = e.Name)"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Arguments</td>
+                                            <td><DynamicObjectEditor Object="Action.Function!.Arguments" OnChange="async e => await this.OnPropertyChangedAsync(nameof (Action.Function), a => a.Function!.Arguments = e)" /></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </Body>
+                    </ExpandableDataRow>
+                    break;
+                case ActionType.Subflow:
+                        <ExpandableDataRow IsExpanded="true">
+                        <Header>
+                            <td colspan="2"><b>Subflow</b></td>
+                        </Header>
+                        <Body>
+
+                        </Body>
+                    </ExpandableDataRow>
+                    break;
+                case ActionType.Trigger:
+                    <ExpandableDataRow IsExpanded="true">
+                        <Header>
+                            <td colspan="2"><b>Trigger</b></td>
+                        </Header>
+                        <Body>
+
+                        </Body>
+                    </ExpandableDataRow>
+                    break;
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    [CascadingParameter] public WorkflowDefinition Workflow { get; set; } = null!;
+
+    [Parameter] public ActionDefinition? Action { get; set; }
+
+    [Parameter] public EventCallback OnChange { get; set; }
+
+    protected virtual async Task OnActionTypeChangedAsync(ActionType actionType)
+    {
+        if (this.Action == null)
+            return;
+        switch (actionType)
+        {
+            case ActionType.Function:
+                this.Action.Event = null;
+                this.Action.Subflow = null;
+                this.Action.Function = new();
+                break;
+            case ActionType.Subflow:
+                this.Action.Event = null;
+                this.Action.Function = null;
+                this.Action.Subflow = new();
+                break;
+            case ActionType.Trigger:
+                this.Action.Function = null;
+                this.Action.Subflow = null;
+                this.Action.Event = new();
+                break;
+        }
+        await this.OnPropertyChangedAsync(nameof(Action.Type), _ => { });
+    }
+
+    protected virtual async Task OnPropertyChangedAsync(string property, Action<ActionDefinition> patchAction)
+    {
+        if (this.Action == null)
+            return;
+        patchAction(this.Action);
+        await this.OnChange.InvokeAsync(property);
+    }
+
+}

@@ -11,12 +11,20 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Features\Workflows\WorkflowEditor\ActionEditors\**" />
+    <Content Remove="Features\Workflows\WorkflowEditor\ActionEditors\**" />
+    <EmbeddedResource Remove="Features\Workflows\WorkflowEditor\ActionEditors\**" />
+    <None Remove="Features\Workflows\WorkflowEditor\ActionEditors\**" />
+  </ItemGroup>
+
+  <ItemGroup>
 	<PackageReference Include="BlazorMonaco" Version="2.1.0" />
 	<PackageReference Include="BuildWebCompiler2022" Version="1.14.8" Condition="$([MSBuild]::IsOsPlatform('Windows'))" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.8" PrivateAssets="all" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="6.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.NewtonsoftJson" Version="6.0.8" />
+    <PackageReference Include="Microsoft.OpenApi.Readers" Version="1.4.1" />
     <PackageReference Include="Neuroglia.Blazor.Dagre" Version="2.0.1.82" />
 	<PackageReference Include="Neuroglia.Core" Version="2.0.1.82" />
 	<PackageReference Include="Neuroglia.Data.Flux" Version="2.0.1.82" />
@@ -38,11 +46,6 @@
     <Content Update="Pages\Correlations\View.razor">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Features\Workflows\WorkflowEditor\ActionEditors\" />
-    <Folder Include="Features\Workflows\WorkflowEditor\StateEditors\" />
   </ItemGroup>
 
 </Project>
