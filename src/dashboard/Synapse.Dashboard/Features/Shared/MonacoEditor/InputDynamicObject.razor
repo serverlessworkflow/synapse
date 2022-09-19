@@ -21,7 +21,7 @@
 @inherits InputBase<DynamicObject>
 @inject IMonacoEditorHelper MonacoEditorHelper
 @inject IJsonSerializer Serializer
-@inject IYamlConverter YamlService
+@inject IYamlConverter YamlConverter
 
 @if (!string.IsNullOrWhiteSpace(Label))
 {
@@ -55,11 +55,11 @@
         try
         {
             if (language == PreferedLanguage.YAML) {
-                await this.YamlService.JsonToYaml(text);
+                await this.YamlConverter.JsonToYaml(text);
             }
             else
             {
-                await this.YamlService.YamlToJson(text);
+                await this.YamlConverter.YamlToJson(text);
             }
         }
         catch(Exception ex)
@@ -106,7 +106,7 @@
         }
         if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)
         {
-            value = await this.YamlService.JsonToYaml(value);
+            value = await this.YamlConverter.JsonToYaml(value);
         }
         await this.editor.SetValue(value);
     }
@@ -116,7 +116,7 @@
         string value = await this.editor.GetValue();
         if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)
         {
-            value = await this.YamlService.YamlToJson(value);
+            value = await this.YamlConverter.YamlToJson(value);
         }
         if (this.CurrentValueAsString != value) 
         {

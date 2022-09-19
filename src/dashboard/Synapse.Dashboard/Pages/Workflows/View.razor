@@ -31,7 +31,7 @@
 @inject IBreadcrumbService BreadcrumbService
 @inject IJsonSerializer Serializer
 @inject IJSRuntime JS
-@inject IYamlConverter YamlService
+@inject IYamlConverter YamlConverter
 @inject HubConnection HubConnection
 @inject NavigationManager NavigationManager
 
@@ -433,7 +433,7 @@ else
         var text = JsonConvert.SerializeObject(this.workflow!.Definition, Formatting.Indented, new JsonSerializerSettings(){ ContractResolver = new NonPublicSetterContractResolver() });
         if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)
         {
-            text = await this.YamlService.JsonToYaml(text);
+            text = await this.YamlConverter.JsonToYaml(text);
         }
         await (editor as MonacoEditor)!.SetValue(text);
     }

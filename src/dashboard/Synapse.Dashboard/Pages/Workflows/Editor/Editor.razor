@@ -15,80 +15,111 @@
 *@
 
 @page "/workflows/editor"
-@using Neuroglia.Data
-@using Neuroglia.Data.Flux
-@using Neuroglia.Serialization
-@using Newtonsoft.Json
-@using Newtonsoft.Json.Serialization
-@using Synapse.Integration.Models
+@using System.Reactive.Subjects
 @using System.Reactive.Linq
-@using System.Dynamic
-@inject IServiceProvider ServiceProvider
-@inject IBreadcrumbService BreadcrumbService
+@using Synapse.Dashboard.Pages.Workflows.Editor.Actions
+@using Synapse.Dashboard.Pages.Workflows.Editor.State
 @inject IMonacoEditorHelper MonacoEditorHelper
-@inject IJsonSerializer JsonSerializer
-@inject IYamlConverter YamlConverter
-@inject NavigationManager NavigationManager
+@inject IStore Store
+@inject IDispatcher Dispatcher
+@inherits StatefulComponent<WorkflowEditorState>
 
 <PageTitle>Workflow editor</PageTitle>
 
-<div class="row">
-    <div class="col-4">
-        <WorkflowEditor @ref="formBasedEditor" 
-            Workflow="workflow" 
+@if (State.WorkflowDefinition != null)
+{
+    <div class="row">
+        <div class="col-4">
+            <WorkflowEditor
+            Workflow="State.WorkflowDefinition" 
             OnPropertyChanged="OnWorkflowDefinitionChanged" />
-    </div>
-    <div class="col-8">
-        <PreferedLanguageSelector PreferedLanguageChange="ToggletextBasedEditorLanguage" />
-        <MonacoEditor @ref="textBasedEditor"
+        </div>
+        <div class="col-8">
+            <PreferedLanguageSelector PreferedLanguageChange="ToggletextBasedEditorLanguage" />
+            <MonacoEditor @ref="textBasedEditor"
             CssClass="vh-85"
             ConstructionOptions="MonacoEditorHelper.GetStandaloneEditorConstructionOptions()"
+            OnDidInit="OnTextBasedEditorInit"
             OnDidChangeModelContent="OnTextBasedDefinitionChanged"/>
+        </div>
     </div>
-</div>
+}
 
 @code{
+    private MonacoEditor? textBasedEditor;
+    private Subject<string>? editorValue;
+    private Subject<bool>? disposeNotifier;
 
-    private WorkflowDefinition workflow = new(){ Id = "new-workflow", Name = "New workflow", Version = "0.1.0" };
-    private WorkflowEditor formBasedEditor = null!;
-    private MonacoEditor textBasedEditor = null!;
-
-    async Task OnWorkflowDefinitionChanged()
+    protected override async Task OnInitializedAsync()
     {
-        string code = JsonConvert.SerializeObject(this.workflow, Formatting.Indented, new JsonSerializerSettings(){ ContractResolver = new NonPublicSetterContractResolver() });
-        if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)
-            code = await this.YamlConverter.JsonToYaml(code);
-        await this.textBasedEditor.SetValue(code);
+        await base.OnInitializedAsync();
+        this.Dispatcher.Dispatch(new InitializeState());
+        this.disposeNotifier = new Subject<bool>();
+        this.editorValue = new Subject<string>();
+        this.editorValue
+            .Throttle(TimeSpan.FromMilliseconds(300))
+            .DistinctUntilChanged()
+            .TakeUntil(this.disposeNotifier)
+            .Subscribe(text => this.Dispatcher.Dispatch(new HandleTextBasedEditorChange(text)));
+        WorkflowEditorSelectors.SelectWorkflowDefinitionText(this.Store)
+            .TakeUntil(this.disposeNotifier)
+            .Subscribe(async (text) =>
+            {
+                if (text != null && this.textBasedEditor != null)
+                {
+                    var currentText = await this.textBasedEditor!.GetValue();
+                    if (currentText != text) {
+                        await this.textBasedEditor.SetValue(text);
+                    }
+                }
+            });
+    }
+
+    protected async Task OnWorkflowDefinitionChanged()
+    {
+        this.Dispatcher.Dispatch(new HandleFormBasedEditorChange(State.WorkflowDefinition!));
+        await Task.CompletedTask;
     }
 
     protected virtual async Task ToggletextBasedEditorLanguage(string language)
     {
-        await this.OnTextBasedEditorInit(this.textBasedEditor as MonacoEditorBase);
-        if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.JSON)
-        {
-            var model = await this.textBasedEditor.GetModel();
-            await model.jsRuntime.InvokeVoidAsync("enableJsonValidation08" , model.Uri);  
-        }
-        this.StateHasChanged();
+        await this.OnTextBasedEditorInit(this.textBasedEditor! as MonacoEditorBase);
+        var text = await this.textBasedEditor!.GetValue();
+        this.Dispatcher.Dispatch(new ChangeTextLanguage(language, text));
     }
 
     protected async Task OnTextBasedEditorInit(MonacoEditorBase editor)
     {
         var model = await (editor as MonacoEditor)!.GetModel();
         await MonacoEditorBase.SetModelLanguage(model, this.MonacoEditorHelper.PreferedLanguage);
-        var code = JsonConvert.SerializeObject(this.workflow, Formatting.Indented, new JsonSerializerSettings(){ ContractResolver = new NonPublicSetterContractResolver() });
-        if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)
-            code = await this.YamlConverter.JsonToYaml(code);
-        await (editor as MonacoEditor)!.SetValue(code);
+        if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.JSON)
+            await model.jsRuntime.InvokeVoidAsync("enableJsonValidation08", model.Uri);
     }
 
-    async Task OnTextBasedDefinitionChanged(ModelContentChangedEvent e)
+    protected async Task OnTextBasedDefinitionChanged(ModelContentChangedEvent e)
     {
-        var json = await this.textBasedEditor.GetValue();
-        if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)
-            json = await this.YamlConverter.YamlToJson(json);
-        this.workflow = await this.JsonSerializer.DeserializeAsync<WorkflowDefinition>(json);
-        this.StateHasChanged();
+        if (!this.State.Updating && this.editorValue != null)
+        {
+            var text = await this.textBasedEditor!.GetValue();
+            this.editorValue.OnNext(text);
+        }
+    }
+
+    private bool disposed;
+    protected override void Dispose(bool disposing)
+    {
+        if (!this.disposed)
+        {
+            if (this.disposeNotifier != null)
+            {
+                this.disposeNotifier.OnNext(true);
+                this.disposeNotifier.OnCompleted();
+                this.disposeNotifier.Dispose();
+                this.disposeNotifier = null;
+            }
+            this.disposed = true;
+        }
+        base.Dispose();
     }
 
 }

@@ -19,7 +19,7 @@
 @inherits InputBase<string?>
 @inject IMonacoEditorHelper MonacoEditorHelper
 @inject IJSRuntime JsRuntime
-@inject IYamlConverter YamlService
+@inject IYamlConverter YamlConverter
 
 @if (!string.IsNullOrWhiteSpace(Label))
 {
@@ -69,11 +69,11 @@
         try
         {
             if (language == PreferedLanguage.YAML) {
-                this.editorValueBuffer = await this.YamlService.JsonToYaml(text);
+                this.editorValueBuffer = await this.YamlConverter.JsonToYaml(text);
             }
             else
             {
-                this.editorValueBuffer = await this.YamlService.YamlToJson(text);
+                this.editorValueBuffer = await this.YamlConverter.YamlToJson(text);
             }
         }
         catch(Exception ex)
@@ -108,7 +108,7 @@
         var json = await this.editor.GetValue();
         if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)
         {
-            json = await this.YamlService.YamlToJson(json);
+            json = await this.YamlConverter.YamlToJson(json);
         }
         this.output = await this.JsRuntime.InvokeAsync<string>("jq.raw", json, this.CurrentValue);
         // todo: try/catch, display error ?

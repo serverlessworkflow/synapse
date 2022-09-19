@@ -17,7 +17,7 @@
 @namespace Synapse.Dashboard
 @using Newtonsoft.Json
 @inject IMonacoEditorHelper MonacoEditorHelper
-@inject IYamlConverter YamlService
+@inject IYamlConverter YamlConverter
 
 @if (WorkflowInstance != null)
 {
@@ -57,7 +57,7 @@
             input = JsonConvert.SerializeObject(this.WorkflowInstance.Input, Formatting.Indented);
             if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)
             {
-                input = await this.YamlService.JsonToYaml(input);
+                input = await this.YamlConverter.JsonToYaml(input);
             }
             inputModel = await MonacoEditorBase.CreateModel(input, this.MonacoEditorHelper.PreferedLanguage);
         }
@@ -65,7 +65,7 @@
             output = JsonConvert.SerializeObject(this.WorkflowInstance.Output, Formatting.Indented);
             if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)
             {
-                output = await this.YamlService.JsonToYaml(output);
+                output = await this.YamlConverter.JsonToYaml(output);
             }
             outputModel = await MonacoEditorBase.CreateModel(output, this.MonacoEditorHelper.PreferedLanguage);
         }
@@ -73,7 +73,7 @@
             output = JsonConvert.SerializeObject(this.WorkflowInstance.Error, Formatting.Indented);
             if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)
             {
-                output = await this.YamlService.JsonToYaml(output);
+                output = await this.YamlConverter.JsonToYaml(output);
             }
             outputModel = await MonacoEditorBase.CreateModel(output, this.MonacoEditorHelper.PreferedLanguage);
         }
