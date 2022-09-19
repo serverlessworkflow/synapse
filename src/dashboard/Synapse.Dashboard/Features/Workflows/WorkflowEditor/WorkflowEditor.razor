@@ -34,9 +34,18 @@
                             <tr><td>Spec version</td><td><select required value="@Workflow.SpecVersion" @onchange="async e => await OnPropertyChangedAsync(nameof(Workflow.SpecVersion), d => d.SpecVersion = (string)e.Value!)" class="form-control bg-secondary text-white">
                                 <option value="0.8">0.8</option>
                             </select></td></tr>
-                            <tr><td>Id</td><td><input type="text" placeholder="Id" required value="@Workflow.Id" @onchange="async e => await OnPropertyChangedAsync(nameof(Workflow.Id), d => d.Id = (string)e.Value!)" class="form-control" /></td></tr>
+                            <tr><td>Id</td>
+                            <td>
+                                <div class="input-group mb-3">
+                                    <input type="text" placeholder="Id" readonly="@autoGenerateId" required value="@Workflow.Id" @onchange="async e => await OnPropertyChangedAsync(nameof(Workflow.Id), d => d.Id = (string)e.Value!)" class="form-control" />
+                                    <div class="input-group-text">
+                                        <input class="form-check-input mt-0" type="checkbox" checked="@autoGenerateId" @onchange="async e => await OnAutoGenerateIdChanged((bool)e.Value)">
+                                        <label class="ms-1" title="Auto-generate the workflow id based on its sluggified, kebab-cased name">Auto-generate</label>
+                                    </div>
+                                </div>
+                            </td></tr>
                             <tr><td>Version</td><td><input type="text" placeholder="Version" required value="@Workflow.Version" @onchange="async e => await OnPropertyChangedAsync(nameof(Workflow.Version), d => d.Version = (string)e.Value!)" class="form-control" /></td></tr>
-                            <tr><td>Name</td><td><input type="text" placeholder="Name" required value="@Workflow.Name" @onchange="async e => await OnPropertyChangedAsync(nameof(Workflow.Name), d => d.Name = (string)e.Value!)" class="form-control" /></td></tr>
+                            <tr><td>Name</td><td><input type="text" placeholder="Name" required value="@Workflow.Name" @onchange="async e => await OnNameChangedAsync((string?)e.Value)" class="form-control" /></td></tr>
                             <tr><td>Description</td><td><textarea type="text" placeholder="Description" value="@Workflow.Description" @onchange="async e => await OnPropertyChangedAsync(nameof(Workflow.Description), d => d.Description = (string)e.Value!)" class="form-control"></textarea></td></tr>
                             <tr><td>Expression language</td><td><select required @onchange="async e => await OnPropertyChangedAsync(nameof(Workflow.ExpressionLanguage), d => d.ExpressionLanguage = (string)e.Value!)" class="form-control bg-secondary text-white">
                                 <option value="jq">jq</option>
@@ -304,6 +313,7 @@ else
 }
 
 @code {
+    private bool autoGenerateId = true;
 
     [Parameter] public WorkflowDefinition? Workflow { get; set; }
     [Parameter] public EventCallback OnPropertyChanged { get; set; }
@@ -343,6 +353,25 @@ else
         if (this.Workflow == null)
             return;
         await this.OnPropertyChangedAsync(nameof(Workflow.States), _ => { });
+    }
+
+    protected virtual async Task OnAutoGenerateIdChanged(bool autoGenerate)
+    {
+        this.autoGenerateId = autoGenerate;
+        if (this.autoGenerateId)
+            await this.OnPropertyChangedAsync(nameof(Workflow.Name), w => w.Id = w.Name.Slugify("-").ToLowerInvariant());
+    }
+
+    protected virtual async Task OnNameChangedAsync(string? name)
+    {
+        if (this.Workflow == null)
+            return;
+        await this.OnPropertyChangedAsync(nameof(Workflow.Name), w =>
+        {
+            w.Name = name;
+            if (autoGenerateId && !string.IsNullOrWhiteSpace(name))
+                w.Id = name.Slugify("-").ToLowerInvariant();
+        });
     }
 
     protected virtual async Task OnPropertyChangedAsync(string property, Action<WorkflowDefinition> patchAction)

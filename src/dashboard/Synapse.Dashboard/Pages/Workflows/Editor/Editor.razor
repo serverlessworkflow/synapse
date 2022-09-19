@@ -25,6 +25,11 @@
 @inherits StatefulComponent<WorkflowEditorState>
 
 <PageTitle>Workflow editor</PageTitle>
+<AppRightSidebar>
+    <Toolbar>
+        <button @onclick="OnSaveWorkflow" class="btn btn-outline-dark" title="New workflow"><small class="oi oi-plus"></small><span class="btn-label">&nbsp; Save</span></button>
+    </Toolbar>
+</AppRightSidebar>
 
 @if (State.WorkflowDefinition != null)
 {
@@ -103,6 +108,11 @@
             var text = await this.textBasedEditor!.GetValue();
             this.editorValue.OnNext(text);
         }
+    }
+
+    protected virtual async Task OnSaveWorkflow()
+    {
+        
     }
 
     private bool disposed;
