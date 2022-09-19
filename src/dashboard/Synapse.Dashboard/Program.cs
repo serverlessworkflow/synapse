@@ -48,7 +48,7 @@ var baseAddress = builder.HostEnvironment.BaseAddress;
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-builder.Services.AddScoped(provider => new HttpClient { BaseAddress = new Uri(baseAddress) });
+builder.Services.AddTransient(provider => new HttpClient { BaseAddress = new Uri(baseAddress) });
 builder.Services.AddSynapseRestApiClient(http => http.BaseAddress = new Uri(baseAddress));
 builder.Services.AddServerlessWorkflow();
 builder.Services.AddPluralizer();
@@ -58,7 +58,7 @@ builder.Services.AddSingleton<IODataClient>(new ODataClient(new ODataClientSetti
     BaseUri = new($"{baseAddress}api/odata"),
     PayloadFormat = ODataPayloadFormat.Json
 }));
-builder.Services.AddSingleton<ISchemaRegistry, SchemaRegistry>();
+builder.Services.AddSchemaRegistry();
 builder.Services.AddScoped<ILayoutService, LayoutService>();
 builder.Services.AddSingleton<IToastManager, ToastManager>();
 builder.Services.AddSingleton<IAccordionManager, AccordionManager>();

@@ -172,7 +172,7 @@
                                         <Header>
                                             <td>@function.Name</td>
                                             <td><span class="badge bg-secondary">@EnumHelper.Stringify(function.Type)</span></td>
-                                            <td>@function.Operation</td>
+                                            <td class="text-break">@function.Operation</td>
                                             <td><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Functions), d => d.Functions?.Remove(function))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
                                         </Header>
                                         <Body>

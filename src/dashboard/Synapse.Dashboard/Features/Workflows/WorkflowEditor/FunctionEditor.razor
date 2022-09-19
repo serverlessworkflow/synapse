@@ -16,8 +16,10 @@
 
 @namespace Synapse.Dashboard
 @using Microsoft.OpenApi.Readers
+@using Neuroglia.Data.Services
 @inject HttpClient HttpClient
 @inject ILogger<FunctionEditor> Logger
+@inject ISchemaRegistry SchemaRegistry
 
 @if(Function != null)
 {
@@ -54,43 +56,30 @@
                 <div class="input-group">
                     @{
                         string[] operationComponents = null!;
-                        var resourceUri = string.Empty;
+                        Uri? resourceUri = null;
                         var operationId = string.Empty;
                         if (!string.IsNullOrWhiteSpace(Function.Operation))
                         {
                             operationComponents = Function.Operation.Split('#', StringSplitOptions.RemoveEmptyEntries);
-                            resourceUri = operationComponents[0];
+                            resourceUri = new(operationComponents[0]);
                             if(operationComponents.Length == 2)
                                 operationId = operationComponents[1];
                         }    
                     }
                     <input name="@nameof(Function.Operation)" type="url" required placeholder="Resource URI (ex: https://petstore.swagger.io/v2/swagger.json)" class="form-control" value="@Function.Operation"
                     @onchange="async e => await OnResourceUriChangedAsync((string)e.Value!)"/>
-                    <select required class="form-control" 
-                    @onchange="async e => await OnOperationChangedAsync(resourceUri, (string)e.Value!)">
-                        @if(operationComponents == null)
-                        {
-                            <option disabled selected value> -- select an operation -- </option>
-                        }
-                        else
-                        {
-                            <option disabled value> -- select an operation -- </option>
-                        }
-                        @if(operations != null)
-                        {
-                            @foreach(var operation in operations!)
-                            {
-                                if(operation.Id == operationId)
-                                {
-                                    <option value="@operation.Id" selected title="@operation.Description">@operation.Id</option>
-                                }
-                                else
-                                {
-                                    <option value="@operation.Id" title="@operation.Description">@operation.Id</option>
-                                }
-                            }
-                        }
-                    </select>
+                    @switch (Function.Type)
+                    {
+                        case FunctionType.OData:
+                            <ODataEntitySetSelector DocumentUri="resourceUri" OperationId="@operationId" OnChange="async operation => await OnOperationChangedAsync(resourceUri, operation)" />
+                            break;
+                        case FunctionType.Rest:
+                            <OpenApiOperationSelector DocumentUri="resourceUri" OperationId="@operationId" OnChange="async operation => await OnOperationChangedAsync(resourceUri, operation)" />
+                            break;
+                        case FunctionType.Rpc:
+                            <GrpcOperationSelector DocumentUri="resourceUri" OperationId="@operationId" OnChange="async operation => await OnOperationChangedAsync(resourceUri, operation)" />
+                            break;
+                    }
                 </div>
             </td>
         </tr>
@@ -100,51 +89,20 @@
 
 @code {
 
-    private List<OperationDescriptor> operations = null!;
-
     [Parameter] public FunctionDefinition? Function { get; set; }
 
     [Parameter] public EventCallback<FunctionDefinition?> OnChange { get; set; }
-
-    protected virtual async Task FetchAsyncApiOperationsAsync(string openApiResourceUri)
-    {
-        using (HttpRequestMessage request = new(HttpMethod.Get, openApiResourceUri))
-        {
-            using HttpResponseMessage response = await this.HttpClient.SendAsync(request);
-            var responseContent = response.Content == null ? null : await response.Content.ReadAsStringAsync();
-            if (!response.IsSuccessStatusCode)
-            {
-                this.Logger.LogInformation("Failed to retrieve the Open API document at location '{uri}'. The remote server responded with a non-success status code '{statusCode}'.", openApiResourceUri, response.StatusCode);
-                this.Logger.LogDebug("Response content:\r\n{responseContent}", responseContent ?? "None");
-                response.EnsureSuccessStatusCode();
-            }
-            using var responseStream = await response.Content!.ReadAsStreamAsync()!;
-            var document = new OpenApiStreamReader().Read(responseStream, out var diagnostic);
-            this.operations = document.Paths.Values
-                .SelectMany(p => p.Operations.Values).Select(o => new OperationDescriptor(o.OperationId, o.Summary))
-                .OrderBy(o => o.Id)
-                .ToList();
-        }
-    }
 
     protected virtual async Task OnResourceUriChangedAsync(string resourceUri)
     {
         if (this.Function == null)
             return;
-        switch (this.Function.Type)
-        {
-            case FunctionType.Rest:
-                await this.FetchAsyncApiOperationsAsync(resourceUri);
-                break;
-        }
         await this.OnPropertyChanged(nameof(Function.Operation), f => f.Operation = resourceUri);
-        this.StateHasChanged();
     }
 
-    protected virtual async Task OnOperationChangedAsync(string resourceUri,string operationId)
+    protected virtual async Task OnOperationChangedAsync(Uri? resourceUri,string operationId)
     {
         await this.OnPropertyChanged(nameof(Function.Operation), f => f.Operation = $"{resourceUri}#{operationId}");
-        this.StateHasChanged();
     }
 
     protected virtual async Task OnPropertyChanged(string property, Action<FunctionDefinition> patch)
@@ -154,21 +112,6 @@
         patch(this.Function);
         await this.OnChange.InvokeAsync(this.Function);
         this.StateHasChanged();
-    }
-
-    class OperationDescriptor
-    {
-
-        public OperationDescriptor(string id, string? description = null)
-        {
-            this.Id = id;
-            this.Description = description;
-        }
-
-        public string Id { get; }
-
-        public string? Description { get; }
-
     }
 
 }
