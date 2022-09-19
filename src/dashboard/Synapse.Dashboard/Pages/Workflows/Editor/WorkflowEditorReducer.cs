@@ -25,12 +25,13 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor
     [Reducer]
     public static class WorkflowEditorReducer
     {
+
         /// <summary>
         /// Initialize the state
         /// </summary>
-        /// <param name="state"></param>
-        /// <param name="action"></param>
-        /// <returns></returns>
+        /// <param name="state">The state to reduce</param>
+        /// <param name="action">The action to reduce</param>
+        /// <returns>The reduced state</returns>
         public static WorkflowEditorState On(WorkflowEditorState state, InitializeStateSuccessful action)
         {
             return action.InitialState;
@@ -39,9 +40,9 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor
         /// <summary>
         /// Changes the updating state when editing the definition form the text editor
         /// </summary>
-        /// <param name="state"></param>
-        /// <param name="action"></param>
-        /// <returns></returns>
+        /// <param name="state">The state to reduce</param>
+        /// <param name="action">The action to reduce</param>
+        /// <returns>The reduced state</returns>
         public static WorkflowEditorState On(WorkflowEditorState state, StartUpdating action)
         {
             return state with
@@ -53,9 +54,9 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor
         /// <summary>
         /// Changes the updating state when failed to handle the value from the text editor
         /// </summary>
-        /// <param name="state"></param>
-        /// <param name="action"></param>
-        /// <returns></returns>
+        /// <param name="state">The state to reduce</param>
+        /// <param name="action">The action to reduce</param>
+        /// <returns>The reduced state</returns>
         public static WorkflowEditorState On(WorkflowEditorState state, StopUpdating action)
         {
             return state with
@@ -67,9 +68,9 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor
         /// <summary>
         /// Changes the definition state
         /// </summary>
-        /// <param name="state"></param>
-        /// <param name="action"></param>
-        /// <returns></returns>
+        /// <param name="state">The state to reduce</param>
+        /// <param name="action">The action to reduce</param>
+        /// <returns>The reduced state</returns>
         public static WorkflowEditorState On(WorkflowEditorState state, UpdateDefinition action)
         {
             return state with
@@ -79,11 +80,54 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor
         }
 
         /// <summary>
+        /// Notifies about the definition being saved
+        /// </summary>
+        /// <param name="state">The state to reduce</param>
+        /// <param name="action">The action to reduce</param>
+        /// <returns>The reduced state</returns>
+        public static WorkflowEditorState On(WorkflowEditorState state, SaveWorkflowDefinition action)
+        {
+            return state with
+            {
+                Saving = true
+            };
+        }
+
+        /// <summary>
+        /// Notifies about the completion of the definition save
+        /// </summary>
+        /// <param name="state">The state to reduce</param>
+        /// <param name="action">The action to reduce</param>
+        /// <returns>The reduced state</returns>
+        public static WorkflowEditorState On(WorkflowEditorState state, WorkflowDefinitionSaved action)
+        {
+            return state with
+            {
+                WorkflowDefinition = action.WorkflowDefinition,
+                Saving = false
+            };
+        }
+
+        /// <summary>
+        /// Notifies about the failure of the definition save
+        /// </summary>
+        /// <param name="state">The state to reduce</param>
+        /// <param name="action">The action to reduce</param>
+        /// <returns>The reduced state</returns>
+        public static WorkflowEditorState On(WorkflowEditorState state, WorkflowDefinitionSaveFailed action)
+        {
+            return state with
+            {
+                Saving = false
+            };
+        }
+
+        /// <summary>
         /// Changes the JSON definition state
         /// </summary>
-        /// <param name="state"></param>
-        /// <param name="action"></param>
-        /// <returns></returns>
+        /// <param name="state">The state to reduce</param>
+        /// <param name="action">The action to reduce</param>
+        /// <returns>The reduced state</returns>
         public static WorkflowEditorState On(WorkflowEditorState state, UpdateDefinitionText action)
         {
             return state with
@@ -91,5 +135,7 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor
                 WorkflowDefinitionText = action.WorkflowDefinitionText
             };
         }
+    
     }
+
 }

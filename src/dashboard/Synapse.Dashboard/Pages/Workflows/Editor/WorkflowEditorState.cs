@@ -40,5 +40,10 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor.State
         /// Defines if the workflow definition is being updated
         /// </summary>
         public bool Updating { get; set; }
+
+        /// <summary>
+        /// Defines if the workflow definition is being saved
+        /// </summary>
+        public bool Saving { get; set; }
     }
 }

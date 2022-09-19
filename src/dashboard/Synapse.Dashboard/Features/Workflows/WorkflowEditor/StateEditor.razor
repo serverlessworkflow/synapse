@@ -74,11 +74,17 @@
             </ExpandableDataRow>
             <tr>
                 <td>Compensated by</td>
-                <td></td>
+                <td>
+                    <StateSelector 
+                    Disabled="@State.UsedForCompensation"
+                    States="Workflow.States.Where(s => s.UsedForCompensation).ToList()"
+                    Selected="compensatedBy"
+                    ControlFlow="ControlFlow.Compensation"
+                    OnChange="OnCompensatedBySelectionChangedAsync" /></td>
             </tr>
             <tr>
                 <td>Used for compensation</td>
-                <td><input type="checkbox" placeholder="0.1.0" required value="@State.UsedForCompensation" @onchange="async e => await OnPropertyChangedAsync(nameof(State.UsedForCompensation), d => d.UsedForCompensation = (bool)e.Value!)" class="form-check-input" /></td>
+                <td><input type="checkbox" placeholder="0.1.0" required value="@State.UsedForCompensation" checked="@State.UsedForCompensation" @onchange="async e => await OnPropertyChangedAsync(nameof(State.UsedForCompensation), d => { d.UsedForCompensation = (bool)e.Value!; d.CompensatedBy = null; })" class="form-check-input" /></td>
             </tr>
             <ExpandableDataRow IsExpanded="true">
                 <Header>
@@ -86,7 +92,11 @@
                 </Header>
                 <Body>
                     <td colspan="2">
-                        <OutcomeEditor Outcome="@(State.GetOutcome())" ForbiddenTransitions="new List<StateDefinition>() { State }" OnChange="async outcome => await this.OnPropertyChangedAsync(nameof(outcome.Type), d => State.SetOutcome(outcome))" />
+                        <OutcomeEditor 
+                        Outcome="@(State.GetOutcome())" 
+                        ControlFlow="State.UsedForCompensation ? ControlFlow.Compensation : ControlFlow.Default"
+                        ForbiddenTransitions="new List<StateDefinition>(Workflow.States.Where(s => s.UsedForCompensation != State.UsedForCompensation)) { State }" 
+                        OnChange="async outcome => await this.OnPropertyChangedAsync(nameof(outcome.Type), d => State.SetOutcome(outcome))" />
                     </td>
                 </Body>
             </ExpandableDataRow>   
@@ -108,6 +118,15 @@
 
     [Parameter] public EventCallback OnChange { get; set; }
 
+    private StateDefinition? compensatedBy;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        if (this.State?.CompensatedBy != null)
+            this.compensatedBy = this.Workflow.GetState(this.State.CompensatedBy);
+    }
+
     protected virtual async Task OnStateTypeChangedAsync(StateType stateType)
     {
         var stateIndex = this.Workflow.States.IndexOf(this.State);
@@ -125,6 +144,23 @@
         this.State = this.State.OfType(stateType);  
         this.Workflow.States.Insert(stateIndex, this.State);
         await this.OnPropertyChangedAsync(nameof(State.Type), _ => { });
+    }
+
+    protected virtual async Task OnCompensatedBySelectionChangedAsync(StateDefinition? state)
+    {
+        if (this.State == null)
+            return;
+        if(state == null)
+        {
+            this.State.CompensatedBy = null;
+            this.compensatedBy = null;
+            return;
+        }
+        this.compensatedBy = state;
+        await this.OnPropertyChangedAsync(nameof(State.CompensatedBy), s =>
+        {
+            s.CompensatedBy = state.Name;
+        });
     }
 
     protected virtual async Task OnPropertyChangedAsync(string property, Action<StateDefinition> patchAction)

@@ -24,6 +24,7 @@
                 <StateSelector
                     States="Workflow.States.Except(ForbiddenTransitions).ToList()"
                     Selected="transitionTo"
+                    ControlFlow="ControlFlow"
                     OnChange="OnStateSelectedAsync" />
             </td>
         </tr>
@@ -37,6 +38,8 @@
     [Parameter] public List<StateDefinition> ForbiddenTransitions { get; set; } = new();
 
     [Parameter] public TransitionDefinition Transition { get; set; } = new();
+
+    [Parameter] public ControlFlow ControlFlow { get; set; } = ControlFlow.Default;
 
     [Parameter] public EventCallback<WorkflowOutcome> OnChange { get; set; }
 

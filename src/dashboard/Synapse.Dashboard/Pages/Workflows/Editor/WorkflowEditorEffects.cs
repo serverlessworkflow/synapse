@@ -26,12 +26,15 @@ using static Synapse.EnvironmentVariables.Runtime.Correlation;
 using Synapse.Dashboard.Pages.Workflows.Editor.State;
 using static System.Net.Mime.MediaTypeNames;
 using Octokit;
+using Synapse.Apis.Management;
 
 namespace Synapse.Dashboard.Pages.Workflows.Editor.Effects
 {
+
     [Effect]
     public static class WorkflowEditorEffects
     {
+
         public static async Task OnInitiliazeState(InitializeState action, IEffectContext context)
         {
             var monacoEditorHelper = context.Services.GetRequiredService<IMonacoEditorHelper>();
@@ -40,7 +43,7 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor.Effects
             var yamlConverter = context.Services.GetRequiredService<IYamlConverter>();
             if (yamlConverter == null)
                 throw new NullReferenceException("Unable to resolved service 'IYamlConverter'.");
-            var definition = new WorkflowDefinition() { Id = "new-workflow", Name = "New workflow", Version = "0.1.0" };
+            var definition = new WorkflowDefinition() { Id = "undefined", Name = "Undefined", Version = "0.1.0" };
             var text = JsonConvert.SerializeObject(definition, Formatting.Indented, new JsonSerializerSettings() { ContractResolver = new NonPublicSetterContractResolver() });
             if (monacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)
                 text = await yamlConverter.JsonToYaml(text);
@@ -135,11 +138,27 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor.Effects
                     await yamlConverter.JsonToYaml(action.WorkflowDefinitionText);
                 context.Dispatcher.Dispatch(new UpdateDefinitionText(text));
             }
-            catch(Exception ex)
+            catch
             {
                 await monacoEditorHelper.ChangePreferedLanguage(action.Language == PreferedLanguage.JSON ? PreferedLanguage.YAML : PreferedLanguage.JSON);
             }
             context.Dispatcher.Dispatch(new StopUpdating());
         }
+
+        public static async Task OnSaveWorkflowDefinition(SaveWorkflowDefinition action, IEffectContext context)
+        {
+            try
+            {
+                var api = context.Services.GetRequiredService<ISynapseManagementApi>();
+                var workflow = await api.CreateWorkflowAsync(new() { Definition = action.WorkflowDefinition });
+                context.Dispatcher.Dispatch(new WorkflowDefinitionSaved(workflow.Definition));
+            }
+            catch (Exception ex)
+            {
+                context.Dispatcher.Dispatch(new WorkflowDefinitionSaveFailed(ex.Message));
+            }
+        }
+
     }
+
 }

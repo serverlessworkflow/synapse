@@ -27,11 +27,17 @@
 <PageTitle>Workflow editor</PageTitle>
 <AppRightSidebar>
     <Toolbar>
-        <button @onclick="OnSaveWorkflow" class="btn btn-outline-dark" title="New workflow"><small class="oi oi-plus"></small><span class="btn-label">&nbsp; Save</span></button>
+        <button @onclick="OnSaveWorkflow" disabled="@State.Saving" class="btn btn-outline-dark" title="Save workflow"><small class="oi oi-cloud-upload"></small><span class="btn-label">&nbsp; Save</span></button>
     </Toolbar>
 </AppRightSidebar>
 
-@if (State.WorkflowDefinition != null)
+@if (State.Saving)
+{
+    <div class="position-relative w-100 h-100">
+          <Loader />
+    </div>
+}
+else if (State.WorkflowDefinition != null)
 {
     <div class="row">
         <div class="col-4">
@@ -50,7 +56,10 @@
     </div>
 }
 
+
+
 @code{
+
     private MonacoEditor? textBasedEditor;
     private Subject<string>? editorValue;
     private Subject<bool>? disposeNotifier;
@@ -110,9 +119,12 @@
         }
     }
 
-    protected virtual async Task OnSaveWorkflow()
+    protected virtual void OnSaveWorkflow()
     {
-        
+        if (this.State.WorkflowDefinition == null)
+            return;
+        this.Dispatcher.Dispatch(new SaveWorkflowDefinition(this.State.WorkflowDefinition));
+        this.StateHasChanged();
     }
 
     private bool disposed;

@@ -22,6 +22,7 @@ using Synapse.Dashboard.Pages.Workflows.Editor.State;
 /// </summary>
 namespace Synapse.Dashboard.Pages.Workflows.Editor.Actions
 {
+
     /// <summary>
     /// Triggers state initialization
     /// </summary>
@@ -30,7 +31,8 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor.Actions
     /// <summary>
     /// Returns the initial state
     /// </summary>
-    public class InitializeStateSuccessful {
+    public class InitializeStateSuccessful 
+    {
         public InitializeStateSuccessful(WorkflowEditorState initialState)
         {
             this.InitialState = initialState ?? throw new ArgumentNullException(nameof(initialState));
@@ -91,6 +93,51 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor.Actions
     /// The action dispatched when the editor finished updating
     /// </summary>
     public class StopUpdating { }
+
+    /// <summary>
+    /// Saves the specified <see cref="WorkflowDefinition"/> using the Synapse API
+    /// </summary>
+    public class SaveWorkflowDefinition
+    {
+
+        public SaveWorkflowDefinition(WorkflowDefinition workflowDefinition)
+        {
+            this.WorkflowDefinition = workflowDefinition;
+        }
+
+        public WorkflowDefinition WorkflowDefinition { get; }
+
+    }
+
+    /// <summary>
+    /// Notifies the UI about the completion of the specified <see cref="WorkflowDefinition"/>'s save
+    /// </summary>
+    public class WorkflowDefinitionSaved
+    {
+
+        public WorkflowDefinitionSaved(WorkflowDefinition workflowDefinition)
+        {
+            this.WorkflowDefinition = workflowDefinition;
+        }
+
+        public WorkflowDefinition WorkflowDefinition { get; }
+
+    }
+
+    /// <summary>
+    /// Notifies the UI about the failure of a <see cref="WorkflowDefinition"/>'s save
+    /// </summary>
+    public class WorkflowDefinitionSaveFailed
+    {
+
+        public WorkflowDefinitionSaveFailed(string error)
+        {
+            this.Error = error;
+        }
+
+        public string? Error { get; }
+
+    }
 
     /// <summary>
     /// The action to handle changes in the form based editor
@@ -157,4 +204,5 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor.Actions
         /// </summary>
         public string WorkflowDefinitionText { get; }
     }
+
 }

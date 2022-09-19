@@ -23,8 +23,10 @@
 {
 
     <CascadingValue Value="Workflow">
+
+        <!-- General -->
         <div class="border border-secondary rounded-2 p-3 mb-3">
-            <Expander IsExpanded="true">
+            <Expander IsExpanded="@expandedSections["general"]" OnToggleExpand="@(isExpanded => OnToggleExpand("general", isExpanded))">
                 <Header>
                     <h5><span class="oi oi-info me-2"></span>General</h5>
                 </Header>
@@ -57,8 +59,9 @@
             </Expander>
         </div>
     
+        <!-- States -->
         <div class="border border-secondary rounded-2 p-3 mb-3">
-            <Expander IsExpanded="true">
+            <Expander IsExpanded="@expandedSections["states"]" OnToggleExpand="@(isExpanded => OnToggleExpand("states", isExpanded))">
                 <Header>
                     <h5><span class="oi oi-fork me-2"></span>States</h5>
                 </Header>
@@ -121,8 +124,9 @@
             </Expander>
         </div>
 
+        <!-- Events -->
         <div class="border border-secondary rounded-2 p-3 mb-3">
-            <Expander>
+            <Expander IsExpanded="@expandedSections["events"]" OnToggleExpand="@(isExpanded => OnToggleExpand("events", isExpanded))">
                 <Header>
                     <h5><span class="oi oi-cloud me-2"></span>Events</h5>
                 </Header>
@@ -157,8 +161,9 @@
             </Expander>
         </div>
 
+        <!-- Functions -->
         <div class="border border-secondary rounded-2 p-3 mb-3">
-            <Expander>
+            <Expander IsExpanded="@expandedSections["functions"]" OnToggleExpand="@(isExpanded => OnToggleExpand("functions", isExpanded))">
                 <Header>
                     <h5><span class="oi oi-terminal me-2"></span>Functions</h5>
                 </Header>
@@ -181,7 +186,7 @@
                                         <Header>
                                             <td>@function.Name</td>
                                             <td><span class="badge bg-secondary">@EnumHelper.Stringify(function.Type)</span></td>
-                                            <td class="text-break">@function.Operation</td>
+                                            <td class="text-break"><a href="@function.Operation" target="_blank">@function.Operation</a></td>
                                             <td><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Functions), d => d.Functions?.Remove(function))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
                                         </Header>
                                         <Body>
@@ -199,8 +204,9 @@
             </Expander>
         </div>
 
+        <!-- Secrets -->
         <div class="border border-secondary rounded-2 p-3 mb-3">
-            <Expander>
+            <Expander IsExpanded="@expandedSections["secrets"]" OnToggleExpand="@(isExpanded => OnToggleExpand("secrets", isExpanded))">
                 <Header>
                     <h5><span class="oi oi-key me-2"></span>Secrets</h5>
                 </Header>
@@ -223,8 +229,9 @@
             </Expander>
         </div>
 
+        <!-- Authentication -->
         <div class="border border-secondary rounded-2 p-3 mb-3">
-            <Expander>
+            <Expander IsExpanded="@expandedSections["authentication"]" OnToggleExpand="@(isExpanded => OnToggleExpand("authentication", isExpanded))">
                 <Header>
                     <h5><span class="oi oi-lock-locked me-2"></span>Authentication</h5>
                 </Header>
@@ -255,8 +262,9 @@
             </Expander>
         </div>
 
+        <!-- Annotations -->
         <div class="border border-secondary rounded-2 p-3 mb-3">
-            <Expander>
+            <Expander IsExpanded="@expandedSections["annotations"]" OnToggleExpand="@(isExpanded => OnToggleExpand("annotations", isExpanded))">
                 <Header>
                     <h5><span class="oi oi-pencil me-2"></span>Annotations</h5>
                 </Header>
@@ -279,8 +287,9 @@
             </Expander>
         </div>
 
+        <!-- Metadata -->
         <div class="border border-secondary rounded-2 p-3 mb-3">
-            <Expander>
+            <Expander IsExpanded="@expandedSections["metadata"]" OnToggleExpand="@(isExpanded => OnToggleExpand("metadata", isExpanded))">
                 <Header>
                     <h5><span class="oi oi-puzzle-piece me-2"></span>Metadata</h5>
                 </Header>
@@ -313,7 +322,19 @@ else
 }
 
 @code {
+
     private bool autoGenerateId = true;
+    private Dictionary<string, bool> expandedSections = new()
+    {
+        { "general", true },
+        { "states", true },
+        { "events", false },
+        { "functions", false },
+        { "secrets", false },
+        { "authentication", false },
+        { "annotations", false },
+        { "metadata", false }
+    };
 
     [Parameter] public WorkflowDefinition? Workflow { get; set; }
     [Parameter] public EventCallback OnPropertyChanged { get; set; }
@@ -323,13 +344,19 @@ else
         await base.OnInitializedAsync();
     }
 
+    protected virtual void OnToggleExpand(string sectionName, bool isExpanded)
+    {
+        this.expandedSections[sectionName] = isExpanded;
+        this.StateHasChanged();
+    }
+
     protected virtual async Task OnCreateStateAsync()
     {
         if (this.Workflow == null)
             return;
         var state = new OperationStateDefinition()
         {
-            Name = $"state-{Workflow.States.Count + 1}",
+            Name = $"undefined-{Workflow.States.Count + 1}",
             IsEnd = true
         };
         await this.OnPropertyChangedAsync(nameof(Workflow.States), d => d.States.Add(state));

@@ -34,7 +34,7 @@
             <td>Type</td>
             <td>
                 <select name="@nameof(Function.Type)" required class="form-control bg-secondary text-white" 
-                @onchange="async e => await OnPropertyChanged(nameof( Function.Type), f => f.Type = EnumHelper.Parse<FunctionType>((string)e.Value!))">
+                @onchange="async e => await OnPropertyChanged(nameof( Function.Type), f => { f.Type = EnumHelper.Parse<FunctionType>((string)e.Value!); f.Operation = null!; })">
                     @foreach (FunctionType functionType in Enum.GetValues(typeof(FunctionType)))
                     {
                         var functionTypeStr = @EnumHelper.Stringify(functionType);

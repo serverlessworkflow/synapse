@@ -21,7 +21,7 @@
         <tr>
             <td>Type</td>
             <td>
-                <select class="form-control" @onchange="OnOutcomeTypeChangedAsync">
+                <select class="form-control bg-secondary text-white" @onchange="OnOutcomeTypeChangedAsync">
                     @if(this.Outcome.Type == WorkflowOutcomeType.End)
                     {
                         <option value="@EnumHelper.Stringify(SwitchCaseOutcomeType.End)" selected>End</option>
@@ -44,7 +44,11 @@
         <EndEditor OnChange="OnChange" />
         break;
     case WorkflowOutcomeType.Transition:
-        <TransitionEditor Transition="Outcome.Definition as TransitionDefinition" ForbiddenTransitions="ForbiddenTransitions" OnChange="OnChange" />
+        <TransitionEditor 
+        Transition="Outcome.Definition as TransitionDefinition" 
+        ForbiddenTransitions="ForbiddenTransitions" 
+        ControlFlow="ControlFlow"
+        OnChange="OnChange" />
         break;
     default:
         <span class="danger">The specified outcome type '@EnumHelper.Stringify(Outcome.Type)' is not supported</span>
@@ -59,6 +63,8 @@
     [Parameter] public WorkflowOutcome Outcome { get; set; } = new(WorkflowOutcomeType.End);
 
     [Parameter] public List<StateDefinition> ForbiddenTransitions { get; set; } = new();
+
+    [Parameter] public ControlFlow ControlFlow { get; set; } = ControlFlow.Default;
 
     [Parameter] public EventCallback<WorkflowOutcome> OnChange { get; set; }
 

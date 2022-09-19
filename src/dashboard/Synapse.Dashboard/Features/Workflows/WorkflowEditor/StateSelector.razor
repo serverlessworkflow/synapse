@@ -16,7 +16,7 @@
 
 @namespace Synapse.Dashboard
 
-<select class="form-control @CssClass" @onchange="OnStateSelectorValueChangedAsync">
+<select class="form-control @CssClass" disabled="@Disabled" @onchange="OnStateSelectorValueChangedAsync">
     @if(Selected == null)
     {
         <option disabled selected value> -- select a state -- </option>
@@ -52,6 +52,8 @@
 
     [CascadingParameter] public WorkflowDefinition Workflow { get; set; } = null!;
 
+    [Parameter] public bool Disabled { get; set; } = false;
+
     [Parameter] public string? CssClass{ get; set; }
 
     [Parameter] public bool AddCreateNewOption { get; set; } = true;
@@ -62,6 +64,8 @@
 
     [Parameter] public EventCallback<StateDefinition> OnChange { get; set; }
 
+    [Parameter] public ControlFlow ControlFlow { get; set; } = ControlFlow.Default;
+
     protected virtual async Task OnStateSelectorValueChangedAsync(ChangeEventArgs e)
     {
         if (e.Value == null)
@@ -69,7 +73,9 @@
         var state = Workflow.GetState((string)e.Value!);
         if ((string)e.Value == CreateNewOptionValue)
         {
-            state = new OperationStateDefinition() { Name = $"state-{this.Workflow.States.Count + 1}", IsEnd = true };
+            state = new OperationStateDefinition() { Name = $"undefined-{this.Workflow.States.Count + 1}", IsEnd = true };
+            if (this.ControlFlow == ControlFlow.Compensation)
+                state.UsedForCompensation = true;
             this.Workflow.States.Add(state);
         }
         this.Selected = state;

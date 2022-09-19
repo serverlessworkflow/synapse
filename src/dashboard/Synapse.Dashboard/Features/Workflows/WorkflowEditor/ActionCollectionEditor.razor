@@ -61,7 +61,7 @@ else
     {
         if (this.Actions == null)
             return;
-        var action = new ActionDefinition() { Function = new() };
+        var action = new ActionDefinition() { Name = $"undefined-{this.Actions.Count() + 1}", Function = new() };
         this.Actions.Add(action);
              await this.OnChange.InvokeAsync();
         this.StateHasChanged();
