@@ -231,10 +231,10 @@
                 <Body>
                     <table class="table">
                         <tbody>
-                            @if(workflow.Secrets != null)
+                            @if(workflow?.Secrets != null)
                             {
                                 var index = -1;
-                                foreach(var secret in Workflow.Secrets)
+                                foreach(var secret in Workflow.Secrets!)
                                 {
                                     index++;
                                     <ExpandableDataRow>
@@ -281,9 +281,9 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @if(workflow.Auth != null)
+                            @if(workflow?.Auth != null)
                             {
-                                @foreach (var authentication in Workflow.Auth)
+                                @foreach (var authentication in Workflow!.Auth!)
                                 {
                                     <ExpandableDataRow>
                                         <Header>
@@ -317,16 +317,32 @@
                         <tbody>
                             @if(workflow.Annotations != null)
                             {
+                                var index = -1;
                                 @foreach (var annotation in workflow.Annotations)
                                 {
-                                    <tr>
-                                        <td>@annotation</td>
-                                        <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Annotations), d => d.Annotations?.Remove(annotation))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
-                                    </tr>
+                                    index++;
+                                    <ExpandableDataRow>
+                                        <Header>
+                                            <td>@annotation</td>
+                                            <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Annotations), d => d.Annotations?.Remove(annotation))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
+                                        </Header>
+                                        <Body>
+                                            <td colspan="2">
+                                                <table class="table table-striped">
+                                                    <tr>
+                                                        <td>Annotation</td>
+                                                        <td><input type="text" value="@annotation" placeholder="Annotation" title="An annotation to add to the workflow" class="form-control" 
+                                                            @onchange="async e => await OnAnnotationChangedAsync(index, (string)e.Value!)"/></td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </Body>
+                                    </ExpandableDataRow>
                                 }
                             }
                         </tbody>
                     </table>
+                    <button class="btn btn-block btn-warning text-white w-100" @onclick="OnAddAnnotationAsync">Add annotation</button>
                 </Body>
             </Expander>
         </div>
@@ -342,17 +358,41 @@
                         <tbody>
                             @if(workflow.Metadata != null)
                             {
-                                var expando = (IDictionary<string, object>)workflow.Metadata.ToObject()!;
-                                @foreach (var metadata in expando)
+                                var metadata = (IDictionary<string, object>)workflow.Metadata.ToObject()!;
+                                var index = -1;
+                                @foreach (var property in metadata)
                                 {
-                                    <tr>
-                                        <td>@metadata.Key</td>
-                                       @* <td><button @onclick="async () => await OnPropertyChanged(nameof(Definition.Version), d => d.Metadata?.Remove(metadata.Key))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>*@
-                                    </tr>
+                                    index++;
+                                    <ExpandableDataRow>
+                                        <Header>
+                                            <td>@property.Key</td>
+                                            <td>@property.Value</td>
+                                            <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Metadata), d => d.Metadata?.Remove(property.Key))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
+                                        </Header>
+                                        <Body>
+                                            <td colspan="3">
+                                                <table class="table table-striped">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>Name</td>
+                                                            <td><input type="text" value="@property.Key" required placeholder="Name" title="The name of the metadata property to add" class="form-control"
+                                                                @onchange="async e => await OnMetadataPropertyNameChangedAsync(index, (string)e.Value!)"/></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>Value</td>
+                                                            <td><input type="text" value="@property.Value" required placeholder="Value" title="The value of the metadata property to add" class="form-control"
+                                                                @onchange="async e => await OnPropertyChangedAsync(nameof(Workflow.Metadata), w => w.Metadata!.Set(property.Key, (string)e.Value!))"/></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </td>
+                                        </Body>
+                                    </ExpandableDataRow>
                                 }
                             }
                         </tbody>
                     </table>
+                    <button class="btn btn-block btn-warning text-white w-100" @onclick="OnAddMetadataAsync">Add metadata</button>
                 </Body>
             </Expander>
         </div>
@@ -449,15 +489,80 @@ else
             return;
         await this.OnPropertyChangedAsync(nameof(Workflow.Secrets), d =>
         {
-            Workflow.Secrets.RemoveAt(index);
-            if(index >= Workflow.Secrets.Count)
-                index = Workflow.Secrets.Count - 1;
+            if (d.Secrets == null)
+                d.Secrets = new();
+            d.Secrets.RemoveAt(index);
+            if(index >= d.Secrets.Count)
+                index = d.Secrets.Count - 1;
             if (index < 0)
                 index = 0;
-            Workflow.Secrets.Insert(index, secret);
+            d.Secrets.Insert(index, secret);
         });
     }
-    
+
+    protected virtual async Task OnAddAnnotationAsync()
+    {
+        if (this.Workflow == null)
+            return;
+        if (this.Workflow.Annotations == null)
+            this.Workflow.Annotations = new();
+        var secret = $"undefined-{Workflow.Annotations.Count + 1}";
+        await this.OnPropertyChangedAsync(nameof(Workflow.Annotations), d =>
+        {
+            d.Annotations!.Add(secret);
+        });
+    }
+
+    protected virtual async Task OnAnnotationChangedAsync(int index, string annotation)
+    {
+        if (this.Workflow == null || this.Workflow.Annotations == null)
+            return;
+        await this.OnPropertyChangedAsync(nameof(Workflow.Annotations), d =>
+        {
+            if (d.Annotations == null)
+                d.Annotations = new();
+            d.Annotations.RemoveAt(index);
+            if(index >= d.Annotations.Count)
+                index = d.Annotations.Count - 1;
+            if (index < 0)
+                index = 0;
+            d.Annotations.Insert(index, annotation);
+        });
+    }
+
+    protected virtual async Task OnAddMetadataAsync()
+    {
+        if (this.Workflow == null)
+            return;
+        await this.OnPropertyChangedAsync(nameof(Workflow.Metadata), d =>
+        {
+            if (d.Metadata == null)
+                d.Metadata = new();
+            d.Metadata.Set("undefined", "undefined");
+        });
+    }
+
+    protected virtual async Task OnMetadataPropertyNameChangedAsync(int index, string name)
+    {
+        if (this.Workflow == null || this.Workflow.Metadata == null)
+            return;
+        await this.OnPropertyChangedAsync(nameof(Workflow.Metadata), d =>
+        {
+            if (d.Metadata == null)
+                d.Metadata = new();
+            var obsolete = d.Metadata.DynamicProperties.ElementAt(index);
+            d.Metadata.Remove(obsolete.Key);
+            if (index >= d.Metadata.DynamicProperties.Count)
+                index = d.Metadata.DynamicProperties.Count - 1;
+            if (index < 0)
+                index = 0;
+            if (d.Metadata.DynamicProperties.Any())
+                d.Metadata.Insert(index, name, obsolete.Value);
+            else
+                d.Metadata.Set(name, obsolete.Value);
+        });
+    }
+
     protected virtual async Task OnCreateAuthenticationAsync()
     {
         if (this.Workflow == null)
