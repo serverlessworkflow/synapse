@@ -135,7 +135,19 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor
                 WorkflowDefinitionText = action.WorkflowDefinitionText
             };
         }
-    
+
+        /// <summary>
+        /// Toggles the state of the specified expander
+        /// </summary>
+        /// <param name="state">The state to reduce</param>
+        /// <param name="action">The action to reduce</param>
+        /// <returns>The reduced state</returns>
+        public static WorkflowEditorState On(WorkflowEditorState state, ToggleExpand action)
+        {
+            state.ExpanderStates[action.Name] = action.IsExpanded;
+            return state;
+        }
+
     }
 
 }

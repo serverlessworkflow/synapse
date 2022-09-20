@@ -205,4 +205,22 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor.Actions
         public string WorkflowDefinitionText { get; }
     }
 
+    /// <summary>
+    /// Toggles the state of the specified expander
+    /// </summary>
+    public class ToggleExpand
+    {
+
+        public ToggleExpand(string name, bool isExpanded)
+        {
+            this.Name = name;
+            this.IsExpanded = isExpanded;
+        }
+
+        public string Name { get; }
+
+        public bool IsExpanded { get; }
+
+    }
+
 }

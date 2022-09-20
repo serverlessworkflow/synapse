@@ -20,12 +20,14 @@ using ServerlessWorkflow.Sdk.Models;
 
 namespace Synapse.Dashboard.Pages.Workflows.Editor.State
 {
+
     /// <summary>
     /// The <see cref="State{TState}"/> of the workflow editor
     /// </summary>
     [Feature]
     public record WorkflowEditorState
     {
+
         /// <summary>
         /// The workflow definition
         /// </summary>
@@ -37,6 +39,21 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor.State
         public string? WorkflowDefinitionText { get; set; }
 
         /// <summary>
+        /// Gets a dictionary containing the name mappings of the editor's expanders states
+        /// </summary>
+        public Dictionary<string, bool> ExpanderStates { get; set; } = new()
+        {
+            { "general", true },
+            { "states", true },
+            { "events", false },
+            { "functions", false },
+            { "secrets", false },
+            { "authentication", false },
+            { "annotations", false },
+            { "metadata", false }
+        };
+
+        /// <summary>
         /// Defines if the workflow definition is being updated
         /// </summary>
         public bool Updating { get; set; }
@@ -45,5 +62,7 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor.State
         /// Defines if the workflow definition is being saved
         /// </summary>
         public bool Saving { get; set; }
+
     }
+
 }
