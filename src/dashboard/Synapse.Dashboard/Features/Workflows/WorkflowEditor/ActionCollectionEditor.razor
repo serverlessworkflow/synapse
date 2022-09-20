@@ -16,7 +16,7 @@
 
 @namespace Synapse.Dashboard
 
-@if(Actions != null)
+@if (actions != null)
 {
     <table class="table table-striped">
         <thead>
@@ -27,7 +27,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach(var action in Actions)
+            @foreach (var action in actions)
             {
                 <ExpandableDataRow>
                     <Header>
@@ -53,23 +53,33 @@ else
 
 @code {
 
+    private List<ActionDefinition>? actions { get; set; }
     [Parameter] public List<ActionDefinition>? Actions { get; set; }
 
     [Parameter] public EventCallback OnChange { get; set; }
 
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        if (this.actions != this.Actions) {
+            this.actions = this.Actions;
+        }
+    }
+
     protected virtual async Task OnCreateActionAsync()
     {
-        if (this.Actions == null)
+        if (this.actions == null)
             return;
-        var action = new ActionDefinition() { Name = $"undefined-{this.Actions.Count() + 1}", Function = new() { RefName = "undefined" } };
-        this.Actions.Add(action);
+        var action = new ActionDefinition() { Name = $"undefined-{this.actions.Count() + 1}", Function = new() { RefName = "undefined" } };
+        this.actions.Add(action);
              await this.OnChange.InvokeAsync();
         this.StateHasChanged();
     }
 
     protected virtual async Task OnDeleteActionAsync(ActionDefinition action)
     {
-        this.Actions?.Remove(action);
+        this.actions?.Remove(action);
         await this.OnChange.InvokeAsync();
         this.StateHasChanged();
     }

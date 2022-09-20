@@ -25,9 +25,9 @@
     {
         <option disabled value> -- select a function -- </option>
     }
-    @if(Functions != null)
+    @if(functions != null)
     {
-        @foreach(var function in Functions!)
+        @foreach(var function in functions!)
         {
             if(function == Selected)
             {
@@ -58,9 +58,18 @@
 
     [Parameter] public FunctionDefinition? Selected { get; set; }
 
+    private List<FunctionDefinition>? functions { get; set; }
     [Parameter] public List<FunctionDefinition>? Functions { get; set; }
 
     [Parameter] public EventCallback<FunctionDefinition> OnChange { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        if (this.functions != this.Functions) {
+            this.functions = this.Functions;
+        }
+    }
 
     protected virtual async Task OnStateSelectorValueChangedAsync(ChangeEventArgs e)
     {

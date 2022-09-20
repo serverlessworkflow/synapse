@@ -21,24 +21,24 @@
 @inject ILogger<FunctionEditor> Logger
 @inject ISchemaRegistry SchemaRegistry
 
-@if(Function != null)
+@if(function != null)
 {
     <table class="table table-striped">
     <tbody>
         <tr>
             <td>Name</td>
-            <td><input name="@nameof(Function.Name)" type="text" required placeholder="Function name" class="form-control" value="@Function.Name"
-                @onchange="async e => await OnPropertyChanged(nameof(Function.Name), f => f.Name = (string)e.Value!)" /></td>
+            <td><input name="@nameof(function.Name)" type="text" required placeholder="Function name" class="form-control" value="@function.Name"
+                @onchange="async e => await OnPropertyChanged(nameof(function.Name), f => f.Name = (string)e.Value!)" /></td>
         </tr>
         <tr>
             <td>Type</td>
             <td>
-                <select name="@nameof(Function.Type)" required class="form-control bg-secondary text-white" 
-                @onchange="async e => await OnPropertyChanged(nameof( Function.Type), f => { f.Type = EnumHelper.Parse<FunctionType>((string)e.Value!); f.Operation = null!; })">
+                <select name="@nameof(function.Type)" required class="form-control bg-secondary text-white" 
+                @onchange="async e => await OnPropertyChanged(nameof( function.Type), f => { f.Type = EnumHelper.Parse<FunctionType>((string)e.Value!); f.Operation = null!; })">
                     @foreach (FunctionType functionType in Enum.GetValues(typeof(FunctionType)))
                     {
                         var functionTypeStr = @EnumHelper.Stringify(functionType);
-                        if(Function.Type == functionType)
+                        if(function.Type == functionType)
                         {
                             <option value="@functionTypeStr" selected>@functionTypeStr</option>
                         }
@@ -58,17 +58,17 @@
                         string[] operationComponents = null!;
                         Uri? resourceUri = null;
                         var operationId = string.Empty;
-                        if (!string.IsNullOrWhiteSpace(Function.Operation))
+                        if (!string.IsNullOrWhiteSpace(function.Operation))
                         {
-                            operationComponents = Function.Operation.Split('#', StringSplitOptions.RemoveEmptyEntries);
+                            operationComponents = function.Operation.Split('#', StringSplitOptions.RemoveEmptyEntries);
                             resourceUri = new(operationComponents[0]);
                             if(operationComponents.Length == 2)
                                 operationId = operationComponents[1];
                         }    
                     }
-                    <input name="@nameof(Function.Operation)" type="url" required placeholder="Resource URI (ex: https://petstore.swagger.io/v2/swagger.json)" class="form-control" value="@Function.Operation"
+                    <input name="@nameof(function.Operation)" type="url" required placeholder="Resource URI (ex: https://petstore.swagger.io/v2/swagger.json)" class="form-control" value="@function.Operation"
                     @onchange="async e => await OnResourceUriChangedAsync((string)e.Value!)"/>
-                    @switch (Function.Type)
+                    @switch (function.Type)
                     {
                         case FunctionType.OData:
                             <ODataEntitySetSelector DocumentUri="resourceUri" OperationId="@operationId" OnChange="async operation => await OnOperationChangedAsync(resourceUri, operation)" />
@@ -89,28 +89,37 @@
 
 @code {
 
+    private FunctionDefinition? function { get; set; }
     [Parameter] public FunctionDefinition? Function { get; set; }
 
     [Parameter] public EventCallback<FunctionDefinition?> OnChange { get; set; }
 
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        if (this.function != this.Function) {
+            this.function = this.Function;
+        } 
+    }
+
     protected virtual async Task OnResourceUriChangedAsync(string resourceUri)
     {
-        if (this.Function == null)
+        if (this.function == null)
             return;
-        await this.OnPropertyChanged(nameof(Function.Operation), f => f.Operation = resourceUri);
+        await this.OnPropertyChanged(nameof(function.Operation), f => f.Operation = resourceUri);
     }
 
     protected virtual async Task OnOperationChangedAsync(Uri? resourceUri,string operationId)
     {
-        await this.OnPropertyChanged(nameof(Function.Operation), f => f.Operation = $"{resourceUri}#{operationId}");
+        await this.OnPropertyChanged(nameof(function.Operation), f => f.Operation = $"{resourceUri}#{operationId}");
     }
 
     protected virtual async Task OnPropertyChanged(string property, Action<FunctionDefinition> patch)
     {
-        if (this.Function == null)
+        if (this.function == null)
             return;
-        patch(this.Function);
-        await this.OnChange.InvokeAsync(this.Function);
+        patch(this.function);
+        await this.OnChange.InvokeAsync(this.function);
         this.StateHasChanged();
     }
 

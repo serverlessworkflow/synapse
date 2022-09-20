@@ -37,12 +37,12 @@
           <Loader />
     </div>
 }
-else if (State.WorkflowDefinition != null)
+else if (workflowDefinition != null)
 {
     <div class="row">
         <div class="col-4">
             <WorkflowEditor
-            Workflow="State.WorkflowDefinition" 
+            Workflow="workflowDefinition" 
             OnPropertyChanged="OnWorkflowDefinitionChanged" />
         </div>
         <div class="col-8">
@@ -63,11 +63,11 @@ else if (State.WorkflowDefinition != null)
     private MonacoEditor? textBasedEditor;
     private Subject<string>? editorValue;
     private Subject<bool>? disposeNotifier;
+    private WorkflowDefinition? workflowDefinition = null;
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        this.Dispatcher.Dispatch(new InitializeState());
         this.disposeNotifier = new Subject<bool>();
         this.editorValue = new Subject<string>();
         this.editorValue
@@ -87,27 +87,43 @@ else if (State.WorkflowDefinition != null)
                     }
                 }
             });
+        WorkflowEditorSelectors.SelectWorkflowDefinition(this.Store)
+            .TakeUntil(this.disposeNotifier)
+            .Subscribe(definition =>
+            {
+                if (this.workflowDefinition != definition) {
+                    this.workflowDefinition = definition;
+                    this.StateHasChanged();
+                }
+            });
+        this.Dispatcher.Dispatch(new InitializeState());
     }
 
-    protected async Task OnWorkflowDefinitionChanged()
+    protected async Task OnWorkflowDefinitionChanged(WorkflowDefinition workflowDefinition)
     {
-        this.Dispatcher.Dispatch(new HandleFormBasedEditorChange(State.WorkflowDefinition!));
+        this.Dispatcher.Dispatch(new HandleFormBasedEditorChange(workflowDefinition!));
         await Task.CompletedTask;
+    }
+
+    protected async Task SetTextBasedEditorLanguageAsync()
+    {
+        var model = await this.textBasedEditor!.GetModel();
+        await MonacoEditorBase.SetModelLanguage(model, this.MonacoEditorHelper.PreferedLanguage);
+        if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.JSON)
+            await model.jsRuntime.InvokeVoidAsync("enableJsonValidation08", model.Uri);
     }
 
     protected virtual async Task ToggletextBasedEditorLanguage(string language)
     {
-        await this.OnTextBasedEditorInit(this.textBasedEditor! as MonacoEditorBase);
+        await this.SetTextBasedEditorLanguageAsync();
         var text = await this.textBasedEditor!.GetValue();
         this.Dispatcher.Dispatch(new ChangeTextLanguage(language, text));
     }
 
     protected async Task OnTextBasedEditorInit(MonacoEditorBase editor)
     {
-        var model = await (editor as MonacoEditor)!.GetModel();
-        await MonacoEditorBase.SetModelLanguage(model, this.MonacoEditorHelper.PreferedLanguage);
-        if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.JSON)
-            await model.jsRuntime.InvokeVoidAsync("enableJsonValidation08", model.Uri);
+        await this.SetTextBasedEditorLanguageAsync();
+        await this.textBasedEditor!.SetValue(this.State.WorkflowDefinitionText);
     }
 
     protected async Task OnTextBasedDefinitionChanged(ModelContentChangedEvent e)
@@ -121,9 +137,9 @@ else if (State.WorkflowDefinition != null)
 
     protected virtual void OnSaveWorkflow()
     {
-        if (this.State.WorkflowDefinition == null)
+        if (this.workflowDefinition == null)
             return;
-        this.Dispatcher.Dispatch(new SaveWorkflowDefinition(this.State.WorkflowDefinition));
+        this.Dispatcher.Dispatch(new SaveWorkflowDefinition(this.workflowDefinition));
         this.StateHasChanged();
     }
 

@@ -22,46 +22,90 @@
 @inject IJsonSerializer JsonSerializer
 @inject IYamlConverter YamlConverter
 
-<MonacoEditor @ref="input"
+<PreferedLanguageSelector PreferedLanguageChange="ToggleLanguage" />
+<MonacoEditor @ref="editor"
     CssClass="pxh-150"
     ConstructionOptions="MonacoEditorHelper.GetStandaloneEditorConstructionOptions()"
+    OnDidInit="OnEditorInit"
     OnDidChangeModelContent="OnInputChangedAsync"/>
 
 @code {
-
-    [Parameter] public DynamicObject? Object { get; set; } = new();
-
+    private DynamicObject? obj;
+    [Parameter] public DynamicObject? Object { get; set; }
     [Parameter] public EventCallback<DynamicObject?> OnChange { get; set; }
 
-    private MonacoEditor input = null!;
-    private string? rawObject;
-    private bool lockUpdates = false;
+    private MonacoEditor? editor;
+    private string? rawObject = "";
+    private bool updating = false;
 
     protected override async Task OnParametersSetAsync()
     {
         await base.OnParametersSetAsync();
-        if (this.Object == null || lockUpdates)
-            return;
-        var json = JsonConvert.SerializeObject(this.Object, Formatting.Indented, JsonConvert.DefaultSettings!.Invoke());
-        if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)
-            json = await this.YamlConverter.JsonToYaml(json);
-        await this.input.SetValue(json);
+        if (this.obj != this.Object) {
+            this.obj = this.Object;
+            this.rawObject = await this.FormatValueAsString(this.Object)! ?? "";
+            if (this.editor != null)
+            {
+                await this.OnEditorInit(this.editor);
+            }
+        }
+    }
+
+    protected virtual async Task ToggleLanguage(string language)
+    {
+        string text = await this.editor!.GetValue();
+        try
+        {
+            if (language == PreferedLanguage.YAML)
+            {
+                this.rawObject = await this.YamlConverter.JsonToYaml(text);
+            }
+            else
+            {
+                this.rawObject = await this.YamlConverter.YamlToJson(text);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            await this.MonacoEditorHelper.ChangePreferedLanguage(language == PreferedLanguage.JSON ? PreferedLanguage.YAML : PreferedLanguage.JSON);
+        }
+        await this.OnEditorInit(this.editor);
         this.StateHasChanged();
     }
 
-    async Task OnInputChangedAsync(ModelContentChangedEvent e)
+    protected async Task OnEditorInit(MonacoEditorBase editorBase) 
     {
-        var json = await this.input.GetValue();
+        this.updating = true;
+        var model = await this.editor!.GetModel();
+        await MonacoEditorBase.SetModelLanguage(model, this.MonacoEditorHelper.PreferedLanguage);
+        await this.editor!.SetValue(this.rawObject);
+        this.updating = false;
+    }
+
+    protected async Task OnInputChangedAsync(ModelContentChangedEvent e)
+    {
+        if (!this.updating) {
+            var text = await this.editor!.GetValue();
+            if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)
+                text = await this.YamlConverter.YamlToJson(text);
+            try
+            {
+                this.obj = await this.JsonSerializer.DeserializeAsync<DynamicObject>(text);
+                await this.OnChange.InvokeAsync(this.obj);
+            }
+            catch (Exception ex) {}
+        }
+    }
+
+    protected async Task<string>? FormatValueAsString(DynamicObject? value) 
+    {
+        if (value == null)
+            return "";
+        var text = JsonConvert.SerializeObject(value, Formatting.Indented);
         if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)
-            json = await this.YamlConverter.YamlToJson(json);
-        if (this.rawObject == json)
-            return;
-        this.rawObject = json;
-        this.Object = await this.JsonSerializer.DeserializeAsync<DynamicObject>(json);
-        lockUpdates = true;
-        await this.OnChange.InvokeAsync(this.Object);
-        this.StateHasChanged();
-        lockUpdates = false;
+            text = await this.YamlConverter.JsonToYaml(text);
+        return text;
     }
 
 }
