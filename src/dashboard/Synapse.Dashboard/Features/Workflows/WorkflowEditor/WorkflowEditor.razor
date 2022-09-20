@@ -107,7 +107,7 @@
                                                     <span class="badge bg-danger text-white mx-1" title="Is fault tolerant and handles defined errors">fault</span>
                                                 }
                                             </td>
-                                            <td><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.States), d => d.States?.Remove(state))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
+                                            <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.States), d => d.States?.Remove(state))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
                                         </Header>
                                         <Body>
                                             <td colspan="5">
@@ -161,7 +161,7 @@
                                                     <span class="badge bg-success text-white mx-1" title="Is compensated by another state">correlated</span>
                                                 }
                                             </td>
-                                            <td><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Events), d => d.Events?.Remove(e))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
+                                            <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Events), d => d.Events?.Remove(e))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
                                         </Header>
                                         <Body>
                                             <td colspan="6">
@@ -204,7 +204,7 @@
                                             <td>@function.Name</td>
                                             <td><span class="badge bg-secondary">@EnumHelper.Stringify(function.Type)</span></td>
                                             <td class="text-break"><a href="@function.Operation" target="_blank">@function.Operation</a></td>
-                                            <td><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Functions), d => d.Functions?.Remove(function))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
+                                            <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Functions), d => d.Functions?.Remove(function))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
                                         </Header>
                                         <Body>
                                             <td colspan="4">
@@ -232,16 +232,34 @@
                         <tbody>
                             @if(Workflow.Secrets != null)
                             {
-                                @foreach (var secret in Workflow.Secrets)
+                                var index = -1;
+                                foreach(var secret in Workflow.Secrets)
                                 {
-                                    <tr>
-                                        <td>@secret</td>
-                                        <td><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Secrets), d => d.Secrets?.Remove(secret))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
-                                    </tr>
+                                    index++;
+                                    <ExpandableDataRow>
+                                        <Header>
+                                            <td>@secret</td>
+                                            <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Secrets), d => d.Secrets?.Remove(secret))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
+                                        </Header>
+                                        <Body>
+                                            <td colspan="2">
+                                                <table class="table table-striped">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>Secret name</td>
+                                                            <td><input type="text" value="@secret" required minlength="1" placeholder="Secret name" title="The name of the secret to import" class="form-control" 
+                                                                @onchange="async e => await OnsecretChangedAsync(index, (string)e.Value!)"/></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </td>
+                                        </Body>
+                                    </ExpandableDataRow>
                                 }
                             }
                         </tbody>
                     </table>
+                    <button class="btn btn-block btn-warning text-white w-100" @onclick="OnAddSecretAsync">Add secret</button>
                 </Body>
             </Expander>
         </div>
@@ -264,17 +282,25 @@
                         <tbody>
                             @if(Workflow.Auth != null)
                             {
-                                @foreach (var auth in Workflow.Auth)
+                                @foreach (var authentication in Workflow.Auth)
                                 {
-                                    <tr>
-                                        <td>@auth.Name</td>
-                                        <td><span class="badge bg-secondary">@EnumHelper.Stringify(auth.Scheme)</span></td>
-                                        <td><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Auth), d => d.Auth?.Remove(auth))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
-                                    </tr>
+                                    <ExpandableDataRow>
+                                        <Header>
+                                            <td>@authentication.Name</td>
+                                            <td><span class="badge bg-secondary">@EnumHelper.Stringify(authentication.Scheme)</span></td>
+                                            <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Auth), d => d.Auth?.Remove(authentication))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
+                                        </Header>
+                                        <Body>
+                                            <td colspan="3">
+                                                <AuthenticationEditor Authentication="authentication" OnChange="async e => await OnPropertyChangedAsync(nameof(Workflow.Auth), _ => { })" />
+                                            </td>
+                                        </Body>
+                                    </ExpandableDataRow>
                                 }
                             }
                         </tbody>
                     </table>
+                    <button class="btn btn-block btn-warning text-white w-100" @onclick="OnCreateAuthenticationAsync">Create new authentication</button>
                 </Body>
             </Expander>
         </div>
@@ -294,7 +320,7 @@
                                 {
                                     <tr>
                                         <td>@annotation</td>
-                                        <td><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Annotations), d => d.Annotations?.Remove(annotation))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
+                                        <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Annotations), d => d.Annotations?.Remove(annotation))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
                                     </tr>
                                 }
                             }
@@ -377,7 +403,7 @@ else
         var e = new EventDefinition() { Name = $"undefined-{Workflow.Events.Count + 1}" };
         await this.OnPropertyChangedAsync(nameof(Workflow.Events), d =>
         {
-            d.Events.Add(e);
+            d.Events!.Add(e);
         });
     }
 
@@ -390,7 +416,48 @@ else
         var function = new FunctionDefinition() { Name = $"undefined-{Workflow.Functions.Count + 1}" };
         await this.OnPropertyChangedAsync(nameof(Workflow.Functions), d =>
         {
-            d.Functions.Add(function);
+            d.Functions!.Add(function);
+        });
+    }
+
+    protected virtual async Task OnAddSecretAsync()
+    {
+        if (this.Workflow == null)
+            return;
+        if (this.Workflow.Secrets == null)
+            this.Workflow.Secrets = new();
+        var secret = $"undefined-{Workflow.Secrets.Count + 1}";
+        await this.OnPropertyChangedAsync(nameof(Workflow.Secrets), d =>
+        {
+            d.Secrets!.Add(secret);
+        });
+    }
+
+    protected virtual async Task OnsecretChangedAsync(int index, string secret)
+    {
+        if (this.Workflow == null || this.Workflow.Secrets == null)
+            return;
+        await this.OnPropertyChangedAsync(nameof(Workflow.Secrets), d =>
+        {
+            Workflow.Secrets.RemoveAt(index);
+            if(index >= Workflow.Secrets.Count)
+                index = Workflow.Secrets.Count - 1;
+            if (index < 0)
+                index = 0;
+            Workflow.Secrets.Insert(index, secret);
+        });
+    }
+    
+    protected virtual async Task OnCreateAuthenticationAsync()
+    {
+        if (this.Workflow == null)
+            return;
+        if (this.Workflow.Auth == null)
+            this.Workflow.Auth = new();
+        var auth = new AuthenticationDefinition() { Name = $"undefined-{Workflow.Auth.Count + 1}", Scheme = AuthenticationScheme.Basic, Properties = new BasicAuthenticationProperties() };
+        await this.OnPropertyChangedAsync(nameof(Workflow.Auth), d =>
+        {
+            d.Auth!.Add(auth);
         });
     }
 

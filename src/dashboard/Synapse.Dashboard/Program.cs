@@ -29,12 +29,14 @@ using Simple.OData.Client;
 using Synapse;
 using Synapse.Dashboard;
 using Synapse.Dashboard.Services;
+using Synapse.Integration.Serialization.Converters;
 
 JsonConvert.DefaultSettings = () =>
 {
     return new JsonSerializerSettings()
     {
         ContractResolver = new NonPublicSetterContractResolver() { NamingStrategy = new CamelCaseNamingStrategy() { ProcessDictionaryKeys = false, OverrideSpecifiedNames = false, ProcessExtensionDataNames = false } },
+        Converters = new List<JsonConverter>() { new FilteredExpandoObjectConverter() },
         NullValueHandling = NullValueHandling.Ignore,
         DefaultValueHandling = DefaultValueHandling.Ignore,
         DateFormatHandling = DateFormatHandling.IsoDateFormat,

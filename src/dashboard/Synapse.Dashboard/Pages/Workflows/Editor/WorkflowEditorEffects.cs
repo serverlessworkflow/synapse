@@ -47,7 +47,7 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor.Effects
             if (yamlConverter == null)
                 throw new NullReferenceException("Unable to resolved service 'IYamlConverter'.");
             var definition = new WorkflowDefinition() { Id = "undefined", Name = "Undefined", Version = "0.1.0" };
-            var text = JsonConvert.SerializeObject(definition, Formatting.Indented, new JsonSerializerSettings() { ContractResolver = new NonPublicSetterContractResolver() });
+            var text = JsonConvert.SerializeObject(definition, Formatting.Indented, JsonConvert.DefaultSettings!()!);
             if (monacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)
                 text = await yamlConverter.JsonToYaml(text);
             WorkflowEditorState initialState = new() { 
@@ -74,7 +74,7 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor.Effects
             context.Dispatcher.Dispatch(new UpdateDefinition(action.WorkflowDefinition));
             try
             {
-                var text = JsonConvert.SerializeObject(action.WorkflowDefinition, Formatting.Indented, new JsonSerializerSettings() { ContractResolver = new NonPublicSetterContractResolver() });
+                var text = JsonConvert.SerializeObject(action.WorkflowDefinition, Formatting.Indented, JsonConvert.DefaultSettings!()!);
                 if (monacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)
                 {
                     var yamlConverter = context.Services.GetRequiredService<IYamlConverter>();
