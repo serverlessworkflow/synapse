@@ -16,10 +16,33 @@
 
 @namespace Synapse.Dashboard
 
-@if(this.state != null)
+@if(state != null)
 {
-    <h6>Actions</h6>
-    <ActionCollectionEditor Actions="state.Actions" OnChange="OnChange" />
+    <table class="table table-striped">
+        <tbody>
+            <tr>
+                <td>Execution mode</td>
+                <td>
+                    <select required title="The mode in which the state's operations are to be executed'" class="form-control bg-secondary text-white"
+                    @onchange="async e => await OnChangedAsync(s => s.ActionMode = EnumHelper.Parse<ActionExecutionMode>((string)e.Value!))">
+                        @foreach(var mode in Enum.GetValues<ActionExecutionMode>())
+                        {
+                            var modeStr = @EnumHelper.Stringify(mode);
+                            <option value="@modeStr" selected="@(state.ActionMode == mode)">@modeStr</option> 
+                        }
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2"><h6>Actions</h6></td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <ActionCollectionEditor Actions="state.Actions" OnChange="OnChange" />
+                </td>
+            </tr>
+        </tbody>
+    </table>
 }
 
 @code {
@@ -31,9 +54,17 @@
     protected override async Task OnParametersSetAsync()
     {
         await base.OnParametersSetAsync();
-        if (this.state != this.State) {
+        if (this.state != this.State)
             this.state = this.State;
-        }
+    }
+
+    protected virtual async Task OnChangedAsync(Action<OperationStateDefinition> patch)
+    {
+        if (this.state == null)
+            return;
+        patch(this.state);
+        await this.OnChange.InvokeAsync();
+        this.StateHasChanged();
     }
 
 }

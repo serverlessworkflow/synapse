@@ -19,30 +19,30 @@
 <select class="form-control @CssClass" @onchange="OnStateSelectorValueChangedAsync">
     @if(Selected == null)
     {
-        <option disabled selected value> -- select a function -- </option>
+        <option disabled selected value> -- select an authentication -- </option>
     }
     else
     {
-        <option disabled value> -- select a function -- </option>
+        <option disabled value> -- select an authentication -- </option>
     }
-    @if(functions != null)
+    @if(authentications != null)
     {
-        @foreach(var function in functions!)
+        @foreach(var authentication in authentications!)
         {
-            if(function == Selected)
+            if(authentication == Selected)
             {
-                <option value="@function.Name" selected>@function.Name [@EnumHelper.Stringify(@function.Type)]</option>
+                <option value="@authentication.Name" selected>@authentication.Name [@EnumHelper.Stringify(authentication.Scheme)]</option>
             }
             else
             {
-                <option value="@function.Name">@function.Name [@EnumHelper.Stringify(@function.Type)]</option>
+                <option value="@authentication.Name">@authentication.Name [@EnumHelper.Stringify(authentication.Scheme)]</option>
             }
         }
     }
     @if (AddCreateNewOption)
     {
         <option disabled value>--------------------</option>
-        <option value="@CreateNewOptionValue">Create new function</option>
+        <option value="@CreateNewOptionValue">Create new authentication</option>
     }
 </select>
 
@@ -56,35 +56,34 @@
 
     [Parameter] public bool AddCreateNewOption { get; set; } = true;
 
-    [Parameter] public FunctionDefinition? Selected { get; set; }
+    [Parameter] public AuthenticationDefinition? Selected { get; set; }
 
-    private List<FunctionDefinition>? functions { get; set; }
-    [Parameter] public List<FunctionDefinition>? Functions { get; set; }
+    private List<AuthenticationDefinition>? authentications { get; set; }
+    [Parameter] public List<AuthenticationDefinition>? Authentications { get; set; }
 
-    [Parameter] public EventCallback<FunctionDefinition> OnChange { get; set; }
+    [Parameter] public EventCallback<AuthenticationDefinition> OnChange { get; set; }
 
     protected override async Task OnParametersSetAsync()
     {
         await base.OnParametersSetAsync();
-        if (this.functions != this.Functions) {
-            this.functions = this.Functions;
-        }
+        if (this.authentications != this.Authentications)
+            this.authentications = this.Authentications;
     }
 
     protected virtual async Task OnStateSelectorValueChangedAsync(ChangeEventArgs e)
     {
         if (e.Value == null)
             return;
-        var function = Workflow.GetFunction((string)e.Value!);
+        var authentication = Workflow.GetAuthentication((string)e.Value!);
         if ((string)e.Value == CreateNewOptionValue)
         {
-            if (this.Workflow.Functions == null)
-                this.Workflow.Functions = new();
-            function = new FunctionDefinition() { Name = $"undefined-{this.Workflow.Functions.Count + 1}" };
-            this.Workflow.Functions.Add(function);
+            if (this.Workflow.Auth == null)
+                this.Workflow.Auth = new();
+            authentication = new AuthenticationDefinition() { Name = $"undefined-{this.Workflow.Auth.Count + 1}", Scheme = AuthenticationScheme.Basic, Properties = new BasicAuthenticationProperties() };
+            this.Workflow.Auth.Add(authentication);
         }
-        this.Selected = function;
-        await this.OnChange.InvokeAsync(function);
+        this.Selected = authentication;
+        await this.OnChange.InvokeAsync(authentication);
     }
 
 }

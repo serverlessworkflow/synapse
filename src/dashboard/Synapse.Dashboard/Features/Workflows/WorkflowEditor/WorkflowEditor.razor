@@ -107,8 +107,7 @@
                                                     <span class="badge bg-danger text-white mx-1" title="Is fault tolerant and handles defined errors">fault</span>
                                                 }
                                             </td>
-                                        <td><button @onclick="async () => await OnPropertyChangedAsync(nameof(workflow.States), d => d.States?.Remove(state))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="bi bi-trash"></small></button></td>
-                                            <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.States), d => d.States?.Remove(state))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="bi bi-trash"></small></button></td>
+                                            <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChangedAsync(nameof(workflow.States), d => d.States?.Remove(state))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="bi bi-trash"></small></button></td>
                                         </Header>
                                         <Body>
                                             <td colspan="5">
@@ -205,10 +204,16 @@
                                             <td>@function.Name</td>
                                             <td><span class="badge bg-secondary">@EnumHelper.Stringify(function.Type)</span></td>
                                             <td class="text-break"><a href="@function.Operation" target="_blank">@function.Operation</a></td>
+                                            <td>
+                                                @if(!string.IsNullOrWhiteSpace(function.AuthRef))
+                                                {
+                                                    <span class="badge bg-primary text-white mx-1" title="The function call is secured by an authentication mechanism">secured</span>
+                                                }
+                                            </td>
                                             <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Functions), d => d.Functions?.Remove(function))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="bi bi-trash"></small></button></td>
                                         </Header>
                                         <Body>
-                                            <td colspan="4">
+                                            <td colspan="5">
                                                 <FunctionEditor Function="@function" OnChange="OnFunctionEditorChanged" />
                                             </td>
                                         </Body>
@@ -354,45 +359,9 @@
                     <h5><span class="bi bi-puzzle me-2"></span>Metadata</h5>
                 </Header>
                 <Body>
-                    <table class="table">
-                        <tbody>
-                            @if(workflow.Metadata != null)
-                            {
-                                var metadata = (IDictionary<string, object>)workflow.Metadata.ToObject()!;
-                                var index = -1;
-                                @foreach (var property in metadata)
-                                {
-                                    index++;
-                                    <ExpandableDataRow>
-                                        <Header>
-                                            <td>@property.Key</td>
-                                            <td>@property.Value</td>
-                                            <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Metadata), d => d.Metadata?.Remove(property.Key))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="bi bi-trash"></small></button></td>
-                                        </Header>
-                                        <Body>
-                                            <td colspan="3">
-                                                <table class="table table-striped">
-                                                    <tbody>
-                                                        <tr>
-                                                            <td>Name</td>
-                                                            <td><input type="text" value="@property.Key" required placeholder="Name" title="The name of the metadata property to add" class="form-control"
-                                                                @onchange="async e => await OnMetadataPropertyNameChangedAsync(index, (string)e.Value!)"/></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>Value</td>
-                                                            <td><input type="text" value="@property.Value" required placeholder="Value" title="The value of the metadata property to add" class="form-control"
-                                                                @onchange="async e => await OnPropertyChangedAsync(nameof(Workflow.Metadata), w => w.Metadata!.Set(property.Key, (string)e.Value!))"/></td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </td>
-                                        </Body>
-                                    </ExpandableDataRow>
-                                }
-                            }
-                        </tbody>
-                    </table>
-                    <button class="btn btn-block btn-warning text-white w-100" @onclick="OnAddMetadataAsync">Add metadata</button>
+                    <MetadataEditor 
+                    Metadata="workflow.Metadata"
+                    OnChange="async e => await OnPropertyChangedAsync(nameof(workflow.Metadata), w => w.Metadata = e)" />
                 </Body>
             </Expander>
         </div>

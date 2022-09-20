@@ -83,11 +83,30 @@
                 </div>
             </td>
         </tr>
+        <tr>
+            <td>Authentication</td>
+            <td><AuthenticationSelector 
+            Authentications="Workflow.Auth"
+            Selected="string.IsNullOrWhiteSpace(function.AuthRef) ? null : Workflow.GetAuthentication(function.AuthRef)"
+            OnChange="async e => await OnPropertyChanged(nameof(function.AuthRef), f => f.AuthRef = e.Name)"/></td>
+        </tr>
+        <tr>
+            <td colspan="2">Metadata</td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <MetadataEditor
+                Metadata="function.Metadata"
+                OnChange="async e => await OnPropertyChanged(nameof(function.Metadata), f => f.Metadata = e)"/>
+            </td>
+        </tr>
     </tbody>
 </table>
 }
 
 @code {
+
+    [CascadingParameter] public WorkflowDefinition Workflow { get; set; } = null!;
 
     private FunctionDefinition? function { get; set; }
     [Parameter] public FunctionDefinition? Function { get; set; }

@@ -22,7 +22,8 @@
         <tbody>
             <tr>
                 <td>Name</td>
-                <td></td>
+                <td><input type="text" value="@authentication.Name" required placeholder="Name" title="The authentication name" class="form-control"
+                    @onchange="async e => await OnPropertyChangedAsync(nameof(authentication.Name), a => a.Name = (string)e.Value!)"/></td>
             </tr>
             <tr>
                 <td>Scheme</td>

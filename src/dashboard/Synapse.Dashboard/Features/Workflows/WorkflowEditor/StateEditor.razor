@@ -62,16 +62,6 @@
                     </td>
                 </Body>
             </ExpandableDataRow>
-            <ExpandableDataRow>
-                <Header>
-                    <td colspan="2">Metadata</td>
-                </Header>
-                <Body>
-                    <td colspan="2">
-                            
-                    </td>
-                </Body>
-            </ExpandableDataRow>
             <tr>
                 <td>Compensated by</td>
                 <td>
@@ -87,7 +77,7 @@
             </tr>
             <ExpandableDataRow IsExpanded="true">
                 <Header>
-                    <td colspan="2">Outcome</td>
+                    <td colspan="2"><h6>Outcome</h6></td>
                 </Header>
                 <Body>
                     <td colspan="2">
@@ -98,13 +88,31 @@
                         OnChange="async outcome => await this.OnPropertyChangedAsync(nameof(outcome.Type), d => state.SetOutcome(outcome))" />
                     </td>
                 </Body>
-            </ExpandableDataRow>   
+            </ExpandableDataRow>
+            <ExpandableDataRow IsExpanded="false">
+                <Header>
+                    <td colspan="2"><h6>Metadata</h6></td>
+                </Header>
+                <Body>
+                    <td colspan="2">
+                        <MetadataEditor 
+                        Metadata="state.Metadata" 
+                        OnChange="async metadata => await this.OnPropertyChangedAsync(nameof(state.Metadata), d => state.Metadata = metadata)" />
+                    </td>
+                </Body>
+            </ExpandableDataRow>
         </tbody>
     </table>
     @switch (state)
     {
+        case InjectStateDefinition injectState:
+            <InjectStateEditor State="injectState" OnChange="OnChange" />
+            break;
         case OperationStateDefinition operationState:
             <OperationStateEditor State="operationState" OnChange="OnChange" />
+            break;
+        case SleepStateDefinition sleepState:
+            <SleepStateEditor State="sleepState" OnChange="OnChange" />
             break;
     }
 </div>
@@ -128,7 +136,6 @@
             if (this.state?.CompensatedBy != null && this.compensatedBy?.Name != this.state.CompensatedBy)
                 this.compensatedBy = this.Workflow.GetState(this.state.CompensatedBy);
         }
-
     }
 
     protected virtual async Task OnStateTypeChangedAsync(StateType stateType)
