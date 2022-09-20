@@ -226,7 +226,7 @@
         <div class="border border-secondary rounded-2 p-3 mb-3">
             <Expander IsExpanded="@(State.ExpanderStates["secrets"])" OnToggleExpand="@(isExpanded => OnToggleExpand("secrets", isExpanded))">
                 <Header>
-                    <h5><span class="bi bi-key me-2"></span>Secrets</h5>
+                    <h5><span class="bi bi-incognito me-2"></span>Secrets</h5>
                 </Header>
                 <Body>
                     <table class="table">
@@ -269,7 +269,7 @@
         <div class="border border-secondary rounded-2 p-3 mb-3">
             <Expander IsExpanded="@State.ExpanderStates["authentication"]" OnToggleExpand="@(isExpanded => OnToggleExpand("authentication", isExpanded))">
                 <Header>
-                    <h5><span class="bi bi-pass me-2"></span>Authentication</h5>
+                    <h5><span class="bi bi-shield-lock me-2"></span>Authentication</h5>
                 </Header>
                 <Body>
                     <table class="table">
