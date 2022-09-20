@@ -22,10 +22,7 @@ using Newtonsoft.Json;
 using ServerlessWorkflow.Sdk.Models;
 using Synapse.Dashboard.Pages.Workflows.Editor.Actions;
 using Synapse.Dashboard.Services;
-using static Synapse.EnvironmentVariables.Runtime.Correlation;
 using Synapse.Dashboard.Pages.Workflows.Editor.State;
-using static System.Net.Mime.MediaTypeNames;
-using Octokit;
 using Synapse.Apis.Management;
 
 namespace Synapse.Dashboard.Pages.Workflows.Editor.Effects
@@ -34,7 +31,13 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor.Effects
     [Effect]
     public static class WorkflowEditorEffects
     {
-
+        /// <summary>
+        /// Handles the state initialization
+        /// </summary>
+        /// <param name="action">The <see cref="InitializeState"/> action</param>
+        /// <param name="context">The <see cref="IEffectContext"/> context</param>
+        /// <returns></returns>
+        /// <exception cref="NullReferenceException"></exception>
         public static async Task OnInitiliazeState(InitializeState action, IEffectContext context)
         {
             var monacoEditorHelper = context.Services.GetRequiredService<IMonacoEditorHelper>();
@@ -58,8 +61,8 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor.Effects
         /// <summary>
         /// Handles the form editor changes
         /// </summary>
-        /// <param name="action"></param>
-        /// <param name="context"></param>
+        /// <param name="action">The <see cref="HandleFormBasedEditorChange"/> action</param>
+        /// <param name="context">The <see cref="IEffectContext"/> context</param>
         /// <returns></returns>
         /// <exception cref="NullReferenceException"></exception>
         public static async Task OnFormBasedEditorChange(HandleFormBasedEditorChange action, IEffectContext context)
@@ -83,7 +86,7 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor.Effects
             }
             catch (Exception ex)
             {
-                // Ignore parsing failure
+                Console.WriteLine(ex.ToString());
             }
             context.Dispatcher.Dispatch(new StopUpdating());
         }
@@ -91,8 +94,8 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor.Effects
         /// <summary>
         /// Handles the text editor changes
         /// </summary>
-        /// <param name="action"></param>
-        /// <param name="context"></param>
+        /// <param name="action">The <see cref="HandleTextBasedEditorChange"/> action</param>
+        /// <param name="context">The <see cref="IEffectContext"/> context</param>
         /// <returns></returns>
         /// <exception cref="NullReferenceException"></exception>
         public static async Task OnTextBasedEditorChange(HandleTextBasedEditorChange action, IEffectContext context)
@@ -117,34 +120,48 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor.Effects
             }
             catch(Exception ex)
             {
-                // Ignore parsing failure
+                Console.WriteLine(ex.ToString());
             }
             context.Dispatcher.Dispatch(new StopUpdating());
         }
 
+        /// <summary>
+        /// Handles the text editor language changes
+        /// </summary>
+        /// <param name="action">The <see cref="ChangeTextLanguage"/> action</param>
+        /// <param name="context">The <see cref="IEffectContext"/> context</param>
+        /// <returns></returns>
+        /// <exception cref="NullReferenceException"></exception>
         public static async Task OnChangeTextLanguage(ChangeTextLanguage action, IEffectContext context)
         {
-            context.Dispatcher.Dispatch(new StartUpdating());
             var monacoEditorHelper = context.Services.GetRequiredService<IMonacoEditorHelper>();
             if (monacoEditorHelper == null)
                 throw new NullReferenceException("Unable to resolved service 'IMonacoEditorHelper'.");
             var yamlConverter = context.Services.GetRequiredService<IYamlConverter>();
             if (yamlConverter == null)
                 throw new NullReferenceException("Unable to resolved service 'IYamlConverter'.");
+            context.Dispatcher.Dispatch(new StartUpdating());
             try
             {
                 var text = action.Language == PreferedLanguage.YAML ?
                     await yamlConverter.JsonToYaml(action.WorkflowDefinitionText) :
-                    await yamlConverter.JsonToYaml(action.WorkflowDefinitionText);
+                    await yamlConverter.YamlToJson(action.WorkflowDefinitionText);
                 context.Dispatcher.Dispatch(new UpdateDefinitionText(text));
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.ToString());
                 await monacoEditorHelper.ChangePreferedLanguage(action.Language == PreferedLanguage.JSON ? PreferedLanguage.YAML : PreferedLanguage.JSON);
             }
             context.Dispatcher.Dispatch(new StopUpdating());
         }
 
+        /// <summary>
+        /// Handles the request to save the workflow
+        /// </summary>
+        /// <param name="action">The <see cref="SaveWorkflowDefinition"/> action</param>
+        /// <param name="context">The <see cref="IEffectContext"/> context</param>
+        /// <returns></returns>
         public static async Task OnSaveWorkflowDefinition(SaveWorkflowDefinition action, IEffectContext context)
         {
             try
