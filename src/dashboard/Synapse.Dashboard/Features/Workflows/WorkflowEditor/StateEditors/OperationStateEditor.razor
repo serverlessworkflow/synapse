@@ -16,16 +16,24 @@
 
 @namespace Synapse.Dashboard
 
-@if(this.State != null)
+@if(this.state != null)
 {
     <h6>Actions</h6>
-    <ActionCollectionEditor Actions="State.Actions" OnChange="OnChange" />
+    <ActionCollectionEditor Actions="state.Actions" OnChange="OnChange" />
 }
 
 @code {
-
+    private OperationStateDefinition? state = null;
     [Parameter] public OperationStateDefinition? State { get; set; }
 
     [Parameter] public EventCallback OnChange { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        if (this.state != this.State) {
+            this.state = this.State;
+        }
+    }
 
 }

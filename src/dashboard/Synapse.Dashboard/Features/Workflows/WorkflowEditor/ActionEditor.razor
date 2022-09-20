@@ -16,13 +16,13 @@
 
 @namespace Synapse.Dashboard
 
-@if(Action != null)
+@if (action != null)
 {
     <table class="table table-striped">
         <tbody>
             <tr>
                 <td>Name</td>
-                <td><input type="text" placeholder="Name" title="The action's name" required class="form-control" value="@Action.Name" @onchange="async e => await OnPropertyChangedAsync(nameof(Action.Name), a => a.Name = (string)e.Value!)"/></td>
+                <td><input type="text" placeholder="Name" title="The action's name" required class="form-control" value="@action.Name" @onchange="async e => await OnPropertyChangedAsync(nameof(action.Name), a => a.Name = (string)e.Value!)" /></td>
             </tr>
             <tr>
                 <td>Type</td>
@@ -60,7 +60,7 @@
                     <input type="text" title="A runtime expression that determines whether or not to run the action" placeholder=".age > 18" class="form-control" />
                 </td>
             </tr>
-            @switch (Action.Type) 
+            @switch (action.Type)
             {
                 case ActionType.Function:
                     <ExpandableDataRow IsExpanded="true">
@@ -76,13 +76,13 @@
                                             <td>
                                                 <FunctionSelector 
                                                     Functions="Workflow.Functions"
-                                                    Selected="string.IsNullOrWhiteSpace(Action.Function?.RefName) ? null : Workflow.GetFunction(Action.Function.RefName)"
-                                                    OnChange="async e => await OnPropertyChangedAsync(nameof(Action.Function), a => a.Function!.RefName = e.Name)"/>
+                                                  Selected="string.IsNullOrWhiteSpace(action.Function?.RefName) ? null : Workflow.GetFunction(action.Function.RefName)"
+                                                  OnChange="async e => await OnPropertyChangedAsync(nameof(action.Function), a => a.Function!.RefName = e.Name)" />
                                             </td>
                                         </tr>
                                         <tr>
                                             <td>Arguments</td>
-                                            <td><DynamicObjectEditor Object="Action.Function!.Arguments" OnChange="async e => await this.OnPropertyChangedAsync(nameof (Action.Function), a => a.Function!.Arguments = e)" /></td>
+                                        <td><DynamicObjectEditor Object="action.Function!.Arguments" OnChange="async e => await this.OnPropertyChangedAsync(nameof (action.Function), a => a.Function!.Arguments = e)" /></td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -118,40 +118,49 @@
 @code {
     [CascadingParameter] public WorkflowDefinition Workflow { get; set; } = null!;
 
+    private ActionDefinition? action { get; set; }
     [Parameter] public ActionDefinition? Action { get; set; }
 
     [Parameter] public EventCallback OnChange { get; set; }
 
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        if (this.action != this.Action) {
+            this.action = this.Action;
+        }
+    }
+
     protected virtual async Task OnActionTypeChangedAsync(ActionType actionType)
     {
-        if (this.Action == null)
+        if (this.action == null)
             return;
         switch (actionType)
         {
             case ActionType.Function:
-                this.Action.Event = null;
-                this.Action.Subflow = null;
-                this.Action.Function = new();
+                this.action.Event = null;
+                this.action.Subflow = null;
+                this.action.Function = new();
                 break;
             case ActionType.Subflow:
-                this.Action.Event = null;
-                this.Action.Function = null;
-                this.Action.Subflow = new();
+                this.action.Event = null;
+                this.action.Function = null;
+                this.action.Subflow = new();
                 break;
             case ActionType.Trigger:
-                this.Action.Function = null;
-                this.Action.Subflow = null;
-                this.Action.Event = new();
+                this.action.Function = null;
+                this.action.Subflow = null;
+                this.action.Event = new();
                 break;
         }
-        await this.OnPropertyChangedAsync(nameof(Action.Type), _ => { });
+        await this.OnPropertyChangedAsync(nameof(action.Type), _ => { });
     }
 
     protected virtual async Task OnPropertyChangedAsync(string property, Action<ActionDefinition> patchAction)
     {
-        if (this.Action == null)
+        if (this.action == null)
             return;
-        patchAction(this.Action);
+        patchAction(this.action);
         await this.OnChange.InvokeAsync(property);
     }
 
