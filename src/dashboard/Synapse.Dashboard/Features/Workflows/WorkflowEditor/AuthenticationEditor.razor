@@ -45,7 +45,7 @@
                             <div class="input-group-text">
                                 <input class="form-check-input mt-0 me-2" type="checkbox" value="@useSecretBasedProperties" checked="@useSecretBasedProperties"
                                 @onclick="OnUseSecretBasedPropertiesChanged">
-                                <label>Secret based</label>
+                                <label title="Indicates whether or not to load the authentication properties from a secret">Load properties from secret</label>
                             </div>
                             @if (useSecretBasedProperties)
                             {
@@ -74,12 +74,12 @@
                                             <tr>
                                                 <td>Username</td>
                                                 <td><input type="text" value="@basic.Username" required placeholder="Username" title="The username to use to authenticate" class="form-control"
-                                                    @onchange="async e => await OnPropertyChangedAsync(nameof(authentication.Properties), a => ((BasicAuthenticationProperties)a.Properties).Username = (string)e.Value!)"/></td>
+                                                    @onchange="async e => await OnAuthenticationPropertiesChangedAsync<BasicAuthenticationProperties>(p => p.Username =  (string)e.Value!)"/></td>
                                             </tr>
                                             <tr>
                                                 <td>Password</td>
                                                 <td><input type="text" value="@basic.Password" required placeholder="Password" title="The password to use to authenticate" class="form-control"
-                                                    @onchange="async e => await OnPropertyChangedAsync(nameof(authentication.Properties), a => ((BasicAuthenticationProperties)a.Properties).Password = (string)e.Value!)"/></td>
+                                                    @onchange="async e => await OnAuthenticationPropertiesChangedAsync<BasicAuthenticationProperties>(p => p.Password =  (string)e.Value!)"/></td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -157,7 +157,7 @@
     {
         if (this.authentication == null)
             return;
-        this.authentication.SecretRef = null;
+        this.useSecretBasedProperties = false;
         await this.OnPropertyChangedAsync(nameof(Authentication.Scheme), a =>
         {
             a.Scheme = scheme;
@@ -169,6 +169,14 @@
                 _ => throw new NotSupportedException($"The specified {nameof(AuthenticationScheme)} '{a.Scheme}' is not supported")
             };
         });
+    }
+
+    protected virtual async Task OnAuthenticationPropertiesChangedAsync<TAuthenticationProperties>(Action<TAuthenticationProperties> patch)
+        where TAuthenticationProperties : AuthenticationProperties
+    {
+        var authenticationProperties = (TAuthenticationProperties)this.authentication!.Properties;
+        patch(authenticationProperties);
+        await this.OnPropertyChangedAsync(nameof(Authentication.Properties), a => a.Properties = authenticationProperties);
     }
 
     protected virtual async Task OnPropertyChangedAsync(string property, Action<AuthenticationDefinition> patchAction)
