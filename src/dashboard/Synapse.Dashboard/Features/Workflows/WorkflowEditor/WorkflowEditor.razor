@@ -31,7 +31,7 @@
         <div class="border border-secondary rounded-2 p-3 mb-3">
             <Expander IsExpanded="@(State.ExpanderStates["general"])" OnToggleExpand="@(isExpanded => OnToggleExpand("general", isExpanded))">
                 <Header>
-                    <h5><span class="oi oi-info me-2"></span>General</h5>
+                    <h5><span class="bi bi-info-circle me-2"></span>General</h5>
                 </Header>
                 <Body>
                     <table class="table">
@@ -66,7 +66,7 @@
         <div class="border border-secondary rounded-2 p-3 mb-3">
             <Expander IsExpanded="@(State.ExpanderStates["states"])" OnToggleExpand="@(isExpanded => OnToggleExpand("states", isExpanded))">
                 <Header>
-                    <h5><span class="oi oi-fork me-2"></span>States</h5>
+                    <h5><span class="bi bi-box-seam me-2"></span>States</h5>
                 </Header>
                 <Body>
                     @if(workflow.States.Any())
@@ -107,8 +107,8 @@
                                                     <span class="badge bg-danger text-white mx-1" title="Is fault tolerant and handles defined errors">fault</span>
                                                 }
                                             </td>
-                                        <td><button @onclick="async () => await OnPropertyChangedAsync(nameof(workflow.States), d => d.States?.Remove(state))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
-                                            <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.States), d => d.States?.Remove(state))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
+                                        <td><button @onclick="async () => await OnPropertyChangedAsync(nameof(workflow.States), d => d.States?.Remove(state))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="bi bi-trash"></small></button></td>
+                                            <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.States), d => d.States?.Remove(state))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="bi bi-trash"></small></button></td>
                                         </Header>
                                         <Body>
                                             <td colspan="5">
@@ -132,7 +132,7 @@
         <div class="border border-secondary rounded-2 p-3 mb-3">
             <Expander IsExpanded="@(State.ExpanderStates["events"])" OnToggleExpand="@(isExpanded => OnToggleExpand("events", isExpanded))">
                 <Header>
-                    <h5><span class="oi oi-cloud me-2"></span>Events</h5>
+                    <h5><span class="bi bi-cloud me-2"></span>Events</h5>
                 </Header>
                 <Body>
                     <table class="table">
@@ -162,7 +162,7 @@
                                                     <span class="badge bg-success text-white mx-1" title="Is compensated by another state">correlated</span>
                                                 }
                                             </td>
-                                            <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Events), d => d.Events?.Remove(e))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
+                                            <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Events), d => d.Events?.Remove(e))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="bi bi-trash"></small></button></td>
                                         </Header>
                                         <Body>
                                             <td colspan="6">
@@ -183,7 +183,7 @@
         <div class="border border-secondary rounded-2 p-3 mb-3">
             <Expander IsExpanded="@(State.ExpanderStates["functions"])" OnToggleExpand="@(isExpanded => OnToggleExpand("functions", isExpanded))">
                 <Header>
-                    <h5><span class="oi oi-terminal me-2"></span>Functions</h5>
+                    <h5><span class="bi bi-code-square me-2"></span>Functions</h5>
                 </Header>
                 <Body>
                     <table class="table">
@@ -205,7 +205,7 @@
                                             <td>@function.Name</td>
                                             <td><span class="badge bg-secondary">@EnumHelper.Stringify(function.Type)</span></td>
                                             <td class="text-break"><a href="@function.Operation" target="_blank">@function.Operation</a></td>
-                                            <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Functions), d => d.Functions?.Remove(function))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
+                                            <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Functions), d => d.Functions?.Remove(function))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="bi bi-trash"></small></button></td>
                                         </Header>
                                         <Body>
                                             <td colspan="4">
@@ -226,7 +226,7 @@
         <div class="border border-secondary rounded-2 p-3 mb-3">
             <Expander IsExpanded="@(State.ExpanderStates["secrets"])" OnToggleExpand="@(isExpanded => OnToggleExpand("secrets", isExpanded))">
                 <Header>
-                    <h5><span class="oi oi-key me-2"></span>Secrets</h5>
+                    <h5><span class="bi bi-key me-2"></span>Secrets</h5>
                 </Header>
                 <Body>
                     <table class="table">
@@ -240,7 +240,7 @@
                                     <ExpandableDataRow>
                                         <Header>
                                             <td>@secret</td>
-                                            <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Secrets), d => d.Secrets?.Remove(secret))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
+                                            <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Secrets), d => d.Secrets?.Remove(secret))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="bi bi-trash"></small></button></td>
                                         </Header>
                                         <Body>
                                             <td colspan="2">
@@ -269,7 +269,7 @@
         <div class="border border-secondary rounded-2 p-3 mb-3">
             <Expander IsExpanded="@State.ExpanderStates["authentication"]" OnToggleExpand="@(isExpanded => OnToggleExpand("authentication", isExpanded))">
                 <Header>
-                    <h5><span class="oi oi-lock-locked me-2"></span>Authentication</h5>
+                    <h5><span class="bi bi-pass me-2"></span>Authentication</h5>
                 </Header>
                 <Body>
                     <table class="table">
@@ -289,7 +289,7 @@
                                         <Header>
                                             <td>@authentication.Name</td>
                                             <td><span class="badge bg-secondary">@EnumHelper.Stringify(authentication.Scheme)</span></td>
-                                            <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Auth), d => d.Auth?.Remove(authentication))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
+                                            <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Auth), d => d.Auth?.Remove(authentication))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="bi bi-trash"></small></button></td>
                                         </Header>
                                         <Body>
                                             <td colspan="3">
@@ -310,7 +310,7 @@
         <div class="border border-secondary rounded-2 p-3 mb-3">
             <Expander IsExpanded="@State.ExpanderStates["annotations"]" OnToggleExpand="@(isExpanded => OnToggleExpand("annotations", isExpanded))">
                 <Header>
-                    <h5><span class="oi oi-pencil me-2"></span>Annotations</h5>
+                    <h5><span class="bi bi-pencil me-2"></span>Annotations</h5>
                 </Header>
                 <Body>
                     <table class="table">
@@ -324,7 +324,7 @@
                                     <ExpandableDataRow>
                                         <Header>
                                             <td>@annotation</td>
-                                            <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Annotations), d => d.Annotations?.Remove(annotation))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
+                                            <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Annotations), d => d.Annotations?.Remove(annotation))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="bi bi-trash"></small></button></td>
                                         </Header>
                                         <Body>
                                             <td colspan="2">
@@ -351,7 +351,7 @@
         <div class="border border-secondary rounded-2 p-3 mb-3">
             <Expander IsExpanded="@State.ExpanderStates["metadata"]" OnToggleExpand="@(isExpanded => OnToggleExpand("metadata", isExpanded))">
                 <Header>
-                    <h5><span class="oi oi-puzzle-piece me-2"></span>Metadata</h5>
+                    <h5><span class="bi bi-puzzle me-2"></span>Metadata</h5>
                 </Header>
                 <Body>
                     <table class="table">
@@ -367,7 +367,7 @@
                                         <Header>
                                             <td>@property.Key</td>
                                             <td>@property.Value</td>
-                                            <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Metadata), d => d.Metadata?.Remove(property.Key))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
+                                            <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Metadata), d => d.Metadata?.Remove(property.Key))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="bi bi-trash"></small></button></td>
                                         </Header>
                                         <Body>
                                             <td colspan="3">

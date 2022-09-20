@@ -19,6 +19,7 @@
 @using System.Reactive.Linq
 @using Synapse.Dashboard.Pages.Workflows.Editor.Actions
 @using Synapse.Dashboard.Pages.Workflows.Editor.State
+@inject IBreadcrumbService BreadcrumbService
 @inject IMonacoEditorHelper MonacoEditorHelper
 @inject IStore Store
 @inject IDispatcher Dispatcher
@@ -27,7 +28,7 @@
 <PageTitle>Workflow editor</PageTitle>
 <AppRightSidebar>
     <Toolbar>
-        <button @onclick="OnSaveWorkflow" disabled="@State.Saving" class="btn btn-outline-dark" title="Save workflow"><small class="oi oi-cloud-upload"></small><span class="btn-label">&nbsp; Save</span></button>
+        <button @onclick="OnSaveWorkflow" disabled="@State.Saving" class="btn btn-outline-dark" title="Save workflow"><small class="bi bi-cloud-upload"></small><span class="btn-label">&nbsp; Save</span></button>
     </Toolbar>
 </AppRightSidebar>
 
@@ -68,6 +69,7 @@ else if (workflowDefinition != null)
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+        await this.BreadcrumbService.Use(KnownBreadcrumbs.WorkflowEditor);
         this.disposeNotifier = new Subject<bool>();
         this.editorValue = new Subject<string>();
         this.editorValue

@@ -1,4 +1,6 @@
-﻿@import "../lib/open-iconic/font/css/open-iconic-bootstrap";
+﻿$bootstrap-icons-font-dir: '/lib/bootstrap-icons/font/fonts/';
+
+@import "../lib/bootstrap-icons/font/bootstrap-icons";
 @import "./theme";
 @import "./splash";
 
@@ -68,10 +70,10 @@ input[type=time]::-webkit-clear-button {
 .monaco-extra-small {
     height: 100px !important;
 }
-
-.oi {
+/*
+.bi {
     width: 16px;
-}
+}*/
 
 .toast-container {
     z-index: 1 !important;

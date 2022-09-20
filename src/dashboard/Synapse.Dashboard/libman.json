@@ -145,13 +145,13 @@
     },
     {
       "provider": "unpkg",
-      "library": "yaml@2.1.1",
-      "destination": "wwwroot/lib/yaml/"
-    },
-    {
-      "provider": "unpkg",
       "library": "js-yaml@4.1.0",
       "destination": "wwwroot/lib/js-yaml/"
+    },
+    {
+      "provider": "jsdelivr",
+      "library": "bootstrap-icons@1.9.1",
+      "destination": "wwwroot/lib/bootstrap-icons/"
     }
   ]
 }
