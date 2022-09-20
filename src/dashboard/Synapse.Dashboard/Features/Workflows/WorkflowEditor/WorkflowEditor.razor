@@ -20,7 +20,6 @@
 @using Synapse.Dashboard.Pages.Workflows.Editor.Actions
 @using Synapse.Dashboard.Pages.Workflows.Editor.State
 @inherits StatefulComponent<WorkflowEditorState>
-@implements IDisposable
 @inject IDispatcher Dispatcher
 
 @if(Workflow != null)
@@ -82,41 +81,41 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                    @foreach (var state in Workflow.States)
-                                    {
-                                        <ExpandableDataRow>
-                                            <Header>
-                                                <td>@state.Name</td>
-                                                <td><span class="badge bg-secondary">@EnumHelper.Stringify(state.Type)</span></td>
-                                                <td>@(state.IsEnd ? "End workflow" : $"Transition to '{state.TransitionToStateName}'")</td>
-                                                <td>
-                                                    @if(state == Workflow.GetStartState())
-                                                    {
-                                                        <span class="badge bg-success text-white mx-1" title="First state in the workflow">start</span>
-                                                    }
-                                                    @if (state.IsEnd)
-                                                    {
-                                                        <span class="badge bg-warning text-white mx-1" title="Ends the workflow">end</span>
-                                                    }
-                                                    @if(!string.IsNullOrWhiteSpace(state.CompensatedBy))
-                                                    {
-                                                        <span class="badge bg-primary text-white mx-1" title="Is compensated by another state">compensated</span>
-                                                    }
-                                                    @if(state.Errors != null
-                                                    && state.Errors.Any())
-                                                    {
-                                                        <span class="badge bg-danger text-white mx-1" title="Is fault tolerant and handles defined errors">fault</span>
-                                                    }
-                                                </td>
-                                                <td><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.States), d => d.States?.Remove(state))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
-                                            </Header>
-                                            <Body>
-                                                <td colspan="5">
-                                                    <StateEditor State="@state" OnChange="async () => await OnStatePropertyChangedAsync(state)" />
-                                                </td>
-                                            </Body>
-                                        </ExpandableDataRow>
-                                    }
+                                @foreach (var state in Workflow.States)
+                                {
+                                    <ExpandableDataRow>
+                                        <Header>
+                                            <td>@state.Name</td>
+                                            <td><span class="badge bg-secondary">@EnumHelper.Stringify(state.Type)</span></td>
+                                            <td>@(state.IsEnd ? "End workflow" : $"Transition to '{state.TransitionToStateName}'")</td>
+                                            <td>
+                                                @if(state == Workflow.GetStartState())
+                                                {
+                                                    <span class="badge bg-success text-white mx-1" title="First state in the workflow">start</span>
+                                                }
+                                                @if (state.IsEnd)
+                                                {
+                                                    <span class="badge bg-warning text-white mx-1" title="Ends the workflow">end</span>
+                                                }
+                                                @if(!string.IsNullOrWhiteSpace(state.CompensatedBy))
+                                                {
+                                                    <span class="badge bg-primary text-white mx-1" title="Is compensated by another state">compensated</span>
+                                                }
+                                                @if(state.Errors != null
+                                                && state.Errors.Any())
+                                                {
+                                                    <span class="badge bg-danger text-white mx-1" title="Is fault tolerant and handles defined errors">fault</span>
+                                                }
+                                            </td>
+                                            <td><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.States), d => d.States?.Remove(state))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
+                                        </Header>
+                                        <Body>
+                                            <td colspan="5">
+                                                <StateEditor State="@state" OnChange="async () => await OnStatePropertyChangedAsync(state)" />
+                                            </td>
+                                        </Body>
+                                    </ExpandableDataRow>
+                                }
                             </tbody>
                         </table>
                     }
@@ -136,7 +135,7 @@
                 </Header>
                 <Body>
                     <table class="table">
-                         <thead>
+                        <thead>
                             <tr>
                                 <th>Name</th>
                                 <th>Kind</th>
@@ -150,17 +149,31 @@
                             {
                                 @foreach (var e in Workflow.Events)
                                 {
-                                    <tr>
-                                        <td>@e.Name</td>
-                                        <td><span class="badge bg-secondary">@EnumHelper.Stringify(e.Kind)</span></td>
-                                        <td>@e.Source</td>
-                                        <td>@e.Type</td>
-                                        <td><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Events), d => d.Events?.Remove(e))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
-                                    </tr>
+                                    <ExpandableDataRow>
+                                        <Header>
+                                            <td>@e.Name</td>
+                                            <td><span class="badge bg-secondary">@EnumHelper.Stringify(e.Kind)</span></td>
+                                            <td class="text-break"><a href="@e.Source" target="_blank">@e.Source</a></td>
+                                            <td>@e.Type</td>
+                                            <td>
+                                                @if(e.Correlations != null && e.Correlations.Any())
+                                                {
+                                                    <span class="badge bg-success text-white mx-1" title="Is compensated by another state">correlated</span>
+                                                }
+                                            </td>
+                                            <td><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Events), d => d.Events?.Remove(e))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="oi oi-trash"></small></button></td>
+                                        </Header>
+                                        <Body>
+                                            <td colspan="6">
+                                                <EventEditor Event="@e" OnChange="OnPropertyChanged" />
+                                            </td>
+                                        </Body>
+                                    </ExpandableDataRow>
                                 }
                             }
                         </tbody>
                     </table>
+                    <button class="btn btn-block btn-warning text-white w-100" @onclick="OnCreateEventAsync">Create new event</button>
                 </Body>
             </Expander>
         </div>
@@ -355,15 +368,28 @@ else
         await this.OnPropertyChangedAsync(nameof(Workflow.States), d => d.States.Add(state));
     }
 
+    protected virtual async Task OnCreateEventAsync()
+    {
+        if (this.Workflow == null)
+            return;
+        if (this.Workflow.Events == null)
+            this.Workflow.Events = new();
+        var e = new EventDefinition() { Name = $"undefined-{Workflow.Events.Count + 1}" };
+        await this.OnPropertyChangedAsync(nameof(Workflow.Events), d =>
+        {
+            d.Events.Add(e);
+        });
+    }
+
     protected virtual async Task OnCreateFunctionAsync()
     {
         if (this.Workflow == null)
             return;
-        var function = new FunctionDefinition();
+        if (this.Workflow.Functions == null)
+            this.Workflow.Functions = new();
+        var function = new FunctionDefinition() { Name = $"undefined-{Workflow.Functions.Count + 1}" };
         await this.OnPropertyChangedAsync(nameof(Workflow.Functions), d =>
         {
-            if (d.Functions == null)
-                d.Functions = new();
             d.Functions.Add(function);
         });
     }
@@ -400,22 +426,6 @@ else
             return;
         patchAction(this.Workflow);
         await this.OnPropertyChanged.InvokeAsync(property);
-    }
-
-    private bool disposed;
-    protected virtual void Dispose(bool disposing)
-    {
-        if (!this.disposed)
-        {
-
-            this.disposed = true;
-        }
-    }
-
-    public void Dispose()
-    {
-        this.Dispose(disposing: true);
-        GC.SuppressFinalize(this);
     }
 
 }
