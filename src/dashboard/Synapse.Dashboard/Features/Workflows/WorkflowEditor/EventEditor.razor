@@ -110,9 +110,8 @@
     protected override async Task OnParametersSetAsync()
     {
         await base.OnParametersSetAsync();
-        if (this.evt != this.evt) {
-            this.evt = this.evt;
-        }
+        if (this.Event != this.evt) 
+            this.evt = this.Event;
     }
 
     protected virtual async Task OnPropertyChanged(string property, Action<EventDefinition> patch)

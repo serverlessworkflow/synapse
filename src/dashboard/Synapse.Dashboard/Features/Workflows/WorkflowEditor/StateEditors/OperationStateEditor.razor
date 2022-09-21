@@ -33,14 +33,16 @@
                     </select>
                 </td>
             </tr>
-            <tr>
-                <td colspan="2"><h6>Actions</h6></td>
-            </tr>
-            <tr>
-                <td colspan="2">
+            <ExpandableDataRow>
+                <Header>
+                    <td colspan="2"><h6>Actions</h6></td>
+                </Header>
+                <Body>
+                    <td colspan="2">
                     <ActionCollectionEditor Actions="state.Actions" OnChange="OnChange" />
                 </td>
-            </tr>
+                </Body>
+            </ExpandableDataRow>
         </tbody>
     </table>
 }

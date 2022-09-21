@@ -17,65 +17,88 @@
 @namespace Synapse.Dashboard
 
 <div>
+
+    <!-- Common properties -->
     <table class="table table-striped">
         <tbody>
-            <tr>
-                <td>Name</td>
-                <td>
-                    <input name="name" type="text" placeholder="Name" required class="form-control" value="@state.Name"
-                           @onchange="async e => await OnPropertyChangedAsync(nameof(state.Name), s => s.Name = (string)e.Value!)" />
-                </td>
-            </tr>
-            <tr>
-                <td>Type</td>
-                <td>
-                    <select class="form-control bg-secondary text-white"
-                    @onchange="async e => await OnStateTypeChangedAsync(EnumHelper.Parse<StateType>((string)e.Value!))">
-                        @foreach(var type in Enum.GetValues<StateType>())
-                        {
-                            var typeStr = @EnumHelper.Stringify(type);
-                            if (state.Type == type)
-                            {
-                                <option value="@typeStr" selected>@typeStr</option>
-                            }
-                            else
-                            {
-                                <option value="@typeStr">@typeStr</option>
-                            }
-                        }
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <td>Data input schema</td>
-                <td>
-                    <input name="name" type="url" placeholder="Data input schema uri" class="form-control" value="@state.DataInputSchemaUri" />
-                </td>
-            </tr>
-            <ExpandableDataRow>
+
+            <!-- General -->
+            <ExpandableDataRow IsExpanded="true">
                 <Header>
-                    <td colspan="2">Data filter</td>
+                    <td colspan="2"><h6>General</h6></td>
                 </Header>
                 <Body>
                     <td colspan="2">
-                            
+                        <table class="table table-striped">
+                            <tbody>
+                                <tr>
+                                    <td>Name</td>
+                                    <td>
+                                        <input name="name" type="text" placeholder="Name" required class="form-control" value="@state.Name"
+                                               @onchange="async e => await OnPropertyChangedAsync(nameof(state.Name), s => s.Name = (string)e.Value!)" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Type</td>
+                                    <td>
+                                        <select class="form-control bg-secondary text-white"
+                                        @onchange="async e => await OnStateTypeChangedAsync(EnumHelper.Parse<StateType>((string)e.Value!))">
+                                            @foreach(var type in Enum.GetValues<StateType>())
+                                            {
+                                                var typeStr = @EnumHelper.Stringify(type);
+                                                if (state.Type == type)
+                                                {
+                                                    <option value="@typeStr" selected>@typeStr</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@typeStr">@typeStr</option>
+                                                }
+                                            }
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Data input schema</td>
+                                    <td>
+                                        <input name="name" type="url" placeholder="Data input schema uri" class="form-control" value="@state.DataInputSchemaUri" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Compensated by</td>
+                                    <td>
+                                        <StateSelector Disabled="@state.UsedForCompensation"
+                                        States="Workflow.States.Where(s => s.UsedForCompensation).ToList()"
+                                        Selected="compensatedBy"
+                                        ControlFlow="ControlFlow.Compensation"
+                                        OnChange="OnCompensatedBySelectionChangedAsync" /></td>
+                                </tr>
+                                <tr>
+                                    <td>Used for compensation</td>
+                                    <td><input type="checkbox" placeholder="0.1.0" required value="@state.UsedForCompensation" checked="@state.UsedForCompensation" @onchange="async e => await OnPropertyChangedAsync(nameof(state.UsedForCompensation), d => { d.UsedForCompensation = (bool)e.Value!; d.CompensatedBy = null; })" class="form-check-input" /></td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </td>
                 </Body>
             </ExpandableDataRow>
-            <tr>
-                <td>Compensated by</td>
-                <td>
-                    <StateSelector Disabled="@state.UsedForCompensation"
-                    States="Workflow.States.Where(s => s.UsedForCompensation).ToList()"
-                    Selected="compensatedBy"
-                    ControlFlow="ControlFlow.Compensation"
-                    OnChange="OnCompensatedBySelectionChangedAsync" /></td>
-            </tr>
-            <tr>
-                <td>Used for compensation</td>
-                <td><input type="checkbox" placeholder="0.1.0" required value="@state.UsedForCompensation" checked="@state.UsedForCompensation" @onchange="async e => await OnPropertyChangedAsync(nameof(state.UsedForCompensation), d => { d.UsedForCompensation = (bool)e.Value!; d.CompensatedBy = null; })" class="form-check-input" /></td>
-            </tr>
-            <ExpandableDataRow IsExpanded="true">
+            
+            <!-- Data filter-->
+            <ExpandableDataRow>
+                <Header>
+                    <td colspan="2"><h6>Data filter</h6></td>
+                </Header>
+                <Body>
+                    <td colspan="2">
+                        <StateDataFilterEditor 
+                            DataFilter="state.DataFilter"
+                            OnChange="async e => await OnPropertyChangedAsync(nameof(state.DataFilter), s => s.DataFilter = e)"/>
+                    </td>
+                </Body>
+            </ExpandableDataRow>
+            
+            <!-- Outcome-->
+            <ExpandableDataRow>
                 <Header>
                     <td colspan="2"><h6>Outcome</h6></td>
                 </Header>
@@ -89,7 +112,9 @@
                     </td>
                 </Body>
             </ExpandableDataRow>
-            <ExpandableDataRow IsExpanded="false">
+            
+            <!-- Metadata -->
+            <ExpandableDataRow>
                 <Header>
                     <td colspan="2"><h6>Metadata</h6></td>
                 </Header>
@@ -101,20 +126,32 @@
                     </td>
                 </Body>
             </ExpandableDataRow>
+
+            <!-- Specialized properties -->
+            <ExpandableDataRow>
+                <Header>
+                    <td colspan="2"><h6>@state.Type.ToString()</h6></td>
+                </Header>
+                <Body>
+                    <td colspan="2">
+                        @switch (state)
+                        {
+                            case InjectStateDefinition injectState:
+                                <InjectStateEditor State="injectState" OnChange="OnChange" />
+                                break;
+                            case OperationStateDefinition operationState:
+                                <OperationStateEditor State="operationState" OnChange="OnChange" />
+                                break;
+                            case SleepStateDefinition sleepState:
+                                <SleepStateEditor State="sleepState" OnChange="OnChange" />
+                                break;
+                        }
+                    </td>
+                </Body>
+            </ExpandableDataRow>
+
         </tbody>
     </table>
-    @switch (state)
-    {
-        case InjectStateDefinition injectState:
-            <InjectStateEditor State="injectState" OnChange="OnChange" />
-            break;
-        case OperationStateDefinition operationState:
-            <OperationStateEditor State="operationState" OnChange="OnChange" />
-            break;
-        case SleepStateDefinition sleepState:
-            <SleepStateEditor State="sleepState" OnChange="OnChange" />
-            break;
-    }
 </div>
 
 @code {

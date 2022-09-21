@@ -32,6 +32,7 @@
 	<PackageReference Include="Neuroglia.Data.OData" Version="2.0.1.86" />
 	<PackageReference Include="Neuroglia.Data.Schemas" Version="2.0.1.86" />
 	<PackageReference Include="Neuroglia.Mapping" Version="2.0.1.86" />
+	<PackageReference Include="Semver" Version="2.2.0" />
   </ItemGroup>
 
   <ItemGroup>

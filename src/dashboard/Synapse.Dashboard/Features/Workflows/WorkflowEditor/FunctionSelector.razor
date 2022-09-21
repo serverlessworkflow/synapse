@@ -17,26 +17,12 @@
 @namespace Synapse.Dashboard
 
 <select class="form-control @CssClass" @onchange="OnStateSelectorValueChangedAsync">
-    @if(Selected == null)
-    {
-        <option disabled selected value> -- select a function -- </option>
-    }
-    else
-    {
-        <option disabled value> -- select a function -- </option>
-    }
+    <option disabled selected="@(Selected == null)" value> -- select a function -- </option>
     @if(functions != null)
     {
         @foreach(var function in functions!)
         {
-            if(function == Selected)
-            {
-                <option value="@function.Name" selected>@function.Name [@EnumHelper.Stringify(@function.Type)]</option>
-            }
-            else
-            {
-                <option value="@function.Name">@function.Name [@EnumHelper.Stringify(@function.Type)]</option>
-            }
+           <option value="@function.Name" selected="@(function == Selected)">@function.Name [@EnumHelper.Stringify(@function.Type)]</option>
         }
     }
     @if (AddCreateNewOption)
