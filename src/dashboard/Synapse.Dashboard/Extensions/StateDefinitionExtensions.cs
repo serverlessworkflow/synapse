@@ -33,11 +33,10 @@ namespace Synapse.Dashboard
         /// <returns>The <see cref="StateDefinition"/>'s <see cref="WorkflowOutcome"/></returns>
         public static WorkflowOutcome GetOutcome(this StateDefinition state)
         {
-            if (state.IsEnd)
+            if (state.IsEnd || state.End != null)
                 return new(WorkflowOutcomeType.End, state.End);
             else
                 return new(WorkflowOutcomeType.Transition, string.IsNullOrWhiteSpace(state.TransitionToStateName)? state.Transition : state.TransitionToStateName);
-
         }
 
         /// <summary>
@@ -77,8 +76,12 @@ namespace Synapse.Dashboard
                     {
                         switch (outcome.Definition)
                         {
-                            case TransitionDefinition transition:
-                                state.Transition = transition;
+                            case EndDefinition end:
+                                state.End = end;
+                                break;
+                            default:
+                                state.End = null;
+                                state.IsEnd = true;
                                 break;
                         }
                     }

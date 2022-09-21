@@ -22,36 +22,31 @@
             <td>Type</td>
             <td>
                 <select class="form-control bg-secondary text-white" @onchange="OnOutcomeTypeChangedAsync">
-                    @if(this.Outcome.Type == WorkflowOutcomeType.End)
-                    {
-                        <option value="@EnumHelper.Stringify(SwitchCaseOutcomeType.End)" selected>End</option>
-                        <option value="@EnumHelper.Stringify(SwitchCaseOutcomeType.Transition)">Transition</option>
-                    }
-                    else
-                    {
-                        <option value="@EnumHelper.Stringify(SwitchCaseOutcomeType.End)">End</option>
-                        <option value="@EnumHelper.Stringify(SwitchCaseOutcomeType.Transition)" selected>Transition</option>
-                    }
+                    <option value="@EnumHelper.Stringify(SwitchCaseOutcomeType.End)" selected="@(outcome?.Type == WorkflowOutcomeType.End)">End</option>
+                    <option value="@EnumHelper.Stringify(SwitchCaseOutcomeType.Transition)" selected="@(outcome?.Type == WorkflowOutcomeType.Transition)">Transition</option>
                 </select>
             </td>
         </tr>
     </tbody>
 </table>
 
-@switch (Outcome.Type)
+@switch (Outcome?.Type)
 {
     case WorkflowOutcomeType.End:
-        <EndEditor OnChange="OnChange" />
+        <EndEditor
+        End="outcome?.Definition as EndDefinition"
+        ControlFlow="ControlFlow"
+        OnChange="OnChange"/>
         break;
     case WorkflowOutcomeType.Transition:
         <TransitionEditor 
-        Transition="Outcome.Definition as TransitionDefinition" 
+        Transition="outcome?.Definition as TransitionDefinition" 
         ForbiddenTransitions="ForbiddenTransitions" 
         ControlFlow="ControlFlow"
-        OnChange="OnChange" />
+        OnChange="OnChange"/>
         break;
     default:
-        <span class="danger">The specified outcome type '@EnumHelper.Stringify(Outcome.Type)' is not supported</span>
+        <span class="danger">The specified outcome type '@EnumHelper.Stringify(outcome!.Type)' is not supported</span>
         break;
 }
 
@@ -60,7 +55,8 @@
 
     [CascadingParameter] public WorkflowDefinition Workflow { get; set; } = null!;
 
-    [Parameter] public WorkflowOutcome Outcome { get; set; } = new(WorkflowOutcomeType.End);
+    private WorkflowOutcome? outcome;
+    [Parameter] public WorkflowOutcome? Outcome { get; set; }
 
     [Parameter] public List<StateDefinition> ForbiddenTransitions { get; set; } = new();
 
@@ -68,10 +64,17 @@
 
     [Parameter] public EventCallback<WorkflowOutcome> OnChange { get; set; }
 
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        if (this.outcome != this.Outcome)
+            this.outcome = this.Outcome;
+    }
+
     protected virtual async Task OnOutcomeTypeChangedAsync(ChangeEventArgs e)
     {
-        this.Outcome = new WorkflowOutcome(EnumHelper.Parse<WorkflowOutcomeType>((string)e.Value!));
-        await this.OnChange.InvokeAsync(this.Outcome);
+        this.outcome = new WorkflowOutcome(EnumHelper.Parse<WorkflowOutcomeType>((string)e.Value!));
+        await this.OnChange.InvokeAsync(this.outcome);
         this.StateHasChanged();
     }
 
