@@ -176,7 +176,21 @@
                                         <tr>
                                             <td>Produce event</td>
                                             <td>
-                                                
+                                                <EventSelector 
+                                                    EventKind="EventKind.Produced"
+                                                    Selected="string.IsNullOrWhiteSpace(action.Event?.ProduceEvent) ? null : Workflow.GetEvent(action.Event.ProduceEvent)"
+                                                    Events="Workflow.Events?.Where(e => e.Kind == EventKind.Produced).ToList()"
+                                                    OnChange="async e => await OnPropertyChangedAsync(nameof(action.Event.ProduceEvent), a => { if(a.Event == null) a.Event = new(); a.Event.ProduceEvent = e.Name; })"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Result event</td>
+                                            <td>
+                                                <EventSelector
+                                                    EventKind="EventKind.Consumed"
+                                                    Selected="string.IsNullOrWhiteSpace(action.Event?.ResultEvent) ? null : Workflow.GetEvent(action.Event.ResultEvent)"
+                                                    Events="Workflow.Events?.Where(e => e.Kind == EventKind.Consumed).ToList()"
+                                                    OnChange="async e => await OnPropertyChangedAsync(nameof(action.Event.ResultEvent), a => { if(a.Event == null) a.Event = new(); a.Event.ResultEvent = e.Name; })"/>
                                             </td>
                                         </tr>
                                     </tbody>

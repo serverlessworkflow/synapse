@@ -101,6 +101,10 @@
                                                 {
                                                     <span class="badge bg-primary text-white mx-1" title="Is compensated by another state">compensated</span>
                                                 }
+                                                @if(state.UsedForCompensation)
+                                                {
+                                                    <span class="badge bg-danger text-white mx-1" title="Is compensating another state">compensating</span>
+                                                }
                                                 @if(state.Errors != null
                                                 && state.Errors.Any())
                                                 {
