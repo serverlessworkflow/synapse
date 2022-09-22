@@ -2,7 +2,7 @@
 
     .input-left {
         position: relative;
-        z-index: 1;
+        z-index: 3;
 
         input {
             padding-right: 3rem;
@@ -30,6 +30,7 @@
 
         i {
             color: var(--bs-primary);
+            margin: 0;
         }
     }
 
@@ -39,9 +40,5 @@
         right: 0;
         top: 0;
         padding: 0;
-
-        i {
-            font-size: 12px;
-        }
     }
 }

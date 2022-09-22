@@ -98,6 +98,7 @@ input[type=time]::-webkit-clear-button {
     margin-right: 8px;
     display: inline-flex;
     justify-content: flex-end;
+    align-items: center;
 }
 
 .toast-container {
@@ -279,6 +280,12 @@ table .details {
     a{
         text-decoration: none;
         font-size: 0.9em;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        .bi{
+            margin-right: 4px;
+        }
     }
 }
  
