@@ -1,6 +1,6 @@
 ﻿.search-box .input-left {
   position: relative;
-  z-index: 1;
+  z-index: 3;
 }
 .search-box .input-left input {
   padding-right: 3rem;
@@ -24,6 +24,7 @@
 }
 .search-box .btn i {
   color: var(--bs-primary);
+  margin: 0;
 }
 .search-box .reset {
   width: 2.5rem;
@@ -31,7 +32,4 @@
   right: 0;
   top: 0;
   padding: 0;
-}
-.search-box .reset i {
-  font-size: 12px;
 }
