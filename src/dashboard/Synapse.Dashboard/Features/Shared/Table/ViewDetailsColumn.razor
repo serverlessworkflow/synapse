@@ -20,7 +20,7 @@
 <Column T="T" CssClass="details">
     <HeaderTemplate />
     <CellTemplate Context="context">
-        <button @onclick="async () => await OnViewDetails.InvokeAsync(context.Item)" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="bi bi-info-circle"></small><span class="btn-label">&nbsp; Details</span></button>
+        <button @onclick="async () => await OnViewDetails.InvokeAsync(context.Item)" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="bi bi-info-circle"></small><span class="btn-label">Details</span></button>
     </CellTemplate>
 </Column>
 

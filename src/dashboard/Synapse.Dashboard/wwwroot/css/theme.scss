@@ -6,13 +6,22 @@
  */
 // scss-docs-start import-stack
 // Configuration
+
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,300;0,400;0,700;1,400&display=swap');
 @import "../lib/bootstrap/scss/functions";
 
-$primary: #025259;
-$success: #007172;
-$info: #0398A6;
-$warning: #F29325;
-$danger: #C00B02;
+$primary: #005EB8;
+$success: #8EC900;
+$info: #43C6F4;
+$warning: #F39D39;
+$danger: #CE453E;
+$dark: #00305E;
+$light: #F5FAFF;
+
+$font-family-base: 'Source Sans Pro', sans-serif;
+$font-size-root: 15px;
+
+$body-color: #00305E;
 
 @import "../lib/bootstrap/scss/variables";
 @import "../lib/bootstrap/scss/mixins";
@@ -68,4 +77,9 @@ $danger: #C00B02;
     --bs-gray-700-rgb: #{to-rgb($gray-700)};
     --bs-gray-800-rgb: #{to-rgb($gray-800)};
     --bs-gray-900-rgb: #{to-rgb($gray-900)};
+
+    --scroll-size: 8px;
+    --scroll-radius: 0px;
+    --scroll-track: var(--bs-light);
+    --scroll-thumb-color: var(--bs-primary);
 }

@@ -17,7 +17,6 @@
 
 namespace Synapse.Integration.Models
 {
-
     /// <summary>
     /// Describes the running Synapse instance
     /// </summary>
@@ -46,7 +45,7 @@ namespace Synapse.Integration.Models
         /// <param name="supportedRuntimeExpressionLanguages">A list containing all supported runtime expression languages</param>
         /// <param name="environmentVariables">An <see cref="IDictionary{TKey, TValue}"/> containing the Synapse application's environment variables</param>
         /// <param name="plugins">A collection containing the metadata of all installed plugins</param>
-        public V1ApplicationInfo(string name, string version, string osDescription, string frameworkDescription, string serverlessWorkflowSdkVersion, string environmentName, 
+        public V1ApplicationInfo(string name, string version, string osDescription, string frameworkDescription, string serverlessWorkflowSdkVersion, string environmentName,
             string workflowRuntime, IEnumerable<string> supportedRuntimeExpressionLanguages, IDictionary<string, string> environmentVariables, IEnumerable<V1PluginInfo> plugins)
         {
             this.Name = name;

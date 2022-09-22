@@ -24,15 +24,15 @@
         <button @onclick="@(async () => await OnNavigateToWorkflow())" class="btn btn-outline-dark" title="Back to list"><small class="bi bi-arrow-left"></small><span class="btn-label">&nbsp; Back to list</span></button>
         @if(WorkflowInstance.Status == V1WorkflowInstanceStatus.Running) 
         {
-            <button @onclick="() => Dispatcher.Dispatch(new SuspendV1WorkflowInstance(WorkflowInstance.Id))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="bi bi-pause"></small><span class="btn-label">&nbsp; Suspend</span></button>
+            <button @onclick="() => Dispatcher.Dispatch(new SuspendV1WorkflowInstance(WorkflowInstance.Id))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="bi bi-pause"></small><span class="btn-label"> Suspend</span></button>
         }
         @if(WorkflowInstance.Status == V1WorkflowInstanceStatus.Suspended) 
         {
-            <button @onclick="() => Dispatcher.Dispatch(new ResumeV1WorkflowInstance(WorkflowInstance.Id))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="bi bi-play"></small><span class="btn-label">&nbsp; Resume</span></button>
+            <button @onclick="() => Dispatcher.Dispatch(new ResumeV1WorkflowInstance(WorkflowInstance.Id))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="bi bi-play"></small><span class="btn-label"> Resume</span></button>
         }
         @if (WorkflowInstance.Status <= V1WorkflowInstanceStatus.Resuming) 
         {
-            <button @onclick="() => Dispatcher.Dispatch(new CancelV1WorkflowInstance(WorkflowInstance.Id))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="bi bi-stop"></small><span class="btn-label">&nbsp; Cancel</span></button>
+            <button @onclick="() => Dispatcher.Dispatch(new CancelV1WorkflowInstance(WorkflowInstance.Id))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="bi bi-stop"></small><span class="btn-label"> Cancel</span></button>
         }
     </Toolbar>
 }
