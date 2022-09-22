@@ -91,6 +91,12 @@ namespace Synapse.Dashboard
             }
         }
 
+        /// <summary>
+        /// Converts the <see cref="StateDefinition"/> to a new <see cref="StateDefinition"/> of the specified type
+        /// </summary>
+        /// <param name="state">The <see cref="StateDefinition"/> to convert</param>
+        /// <param name="type">The type to convert the <see cref="StateDefinition"/> to</param>
+        /// <returns>A new <see cref="StateDefinition"/> of the specified type</returns>
         public static StateDefinition OfType(this StateDefinition state, StateType type)
         {
            var result = type switch
@@ -121,6 +127,13 @@ namespace Synapse.Dashboard
             else
                 result.TransitionToStateName = state.TransitionToStateName;
             result.UsedForCompensation = state.UsedForCompensation;
+            if(result is SwitchStateDefinition)
+            {
+                result.Transition = null;
+                result.TransitionToStateName = null;
+                result.IsEnd = false;
+                result.End = null;
+            }
             return result;
         }
 

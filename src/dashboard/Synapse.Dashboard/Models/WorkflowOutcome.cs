@@ -15,6 +15,9 @@
  *
  */
 
+using Neuroglia;
+using ServerlessWorkflow.Sdk.Models;
+
 namespace Synapse.Dashboard
 {
     /// <summary>
@@ -34,8 +37,6 @@ namespace Synapse.Dashboard
             this.Definition = definition;
         }
 
-
-
         /// <summary>
         /// Gets the outcome type
         /// </summary>
@@ -45,6 +46,17 @@ namespace Synapse.Dashboard
         /// Gets the outcome definition object
         /// </summary>
         public object? Definition { get; }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return this.Type switch
+            {
+                WorkflowOutcomeType.Transition => this.Definition == null ? "Transitions" : $"Transitions to {(this.Definition is string stateName ? stateName : ((TransitionDefinition)this.Definition!).NextState)}",
+                WorkflowOutcomeType.End => "Ends workflow",
+                _ => throw new NotSupportedException($"The specified {nameof(WorkflowOutcomeType)} '{EnumHelper.Stringify(this.Type)}' is not supported")
+            };
+        }
 
     }
 

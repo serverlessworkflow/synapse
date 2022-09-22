@@ -43,7 +43,7 @@
                                     <td>
                                         <select class="form-control bg-secondary text-white"
                                         @onchange="async e => await OnStateTypeChangedAsync(EnumHelper.Parse<StateType>((string)e.Value!))">
-                                            @foreach(var type in Enum.GetValues<StateType>())
+                                            @foreach(var type in Enum.GetValues<StateType>().OrderBy(v => v.ToString()))
                                             {
                                                 var typeStr = @EnumHelper.Stringify(type);
                                                 if (state.Type == type)
@@ -151,6 +151,9 @@
                             case SleepStateDefinition sleepState:
                                 <SleepStateEditor State="sleepState" OnChange="OnChange" />
                                 break;
+                            case SwitchStateDefinition switchState:
+                                <SwitchStateEditor State="switchState" OnChange="OnChange" />
+                                break;
                         }
                     </td>
                 </Body>
@@ -186,12 +189,12 @@
         var stateIndex = this.Workflow.States.IndexOf(this.state);
         if (this.Workflow.States.Remove(this.state))
         {
-            if (stateIndex >= this.Workflow.States.Count)
-                stateIndex = this.Workflow.States.Count - 1;
+            if (stateIndex > this.Workflow.States.Count)
+                stateIndex = this.Workflow.States.Count;
         }
         else
         {
-            stateIndex = this.Workflow.States.Count - 1;
+            stateIndex = this.Workflow.States.Count;
         }
         if (stateIndex < 0)
             stateIndex = 0;
