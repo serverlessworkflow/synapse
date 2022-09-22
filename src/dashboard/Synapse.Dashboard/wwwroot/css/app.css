@@ -1,6 +1,4 @@
 ﻿@charset "UTF-8";
-/* Bootstrap */
-/* Override Bootstrap default variable */
 @import url("https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,300;0,400;0,700;1,400&display=swap");
 @font-face {
   font-display: block;
@@ -18775,7 +18773,7 @@ input[type=time]::-webkit-clear-button {
   height: 100px !important;
 }
 
-.oi {
+.bi {
   width: 16px;
   height: 16px;
   margin-right: 8px;
@@ -18783,10 +18781,6 @@ input[type=time]::-webkit-clear-button {
   justify-content: flex-end;
 }
 
-/*
-.bi {
-    width: 16px;
-}*/
 .toast-container {
   z-index: 1 !important;
   position: fixed !important;
@@ -18943,6 +18937,7 @@ table .details {
 .breadcrumb a {
   text-decoration: none;
   font-size: 0.9em;
+}
 
 .vh-90 {
   height: 90vh;

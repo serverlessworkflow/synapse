@@ -34,7 +34,9 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor
         /// <returns>The reduced state</returns>
         public static WorkflowEditorState On(WorkflowEditorState state, InitializeStateSuccessful action)
         {
-            return action.InitialState;
+            if (action.IfNotExists && state.Initialized)
+                return state;
+            return action.InitialState with { Initialized = true };
         }
 
         /// <summary>

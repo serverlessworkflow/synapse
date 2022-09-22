@@ -17,6 +17,7 @@
 
 using Neuroglia.Data.Flux;
 using ServerlessWorkflow.Sdk.Models;
+using Synapse.Dashboard.Pages.Workflows.Editor.Actions;
 
 namespace Synapse.Dashboard.Pages.Workflows.Editor.State
 {
@@ -52,6 +53,12 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor.State
             { "annotations", false },
             { "metadata", false }
         };
+
+        /// <summary>
+        /// Gets/sets a boolean indicating whether or not the state has been initialized
+        /// </summary>
+        /// <remarks>Used in conjunction with the <see cref="InitializeState.IfNotExists"/> property</remarks>
+        public bool Initialized { get; set; }
 
         /// <summary>
         /// Defines if the workflow definition is being updated

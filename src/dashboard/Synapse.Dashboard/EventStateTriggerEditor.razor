@@ -28,7 +28,7 @@
                         @foreach (var mode in Enum.GetValues<ActionExecutionMode>())
                         {
                             var modeStr = EnumHelper.Stringify(mode);
-                            <option value="@modeStr">@modeStr</option>
+                            <option value="@modeStr" selected="@(trigger!.ActionMode == mode)">@modeStr</option>
                         }
                     </select>
                 </td>
