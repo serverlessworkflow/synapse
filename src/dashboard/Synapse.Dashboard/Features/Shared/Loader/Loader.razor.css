@@ -1,5 +1,6 @@
 ﻿.loader-container {
   width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -7,6 +8,8 @@
 }
 .loader-container .logo-viewbox {
   width: 75px;
+  fill: var(--bs-primary);
+  stroke: var(--bs-primary);
 }
 
 @keyframes fadeIn {
@@ -15,5 +18,5 @@
   }
 }
 .animation-in-out {
-  animation: fadeIn 0.5s infinite alternate;
+  animation: fadeIn 0.666s infinite alternate;
 }

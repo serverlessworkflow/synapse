@@ -1,11 +1,13 @@
 ﻿@namespace Synapse.Dashboard
 
 <div class="form-group mb-3">
-    <div class="input-group">
-        <input class="form-control border-end-0 border rounded-2" type="text" placeholder="@PlaceHolder" value="@Term" @onchange="OnTermInputChange">
-        <button type="button" class="btn bg-transparent" style="margin-left: -40px; z-index: 100;" @onclick="OnClearButtonClick">
-            <i class="oi oi-x"></i>
-        </button>   
+    <div class="input-group search-box"> 
+        <div class="input-left">
+            <input class="form-control border-end-0 border rounded-2" type="text" placeholder="@PlaceHolder" value="@Term" @onchange="OnTermInputChange">
+            <button type="button" class="btn bg-transparent reset" @onclick="OnClearButtonClick">
+                <i class="oi oi-x"></i>
+            </button>
+        </div>
         <span class="input-group-append">
             <button class="btn btn-outline-secondary bg-white border-start-0 border rounded-2 ms-n3" type="button" @onclick="OnSearchButtonClick">
                 <i class="oi oi-magnifying-glass"></i>

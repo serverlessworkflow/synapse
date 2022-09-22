@@ -1,29 +1,50 @@
 ﻿@import "../lib/open-iconic/font/css/open-iconic-bootstrap";
 @import "./theme";
 @import "./splash";
+@import "./scroll.scss";
+
 
 * {
     padding: 0;
     margin: 0;
 }
 
+body {
+    @include scroll-style( 
+        $size: var(--scroll-size, 10px), 
+        $thumb: var(--scroll-thumb, none), 
+        $thumb-color: var(--scroll-thumb-color, grey), 
+        $thumb-radius: var(--scroll-thumb-radius, var(--scroll-radius)), 
+        $track-color: var(--scroll-track, transparent), 
+        $track-radius: var(--scroll-track-radius, var(--scroll-radius)) 
+    );
+}
+
 #blazor-error-ui {
-    background: $warning;
+    background: var(--bs-danger);
+    color: var(--bs-light);
     bottom: 0;
-    box-shadow: 0 -1px 2px rgba(var(--bs-black-rgb), 0.2);
     display: none;
     left: 0;
     padding: 0.6rem 1.25rem 0.7rem 1.25rem;
     position: fixed;
     width: 100%;
     z-index: 1000;
-}
 
-#blazor-error-ui .dismiss {
-    cursor: pointer;
-    position: absolute;
-    right: 0.75rem;
-    top: 0.5rem;
+    a {
+        color: var(--bs-light);
+        text-decoration: none;
+    }
+
+    .reload{
+        font-weight: 600;
+    }
+    .dismiss {
+        cursor: pointer;
+        position: absolute;
+        right: 0.75rem;
+        top: 0.5rem;
+    }
 }
 
 .form-control.invalid {
@@ -71,6 +92,10 @@ input[type=time]::-webkit-clear-button {
 
 .oi {
     width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    display: inline-flex;
+    justify-content: flex-end;
 }
 
 .toast-container {
@@ -154,7 +179,7 @@ input[type=time]::-webkit-clear-button {
     .btn {
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        justify-content: flex-start;
     }
 }
 
@@ -245,4 +270,14 @@ table .details {
 
 .upload-page {
     gap: var(--bs-gutter-x);
+}
+
+
+/*Breadcrumb*/
+
+.breadcrumb{
+    a{
+        text-decoration: none;
+        font-size: 0.9em;
+    }
 }
