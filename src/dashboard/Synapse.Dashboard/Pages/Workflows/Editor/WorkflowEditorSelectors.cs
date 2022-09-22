@@ -18,6 +18,7 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor
                 .Select(featureState => featureState.WorkflowDefinition)
                 .DistinctUntilChanged();
         }
+
         /// <summary>
         /// Selects the workflow definition text
         /// </summary>
@@ -27,6 +28,18 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor
         {
             return store.GetFeature<WorkflowEditorState>()
                 .Select(featureState => featureState.WorkflowDefinitionText)
+                .DistinctUntilChanged();
+        }
+
+        /// <summary>
+        /// Selects the workflow definition validation messages
+        /// </summary>
+        /// <param name="store"></param>
+        /// <returns></returns>
+        public static IObservable<ICollection<string>?> SelectValidationMessages(IStore store)
+        {
+            return store.GetFeature<WorkflowEditorState>()
+                .Select(featureState => featureState.ValidationMessages)
                 .DistinctUntilChanged();
         }
     }

@@ -29,7 +29,7 @@
 
         <!-- General -->
         <div class="border border-secondary rounded-2 p-3 mb-3">
-            <Expander IsExpanded="@(State.ExpanderStates["general"])" OnToggleExpand="@(isExpanded => OnToggleExpand("general", isExpanded))">
+            <Expander IsExpanded="@(State.ExpanderStates!["general"])" OnToggleExpand="@(isExpanded => OnToggleExpand("general", isExpanded))">
                 <Header>
                     <h5><span class="bi bi-info-circle me-2"></span>General</h5>
                 </Header>
@@ -64,7 +64,7 @@
     
         <!-- States -->
         <div class="border border-secondary rounded-2 p-3 mb-3">
-            <Expander IsExpanded="@(State.ExpanderStates["states"])" OnToggleExpand="@(isExpanded => OnToggleExpand("states", isExpanded))">
+            <Expander IsExpanded="@(State.ExpanderStates!["states"])" OnToggleExpand="@(isExpanded => OnToggleExpand("states", isExpanded))">
                 <Header>
                     <h5><span class="bi bi-box-seam me-2"></span>States</h5>
                 </Header>
@@ -133,7 +133,7 @@
 
         <!-- Events -->
         <div class="border border-secondary rounded-2 p-3 mb-3">
-            <Expander IsExpanded="@(State.ExpanderStates["events"])" OnToggleExpand="@(isExpanded => OnToggleExpand("events", isExpanded))">
+            <Expander IsExpanded="@(State.ExpanderStates!["events"])" OnToggleExpand="@(isExpanded => OnToggleExpand("events", isExpanded))">
                 <Header>
                     <h5><span class="bi bi-cloud me-2"></span>Events</h5>
                 </Header>
@@ -184,7 +184,7 @@
 
         <!-- Functions -->
         <div class="border border-secondary rounded-2 p-3 mb-3">
-            <Expander IsExpanded="@(State.ExpanderStates["functions"])" OnToggleExpand="@(isExpanded => OnToggleExpand("functions", isExpanded))">
+            <Expander IsExpanded="@(State.ExpanderStates!["functions"])" OnToggleExpand="@(isExpanded => OnToggleExpand("functions", isExpanded))">
                 <Header>
                     <h5><span class="bi bi-code-square me-2"></span>Functions</h5>
                 </Header>
@@ -233,7 +233,7 @@
 
         <!-- Secrets -->
         <div class="border border-secondary rounded-2 p-3 mb-3">
-            <Expander IsExpanded="@(State.ExpanderStates["secrets"])" OnToggleExpand="@(isExpanded => OnToggleExpand("secrets", isExpanded))">
+            <Expander IsExpanded="@(State.ExpanderStates!["secrets"])" OnToggleExpand="@(isExpanded => OnToggleExpand("secrets", isExpanded))">
                 <Header>
                     <h5><span class="bi bi-incognito me-2"></span>Secrets</h5>
                 </Header>
@@ -276,7 +276,7 @@
 
         <!-- Authentication -->
         <div class="border border-secondary rounded-2 p-3 mb-3">
-            <Expander IsExpanded="@State.ExpanderStates["authentication"]" OnToggleExpand="@(isExpanded => OnToggleExpand("authentication", isExpanded))">
+            <Expander IsExpanded="@State.ExpanderStates!["authentication"]" OnToggleExpand="@(isExpanded => OnToggleExpand("authentication", isExpanded))">
                 <Header>
                     <h5><span class="bi bi-shield-lock me-2"></span>Authentication</h5>
                 </Header>
@@ -317,7 +317,7 @@
 
         <!-- Annotations -->
         <div class="border border-secondary rounded-2 p-3 mb-3">
-            <Expander IsExpanded="@State.ExpanderStates["annotations"]" OnToggleExpand="@(isExpanded => OnToggleExpand("annotations", isExpanded))">
+            <Expander IsExpanded="@State.ExpanderStates!["annotations"]" OnToggleExpand="@(isExpanded => OnToggleExpand("annotations", isExpanded))">
                 <Header>
                     <h5><span class="bi bi-pencil me-2"></span>Annotations</h5>
                 </Header>
@@ -358,7 +358,7 @@
 
         <!-- Metadata -->
         <div class="border border-secondary rounded-2 p-3 mb-3">
-            <Expander IsExpanded="@State.ExpanderStates["metadata"]" OnToggleExpand="@(isExpanded => OnToggleExpand("metadata", isExpanded))">
+            <Expander IsExpanded="@State.ExpanderStates!["metadata"]" OnToggleExpand="@(isExpanded => OnToggleExpand("metadata", isExpanded))">
                 <Header>
                     <h5><span class="bi bi-puzzle me-2"></span>Metadata</h5>
                 </Header>

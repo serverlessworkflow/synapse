@@ -28,11 +28,15 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor.Actions
     /// </summary>
     public class InitializeState 
     {
+        public InitializeState(bool ifNotExists = true)
+        {
+            IfNotExists = ifNotExists;
+        }
 
         /// <summary>
         /// Gets/sets a boolean indicating whether or not to initialize the state only if it does not yet exist
         /// </summary>
-        public bool IfNotExists { get; set; } = true;
+        public bool IfNotExists { get; }
 
     }
 
@@ -50,12 +54,12 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor.Actions
         /// <summary>
         /// The initial state
         /// </summary>
-        public WorkflowEditorState InitialState { get; set; }
+        public WorkflowEditorState InitialState { get; }
 
         /// <summary>
         /// Gets/sets a boolean indicating whether or not to initialize the state only if it does not yet exist
         /// </summary>
-        public bool IfNotExists { get; set; }
+        public bool IfNotExists { get; }
     }
 
     /// <summary>
@@ -236,5 +240,54 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor.Actions
         public bool IsExpanded { get; }
 
     }
+
+    /// <summary>
+    /// The action dispatched to valide the workflow definition
+    /// </summary>
+    public class ValidateWorkflowDefinition 
+    {
+        public ValidateWorkflowDefinition(WorkflowDefinition workflowDefinition, bool saveAfterValidation)
+        {
+            this.WorkflowDefinition = workflowDefinition;
+            this.SaveAfterValidation = saveAfterValidation;
+        }
+
+        public WorkflowDefinition WorkflowDefinition { get; }
+        public bool SaveAfterValidation { get; }
+    }
+
+    /// <summary>
+    /// The action dispatched to set the validation messages
+    /// </summary>
+    public class SetValidationMessages 
+    {
+        public SetValidationMessages(List<string> validationMessages)
+        {
+            ValidationMessages = validationMessages;
+        }
+
+        public List<string> ValidationMessages { get; }
+
+    }
+
+    /// <summary>
+    /// The action dispatched a workflow definition has been validated without messages/errors
+    /// </summary>
+    public class WorkflowDefinitionValidated
+    {
+        public WorkflowDefinitionValidated(WorkflowDefinition workflowDefinition, bool saveAfterValidation)
+        {
+            this.WorkflowDefinition = workflowDefinition;
+            this.SaveAfterValidation = saveAfterValidation;
+        }
+
+        public WorkflowDefinition WorkflowDefinition { get; }
+        public bool SaveAfterValidation { get; }
+    }
+
+    /// <summary>
+    /// The action dispatched to clear the validation messages
+    /// </summary>
+    public class ClearValidationMessages { }
 
 }

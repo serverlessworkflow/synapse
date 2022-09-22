@@ -146,10 +146,39 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor
         /// <returns>The reduced state</returns>
         public static WorkflowEditorState On(WorkflowEditorState state, ToggleExpand action)
         {
-            state.ExpanderStates[action.Name] = action.IsExpanded;
+            state.ExpanderStates![action.Name] = action.IsExpanded;
             return state;
         }
 
+        /// <summary>
+        /// Clears the validation messages
+        /// </summary>
+        /// <param name="state">The state to reduce</param>
+        /// <param name="action">The action to reduce</param>
+        /// <returns></returns>
+        public static WorkflowEditorState On(WorkflowEditorState state, ClearValidationMessages action)
+        {
+            return state with
+            {
+                ValidationMessages = new List<string>()
+            };
+        }
+
+        /// <summary>
+        /// Sets the validation messages
+        /// </summary>
+        /// <param name="state">The state to reduce</param>
+        /// <param name="action">The action to reduce</param>
+        /// <returns></returns>
+        public static WorkflowEditorState On(WorkflowEditorState state, SetValidationMessages action)
+        {
+
+            return state with
+            {
+                ValidationMessages = new List<string>(action.ValidationMessages)
+            };
+
+        }
     }
 
 }

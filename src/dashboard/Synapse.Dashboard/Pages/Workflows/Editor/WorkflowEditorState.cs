@@ -42,17 +42,7 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor.State
         /// <summary>
         /// Gets a dictionary containing the name mappings of the editor's expanders states
         /// </summary>
-        public Dictionary<string, bool> ExpanderStates { get; set; } = new()
-        {
-            { "general", true },
-            { "states", true },
-            { "events", false },
-            { "functions", false },
-            { "secrets", false },
-            { "authentication", false },
-            { "annotations", false },
-            { "metadata", false }
-        };
+        public Dictionary<string, bool>? ExpanderStates { get; set; }
 
         /// <summary>
         /// Gets/sets a boolean indicating whether or not the state has been initialized
@@ -69,6 +59,11 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor.State
         /// Defines if the workflow definition is being saved
         /// </summary>
         public bool Saving { get; set; }
+
+        /// <summary>
+        /// Stores the workflow definition validation messages
+        /// </summary>
+        public ICollection<string>? ValidationMessages { get; set; }
 
     }
 

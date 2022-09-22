@@ -24,6 +24,10 @@ using Synapse.Dashboard.Pages.Workflows.Editor.Actions;
 using Synapse.Dashboard.Services;
 using Synapse.Dashboard.Pages.Workflows.Editor.State;
 using Synapse.Apis.Management;
+using Newtonsoft.Json.Schema;
+using System.Text;
+using ServerlessWorkflow.Sdk.Services.Validation;
+using Microsoft.AspNetCore.Components;
 
 namespace Synapse.Dashboard.Pages.Workflows.Editor.Effects
 {
@@ -53,7 +57,20 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor.Effects
             WorkflowEditorState initialState = new() { 
                 WorkflowDefinition = definition,
                 WorkflowDefinitionText = text,
-                Updating = false
+                Updating = false,
+                Saving = false,
+                ExpanderStates = new()
+                {
+                    { "general", true },
+                    { "states", true },
+                    { "events", false },
+                    { "functions", false },
+                    { "secrets", false },
+                    { "authentication", false },
+                    { "annotations", false },
+                    { "metadata", false }
+                },
+                ValidationMessages = new List<string>()
             };
             context.Dispatcher.Dispatch(new InitializeStateSuccessful(initialState, action.IfNotExists));
         }
@@ -167,13 +184,68 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor.Effects
             try
             {
                 var api = context.Services.GetRequiredService<ISynapseManagementApi>();
+                if (api == null)
+                    throw new NullReferenceException("Unable to resolved service 'ISynapseManagementApi'.");
                 var workflow = await api.CreateWorkflowAsync(new() { Definition = action.WorkflowDefinition });
                 context.Dispatcher.Dispatch(new WorkflowDefinitionSaved(workflow.Definition));
+                context.Dispatcher.Dispatch(new InitializeState(false));
+                var navigationManager = context.Services.GetRequiredService<NavigationManager>();
+                if (navigationManager == null)
+                    throw new NullReferenceException("Unable to resolved service 'NavigationManager'.");
+                navigationManager.NavigateTo($"/workflows");
             }
             catch (Exception ex)
             {
                 context.Dispatcher.Dispatch(new WorkflowDefinitionSaveFailed(ex.Message));
             }
+        }
+
+        /// <summary>
+        /// Validates the workflow definition
+        /// </summary>
+        /// <param name="action"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        /// <exception cref="NullReferenceException"></exception>
+        public static async Task OnValidateWorkflowDefinition(ValidateWorkflowDefinition action, IEffectContext context)
+        {
+            var workflowValidator = context.Services.GetRequiredService<IWorkflowValidator>();
+            if (workflowValidator == null)
+                throw new NullReferenceException("Unable to resolved service 'IWorkflowValidator'.");
+            var validationResult = await workflowValidator.ValidateAsync(action.WorkflowDefinition, false, true);
+            var validationMessages = new List<string>();
+            if (!validationResult.IsValid)
+            {
+                validationResult.SchemaValidationErrors.ToList().ForEach(error =>
+                {
+                    validationMessages.Add($"(Schema) ${error.Message}");
+                });
+                validationResult.DslValidationErrors.ToList().ForEach(error =>
+                {
+                    validationMessages.Add($"(DSL) ${error.ErrorMessage}");
+                });
+            }
+            if (validationMessages.Any())
+            {
+                context.Dispatcher.Dispatch(new SetValidationMessages(validationMessages));
+            }
+            else
+            {
+                context.Dispatcher.Dispatch(new WorkflowDefinitionValidated(action.WorkflowDefinition, action.SaveAfterValidation));
+            }
+        }
+        /// <summary>
+        /// Triggers save workflow if validation is successful
+        /// </summary>
+        /// <param name="action"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        /// <exception cref="NullReferenceException"></exception>
+        public static async Task OnWorkflowDefinitionValidated(WorkflowDefinitionValidated action, IEffectContext context)
+        {
+            if (action.SaveAfterValidation)
+                context.Dispatcher.Dispatch(new SaveWorkflowDefinition(action.WorkflowDefinition));
+            await Task.CompletedTask;
         }
 
     }

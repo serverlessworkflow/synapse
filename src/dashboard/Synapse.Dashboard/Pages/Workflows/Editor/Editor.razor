@@ -14,7 +14,7 @@
     limitations under the License.
 *@
 
-@page "/editor"
+@page "/workflows/editor"
 @using System.Reactive.Subjects
 @using System.Reactive.Linq
 @using Synapse.Dashboard.Pages.Workflows.Editor.Actions
@@ -43,22 +43,47 @@
 }
 else if (workflowDefinition != null)
 {
-    <div class="row">
+    <div class="row align-items-start">
         <div class="col-4">
             <WorkflowEditor
-            Workflow="workflowDefinition" 
-            OnPropertyChanged="OnWorkflowDefinitionChanged" />
+                Workflow="workflowDefinition" 
+                OnPropertyChanged="OnWorkflowDefinitionChanged" 
+            />
         </div>
-        <div class="col-8">
+        <div class="col-4">
             <PreferedLanguageSelector PreferedLanguageChange="ToggletextBasedEditorLanguage" />
             <MonacoEditor @ref="textBasedEditor"
-            CssClass="vh-85"
-            ConstructionOptions="MonacoEditorHelper.GetStandaloneEditorConstructionOptions()"
-            OnDidInit="OnTextBasedEditorInit"
-            OnDidChangeModelContent="OnTextBasedDefinitionChanged"/>
+                CssClass="vh-85"
+                ConstructionOptions="MonacoEditorHelper.GetStandaloneEditorConstructionOptions()"
+                OnDidInit="OnTextBasedEditorInit"
+                OnDidChangeModelContent="OnTextBasedDefinitionChanged"
+            />
+        </div>
+        <div class="col-4 vh-85">
+            <WorkflowDiagram @ref="workflowDiagram" WorkflowDefinition="workflowDefinition" Orientation="WorkflowDiagramOrientation.TopToBottom" />
         </div>
     </div>
 }
+<Modal @ref="validationMessagesDialog">
+    <Title>
+        Validation messages
+    </Title>
+    <Body>
+        <div>
+            @if (State.ValidationMessages != null && State.ValidationMessages.Any())
+            {
+                <div class="validation-errors alert alert-danger">
+                    <ul>
+                        @foreach (var error in State.ValidationMessages)
+                        {
+                            <li>@error.ToString()</li>
+                        }
+                    </ul>
+                </div>
+            }
+        </div>
+    </Body>
+</Modal>
 
 @code{
 
@@ -66,6 +91,8 @@ else if (workflowDefinition != null)
     private Subject<string>? editorValue;
     private Subject<bool>? disposeNotifier;
     private WorkflowDefinition? workflowDefinition = null;
+    private WorkflowDiagram? workflowDiagram;
+    private Modal? validationMessagesDialog;
 
     protected override async Task OnInitializedAsync()
     {
@@ -92,10 +119,22 @@ else if (workflowDefinition != null)
             });
         WorkflowEditorSelectors.SelectWorkflowDefinition(this.Store)
             .TakeUntil(this.disposeNotifier)
-            .Subscribe(definition =>
+            .Subscribe(async (definition) =>
             {
-                if (this.workflowDefinition != definition) {
+                if (this.workflowDefinition != definition) 
+                {
                     this.workflowDefinition = definition;
+                    this.StateHasChanged();
+                    await this.workflowDiagram!.RefreshAsync();
+                }
+            });
+        WorkflowEditorSelectors.SelectValidationMessages(this.Store)
+            .TakeUntil(this.disposeNotifier)
+            .Subscribe(async (messages) =>
+            {
+                if (messages != null && messages.Any())
+                {
+                    await this.validationMessagesDialog!.ShowAsync();
                     this.StateHasChanged();
                 }
             });
@@ -140,14 +179,14 @@ else if (workflowDefinition != null)
 
     protected virtual void OnResetWorkflow()
     {
-        this.Dispatcher.Dispatch(new InitializeState() { IfNotExists = false });
+        this.Dispatcher.Dispatch(new InitializeState(false));
     }
 
     protected virtual void OnSaveWorkflow()
     {
         if (this.workflowDefinition == null)
             return;
-        this.Dispatcher.Dispatch(new SaveWorkflowDefinition(this.workflowDefinition));
+        this.Dispatcher.Dispatch(new ValidateWorkflowDefinition(this.workflowDefinition, true));
         this.StateHasChanged();
     }
 

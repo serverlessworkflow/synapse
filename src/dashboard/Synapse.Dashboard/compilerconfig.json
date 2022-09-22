@@ -40,14 +40,6 @@
     "inputFile": "Features/Shared/SearchBox/SearchBox.razor.scss"
   },
   {
-    "outputFile": "Features/Workflows/WorkflowVisualEditor/AddStateContextualMenu.razor.css",
-    "inputFile": "Features/Workflows/WorkflowVisualEditor/AddStateContextualMenu.razor.scss"
-  },
-  {
-    "outputFile": "Features/Workflows/WorkflowVisualEditor/WorkflowVisualEditor.razor.css",
-    "inputFile": "Features/Workflows/WorkflowVisualEditor/WorkflowVisualEditor.razor.scss"
-  },
-  {
     "outputFile": "Pages/Correlations/List.css",
     "inputFile": "Pages/Correlations/List.scss"
   }
