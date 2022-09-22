@@ -139,6 +139,9 @@
                             case EventStateDefinition eventState:
                                 <EventStateEditor State="eventState" OnChange="OnChange" />
                                 break;
+                            case ForEachStateDefinition forEachState:
+                                <ForEachStateEditor State="forEachState" OnChange="OnChange" />
+                                break;
                             case InjectStateDefinition injectState:
                                 <InjectStateEditor State="injectState" OnChange="OnChange" />
                                 break;

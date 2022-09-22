@@ -55,7 +55,7 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor.Effects
                 WorkflowDefinitionText = text,
                 Updating = false
             };
-            context.Dispatcher.Dispatch(new InitializeStateSuccessful(initialState));
+            context.Dispatcher.Dispatch(new InitializeStateSuccessful(initialState, action.IfNotExists));
         }
 
         /// <summary>

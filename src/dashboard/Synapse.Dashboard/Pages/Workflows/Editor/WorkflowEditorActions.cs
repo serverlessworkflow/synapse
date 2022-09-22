@@ -26,22 +26,36 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor.Actions
     /// <summary>
     /// Triggers state initialization
     /// </summary>
-    public class InitializeState { }
+    public class InitializeState 
+    {
+
+        /// <summary>
+        /// Gets/sets a boolean indicating whether or not to initialize the state only if it does not yet exist
+        /// </summary>
+        public bool IfNotExists { get; set; } = true;
+
+    }
 
     /// <summary>
     /// Returns the initial state
     /// </summary>
     public class InitializeStateSuccessful 
     {
-        public InitializeStateSuccessful(WorkflowEditorState initialState)
+        public InitializeStateSuccessful(WorkflowEditorState initialState, bool ifNotExists = true)
         {
             this.InitialState = initialState ?? throw new ArgumentNullException(nameof(initialState));
+            this.IfNotExists = ifNotExists;
         }
 
         /// <summary>
         /// The initial state
         /// </summary>
         public WorkflowEditorState InitialState { get; set; }
+
+        /// <summary>
+        /// Gets/sets a boolean indicating whether or not to initialize the state only if it does not yet exist
+        /// </summary>
+        public bool IfNotExists { get; set; }
     }
 
     /// <summary>
