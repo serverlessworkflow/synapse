@@ -136,6 +136,9 @@
                     <td colspan="2">
                         @switch (state)
                         {
+                            case EventStateDefinition eventState:
+                                <EventStateEditor State="eventState" OnChange="OnChange" />
+                                break;
                             case InjectStateDefinition injectState:
                                 <InjectStateEditor State="injectState" OnChange="OnChange" />
                                 break;
