@@ -242,6 +242,11 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor.Actions
     }
 
     /// <summary>
+    /// Toggles the workflow diagram visibility
+    /// </summary>
+    public class ToggleDiagramVisibility { }
+
+    /// <summary>
     /// The action dispatched to valide the workflow definition
     /// </summary>
     public class ValidateWorkflowDefinition 

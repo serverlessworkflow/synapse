@@ -59,6 +59,7 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor.Effects
                 WorkflowDefinitionText = text,
                 Updating = false,
                 Saving = false,
+                IsDiagramVisible = false,
                 ExpanderStates = new()
                 {
                     { "general", true },

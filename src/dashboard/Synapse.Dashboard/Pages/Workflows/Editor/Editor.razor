@@ -44,14 +44,24 @@
 else if (workflowDefinition != null)
 {
     <div class="row align-items-start">
-        <div class="col-4">
+        <div class="@colClass">
             <WorkflowEditor
                 Workflow="workflowDefinition" 
                 OnPropertyChanged="OnWorkflowDefinitionChanged" 
             />
         </div>
-        <div class="col-4">
-            <PreferedLanguageSelector PreferedLanguageChange="ToggletextBasedEditorLanguage" />
+        <div class="@colClass">
+            <div class="row">
+                <div class="col">
+                    <PreferedLanguageSelector PreferedLanguageChange="ToggletextBasedEditorLanguage" />
+                </div>
+                <div class="col">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="toggle-language" checked="@State.IsDiagramVisible" @onchange="(() => Dispatcher.Dispatch(new ToggleDiagramVisibility()))">
+                        <label class="form-check-label" for="toggle-language">Show diagram</label>
+                    </div>
+                </div>
+            </div>
             <MonacoEditor @ref="textBasedEditor"
                 CssClass="vh-85"
                 ConstructionOptions="MonacoEditorHelper.GetStandaloneEditorConstructionOptions()"
@@ -59,9 +69,11 @@ else if (workflowDefinition != null)
                 OnDidChangeModelContent="OnTextBasedDefinitionChanged"
             />
         </div>
-        <div class="col-4 vh-85">
-            <WorkflowDiagram @ref="workflowDiagram" WorkflowDefinition="workflowDefinition" Orientation="WorkflowDiagramOrientation.TopToBottom" />
-        </div>
+        @if (State.IsDiagramVisible) {
+            <div class="@colClass vh-85">
+                <WorkflowDiagram @ref="workflowDiagram" WorkflowDefinition="workflowDefinition" Orientation="WorkflowDiagramOrientation.TopToBottom" />
+            </div>
+        }
     </div>
 }
 <Modal @ref="validationMessagesDialog">
@@ -93,6 +105,7 @@ else if (workflowDefinition != null)
     private WorkflowDefinition? workflowDefinition = null;
     private WorkflowDiagram? workflowDiagram;
     private Modal? validationMessagesDialog;
+    private string colClass = "col-6";
 
     protected override async Task OnInitializedAsync()
     {
@@ -125,7 +138,9 @@ else if (workflowDefinition != null)
                 {
                     this.workflowDefinition = definition;
                     this.StateHasChanged();
-                    await this.workflowDiagram!.RefreshAsync();
+                    if (this.workflowDiagram != null) {
+                        await this.workflowDiagram!.RefreshAsync();
+                    }
                 }
             });
         WorkflowEditorSelectors.SelectValidationMessages(this.Store)
@@ -137,6 +152,13 @@ else if (workflowDefinition != null)
                     await this.validationMessagesDialog!.ShowAsync();
                     this.StateHasChanged();
                 }
+            });
+        WorkflowEditorSelectors.SelectIsDiagramVisible(this.Store)
+            .TakeUntil(this.disposeNotifier)
+            .Subscribe((isVisible) =>
+            {
+                this.colClass = isVisible ? "col-4" : "col-6";
+                this.StateHasChanged();
             });
         this.Dispatcher.Dispatch(new InitializeState());
     }

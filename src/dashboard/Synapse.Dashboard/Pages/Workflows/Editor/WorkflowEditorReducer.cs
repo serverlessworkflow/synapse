@@ -179,6 +179,20 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor
             };
 
         }
+
+        /// <summary>
+        /// Toggles the diagram visibiliy
+        /// </summary>
+        /// <param name="state">The state to reduce</param>
+        /// <param name="action">The action to reduce</param>
+        /// <returns></returns>
+        public static WorkflowEditorState On(WorkflowEditorState state, ToggleDiagramVisibility action)
+        {
+            return state with
+            {
+                IsDiagramVisible = !state.IsDiagramVisible
+            };
+        }
     }
 
 }

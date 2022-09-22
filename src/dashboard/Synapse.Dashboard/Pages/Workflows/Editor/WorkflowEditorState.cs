@@ -61,6 +61,11 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor.State
         public bool Saving { get; set; }
 
         /// <summary>
+        /// Defines if the diagram should be displayed
+        /// </summary>
+        public bool IsDiagramVisible { get; set; }
+
+        /// <summary>
         /// Stores the workflow definition validation messages
         /// </summary>
         public ICollection<string>? ValidationMessages { get; set; }
