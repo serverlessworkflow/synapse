@@ -136,6 +136,9 @@
                     <td colspan="2">
                         @switch (state)
                         {
+                            case CallbackStateDefinition callbackState:
+                                <CallbackStateEditor State="callbackState" OnChange="OnChange" />
+                                break;
                             case EventStateDefinition eventState:
                                 <EventStateEditor State="eventState" OnChange="OnChange" />
                                 break;

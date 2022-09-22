@@ -211,7 +211,7 @@
     private ActionDefinition? action;
     [Parameter] public ActionDefinition? Action { get; set; }
 
-    [Parameter] public EventCallback OnChange { get; set; }
+    [Parameter] public EventCallback<ActionDefinition?> OnChange { get; set; }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -267,7 +267,7 @@
         if (this.action == null)
             return;
         patchAction(this.action);
-        await this.OnChange.InvokeAsync(property);
+        await this.OnChange.InvokeAsync(this.action);
     }
 
 }
