@@ -24,4 +24,5 @@ namespace Synapse.Dashboard
         public const string SpecVersion = "0.8";
         public const string DefinitionVersion = "1.0";
     }
+
 }

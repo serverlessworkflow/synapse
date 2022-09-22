@@ -35,8 +35,8 @@
   </ItemGroup>
 	
   <ItemGroup>
-    <PackageReference Include="protobuf-net.Grpc" Version="1.0.171" />
-    <PackageReference Include="protobuf-net.Grpc.ClientFactory" Version="1.0.152" />
+    <PackageReference Include="protobuf-net.Grpc" Version="1.0.177" />
+    <PackageReference Include="protobuf-net.Grpc.ClientFactory" Version="1.0.177" />
   </ItemGroup>
 	
   <ItemGroup>

@@ -18,9 +18,19 @@ using System.Linq.Expressions;
 
 namespace Synapse.Dashboard
 {
+
+    /// <summary>
+    /// Defines extensions for <see cref="Expression"/>s
+    /// </summary>
     public static class ExpressionExtensions
     {
 
+        /// <summary>
+        /// Combines the <see cref="Expression"/> with the specified one
+        /// </summary>
+        /// <param name="left">The <see cref="Expression"/></param>
+        /// <param name="right">The <see cref="Expression"/> to combine</param>
+        /// <returns>A new <see cref="Expression"/></returns>
         public static Expression CombineWith(this Expression left, Expression right)
         {
             return Expression.And(left, right);

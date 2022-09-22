@@ -33,13 +33,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="6.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="6.0.9" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.0" />
-    <PackageReference Include="Neuroglia.Caching.InMemory" Version="2.0.1.82" />
-    <PackageReference Include="Neuroglia.Data.Expressions.JQ" Version="2.0.1.82" />
-    <PackageReference Include="Neuroglia.Eventing.CloudEvents.AspNetCore" Version="2.0.1.82" />
-    <PackageReference Include="Neuroglia.Serialization.Json" Version="2.0.1.82" />
-    <PackageReference Include="protobuf-net.Grpc.AspNetCore" Version="1.0.152" />
+    <PackageReference Include="Neuroglia.Caching.InMemory" Version="2.0.1.86" />
+    <PackageReference Include="Neuroglia.Data.Expressions.JQ" Version="2.0.1.86" />
+    <PackageReference Include="Neuroglia.Eventing.CloudEvents.AspNetCore" Version="2.0.1.86" />
+    <PackageReference Include="Neuroglia.Serialization.Json" Version="2.0.1.86" />
+    <PackageReference Include="protobuf-net.Grpc.AspNetCore" Version="1.0.177" />
     <PackageReference Include="System.IO.FileSystem" Version="4.3.0" />
   </ItemGroup>
 

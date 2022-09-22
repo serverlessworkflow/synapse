@@ -23,7 +23,7 @@
 @inject IWorkflowReader WorkflowReader
 @inject IWorkflowValidator WorkflowValidator
 @inject IDispatcher Dispatcher
-@inject IYamlService YamlService
+@inject IYamlConverter YamlConverter
 
 
 <label class="form-form-label">Definition</label>
@@ -70,11 +70,11 @@
         try
         {
             if (language == PreferedLanguage.YAML) {
-                this.editorValueBuffer = await this.YamlService.JsonToYaml(text);
+                this.editorValueBuffer = await this.YamlConverter.JsonToYaml(text);
             }
             else
             {
-                this.editorValueBuffer = await this.YamlService.YamlToJson(text);
+                this.editorValueBuffer = await this.YamlConverter.YamlToJson(text);
             }
         }
         catch(Exception ex)
@@ -97,7 +97,7 @@
             return;
         }                    
         if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML) {
-            rawDefinition = await this.YamlService.YamlToJson(rawDefinition);
+            rawDefinition = await this.YamlConverter.YamlToJson(rawDefinition);
         }
         try
         {

@@ -1,4 +1,6 @@
-﻿@import "../lib/open-iconic/font/css/open-iconic-bootstrap";
+﻿$bootstrap-icons-font-dir: '/lib/bootstrap-icons/font/fonts/';
+
+@import "../lib/bootstrap-icons/font/bootstrap-icons";
 @import "./theme";
 @import "./splash";
 @import "./scroll.scss";
@@ -90,7 +92,7 @@ input[type=time]::-webkit-clear-button {
     height: 100px !important;
 }
 
-.oi {
+.bi {
     width: 16px;
     height: 16px;
     margin-right: 8px;
@@ -272,12 +274,22 @@ table .details {
     gap: var(--bs-gutter-x);
 }
 
-
 /*Breadcrumb*/
-
 .breadcrumb{
     a{
         text-decoration: none;
         font-size: 0.9em;
     }
+}
+ 
+.vh-90 {
+    height: 90vh;
+}
+
+.vh-85 {
+    height: 85vh;
+}
+
+.pxh-150{
+    height: 150px;
 }
