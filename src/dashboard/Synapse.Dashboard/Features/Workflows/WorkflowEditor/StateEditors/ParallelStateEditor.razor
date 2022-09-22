@@ -21,25 +21,37 @@
     <table class="table table-striped">
         <tbody>
             <tr>
-                <td>Execution mode</td>
+                <td>Completion type</td>
                 <td>
-                    <select required title="The mode in which the state's operations are to be executed" class="form-control bg-secondary text-white"
-                    @onchange="async e => await OnChangedAsync(s => s.ActionMode = EnumHelper.Parse<ActionExecutionMode>((string)e.Value!))">
-                        @foreach(var mode in Enum.GetValues<ActionExecutionMode>())
+                    <select required title="Configure the way the state completes" class="form-control bg-secondary text-white"
+                    @onchange="async e => await OnChangedAsync(s => s.CompletionType = EnumHelper.Parse<ParallelCompletionType>((string)e.Value!))">
+                        @foreach(var completionType in Enum.GetValues<ParallelCompletionType>())
                         {
-                            var modeStr = @EnumHelper.Stringify(mode);
-                            <option value="@modeStr" selected="@(state.ActionMode == mode)">@modeStr</option> 
+                            var completionTypeStr = @EnumHelper.Stringify(completionType);
+                            <option value="@completionTypeStr" selected="@(state.CompletionType == completionType)">@completionTypeStr</option> 
                         }
                     </select>
                 </td>
             </tr>
+            @if(state.CompletionType == ParallelCompletionType.AtLeastN)
+            {
+                <tr>
+                    <td>Completed branches</td>
+                    <td>
+                        <input type="number" title="The amount of branches to complete before competing the state" class="form-control"
+                        @onchange="async e => await OnChangedAsync(s => s.N = uint.Parse((string)e.Value!))"/>
+                    </td>
+                </tr>
+            }
             <ExpandableDataRow>
                 <Header>
-                    <td colspan="2"><h6>Actions</h6></td>
+                    <td colspan="2"><h6>Branches</h6></td>
                 </Header>
                 <Body>
                     <td colspan="2">
-                    <ActionCollectionEditor Actions="state.Actions" OnChange="OnChange" />
+                    <BranchCollectionEditor 
+                    Branches="state.Branches" 
+                    OnChange="OnChange" />
                 </td>
                 </Body>
             </ExpandableDataRow>
@@ -48,8 +60,8 @@
 }
 
 @code {
-    private OperationStateDefinition? state = null;
-    [Parameter] public OperationStateDefinition? State { get; set; }
+    private ParallelStateDefinition? state = null;
+    [Parameter] public ParallelStateDefinition? State { get; set; }
 
     [Parameter] public EventCallback OnChange { get; set; }
 
@@ -60,7 +72,7 @@
             this.state = this.State;
     }
 
-    protected virtual async Task OnChangedAsync(Action<OperationStateDefinition> patch)
+    protected virtual async Task OnChangedAsync(Action<ParallelStateDefinition> patch)
     {
         if (this.state == null)
             return;

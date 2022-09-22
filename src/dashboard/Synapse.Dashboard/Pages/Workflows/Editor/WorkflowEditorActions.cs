@@ -33,6 +33,16 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor.Actions
             IfNotExists = ifNotExists;
         }
 
+        public InitializeState(string workflowId)
+        {
+            WorkflowId = workflowId;
+        }
+
+        /// <summary>
+        /// Gets/sets the id of the workflow to initialize the state with
+        /// </summary>
+        public string WorkflowId { get; }
+        
         /// <summary>
         /// Gets/sets a boolean indicating whether or not to initialize the state only if it does not yet exist
         /// </summary>

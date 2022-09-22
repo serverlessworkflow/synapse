@@ -15,6 +15,7 @@
 *@
 
 @page "/workflows/editor"
+@page "/workflows/editor/{workflowId}"
 @using System.Reactive.Subjects
 @using System.Reactive.Linq
 @using Synapse.Dashboard.Pages.Workflows.Editor.Actions
@@ -76,6 +77,10 @@ else if (workflowDefinition != null)
         }
     </div>
 }
+else if(!string.IsNullOrWhiteSpace(this.workflowId))
+{
+    <Loader />
+}
 <Modal @ref="validationMessagesDialog">
     <Title>
         Validation messages
@@ -98,7 +103,10 @@ else if (workflowDefinition != null)
 </Modal>
 
 @code{
+    private string? workflowId;
+    [Parameter] public string? WorkflowId { get; set; }
 
+    private IFeature<V1WorkflowCollectionState> workflowsFeature; 
     private MonacoEditor? textBasedEditor;
     private Subject<string>? editorValue;
     private Subject<bool>? disposeNotifier;
@@ -160,7 +168,19 @@ else if (workflowDefinition != null)
                 this.colClass = isVisible ? "col-4" : "col-6";
                 this.StateHasChanged();
             });
-        this.Dispatcher.Dispatch(new InitializeState());
+        if (string.IsNullOrWhiteSpace(this.workflowId))
+            this.Dispatcher.Dispatch(new InitializeState());
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        if (this.workflowId != this.WorkflowId)
+        {
+            this.workflowId = this.WorkflowId;
+            if(!string.IsNullOrWhiteSpace(this.workflowId))
+                this.Dispatcher.Dispatch(new InitializeState(this.workflowId));
+        }  
     }
 
     protected async Task OnWorkflowDefinitionChanged(WorkflowDefinition workflowDefinition)

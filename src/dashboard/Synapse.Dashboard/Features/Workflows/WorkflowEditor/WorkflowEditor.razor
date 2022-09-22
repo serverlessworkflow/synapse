@@ -36,8 +36,8 @@
                 <Body>
                     <table class="table">
                         <tbody>
-                            <tr><td>Spec version</td><td><select required value="@workflow.SpecVersion" @onchange="async e => await OnPropertyChangedAsync(nameof(workflow.SpecVersion), d => d.SpecVersion = (string)e.Value!)" class="form-control bg-secondary text-white">
-                                <option value="0.8">0.8</option>
+                            <tr><td>Spec version</td><td><select required @onchange="async e => await OnPropertyChangedAsync(nameof(workflow.SpecVersion), d => d.SpecVersion = (string)e.Value!)" class="form-control bg-secondary text-white">
+                                <option value="0.8" selected>0.8</option>
                             </select></td></tr>
                             <tr><td>Id</td>
                             <td>
@@ -411,7 +411,7 @@ else
             return;
         var state = new OperationStateDefinition()
         {
-            Name = $"undefined-{workflow.States.Count + 1}",
+            Name = $"state-{workflow.States.Count + 1}",
             IsEnd = true
         };
         await this.OnPropertyChangedAsync(nameof(workflow.States), d => d.States.Add(state));
@@ -423,7 +423,7 @@ else
             return;
         if (this.workflow.Events == null)
             this.workflow.Events = new();
-        var e = new EventDefinition() { Name = $"undefined-{workflow.Events.Count + 1}" };
+        var e = new EventDefinition() { Name = $"event-{workflow.Events.Count + 1}" };
         await this.OnPropertyChangedAsync(nameof(workflow.Events), d =>
         {
             d.Events!.Add(e);
@@ -436,7 +436,7 @@ else
             return;
         if (this.workflow.Functions == null)
             this.workflow.Functions = new();
-        var function = new FunctionDefinition() { Name = $"undefined-{workflow.Functions.Count + 1}" };
+        var function = new FunctionDefinition() { Name = $"function-{workflow.Functions.Count + 1}" };
         await this.OnPropertyChangedAsync(nameof(workflow.Functions), d =>
         {
             d.Functions!.Add(function);
@@ -449,7 +449,7 @@ else
             return;
         if (this.Workflow.Secrets == null)
             this.Workflow.Secrets = new();
-        var secret = $"undefined-{Workflow.Secrets.Count + 1}";
+        var secret = $"secret-{Workflow.Secrets.Count + 1}";
         await this.OnPropertyChangedAsync(nameof(Workflow.Secrets), d =>
         {
             d.Secrets!.Add(secret);
@@ -479,7 +479,7 @@ else
             return;
         if (this.Workflow.Annotations == null)
             this.Workflow.Annotations = new();
-        var secret = $"undefined-{Workflow.Annotations.Count + 1}";
+        var secret = $"annotation-{Workflow.Annotations.Count + 1}";
         await this.OnPropertyChangedAsync(nameof(Workflow.Annotations), d =>
         {
             d.Annotations!.Add(secret);
@@ -542,7 +542,7 @@ else
             return;
         if (this.Workflow.Auth == null)
             this.Workflow.Auth = new();
-        var auth = new AuthenticationDefinition() { Name = $"undefined-{Workflow.Auth.Count + 1}", Scheme = AuthenticationScheme.Basic, Properties = new BasicAuthenticationProperties() };
+        var auth = new AuthenticationDefinition() { Name = $"authentication-{Workflow.Auth.Count + 1}", Scheme = AuthenticationScheme.Basic, Properties = new BasicAuthenticationProperties() };
         await this.OnPropertyChangedAsync(nameof(Workflow.Auth), d =>
         {
             d.Auth!.Add(auth);

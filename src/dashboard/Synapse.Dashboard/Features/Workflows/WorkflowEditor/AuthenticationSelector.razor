@@ -79,7 +79,7 @@
         {
             if (this.Workflow.Auth == null)
                 this.Workflow.Auth = new();
-            authentication = new AuthenticationDefinition() { Name = $"undefined-{this.Workflow.Auth.Count + 1}", Scheme = AuthenticationScheme.Basic, Properties = new BasicAuthenticationProperties() };
+            authentication = new AuthenticationDefinition() { Name = $"authentication-{this.Workflow.Auth.Count + 1}", Scheme = AuthenticationScheme.Basic, Properties = new BasicAuthenticationProperties() };
             this.Workflow.Auth.Add(authentication);
         }
         this.Selected = authentication;

@@ -148,6 +148,9 @@
                             case OperationStateDefinition operationState:
                                 <OperationStateEditor State="operationState" OnChange="OnChange" />
                                 break;
+                            case ParallelStateDefinition parallelState:
+                                <ParallelStateEditor State="parallelState" OnChange="OnChange" />
+                                break;
                             case SleepStateDefinition sleepState:
                                 <SleepStateEditor State="sleepState" OnChange="OnChange" />
                                 break;

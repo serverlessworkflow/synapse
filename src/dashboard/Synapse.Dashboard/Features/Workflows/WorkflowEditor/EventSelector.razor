@@ -68,7 +68,7 @@
         {
             if (this.Workflow.Events == null)
                 this.Workflow.Events = new();
-            evt = new EventDefinition() { Name = $"undefined-{this.Workflow.Events.Count + 1}" };
+            evt = new EventDefinition() { Name = $"event-{this.Workflow.Events.Count + 1}" };
         if (this.EventKind.HasValue)
                 evt.Kind = this.EventKind.Value;
             this.Workflow.Events.Add(evt);

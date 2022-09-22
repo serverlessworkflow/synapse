@@ -73,7 +73,7 @@
         var state = Workflow.GetState((string)e.Value!);
         if ((string)e.Value == CreateNewOptionValue)
         {
-            state = new OperationStateDefinition() { Name = $"undefined-{this.Workflow.States.Count + 1}", IsEnd = true };
+            state = new OperationStateDefinition() { Name = $"state-{this.Workflow.States.Count + 1}", IsEnd = true };
             if (this.ControlFlow == ControlFlow.Compensation)
                 state.UsedForCompensation = true;
             this.Workflow.States.Add(state);

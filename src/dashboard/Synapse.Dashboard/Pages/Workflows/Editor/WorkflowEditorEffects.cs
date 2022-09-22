@@ -50,7 +50,11 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor.Effects
             var yamlConverter = context.Services.GetRequiredService<IYamlConverter>();
             if (yamlConverter == null)
                 throw new NullReferenceException("Unable to resolved service 'IYamlConverter'.");
-            var definition = new WorkflowDefinition() { Id = "undefined", Name = "Undefined", Version = "0.1.0" };
+            WorkflowDefinition definition;
+            if (string.IsNullOrWhiteSpace(action.WorkflowId))
+                definition = new WorkflowDefinition() { Id = "undefined", Name = "Undefined", Version = "0.1.0" };
+            else
+                definition = (await context.Services.GetRequiredService<ISynapseManagementApi>().GetWorkflowByIdAsync(action.WorkflowId)).Definition;
             var text = JsonConvert.SerializeObject(definition, Formatting.Indented, JsonConvert.DefaultSettings!()!);
             if (monacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)
                 text = await yamlConverter.JsonToYaml(text);

@@ -16,35 +16,39 @@
 
 @namespace Synapse.Dashboard
 
-@if (actions != null)
+@if (branches != null)
 {
     <table class="table table-striped">
         <thead>
             <tr>
                 <th>Name</th>
-                <th>Type</th>
+                <th>Action Execution Mode</th>
+                <th>Actions</th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var action in actions)
+            @foreach (var branch in branches)
             {
                 <ExpandableDataRow>
                     <Header>
-                        <td>@action.Name</td>
-                        <td><span class="badge bg-secondary">@action.Type</span></td>
-                        <td><button @onclick="async () => await OnDeleteActionAsync(action)" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="bi bi-trash"></small></button></td>
+                        <td>@branch.Name</td>
+                        <td><span class="badge bg-secondary">@EnumHelper.Stringify(branch.ActionMode)</span></td>
+                        <td>@branch.Actions?.Count</td>
+                        <td><button @onclick="async () => await OnDeleteBranchAsync(branch)" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="bi bi-trash"></small></button></td>
                     </Header>
                     <Body>
-                        <td colspan="3">
-                            <ActionEditor Action="action" OnChange="OnChange" />
+                        <td colspan="4">
+                            <BranchEditor 
+                            Branch="branch"
+                            OnChange="OnChange" />
                         </td>
                     </Body>
                 </ExpandableDataRow>
             }
         </tbody>
     </table>
-    <button class="btn btn-block btn-primary text-white w-100" @onclick="OnCreateActionAsync">Create action</button>
+    <button class="btn btn-block btn-primary text-white w-100" @onclick="OnCreateBranchAsync">Create branch</button>
 }
 else
 {
@@ -53,33 +57,32 @@ else
 
 @code {
 
-    private List<ActionDefinition>? actions { get; set; }
-    [Parameter] public List<ActionDefinition>? Actions { get; set; }
+    private List<BranchDefinition>? branches { get; set; }
+    [Parameter] public List<BranchDefinition>? Branches { get; set; }
 
     [Parameter] public EventCallback OnChange { get; set; }
-
 
     protected override async Task OnParametersSetAsync()
     {
         await base.OnParametersSetAsync();
-        if (this.actions != this.Actions) {
-            this.actions = this.Actions;
+        if (this.branches != this.Branches) {
+            this.branches = this.Branches;
         }
     }
 
-    protected virtual async Task OnCreateActionAsync()
+    protected virtual async Task OnCreateBranchAsync()
     {
-        if (this.actions == null)
+        if (this.branches == null)
             return;
-        var action = new ActionDefinition() { Name = $"action-{this.actions.Count() + 1}", Function = new() { RefName = "undefined" } };
-        this.actions.Add(action);
+        var branch = new BranchDefinition() { Name = $"branch-{this.branches.Count() + 1}" };
+        this.branches.Add(branch);
              await this.OnChange.InvokeAsync();
         this.StateHasChanged();
     }
 
-    protected virtual async Task OnDeleteActionAsync(ActionDefinition action)
+    protected virtual async Task OnDeleteBranchAsync(BranchDefinition branch)
     {
-        this.actions?.Remove(action);
+        this.branches?.Remove(branch);
         await this.OnChange.InvokeAsync();
         this.StateHasChanged();
     }
