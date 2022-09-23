@@ -24,7 +24,7 @@
                 <a href="" @onclick="@(async() => await BreadcrumbService.NavigateTo(item))" @onclick:preventDefault>
                     @if (!String.IsNullOrWhiteSpace(item.Icon))
                     {
-                        <small class="oi @item.Icon" aria-hidden="true"></small>
+                        <small class="bi @item.Icon" aria-hidden="true"></small>
                     }
                     @item.Label
                 </a>

@@ -19,7 +19,7 @@
 
 
 @if (Graph != null) {
-    <DagreGraph @ref="dagre" Graph="Graph" OnMouseUp="OnMouseUp" />
+    <DagreGraph @ref="dagre" Graph="Graph" OnMouseUp="OnMouseUp" Options="options" />
 }
 
 @code {
@@ -27,30 +27,42 @@
     [Parameter] public WorkflowDefinition WorkflowDefinition { get; set; } = null!;
     protected WorkflowDefinition workflowDefinition { get; set; } = null!;
 
+    [Parameter] public WorkflowDiagramOrientation Orientation { get; set; } = WorkflowDiagramOrientation.LeftToRight;
+
     [Parameter] public bool EditMode { get; set; } = false;
 
     [Parameter] public EventCallback<GraphEventArgs<MouseEventArgs>> OnMouseUp { get; set; }
 
     public IGraphViewModel? Graph { get; set; }
-    protected DagreGraph? dagre { get; set;  }
+    protected DagreGraph? dagre { get; set; }
+    protected IDagreGraphOptions? options { get; set; } = null;
 
     protected override async Task OnParametersSetAsync()
     {
         await base.OnParametersSetAsync();
         if (this.WorkflowDefinition != null && this.WorkflowDefinition != this.workflowDefinition) {
             this.workflowDefinition = this.WorkflowDefinition;
+            this.options = new DagreGraphOptions()
+                {
+                    Direction = this.Orientation == WorkflowDiagramOrientation.LeftToRight ? DagreGraphDirection.LeftToRight : DagreGraphDirection.TopToBottom
+                };
             var graph = await this.WorkflowGraphBuilder.BuildGraph(this.workflowDefinition);
             graph.Metadata = graph.Metadata ?? new Dictionary<string, object>();
             graph.Metadata.Add("EditMode", this.EditMode);
             this.Graph = graph;
         }
     }
-      
+
     public virtual void DisplayActivityStatusFor(IEnumerable<V1WorkflowInstance> instances, bool highlightPath = false)
     {
         if (this.Graph != null) {
             this.Graph.DisplayActivityStatusFor(instances, highlightPath);
         }
+    }
+
+    public virtual async Task RefreshAsync()
+    {
+        await this.dagre.RefreshAsync();
     }
 
 }

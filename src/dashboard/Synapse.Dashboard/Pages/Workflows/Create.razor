@@ -1,0 +1,36 @@
+﻿@page "/workflows/new"
+@inject IBreadcrumbService BreadcrumbService
+@inject NavigationManager NavigationManager
+
+<PageTitle>New workflow</PageTitle>
+<AppHeader>
+    <span class="h5 m-0 p-0">New workflow</span>
+</AppHeader>
+<div class="h-100 mh-100 flex-grow d-flex flex-column justify-content-center align-items-center g-3">
+    <div class="row">
+        <div role="button" class="col" @onclick="@(() => NavigationManager.NavigateTo("/workflows/editor"))">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="bi bi-pencil-square"></i>
+                    <h5 class="card-title">Editor</h5>
+                </div>
+            </div>
+        </div>
+        <div role="button" class="col" @onclick="@(() => NavigationManager.NavigateTo("/workflows/upload"))">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="bi bi-upload"></i>
+                    <h5 class="card-title">Upload</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await this.BreadcrumbService.Use(KnownBreadcrumbs.CreateWorkflow);
+    }
+}

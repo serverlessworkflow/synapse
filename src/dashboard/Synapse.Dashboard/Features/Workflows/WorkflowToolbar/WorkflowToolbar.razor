@@ -23,13 +23,14 @@
 @inject ISynapseManagementApi SynapseApi
 @inject IJsonSerializer JsonSerializer
 @inject IMonacoEditorHelper MonacoEditorHelper
-@inject IYamlService YamlService
+@inject IYamlConverter YamlConverter
 @inject HttpClient HttpClient
 
-@if (Workflow != null) 
+@if (workflow != null) 
 {
     <Toolbar>
-        <button @onclick="async () => await OnShowWorkflowInputModal()" class="btn btn-outline-dark" title="Start workflow"><small class="oi oi-media-play"></small><span class="btn-label">&nbsp; Start workflow</span></button>
+        <button @onclick="async () => await OnShowWorkflowInputModal()" class="btn btn-outline-dark" title="Start workflow"><small class="bi bi-play"></small><span class="btn-label"> Start workflow</span></button>
+        <a href="/workflows/editor/@workflow.Id" class="btn btn-outline-dark" title="Edit workflow"><small class="bi bi-pencil"></small><span class="btn-label"> Edit workflow</span></a>
     </Toolbar>
     
     <Modal @ref="errorModal">
@@ -98,11 +99,11 @@
         try
         {
             if (language == PreferedLanguage.YAML) {
-                this.editorValueBuffer = await this.YamlService.JsonToYaml(text);
+                this.editorValueBuffer = await this.YamlConverter.JsonToYaml(text);
             }
             else
             {
-                this.editorValueBuffer = await this.YamlService.YamlToJson(text);
+                this.editorValueBuffer = await this.YamlConverter.YamlToJson(text);
             }
         }
         catch(Exception ex)
@@ -168,7 +169,7 @@
         {
             json = await this.workflowInputEditor.GetValue();            
             if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML) {
-                json = await this.YamlService.YamlToJson(json);
+                json = await this.YamlConverter.YamlToJson(json);
             }
             if(this.dataInputSchema != null)
             {

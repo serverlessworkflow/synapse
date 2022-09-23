@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	<VersionPrefix>0.1.27</VersionPrefix>
+	<VersionPrefix>0.2.0</VersionPrefix>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
 	<Authors>The Synapse Authors</Authors>
 	<Company>Cloud Native Computing Foundation</Company>
@@ -28,10 +28,10 @@
 
   <ItemGroup>
 	<PackageReference Include="Cronos" Version="0.7.1" />
-	<PackageReference Include="Neuroglia.Data.Expressions" Version="2.0.1.82" />
-	<PackageReference Include="Neuroglia.Eventing.CloudEvents" Version="2.0.1.82" />
-	<PackageReference Include="Neuroglia.Mapping" Version="2.0.1.82" />
-	<PackageReference Include="Neuroglia.Mediation" Version="2.0.1.82" />
+	<PackageReference Include="Neuroglia.Data.Expressions" Version="2.0.1.86" />
+	<PackageReference Include="Neuroglia.Eventing.CloudEvents" Version="2.0.1.86" />
+	<PackageReference Include="Neuroglia.Mapping" Version="2.0.1.86" />
+	<PackageReference Include="Neuroglia.Mediation" Version="2.0.1.86" />
   </ItemGroup>
 	
 </Project>

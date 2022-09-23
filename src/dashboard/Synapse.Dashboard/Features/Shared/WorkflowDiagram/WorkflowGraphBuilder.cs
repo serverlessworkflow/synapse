@@ -38,7 +38,7 @@ namespace Synapse.Dashboard
         {
             var isEmpty = definition.States == null || !definition.States.Any(s => !s.UsedForCompensation);
             var graph = new GraphViewModel();
-            graph.RegisterBehavior(new DragAndDropNodeBehavior(graph, this.jSRuntime));
+            //graph.RegisterBehavior(new DragAndDropNodeBehavior(graph, this.jSRuntime));
             var startNode = this.BuildStartNode(!isEmpty);
             var endNode = this.BuildEndNode();
             await graph.AddElementAsync(startNode);
@@ -249,7 +249,7 @@ namespace Synapse.Dashboard
                                     {
                                         foreach (var condition in switchState.DataConditions!)
                                         {
-                                            var caseNode = this.BuildDataConditionNode(condition.Name!); // todo: should be a labeled edge, not a node?
+                                            var caseNode = this.BuildDataConditionNode(condition.Name! ?? condition.Condition); // todo: should be a labeled edge, not a node?
                                             await stateNodeGroup.AddChildAsync(caseNode);
                                             await this.BuildEdgeBetween(graph, firstNode, caseNode, state.UsedForCompensation);
                                             switch (condition.OutcomeType)
