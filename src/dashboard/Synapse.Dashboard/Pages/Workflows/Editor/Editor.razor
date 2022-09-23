@@ -70,7 +70,7 @@ else if (workflowDefinition != null)
                 OnDidChangeModelContent="OnTextBasedDefinitionChanged"
             />
         </div>
-        @if (State.IsDiagramVisible) {
+        @if (isDiagramVisible) {
             <div class="@colClass vh-85">
                 <WorkflowDiagram @ref="workflowDiagram" WorkflowDefinition="workflowDefinition" Orientation="WorkflowDiagramOrientation.TopToBottom" />
             </div>
@@ -113,6 +113,7 @@ else if(!string.IsNullOrWhiteSpace(this.workflowId))
     private WorkflowDefinition? workflowDefinition = null;
     private WorkflowDiagram? workflowDiagram;
     private Modal? validationMessagesDialog;
+    private bool isDiagramVisible = false;
     private string colClass = "col-6";
 
     protected override async Task OnInitializedAsync()
@@ -165,6 +166,7 @@ else if(!string.IsNullOrWhiteSpace(this.workflowId))
             .TakeUntil(this.disposeNotifier)
             .Subscribe((isVisible) =>
             {
+                this.isDiagramVisible = isVisible;
                 this.colClass = isVisible ? "col-4" : "col-6";
                 this.StateHasChanged();
             });
