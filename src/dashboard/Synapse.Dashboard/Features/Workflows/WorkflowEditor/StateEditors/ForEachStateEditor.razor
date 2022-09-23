@@ -23,15 +23,25 @@
             <tr>
                 <td>Input collection</td>
                 <td>
-                    <input type="text" value="@state?.InputCollection" placeholder="${ . }" title="A runtime expression used to select the elements to enumerate" class="form-control"
-                    @onchange="async e => await OnChangedAsync(s => s.InputCollection = (string)e.Value!)"/>
+                    <JqExpressionEditor
+                        Expression="@state?.InputCollection"
+                        placeholder="${ . }"
+                        title="A runtime expression used to select the elements to enumerate"
+                        class="form-control"
+                        OnChange="async e => await OnChangedAsync(s => s.InputCollection = e)"
+                    />
                 </td>
             </tr>
             <tr>
                 <td>Output collection</td>
                 <td>
-                    <input type="text" value="@state?.OutputCollection" placeholder="${ . }" title="A runtime expression used to select within the state data the array to output the iteration results to" class="form-control"
-                    @onchange="async e => await OnChangedAsync(s => s.OutputCollection = (string)e.Value!)"/>
+                    <JqExpressionEditor
+                        Expression="@state?.OutputCollection"
+                        placeholder="${ . }"
+                        title="A runtime expression used to select within the state data the array to output the iteration results to"
+                        class="form-control"
+                        OnChange="async e => await OnChangedAsync(s => s.OutputCollection = e)"
+                    />
                 </td>
             </tr>
             <tr>

@@ -36,9 +36,7 @@
                 <Body>
                     <table class="table">
                         <tbody>
-                            <tr><td>Spec version</td><td><select required @onchange="async e => await OnPropertyChangedAsync(nameof(workflow.SpecVersion), d => d.SpecVersion = (string)e.Value!)" class="form-control bg-secondary text-white">
-                                <option value="0.8" selected>0.8</option>
-                            </select></td></tr>
+                            <tr><td>Name</td><td><input type="text" placeholder="Name" required value="@workflow.Name" @onchange="async e => await OnNameChangedAsync((string?)e.Value)" class="form-control" /></td></tr>
                             <tr><td>Id</td>
                             <td>
                                 <div class="input-group mb-3">
@@ -49,9 +47,11 @@
                                     </div>
                                 </div>
                             </td></tr>
-                            <tr><td>Version</td><td><input type="text" placeholder="Version" required value="@workflow.Version" @onchange="async e => await OnPropertyChangedAsync(nameof(workflow.Version), d => d.Version = (string)e.Value!)" class="form-control" /></td></tr>
-                            <tr><td>Name</td><td><input type="text" placeholder="Name" required value="@workflow.Name" @onchange="async e => await OnNameChangedAsync((string?)e.Value)" class="form-control" /></td></tr>
                             <tr><td>Description</td><td><textarea type="text" placeholder="Description" value="@workflow.Description" @onchange="async e => await OnPropertyChangedAsync(nameof(workflow.Description), d => d.Description = (string)e.Value!)" class="form-control"></textarea></td></tr>
+                            <tr><td>Version</td><td><input type="text" placeholder="Version" required value="@workflow.Version" @onchange="async e => await OnPropertyChangedAsync(nameof(workflow.Version), d => d.Version = (string)e.Value!)" class="form-control" /></td></tr>
+                            <tr><td>Spec version</td><td><select required @onchange="async e => await OnPropertyChangedAsync(nameof(workflow.SpecVersion), d => d.SpecVersion = (string)e.Value!)" class="form-control bg-secondary text-white">
+                                <option value="0.8" selected>0.8</option>
+                            </select></td></tr>
                             <tr><td>Expression language</td><td><select required @onchange="async e => await OnPropertyChangedAsync(nameof(workflow.ExpressionLanguage), d => d.ExpressionLanguage = (string)e.Value!)" class="form-control bg-secondary text-white">
                                 <option value="jq">jq</option>
                             </select></td></tr>

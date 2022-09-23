@@ -21,8 +21,13 @@
         <tr>
             <td>From state data</td>
             <td>
-                <input type="text" value="@dataFilter?.FromStateData" placeholder="${ . }" title="A runtime expression used to filter the state data that can be used by the action" class="form-control"
-                @onchange="async e => await OnChangeAsync(f => f.FromStateData = (string)e.Value!)"/>
+                <JqExpressionEditor
+                    Expression="@dataFilter?.FromStateData"
+                    placeholder="${ . }"
+                    title="A runtime expression used to filter the state data that can be used by the action"
+                    class="form-control"
+                    OnChange="async e => await OnChangeAsync(f => f.FromStateData = e)"
+                />
             </td>
         </tr>
         <tr>
@@ -35,15 +40,27 @@
         <tr>
             <td>Results</td>
             <td>
-                <input type="text" value="@dataFilter?.Results" disabled="@(!dataFilter?.UseResults)" placeholder="${ . }" title="A runtime expression used to filter the action's output'" class="form-control"
-                @onchange="async e => await OnChangeAsync(f => f.Results = (string)e.Value!)"/>
+                <JqExpressionEditor
+                    Expression="@dataFilter?.Results"
+                    disabled="@(!dataFilter?.UseResults)"
+                    placeholder="${ . }"
+                    title="A runtime expression used to filter the action's output'"
+                    class="form-control"
+                    OnChange="async e => await OnChangeAsync(f => f.Results = e)"
+                />
             </td>
         </tr>
         <tr>
             <td>To state data</td>
             <td>
-                <input type="text" value="@dataFilter?.ToStateData" disabled="@(!dataFilter?.UseResults)" placeholder="${ . }" title="A runtime expression used to select state data elements to which the action's output should be merged" class="form-control"
-                @onchange="async e => await OnChangeAsync(f => f.ToStateData = (string)e.Value!)"/>
+                <JqExpressionEditor
+                    Expression="@dataFilter?.ToStateData" 
+                    disabled="@(!dataFilter?.UseResults)"
+                    placeholder="${ . }"
+                    title="A runtime expression used to select state data elements to which the action's output should be merged"
+                    class="form-control"
+                    OnChange="async e => await OnChangeAsync(f => f.ToStateData = e)"
+                />
             </td>
         </tr>
     </tbody>

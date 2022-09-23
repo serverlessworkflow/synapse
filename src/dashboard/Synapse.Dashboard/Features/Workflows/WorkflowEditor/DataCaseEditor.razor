@@ -23,15 +23,20 @@
             <tr>
                 <td>Name</td>
                 <td>
-                    <input type="text" value="@dataCase.Name" required placeholder="${ . }" title="The name of the case" class="form-control"
+                    <input type="text" value="@dataCase.Name" required placeholder="My condition" title="The name of the case" class="form-control"
                     @onchange="async e => await OnChangeAsync(c => c.Name = (string)e.Value!)"/>
                 </td>
             </tr>
             <tr>
                 <td>Condition</td>
                 <td>
-                    <input type="text" value="@dataCase.Condition" placeholder="${ . }" title="A runtime expression producing a boolean that indicates whether or not the case conditions are met" class="form-control"
-                    @onchange="async e => await OnChangeAsync(c => c.Condition = (string)e.Value!)"/>
+                    <JqExpressionEditor
+                        Expression="@dataCase.Condition"
+                        placeholder="${ . }"
+                        title="A runtime expression producing a boolean that indicates whether or not the case conditions are met"
+                        class="form-control"
+                        OnChange="async e => await OnChangeAsync(c => c.Condition = e)"
+                    />
                 </td>
             </tr>
             <tr>

@@ -21,15 +21,25 @@
         <tr>
             <td>Input</td>
             <td>
-                <input type="text" value="@dataFilter?.Input" placeholder="${ . }" title="A runtime expression used to filter the state's input data'" class="form-control"
-                @onchange="async e => await OnChangeAsync(f => f.Input = (string)e.Value!)"/>
+                <JqExpressionEditor
+                    Expression="@dataFilter?.Input"
+                    placeholder="${ . }" 
+                    title="A runtime expression used to filter the state's input data'" 
+                    class="form-control"
+                    OnChange="async e => await OnChangeAsync(f => f.Input = e)"
+                />
             </td>
         </tr>
         <tr>
             <td>Output</td>
             <td>
-                <input type="text" value="@dataFilter?.Output" placeholder="${ . }" title="A runtime expression used to filter the state's output data'" class="form-control"
-                @onchange="async e => await OnChangeAsync(f => f.Output = (string)e.Value!)"/>
+                <JqExpressionEditor
+                    Expression="@dataFilter?.Output"
+                    placeholder="${ . }" 
+                    title="A runtime expression used to filter the state's output data'" 
+                    class="form-control"
+                    OnChange="async e => await OnChangeAsync(f => f.Output = e)"
+                />
             </td>
         </tr>
     </tbody>

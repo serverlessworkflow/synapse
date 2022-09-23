@@ -42,5 +42,9 @@
   {
     "outputFile": "Pages/Correlations/List.css",
     "inputFile": "Pages/Correlations/List.scss"
+  },
+  {
+    "outputFile": "Features/Workflows/WorkflowEditor/JqExpressionEditor.razor.css",
+    "inputFile": "Features/Workflows/WorkflowEditor/JqExpressionEditor.razor.scss"
   }
 ]

@@ -23,7 +23,7 @@
             <tr>
                 <td>Name</td>
                 <td>
-                    <input type="text" value="@eventCase.Name" required placeholder="${ . }" title="The name of the case" class="form-control"
+                    <input type="text" value="@eventCase.Name" required placeholder="My event case" title="The name of the case" class="form-control"
                     @onchange="async e => await OnChangeAsync(c => c.Name = (string)e.Value!)"/>
                 </td>
             </tr>
@@ -33,8 +33,13 @@
                     <EventSelector 
                     Selected="string.IsNullOrWhiteSpace(eventCase.Event) ? null : Workflow.GetEvent(eventCase.Event)"
                     Events="Workflow.Events?.Where(e => e.Kind == EventKind.Consumed).ToList()"/>
-                    <input type="text" value="@eventCase.Event" placeholder="${ . }" title="A runtime expression producing a boolean that indicates whether or not the case conditions are met" class="form-control"
-                    @onchange="async e => await OnChangeAsync(c => c.Event = (string)e.Value!)"/>
+                    <JqExpressionEditor
+                        Expression="@eventCase.Event" 
+                        placeholder="${ . }" 
+                        title="A runtime expression producing a boolean that indicates whether or not the case conditions are met" 
+                        class="form-control"
+                        OnChange="async e => await OnChangeAsync(c => c.Event = e)"
+                    />
                 </td>
             </tr>
             <tr>

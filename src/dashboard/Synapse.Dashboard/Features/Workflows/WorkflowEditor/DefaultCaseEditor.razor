@@ -23,7 +23,7 @@
             <tr>
                 <td>Name</td>
                 <td>
-                    <input type="text" value="@dataCase.Name" required placeholder="${ . }" title="The name of the case" class="form-control"
+                    <input type="text" value="@dataCase.Name" required placeholder="My default case" title="The name of the case" class="form-control"
                     @onchange="async e => await OnChangeAsync(c => c.Name = (string)e.Value!)"/>
                 </td>
             </tr>

@@ -61,8 +61,13 @@
                                 <tr>
                                     <td>Condition</td>
                                     <td>
-                                        <input type="text" title="A runtime expression that determines whether or not to run the action" placeholder="${ . }" class="form-control"
-                                        @onchange="async e => await OnPropertyChangedAsync(nameof(action.Condition), a => a.Condition = (string)e.Value!)"/>
+                                        <JqExpressionEditor
+                                            Expression="action.Condition" 
+                                            title="A runtime expression that determines whether or not to run the action"
+                                            placeholder="${ . }"
+                                            class="form-control"
+                                            OnChange="async e => await OnPropertyChangedAsync(nameof(action.Condition), a => a.Condition = e)"
+                                        />
                                     </td>
                                 </tr>
                             </tbody>
