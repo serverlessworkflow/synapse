@@ -29,8 +29,6 @@
 
     [Parameter] public WorkflowDiagramOrientation Orientation { get; set; } = WorkflowDiagramOrientation.LeftToRight;
 
-    [Parameter] public bool EditMode { get; set; } = false;
-
     [Parameter] public EventCallback<GraphEventArgs<MouseEventArgs>> OnMouseUp { get; set; }
 
     public IGraphViewModel? Graph { get; set; }
@@ -47,8 +45,6 @@
                     Direction = this.Orientation == WorkflowDiagramOrientation.LeftToRight ? DagreGraphDirection.LeftToRight : DagreGraphDirection.TopToBottom
                 };
             var graph = await this.WorkflowGraphBuilder.BuildGraph(this.workflowDefinition);
-            graph.Metadata = graph.Metadata ?? new Dictionary<string, object>();
-            graph.Metadata.Add("EditMode", this.EditMode);
             this.Graph = graph;
         }
     }
@@ -62,7 +58,7 @@
 
     public virtual async Task RefreshAsync()
     {
-        await this.dagre.RefreshAsync();
+        if (this.dagre != null) await this.dagre.RefreshAsync();
     }
 
 }

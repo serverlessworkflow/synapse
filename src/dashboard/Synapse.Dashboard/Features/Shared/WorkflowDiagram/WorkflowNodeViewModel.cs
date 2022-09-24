@@ -28,7 +28,7 @@ namespace Synapse.Dashboard
     /// Represents the base class for all workflow-related <see cref="NodeModel"/>s
     /// </summary>
     public abstract class WorkflowNodeViewModel
-        : NodeViewModel, IWorkflowNodeViewModel
+        : NodeViewModel, IWorkflowNodeViewModel, IDisposable
     {
 
         /// <inheritdoc/>
@@ -57,11 +57,35 @@ namespace Synapse.Dashboard
         {
             this.ComponentType = typeof(WorkflowNodeTemplate);
             this.ActiveInstances.CollectionChanged += this.OnCollectionChanged;
+            this.FaultedInstances.CollectionChanged += this.OnCollectionChanged;
+            this.CompensatedInstances.CollectionChanged += this.OnCollectionChanged;
         }
 
         protected void OnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            //this.Changed?.Invoke();
+            this.OnChange();
+        }
+
+        private bool disposed;
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    this.ActiveInstances.CollectionChanged -= this.OnCollectionChanged;
+                    this.FaultedInstances.CollectionChanged -= this.OnCollectionChanged;
+                    this.CompensatedInstances.CollectionChanged -= this.OnCollectionChanged;
+                }
+                disposed = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 

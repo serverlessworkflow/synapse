@@ -16,7 +16,6 @@
 
 @namespace Synapse.Dashboard
 @inherits ClusterTemplate
-@inject IWorkflowGraphEventDispatcher WorkflowGraphEventDispatcher
 
 <g class="cluster @Cluster.CssClass" transform="translate(@Cluster.X.ToInvariantString(), @Cluster.Y.ToInvariantString())">
     <CascadingValue Name="Node" Value="Cluster">
@@ -32,46 +31,9 @@
         @if (Graph.EnableProfiling) {
             <circle cx="0" cy="0" r="1" fill="red" />
         }
-        @if (EditMode)
-        {
-            if (!this.StateNode.IsFirst)
-            {
-                <MoveBackwardButton OnMoveStateBackward="OnMoveStateBackward" />
-            }            
-            if (string.IsNullOrWhiteSpace(StateNode.State.TransitionToStateName))
-            {
-                <AddStateButton OnAddState="OnAddState" />
-            }
-            else if (!this.StateNode.State.IsEnd)
-            {
-                <MoveForwardButton OnMoveStateForward="OnMoveStateForward" />
-            }
-            <EditStateButton OnEditState="OnEditState" />
-        }
     </CascadingValue>
 </g>
     
 @code {
     protected virtual StateNodeViewModel StateNode => (StateNodeViewModel)this.Cluster;
-    protected virtual bool EditMode => (bool?)this.Graph.Metadata?["EditMode"] ?? false;
-
-    protected virtual async Task OnAddState(MouseEventArgs e)
-    {
-        await this.WorkflowGraphEventDispatcher.OnAddStateAsync(this.StateNode, e);
-    }
-
-    protected virtual async Task OnEditState(MouseEventArgs e)
-    {
-        await this.WorkflowGraphEventDispatcher.OnEditStateAsync(this.StateNode, e);
-    }
-
-    protected virtual async Task OnMoveStateForward(MouseEventArgs e)
-    {
-        await this.WorkflowGraphEventDispatcher.OnMoveStateForwardAsync(this.StateNode, e);
-    }
-
-    protected virtual async Task OnMoveStateBackward(MouseEventArgs e)
-    {
-        await this.WorkflowGraphEventDispatcher.OnMoveStateBackwardAsync(this.StateNode, e);
-    }
 }

@@ -69,7 +69,6 @@ builder.Services.AddSingleton<IMonacoEditorHelper, MonacoEditorHelper>();
 builder.Services.AddSingleton<IBreadcrumbService, BreadcrumbService>();
 builder.Services.AddSingleton<IDagreService, DagreService>();
 builder.Services.AddSingleton<ICloner, Cloner>();
-builder.Services.AddSingleton<IWorkflowGraphEventDispatcher, WorkflowGraphEventDispatcher>();
 builder.Services.AddSingleton<IChartService, ChartService>();
 builder.Services.AddSingleton<IYamlConverter, YamlConverter>();
 builder.Services.AddScoped<IStyleManager, StyleManager>();
