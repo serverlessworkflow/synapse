@@ -34,6 +34,7 @@
 	<PackageReference Include="Neuroglia.Data.DistributedCache" Version="2.0.1.88" />
 	<PackageReference Include="Neuroglia.Data.EventSourcing" Version="2.0.1.88" />
 	<PackageReference Include="Neuroglia.Mediation.FluentValidation" Version="2.0.1.88" />
+	<PackageReference Include="Semver" Version="2.2.0" />
 	<PackageReference Include="System.Linq.Async" Version="6.0.1" />
   </ItemGroup>
 
