@@ -15,6 +15,8 @@
  *
  */
 
+using Semver;
+
 namespace Synapse.Application.Queries.Workflows
 {
 
@@ -97,7 +99,8 @@ namespace Synapse.Application.Queries.Workflows
             {
                 workflow = this.Repository.AsQueryable()
                     .Where(wf => wf.Definition.Id!.Equals(query.Id, StringComparison.OrdinalIgnoreCase))
-                    .OrderByDescending(wf => wf.Definition.Version)
+                    .ToList()
+                    .OrderByDescending(wf => SemVersion.Parse(wf.Definition.Version, SemVersionStyles.Any))
                     .FirstOrDefault()!;
             }
             else
