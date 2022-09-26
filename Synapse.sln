@@ -103,6 +103,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "kubernetes", "kubernetes", 
 		deployment\kubernetes\stand-alone.yaml = deployment\kubernetes\stand-alone.yaml
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{40114B2A-998C-471F-93F0-9834DE4F6BD2}"
+	ProjectSection(SolutionItems) = preProject
+		CODE-OF-CONDUCT.md = CODE-OF-CONDUCT.md
+		CONTRIBUTING.md = CONTRIBUTING.md
+		GOVERNANCE.md = GOVERNANCE.md
+		LICENSE = LICENSE
+		MAINTAINERS.md = MAINTAINERS.md
+		MAITAINER-GUIDELINES.md = MAITAINER-GUIDELINES.md
+		OWNERS.md = OWNERS.md
+		README.md = README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
