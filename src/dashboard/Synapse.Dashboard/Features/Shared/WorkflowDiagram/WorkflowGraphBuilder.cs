@@ -37,7 +37,7 @@ namespace Synapse.Dashboard
         public async Task<IGraphViewModel> BuildGraph(WorkflowDefinition definition)
         {
             var isEmpty = definition.States == null || !definition.States.Any(s => !s.UsedForCompensation);
-            var graph = new GraphViewModel(enableProfiling: true);
+            var graph = new GraphViewModel(/*enableProfiling: true*/);
             //graph.RegisterBehavior(new DragAndDropNodeBehavior(graph, this.jSRuntime));
             var startNode = this.BuildStartNode(!isEmpty);
             var endNode = this.BuildEndNode();
