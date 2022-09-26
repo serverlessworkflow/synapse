@@ -16,7 +16,6 @@
 
 @namespace Synapse.Dashboard
 @inherits NodeTemplate
-@inject IWorkflowGraphEventDispatcher WorkflowGraphEventDispatcher
 
 <g class="node @Node.CssClass" transform="translate(@((Node.X ?? 0).ToInvariantString()), @((Node.Y ?? 0).ToInvariantString()))">
     <CascadingValue Name="Node" Value="Node">
@@ -32,24 +31,10 @@
         @if (Graph.EnableProfiling) {
             <circle cx="0" cy="0" r="1" fill="red" />
         }
-        @if (EditMode)
-        {
-            @if (Node is StartNodeViewModel startNode && !startNode.HasSuccessor)
-            {
-                <AddStateButton OnAddState="OnAddStateClick" />
-            }
-        }
     </CascadingValue>
 </g>
 
     
 @code {
     protected virtual WorkflowNodeViewModel WorkflowNode => (WorkflowNodeViewModel)this.Node;
-    protected virtual bool EditMode => (bool?)this.Graph.Metadata?["EditMode"] ?? false;
-
-    protected virtual async Task OnAddStateClick(MouseEventArgs e)
-    {
-        await this.WorkflowGraphEventDispatcher.OnAddStateAsync(null, e);
-    }
-
 }

@@ -17,6 +17,7 @@
 
 using Microsoft.AspNetCore.Components;
 using Neuroglia.Data.Flux;
+using System.Reactive.Linq;
 
 namespace Synapse.Dashboard
 {
@@ -38,6 +39,13 @@ namespace Synapse.Dashboard
 
         public TState State => this.Feature.State;
 
+        protected override async Task OnInitializedAsync()
+        {
+            await base.OnInitializedAsync();
+            this.Feature = this.Store.GetFeature<TState>();
+            this._Subscription = this.Feature.DistinctUntilChanged().Subscribe(_ => this.StateHasChanged());
+        }
+
         protected virtual void Dispose(bool disposing)
         {
             if (!this._Disposed)
@@ -49,13 +57,6 @@ namespace Synapse.Dashboard
                 }
                 this._Disposed = true;
             }
-        }
-
-        protected override async Task OnInitializedAsync()
-        {
-            await base.OnInitializedAsync();
-            this.Feature = this.Store.GetFeature<TState>();
-            this._Subscription = this.Feature.Subscribe(_ => this.StateHasChanged());
         }
 
         public void Dispose()

@@ -19,6 +19,7 @@ using Neuroglia.Blazor.Dagre.Models;
 using ServerlessWorkflow.Sdk.Models;
 using Synapse.Integration.Models;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 
 namespace Synapse.Dashboard
 {
@@ -27,7 +28,7 @@ namespace Synapse.Dashboard
     /// Represents a <see cref="StateDefinition"/> <see cref="NodeViewModel"/>
     /// </summary>
     public class StateNodeViewModel
-        : ClusterViewModel, IWorkflowNodeViewModel
+        : ClusterViewModel, IWorkflowNodeViewModel, IDisposable
     {
 
         /// <summary>
@@ -44,6 +45,9 @@ namespace Synapse.Dashboard
             {
                 this.CssClass = (this.CssClass ?? "") + " used-for-compensation";
             }
+            this.ActiveInstances.CollectionChanged += this.OnCollectionChanged;
+            this.FaultedInstances.CollectionChanged += this.OnCollectionChanged;
+            this.CompensatedInstances.CollectionChanged += this.OnCollectionChanged;
         }
 
         /// <summary>
@@ -66,6 +70,33 @@ namespace Synapse.Dashboard
 
         /// <inheritdoc/>
         public ObservableCollection<V1WorkflowInstance> CompensatedInstances { get; } = new();
+
+        protected void OnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            this.OnChange();
+        }
+
+        private bool disposed;
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    this.ActiveInstances.CollectionChanged -= this.OnCollectionChanged;
+                    this.FaultedInstances.CollectionChanged -= this.OnCollectionChanged;
+                    this.CompensatedInstances.CollectionChanged -= this.OnCollectionChanged;
+                }
+                disposed = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
 
     }
 
