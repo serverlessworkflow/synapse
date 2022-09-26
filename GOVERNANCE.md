@@ -3,7 +3,7 @@
 As a CNCF member project, we abide by the [CNCF Code of Conduct](https://github.com/cncf/foundation/blob/master/code-of-conduct.md).
 
 For specific guidance on practical contribution steps for any Synapse sub-project please
-see our [contributing guide](contributing.md).
+see our [contributing guide](CONTRIBUTING.md).
 
 You can contact the project maintainers at any time by sending an email to the 
 [Synapse WMS Maintainers](mailto:cncf-serverlessws-maintainers@lists.cncf.io)
