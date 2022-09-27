@@ -56,7 +56,7 @@ jobs:
           context: .
           file: './src/apps/Synapse.Server/Dockerfile'
           push: true
-          tags: ${{ steps.meta.get_tag.tag }}
+          tags: ${{ steps.get_tag.outputs.tag }}
           labels: ${{ steps.meta.outputs.labels }}
           
   release-worker-image:
@@ -89,7 +89,7 @@ jobs:
           context: .
           file: './src/apps/Synapse.Worker/Dockerfile'
           push: true
-          tags: ${{ steps.meta.get_tag.tag }}
+          tags: ${{ steps.get_tag.outputs.tag }}
           labels: ${{ steps.meta.outputs.labels }}
 
   release-server-bin:
