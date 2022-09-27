@@ -48,7 +48,7 @@ jobs:
         with:
           script: |
             const temp = context.ref.substring(10)
-            const tag = temp.replace(1)
+            const tag = temp.substring(1)
             core.setOutput('tag', tag)
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
