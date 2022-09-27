@@ -42,13 +42,21 @@ jobs:
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
         with:
           images: ${{ env.REGISTRY }}/${{ github.repository }}
+      - name: Get tag
+        uses: actions/github-script@v4
+        id: get_tag
+        with:
+          script: |
+            const temp = context.ref.substring(10)
+            const tag = temp.replace(1)
+            core.setOutput('tag', tag)
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
           context: .
           file: './src/apps/Synapse.Server/Dockerfile'
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ${{ steps.meta.get_tag.tag }}
           labels: ${{ steps.meta.outputs.labels }}
           
   release-worker-image:
@@ -67,13 +75,21 @@ jobs:
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
         with:
           images: ${{ env.REGISTRY }}/${{ github.repository }}-worker
+      - name: Get tag
+        uses: actions/github-script@v4
+        id: get_tag
+        with:
+          script: |
+            const temp = context.ref.substring(10)
+            const tag = temp.replace(1)
+            core.setOutput('tag', tag)
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
           context: .
           file: './src/apps/Synapse.Worker/Dockerfile'
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ${{ steps.meta.get_tag.tag }}
           labels: ${{ steps.meta.outputs.labels }}
 
   release-server-bin:
