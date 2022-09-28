@@ -31,20 +31,6 @@ using Synapse.Dashboard;
 using Synapse.Dashboard.Services;
 using Synapse.Integration.Serialization.Converters;
 
-JsonConvert.DefaultSettings = () =>
-{
-    return new JsonSerializerSettings()
-    {
-        ContractResolver = new NonPublicSetterContractResolver() { NamingStrategy = new CamelCaseNamingStrategy() { ProcessDictionaryKeys = false, OverrideSpecifiedNames = false, ProcessExtensionDataNames = false } },
-        Converters = new List<JsonConverter>() { new FilteredExpandoObjectConverter() },
-        NullValueHandling = NullValueHandling.Ignore,
-        DefaultValueHandling = DefaultValueHandling.Ignore,
-        DateFormatHandling = DateFormatHandling.IsoDateFormat,
-        DateParseHandling = DateParseHandling.DateTime,
-        DateTimeZoneHandling = DateTimeZoneHandling.Utc
-    };
-};
-
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 var baseAddress = builder.HostEnvironment.BaseAddress;
 builder.RootComponents.Add<App>("#app");
@@ -98,4 +84,19 @@ builder.Services.AddSingleton(provider =>
         })
         .Build();
 });
+
+JsonConvert.DefaultSettings = () =>
+{
+    return new JsonSerializerSettings()
+    {
+        ContractResolver = new NonPublicSetterContractResolver() { NamingStrategy = new CamelCaseNamingStrategy() { ProcessDictionaryKeys = false, OverrideSpecifiedNames = false, ProcessExtensionDataNames = false } },
+        Converters = new List<JsonConverter>() { new FilteredExpandoObjectConverter() },
+        NullValueHandling = NullValueHandling.Ignore,
+        DefaultValueHandling = DefaultValueHandling.Ignore,
+        DateFormatHandling = DateFormatHandling.IsoDateFormat,
+        DateParseHandling = DateParseHandling.DateTime,
+        DateTimeZoneHandling = DateTimeZoneHandling.Utc
+    };
+};
+
 await builder.Build().RunAsync();

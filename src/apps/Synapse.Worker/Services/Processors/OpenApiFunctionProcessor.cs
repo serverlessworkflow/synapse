@@ -174,6 +174,8 @@ namespace Synapse.Worker.Services.Processors
                     .Single(p => p.Value.Operations.Any(o => o.Value.OperationId == operation.Value.OperationId));
                 this.Path = path.Key;
                 await this.BuildParametersAsync(cancellationToken);
+                if (this.Parameters == null)
+                    return;
                 var parameters = path.Value.Parameters.ToList();
                 parameters.AddRange(this.Operation.Parameters);
                 foreach (OpenApiParameter param in parameters

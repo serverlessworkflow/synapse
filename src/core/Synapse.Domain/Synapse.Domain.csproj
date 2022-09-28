@@ -22,9 +22,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Neuroglia.AspNetCore.JsonPatch" Version="2.0.1.88" />
-    <PackageReference Include="Neuroglia.Data" Version="2.0.1.88" />
-    <PackageReference Include="Neuroglia.Data.Kubernetes" Version="2.0.1.88" />
+    <PackageReference Include="Neuroglia.AspNetCore.JsonPatch" Version="2.0.2" />
+    <PackageReference Include="Neuroglia.Data" Version="2.0.2" />
+    <PackageReference Include="Neuroglia.Data.Kubernetes" Version="2.0.2" />
 	<PackageReference Include="Semver" Version="2.2.0" />
   </ItemGroup>
 

@@ -15,6 +15,8 @@
  *
  */
 
+using ServerlessWorkflow.Sdk.Models;
+
 namespace Synapse.Apis.Management.Http.Controllers
 {
 
@@ -63,6 +65,22 @@ namespace Synapse.Apis.Management.Http.Controllers
         public virtual async Task<IActionResult> GetFunctionCollectionById(string id, CancellationToken cancellationToken)
         {
             return this.Process(await this.Mediator.ExecuteAsync(Application.Queries.FunctionDefinitionCollections.V1GetFunctionDefinitionCollectionByIdQuery.Parse(id), cancellationToken));
+        }
+
+        /// <summary>
+        /// Gets the raw function definition collection with the specified id
+        /// </summary>
+        /// <param name="id">The id of the function definition collection to get</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new <see cref="IActionResult"/></returns>
+        [HttpGet("{id}/raw")]
+        [ProducesResponseType(typeof(List<FunctionDefinition>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.Forbidden)]
+        public virtual async Task<IActionResult> GetRawFunctionCollectionById(string id, CancellationToken cancellationToken)
+        {
+            return this.Process(await this.Mediator.ExecuteAsync(Application.Queries.FunctionDefinitionCollections.V1GetRawFunctionDefinitionCollectionByIdQuery.Parse(id), cancellationToken));
         }
 
         /// <summary>
