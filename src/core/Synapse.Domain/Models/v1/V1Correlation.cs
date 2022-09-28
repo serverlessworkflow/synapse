@@ -23,6 +23,7 @@ namespace Synapse.Domain.Models
     /// <summary>
     /// Represents an event correlation
     /// </summary>
+    [Patchable]
     [DataTransferObjectType(typeof(Integration.Models.V1Correlation))]
     public class V1Correlation
         : AggregateRoot<string>

@@ -1,0 +1,132 @@
+﻿@* 
+    Copyright © 2022-Present The Synapse Authors
+    <p>
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+    <p>
+    http://www.apache.org/licenses/LICENSE-2.0
+    <p>
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*@
+
+@page "/resources"
+@using Semver
+@using Synapse.Dashboard.Pages.Resources.Collections.Functions
+@inherits StatefulComponent<V1FunctionDefinitionCollectionState>
+@inject IBreadcrumbService BreadcrumbService
+
+<PageTitle>Resources</PageTitle>
+
+<TabControl ContainerCssClass="d-flex flex-column w-100 h-100">
+    <TabPage Header="Functions">
+        <div class="p-5">
+            <div class="row">
+                <div class="col-6">
+                    <SearchBox PlaceHolder="Search collections..." OnSearch="OnSearchFunctionDefinitionCollection" OnClear="OnClearFunctionDefinitionCollectionSearch" />
+                </div>
+            </div>
+            <Table Items="functionDefinitionCollections" AutoGenerateColumns="false">
+                <RowTemplate Context="RenderContext">
+                    <ExpandableDataRow>
+                        <Header>
+                            <CellCollectionPresenter Item="@RenderContext.Item" />
+                        </Header>
+                        <Body>
+                            <td colspan="100">
+                                <Table Items="RenderContext.Item.Value" AutoGenerateColumns="false">
+                                    <RowTemplate Context="SubRenderContext">
+                                        <tr>
+                                            <CellCollectionPresenter Item="@SubRenderContext.Item" />
+                                        </tr>
+                                    </RowTemplate>
+                                    <Columns>                        
+                                        <Column T="V1FunctionDefinitionCollection" 
+                                        Name="Version"
+                                        ValueProvider="collection => collection.Version" />
+                                        <Column T="V1FunctionDefinitionCollection" 
+                                        Name="CreatedAt"
+                                        ValueProvider="collection => collection.CreatedAt" />
+                                        <Column T="V1FunctionDefinitionCollection"
+                                        Name="Uri"
+                                        ValueProvider="@(c => $"/api/v1/resources/collections/functions/{c.Id}")">
+                                            <CellTemplate Context="context">
+                                                <a href="@context.Value">@context.Value</a>
+                                            </CellTemplate>
+                                        </Column>
+                                        <ViewDetailsColumn T="V1FunctionDefinitionCollection" OnViewDetails="collection => OnViewCollection(collection)" />
+                                    </Columns>
+                                </Table>
+                            </td>
+                        </Body>
+                    </ExpandableDataRow>
+                </RowTemplate>
+                <Columns>
+                    <Column T="KeyValuePair<string, List<V1FunctionDefinitionCollection>>"
+                    Name="Name"
+                    ValueProvider="c => c.Key" />
+                    <Column T="KeyValuePair<string, List<V1FunctionDefinitionCollection>>"
+                    Name="Versions"
+                    ValueProvider="c => c.Value.Count" />
+                    <Column T="KeyValuePair<string, List<V1FunctionDefinitionCollection>>"
+                    Name="Latest version"
+                    ValueProvider="c => c.Value.Max(c => SemVersion.Parse(c.Version, SemVersionStyles.Any, 1024))" />
+                    <Column T="KeyValuePair<string, List<V1FunctionDefinitionCollection>>"
+                    Name="Uri"
+                    ValueProvider="@(c => $"/api/v1/resources/collections/functions/{c.Key.ToLowerInvariant().Slugify("-", false, null)}:latest")">
+                        <CellTemplate Context="context">
+                            <a href="@context.Value">@context.Value</a>
+                        </CellTemplate>
+                    </Column>
+                    <ViewDetailsColumn T="KeyValuePair<string, List<V1FunctionDefinitionCollection>>" OnViewDetails="kvp => OnViewCollection(kvp.Value.First())" />
+                </Columns>
+            </Table>
+        </div>     
+    </TabPage>
+    <TabPage Header="Events">
+
+    </TabPage>
+    <TabPage Header="Authentications">
+
+    </TabPage>
+</TabControl>
+
+@code {
+    private Dictionary<string, List<V1FunctionDefinitionCollection>> functionDefinitionCollections = null!;
+    private IDisposable functionDefinitionCollectionSubscription = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await this.BreadcrumbService.Use(KnownBreadcrumbs.Resources);
+        this.functionDefinitionCollectionSubscription = this.Feature
+            .Subscribe(state =>
+            {
+                this.functionDefinitionCollections = state.Collections
+                    .GroupBy(c => c.Name)
+                    .ToDictionary(g => g.Key, g => g.OrderByDescending(c => SemVersion.Parse(c.Version, SemVersionStyles.Any)).ToList())!;
+                this.StateHasChanged();
+            });
+        this.Dispatcher.Dispatch(new QueryV1FunctionDefinitionCollections());
+    }
+
+    protected virtual async Task OnSearchFunctionDefinitionCollection(string searchTerm)
+    {
+        this.Dispatcher.Dispatch(new QueryV1FunctionDefinitionCollections(searchTerm));
+    }
+
+    protected virtual async Task OnClearFunctionDefinitionCollectionSearch()
+    {
+        this.Dispatcher.Dispatch(new QueryV1FunctionDefinitionCollections());
+    }
+
+    protected virtual async Task OnViewCollection(V1FunctionDefinitionCollection collection)
+    {
+        
+    }
+
+}

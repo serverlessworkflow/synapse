@@ -46,7 +46,7 @@ namespace Synapse.Apis.Management.Http.Controllers
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.Forbidden)]
-        public async Task<IActionResult> Create([FromBody] Integration.Commands.Workflows.V1CreateWorkflowCommand command, CancellationToken cancellationToken)
+        public async Task<IActionResult> CreateWorkflow([FromBody] Integration.Commands.Workflows.V1CreateWorkflowCommand command, CancellationToken cancellationToken)
         {
             return this.Process(await this.Mediator.ExecuteAsync(this.Mapper.Map<Application.Commands.Workflows.V1CreateWorkflowCommand>(command), cancellationToken), (int)HttpStatusCode.Created);
         }
@@ -62,7 +62,7 @@ namespace Synapse.Apis.Management.Http.Controllers
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.Forbidden)]
-        public async Task<IActionResult> Upload([FromForm] Integration.Commands.Workflows.V1UploadWorkflowCommand command, CancellationToken cancellationToken)
+        public async Task<IActionResult> UploadWorkflow([FromForm] Integration.Commands.Workflows.V1UploadWorkflowCommand command, CancellationToken cancellationToken)
         {
             return this.Process(await this.Mediator.ExecuteAsync(this.Mapper.Map<Application.Commands.Workflows.V1UploadWorkflowCommand>(command), cancellationToken), (int)HttpStatusCode.Created);
         }
@@ -78,7 +78,7 @@ namespace Synapse.Apis.Management.Http.Controllers
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.Forbidden)]
-        public async Task<IActionResult> GetById(string id, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetWorkflowById(string id, CancellationToken cancellationToken)
         {
             return this.Process(await this.Mediator.ExecuteAsync(Application.Queries.Workflows.V1GetWorkflowByIdQuery.Parse(id), cancellationToken));
         }
@@ -95,7 +95,7 @@ namespace Synapse.Apis.Management.Http.Controllers
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.Forbidden)]
-        public async Task<IActionResult> GetInstanceByKey(string id, string instanceKey, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetWorkflowInstanceByKey(string id, string instanceKey, CancellationToken cancellationToken)
         {
             return this.Process(await this.Mediator.ExecuteAsync(new Application.Queries.Generic.V1FindByIdQuery<Integration.Models.V1WorkflowInstance, string>($"{id}-{instanceKey}"), cancellationToken));
         }
@@ -111,7 +111,7 @@ namespace Synapse.Apis.Management.Http.Controllers
         [ProducesResponseType(typeof(IEnumerable<Integration.Models.V1Workflow>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.Forbidden)]
-        public async Task<IActionResult> Get(ODataQueryOptions<Integration.Models.V1Workflow> queryOptions, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetWorkflows(ODataQueryOptions<Integration.Models.V1Workflow> queryOptions, CancellationToken cancellationToken)
         {
             return this.Process(await this.Mediator.ExecuteAsync(new Application.Queries.Generic.V1FilterQuery<Integration.Models.V1Workflow>(queryOptions), cancellationToken));
         }
@@ -128,9 +128,9 @@ namespace Synapse.Apis.Management.Http.Controllers
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.Forbidden)]
-        public async Task<IActionResult> Patch([FromBody] Integration.Commands.Generic.V1PatchCommand command, CancellationToken cancellationToken)
+        public async Task<IActionResult> PatchWorkflow([FromBody] Integration.Commands.Generic.V1PatchCommand command, CancellationToken cancellationToken)
         {
-            return this.Process(await this.Mediator.ExecuteAsync(this.Mapper.Map<Application.Commands.Generic.V1PatchCommand<Domain.Models.V1Workflow, string>>(command), cancellationToken));
+            return this.Process(await this.Mediator.ExecuteAsync(this.Mapper.Map<Application.Commands.Generic.V1PatchCommand<Domain.Models.V1Workflow, Integration.Models.V1Workflow, string>>(command), cancellationToken));
         }
 
         /// <summary>
@@ -145,7 +145,7 @@ namespace Synapse.Apis.Management.Http.Controllers
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.Forbidden)]
-        public async Task<IActionResult> Archive(string id, string? version, CancellationToken cancellationToken)
+        public async Task<IActionResult> ArchiveWorkflow(string id, string? version, CancellationToken cancellationToken)
         {
             var result = await this.Mediator.ExecuteAsync(new Application.Commands.Workflows.V1ArchiveWorkflowCommand(id, version), cancellationToken);
             if (!result.Succeeded)
@@ -164,7 +164,7 @@ namespace Synapse.Apis.Management.Http.Controllers
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.Forbidden)]
-        public async Task<IActionResult> Delete(string id, CancellationToken cancellationToken)
+        public async Task<IActionResult> DeleteWorkflow(string id, CancellationToken cancellationToken)
         {
             return this.Process(await this.Mediator.ExecuteAsync(new Application.Commands.Workflows.V1DeleteWorkflowCommand(id), cancellationToken));
         }

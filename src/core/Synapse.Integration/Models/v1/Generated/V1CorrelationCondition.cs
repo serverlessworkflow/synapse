@@ -33,7 +33,7 @@ namespace Synapse.Integration.Models
 		/// <summary>
 		/// An IReadOnlyCollection`1 containing the V1EventFilter used to configure the filtering of events that can fire the V1Correlation
 		/// </summary>
-		[DataMember(Name = "Filters", Order = 1)]
+		[DataMember(Name = "filters", Order = 1)]
 		[Description("An IReadOnlyCollection`1 containing the V1EventFilter used to configure the filtering of events that can fire the V1Correlation")]
 		public virtual ICollection<V1EventFilter> Filters { get; set; }
 

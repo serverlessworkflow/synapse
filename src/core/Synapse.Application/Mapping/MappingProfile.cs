@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
+using Synapse.Application.Commands.Generic;
 using Synapse.Application.Mapping.Converters;
 using System.Reflection;
 
@@ -20,7 +21,7 @@ namespace Synapse.Application.Mapping
         {
             this.AllowNullCollections = true;
             this.MappingConfigurationTypes = new List<Type>();
-            this.Initialize();
+            this.ApplyMappingConfigurations();
             this.ConfigureEntities();
             this.ConfigureCommands();
             this.ConfigureQueries();
@@ -37,7 +38,7 @@ namespace Synapse.Application.Mapping
         /// <summary>
         /// Initializes the <see cref="MappingProfile"/>
         /// </summary>
-        protected void Initialize()
+        protected void ApplyMappingConfigurations()
         {
             foreach (Type mappingConfigurationType in this.GetType().Assembly
                 .GetTypes()
@@ -68,13 +69,22 @@ namespace Synapse.Application.Mapping
         /// </summary>
         protected void ConfigureCommands()
         {
-            foreach (Type commandType in typeof(MappingProfile).Assembly
+            foreach (var commandType in typeof(MappingProfile).Assembly
                 .GetTypes()
                 .Where(t => !t.IsAbstract && !t.IsInterface && t.IsClass && typeof(ICommand).IsAssignableFrom(t)))
             {
-                DataTransferObjectTypeAttribute? dtoTypeAttribute = commandType.GetCustomAttribute<DataTransferObjectTypeAttribute>();
+                var dtoTypeAttribute = commandType.GetCustomAttribute<DataTransferObjectTypeAttribute>();
                 if (dtoTypeAttribute != null && !this.MappingConfigurationTypes.Any(t => typeof(IMappingConfiguration<,>).MakeGenericType(dtoTypeAttribute.Type, commandType).IsAssignableFrom(t)))
                     this.CreateMap(dtoTypeAttribute.Type, commandType);
+            }
+            foreach (var patchableAggregateType in typeof(V1Workflow).Assembly
+                .GetTypes()
+                .Where(t => !t.IsAbstract && !t.IsInterface && t.IsClass && typeof(IAggregateRoot).IsAssignableFrom(t) && t.TryGetCustomAttribute<PatchableAttribute>(out _)))
+            {
+                var keyType = patchableAggregateType.GetGenericType(typeof(IIdentifiable<>)).GetGenericArguments()[0];
+                var dtoType = patchableAggregateType.GetCustomAttribute<DataTransferObjectTypeAttribute>()!.Type;
+                var patchCommandType = typeof(V1PatchCommand<,,>).MakeGenericType(patchableAggregateType, dtoType, keyType);
+                this.CreateMap(typeof(Integration.Commands.Generic.V1PatchCommand), patchCommandType);
             }
         }
 

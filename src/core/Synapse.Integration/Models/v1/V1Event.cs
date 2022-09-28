@@ -19,6 +19,7 @@ using CloudNative.CloudEvents;
 
 namespace Synapse.Integration.Models
 {
+
     public partial class V1Event
     {
 

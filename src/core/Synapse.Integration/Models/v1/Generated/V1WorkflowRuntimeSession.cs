@@ -33,28 +33,28 @@ namespace Synapse.Integration.Models
 		/// <summary>
 		/// The string used to uniquely identify the process the session is bound to
 		/// </summary>
-		[DataMember(Name = "ProcessId", Order = 1)]
+		[DataMember(Name = "processId", Order = 1)]
 		[Description("The string used to uniquely identify the process the session is bound to")]
 		public virtual string ProcessId { get; set; }
 
 		/// <summary>
 		/// The date and time at which the V1WorkflowRuntimeSession has started
 		/// </summary>
-		[DataMember(Name = "StartedAt", Order = 2)]
+		[DataMember(Name = "startedAt", Order = 2)]
 		[Description("The date and time at which the V1WorkflowRuntimeSession has started")]
 		public virtual DateTime StartedAt { get; set; }
 
 		/// <summary>
 		/// The date and time at which the V1WorkflowRuntimeSession has ended
 		/// </summary>
-		[DataMember(Name = "EndedAt", Order = 3)]
+		[DataMember(Name = "endedAt", Order = 3)]
 		[Description("The date and time at which the V1WorkflowRuntimeSession has ended")]
 		public virtual DateTime? EndedAt { get; set; }
 
 		/// <summary>
 		/// The logs associated to the V1WorkflowRuntimeSession
 		/// </summary>
-		[DataMember(Name = "Logs", Order = 4)]
+		[DataMember(Name = "logs", Order = 4)]
 		[Description("The logs associated to the V1WorkflowRuntimeSession")]
 		public virtual string Logs { get; set; }
 

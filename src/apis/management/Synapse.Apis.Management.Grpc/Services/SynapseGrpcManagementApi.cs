@@ -25,6 +25,8 @@ using Synapse.Apis.Management.Grpc.Models;
 using Synapse.Application.Commands.Generic;
 using Synapse.Application.Queries.Generic;
 using Synapse.Application.Services;
+using Synapse.Integration.Commands.Correlations;
+using Synapse.Integration.Commands.FunctionDefinitionCollections;
 using Synapse.Integration.Commands.Workflows;
 using Synapse.Integration.Models;
 
@@ -225,6 +227,34 @@ namespace Synapse.Apis.Management.Grpc
             return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new V1DeleteCommand<V1Correlation, string>(id), context.CancellationToken));
         }
 
+
+        #endregion
+
+        #region FunctionDefinitionCollections
+
+        /// <inheritdoc/>
+        public virtual async Task<GrpcApiResult<V1FunctionDefinitionCollection>> CreateFunctionDefinitionCollectionAsync(V1CreateFunctionDefinitionCollectionCommand command, CallContext context = default)
+        {
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(this.Mapper.Map<Application.Commands.FunctionDefinitionCollections.V1CreateFunctionDefinitionCollectionCommand>(command), context.CancellationToken));
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<GrpcApiResult<V1FunctionDefinitionCollection>> GetFunctionDefinitionCollectionByIdAsync(string id, CallContext context = default)
+        {
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new V1FindByIdQuery<V1FunctionDefinitionCollection, string>(id), context.CancellationToken));
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<GrpcApiResult<List<V1FunctionDefinitionCollection>>> GetFunctionDefinitionCollectionsAsync(string? query = null, CallContext context = default)
+        {
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new V1FilterQuery<V1FunctionDefinitionCollection>(this.QueryOptionsParser.Parse<V1FunctionDefinitionCollection>(query)), context.CancellationToken));
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<GrpcApiResult> DeleteFunctionDefinitionCollectionAsync(string id, CallContext context = default)
+        {
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new V1FindByIdQuery<V1FunctionDefinitionCollection, string>(id), context.CancellationToken));
+        }
 
         #endregion
 

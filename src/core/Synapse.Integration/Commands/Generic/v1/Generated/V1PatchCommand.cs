@@ -36,7 +36,7 @@ namespace Synapse.Integration.Commands.Generic
 		/// </summary>
 		[DataMember(Name = "Id", Order = 1)]
 		[Description("The id of the entity to patch")]
-		public virtual Dynamic Id { get; set; }
+		public virtual object Id { get; set; }
 
 		/// <summary>
 		/// The JsonPatchDocument`1 to apply

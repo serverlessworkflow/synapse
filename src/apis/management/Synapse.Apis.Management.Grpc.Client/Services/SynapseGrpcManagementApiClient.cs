@@ -16,6 +16,7 @@
  */
 using Microsoft.Extensions.Logging;
 using Synapse.Integration.Commands.Correlations;
+using Synapse.Integration.Commands.FunctionDefinitionCollections;
 using Synapse.Integration.Commands.WorkflowInstances;
 using Synapse.Integration.Commands.Workflows;
 
@@ -202,20 +203,20 @@ namespace Synapse.Apis.Management.Grpc
         }
 
         /// <inheritdoc/>
-        public virtual async Task DeleteWorkflowInstanceAsync(string id, CancellationToken cancellationToken = default)
-        {
-            var result = await this.Adapter.DeleteWorkflowInstanceAsync(id, cancellationToken);
-            if(!result.Succeeded)
-                throw new SynapseApiException(result);
-        }
-
-        /// <inheritdoc/>
         public virtual async Task<string> GetWorkflowInstanceLogsAsync(string id, CancellationToken cancellationToken = default)
         {
             var result = await this.Adapter.GetWorkflowInstanceLogsAsync(id, cancellationToken);
             if (!result.Succeeded)
                 throw new SynapseApiException(result);
             return result.Data!;
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task DeleteWorkflowInstanceAsync(string id, CancellationToken cancellationToken = default)
+        {
+            var result = await this.Adapter.DeleteWorkflowInstanceAsync(id, cancellationToken);
+            if (!result.Succeeded)
+                throw new SynapseApiException(result);
         }
 
         #endregion
@@ -263,6 +264,51 @@ namespace Synapse.Apis.Management.Grpc
 
 
         #endregion region
+
+        #region FunctionDefinitionCollections
+
+        /// <inheritdoc/>
+        public virtual async Task<V1FunctionDefinitionCollection> CreateFunctionDefinitionCollectionAsync(V1CreateFunctionDefinitionCollectionCommand command, CancellationToken cancellationToken = default)
+        {
+            var result = await this.Adapter.CreateFunctionDefinitionCollectionAsync(command, cancellationToken);
+            if (!result.Succeeded)
+                throw new SynapseApiException(result);
+            return result.Data!;
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<V1FunctionDefinitionCollection> GetFunctionDefinitionCollectionByIdAsync(string id, CancellationToken cancellationToken = default)
+        {
+            var result = await this.Adapter.GetFunctionDefinitionCollectionByIdAsync(id, cancellationToken);
+            if (!result.Succeeded)
+                throw new SynapseApiException(result);
+            return result.Data!;
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<List<V1FunctionDefinitionCollection>> GetFunctionDefinitionCollectionsAsync(CancellationToken cancellationToken = default)
+        {
+            return await this.GetFunctionDefinitionCollectionsAsync(null!, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<List<V1FunctionDefinitionCollection>> GetFunctionDefinitionCollectionsAsync(string query, CancellationToken cancellationToken = default)
+        {
+            var result = await this.Adapter.GetFunctionDefinitionCollectionsAsync(query, cancellationToken);
+            if (!result.Succeeded)
+                throw new SynapseApiException(result);
+            return result.Data!;
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task DeleteFunctionDefinitionCollectionAsync(string id, CancellationToken cancellationToken = default)
+        {
+            var result = await this.Adapter.DeleteWorkflowInstanceAsync(id, cancellationToken);
+            if (!result.Succeeded)
+                throw new SynapseApiException(result);
+        }
+
+        #endregion
 
         #region OperationalReports
 

@@ -81,6 +81,9 @@
     <Compile Update="Commands\Correlations\v1\Generated\V1CorrelateEventCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\Correlations\v1\V1CorrelateEventCommand.cs</CustomToolNamespace>
     </Compile>
+    <Compile Update="Commands\FunctionDefinitionCollections\v1\Generated\V1CreateFunctionDefinitionCollectionCommand.cs">
+      <CustomToolNamespace>..\Synapse.Application\Commands\FunctionDefinitionCollections\v1\V1CreateFunctionDefinitionCollectionCommand.cs</CustomToolNamespace>
+    </Compile>
     <Compile Update="Commands\Generic\v1\Generated\V1DeleteCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\Generic\v1\V1DeleteCommand.cs</CustomToolNamespace>
     </Compile>
@@ -197,6 +200,21 @@
     </Compile>
     <Compile Update="Events\Correlations\v1\Generated\V1EventCorrelatedIntegrationEvent.cs">
       <CustomToolNamespace>..\Synapse.Domain\Events\Correlations\v1\V1EventCorrelatedDomainEvent.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\FunctionDefinitionCollections\v1\Generated\V1FunctionDefinitionAddedToCollectionIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\FunctionDefinitionCollections\v1\V1FunctionDefinitionAddedToCollectionDomainEvent.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\FunctionDefinitionCollections\v1\Generated\V1FunctionDefinitionCollectionCreatedIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\FunctionDefinitionCollections\v1\V1WorkflowActivityCreatedDomainEvent.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\FunctionDefinitionCollections\v1\Generated\V1FunctionDefinitionCollectionDeletedIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\FunctionDefinitionCollections\v1\V1FunctionDefinitionCollectionDeletedDomainEvent.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\FunctionDefinitionCollections\v1\Generated\V1FunctionDefinitionCollectionDescriptionChangedIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\FunctionDefinitionCollections\v1\V1FunctionDefinitionCollectionDescriptionChangedDomainEvent.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\FunctionDefinitionCollections\v1\Generated\V1FunctionDefinitionRemovedFromCollectionIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\FunctionDefinitionCollections\v1\V1FunctionDefinitionRemovedFromCollectionDomainEvent.cs</CustomToolNamespace>
     </Compile>
     <Compile Update="Events\WorkflowActivities\v1\Generated\V1WorkflowActivityCancelledIntegrationEvent.cs">
       <CustomToolNamespace>..\Synapse.Domain\Events\WorkflowActivities\v1\V1WorkflowActivityCancelledDomainEvent.cs</CustomToolNamespace>
@@ -336,6 +354,9 @@
     <Compile Update="Models\v1\Generated\V1EventFilter.cs">
       <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1EventFilter.cs</CustomToolNamespace>
     </Compile>
+    <Compile Update="Models\v1\Generated\V1FunctionDefinitionCollection.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1FunctionDefinitionCollection.cs</CustomToolNamespace>
+    </Compile>
     <Compile Update="Models\v1\Generated\V1WorkflowActivity.cs">
       <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1WorkflowActivity.cs</CustomToolNamespace>
     </Compile>
@@ -344,6 +365,12 @@
     </Compile>
     <Compile Update="Models\v1\Generated\V1WorkflowInstance.cs">
       <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1WorkflowInstance.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Models\v1\Generated\V1WorkflowProcess.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1WorkflowProcess.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Models\v1\Generated\V1WorkflowRuntimeSession.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1WorkflowRuntimeSession.cs</CustomToolNamespace>
     </Compile>
   </ItemGroup>
 

@@ -44,7 +44,7 @@ namespace Synapse.Apis.Management.Http.Controllers
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.Forbidden)]
-        public async Task<IActionResult> Get(DateTime? date = null, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetOperationalReport(DateTime? date = null, CancellationToken cancellationToken = default)
         {
             if (!date.HasValue)
                 date = DateTime.Now;

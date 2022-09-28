@@ -17,6 +17,7 @@
 
 using ProtoBuf.Grpc;
 using Synapse.Integration.Commands.Correlations;
+using Synapse.Integration.Commands.FunctionDefinitionCollections;
 using Synapse.Integration.Commands.WorkflowInstances;
 using Synapse.Integration.Commands.Workflows;
 
@@ -234,6 +235,47 @@ namespace Synapse.Apis.Management.Grpc
         /// <returns>A new object that describes the result of the operation</returns>
         [OperationContract]
         Task<GrpcApiResult> DeleteCorrelationAsync(string id, CallContext context = default);
+
+        #endregion
+
+        #region FunctionDefinitionCollections
+
+        /// <summary>
+        /// Creates a new <see cref="V1FunctionDefinitionCollection"/>
+        /// </summary>
+        /// <param name="command">The object that describes the command to execute</param>
+        /// <param name="context">The current <see cref="CallContext"/></param>
+        /// <returns>The newly created <see cref="V1FunctionDefinitionCollection"/></returns>
+        [OperationContract]
+        Task<GrpcApiResult<V1FunctionDefinitionCollection>> CreateFunctionDefinitionCollectionAsync(V1CreateFunctionDefinitionCollectionCommand command, CallContext context = default);
+
+        /// <summary>
+        /// Gets the <see cref="V1FunctionDefinitionCollection"/> with the specified id
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1FunctionDefinitionCollection"/> to get</param>
+        /// <param name="context">The current <see cref="CallContext"/></param>
+        /// <returns>The <see cref="V1Correlation"/> with the specified id</returns>
+
+        [OperationContract]
+        Task<GrpcApiResult<V1FunctionDefinitionCollection>> GetFunctionDefinitionCollectionByIdAsync(string id, CallContext context = default);
+
+        /// <summary>
+        /// Lists existing <see cref="V1FunctionDefinitionCollection"/>s
+        /// </summary>
+        /// <param name="query">The OData query string</param>
+        /// <param name="context">The current <see cref="CallContext"/></param>
+        /// <returns>A new <see cref="List{T}"/> containing all existing <see cref="V1FunctionDefinitionCollection"/>s</returns>
+        [OperationContract]
+        Task<GrpcApiResult<List<V1FunctionDefinitionCollection>>> GetFunctionDefinitionCollectionsAsync(string? query = null, CallContext context = default);
+
+        /// <summary>
+        /// Deletes the <see cref="V1FunctionDefinitionCollection"/> with the specified id
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1FunctionDefinitionCollection"/> to delete</param>
+        /// <param name="context">The current <see cref="CallContext"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        [OperationContract]
+        Task<GrpcApiResult> DeleteFunctionDefinitionCollectionAsync(string id, CallContext context = default);
 
         #endregion
 

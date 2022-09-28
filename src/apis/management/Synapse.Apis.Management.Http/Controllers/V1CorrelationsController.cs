@@ -44,7 +44,7 @@ namespace Synapse.Apis.Management.Http.Controllers
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.Forbidden)]
-        public async Task<IActionResult> Create([FromBody] Integration.Commands.Correlations.V1CreateCorrelationCommand command, CancellationToken cancellationToken)
+        public async Task<IActionResult> CreateCorrelation([FromBody] Integration.Commands.Correlations.V1CreateCorrelationCommand command, CancellationToken cancellationToken)
         {
             return this.Process(await this.Mediator.ExecuteAsync(this.Mapper.Map<Application.Commands.Correlations.V1CreateCorrelationCommand>(command), cancellationToken), (int)HttpStatusCode.Created);
         }
@@ -60,7 +60,7 @@ namespace Synapse.Apis.Management.Http.Controllers
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.Forbidden)]
-        public async Task<IActionResult> GetById(string id, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetCorrelationById(string id, CancellationToken cancellationToken)
         {
             return this.Process(await this.Mediator.ExecuteAsync(new Application.Queries.Generic.V1FindByIdQuery<Integration.Models.V1Correlation, string>(id), cancellationToken));
         }
@@ -76,7 +76,7 @@ namespace Synapse.Apis.Management.Http.Controllers
         [ProducesResponseType(typeof(IEnumerable<Integration.Models.V1Correlation>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.Forbidden)]
-        public async Task<IActionResult> Get(ODataQueryOptions<Integration.Models.V1Correlation> queryOptions, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetCorrelations(ODataQueryOptions<Integration.Models.V1Correlation> queryOptions, CancellationToken cancellationToken)
         {
             return this.Process(await this.Mediator.ExecuteAsync(new Application.Queries.Generic.V1FilterQuery<Integration.Models.V1Correlation>(queryOptions), cancellationToken));
         }
@@ -93,9 +93,9 @@ namespace Synapse.Apis.Management.Http.Controllers
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.Forbidden)]
-        public async Task<IActionResult> Patch([FromBody] Integration.Commands.Generic.V1PatchCommand command, CancellationToken cancellationToken)
+        public async Task<IActionResult> PatchCorrelation([FromBody] Integration.Commands.Generic.V1PatchCommand command, CancellationToken cancellationToken)
         {
-            return this.Process(await this.Mediator.ExecuteAsync(this.Mapper.Map<Application.Commands.Generic.V1PatchCommand<Domain.Models.V1Correlation, string>>(command), cancellationToken));
+            return this.Process(await this.Mediator.ExecuteAsync(this.Mapper.Map<Application.Commands.Generic.V1PatchCommand<Domain.Models.V1Correlation, Integration.Models.V1Correlation, string >>(command), cancellationToken));
         }
 
         /// <summary>
@@ -109,7 +109,7 @@ namespace Synapse.Apis.Management.Http.Controllers
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.Forbidden)]
-        public async Task<IActionResult> Delete(string id, CancellationToken cancellationToken)
+        public async Task<IActionResult> DeleteCorrelation(string id, CancellationToken cancellationToken)
         {
             return this.Process(await this.Mediator.ExecuteAsync(new Application.Commands.Generic.V1DeleteCommand<Domain.Models.V1Correlation, string>(id), cancellationToken), (int)HttpStatusCode.Created);
         }

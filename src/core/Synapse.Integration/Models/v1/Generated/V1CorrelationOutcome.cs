@@ -33,14 +33,14 @@ namespace Synapse.Integration.Models
 		/// <summary>
 		/// The V1CorrelationOutcomeType's type
 		/// </summary>
-		[DataMember(Name = "Type", Order = 1)]
+		[DataMember(Name = "type", Order = 1)]
 		[Description("The V1CorrelationOutcomeType's type")]
 		public virtual V1CorrelationOutcomeType Type { get; set; }
 
 		/// <summary>
 		/// The identifier of the V1CorrelationOutcome's target (a V1Workflow or a V1WorkflowInstance)
 		/// </summary>
-		[DataMember(Name = "Target", Order = 2)]
+		[DataMember(Name = "target", Order = 2)]
 		[Description("The identifier of the V1CorrelationOutcome's target (a V1Workflow or a V1WorkflowInstance)")]
 		public virtual string Target { get; set; }
 

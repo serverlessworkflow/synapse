@@ -35,21 +35,21 @@ namespace Synapse.Integration.Models
 		/// <summary>
 		/// The date and time at which the V1WorkflowProcess has exited
 		/// </summary>
-		[DataMember(Name = "ExitedAt", Order = 1)]
+		[DataMember(Name = "exitedAt", Order = 1)]
 		[Description("The date and time at which the V1WorkflowProcess has exited")]
 		public virtual DateTime? ExitedAt { get; set; }
 
 		/// <summary>
 		/// The logs associated to the V1WorkflowProcess
 		/// </summary>
-		[DataMember(Name = "Logs", Order = 2)]
+		[DataMember(Name = "logs", Order = 2)]
 		[Description("The logs associated to the V1WorkflowProcess")]
 		public virtual string Logs { get; set; }
 
 		/// <summary>
 		/// The V1WorkflowProcess's exit code
 		/// </summary>
-		[DataMember(Name = "ExitCode", Order = 3)]
+		[DataMember(Name = "exitCode", Order = 3)]
 		[Description("The V1WorkflowProcess's exit code")]
 		public virtual long? ExitCode { get; set; }
 

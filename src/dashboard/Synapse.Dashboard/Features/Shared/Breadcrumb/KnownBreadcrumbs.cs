@@ -25,6 +25,7 @@ namespace Synapse.Dashboard
         public static IEnumerable<IBreadcrumbItem> UploadWorkflow = new List<IBreadcrumbItem>(KnownBreadcrumbs.Workflows) { new BreadcrumbItem("Upload Workflow", "/workflows/upload") };
         public static IEnumerable<IBreadcrumbItem> WorkflowEditor = new List<IBreadcrumbItem>(Workflows) { new BreadcrumbItem("Workflow Editor", "/workflows/editor") };
         public static IEnumerable<IBreadcrumbItem> Correlations = new List<IBreadcrumbItem>(Home) { new BreadcrumbItem("Correlations", "/correlations", "bi-link-45deg") };
+        public static IEnumerable<IBreadcrumbItem> Resources = new List<IBreadcrumbItem>(Home) { new BreadcrumbItem("Resources", "/resources", "bi-files") };
         public static IEnumerable<IBreadcrumbItem> About = new List<IBreadcrumbItem>(Home) { new BreadcrumbItem("About", "/application/info", "bi-display") };
        
     }

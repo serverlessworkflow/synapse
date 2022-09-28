@@ -269,7 +269,7 @@ ${
             }
             Attribute jsonPropertyAttribute = property.Attributes.FirstOrDefault(a => a.Name == "JsonProperty");
             var propertyName = jsonPropertyAttribute == null ? property.Name : jsonPropertyAttribute.Arguments.First().Value.ToString();
-            output.AppendLine(Indent(2, $"[DataMember(Name = \"{propertyName}\", Order = {order})]"));
+            output.AppendLine(Indent(2, $"[DataMember(Name = \"{Char.ToLowerInvariant(propertyName[0]) + propertyName.Substring(1)}\", Order = {order})]"));
             if(jsonPropertyAttribute != null)
             {
                 output.AppendLine(Indent(2, $"[Newtonsoft.Json.JsonProperty({jsonPropertyAttribute.Value})]"));

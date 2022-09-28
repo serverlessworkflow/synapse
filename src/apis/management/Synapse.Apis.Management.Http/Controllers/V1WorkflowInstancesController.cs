@@ -46,7 +46,7 @@ namespace Synapse.Apis.Management.Http.Controllers
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.Forbidden)]
-        public async Task<IActionResult> Create([FromBody] Integration.Commands.WorkflowInstances.V1CreateWorkflowInstanceCommand command, CancellationToken cancellationToken)
+        public async Task<IActionResult> CreateWorkflowInstance([FromBody] Integration.Commands.WorkflowInstances.V1CreateWorkflowInstanceCommand command, CancellationToken cancellationToken)
         {
             return this.Process(await this.Mediator.ExecuteAsync(this.Mapper.Map<Application.Commands.WorkflowInstances.V1CreateWorkflowInstanceCommand>(command), cancellationToken), (int)HttpStatusCode.Created);
         }
@@ -62,7 +62,7 @@ namespace Synapse.Apis.Management.Http.Controllers
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.Forbidden)]
-        public async Task<IActionResult> GetById(string id, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetWorkflowInstanceById(string id, CancellationToken cancellationToken)
         {
             return this.Process(await this.Mediator.ExecuteAsync(new Application.Queries.Generic.V1FindByIdQuery<Integration.Models.V1WorkflowInstance, string>(id), cancellationToken));
         }
@@ -78,7 +78,7 @@ namespace Synapse.Apis.Management.Http.Controllers
         [ProducesResponseType(typeof(IEnumerable<Integration.Models.V1WorkflowInstance>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.Forbidden)]
-        public async Task<IActionResult> Get(ODataQueryOptions<Integration.Models.V1WorkflowInstance> queryOptions, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetWorkflowInstance(ODataQueryOptions<Integration.Models.V1WorkflowInstance> queryOptions, CancellationToken cancellationToken)
         {
             return this.Process(await this.Mediator.ExecuteAsync(new Application.Queries.Generic.V1FilterQuery<Integration.Models.V1WorkflowInstance>(queryOptions), cancellationToken));
         }
@@ -93,7 +93,7 @@ namespace Synapse.Apis.Management.Http.Controllers
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.Forbidden)]
-        public async Task<IActionResult> Start(string id, CancellationToken cancellationToken)
+        public async Task<IActionResult> StartWorkflowInstance(string id, CancellationToken cancellationToken)
         {
             return this.Process(await this.Mediator.ExecuteAsync(new Application.Commands.WorkflowInstances.V1StartWorkflowInstanceCommand(id), cancellationToken));
         }
@@ -110,9 +110,9 @@ namespace Synapse.Apis.Management.Http.Controllers
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.Forbidden)]
-        public async Task<IActionResult> Patch([FromBody] Integration.Commands.Generic.V1PatchCommand command, CancellationToken cancellationToken)
+        public async Task<IActionResult> PatchWorkflowInstance([FromBody] Integration.Commands.Generic.V1PatchCommand command, CancellationToken cancellationToken)
         {
-            return this.Process(await this.Mediator.ExecuteAsync(this.Mapper.Map<Application.Commands.Generic.V1PatchCommand<Domain.Models.V1WorkflowInstance, string>>(command), cancellationToken));
+            return this.Process(await this.Mediator.ExecuteAsync(this.Mapper.Map<Application.Commands.Generic.V1PatchCommand<Domain.Models.V1WorkflowInstance, Integration.Models.V1WorkflowInstance, string>>(command), cancellationToken));
         }
 
         /// <summary>
@@ -126,7 +126,7 @@ namespace Synapse.Apis.Management.Http.Controllers
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.Forbidden)]
-        public async Task<IActionResult> Suspend(string id, CancellationToken cancellationToken)
+        public async Task<IActionResult> SuspendWorkflowInstance(string id, CancellationToken cancellationToken)
         {
             return this.Process(await this.Mediator.ExecuteAsync(new Application.Commands.WorkflowInstances.V1SuspendWorkflowInstanceCommand(id), cancellationToken));
         }
@@ -142,7 +142,7 @@ namespace Synapse.Apis.Management.Http.Controllers
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.Forbidden)]
-        public async Task<IActionResult> Resume(string id, CancellationToken cancellationToken)
+        public async Task<IActionResult> ResumeWorkflowInstance(string id, CancellationToken cancellationToken)
         {
             return this.Process(await this.Mediator.ExecuteAsync(new Application.Commands.WorkflowInstances.V1ResumeWorkflowInstanceCommand(id), cancellationToken));
         }
@@ -158,7 +158,7 @@ namespace Synapse.Apis.Management.Http.Controllers
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.Forbidden)]
-        public async Task<IActionResult> Cancel(string id, CancellationToken cancellationToken)
+        public async Task<IActionResult> CancelWorkflowInstance(string id, CancellationToken cancellationToken)
         {
             return this.Process(await this.Mediator.ExecuteAsync(new Application.Commands.WorkflowInstances.V1CancelWorkflowInstanceCommand(id), cancellationToken));
         }
@@ -174,7 +174,7 @@ namespace Synapse.Apis.Management.Http.Controllers
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.Forbidden)]
-        public async Task<IActionResult> Archive(string id, CancellationToken cancellationToken)
+        public async Task<IActionResult> ArchiveWorkflowInstance(string id, CancellationToken cancellationToken)
         {
             var result = await this.Mediator.ExecuteAsync(new Application.Commands.WorkflowInstances.V1ArchiveWorkflowInstanceCommand(id), cancellationToken);
             if (!result.Succeeded)
@@ -193,7 +193,7 @@ namespace Synapse.Apis.Management.Http.Controllers
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.Forbidden)]
-        public async Task<IActionResult> GetLogs(string id, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetWorkflowInstanceLogs(string id, CancellationToken cancellationToken)
         {
             return this.Process(await this.Mediator.ExecuteAsync(new Application.Queries.WorkflowInstances.V1GetWorkflowInstanceLogsQuery(id), cancellationToken));
         }
@@ -209,7 +209,7 @@ namespace Synapse.Apis.Management.Http.Controllers
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.Forbidden)]
-        public async Task<IActionResult> Delete(string id, CancellationToken cancellationToken)
+        public async Task<IActionResult> DeleteWorkflowInstance(string id, CancellationToken cancellationToken)
         {
             return this.Process(await this.Mediator.ExecuteAsync(new Application.Commands.WorkflowInstances.V1DeleteWorkflowInstanceCommand(id), cancellationToken), (int)HttpStatusCode.Created);
         }

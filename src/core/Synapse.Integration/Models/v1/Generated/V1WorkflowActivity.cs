@@ -35,70 +35,70 @@ namespace Synapse.Integration.Models
 		/// <summary>
 		/// The id of the V1WorkflowInstance the V1WorkflowActivity belongs to
 		/// </summary>
-		[DataMember(Name = "WorkflowInstanceId", Order = 1)]
+		[DataMember(Name = "workflowInstanceId", Order = 1)]
 		[Description("The id of the V1WorkflowInstance the V1WorkflowActivity belongs to")]
 		public virtual string WorkflowInstanceId { get; set; }
 
 		/// <summary>
 		/// The V1WorkflowActivity's type
 		/// </summary>
-		[DataMember(Name = "Type", Order = 2)]
+		[DataMember(Name = "type", Order = 2)]
 		[Description("The V1WorkflowActivity's type")]
 		public virtual V1WorkflowActivityType Type { get; set; }
 
 		/// <summary>
 		/// The V1WorkflowActivity's status
 		/// </summary>
-		[DataMember(Name = "Status", Order = 3)]
+		[DataMember(Name = "status", Order = 3)]
 		[Description("The V1WorkflowActivity's status")]
 		public virtual V1WorkflowActivityStatus Status { get; set; }
 
 		/// <summary>
 		/// The date and time at which the V1WorkflowActivity has started
 		/// </summary>
-		[DataMember(Name = "StartedAt", Order = 4)]
+		[DataMember(Name = "startedAt", Order = 4)]
 		[Description("The date and time at which the V1WorkflowActivity has started")]
 		public virtual DateTime? StartedAt { get; set; }
 
 		/// <summary>
 		/// The date and time at which the V1WorkflowActivity has been executed<para></para>  Value is set when the V1WorkflowActivity has been cancelled, faults or completes
 		/// </summary>
-		[DataMember(Name = "ExecutedAt", Order = 5)]
+		[DataMember(Name = "executedAt", Order = 5)]
 		[Description("The date and time at which the V1WorkflowActivity has been executed<para></para>  Value is set when the V1WorkflowActivity has been cancelled, faults or completes")]
 		public virtual DateTime? ExecutedAt { get; set; }
 
 		/// <summary>
 		/// The Error that caused the V1WorkflowActivity to end prematurily
 		/// </summary>
-		[DataMember(Name = "Error", Order = 6)]
+		[DataMember(Name = "error", Order = 6)]
 		[Description("The Error that caused the V1WorkflowActivity to end prematurily")]
 		public virtual Error Error { get; set; }
 
 		/// <summary>
 		/// The V1WorkflowActivity's input
 		/// </summary>
-		[DataMember(Name = "Input", Order = 7)]
+		[DataMember(Name = "input", Order = 7)]
 		[Description("The V1WorkflowActivity's input")]
 		public virtual Dynamic Input { get; set; }
 
 		/// <summary>
 		/// The V1WorkflowInstance's output
 		/// </summary>
-		[DataMember(Name = "Output", Order = 8)]
+		[DataMember(Name = "output", Order = 8)]
 		[Description("The V1WorkflowInstance's output")]
 		public virtual Dynamic Output { get; set; }
 
 		/// <summary>
 		/// The V1WorkflowActivity's metadata
 		/// </summary>
-		[DataMember(Name = "Metadata", Order = 9)]
+		[DataMember(Name = "metadata", Order = 9)]
 		[Description("The V1WorkflowActivity's metadata")]
 		public virtual NameValueCollection<string> Metadata { get; set; }
 
 		/// <summary>
 		/// The id of the V1WorkflowActivity's parent, if any
 		/// </summary>
-		[DataMember(Name = "ParentId", Order = 10)]
+		[DataMember(Name = "parentId", Order = 10)]
 		[Description("The id of the V1WorkflowActivity's parent, if any")]
 		public virtual string ParentId { get; set; }
 
