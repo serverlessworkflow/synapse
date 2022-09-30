@@ -40,15 +40,27 @@ namespace Synapse.Dashboard.Pages.Resources.Collections
         /// Initializes a new <see cref="ResourceListState"/>
         /// </summary>
         /// <param name="functionDefinitionCollections">A <see cref="List{T}"/> containing the currently available <see cref="V1FunctionDefinitionCollection"/>s</param>
-        public ResourceListState(List<V1FunctionDefinitionCollection> functionDefinitionCollections)
+        public ResourceListState(List<V1FunctionDefinitionCollection> functionDefinitionCollections, List<V1EventDefinitionCollection> eventDefinitionCollections, List<V1AuthenticationDefinitionCollection> authenticationDefinitionCollections)
         {
             this.FunctionDefinitionCollections = functionDefinitionCollections;
+            this.EventDefinitionCollections = eventDefinitionCollections;
+            this.AuthenticationDefinitionCollections = authenticationDefinitionCollections;
         }
 
         /// <summary>
         /// Gets a <see cref="List{T}"/> containing the currently available <see cref="V1FunctionDefinitionCollection"/>s
         /// </summary>
         public List<V1FunctionDefinitionCollection> FunctionDefinitionCollections { get; set; } = null!;
+
+        /// <summary>
+        /// Gets a <see cref="List{T}"/> containing the currently available <see cref="V1EventDefinitionCollection"/>s
+        /// </summary>
+        public List<V1EventDefinitionCollection> EventDefinitionCollections { get; set; } = null!;
+
+        /// <summary>
+        /// Gets a <see cref="List{T}"/> containing the currently available <see cref="V1AuthenticationDefinitionCollection"/>s
+        /// </summary>
+        public List<V1AuthenticationDefinitionCollection> AuthenticationDefinitionCollections { get; set; } = null!;
 
     }
 

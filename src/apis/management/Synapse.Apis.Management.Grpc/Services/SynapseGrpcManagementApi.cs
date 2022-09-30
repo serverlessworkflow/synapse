@@ -25,7 +25,9 @@ using Synapse.Apis.Management.Grpc.Models;
 using Synapse.Application.Commands.Generic;
 using Synapse.Application.Queries.Generic;
 using Synapse.Application.Services;
+using Synapse.Integration.Commands.AuthenticationDefinitionCollections;
 using Synapse.Integration.Commands.Correlations;
+using Synapse.Integration.Commands.EventDefinitionCollections;
 using Synapse.Integration.Commands.FunctionDefinitionCollections;
 using Synapse.Integration.Commands.Workflows;
 using Synapse.Integration.Models;
@@ -227,6 +229,62 @@ namespace Synapse.Apis.Management.Grpc
             return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new V1DeleteCommand<V1Correlation, string>(id), context.CancellationToken));
         }
 
+
+        #endregion
+
+        #region AuthenticationDefinitionCollections
+
+        /// <inheritdoc/>
+        public virtual async Task<GrpcApiResult<V1AuthenticationDefinitionCollection>> CreateAuthenticationDefinitionCollectionAsync(V1CreateAuthenticationDefinitionCollectionCommand command, CallContext context = default)
+        {
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(this.Mapper.Map<Application.Commands.AuthenticationDefinitionCollections.V1CreateAuthenticationDefinitionCollectionCommand>(command), context.CancellationToken));
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<GrpcApiResult<V1AuthenticationDefinitionCollection>> GetAuthenticationDefinitionCollectionByIdAsync(string id, CallContext context = default)
+        {
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new V1FindByIdQuery<V1AuthenticationDefinitionCollection, string>(id), context.CancellationToken));
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<GrpcApiResult<List<V1AuthenticationDefinitionCollection>>> GetAuthenticationDefinitionCollectionsAsync(string? query = null, CallContext context = default)
+        {
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new V1FilterQuery<V1AuthenticationDefinitionCollection>(this.QueryOptionsParser.Parse<V1AuthenticationDefinitionCollection>(query)), context.CancellationToken));
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<GrpcApiResult> DeleteAuthenticationDefinitionCollectionAsync(string id, CallContext context = default)
+        {
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new V1FindByIdQuery<V1AuthenticationDefinitionCollection, string>(id), context.CancellationToken));
+        }
+
+        #endregion
+
+        #region EventDefinitionCollections
+
+        /// <inheritdoc/>
+        public virtual async Task<GrpcApiResult<V1EventDefinitionCollection>> CreateEventDefinitionCollectionAsync(V1CreateEventDefinitionCollectionCommand command, CallContext context = default)
+        {
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(this.Mapper.Map<Application.Commands.EventDefinitionCollections.V1CreateEventDefinitionCollectionCommand>(command), context.CancellationToken));
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<GrpcApiResult<V1EventDefinitionCollection>> GetEventDefinitionCollectionByIdAsync(string id, CallContext context = default)
+        {
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new V1FindByIdQuery<V1EventDefinitionCollection, string>(id), context.CancellationToken));
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<GrpcApiResult<List<V1EventDefinitionCollection>>> GetEventDefinitionCollectionsAsync(string? query = null, CallContext context = default)
+        {
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new V1FilterQuery<V1EventDefinitionCollection>(this.QueryOptionsParser.Parse<V1EventDefinitionCollection>(query)), context.CancellationToken));
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<GrpcApiResult> DeleteEventDefinitionCollectionAsync(string id, CallContext context = default)
+        {
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new V1FindByIdQuery<V1EventDefinitionCollection, string>(id), context.CancellationToken));
+        }
 
         #endregion
 

@@ -20,14 +20,14 @@
  * -----------------------------------------------------------------------
  */
 
-namespace Synapse.Integration.Events.Correlations
+namespace Synapse.Integration.Events.AuthenticationDefinitionCollections
 {
 
 	/// <summary>
-	/// Represents the IDomainEvent fired whenever a new CloudEvent has been correlated
+	/// Represents the IDomainEvent fired whenever a new V1EventDefinitionCollection has been deleted
 	/// </summary>
 	[DataContract]
-	public partial class V1EventCorrelatedIntegrationEvent
+	public partial class V1AuthenticationDefinitionCollectionDeletedIntegrationEvent
 		: V1IntegrationEvent
 	{
 
@@ -44,27 +44,6 @@ namespace Synapse.Integration.Events.Correlations
 		[DataMember(Name = "CreatedAt", Order = 2)]
 		[Description("Gets the date and time at which the event has been produced")]
 		public virtual DateTime CreatedAt { get; set; }
-
-		/// <summary>
-		/// The id of the context in which the correlation has been performed
-		/// </summary>
-		[DataMember(Name = "ContextId", Order = 3)]
-		[Description("The id of the context in which the correlation has been performed")]
-		public virtual string ContextId { get; set; }
-
-		/// <summary>
-		/// The V1Event that has been correlated
-		/// </summary>
-		[DataMember(Name = "Event", Order = 4)]
-		[Description("The V1Event that has been correlated")]
-		public virtual V1Event Event { get; set; }
-
-		/// <summary>
-		/// An ICollection`1 containing the keys of the mappings used to correlate the V1Event
-		/// </summary>
-		[DataMember(Name = "Mappings", Order = 5)]
-		[Description("An ICollection`1 containing the keys of the mappings used to correlate the V1Event")]
-		public virtual IEnumerable<string> Mappings { get; set; }
 
     }
 

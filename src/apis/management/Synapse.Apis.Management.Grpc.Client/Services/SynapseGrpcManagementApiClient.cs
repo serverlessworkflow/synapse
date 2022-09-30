@@ -15,7 +15,9 @@
  *
  */
 using Microsoft.Extensions.Logging;
+using Synapse.Integration.Commands.AuthenticationDefinitionCollections;
 using Synapse.Integration.Commands.Correlations;
+using Synapse.Integration.Commands.EventDefinitionCollections;
 using Synapse.Integration.Commands.FunctionDefinitionCollections;
 using Synapse.Integration.Commands.WorkflowInstances;
 using Synapse.Integration.Commands.Workflows;
@@ -264,6 +266,96 @@ namespace Synapse.Apis.Management.Grpc
 
 
         #endregion region
+
+        #region AuthenticationDefinitionCollections
+
+        /// <inheritdoc/>
+        public virtual async Task<V1AuthenticationDefinitionCollection> CreateAuthenticationDefinitionCollectionAsync(V1CreateAuthenticationDefinitionCollectionCommand command, CancellationToken cancellationToken = default)
+        {
+            var result = await this.Adapter.CreateAuthenticationDefinitionCollectionAsync(command, cancellationToken);
+            if (!result.Succeeded)
+                throw new SynapseApiException(result);
+            return result.Data!;
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<V1AuthenticationDefinitionCollection> GetAuthenticationDefinitionCollectionByIdAsync(string id, CancellationToken cancellationToken = default)
+        {
+            var result = await this.Adapter.GetAuthenticationDefinitionCollectionByIdAsync(id, cancellationToken);
+            if (!result.Succeeded)
+                throw new SynapseApiException(result);
+            return result.Data!;
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<List<V1AuthenticationDefinitionCollection>> GetAuthenticationDefinitionCollectionsAsync(CancellationToken cancellationToken = default)
+        {
+            return await this.GetAuthenticationDefinitionCollectionsAsync(null!, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<List<V1AuthenticationDefinitionCollection>> GetAuthenticationDefinitionCollectionsAsync(string? query, CancellationToken cancellationToken = default)
+        {
+            var result = await this.Adapter.GetAuthenticationDefinitionCollectionsAsync(query, cancellationToken);
+            if (!result.Succeeded)
+                throw new SynapseApiException(result);
+            return result.Data!;
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task DeleteAuthenticationDefinitionCollectionAsync(string id, CancellationToken cancellationToken = default)
+        {
+            var result = await this.Adapter.DeleteWorkflowInstanceAsync(id, cancellationToken);
+            if (!result.Succeeded)
+                throw new SynapseApiException(result);
+        }
+
+        #endregion
+
+        #region EventDefinitionCollections
+
+        /// <inheritdoc/>
+        public virtual async Task<V1EventDefinitionCollection> CreateEventDefinitionCollectionAsync(V1CreateEventDefinitionCollectionCommand command, CancellationToken cancellationToken = default)
+        {
+            var result = await this.Adapter.CreateEventDefinitionCollectionAsync(command, cancellationToken);
+            if (!result.Succeeded)
+                throw new SynapseApiException(result);
+            return result.Data!;
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<V1EventDefinitionCollection> GetEventDefinitionCollectionByIdAsync(string id, CancellationToken cancellationToken = default)
+        {
+            var result = await this.Adapter.GetEventDefinitionCollectionByIdAsync(id, cancellationToken);
+            if (!result.Succeeded)
+                throw new SynapseApiException(result);
+            return result.Data!;
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<List<V1EventDefinitionCollection>> GetEventDefinitionCollectionsAsync(CancellationToken cancellationToken = default)
+        {
+            return await this.GetEventDefinitionCollectionsAsync(null!, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<List<V1EventDefinitionCollection>> GetEventDefinitionCollectionsAsync(string? query, CancellationToken cancellationToken = default)
+        {
+            var result = await this.Adapter.GetEventDefinitionCollectionsAsync(query, cancellationToken);
+            if (!result.Succeeded)
+                throw new SynapseApiException(result);
+            return result.Data!;
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task DeleteEventDefinitionCollectionAsync(string id, CancellationToken cancellationToken = default)
+        {
+            var result = await this.Adapter.DeleteWorkflowInstanceAsync(id, cancellationToken);
+            if (!result.Succeeded)
+                throw new SynapseApiException(result);
+        }
+
+        #endregion
 
         #region FunctionDefinitionCollections
 

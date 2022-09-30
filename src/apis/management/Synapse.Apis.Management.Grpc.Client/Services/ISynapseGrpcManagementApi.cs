@@ -16,7 +16,9 @@
  */
 
 using ProtoBuf.Grpc;
+using Synapse.Integration.Commands.AuthenticationDefinitionCollections;
 using Synapse.Integration.Commands.Correlations;
+using Synapse.Integration.Commands.EventDefinitionCollections;
 using Synapse.Integration.Commands.FunctionDefinitionCollections;
 using Synapse.Integration.Commands.WorkflowInstances;
 using Synapse.Integration.Commands.Workflows;
@@ -235,6 +237,88 @@ namespace Synapse.Apis.Management.Grpc
         /// <returns>A new object that describes the result of the operation</returns>
         [OperationContract]
         Task<GrpcApiResult> DeleteCorrelationAsync(string id, CallContext context = default);
+
+        #endregion
+
+        #region AuthenticationDefinitionCollections
+
+        /// <summary>
+        /// Creates a new <see cref="V1AuthenticationDefinitionCollection"/>
+        /// </summary>
+        /// <param name="command">The object that describes the command to execute</param>
+        /// <param name="context">The current <see cref="CallContext"/></param>
+        /// <returns>The newly created <see cref="V1AuthenticationDefinitionCollection"/></returns>
+        [OperationContract]
+        Task<GrpcApiResult<V1AuthenticationDefinitionCollection>> CreateAuthenticationDefinitionCollectionAsync(V1CreateAuthenticationDefinitionCollectionCommand command, CallContext context = default);
+
+        /// <summary>
+        /// Gets the <see cref="V1AuthenticationDefinitionCollection"/> with the specified id
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1AuthenticationDefinitionCollection"/> to get</param>
+        /// <param name="context">The current <see cref="CallContext"/></param>
+        /// <returns>The <see cref="V1Correlation"/> with the specified id</returns>
+
+        [OperationContract]
+        Task<GrpcApiResult<V1AuthenticationDefinitionCollection>> GetAuthenticationDefinitionCollectionByIdAsync(string id, CallContext context = default);
+
+        /// <summary>
+        /// Lists existing <see cref="V1AuthenticationDefinitionCollection"/>s
+        /// </summary>
+        /// <param name="query">The OData query string</param>
+        /// <param name="context">The current <see cref="CallContext"/></param>
+        /// <returns>A new <see cref="List{T}"/> containing all existing <see cref="V1AuthenticationDefinitionCollection"/>s</returns>
+        [OperationContract]
+        Task<GrpcApiResult<List<V1AuthenticationDefinitionCollection>>> GetAuthenticationDefinitionCollectionsAsync(string? query = null, CallContext context = default);
+
+        /// <summary>
+        /// Deletes the <see cref="V1AuthenticationDefinitionCollection"/> with the specified id
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1AuthenticationDefinitionCollection"/> to delete</param>
+        /// <param name="context">The current <see cref="CallContext"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        [OperationContract]
+        Task<GrpcApiResult> DeleteAuthenticationDefinitionCollectionAsync(string id, CallContext context = default);
+
+        #endregion
+
+        #region EventDefinitionCollections
+
+        /// <summary>
+        /// Creates a new <see cref="V1EventDefinitionCollection"/>
+        /// </summary>
+        /// <param name="command">The object that describes the command to execute</param>
+        /// <param name="context">The current <see cref="CallContext"/></param>
+        /// <returns>The newly created <see cref="V1EventDefinitionCollection"/></returns>
+        [OperationContract]
+        Task<GrpcApiResult<V1EventDefinitionCollection>> CreateEventDefinitionCollectionAsync(V1CreateEventDefinitionCollectionCommand command, CallContext context = default);
+
+        /// <summary>
+        /// Gets the <see cref="V1EventDefinitionCollection"/> with the specified id
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1EventDefinitionCollection"/> to get</param>
+        /// <param name="context">The current <see cref="CallContext"/></param>
+        /// <returns>The <see cref="V1Correlation"/> with the specified id</returns>
+
+        [OperationContract]
+        Task<GrpcApiResult<V1EventDefinitionCollection>> GetEventDefinitionCollectionByIdAsync(string id, CallContext context = default);
+
+        /// <summary>
+        /// Lists existing <see cref="V1EventDefinitionCollection"/>s
+        /// </summary>
+        /// <param name="query">The OData query string</param>
+        /// <param name="context">The current <see cref="CallContext"/></param>
+        /// <returns>A new <see cref="List{T}"/> containing all existing <see cref="V1EventDefinitionCollection"/>s</returns>
+        [OperationContract]
+        Task<GrpcApiResult<List<V1EventDefinitionCollection>>> GetEventDefinitionCollectionsAsync(string? query = null, CallContext context = default);
+
+        /// <summary>
+        /// Deletes the <see cref="V1EventDefinitionCollection"/> with the specified id
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1EventDefinitionCollection"/> to delete</param>
+        /// <param name="context">The current <see cref="CallContext"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        [OperationContract]
+        Task<GrpcApiResult> DeleteEventDefinitionCollectionAsync(string id, CallContext context = default);
 
         #endregion
 

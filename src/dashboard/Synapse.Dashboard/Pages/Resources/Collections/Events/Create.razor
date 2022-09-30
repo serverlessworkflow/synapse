@@ -14,19 +14,19 @@
     limitations under the License.
 *@
 
-@page "/resources/collections/functions/new"
-@page "/resources/collections/functions/edit/{collectionId}"
+@page "/resources/collections/events/new"
+@page "/resources/collections/events/edit/{collectionId}"
 @using System.Reactive.Subjects
 @using System.Reactive.Linq
-@inherits StatefulComponent<FunctionDefinitionCollectionEditorState>
+@inherits StatefulComponent<EventDefinitionCollectionEditorState>
 @inject IBreadcrumbService BreadcrumbService
 @inject IMonacoEditorHelper MonacoEditorHelper
 @inject NavigationManager NavigationManager
 
-<PageTitle>New function definition collection</PageTitle>
+<PageTitle>New event definition collection</PageTitle>
 
 <AppHeader>
-    <span class="h5 m-0 p-0">New function definition collection</span>
+    <span class="h5 m-0 p-0">New event definition collection</span>
 </AppHeader>
 
 <AppRightSidebar>
@@ -69,41 +69,43 @@
                 </Expander>
             </div>
             <div class="border border-secondary rounded-2 p-3 mb-3">
-                <Expander IsExpanded="@(State.ExpanderStates!["functions"])" OnToggleExpand="@(isExpanded => OnToggleExpand("functions", isExpanded))">
+                <Expander IsExpanded="@(State.ExpanderStates!["events"])" OnToggleExpand="@(isExpanded => OnToggleExpand("events", isExpanded))">
                     <Header>
-                        <h5><span class="bi bi-code-square me-2"></span>Functions</h5>
+                        <h5><span class="bi bi-code-square me-2"></span>Events</h5>
                     </Header>
                     <Body>
                         <table class="table">
                             <thead>
                                 <tr>
                                     <th>Name</th>
+                                    <th>Kind</th>
+                                    <th>Source</th>
                                     <th>Type</th>
-                                    <th>Operation</th>
                                     <th></th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @if (collection.Functions != null)
+                                @if (collection.Events != null)
                                 {
-                                    @foreach (var function in collection.Functions)
+                                    @foreach (var e in collection.Events)
                                     {
                                         <ExpandableDataRow>
                                             <Header>
-                                            <td>@function.Name</td>
-                                            <td><span class="badge bg-secondary">@EnumHelper.Stringify(function.Type)</span></td>
-                                            <td class="text-break"><a href="@function.Operation" target="_blank">@function.Operation</a></td>
-                                            <td>
-                                                @if (!string.IsNullOrWhiteSpace(function.AuthRef))
-                                                {
-                                                    <span class="badge bg-primary text-white mx-1" title="The function call is secured by an authentication mechanism">secured</span>
-                                                }
-                                            </td>
-                                            <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChanged(nameof(collection.Functions), d => d.Functions?.Remove(function))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="bi bi-trash"></small></button></td>
+                                                <td>@e.Name</td>
+                                                <td><span class="badge bg-secondary">@EnumHelper.Stringify(e.Kind)</span></td>
+                                                <td class="text-break"><a href="@e.Source" target="_blank">@e.Source</a></td>
+                                                <td>@e.Type</td>
+                                                <td>
+                                                        @if (e.Correlations != null && e.Correlations.Any())
+                                                        {
+                                                            <span class="badge bg-success text-white mx-1" title="Is compensated by another state">correlated</span>
+                                                        }
+                                                </td>
+                                                <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChanged(nameof(collection.Events), d => d.Events?.Remove(e))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="bi bi-trash"></small></button></td>
                                             </Header>
                                             <Body>
                                                 <td colspan="5">
-                                                    <FunctionEditor Function="@function" OnChange="OnFunctionChanged" />
+                                                    <EventEditor Event="@e" OnChange="OnEventChanged" />
                                                 </td>
                                             </Body>
                                         </ExpandableDataRow>
@@ -111,7 +113,7 @@
                                 }
                             </tbody>
                         </table>
-                        <button class="btn btn-block btn-warning text-white w-100" @onclick="OnCreateFunction">Create new function</button>
+                        <button class="btn btn-block btn-warning text-white w-100" @onclick="OnCreateEvent">Create new e</button>
                     </Body>
                 </Expander>
             </div>
@@ -136,12 +138,12 @@
     private MonacoEditor? textBasedEditor;
     private Subject<string>? editorValue;
     private Subject<bool>? disposeNotifier;
-    private V1FunctionDefinitionCollection? collection;
+    private V1EventDefinitionCollection? collection;
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        await this.BreadcrumbService.Use(KnownBreadcrumbs.CreateFunctionDefinitionCollection);
+        await this.BreadcrumbService.Use(KnownBreadcrumbs.CreateEventDefinitionCollection);
         this.disposeNotifier = new Subject<bool>();
         this.editorValue = new Subject<string>();
         this.editorValue
@@ -149,7 +151,7 @@
             .DistinctUntilChanged()
             .TakeUntil(this.disposeNotifier)
             .Subscribe(text => this.Dispatcher.Dispatch(new HandleTextBasedEditorChange(text)));
-        FunctionDefinitionCollectionEditorSelectors.SelectSerializedFunctionDefinitionCollection(this.Store)
+        EventDefinitionCollectionEditorSelectors.SelectSerializedEventDefinitionCollection(this.Store)
             .TakeUntil(this.disposeNotifier)
             .Subscribe(async (text) =>
             {
@@ -160,7 +162,7 @@
                         await this.textBasedEditor.SetValue(text);
                 }
             });
-        FunctionDefinitionCollectionEditorSelectors.SelectFunctionDefinitionCollection(this.Store)
+        EventDefinitionCollectionEditorSelectors.SelectEventDefinitionCollection(this.Store)
             .TakeUntil(this.disposeNotifier)
             .Subscribe(async (definition) =>
             {
@@ -222,25 +224,25 @@
         });
     }
 
-    protected virtual async Task OnCreateFunction()
+    protected virtual async Task OnCreateEvent()
     {
         if (this.collection == null)
             return;
-        if (this.collection.Functions == null)
-            this.collection.Functions = new List<FunctionDefinition>();
-        var function = new FunctionDefinition() { Name = $"function-{collection.Functions.Count + 1}" };
-        await this.OnPropertyChanged(nameof(collection.Functions), d =>
+        if (this.collection.Events == null)
+            this.collection.Events = new List<EventDefinition>();
+        var e = new EventDefinition() { Name = $"event-{collection.Events.Count + 1}" };
+        await this.OnPropertyChanged(nameof(collection.Events), d =>
         {
-            d.Functions!.Add(function);
+            d.Events!.Add(e);
         });
     }
 
-    protected virtual async Task OnFunctionChanged(FunctionDefinition? function)
+    protected virtual async Task OnEventChanged(EventDefinition? e)
     {
-        await this.OnPropertyChanged(nameof(collection.Functions));
+        await this.OnPropertyChanged(nameof(collection.Events));
     }
 
-    protected virtual async Task OnPropertyChanged(string property, Action<V1FunctionDefinitionCollection>? patch = null)
+    protected virtual async Task OnPropertyChanged(string property, Action<V1EventDefinitionCollection>? patch = null)
     {
         if (this.collection == null)
             return;

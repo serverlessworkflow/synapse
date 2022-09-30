@@ -15,7 +15,9 @@
  *
  */
 
+using Synapse.Integration.Commands.AuthenticationDefinitionCollections;
 using Synapse.Integration.Commands.Correlations;
+using Synapse.Integration.Commands.EventDefinitionCollections;
 using Synapse.Integration.Commands.FunctionDefinitionCollections;
 using Synapse.Integration.Commands.WorkflowInstances;
 using Synapse.Integration.Commands.Workflows;
@@ -260,6 +262,88 @@ namespace Synapse.Apis.Management
         /// <returns>A new awaitable <see cref="Task"/></returns>
         [OperationContract]
         Task DeleteCorrelationAsync(string id, CancellationToken cancellationToken = default);
+
+        #endregion
+
+        #region AuthenticationDefinitionCollections
+
+        /// <summary>
+        /// Creates a new <see cref="V1AuthenticationDefinitionCollection"/>
+        /// </summary>
+        /// <param name="command">The object that describes the command to execute</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The newly created <see cref="V1AuthenticationDefinitionCollection"/></returns>
+        [OperationContract]
+        Task<V1AuthenticationDefinitionCollection> CreateAuthenticationDefinitionCollectionAsync(V1CreateAuthenticationDefinitionCollectionCommand command, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Gets the <see cref="V1AuthenticationDefinitionCollection"/> with the specified id
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1AuthenticationDefinitionCollection"/> to get</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The <see cref="V1Correlation"/> with the specified id</returns>
+
+        [OperationContract]
+        Task<V1AuthenticationDefinitionCollection> GetAuthenticationDefinitionCollectionByIdAsync(string id, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Lists existing <see cref="V1AuthenticationDefinitionCollection"/>s
+        /// </summary>
+        /// <param name="query">The OData query string</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new <see cref="List{T}"/> containing all existing <see cref="V1AuthenticationDefinitionCollection"/>s</returns>
+        [OperationContract]
+        Task<List<V1AuthenticationDefinitionCollection>> GetAuthenticationDefinitionCollectionsAsync(string? query, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Deletes the <see cref="V1AuthenticationDefinitionCollection"/> with the specified id
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1AuthenticationDefinitionCollection"/> to delete</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        [OperationContract]
+        Task DeleteAuthenticationDefinitionCollectionAsync(string id, CancellationToken cancellationToken = default);
+
+        #endregion
+
+        #region EventDefinitionCollections
+
+        /// <summary>
+        /// Creates a new <see cref="V1EventDefinitionCollection"/>
+        /// </summary>
+        /// <param name="command">The object that describes the command to execute</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The newly created <see cref="V1EventDefinitionCollection"/></returns>
+        [OperationContract]
+        Task<V1EventDefinitionCollection> CreateEventDefinitionCollectionAsync(V1CreateEventDefinitionCollectionCommand command, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Gets the <see cref="V1EventDefinitionCollection"/> with the specified id
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1EventDefinitionCollection"/> to get</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The <see cref="V1Correlation"/> with the specified id</returns>
+
+        [OperationContract]
+        Task<V1EventDefinitionCollection> GetEventDefinitionCollectionByIdAsync(string id, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Lists existing <see cref="V1EventDefinitionCollection"/>s
+        /// </summary>
+        /// <param name="query">The OData query string</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new <see cref="List{T}"/> containing all existing <see cref="V1EventDefinitionCollection"/>s</returns>
+        [OperationContract]
+        Task<List<V1EventDefinitionCollection>> GetEventDefinitionCollectionsAsync(string? query, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Deletes the <see cref="V1EventDefinitionCollection"/> with the specified id
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1EventDefinitionCollection"/> to delete</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        [OperationContract]
+        Task DeleteEventDefinitionCollectionAsync(string id, CancellationToken cancellationToken = default);
 
         #endregion
 

@@ -14,19 +14,19 @@
     limitations under the License.
 *@
 
-@page "/resources/collections/functions/new"
-@page "/resources/collections/functions/edit/{collectionId}"
+@page "/resources/collections/authentications/new"
+@page "/resources/collections/authentications/edit/{collectionId}"
 @using System.Reactive.Subjects
 @using System.Reactive.Linq
-@inherits StatefulComponent<FunctionDefinitionCollectionEditorState>
+@inherits StatefulComponent<AuthenticationDefinitionCollectionEditorState>
 @inject IBreadcrumbService BreadcrumbService
 @inject IMonacoEditorHelper MonacoEditorHelper
 @inject NavigationManager NavigationManager
 
-<PageTitle>New function definition collection</PageTitle>
+<PageTitle>New authentication definition collection</PageTitle>
 
 <AppHeader>
-    <span class="h5 m-0 p-0">New function definition collection</span>
+    <span class="h5 m-0 p-0">New authentication definition collection</span>
 </AppHeader>
 
 <AppRightSidebar>
@@ -69,41 +69,35 @@
                 </Expander>
             </div>
             <div class="border border-secondary rounded-2 p-3 mb-3">
-                <Expander IsExpanded="@(State.ExpanderStates!["functions"])" OnToggleExpand="@(isExpanded => OnToggleExpand("functions", isExpanded))">
+                <Expander IsExpanded="@(State.ExpanderStates!["authentications"])" OnToggleExpand="@(isExpanded => OnToggleExpand("authentications", isExpanded))">
                     <Header>
-                        <h5><span class="bi bi-code-square me-2"></span>Functions</h5>
+                        <h5><span class="bi bi-code-square me-2"></span>Authentications</h5>
                     </Header>
                     <Body>
                         <table class="table">
                             <thead>
                                 <tr>
                                     <th>Name</th>
+                                    <th>Kind</th>
+                                    <th>Source</th>
                                     <th>Type</th>
-                                    <th>Operation</th>
                                     <th></th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @if (collection.Functions != null)
+                                @if (collection.Authentications != null)
                                 {
-                                    @foreach (var function in collection.Functions)
+                                    @foreach (var authentication in collection.Authentications)
                                     {
                                         <ExpandableDataRow>
                                             <Header>
-                                            <td>@function.Name</td>
-                                            <td><span class="badge bg-secondary">@EnumHelper.Stringify(function.Type)</span></td>
-                                            <td class="text-break"><a href="@function.Operation" target="_blank">@function.Operation</a></td>
-                                            <td>
-                                                @if (!string.IsNullOrWhiteSpace(function.AuthRef))
-                                                {
-                                                    <span class="badge bg-primary text-white mx-1" title="The function call is secured by an authentication mechanism">secured</span>
-                                                }
-                                            </td>
-                                            <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChanged(nameof(collection.Functions), d => d.Functions?.Remove(function))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="bi bi-trash"></small></button></td>
+                                            <td>@authentication.Name</td>
+                                            <td><span class="badge bg-secondary">@EnumHelper.Stringify(authentication.Scheme)</span></td>
+                                            <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChanged(nameof(collection.Authentications), d => d.Authentications?.Remove(authentication))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="bi bi-trash"></small></button></td>
                                             </Header>
                                             <Body>
                                                 <td colspan="5">
-                                                    <FunctionEditor Function="@function" OnChange="OnFunctionChanged" />
+                                                    <AuthenticationEditor Authentication="@authentication" OnChange="OnAuthenticationChanged" />
                                                 </td>
                                             </Body>
                                         </ExpandableDataRow>
@@ -111,7 +105,7 @@
                                 }
                             </tbody>
                         </table>
-                        <button class="btn btn-block btn-warning text-white w-100" @onclick="OnCreateFunction">Create new function</button>
+                        <button class="btn btn-block btn-warning text-white w-100" @onclick="OnCreateAuthentication">Create new e</button>
                     </Body>
                 </Expander>
             </div>
@@ -136,12 +130,12 @@
     private MonacoEditor? textBasedEditor;
     private Subject<string>? editorValue;
     private Subject<bool>? disposeNotifier;
-    private V1FunctionDefinitionCollection? collection;
+    private V1AuthenticationDefinitionCollection? collection;
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        await this.BreadcrumbService.Use(KnownBreadcrumbs.CreateFunctionDefinitionCollection);
+        await this.BreadcrumbService.Use(KnownBreadcrumbs.CreateAuthenticationDefinitionCollection);
         this.disposeNotifier = new Subject<bool>();
         this.editorValue = new Subject<string>();
         this.editorValue
@@ -149,7 +143,7 @@
             .DistinctUntilChanged()
             .TakeUntil(this.disposeNotifier)
             .Subscribe(text => this.Dispatcher.Dispatch(new HandleTextBasedEditorChange(text)));
-        FunctionDefinitionCollectionEditorSelectors.SelectSerializedFunctionDefinitionCollection(this.Store)
+        AuthenticationDefinitionCollectionEditorSelectors.SelectSerializedAuthenticationDefinitionCollection(this.Store)
             .TakeUntil(this.disposeNotifier)
             .Subscribe(async (text) =>
             {
@@ -160,7 +154,7 @@
                         await this.textBasedEditor.SetValue(text);
                 }
             });
-        FunctionDefinitionCollectionEditorSelectors.SelectFunctionDefinitionCollection(this.Store)
+        AuthenticationDefinitionCollectionEditorSelectors.SelectAuthenticationDefinitionCollection(this.Store)
             .TakeUntil(this.disposeNotifier)
             .Subscribe(async (definition) =>
             {
@@ -222,25 +216,25 @@
         });
     }
 
-    protected virtual async Task OnCreateFunction()
+    protected virtual async Task OnCreateAuthentication()
     {
         if (this.collection == null)
             return;
-        if (this.collection.Functions == null)
-            this.collection.Functions = new List<FunctionDefinition>();
-        var function = new FunctionDefinition() { Name = $"function-{collection.Functions.Count + 1}" };
-        await this.OnPropertyChanged(nameof(collection.Functions), d =>
+        if (this.collection.Authentications == null)
+            this.collection.Authentications = new List<AuthenticationDefinition>();
+        var e = new AuthenticationDefinition() { Name = $"authentication-{collection.Authentications.Count + 1}", Scheme = AuthenticationScheme.Basic, Properties = new BasicAuthenticationProperties() { Username = "username", Password = "password" } };
+        await this.OnPropertyChanged(nameof(collection.Authentications), d =>
         {
-            d.Functions!.Add(function);
+            d.Authentications!.Add(e);
         });
     }
 
-    protected virtual async Task OnFunctionChanged(FunctionDefinition? function)
+    protected virtual async Task OnAuthenticationChanged(AuthenticationDefinition? e)
     {
-        await this.OnPropertyChanged(nameof(collection.Functions));
+        await this.OnPropertyChanged(nameof(collection.Authentications));
     }
 
-    protected virtual async Task OnPropertyChanged(string property, Action<V1FunctionDefinitionCollection>? patch = null)
+    protected virtual async Task OnPropertyChanged(string property, Action<V1AuthenticationDefinitionCollection>? patch = null)
     {
         if (this.collection == null)
             return;

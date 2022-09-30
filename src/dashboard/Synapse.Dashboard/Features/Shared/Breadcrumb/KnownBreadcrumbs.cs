@@ -30,8 +30,8 @@ namespace Synapse.Dashboard
         public static IEnumerable<IBreadcrumbItem> EventDefinitionCollections = new List<IBreadcrumbItem>(Resources) { new BreadcrumbItem("Events", "/resources/collections/events", "bi-files") };
         public static IEnumerable<IBreadcrumbItem> AuthenticationDefinitionCollections = new List<IBreadcrumbItem>(Resources) { new BreadcrumbItem("Authentications", "/resources/collections/authentications", "bi-files") };
         public static IEnumerable<IBreadcrumbItem> CreateFunctionDefinitionCollection = new List<IBreadcrumbItem>(FunctionDefinitionCollections) { new BreadcrumbItem("Create Function Definition Collection", "/resources/collections/functions/new") };
-        public static IEnumerable<IBreadcrumbItem> CreateEventDefinitionCollection = new List<IBreadcrumbItem>(FunctionDefinitionCollections) { new BreadcrumbItem("Create Event Definition Collection", "/resources/collections/events/new") };
-        public static IEnumerable<IBreadcrumbItem> CreateAuthenticationDefinitionCollection = new List<IBreadcrumbItem>(FunctionDefinitionCollections) { new BreadcrumbItem("Create Authentication Definition Collection", "/resources/collections/authentications/new") };
+        public static IEnumerable<IBreadcrumbItem> CreateEventDefinitionCollection = new List<IBreadcrumbItem>(EventDefinitionCollections) { new BreadcrumbItem("Create Event Definition Collection", "/resources/collections/events/new") };
+        public static IEnumerable<IBreadcrumbItem> CreateAuthenticationDefinitionCollection = new List<IBreadcrumbItem>(AuthenticationDefinitionCollections) { new BreadcrumbItem("Create Authentication Definition Collection", "/resources/collections/authentications/new") };
         public static IEnumerable<IBreadcrumbItem> About = new List<IBreadcrumbItem>(Home) { new BreadcrumbItem("About", "/application/info", "bi-display") };
        
     }

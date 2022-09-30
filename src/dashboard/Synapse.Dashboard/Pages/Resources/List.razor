@@ -73,7 +73,7 @@
                                         ValueProvider="collection => collection.CreatedAt" />
                                         <Column T="V1FunctionDefinitionCollection"
                                         Name="Uri"
-                                        ValueProvider="@(c => $"/api/v1/resources/collections/functions/{c.Id}")">
+                                        ValueProvider="@(c => $"/api/v1/resources/collections/functions/{c.Id}/raw")">
                                             <CellTemplate Context="context">
                                                 <a href="@context.Value" target="_blank">@context.Value</a>
                                             </CellTemplate>
@@ -108,16 +108,141 @@
         </div>     
     </TabPage>
     <TabPage Header="Events" IsActive="@(selectedDefinitionType == "events")">
-
+        <div class="p-5">
+            <div class="row">
+                <div class="col-6">
+                    <SearchBox PlaceHolder="Search collections..." OnSearch="OnSearchEventDefinitionCollection" OnClear="OnClearEventDefinitionCollectionSearch" />
+                </div>
+            </div>
+            <Table Items="eventDefinitionCollections" AutoGenerateColumns="false">
+                <RowTemplate Context="RenderContext">
+                    <ExpandableDataRow>
+                        <Header>
+                            <CellCollectionPresenter Item="@RenderContext.Item" />
+                        </Header>
+                        <Body>
+                        <td colspan="100">
+                            <Table Items="RenderContext.Item.Value" AutoGenerateColumns="false">
+                                <RowTemplate Context="SubRenderContext">
+                                    <tr>
+                                        <CellCollectionPresenter Item="@SubRenderContext.Item" />
+                                    </tr>
+                                </RowTemplate>
+                                <Columns>
+                                    <Column T="V1EventDefinitionCollection"
+                                            Name="Version"
+                                            ValueProvider="collection => collection.Version" />
+                                    <Column T="V1EventDefinitionCollection"
+                                            Name="CreatedAt"
+                                            ValueProvider="collection => collection.CreatedAt" />
+                                    <Column T="V1EventDefinitionCollection"
+                                            Name="Uri"
+                                            ValueProvider="@(c => $"/api/v1/resources/collections/events/{c.Id}/raw")">
+                                        <CellTemplate Context="context">
+                                            <a href="@context.Value" target="_blank">@context.Value</a>
+                                        </CellTemplate>
+                                    </Column>
+                                    <ViewDetailsColumn T="V1EventDefinitionCollection" OnViewDetails="collection => OnViewEventDefinitionCollection(collection)" />
+                                </Columns>
+                            </Table>
+                        </td>
+                        </Body>
+                    </ExpandableDataRow>
+                </RowTemplate>
+                <Columns>
+                    <Column T="KeyValuePair<string, List<V1EventDefinitionCollection>>"
+                            Name="Name"
+                            ValueProvider="c => c.Key" />
+                    <Column T="KeyValuePair<string, List<V1EventDefinitionCollection>>"
+                            Name="Versions"
+                            ValueProvider="c => c.Value.Count" />
+                    <Column T="KeyValuePair<string, List<V1EventDefinitionCollection>>"
+                            Name="Latest version"
+                            ValueProvider="c => c.Value.Max(c => SemVersion.Parse(c.Version, SemVersionStyles.Any, 1024))" />
+                    <Column T="KeyValuePair<string, List<V1EventDefinitionCollection>>"
+                            Name="Resource Uri"
+                            ValueProvider="@(c => $"/api/v1/resources/collections/events/{c.Key.ToLowerInvariant().Slugify("-", false, null)}:latest/raw")">
+                        <CellTemplate Context="context">
+                            <a href="@context.Value" target="_blank">@context.Value</a>
+                        </CellTemplate>
+                    </Column>
+                    <ViewDetailsColumn T="KeyValuePair<string, List<V1EventDefinitionCollection>>" OnViewDetails="kvp => OnViewEventDefinitionCollection(kvp.Value.First())" />
+                </Columns>
+            </Table>
+        </div>
     </TabPage>
     <TabPage Header="Authentications" IsActive="@(selectedDefinitionType == "authentications")">
-
+        <div class="p-5">
+            <div class="row">
+                <div class="col-6">
+                    <SearchBox PlaceHolder="Search collections..." OnSearch="OnSearchAuthenticationDefinitionCollection" OnClear="OnClearAuthenticationDefinitionCollectionSearch" />
+                </div>
+            </div>
+            <Table Items="authenticationDefinitionCollections" AutoGenerateColumns="false">
+                <RowTemplate Context="RenderContext">
+                    <ExpandableDataRow>
+                        <Header>
+                            <CellCollectionPresenter Item="@RenderContext.Item" />
+                        </Header>
+                        <Body>
+                        <td colspan="100">
+                            <Table Items="RenderContext.Item.Value" AutoGenerateColumns="false">
+                                <RowTemplate Context="SubRenderContext">
+                                    <tr>
+                                        <CellCollectionPresenter Item="@SubRenderContext.Item" />
+                                    </tr>
+                                </RowTemplate>
+                                <Columns>
+                                    <Column T="V1AuthenticationDefinitionCollection"
+                                            Name="Version"
+                                            ValueProvider="collection => collection.Version" />
+                                    <Column T="V1AuthenticationDefinitionCollection"
+                                            Name="CreatedAt"
+                                            ValueProvider="collection => collection.CreatedAt" />
+                                    <Column T="V1AuthenticationDefinitionCollection"
+                                            Name="Uri"
+                                            ValueProvider="@(c => $"/api/v1/resources/collections/authentications/{c.Id}/raw")">
+                                        <CellTemplate Context="context">
+                                            <a href="@context.Value" target="_blank">@context.Value</a>
+                                        </CellTemplate>
+                                    </Column>
+                                    <ViewDetailsColumn T="V1AuthenticationDefinitionCollection" OnViewDetails="collection => OnViewAuthenticationDefinitionCollection(collection)" />
+                                </Columns>
+                            </Table>
+                        </td>
+                        </Body>
+                    </ExpandableDataRow>
+                </RowTemplate>
+                <Columns>
+                    <Column T="KeyValuePair<string, List<V1AuthenticationDefinitionCollection>>"
+                            Name="Name"
+                            ValueProvider="c => c.Key" />
+                    <Column T="KeyValuePair<string, List<V1AuthenticationDefinitionCollection>>"
+                            Name="Versions"
+                            ValueProvider="c => c.Value.Count" />
+                    <Column T="KeyValuePair<string, List<V1AuthenticationDefinitionCollection>>"
+                            Name="Latest version"
+                            ValueProvider="c => c.Value.Max(c => SemVersion.Parse(c.Version, SemVersionStyles.Any, 1024))" />
+                    <Column T="KeyValuePair<string, List<V1AuthenticationDefinitionCollection>>"
+                            Name="Resource Uri"
+                            ValueProvider="@(c => $"/api/v1/resources/collections/authentications/{c.Key.ToLowerInvariant().Slugify("-", false, null)}:latest/raw")">
+                        <CellTemplate Context="context">
+                            <a href="@context.Value" target="_blank">@context.Value</a>
+                        </CellTemplate>
+                    </Column>
+                    <ViewDetailsColumn T="KeyValuePair<string, List<V1AuthenticationDefinitionCollection>>" OnViewDetails="kvp => OnViewAuthenticationDefinitionCollection(kvp.Value.First())" />
+                </Columns>
+            </Table>
+        </div>
     </TabPage>
 </TabControl>
 
 @code {
+
     private Dictionary<string, List<V1FunctionDefinitionCollection>> functionDefinitionCollections = null!;
-    private IDisposable functionDefinitionCollectionSubscription = null!;
+    private Dictionary<string, List<V1EventDefinitionCollection>> eventDefinitionCollections = null!;
+    private Dictionary<string, List<V1AuthenticationDefinitionCollection>> authenticationDefinitionCollections = null!;
+    private IDisposable subscription = null!;
     private TabPage? activeTabPage;
     private string selectedDefinitionType = "functions";
 
@@ -128,15 +253,26 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        this.functionDefinitionCollectionSubscription = this.Feature
+        this.subscription = this.Feature
             .Subscribe(state =>
             {
-                this.functionDefinitionCollections = state.FunctionDefinitionCollections
-                    .GroupBy(c => c.Name)
-                    .ToDictionary(g => g.Key, g => g.OrderByDescending(c => SemVersion.Parse(c.Version, SemVersionStyles.Any)).ToList())!;
+                if(state.FunctionDefinitionCollections != null)
+                    this.functionDefinitionCollections = state.FunctionDefinitionCollections
+                        .GroupBy(c => c.Name)
+                        .ToDictionary(g => g.Key, g => g.OrderByDescending(c => SemVersion.Parse(c.Version, SemVersionStyles.Any)).ToList())!;
+                if (state.EventDefinitionCollections != null)
+                    this.eventDefinitionCollections = state.EventDefinitionCollections
+                        .GroupBy(c => c.Name)
+                        .ToDictionary(g => g.Key, g => g.OrderByDescending(c => SemVersion.Parse(c.Version, SemVersionStyles.Any)).ToList())!;
+                if (state.AuthenticationDefinitionCollections != null)
+                    this.authenticationDefinitionCollections = state.AuthenticationDefinitionCollections
+                        .GroupBy(c => c.Name)
+                        .ToDictionary(g => g.Key, g => g.OrderByDescending(c => SemVersion.Parse(c.Version, SemVersionStyles.Any)).ToList())!;
                 this.StateHasChanged();
             });
         this.Dispatcher.Dispatch(new QueryV1FunctionDefinitionCollections());
+        this.Dispatcher.Dispatch(new QueryV1EventDefinitionCollections());
+        this.Dispatcher.Dispatch(new QueryV1AuthenticationDefinitionCollections());
     }
 
     protected override async Task OnParametersSetAsync()
@@ -169,6 +305,14 @@
         await this.BreadcrumbService.Use(breadcrumb);
     }
 
+    protected virtual async Task OnTabPageChanged(TabPage page)
+    {
+        this.activeTabPage = page;
+        this.selectedDefinitionType = page.Header?.ToLower()!;
+        await this.UpdateBreadcrumbAsync();
+        this.StateHasChanged();
+    }
+
     protected virtual void OnSearchFunctionDefinitionCollection(string searchTerm)
     {
         this.Dispatcher.Dispatch(new QueryV1FunctionDefinitionCollections(searchTerm));
@@ -184,17 +328,24 @@
         this.NavigationManager.NavigateTo($"/resources/collections/functions/{collection.Id}");
     }
 
-    protected virtual async Task OnTabPageChanged(TabPage page)
-    {
-        this.activeTabPage = page;
-        this.selectedDefinitionType = page.Header?.ToLower()!;
-        await this.UpdateBreadcrumbAsync();
-        this.StateHasChanged();
-    }
-
     protected virtual void OnCreateFunctionDefinitionCollection()
     {
         this.NavigationManager.NavigateTo("/resources/collections/functions/new");
+    }
+
+    protected virtual void OnSearchEventDefinitionCollection(string searchTerm)
+    {
+        this.Dispatcher.Dispatch(new QueryV1EventDefinitionCollections(searchTerm));
+    }
+
+    protected virtual void OnClearEventDefinitionCollectionSearch()
+    {
+        this.Dispatcher.Dispatch(new QueryV1EventDefinitionCollections());
+    }
+
+    protected virtual void OnViewEventDefinitionCollection(V1EventDefinitionCollection collection)
+    {
+        this.NavigationManager.NavigateTo($"/resources/collections/events/{collection.Id}");
     }
 
     protected virtual void OnCreateEventDefinitionCollection()
@@ -202,9 +353,33 @@
         this.NavigationManager.NavigateTo("/resources/collections/events/new");
     }
 
+    protected virtual void OnSearchAuthenticationDefinitionCollection(string searchTerm)
+    {
+        this.Dispatcher.Dispatch(new QueryV1AuthenticationDefinitionCollections(searchTerm));
+    }
+
+    protected virtual void OnClearAuthenticationDefinitionCollectionSearch()
+    {
+        this.Dispatcher.Dispatch(new QueryV1AuthenticationDefinitionCollections());
+    }
+
+    protected virtual void OnViewAuthenticationDefinitionCollection(V1AuthenticationDefinitionCollection collection)
+    {
+        this.NavigationManager.NavigateTo($"/resources/collections/authentications/{collection.Id}");
+    }
+
     protected virtual void OnCreateAuthenticationDefinitionCollection()
     {
         this.NavigationManager.NavigateTo("/resources/collections/authentications/new");
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if(disposing)
+        {
+            this.subscription?.Dispose();
+        }
+        base.Dispose(disposing);
     }
 
 }

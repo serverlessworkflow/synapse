@@ -145,4 +145,250 @@ namespace Synapse.Dashboard.Pages.Resources.Collections
 
     }
 
+    /// <summary>
+    /// Represents the action used to query <see cref="V1EventDefinitionCollection"/>s
+    /// </summary>
+    public class QueryV1EventDefinitionCollections
+    {
+
+        /// <summary>
+        /// Initializes a new <see cref="QueryV1EventDefinitionCollections"/>
+        /// </summary>
+        public QueryV1EventDefinitionCollections()
+        {
+
+        }
+
+        /// <summary>
+        /// Initializes a new <see cref="QueryV1EventDefinitionCollections"/>
+        /// </summary>
+        /// <param name="searchTerm">The term to search for</param>
+        /// <param name="querySetup">An <see cref="Action{T}"/> used to setup the query to perform</param>
+        public QueryV1EventDefinitionCollections(string? searchTerm, Action<IODataQueryCollection<V1EventDefinitionCollection>> querySetup)
+        {
+            var builder = new ODataQueryBuilder(new Uri("https://test.com"))
+                .For<V1EventDefinitionCollection>("V1EventDefinitionCollections")
+                .ByList();
+            querySetup(builder);
+            this.Query = builder.ToUri(UriKind.Absolute).Query;
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+                this.Query = $"$search={searchTerm}&{Query}";
+        }
+
+        /// <summary>
+        /// Initializes a new <see cref="QueryV1EventDefinitionCollections"/>
+        /// </summary>
+        /// <param name="searchTerm">The term to search for</param>
+        public QueryV1EventDefinitionCollections(string searchTerm)
+            : this(searchTerm, _ => { })
+        {
+
+        }
+
+        /// <summary>
+        /// Initializes a new <see cref="QueryV1EventDefinitionCollections"/>
+        /// </summary>
+        /// <param name="querySetup">An <see cref="Action{T}"/> used to setup the query to perform</param>
+        public QueryV1EventDefinitionCollections(Action<IODataQueryCollection<V1EventDefinitionCollection>> querySetup)
+            : this(null, querySetup)
+        {
+
+        }
+
+        /// <summary>
+        /// Gets the query to perform
+        /// </summary>
+        public string? Query { get; }
+
+    }
+
+    /// <summary>
+    /// Represents the action used to set the currently available <see cref="V1EventDefinitionCollection"/>s
+    /// </summary>
+    public class SetV1EventDefinitionCollections
+    {
+
+        /// <summary>
+        /// Initializes a new <see cref="SetV1EventDefinitionCollections"/>
+        /// </summary>
+        /// <param name="collections">A <see cref="List{T}"/> containing the currently available <see cref="V1EventDefinitionCollection"/>s</param>
+        public SetV1EventDefinitionCollections(List<V1EventDefinitionCollection> collections)
+        {
+            Collections = collections;
+        }
+
+        /// <summary>
+        /// Gets a <see cref="List{T}"/> containing the currently available <see cref="V1EventDefinitionCollection"/>s
+        /// </summary>
+        public List<V1EventDefinitionCollection> Collections { get; }
+
+    }
+
+    /// <summary>
+    /// Represents the action used to add a event definition to the current <see cref="V1CorrelationCollectionState"/>
+    /// </summary>
+    public class AddV1EventDefinitionCollection
+    {
+
+        /// <summary>
+        /// Initializes a new <see cref="AddV1EventDefinitionCollection"/>
+        /// </summary>
+        /// <param name="collection">The <see cref="V1EventDefinitionCollection"/> to add</param>
+        public AddV1EventDefinitionCollection(V1EventDefinitionCollection collection)
+        {
+            Collection = collection;
+        }
+
+        /// <summary>
+        /// Gets the <see cref="V1EventDefinitionCollection"/> to add
+        /// </summary>
+        public V1EventDefinitionCollection Collection { get; }
+
+    }
+
+    /// <summary>
+    /// Represents the action used to removed a event definition from the current <see cref="V1CorrelationCollectionState"/>
+    /// </summary>
+    public class RemoveV1EventDefinitionCollection
+    {
+
+        /// <summary>
+        /// Initializes a new <see cref="RemoveV1EventDefinitionCollection"/>
+        /// </summary>
+        /// <param name="collectionId">The id of the <see cref="V1EventDefinitionCollection"/> to remove</param>
+        public RemoveV1EventDefinitionCollection(string collectionId)
+        {
+            CollectionId = collectionId;
+        }
+
+        /// <summary>
+        /// Gets the id of the <see cref="V1EventDefinitionCollection"/> to remove
+        /// </summary>
+        public string CollectionId { get; }
+
+    }
+
+    /// <summary>
+    /// Represents the action used to query <see cref="V1AuthenticationDefinitionCollection"/>s
+    /// </summary>
+    public class QueryV1AuthenticationDefinitionCollections
+    {
+
+        /// <summary>
+        /// Initializes a new <see cref="QueryV1AuthenticationDefinitionCollections"/>
+        /// </summary>
+        public QueryV1AuthenticationDefinitionCollections()
+        {
+
+        }
+
+        /// <summary>
+        /// Initializes a new <see cref="QueryV1AuthenticationDefinitionCollections"/>
+        /// </summary>
+        /// <param name="searchTerm">The term to search for</param>
+        /// <param name="querySetup">An <see cref="Action{T}"/> used to setup the query to perform</param>
+        public QueryV1AuthenticationDefinitionCollections(string? searchTerm, Action<IODataQueryCollection<V1AuthenticationDefinitionCollection>> querySetup)
+        {
+            var builder = new ODataQueryBuilder(new Uri("https://test.com"))
+                .For<V1AuthenticationDefinitionCollection>("V1AuthenticationDefinitionCollections")
+                .ByList();
+            querySetup(builder);
+            Query = builder.ToUri(UriKind.Absolute).Query;
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+                Query = $"$search={searchTerm}&{Query}";
+        }
+
+        /// <summary>
+        /// Initializes a new <see cref="QueryV1AuthenticationDefinitionCollections"/>
+        /// </summary>
+        /// <param name="searchTerm">The term to search for</param>
+        public QueryV1AuthenticationDefinitionCollections(string searchTerm)
+            : this(searchTerm, _ => { })
+        {
+
+        }
+
+        /// <summary>
+        /// Initializes a new <see cref="QueryV1AuthenticationDefinitionCollections"/>
+        /// </summary>
+        /// <param name="querySetup">An <see cref="Action{T}"/> used to setup the query to perform</param>
+        public QueryV1AuthenticationDefinitionCollections(Action<IODataQueryCollection<V1AuthenticationDefinitionCollection>> querySetup)
+            : this(null, querySetup)
+        {
+
+        }
+
+        /// <summary>
+        /// Gets the query to perform
+        /// </summary>
+        public string? Query { get; }
+
+    }
+
+    /// <summary>
+    /// Represents the action used to set the currently available <see cref="V1AuthenticationDefinitionCollection"/>s
+    /// </summary>
+    public class SetV1AuthenticationDefinitionCollections
+    {
+
+        /// <summary>
+        /// Initializes a new <see cref="SetV1AuthenticationDefinitionCollections"/>
+        /// </summary>
+        /// <param name="collections">A <see cref="List{T}"/> containing the currently available <see cref="V1AuthenticationDefinitionCollection"/>s</param>
+        public SetV1AuthenticationDefinitionCollections(List<V1AuthenticationDefinitionCollection> collections)
+        {
+            this.Collections = collections;
+        }
+
+        /// <summary>
+        /// Gets a <see cref="List{T}"/> containing the currently available <see cref="V1AuthenticationDefinitionCollection"/>s
+        /// </summary>
+        public List<V1AuthenticationDefinitionCollection> Collections { get; }
+
+    }
+
+    /// <summary>
+    /// Represents the action used to add a authentication definition to the current <see cref="V1CorrelationCollectionState"/>
+    /// </summary>
+    public class AddV1AuthenticationDefinitionCollection
+    {
+
+        /// <summary>
+        /// Initializes a new <see cref="AddV1AuthenticationDefinitionCollection"/>
+        /// </summary>
+        /// <param name="collection">The <see cref="V1AuthenticationDefinitionCollection"/> to add</param>
+        public AddV1AuthenticationDefinitionCollection(V1AuthenticationDefinitionCollection collection)
+        {
+            this.Collection = collection;
+        }
+
+        /// <summary>
+        /// Gets the <see cref="V1AuthenticationDefinitionCollection"/> to add
+        /// </summary>
+        public V1AuthenticationDefinitionCollection Collection { get; }
+
+    }
+
+    /// <summary>
+    /// Represents the action used to removed a authentication definition from the current <see cref="V1CorrelationCollectionState"/>
+    /// </summary>
+    public class RemoveV1AuthenticationDefinitionCollection
+    {
+
+        /// <summary>
+        /// Initializes a new <see cref="RemoveV1AuthenticationDefinitionCollection"/>
+        /// </summary>
+        /// <param name="collectionId">The id of the <see cref="V1AuthenticationDefinitionCollection"/> to remove</param>
+        public RemoveV1AuthenticationDefinitionCollection(string collectionId)
+        {
+            this.CollectionId = collectionId;
+        }
+
+        /// <summary>
+        /// Gets the id of the <see cref="V1AuthenticationDefinitionCollection"/> to remove
+        /// </summary>
+        public string CollectionId { get; }
+
+    }
+
 }

@@ -17,6 +17,7 @@
 
 using Neuroglia.Data.Flux;
 using Synapse.Apis.Management;
+using Synapse.Integration.Models;
 
 namespace Synapse.Dashboard.Pages.Resources.Collections
 {
@@ -29,7 +30,7 @@ namespace Synapse.Dashboard.Pages.Resources.Collections
     {
 
         /// <summary>
-        /// Queries <see cref="FunctionDefinitionCollection"/>s
+        /// Queries <see cref="V1FunctionDefinitionCollection"/>s
         /// </summary>
         /// <param name="action">The Flux action the effect applies to</param>
         /// <param name="context">The current <see cref="IEffectContext"/></param>
@@ -39,6 +40,32 @@ namespace Synapse.Dashboard.Pages.Resources.Collections
             var api = context.Services.GetRequiredService<ISynapseManagementApi>();
             var collections = await api.GetFunctionDefinitionCollectionsAsync(action.Query);
             context.Dispatcher.Dispatch(new SetV1FunctionDefinitionCollections(collections));
+        }
+
+        /// <summary>
+        /// Queries <see cref="V1EventDefinitionCollection"/>s
+        /// </summary>
+        /// <param name="action">The Flux action the effect applies to</param>
+        /// <param name="context">The current <see cref="IEffectContext"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        public static async Task On(QueryV1EventDefinitionCollections action, IEffectContext context)
+        {
+            var api = context.Services.GetRequiredService<ISynapseManagementApi>();
+            var collections = await api.GetEventDefinitionCollectionsAsync(action.Query);
+            context.Dispatcher.Dispatch(new SetV1EventDefinitionCollections(collections));
+        }
+
+        /// <summary>
+        /// Queries <see cref="V1AuthenticationDefinitionCollection"/>s
+        /// </summary>
+        /// <param name="action">The Flux action the effect applies to</param>
+        /// <param name="context">The current <see cref="IEffectContext"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        public static async Task On(QueryV1AuthenticationDefinitionCollections action, IEffectContext context)
+        {
+            var api = context.Services.GetRequiredService<ISynapseManagementApi>();
+            var collections = await api.GetAuthenticationDefinitionCollectionsAsync(action.Query);
+            context.Dispatcher.Dispatch(new SetV1AuthenticationDefinitionCollections(collections));
         }
 
     }

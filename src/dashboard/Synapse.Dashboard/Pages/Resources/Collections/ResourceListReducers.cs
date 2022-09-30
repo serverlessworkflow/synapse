@@ -76,6 +76,104 @@ namespace Synapse.Dashboard.Pages.Resources.Collections
             };
         }
 
+        /// <summary>
+        /// Sets the current <see cref="ResourceListState"/>'s <see cref="ResourceListState.EventDefinitionCollections"/>
+        /// </summary>
+        /// <param name="state">The <see cref="ResourceListState"/> to reduce</param>
+        /// <param name="action">The Flux action used to reduce the specified <see cref="ResourceListState"/></param>
+        /// <returns>The reduced <see cref="ResourceListState"/></returns>
+        public static ResourceListState On(ResourceListState state, SetV1EventDefinitionCollections action)
+        {
+            return state with
+            {
+                EventDefinitionCollections = action.Collections
+            };
+        }
+
+        /// <summary>
+        /// Adds the specified <see cref="V1EventDefinitionCollection"/> to the current state
+        /// </summary>
+        /// <param name="state">The <see cref="ResourceListState"/> to reduce</param>
+        /// <param name="action">The Flux action used to reduce the specified <see cref="ResourceListState"/></param>
+        /// <returns>The reduced <see cref="ResourceListState"/></returns>
+        public static ResourceListState On(ResourceListState state, AddV1EventDefinitionCollection action)
+        {
+            var collections = state.EventDefinitionCollections;
+            collections.Add(action.Collection);
+            return state with
+            {
+                EventDefinitionCollections = collections
+            };
+        }
+
+        /// <summary>
+        /// Removes the specified <see cref="V1EventDefinitionCollection"/> from the current state
+        /// </summary>
+        /// <param name="state">The <see cref="ResourceListState"/> to reduce</param>
+        /// <param name="action">The Flux action used to reduce the specified <see cref="ResourceListState"/></param>
+        /// <returns>The reduced <see cref="ResourceListState"/></returns>
+        public static ResourceListState On(ResourceListState state, RemoveV1EventDefinitionCollection action)
+        {
+            var collections = state.EventDefinitionCollections;
+            var collection = collections.FirstOrDefault(c => c.Id.Equals(action.CollectionId, StringComparison.InvariantCultureIgnoreCase));
+            if (collection == null)
+                return state;
+            collections.Remove(collection);
+            return state with
+            {
+                EventDefinitionCollections = collections
+            };
+        }
+
+        /// <summary>
+        /// Sets the current <see cref="ResourceListState"/>'s <see cref="ResourceListState.AuthenticationDefinitionCollections"/>
+        /// </summary>
+        /// <param name="state">The <see cref="ResourceListState"/> to reduce</param>
+        /// <param name="action">The Flux action used to reduce the specified <see cref="ResourceListState"/></param>
+        /// <returns>The reduced <see cref="ResourceListState"/></returns>
+        public static ResourceListState On(ResourceListState state, SetV1AuthenticationDefinitionCollections action)
+        {
+            return state with
+            {
+                AuthenticationDefinitionCollections = action.Collections
+            };
+        }
+
+        /// <summary>
+        /// Adds the specified <see cref="V1AuthenticationDefinitionCollection"/> to the current state
+        /// </summary>
+        /// <param name="state">The <see cref="ResourceListState"/> to reduce</param>
+        /// <param name="action">The Flux action used to reduce the specified <see cref="ResourceListState"/></param>
+        /// <returns>The reduced <see cref="ResourceListState"/></returns>
+        public static ResourceListState On(ResourceListState state, AddV1AuthenticationDefinitionCollection action)
+        {
+            var collections = state.AuthenticationDefinitionCollections;
+            collections.Add(action.Collection);
+            return state with
+            {
+                AuthenticationDefinitionCollections = collections
+            };
+        }
+
+        /// <summary>
+        /// Removes the specified <see cref="V1AuthenticationDefinitionCollection"/> from the current state
+        /// </summary>
+        /// <param name="state">The <see cref="ResourceListState"/> to reduce</param>
+        /// <param name="action">The Flux action used to reduce the specified <see cref="ResourceListState"/></param>
+        /// <returns>The reduced <see cref="ResourceListState"/></returns>
+        public static ResourceListState On(ResourceListState state, RemoveV1AuthenticationDefinitionCollection action)
+        {
+            var collections = state.AuthenticationDefinitionCollections;
+            var collection = collections.FirstOrDefault(c => c.Id.Equals(action.CollectionId, StringComparison.InvariantCultureIgnoreCase));
+            if (collection == null)
+                return state;
+            collections.Remove(collection);
+            return state with
+            {
+                AuthenticationDefinitionCollections = collections
+            };
+        }
+
     }
 
 }

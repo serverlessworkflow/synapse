@@ -20,14 +20,14 @@
  * -----------------------------------------------------------------------
  */
 
-namespace Synapse.Integration.Events.Correlations
+namespace Synapse.Integration.Events.EventDefinitionCollections
 {
 
 	/// <summary>
-	/// Represents the IDomainEvent fired whenever a new CloudEvent has been correlated
+	/// Represents the IDomainEvent fired whenever a new V1EventDefinitionCollection has been created
 	/// </summary>
 	[DataContract]
-	public partial class V1EventCorrelatedIntegrationEvent
+	public partial class V1EventDefinitionCollectionCreatedIntegrationEvent
 		: V1IntegrationEvent
 	{
 
@@ -46,25 +46,32 @@ namespace Synapse.Integration.Events.Correlations
 		public virtual DateTime CreatedAt { get; set; }
 
 		/// <summary>
-		/// The id of the context in which the correlation has been performed
+		/// The V1EventDefinitionCollection's name
 		/// </summary>
-		[DataMember(Name = "ContextId", Order = 3)]
-		[Description("The id of the context in which the correlation has been performed")]
-		public virtual string ContextId { get; set; }
+		[DataMember(Name = "Name", Order = 3)]
+		[Description("The V1EventDefinitionCollection's name")]
+		public virtual string Name { get; set; }
 
 		/// <summary>
-		/// The V1Event that has been correlated
+		/// The V1EventDefinitionCollection's version
 		/// </summary>
-		[DataMember(Name = "Event", Order = 4)]
-		[Description("The V1Event that has been correlated")]
-		public virtual V1Event Event { get; set; }
+		[DataMember(Name = "Version", Order = 4)]
+		[Description("The V1EventDefinitionCollection's version")]
+		public virtual string Version { get; set; }
 
 		/// <summary>
-		/// An ICollection`1 containing the keys of the mappings used to correlate the V1Event
+		/// The V1EventDefinitionCollection's description
 		/// </summary>
-		[DataMember(Name = "Mappings", Order = 5)]
-		[Description("An ICollection`1 containing the keys of the mappings used to correlate the V1Event")]
-		public virtual IEnumerable<string> Mappings { get; set; }
+		[DataMember(Name = "Description", Order = 5)]
+		[Description("The V1EventDefinitionCollection's description")]
+		public virtual string Description { get; set; }
+
+		/// <summary>
+		/// An IReadOnlyCollection`1 containing the EventDefinitions the V1EventDefinitionCollection is made out of
+		/// </summary>
+		[DataMember(Name = "Events", Order = 6)]
+		[Description("An IReadOnlyCollection`1 containing the EventDefinitions the V1EventDefinitionCollection is made out of")]
+		public virtual ICollection<EventDefinition> Events { get; set; }
 
     }
 

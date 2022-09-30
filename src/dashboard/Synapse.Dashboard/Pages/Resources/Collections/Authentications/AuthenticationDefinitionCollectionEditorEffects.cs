@@ -24,14 +24,14 @@ using Synapse.Apis.Management;
 using Synapse.Dashboard.Services;
 using Synapse.Integration.Models;
 
-namespace Synapse.Dashboard.Pages.Resources.Collections.Functions
+namespace Synapse.Dashboard.Pages.Resources.Collections.Authentications
 {
 
     /// <summary>
-    /// Defines Flux effects that apply to <see cref="FunctionDefinitionCollectionEditorState"/>-related Flux actions
+    /// Defines Flux effects that apply to <see cref="AuthenticationDefinitionCollectionEditorState"/>-related Flux actions
     /// </summary>
     [Effect]
-    public static class FunctionDefinitionCollectionEditorEffects
+    public static class AuthenticationDefinitionCollectionEditorEffects
     {
 
         /// <summary>
@@ -46,15 +46,15 @@ namespace Synapse.Dashboard.Pages.Resources.Collections.Functions
             {
                 var monacoEditorHelper = context.Services.GetRequiredService<IMonacoEditorHelper>();
                 var yamlConverter = context.Services.GetRequiredService<IYamlConverter>();
-                V1FunctionDefinitionCollection collection;
+                V1AuthenticationDefinitionCollection collection;
                 if (string.IsNullOrWhiteSpace(action.CollectionId))
-                    collection = new() { Name = "Undefined", Version = "0.1.0", Functions = new List<FunctionDefinition>() };
+                    collection = new() { Name = "Undefined", Version = "0.1.0", Authentications = new List<AuthenticationDefinition>() };
                 else
-                    collection = (await context.Services.GetRequiredService<ISynapseManagementApi>().GetFunctionDefinitionCollectionByIdAsync(action.CollectionId));
+                    collection = (await context.Services.GetRequiredService<ISynapseManagementApi>().GetAuthenticationDefinitionCollectionByIdAsync(action.CollectionId));
                 var serializedCollection = JsonConvert.SerializeObject(collection, Formatting.Indented, JsonConvert.DefaultSettings!()!);
                 if (monacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)
                     serializedCollection = await yamlConverter.JsonToYaml(serializedCollection);
-                var initialState = new FunctionDefinitionCollectionEditorState()
+                var initialState = new AuthenticationDefinitionCollectionEditorState()
                 {
                     Collection = collection,
                     SerializedCollection = serializedCollection,
@@ -63,7 +63,7 @@ namespace Synapse.Dashboard.Pages.Resources.Collections.Functions
                     ExpanderStates = new Dictionary<string, bool>()
                     {
                         { "general", true },
-                        { "functions", true }
+                        { "authentications", true }
                     }
                 };
                 context.Dispatcher.Dispatch(new InitializeStateSuccessful(initialState, action.IfNotExists));
@@ -120,7 +120,7 @@ namespace Synapse.Dashboard.Pages.Resources.Collections.Functions
                 context.Dispatcher.Dispatch(new UpdateSerializedCollection(serializedCollection));
                 if (monacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)
                     serializedCollection = await yamlConverter.YamlToJson(serializedCollection);
-                var collection = await jsonSerializer.DeserializeAsync<V1FunctionDefinitionCollection>(serializedCollection);
+                var collection = await jsonSerializer.DeserializeAsync<V1AuthenticationDefinitionCollection>(serializedCollection);
                 context.Dispatcher.Dispatch(new UpdateCollection(collection));
                 context.Dispatcher.Dispatch(new StopUpdating());
             }
@@ -168,17 +168,17 @@ namespace Synapse.Dashboard.Pages.Resources.Collections.Functions
             try
             {
                 var api = context.Services.GetRequiredService<ISynapseManagementApi>();
-                var collection = await api.CreateFunctionDefinitionCollectionAsync(new() 
+                var collection = await api.CreateAuthenticationDefinitionCollectionAsync(new() 
                 { 
                     Name = action.Collection.Name,
                     Version = action.Collection.Version,
                     Description = action.Collection.Description,
-                    Functions = action.Collection.Functions
+                    Authentications = action.Collection.Authentications
                 });
                 context.Dispatcher.Dispatch(new CollectionSaved(collection));
                 context.Dispatcher.Dispatch(new InitializeState(false));
                 var navigationManager = context.Services.GetRequiredService<NavigationManager>();
-                navigationManager.NavigateTo($"/resources");
+                navigationManager.NavigateTo($"/resources/collections/authentications");
             }
             catch (Exception ex)
             {
