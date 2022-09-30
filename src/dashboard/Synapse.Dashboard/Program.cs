@@ -22,6 +22,7 @@ using Neuroglia.Blazor.Dagre;
 using Neuroglia.Data;
 using Neuroglia.Data.Flux;
 using Neuroglia.Mapping;
+using Neuroglia.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using ServerlessWorkflow.Sdk;
@@ -30,6 +31,7 @@ using Synapse;
 using Synapse.Dashboard;
 using Synapse.Dashboard.Services;
 using Synapse.Integration.Serialization.Converters;
+using System;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 var baseAddress = builder.HostEnvironment.BaseAddress;
@@ -38,6 +40,16 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddTransient(provider => new HttpClient { BaseAddress = new Uri(baseAddress) });
 builder.Services.AddSynapseRestApiClient(http => http.BaseAddress = new Uri(baseAddress));
+builder.Services.AddNewtonsoftJsonSerializer(options =>
+{
+    options.ContractResolver = new NonPublicSetterContractResolver() { NamingStrategy = new CamelCaseNamingStrategy() { ProcessDictionaryKeys = false, OverrideSpecifiedNames = false, ProcessExtensionDataNames = false } };
+    options.Converters = new List<JsonConverter>() { new FilteredExpandoObjectConverter() };
+    options.NullValueHandling = NullValueHandling.Ignore;
+    options.DefaultValueHandling = DefaultValueHandling.Ignore;
+    options.DateFormatHandling = DateFormatHandling.IsoDateFormat;
+    options.DateParseHandling = DateParseHandling.DateTime;
+    options.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
+});
 builder.Services.AddServerlessWorkflow();
 builder.Services.AddPluralizer();
 builder.Services.AddMapper(typeof(Program).Assembly);

@@ -193,7 +193,7 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor.Effects
                 var api = context.Services.GetRequiredService<ISynapseManagementApi>();
                 if (api == null)
                     throw new NullReferenceException("Unable to resolved service 'ISynapseManagementApi'.");
-                var workflow = await api.CreateWorkflowAsync(new() { Collection = action.WorkflowDefinition });
+                var workflow = await api.CreateWorkflowAsync(new() { Definition = action.WorkflowDefinition });
                 context.Dispatcher.Dispatch(new WorkflowDefinitionSaved(workflow.Definition));
                 context.Dispatcher.Dispatch(new InitializeState(false));
                 var navigationManager = context.Services.GetRequiredService<NavigationManager>();
