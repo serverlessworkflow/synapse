@@ -1,39 +1,35 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
-	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-		<VersionPrefix>0.2.0</VersionPrefix>
-		<GenerateDocumentationFile>True</GenerateDocumentationFile>
-		<Authors>The Synapse Authors</Authors>
-		<Company>Cloud Native Computing Foundation</Company>
-		<Copyright>Copyright © 2022-Present The Synapse Authors. All Rights Reserved.</Copyright>
-		<RepositoryUrl>https://github.com/serverlessworkflow/synapse</RepositoryUrl>
-		<RepositoryType>git</RepositoryType>
-		<PackageProjectUrl>https://github.com/serverlessworkflow/synapse</PackageProjectUrl>
-		<PackageTags>synapse management api http</PackageTags>
-		<NeutralLanguage>en</NeutralLanguage>
-		<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
-		<AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
-		<FileVersion>$(VersionPrefix).0</FileVersion>
-		<OutputType>Library</OutputType>
-		<DebugType>embedded</DebugType>
-	</PropertyGroup>
-
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <VersionPrefix>0.2.1</VersionPrefix>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <Authors>The Synapse Authors</Authors>
+    <Company>Cloud Native Computing Foundation</Company>
+    <Copyright>Copyright © 2022-Present The Synapse Authors. All Rights Reserved.</Copyright>
+    <RepositoryUrl>https://github.com/serverlessworkflow/synapse</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/serverlessworkflow/synapse</PackageProjectUrl>
+    <PackageTags>synapse management api http</PackageTags>
+    <NeutralLanguage>en</NeutralLanguage>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
+    <FileVersion>$(VersionPrefix).0</FileVersion>
+    <OutputType>Library</OutputType>
+    <DebugType>embedded</DebugType>
+  </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\core\Synapse.Application\Synapse.Application.csproj" />
     <ProjectReference Include="..\Synapse.Apis.Management.Http.Client\Synapse.Apis.Management.Http.Client.csproj" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.9" />
     <PackageReference Include="Microsoft.AspNetCore.OData" Version="8.0.11" />
     <PackageReference Include="Microsoft.AspNetCore.OData.NewtonsoftJson" Version="8.0.4" />
     <PackageReference Include="Neuroglia.Mediation.AspNetCore" Version="2.0.2" />
-	<PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.4.0" />
-	<PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.4.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.4.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.4.0" />
   </ItemGroup>
-	
 </Project>

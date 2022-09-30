@@ -1,37 +1,33 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	<OutputType>Exe</OutputType>
-	<VersionPrefix>0.2.0</VersionPrefix>
+    <OutputType>Exe</OutputType>
+    <VersionPrefix>0.2.1</VersionPrefix>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
-	<Authors>The Synapse Authors</Authors>
-	<Company>Cloud Native Computing Foundation</Company>
+    <Authors>The Synapse Authors</Authors>
+    <Company>Cloud Native Computing Foundation</Company>
     <Copyright>Copyright © 2022-Present The Synapse Authors. All Rights Reserved.</Copyright>
     <RepositoryUrl>https://github.com/serverlessworkflow/synapse</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://github.com/serverlessworkflow/synapse</PackageProjectUrl>
     <PackageTags>synapse synctl app cli</PackageTags>
     <NeutralLanguage>en</NeutralLanguage>
-	<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-	<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
     <FileVersion>$(VersionPrefix).0</FileVersion>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-	<DebugType>embedded</DebugType>
-	<AssemblyName>synctl</AssemblyName>
+    <DebugType>embedded</DebugType>
+    <AssemblyName>synctl</AssemblyName>
   </PropertyGroup>
-	
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="6.0.0" />
     <PackageReference Include="Spectre.Console" Version="0.45.0" />
     <PackageReference Include="System.CommandLine.NamingConventionBinder" Version="2.0.0-beta3.22114.1" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\..\apis\management\Synapse.Apis.Management.Http.Client\Synapse.Apis.Management.Http.Client.csproj" />
   </ItemGroup>
-
 </Project>

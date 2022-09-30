@@ -1,42 +1,38 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-	<TargetFramework>net6.0</TargetFramework>
-	<RootNamespace>$(MSBuildProjectName.Replace(" ", "_").Replace(".Client", ""))</RootNamespace>
-	<ImplicitUsings>enable</ImplicitUsings>
-	<Nullable>enable</Nullable>
-	<VersionPrefix>0.2.0</VersionPrefix>
-	<GenerateDocumentationFile>True</GenerateDocumentationFile>
-	<Authors>The Synapse Authors</Authors>
-	<Company>Cloud Native Computing Foundation</Company>
-	<Copyright>Copyright © 2022-Present The Synapse Authors. All Rights Reserved.</Copyright>
-	<RepositoryUrl>https://github.com/serverlessworkflow/synapse</RepositoryUrl>
-	<RepositoryType>git</RepositoryType>
-	<PackageProjectUrl>https://github.com/serverlessworkflow/synapse</PackageProjectUrl>
-	<PackageTags>synapse runtime api ipc intra process client</PackageTags>
-	<NeutralLanguage>en</NeutralLanguage>
-	<IsPackable>true</IsPackable>
-	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-	<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-	<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
-	<PackageIcon>synapse-headless.png</PackageIcon>
-	<AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
-	<FileVersion>$(VersionPrefix).0</FileVersion>
-	<OutputType>Library</OutputType>
-	<DebugType>embedded</DebugType>
-	<Description>This package contains the IPC client for the runtime API of Synapse WFMS</Description>
+    <TargetFramework>net6.0</TargetFramework>
+    <RootNamespace>$(MSBuildProjectName.Replace(" ", "_").Replace(".Client", ""))</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <VersionPrefix>0.2.1</VersionPrefix>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <Authors>The Synapse Authors</Authors>
+    <Company>Cloud Native Computing Foundation</Company>
+    <Copyright>Copyright © 2022-Present The Synapse Authors. All Rights Reserved.</Copyright>
+    <RepositoryUrl>https://github.com/serverlessworkflow/synapse</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/serverlessworkflow/synapse</PackageProjectUrl>
+    <PackageTags>synapse runtime api ipc intra process client</PackageTags>
+    <NeutralLanguage>en</NeutralLanguage>
+    <IsPackable>true</IsPackable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <PackageIcon>synapse-headless.png</PackageIcon>
+    <AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
+    <FileVersion>$(VersionPrefix).0</FileVersion>
+    <OutputType>Library</OutputType>
+    <DebugType>embedded</DebugType>
+    <Description>This package contains the IPC client for the runtime API of Synapse WFMS</Description>
   </PropertyGroup>
-
   <ItemGroup>
     <None Include="..\..\..\..\assets\images\synapse-headless.png" Link="synapse-headless.png">
       <PackagePath>\</PackagePath>
       <Pack>True</Pack>
     </None>
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\..\..\core\Synapse.Application\Synapse.Application.csproj" />
     <ProjectReference Include="..\..\management\Synapse.Apis.Management.Core\Synapse.Apis.Management.Core.csproj" />
   </ItemGroup>
-
 </Project>

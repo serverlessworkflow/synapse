@@ -1,37 +1,34 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
-	<VersionPrefix>0.2.0</VersionPrefix>
+    <VersionPrefix>0.2.1</VersionPrefix>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
-	<Authors>The Synapse Authors</Authors>
-	<Company>Cloud Native Computing Foundation</Company>
+    <Authors>The Synapse Authors</Authors>
+    <Company>Cloud Native Computing Foundation</Company>
     <Copyright>Copyright © 2022-Present The Synapse Authors. All Rights Reserved.</Copyright>
     <RepositoryUrl>https://github.com/serverlessworkflow/synapse</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://github.com/serverlessworkflow/synapse</PackageProjectUrl>
     <PackageTags>synapse integration</PackageTags>
     <NeutralLanguage>en</NeutralLanguage>
-	<IsPackable>true</IsPackable>
-	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-	<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-	<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
-	<PackageIcon>synapse-headless.png</PackageIcon>
+    <IsPackable>true</IsPackable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <PackageIcon>synapse-headless.png</PackageIcon>
     <AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
     <FileVersion>$(VersionPrefix).0</FileVersion>
-	<DebugType>embedded</DebugType>
-	<Description>This package contains everything you need to integrate Synapse WFMS and its APIs</Description>
+    <DebugType>embedded</DebugType>
+    <Description>This package contains everything you need to integrate Synapse WFMS and its APIs</Description>
   </PropertyGroup>
-
   <ItemGroup>
     <None Include="..\..\..\assets\images\synapse-headless.png" Link="synapse-headless.png">
       <PackagePath>\</PackagePath>
       <Pack>True</Pack>
     </None>
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" />
     <PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="6.0.9" />
@@ -42,7 +39,6 @@
     <PackageReference Include="ServerlessWorkflow.Sdk" Version="0.8.1.16" />
     <PackageReference Include="System.ServiceModel.Primitives" Version="4.10.0" />
   </ItemGroup>
-
   <ItemGroup>
     <None Update="Templates\commands.tst">
       <DesignTime>True</DesignTime>
@@ -72,11 +68,9 @@
       <LastGenOutput>models.tst</LastGenOutput>
     </None>
   </ItemGroup>
-
   <ItemGroup>
     <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
   </ItemGroup>
-
   <ItemGroup>
     <Compile Update="Commands\AuthenticationDefinitionCollections\v1\Generated\V1CreateAuthenticationDefinitionCollectionCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\AuthenticationDefinitionCollections\v1\V1CreateFunctionDefinitionCollectionCommand.cs</CustomToolNamespace>
@@ -397,5 +391,4 @@
       <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1WorkflowRuntimeSession.cs</CustomToolNamespace>
     </Compile>
   </ItemGroup>
-
 </Project>
