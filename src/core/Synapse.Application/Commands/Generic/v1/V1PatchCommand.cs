@@ -25,15 +25,16 @@ namespace Synapse.Application.Commands.Generic
     /// Represents the <see cref="ICommand"/> used to patch an existing <see cref="IAggregateRoot"/>
     /// </summary>
     /// <typeparam name="TAggregate">The type of <see cref="IAggregateRoot"/> to patch</typeparam>
+    /// <typeparam name="TResult">The type of <see cref="IDataTransferObject"/> to return</typeparam>
     /// <typeparam name="TKey">The type of id used to uniquely identify the <see cref="IAggregateRoot"/> to patch</typeparam>
-    public class V1PatchCommand<TAggregate, TKey>
-        : Command
+    public class V1PatchCommand<TAggregate, TResult, TKey>
+        : Command<TResult>
         where TAggregate : class, IIdentifiable<TKey>
         where TKey : IEquatable<TKey>
     {
 
         /// <summary>
-        /// Initializes a new <see cref="V1PatchCommand{TAggregate, TKey}"/>
+        /// Initializes a new <see cref="V1PatchCommand{TAggregate, TDto, TKey}"/>
         /// </summary>
         protected V1PatchCommand()
         {
@@ -42,7 +43,7 @@ namespace Synapse.Application.Commands.Generic
         }
 
         /// <summary>
-        /// Initializes a new <see cref="V1PatchCommand{TAggregate, TKey}"/>
+        /// Initializes a new <see cref="V1PatchCommand{TAggregate, TDto, TKey}"/>
         /// </summary>
         /// <param name="id">The id of the entity to patch</param>
         /// <param name="patch">The <see cref="JsonPatchDocument{TModel}"/> to apply</param>
@@ -65,13 +66,14 @@ namespace Synapse.Application.Commands.Generic
     }
 
     /// <summary>
-    /// Represents the service used to handle <see cref="V1PatchCommand{TAggregate, TKey}"/> instances
+    /// Represents the service used to handle <see cref="V1PatchCommand{TAggregate, TDto, TKey}"/> instances
     /// </summary>
     /// <typeparam name="TAggregate">The type of <see cref="IAggregateRoot"/> to patch</typeparam>
+    /// <typeparam name="TResult">The type of <see cref="IDataTransferObject"/> to return</typeparam>
     /// <typeparam name="TKey">The type of key used to uniquely identify the <see cref="IAggregateRoot"/> to patch</typeparam>
-    public class PatchCommandHandler<TAggregate, TKey>
+    public class PatchCommandHandler<TAggregate, TResult, TKey>
         : CommandHandlerBase,
-        ICommandHandler<V1PatchCommand<TAggregate, TKey>>
+        ICommandHandler<V1PatchCommand<TAggregate, TResult, TKey>, TResult>
         where TAggregate : class, IIdentifiable<TKey>
         where TKey : IEquatable<TKey>
     {
@@ -95,15 +97,15 @@ namespace Synapse.Application.Commands.Generic
         protected IObjectAdapter Adapter { get; }
 
         /// <inheritdoc/>
-        public virtual async Task<IOperationResult> HandleAsync(V1PatchCommand<TAggregate, TKey> command, CancellationToken cancellationToken = default)
+        public virtual async Task<IOperationResult<TResult>> HandleAsync(V1PatchCommand<TAggregate, TResult, TKey> command, CancellationToken cancellationToken)
         {
             var aggregate = await this.Repository.FindAsync(command.Id, cancellationToken);
-            if(aggregate == null)
+            if (aggregate == null)
                 throw DomainException.NullReference(typeof(TAggregate), command.Id);
             command.Patch.ApplyTo(aggregate, this.Adapter);
-            await this.Repository.UpdateAsync(aggregate, cancellationToken);
+            aggregate = await this.Repository.UpdateAsync(aggregate, cancellationToken);
             await this.Repository.SaveChangesAsync(cancellationToken);
-            return this.Ok();
+            return this.Ok(this.Mapper.Map<TResult>(aggregate));
         }
 
     }

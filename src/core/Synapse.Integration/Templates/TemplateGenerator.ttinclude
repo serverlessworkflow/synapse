@@ -341,7 +341,7 @@ ${
         output.AppendLine(Indent(2, "/// <summary>"));
         output.AppendLine(Indent(2, $"/// {description}"));
         output.AppendLine(Indent(2, "/// </summary>"));
-        output.AppendLine(Indent(2, $"[DataMember(Name = \"AggregateId\", Order = {order})]"));
+        output.AppendLine(Indent(2, $"[DataMember(Name = \"aggregateId\", Order = {order})]"));
         output.AppendLine(Indent(2, $@"[Description(""{description}"")]"));
         output.AppendLine(Indent(2, $"public virtual string AggregateId {{ get; set; }}"));
         order++;
@@ -350,7 +350,7 @@ ${
         output.AppendLine(Indent(2, "/// <summary>"));
         output.AppendLine(Indent(2, $"/// {description}"));
         output.AppendLine(Indent(2, "/// </summary>"));
-        output.AppendLine(Indent(2, $"[DataMember(Name = \"CreatedAt\", Order = {order})]"));
+        output.AppendLine(Indent(2, $"[DataMember(Name = \"createdAt\", Order = {order})]"));
         output.AppendLine(Indent(2, $@"[Description(""{description}"")]"));
         output.AppendLine(Indent(2, $"public virtual DateTime CreatedAt {{ get; set; }}"));
         order++;
@@ -366,7 +366,7 @@ ${
             }
             Attribute jsonPropertyAttribute = property.Attributes.FirstOrDefault(a => a.Name == "JsonProperty");
             var propertyName = jsonPropertyAttribute == null ? property.Name : jsonPropertyAttribute.Arguments.First().Value.ToString();
-            output.AppendLine(Indent(2, $"[DataMember(Name = \"{propertyName}\", Order = {order})]"));
+            output.AppendLine(Indent(2, $"[DataMember(Name = \"{Char.ToLowerInvariant(propertyName[0]) + propertyName.Substring(1)}\", Order = {order})]"));
             if(jsonPropertyAttribute != null)
             {
                 output.AppendLine(Indent(2, $"[Newtonsoft.Json.JsonProperty({jsonPropertyAttribute.Value})]"));

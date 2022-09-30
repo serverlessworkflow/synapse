@@ -59,6 +59,13 @@ namespace Synapse.Integration.Events.Correlations
 		[Description("The V1Event that has been correlated")]
 		public virtual V1Event Event { get; set; }
 
+		/// <summary>
+		/// An ICollection`1 containing the keys of the mappings used to correlate the V1Event
+		/// </summary>
+		[DataMember(Name = "Mappings", Order = 5)]
+		[Description("An ICollection`1 containing the keys of the mappings used to correlate the V1Event")]
+		public virtual IEnumerable<string> Mappings { get; set; }
+
     }
 
 }

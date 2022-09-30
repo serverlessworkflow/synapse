@@ -110,7 +110,7 @@ else if(!string.IsNullOrWhiteSpace(this.workflowId))
     private MonacoEditor? textBasedEditor;
     private Subject<string>? editorValue;
     private Subject<bool>? disposeNotifier;
-    private WorkflowDefinition? workflowDefinition = null;
+    private WorkflowDefinition? workflowDefinition;
     private WorkflowDiagram? workflowDiagram;
     private Modal? validationMessagesDialog;
     private bool isDiagramVisible = false;

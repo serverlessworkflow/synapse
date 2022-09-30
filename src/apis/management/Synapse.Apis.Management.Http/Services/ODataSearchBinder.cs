@@ -1,4 +1,21 @@
-﻿using Microsoft.AspNetCore.OData.Query.Expressions;
+﻿/*
+ * Copyright © 2022-Present The Synapse Authors
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+using Microsoft.AspNetCore.OData.Query.Expressions;
 using Microsoft.OData.UriParser;
 using Neuroglia;
 using System.Linq.Expressions;
@@ -24,6 +41,7 @@ namespace Synapse.Apis.Management.Http.Services
         private static readonly MethodInfo FilterWorkflowInstanceMethod = typeof(ODataSearchBinder).GetMethod(nameof(FilterWorkflowInstance), BindingFlags.Static | BindingFlags.NonPublic)!;
         private static readonly MethodInfo FilterWorkflowActivityMethod = typeof(ODataSearchBinder).GetMethod(nameof(FilterWorkflowActivity), BindingFlags.Static | BindingFlags.NonPublic)!;
         private static readonly MethodInfo FilterCorrelationMethod = typeof(ODataSearchBinder).GetMethod(nameof(FilterCorrelation), BindingFlags.Static | BindingFlags.NonPublic)!;
+        private static readonly MethodInfo FilterFunctionCollectionMethod = typeof(ODataSearchBinder).GetMethod(nameof(FilterFunctionCollection), BindingFlags.Static | BindingFlags.NonPublic)!;
 
         /// <inheritdoc/>
         public Expression BindSearch(SearchClause searchClause, QueryBinderContext context)
@@ -81,6 +99,8 @@ namespace Synapse.Apis.Management.Http.Services
                 return this.BindWorkflowActivitySearchTerm(term, context);
             else if (context.ElementClrType == typeof(Integration.Models.V1Correlation))
                 return this.BindCorrelationSearchTerm(term, context);
+            else if (context.ElementClrType == typeof(Integration.Models.V1FunctionDefinitionCollection))
+                return this.BindFunctionCollectionSearchTerm(term, context);
             else
                 throw new NotSupportedException($"Search is not allowed on element type '{context.ElementClrType.Name}'");
         }
@@ -137,6 +157,19 @@ namespace Synapse.Apis.Management.Http.Services
             return searchQuery;
         }
 
+        /// <summary>
+        /// Binds the specified <see cref="Domain.Models.V1FunctionDefinitionCollection"/> <see cref="SearchTermNode"/>
+        /// </summary>
+        /// <param name="searchTermNode">The <see cref="Domain.Models.V1FunctionDefinitionCollection"/> <see cref="SearchTermNode"/> to bind</param>
+        /// <param name="context">The current <see cref="QueryBinderContext"/></param>
+        /// <returns>A new <see cref="Expression"/></returns>
+        protected virtual Expression BindFunctionCollectionSearchTerm(SearchTermNode searchTermNode, QueryBinderContext context)
+        {
+            var searchTerm = searchTermNode.Text.ToLowerInvariant();
+            var searchQuery = Expression.IsTrue(Expression.Call(null, FilterFunctionCollectionMethod, context.CurrentParameter, Expression.Constant(searchTerm)));
+            return searchQuery;
+        }
+
         static bool FilterWorkflow(Integration.Models.V1Workflow workflow, string searchTerm)
         {
             return workflow.Id.ToLower().Contains(searchTerm)
@@ -179,6 +212,17 @@ namespace Synapse.Apis.Management.Http.Services
                 || (correlation.Contexts != null && correlation.Contexts.Any(c => c.Mappings != null && (c.Mappings.Any(kvp => kvp.Key.ToLower().Contains(searchTerm) || kvp.Value.ToLower().Contains(searchTerm)))))
                 || EnumHelper.Stringify(correlation.Lifetime).ToLowerInvariant().Contains(searchTerm)
                 || EnumHelper.Stringify(correlation.ConditionType).ToLowerInvariant().Contains(searchTerm);
+        }
+
+        static bool FilterFunctionCollection(Integration.Models.V1FunctionDefinitionCollection collection, string searchTerm)
+        {
+            return collection.Id.Contains(searchTerm, StringComparison.InvariantCultureIgnoreCase)
+                || collection.Name.Contains(searchTerm, StringComparison.InvariantCultureIgnoreCase)
+                || collection.Version.Contains(searchTerm, StringComparison.InvariantCultureIgnoreCase)
+                || collection.Description.Contains(searchTerm, StringComparison.InvariantCultureIgnoreCase)
+                || (collection.Functions != null && collection.Functions.Any(f => f.Name.Contains(searchTerm, StringComparison.InvariantCultureIgnoreCase)))
+                || (collection.Functions != null && collection.Functions.Any(f => f.Operation.Contains(searchTerm, StringComparison.InvariantCultureIgnoreCase)))
+                || (collection.Functions != null && collection.Functions.Any(f => EnumHelper.Stringify(f.Type).Contains(searchTerm, StringComparison.InvariantCultureIgnoreCase)));
         }
 
     }

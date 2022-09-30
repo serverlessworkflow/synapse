@@ -85,10 +85,20 @@
         </tr>
         <tr>
             <td>Authentication</td>
-            <td><AuthenticationSelector 
-            Authentications="Workflow.Auth"
-            Selected="string.IsNullOrWhiteSpace(function.AuthRef) ? null : Workflow.GetAuthentication(function.AuthRef)"
-            OnChange="async e => await OnPropertyChanged(nameof(function.AuthRef), f => f.AuthRef = e.Name)"/></td>
+            <td>
+                @if(Workflow != null)
+                {
+                    <AuthenticationSelector 
+                    Authentications="Workflow.Auth"
+                    Selected="string.IsNullOrWhiteSpace(function.AuthRef) ? null : Workflow.GetAuthentication(function.AuthRef)"
+                    OnChange="async e => await OnPropertyChanged(nameof(function.AuthRef), f => f.AuthRef = e.Name)"/>
+                }
+                else
+                {
+                    <input type="text" value="@function.AuthRef" placeholder="Authentication definition reference" class="form-control"
+                    @onchange="async e => await OnPropertyChanged(nameof(function.AuthRef), f => f.AuthRef = (string?)e.Value)"/>
+                }
+            </td>
         </tr>
         <tr>
             <td colspan="2">Metadata</td>
@@ -106,7 +116,7 @@
 
 @code {
 
-    [CascadingParameter] public WorkflowDefinition Workflow { get; set; } = null!;
+    [CascadingParameter] public WorkflowDefinition? Workflow { get; set; }
 
     private FunctionDefinition? function { get; set; }
     [Parameter] public FunctionDefinition? Function { get; set; }

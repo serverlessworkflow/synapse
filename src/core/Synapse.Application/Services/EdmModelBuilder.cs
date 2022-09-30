@@ -41,6 +41,7 @@ namespace Synapse.Application.Services
             builder.EntitySet<Integration.Models.V1WorkflowInstance>("V1WorkflowInstances");
             builder.EntitySet<Integration.Models.V1WorkflowActivity>("V1WorkflowActivities");
             builder.EntitySet<Integration.Models.V1Correlation>("V1Correlations");
+            builder.EntitySet<Integration.Models.V1FunctionDefinitionCollection>("V1FunctionDefinitionCollections");
 
             builder.AddComplexType(typeof(Dynamic));
             builder.AddComplexType(typeof(Neuroglia.Serialization.DynamicObject));

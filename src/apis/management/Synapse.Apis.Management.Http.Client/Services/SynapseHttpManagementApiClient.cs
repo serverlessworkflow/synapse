@@ -17,7 +17,10 @@
 
 using Microsoft.Extensions.Logging;
 using Neuroglia.Serialization;
+using Synapse.Integration.Commands.AuthenticationDefinitionCollections;
 using Synapse.Integration.Commands.Correlations;
+using Synapse.Integration.Commands.EventDefinitionCollections;
+using Synapse.Integration.Commands.FunctionDefinitionCollections;
 using Synapse.Integration.Commands.WorkflowInstances;
 using Synapse.Integration.Commands.Workflows;
 using Synapse.Integration.Models;
@@ -191,7 +194,7 @@ namespace Synapse.Apis.Management.Http
             using var response = await this.HttpClient.SendAsync(request, cancellationToken);
             var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
             if (!response.IsSuccessStatusCode)
-                this.Logger.LogError("An error occured while deleting the specified workflow with the specified id '{id}': {details}", id, json);
+                this.Logger.LogError("An error occured while deleting the workflow with the specified id '{id}': {details}", id, json);
             response.EnsureSuccessStatusCode();
         }
 
@@ -323,7 +326,7 @@ namespace Synapse.Apis.Management.Http
             using var response = await this.HttpClient.SendAsync(request, cancellationToken);
             var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
             if (!response.IsSuccessStatusCode)
-                this.Logger.LogError("An error occured while querying deleting the specified workflow instance with the specified id '{id}': {details}", id, json);
+                this.Logger.LogError("An error occured while querying deleting the workflow instance with the specified id '{id}': {details}", id, json);
             response.EnsureSuccessStatusCode();
         }
 
@@ -386,11 +389,182 @@ namespace Synapse.Apis.Management.Http
             using var response = await this.HttpClient.SendAsync(request, cancellationToken);
             var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
             if (!response.IsSuccessStatusCode)
-                this.Logger.LogError("An error occured while deleting the specified correlation with the specified id '{id}': {details}", id, json);
+                this.Logger.LogError("An error occured while deleting the correlation with the specified id '{id}': {details}", id, json);
             response.EnsureSuccessStatusCode();
         }
 
         #endregion region
+
+        #region AuthenticationDefinitionCollections
+
+        /// <inheritdoc/>
+        public virtual async Task<V1AuthenticationDefinitionCollection> CreateAuthenticationDefinitionCollectionAsync(V1CreateAuthenticationDefinitionCollectionCommand command, CancellationToken cancellationToken = default)
+        {
+            var requestUri = "/api/v1/resources/collections/authentications";
+            using var request = this.CreateRequest(HttpMethod.Post, requestUri);
+            var json = await this.Serializer.SerializeAsync(command, cancellationToken);
+            request.Content = new StringContent(json, Encoding.UTF8, MediaTypeNames.Application.Json);
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while creating a new authentication definition collection: {details}", json);
+            response.EnsureSuccessStatusCode();
+            return await this.Serializer.DeserializeAsync<V1AuthenticationDefinitionCollection>(json, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<V1AuthenticationDefinitionCollection> GetAuthenticationDefinitionCollectionByIdAsync(string id, CancellationToken cancellationToken = default)
+        {
+            using var request = this.CreateRequest(HttpMethod.Get, $"/api/v1/resources/collections/authentications/{id}");
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while querying authentication definition collections: {details}", json);
+            response.EnsureSuccessStatusCode();
+            return await this.Serializer.DeserializeAsync<V1AuthenticationDefinitionCollection>(json, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<List<V1AuthenticationDefinitionCollection>> GetAuthenticationDefinitionCollectionsAsync(string? query, CancellationToken cancellationToken = default)
+        {
+            var requestUri = "/api/v1/resources/collections/authentications";
+            if (!string.IsNullOrWhiteSpace(query))
+                requestUri += $"?{query}";
+            using var request = this.CreateRequest(HttpMethod.Get, requestUri);
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while querying authentication definition collections: {details}", json);
+            response.EnsureSuccessStatusCode();
+            return await this.Serializer.DeserializeAsync<List<V1AuthenticationDefinitionCollection>>(json, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task DeleteAuthenticationDefinitionCollectionAsync(string id, CancellationToken cancellationToken = default)
+        {
+            using var request = this.CreateRequest(HttpMethod.Delete, $"/api/v1/resources/collections/authentications/{id}");
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while deleting the authentication definition collection with the specified id '{id}': {details}", id, json);
+            response.EnsureSuccessStatusCode();
+        }
+
+        #endregion
+
+        #region EventDefinitionCollections
+
+        /// <inheritdoc/>
+        public virtual async Task<V1EventDefinitionCollection> CreateEventDefinitionCollectionAsync(V1CreateEventDefinitionCollectionCommand command, CancellationToken cancellationToken = default)
+        {
+            var requestUri = "/api/v1/resources/collections/events";
+            using var request = this.CreateRequest(HttpMethod.Post, requestUri);
+            var json = await this.Serializer.SerializeAsync(command, cancellationToken);
+            request.Content = new StringContent(json, Encoding.UTF8, MediaTypeNames.Application.Json);
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while creating a new e definition collection: {details}", json);
+            response.EnsureSuccessStatusCode();
+            return await this.Serializer.DeserializeAsync<V1EventDefinitionCollection>(json, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<V1EventDefinitionCollection> GetEventDefinitionCollectionByIdAsync(string id, CancellationToken cancellationToken = default)
+        {
+            using var request = this.CreateRequest(HttpMethod.Get, $"/api/v1/resources/collections/events/{id}");
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while querying e definition collections: {details}", json);
+            response.EnsureSuccessStatusCode();
+            return await this.Serializer.DeserializeAsync<V1EventDefinitionCollection>(json, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<List<V1EventDefinitionCollection>> GetEventDefinitionCollectionsAsync(string? query, CancellationToken cancellationToken = default)
+        {
+            var requestUri = "/api/v1/resources/collections/events";
+            if (!string.IsNullOrWhiteSpace(query))
+                requestUri += $"?{query}";
+            using var request = this.CreateRequest(HttpMethod.Get, requestUri);
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while querying e definition collections: {details}", json);
+            response.EnsureSuccessStatusCode();
+            return await this.Serializer.DeserializeAsync<List<V1EventDefinitionCollection>>(json, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task DeleteEventDefinitionCollectionAsync(string id, CancellationToken cancellationToken = default)
+        {
+            using var request = this.CreateRequest(HttpMethod.Delete, $"/api/v1/resources/collections/events/{id}");
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while deleting the e definition collection with the specified id '{id}': {details}", id, json);
+            response.EnsureSuccessStatusCode();
+        }
+
+        #endregion
+
+        #region FunctionDefinitionCollections
+
+        /// <inheritdoc/>
+        public virtual async Task<V1FunctionDefinitionCollection> CreateFunctionDefinitionCollectionAsync(V1CreateFunctionDefinitionCollectionCommand command, CancellationToken cancellationToken = default)
+        {
+            var requestUri = "/api/v1/resources/collections/functions";
+            using var request = this.CreateRequest(HttpMethod.Post, requestUri);
+            var json = await this.Serializer.SerializeAsync(command, cancellationToken);
+            request.Content = new StringContent(json, Encoding.UTF8, MediaTypeNames.Application.Json);
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while creating a new function definition collection: {details}", json);
+            response.EnsureSuccessStatusCode();
+            return await this.Serializer.DeserializeAsync<V1FunctionDefinitionCollection>(json, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<V1FunctionDefinitionCollection> GetFunctionDefinitionCollectionByIdAsync(string id, CancellationToken cancellationToken = default)
+        {
+            using var request = this.CreateRequest(HttpMethod.Get, $"/api/v1/resources/collections/functions/{id}");
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while querying function definition collections: {details}", json);
+            response.EnsureSuccessStatusCode();
+            return await this.Serializer.DeserializeAsync<V1FunctionDefinitionCollection>(json, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<List<V1FunctionDefinitionCollection>> GetFunctionDefinitionCollectionsAsync(string? query, CancellationToken cancellationToken = default)
+        {
+            var requestUri = "/api/v1/resources/collections/functions";
+            if (!string.IsNullOrWhiteSpace(query))
+                requestUri += $"?{query}";
+            using var request = this.CreateRequest(HttpMethod.Get, requestUri);
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while querying function definition collections: {details}", json);
+            response.EnsureSuccessStatusCode();
+            return await this.Serializer.DeserializeAsync<List<V1FunctionDefinitionCollection>>(json, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task DeleteFunctionDefinitionCollectionAsync(string id, CancellationToken cancellationToken = default)
+        {
+            using var request = this.CreateRequest(HttpMethod.Delete, $"/api/v1/resources/collections/functions/{id}");
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while deleting the function definition collection with the specified id '{id}': {details}", id, json);
+            response.EnsureSuccessStatusCode();
+        }
+
+        #endregion
 
         #region OperationalReports
 

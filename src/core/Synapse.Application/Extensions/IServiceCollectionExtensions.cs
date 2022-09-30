@@ -20,6 +20,7 @@ using Synapse.Application.Commands.Generic;
 using Synapse.Application.Queries.Generic;
 using Synapse.Domain;
 using Synapse.Infrastructure;
+using System.Reflection;
 
 namespace Synapse.Application.Configuration
 {
@@ -109,6 +110,7 @@ namespace Synapse.Application.Configuration
         {
             foreach (Type aggregateType in TypeCacheUtil.FindFilteredTypes("domain:aggregates", t => t.IsClass && !t.IsAbstract && typeof(IAggregateRoot).IsAssignableFrom(t), typeof(V1Workflow).Assembly))
             {
+                Type dtoType = aggregateType.GetCustomAttribute<DataTransferObjectTypeAttribute>()!.Type;
                 Type keyType = aggregateType.GetGenericType(typeof(IIdentifiable<>)).GetGenericArguments().First();
                 Type commandType;
                 Type resultType;
@@ -116,10 +118,10 @@ namespace Synapse.Application.Configuration
                 Type handlerImplementationType;
                 if (aggregateType.TryGetCustomAttribute(out PatchableAttribute patchableAttribute))
                 {
-                    commandType = typeof(V1PatchCommand<,>).MakeGenericType(aggregateType, keyType);
-                    resultType = typeof(IOperationResult<DataTransferObject>);
+                    commandType = typeof(V1PatchCommand<,,>).MakeGenericType(aggregateType, dtoType, keyType);
+                    resultType = typeof(IOperationResult<>).MakeGenericType(dtoType);
                     handlerServiceType = typeof(IRequestHandler<,>).MakeGenericType(commandType, resultType);
-                    handlerImplementationType = typeof(PatchCommandHandler<,>).MakeGenericType(aggregateType, keyType);
+                    handlerImplementationType = typeof(PatchCommandHandler<,,>).MakeGenericType(aggregateType, dtoType, keyType);
                     services.Add(new ServiceDescriptor(handlerServiceType, handlerImplementationType, serviceLifetime));
                     services.Add(new ServiceDescriptor(typeof(IMiddleware<,>).MakeGenericType(commandType, resultType), typeof(DomainExceptionHandlingMiddleware<,>).MakeGenericType(commandType, resultType), serviceLifetime));
                 }

@@ -18,6 +18,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Neuroglia.Data.Expressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using ServerlessWorkflow.Sdk.Services.IO;
 using Synapse.Apis.Management;
 using Synapse.Apis.Runtime;
 using Synapse.Worker.Services;
@@ -39,14 +40,16 @@ namespace Synapse.Worker.Services
         /// <param name="serviceProvider">The current <see cref="IServiceProvider"/></param>
         /// <param name="logger">The service used to perform logging</param>
         /// <param name="expressionEvaluatorProvider">The service used to create provide <see cref="IExpressionEvaluator"/>s</param>
+        /// <param name="workflowExternalDefinitionResolver">The service used to resolve external definitions referenced by <see cref="WorkflowDefinition"/>s</param>
         /// <param name="secretManager">The service used to manage secrets</param>
         /// <param name="managementApi">The service used to interact with the Synapse Public API</param>
         /// <param name="runtimeApi">The service used to interact with the Synapse Runtime API</param>
-        public WorkflowRuntimeContext(IServiceProvider serviceProvider, ILogger<WorkflowRuntimeContext> logger, IExpressionEvaluatorProvider expressionEvaluatorProvider, 
-            ISecretManager secretManager, ISynapseManagementApi managementApi, ISynapseRuntimeApi runtimeApi)
+        public WorkflowRuntimeContext(IServiceProvider serviceProvider, ILogger<WorkflowRuntimeContext> logger, IWorkflowExternalDefinitionResolver workflowExternalDefinitionResolver, 
+            IExpressionEvaluatorProvider expressionEvaluatorProvider, ISecretManager secretManager, ISynapseManagementApi managementApi, ISynapseRuntimeApi runtimeApi)
         {
             this.ServiceProvider = serviceProvider;
             this.Logger = logger;
+            this.WorkflowExternalDefinitionResolver = workflowExternalDefinitionResolver;
             this.ExpressionEvaluatorProvider = expressionEvaluatorProvider;
             this.SecretManager = secretManager;
             this.ManagementApi = managementApi;
@@ -62,6 +65,11 @@ namespace Synapse.Worker.Services
         /// Gets the service used to perform logging
         /// </summary>
         protected ILogger Logger { get; }
+
+        /// <summary>
+        /// Gets the service used to resolve external definitions referenced by <see cref="WorkflowDefinition"/>s
+        /// </summary>
+        protected IWorkflowExternalDefinitionResolver WorkflowExternalDefinitionResolver { get; }
 
         /// <summary>
         /// Gets the service used to create provide <see cref="IExpressionEvaluator"/>s
@@ -108,10 +116,11 @@ namespace Synapse.Worker.Services
                 var workflow = await this.ManagementApi.GetWorkflowByIdAsync(workflowInstance.WorkflowId, cancellationToken);
                 if (workflow == null)
                     throw new NullReferenceException($"Failed to find a workflow with the specified id '{workflowInstance.WorkflowId}'");
+                var workflowDefinition = await this.WorkflowExternalDefinitionResolver.LoadExternalDefinitionsAsync(workflow.Definition, new(), cancellationToken);
                 this.ExpressionEvaluator = this.ExpressionEvaluatorProvider.GetEvaluator(workflow.Definition.ExpressionLanguage)!;
                 if (this.ExpressionEvaluator == null)
                     throw new NullReferenceException($"Failed to find an expression evaluator for language '{workflow.Definition.ExpressionLanguage}'");
-                this.Workflow = ActivatorUtilities.CreateInstance<WorkflowFacade>(this.ServiceProvider, workflowInstance, workflow.Definition);
+                this.Workflow = ActivatorUtilities.CreateInstance<WorkflowFacade>(this.ServiceProvider, workflowInstance, workflowDefinition);
                 this.Logger.LogInformation("Runtime context initialized");
             }
             catch(Exception ex)

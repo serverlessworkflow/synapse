@@ -193,6 +193,7 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor
                 IsDiagramVisible = !state.IsDiagramVisible
             };
         }
+    
     }
 
 }

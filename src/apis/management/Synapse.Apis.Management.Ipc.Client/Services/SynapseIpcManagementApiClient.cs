@@ -20,7 +20,10 @@ using Microsoft.Extensions.Logging;
 using Neuroglia.Mapping;
 using Neuroglia.Mediation;
 using Synapse.Application.Services;
+using Synapse.Integration.Commands.AuthenticationDefinitionCollections;
 using Synapse.Integration.Commands.Correlations;
+using Synapse.Integration.Commands.EventDefinitionCollections;
+using Synapse.Integration.Commands.FunctionDefinitionCollections;
 using Synapse.Integration.Commands.WorkflowInstances;
 using Synapse.Integration.Commands.Workflows;
 using Synapse.Integration.Models;
@@ -264,6 +267,108 @@ namespace Synapse.Apis.Management.Ipc
         }
 
         #endregion region
+
+        #region AuthenticationDefinitionCollections
+
+        /// <inheritdoc/>
+        public virtual async Task<V1AuthenticationDefinitionCollection> CreateAuthenticationDefinitionCollectionAsync(V1CreateAuthenticationDefinitionCollectionCommand command, CancellationToken cancellationToken = default)
+        {
+            if (command == null)
+                throw new ArgumentNullException(nameof(command));
+            return await this.Mediator.ExecuteAndUnwrapAsync(this.Mapper.Map<Application.Commands.AuthenticationDefinitionCollections.V1CreateAuthenticationDefinitionCollectionCommand>(command), cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<V1AuthenticationDefinitionCollection> GetAuthenticationDefinitionCollectionByIdAsync(string id, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                throw new ArgumentNullException(nameof(id));
+            return await this.Mediator.ExecuteAndUnwrapAsync(new Application.Queries.Generic.V1FindByIdQuery<V1AuthenticationDefinitionCollection, string>(id), cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<List<V1AuthenticationDefinitionCollection>> GetAuthenticationDefinitionCollectionsAsync(string? query, CancellationToken cancellationToken = default)
+        {
+            return await this.Mediator.ExecuteAndUnwrapAsync(new Application.Queries.Generic.V1FilterQuery<V1AuthenticationDefinitionCollection>(this.QueryOptionsParser.Parse<V1AuthenticationDefinitionCollection>(query)), cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task DeleteAuthenticationDefinitionCollectionAsync(string id, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                throw new ArgumentNullException(nameof(id));
+            await this.Mediator.ExecuteAndUnwrapAsync(new Application.Commands.Generic.V1DeleteCommand<V1AuthenticationDefinitionCollection, string>(id), cancellationToken);
+        }
+
+        #endregion
+
+        #region EventDefinitionCollections
+
+        /// <inheritdoc/>
+        public virtual async Task<V1EventDefinitionCollection> CreateEventDefinitionCollectionAsync(V1CreateEventDefinitionCollectionCommand command, CancellationToken cancellationToken = default)
+        {
+            if (command == null)
+                throw new ArgumentNullException(nameof(command));
+            return await this.Mediator.ExecuteAndUnwrapAsync(this.Mapper.Map<Application.Commands.EventDefinitionCollections.V1CreateEventDefinitionCollectionCommand>(command), cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<V1EventDefinitionCollection> GetEventDefinitionCollectionByIdAsync(string id, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                throw new ArgumentNullException(nameof(id));
+            return await this.Mediator.ExecuteAndUnwrapAsync(new Application.Queries.Generic.V1FindByIdQuery<V1EventDefinitionCollection, string>(id), cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<List<V1EventDefinitionCollection>> GetEventDefinitionCollectionsAsync(string? query, CancellationToken cancellationToken = default)
+        {
+            return await this.Mediator.ExecuteAndUnwrapAsync(new Application.Queries.Generic.V1FilterQuery<V1EventDefinitionCollection>(this.QueryOptionsParser.Parse<V1EventDefinitionCollection>(query)), cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task DeleteEventDefinitionCollectionAsync(string id, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                throw new ArgumentNullException(nameof(id));
+            await this.Mediator.ExecuteAndUnwrapAsync(new Application.Commands.Generic.V1DeleteCommand<V1EventDefinitionCollection, string>(id), cancellationToken);
+        }
+
+        #endregion
+
+        #region FunctionDefinitionCollections
+
+        /// <inheritdoc/>
+        public virtual async Task<V1FunctionDefinitionCollection> CreateFunctionDefinitionCollectionAsync(V1CreateFunctionDefinitionCollectionCommand command, CancellationToken cancellationToken = default)
+        {
+            if (command == null)
+                throw new ArgumentNullException(nameof(command));
+            return await this.Mediator.ExecuteAndUnwrapAsync(this.Mapper.Map<Application.Commands.FunctionDefinitionCollections.V1CreateFunctionDefinitionCollectionCommand>(command), cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<V1FunctionDefinitionCollection> GetFunctionDefinitionCollectionByIdAsync(string id, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                throw new ArgumentNullException(nameof(id));
+            return await this.Mediator.ExecuteAndUnwrapAsync(new Application.Queries.Generic.V1FindByIdQuery<V1FunctionDefinitionCollection, string>(id), cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<List<V1FunctionDefinitionCollection>> GetFunctionDefinitionCollectionsAsync(string? query, CancellationToken cancellationToken = default)
+        {
+            return await this.Mediator.ExecuteAndUnwrapAsync(new Application.Queries.Generic.V1FilterQuery<V1FunctionDefinitionCollection>(this.QueryOptionsParser.Parse<V1FunctionDefinitionCollection>(query)), cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task DeleteFunctionDefinitionCollectionAsync(string id, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                throw new ArgumentNullException(nameof(id));
+            await this.Mediator.ExecuteAndUnwrapAsync(new Application.Commands.Generic.V1DeleteCommand<V1FunctionDefinitionCollection, string>(id), cancellationToken);
+        }
+
+        #endregion
 
         #region OperationalReports
 

@@ -58,9 +58,11 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor.Effects
             var text = JsonConvert.SerializeObject(definition, Formatting.Indented, JsonConvert.DefaultSettings!()!);
             if (monacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)
                 text = await yamlConverter.JsonToYaml(text);
-            WorkflowEditorState initialState = new() { 
+            WorkflowEditorState initialState = new() 
+            { 
                 WorkflowDefinition = definition,
                 WorkflowDefinitionText = text,
+
                 Updating = false,
                 Saving = false,
                 IsDiagramVisible = false,
@@ -239,6 +241,7 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor.Effects
                 context.Dispatcher.Dispatch(new WorkflowDefinitionValidated(action.WorkflowDefinition, action.SaveAfterValidation));
             }
         }
+        
         /// <summary>
         /// Triggers save workflow if validation is successful
         /// </summary>

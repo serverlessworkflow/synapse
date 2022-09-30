@@ -33,14 +33,14 @@ namespace Synapse.Integration.Models
 		/// <summary>
 		/// An IDictionary`2 containing the attributes to filter V1Events by
 		/// </summary>
-		[DataMember(Name = "Attributes", Order = 1)]
+		[DataMember(Name = "attributes", Order = 1)]
 		[Description("An IDictionary`2 containing the attributes to filter V1Events by")]
 		public virtual NameValueCollection<string> Attributes { get; set; }
 
 		/// <summary>
 		/// An IReadOnlyDictionary`2 containing the attributes key/value to use when correlating an incoming event to the V1Correlation
 		/// </summary>
-		[DataMember(Name = "CorrelationMappings", Order = 2)]
+		[DataMember(Name = "correlationMappings", Order = 2)]
 		[Description("An IReadOnlyDictionary`2 containing the attributes key/value to use when correlating an incoming event to the V1Correlation")]
 		public virtual NameValueCollection<string> CorrelationMappings { get; set; }
 

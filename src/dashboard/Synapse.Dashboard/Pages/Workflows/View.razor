@@ -64,7 +64,7 @@
         <div class="row h-50 mh-50">            
             @if (workflowInstance == null)
             {
-                <TabControl ContainerCssClass="mh-100">
+                <TabControl ContainerCssClass="container d-flex flex-column mh-100">
                     <TabPage Header="Instances">
                         <Table Items="instances" AutoGenerateColumns="false">
                             <Columns>
@@ -156,7 +156,7 @@
             }
             else if(workflowInstance != null)
             {
-                <TabControl ContainerCssClass="mh-100">
+                <TabControl ContainerCssClass="mh-100 container d-flex flex-column">
                     <TabPage Header="Input/Output">
                         <WorkflowInstanceIO WorkflowInstance="workflowInstance" />
                     </TabPage>

@@ -35,11 +35,11 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" />
     <PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="6.0.9" />
-    <PackageReference Include="Neuroglia.Serialization.Dynamic" Version="2.0.1.88" />
-    <PackageReference Include="Neuroglia.Serialization.Json" Version="2.0.1.88" />
-    <PackageReference Include="Neuroglia.Serialization.NewtonsoftJson" Version="2.0.1.88" />
-    <PackageReference Include="Neuroglia.Serialization.Protobuf" Version="2.0.1.88" />
-    <PackageReference Include="ServerlessWorkflow.Sdk" Version="0.8.1.15" />
+    <PackageReference Include="Neuroglia.Serialization.Dynamic" Version="2.0.2" />
+    <PackageReference Include="Neuroglia.Serialization.Json" Version="2.0.2" />
+    <PackageReference Include="Neuroglia.Serialization.NewtonsoftJson" Version="2.0.2" />
+    <PackageReference Include="Neuroglia.Serialization.Protobuf" Version="2.0.2" />
+    <PackageReference Include="ServerlessWorkflow.Sdk" Version="0.8.1.16" />
     <PackageReference Include="System.ServiceModel.Primitives" Version="4.10.0" />
   </ItemGroup>
 
@@ -78,8 +78,17 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Commands\AuthenticationDefinitionCollections\v1\Generated\V1CreateAuthenticationDefinitionCollectionCommand.cs">
+      <CustomToolNamespace>..\Synapse.Application\Commands\AuthenticationDefinitionCollections\v1\V1CreateFunctionDefinitionCollectionCommand.cs</CustomToolNamespace>
+    </Compile>
     <Compile Update="Commands\Correlations\v1\Generated\V1CorrelateEventCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\Correlations\v1\V1CorrelateEventCommand.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Commands\EventDefinitionCollections\v1\Generated\V1CreateEventDefinitionCollectionCommand.cs">
+      <CustomToolNamespace>..\Synapse.Application\Commands\EventDefinitionCollections\v1\V1CreateEventDefinitionCollectionCommand.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Commands\FunctionDefinitionCollections\v1\Generated\V1CreateFunctionDefinitionCollectionCommand.cs">
+      <CustomToolNamespace>..\Synapse.Application\Commands\FunctionDefinitionCollections\v1\V1CreateFunctionDefinitionCollectionCommand.cs</CustomToolNamespace>
     </Compile>
     <Compile Update="Commands\Generic\v1\Generated\V1DeleteCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\Generic\v1\V1DeleteCommand.cs</CustomToolNamespace>
@@ -186,6 +195,12 @@
     <Compile Update="Commands\Workflows\v1\Generated\V1UploadWorkflowCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\Workflows\v1\V1UploadWorkflowCommand.cs</CustomToolNamespace>
     </Compile>
+    <Compile Update="Events\AuthenticationDefinitionCollections\v1\Generated\V1AuthenticationDefinitionCollectionCreatedIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\AuthenticationDefinitionCollections\v1\V1AuthenticationDefinitionCollectionCreatedDomainEvent.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\AuthenticationDefinitionCollections\v1\Generated\V1AuthenticationDefinitionCollectionDeletedIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\AuthenticationDefinitionCollections\v1\V1AuthenticationDefinitionCollectionDeletedDomainEvent.cs</CustomToolNamespace>
+    </Compile>
     <Compile Update="Events\Correlations\v1\Generated\V1ContextAddedToCorrelationIntegrationEvent.cs">
       <CustomToolNamespace>..\Synapse.Domain\Events\Correlations\v1\V1ContextAddedToCorrelationDomainEvent.cs</CustomToolNamespace>
     </Compile>
@@ -197,6 +212,27 @@
     </Compile>
     <Compile Update="Events\Correlations\v1\Generated\V1EventCorrelatedIntegrationEvent.cs">
       <CustomToolNamespace>..\Synapse.Domain\Events\Correlations\v1\V1EventCorrelatedDomainEvent.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\EventDefinitionCollections\v1\Generated\V1EventDefinitionCollectionCreatedIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\EventDefinitionCollections\v1\V1EventDefinitionCollectionCreatedDomainEvent.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\EventDefinitionCollections\v1\Generated\V1EventDefinitionCollectionDeletedIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\EventDefinitionCollections\v1\V1DefinitionCollectionDeletedDomainEvent.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\FunctionDefinitionCollections\v1\Generated\V1FunctionDefinitionAddedToCollectionIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\FunctionDefinitionCollections\v1\V1FunctionDefinitionAddedToCollectionDomainEvent.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\FunctionDefinitionCollections\v1\Generated\V1FunctionDefinitionCollectionCreatedIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\FunctionDefinitionCollections\v1\V1WorkflowActivityCreatedDomainEvent.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\FunctionDefinitionCollections\v1\Generated\V1FunctionDefinitionCollectionDeletedIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\FunctionDefinitionCollections\v1\V1FunctionDefinitionCollectionDeletedDomainEvent.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\FunctionDefinitionCollections\v1\Generated\V1FunctionDefinitionCollectionDescriptionChangedIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\FunctionDefinitionCollections\v1\V1FunctionDefinitionCollectionDescriptionChangedDomainEvent.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\FunctionDefinitionCollections\v1\Generated\V1FunctionDefinitionRemovedFromCollectionIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\FunctionDefinitionCollections\v1\V1FunctionDefinitionRemovedFromCollectionDomainEvent.cs</CustomToolNamespace>
     </Compile>
     <Compile Update="Events\WorkflowActivities\v1\Generated\V1WorkflowActivityCancelledIntegrationEvent.cs">
       <CustomToolNamespace>..\Synapse.Domain\Events\WorkflowActivities\v1\V1WorkflowActivityCancelledDomainEvent.cs</CustomToolNamespace>
@@ -318,6 +354,9 @@
     <Compile Update="Events\Workflows\v1\Generated\V1WorkflowInstanciatedIntegrationEvent.cs">
       <CustomToolNamespace>..\Synapse.Domain\Events\Workflows\v1\V1WorkflowInstanciatedDomainEvent.cs</CustomToolNamespace>
     </Compile>
+    <Compile Update="Models\v1\Generated\V1AuthenticationDefinitionCollection.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1EventDefinitionCollection - Copy.cs</CustomToolNamespace>
+    </Compile>
     <Compile Update="Models\v1\Generated\V1Correlation.cs">
       <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1Correlation.cs</CustomToolNamespace>
     </Compile>
@@ -333,8 +372,14 @@
     <Compile Update="Models\v1\Generated\V1Event.cs">
       <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1Event.cs</CustomToolNamespace>
     </Compile>
+    <Compile Update="Models\v1\Generated\V1EventDefinitionCollection.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1EventDefinitionCollection - Copy.cs</CustomToolNamespace>
+    </Compile>
     <Compile Update="Models\v1\Generated\V1EventFilter.cs">
       <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1EventFilter.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Models\v1\Generated\V1FunctionDefinitionCollection.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1FunctionDefinitionCollection.cs</CustomToolNamespace>
     </Compile>
     <Compile Update="Models\v1\Generated\V1WorkflowActivity.cs">
       <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1WorkflowActivity.cs</CustomToolNamespace>
@@ -344,6 +389,12 @@
     </Compile>
     <Compile Update="Models\v1\Generated\V1WorkflowInstance.cs">
       <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1WorkflowInstance.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Models\v1\Generated\V1WorkflowProcess.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1WorkflowProcess.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Models\v1\Generated\V1WorkflowRuntimeSession.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1WorkflowRuntimeSession.cs</CustomToolNamespace>
     </Compile>
   </ItemGroup>
 

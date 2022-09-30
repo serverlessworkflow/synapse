@@ -17,6 +17,7 @@
 @page "/workflows"
 @using Neuroglia.Data
 @using Neuroglia.Data.Flux
+@using Semver
 @using Synapse.Integration.Models
 @using System.Reactive.Linq
 @inherits StatefulComponent<V1WorkflowCollectionState>
@@ -83,7 +84,7 @@
         -->
         <Column T="KeyValuePair<string, List<V1Workflow>>" 
             Name="Latest version"
-            ValueProvider="g => g.Value.Max(w => new Version(w.Definition.Version))" />
+            ValueProvider="g => g.Value.Max(w => SemVersion.Parse(w.Definition.Version, SemVersionStyles.Any, 1024))" />
         <ViewDetailsColumn T="KeyValuePair<string, List<V1Workflow>>" OnViewDetails="kvp => OnViewWorkflow(kvp.Value.OrderBy(w => new Version(w.Definition.Version)).Last())" />
     </Columns>
 </Table>

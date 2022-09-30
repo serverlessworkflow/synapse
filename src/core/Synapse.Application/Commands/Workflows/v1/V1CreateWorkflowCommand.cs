@@ -108,10 +108,10 @@ namespace Synapse.Application.Commands.Workflows
         /// <inheritdoc/>
         public virtual async Task<IOperationResult<Integration.Models.V1Workflow>> HandleAsync(V1CreateWorkflowCommand command, CancellationToken cancellationToken = default)
         {
-            //var validationResult = await this.WorkflowValidator.ValidateAsync(command.Definition, true, true, cancellationToken);
-            //if (!validationResult.IsValid)
-            //    return this.Invalid(validationResult.AsErrors().ToArray());
-            foreach(var subflowRef in command.Definition.GetSubflowReferences())
+            var validationResult = await this.WorkflowValidator.ValidateAsync(command.Definition, true, true, cancellationToken);
+            if (!validationResult.IsValid)
+                return this.Invalid(validationResult.AsErrors().ToArray());
+            foreach (var subflowRef in command.Definition.GetSubflowReferences())
             {
                 var reference = subflowRef.WorkflowId;
                 if(!string.IsNullOrWhiteSpace(subflowRef.Version))
@@ -122,17 +122,12 @@ namespace Synapse.Application.Commands.Workflows
             }
             if (command.IfNotExists
                 && await this.Workflows.ContainsAsync(command.Definition.GetUniqueIdentifier(), cancellationToken))
-            {
                 return this.NotModified();
-            }
-            else
+            while (await this.Workflows.ContainsAsync(command.Definition.GetUniqueIdentifier(), cancellationToken))
             {
-                while (await this.Workflows.ContainsAsync(command.Definition.GetUniqueIdentifier(), cancellationToken))
-                {
-                    var version = Version.Parse(command.Definition.Version);
-                    version = new Version(version.Major, version.Minor, version.Build == -1 ? 1 : version.Build + 1);
-                    command.Definition.Version = version.ToString(3);
-                }
+                var version = Version.Parse(command.Definition.Version);
+                version = new Version(version.Major, version.Minor, version.Build == -1 ? 1 : version.Build + 1);
+                command.Definition.Version = version.ToString(3);
             }
             var workflow = await this.Workflows.AddAsync(new(command.Definition), cancellationToken);
             await this.Workflows.SaveChangesAsync(cancellationToken);

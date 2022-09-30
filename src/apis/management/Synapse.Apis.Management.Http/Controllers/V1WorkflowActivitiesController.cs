@@ -44,7 +44,7 @@ namespace Synapse.Apis.Management.Http.Controllers
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.Forbidden)]
-        public async Task<IActionResult> GetById(string id, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetWorkflowActivityById(string id, CancellationToken cancellationToken)
         {
             return this.Process(await this.Mediator.ExecuteAsync(new Application.Queries.Generic.V1FindByIdQuery<Integration.Models.V1WorkflowActivity, string>(id), cancellationToken));
         }
@@ -60,7 +60,7 @@ namespace Synapse.Apis.Management.Http.Controllers
         [ProducesResponseType(typeof(IEnumerable<Integration.Models.V1WorkflowActivity>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.Forbidden)]
-        public async Task<IActionResult> Get(ODataQueryOptions<Integration.Models.V1WorkflowActivity> queryOptions, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetWorkflowActivities(ODataQueryOptions<Integration.Models.V1WorkflowActivity> queryOptions, CancellationToken cancellationToken)
         {
             return this.Process(await this.Mediator.ExecuteAsync(new Application.Queries.Generic.V1FilterQuery<Integration.Models.V1WorkflowActivity>(queryOptions), cancellationToken));
         }
