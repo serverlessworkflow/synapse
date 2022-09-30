@@ -1,0 +1,29 @@
+name: Continuous integration
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - '.github/**'
+  workflow_dispatch:
+
+jobs:
+  versionning:
+    if: github.repository == 'serverlessworkflow/synapse' && github.ref_name == 'main'
+    uses: ./.github/workflows/versioning.yml
+    secrets: inherit
+
+  build:
+    needs: [versioning]
+    uses: ./.github/workflows/build-dotnet.yml
+    secrets: inherit
+
+  release:
+    needs: [build]
+    uses: ./.github/workflows/release.yml
+    secrets: inherit
+
+  publish:
+    needs: [build]
+    uses: ./.github/workflows/publish.yml
+    secrets: inherit

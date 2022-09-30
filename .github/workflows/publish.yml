@@ -9,28 +9,27 @@ env:
 
 jobs:
 
-  release-packages:
+  publish-packages:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 6.0.x
-    - name: Restore dependencies
-      run: dotnet restore "./Synapse.sln"
-    - name: Build
-      run: dotnet build "./Synapse.sln" --configuration Release --no-restore 
-    - name: Push1
-      run: dotnet nuget push "./src/*/*/bin/Release/*.nupkg" --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
-    - name: Push2
-      run: dotnet nuget push "./src/*/*/*/bin/Release/*.nupkg" --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+      - uses: actions/checkout@v3      
+      - name: Cache build items
+        if: github.event_name != 'pull_request'
+        uses: actions/cache@v3
+        id: build-dotnet-cache
+        with:
+          path: ./**/Release/*.nupkg
+          key: build-dotnet-cache-${{ github.sha }}
+      - name: Push1
+        run: dotnet nuget push "./src/*/*/bin/Release/*.nupkg" --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+      - name: Push2
+        run: dotnet nuget push "./src/*/*/*/bin/Release/*.nupkg" --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
 
-  release-server-image:
+  publish-server-image:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Log in to the Container registry
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
         with:
@@ -54,11 +53,11 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           
-  release-worker-image:
+  publish-worker-image:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Log in to the Container registry
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
         with:
@@ -82,7 +81,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-  release-server-bin:
+  publish-server-bin:
     name: Release Server Binaries
     strategy:
       matrix:
@@ -102,7 +101,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v1
       - name: Setup
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v2
         with:
           dotnet-version: 6.0.x
       - name: Restore
@@ -131,8 +130,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-
-  release-worker-bin:
+  publish-worker-bin:
     name: Release Worker Binaries
     strategy:
       matrix:
@@ -152,7 +150,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v1
       - name: Setup
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v2
         with:
           dotnet-version: 6.0.x
       - name: Restore
@@ -181,7 +179,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
-  release-cli-bin:
+  publish-cli-bin:
     name: Release CLI Binaries
     strategy:
       matrix:
@@ -201,7 +199,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v1
       - name: Setup
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v2
         with:
           dotnet-version: 6.0.x
       - name: Restore
@@ -230,13 +228,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
-  release-eventstore-plugin:
+  publish-eventstore-plugin:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v1
       - name: Setup
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v2
         with:
           dotnet-version: 6.0.x
       - name: Restore
@@ -259,13 +257,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
-  release-mongodb-plugin:
+  publish-mongodb-plugin:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v1
       - name: Setup
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v2
         with:
           dotnet-version: 6.0.x
       - name: Restore

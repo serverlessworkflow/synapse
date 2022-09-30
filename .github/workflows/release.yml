@@ -1,0 +1,39 @@
+name: Release
+
+on:
+  workflow_call:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Pull latest version tag
+        run: |
+          git fetch
+          git pull
+          LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
+          echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
+          echo "LATEST_VERSION=${LATEST_TAG:1}" >> $GITHUB_ENV
+
+      - name: Retrieve build items
+        uses: actions/cache@v3
+        id: build-dotnet-cache
+        with:
+          path: ./**/Release/*.nupkg
+          key: build-dotnet-cache-${{ github.sha }}
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ env.LATEST_TAG }}
+          name: ${{ env.LATEST_VERSION }}
+          token: ${{ secrets.BOT_PAT }}
+          generate_release_notes: true
+          files: |
+            LICENSE
+          # other files will be appended during/after publish
