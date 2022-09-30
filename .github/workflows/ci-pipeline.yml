@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  versionning:
+  versioning:
     if: github.repository == 'serverlessworkflow/synapse' && github.ref_name == 'main'
     uses: ./.github/workflows/versioning.yml
     secrets: inherit
@@ -25,6 +25,6 @@ jobs:
 
   ## Automatically triggered on release(?)
   # publish:
-  #   needs: [build]
+  #   needs: [release]
   #   uses: ./.github/workflows/publish.yml
   #   secrets: inherit
