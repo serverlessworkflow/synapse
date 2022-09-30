@@ -73,7 +73,7 @@ namespace Synapse.Cli.Commands.Workflows
             try
             {
                 workflowDefinition = await this.WorkflowReader.ReadAsync(stream);
-                var workflow = await this.SynapseManagementApi.CreateWorkflowAsync(new() { Collection = workflowDefinition });
+                var workflow = await this.SynapseManagementApi.CreateWorkflowAsync(new() { Definition = workflowDefinition });
                 Console.WriteLine($"The workflow with id '{workflow.Id}' has been successfully deployed");
             }
             catch
