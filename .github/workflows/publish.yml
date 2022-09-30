@@ -13,14 +13,15 @@ jobs:
   publish-packages:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3      
-      - name: Cache build items
-        if: github.event_name != 'pull_request'
-        uses: actions/cache@v3
-        id: build-dotnet-cache
+      - uses: actions/checkout@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
         with:
-          path: ./**/Release/*.nupkg
-          key: build-dotnet-cache-${{ github.sha }}
+          dotnet-version: 6.0.x
+      - name: Restore dependencies
+        run: dotnet restore "./Synapse.sln"
+      - name: Build
+        run: dotnet build "./Synapse.sln" --configuration Release --no-restore 
       - name: Push1
         run: dotnet nuget push "./src/*/*/bin/Release/*.nupkg" --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
       - name: Push2
