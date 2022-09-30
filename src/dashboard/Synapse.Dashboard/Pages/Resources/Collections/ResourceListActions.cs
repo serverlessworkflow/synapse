@@ -1,8 +1,25 @@
-﻿using OData.QueryBuilder.Builders;
+﻿/*
+ * Copyright © 2022-Present The Synapse Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+using OData.QueryBuilder.Builders;
 using OData.QueryBuilder.Conventions.AddressingEntities.Query;
 using Synapse.Integration.Models;
 
-namespace Synapse.Dashboard.Pages.Resources.Collections.Functions
+namespace Synapse.Dashboard.Pages.Resources.Collections
 {
 
     /// <summary>
@@ -30,9 +47,9 @@ namespace Synapse.Dashboard.Pages.Resources.Collections.Functions
                 .For<V1FunctionDefinitionCollection>("V1FunctionDefinitionCollections")
                 .ByList();
             querySetup(builder);
-            this.Query = builder.ToUri(UriKind.Absolute).Query;
+            Query = builder.ToUri(UriKind.Absolute).Query;
             if (!string.IsNullOrWhiteSpace(searchTerm))
-                this.Query = $"$search={searchTerm}&{this.Query}";
+                Query = $"$search={searchTerm}&{Query}";
         }
 
         /// <summary>
@@ -40,9 +57,9 @@ namespace Synapse.Dashboard.Pages.Resources.Collections.Functions
         /// </summary>
         /// <param name="searchTerm">The term to search for</param>
         public QueryV1FunctionDefinitionCollections(string searchTerm)
-            : this(searchTerm, _ => {  })
+            : this(searchTerm, _ => { })
         {
-            
+
         }
 
         /// <summary>
@@ -52,7 +69,7 @@ namespace Synapse.Dashboard.Pages.Resources.Collections.Functions
         public QueryV1FunctionDefinitionCollections(Action<IODataQueryCollection<V1FunctionDefinitionCollection>> querySetup)
             : this(null, querySetup)
         {
-            
+
         }
 
         /// <summary>
@@ -74,7 +91,7 @@ namespace Synapse.Dashboard.Pages.Resources.Collections.Functions
         /// <param name="collections">A <see cref="List{T}"/> containing the currently available <see cref="V1FunctionDefinitionCollection"/>s</param>
         public SetV1FunctionDefinitionCollections(List<V1FunctionDefinitionCollection> collections)
         {
-            this.Collections = collections;
+            Collections = collections;
         }
 
         /// <summary>
@@ -96,7 +113,7 @@ namespace Synapse.Dashboard.Pages.Resources.Collections.Functions
         /// <param name="collection">The <see cref="V1FunctionDefinitionCollection"/> to add</param>
         public AddV1FunctionDefinitionCollection(V1FunctionDefinitionCollection collection)
         {
-            this.Collection = collection;
+            Collection = collection;
         }
 
         /// <summary>
@@ -118,7 +135,7 @@ namespace Synapse.Dashboard.Pages.Resources.Collections.Functions
         /// <param name="collectionId">The id of the <see cref="V1FunctionDefinitionCollection"/> to remove</param>
         public RemoveV1FunctionDefinitionCollection(string collectionId)
         {
-            this.CollectionId = collectionId;
+            CollectionId = collectionId;
         }
 
         /// <summary>

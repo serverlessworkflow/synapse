@@ -22,7 +22,7 @@
             @foreach (TabPage tabPage in Pages)
             {
                 <li class="nav-item cursor-pointer">
-                    <a class="nav-link @GetButtonClass(tabPage)" @onclick=@( () => ActivatePage(tabPage) )>@tabPage.Header</a>
+                    <a class="nav-link @GetButtonClass(tabPage)" @onclick=@( async () => await ActivatePageAsync(tabPage) )>@tabPage.Header</a>
                 </li>
             }
         </ul>
@@ -39,12 +39,13 @@
 @code 
 {
 
-    [Parameter] public RenderFragment ChildContent { get; set; }
-    [Parameter] public string ContainerCssClass { get; set; }
-    [Parameter] public string NavCssClass { get; set; }
-    [Parameter] public string PageCssClass { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public string? ContainerCssClass { get; set; }
+    [Parameter] public string? NavCssClass { get; set; }
+    [Parameter] public string? PageCssClass { get; set; }
+    [Parameter] public EventCallback<TabPage> OnTabPageChange { get; set; }
 
-    public TabPage ActivePage { get; set; }
+    public TabPage? ActivePage { get; set; }
 
     List<TabPage> Pages = new List<TabPage>();
 
@@ -61,9 +62,10 @@
         return page == this.ActivePage ? "active" : "";
     }
 
-    void ActivatePage(TabPage page)
+    public async Task ActivatePageAsync(TabPage page)
     {
         this.ActivePage = page;
+        await this.OnTabPageChange.InvokeAsync(page);
         this.StateHasChanged();
     }
 

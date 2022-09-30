@@ -37,7 +37,7 @@ namespace Synapse.Integration.Commands.Workflows
 		[DataMember(Name = "Definition", Order = 1)]
 		[Description("The definition of the V1Workflow to create")]
 		[Required]
-		public virtual WorkflowDefinition Definition { get; set; }
+		public virtual WorkflowDefinition Collection { get; set; }
 
 		/// <summary>
 		/// A boolean indicating whether the V1Workflow should be created only if it does not already exist. Defaults to false, in which case the Definition is automatically versionned

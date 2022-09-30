@@ -58,9 +58,11 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor.Effects
             var text = JsonConvert.SerializeObject(definition, Formatting.Indented, JsonConvert.DefaultSettings!()!);
             if (monacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)
                 text = await yamlConverter.JsonToYaml(text);
-            WorkflowEditorState initialState = new() { 
+            WorkflowEditorState initialState = new() 
+            { 
                 WorkflowDefinition = definition,
                 WorkflowDefinitionText = text,
+
                 Updating = false,
                 Saving = false,
                 IsDiagramVisible = false,
@@ -191,7 +193,7 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor.Effects
                 var api = context.Services.GetRequiredService<ISynapseManagementApi>();
                 if (api == null)
                     throw new NullReferenceException("Unable to resolved service 'ISynapseManagementApi'.");
-                var workflow = await api.CreateWorkflowAsync(new() { Definition = action.WorkflowDefinition });
+                var workflow = await api.CreateWorkflowAsync(new() { Collection = action.WorkflowDefinition });
                 context.Dispatcher.Dispatch(new WorkflowDefinitionSaved(workflow.Definition));
                 context.Dispatcher.Dispatch(new InitializeState(false));
                 var navigationManager = context.Services.GetRequiredService<NavigationManager>();
@@ -239,6 +241,7 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor.Effects
                 context.Dispatcher.Dispatch(new WorkflowDefinitionValidated(action.WorkflowDefinition, action.SaveAfterValidation));
             }
         }
+        
         /// <summary>
         /// Triggers save workflow if validation is successful
         /// </summary>

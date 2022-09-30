@@ -15,15 +15,35 @@
 *@
 
 @page "/resources"
+@page "/resources/collections/{definitionType}"
 @using Semver
+@using Synapse.Dashboard.Pages.Resources.Collections
 @using Synapse.Dashboard.Pages.Resources.Collections.Functions
-@inherits StatefulComponent<V1FunctionDefinitionCollectionState>
+@inherits StatefulComponent<ResourceListState>
 @inject IBreadcrumbService BreadcrumbService
+@inject NavigationManager NavigationManager
 
 <PageTitle>Resources</PageTitle>
 
-<TabControl ContainerCssClass="d-flex flex-column w-100 h-100">
-    <TabPage Header="Functions">
+<AppRightSidebar>
+    <Toolbar>
+        @switch (selectedDefinitionType)
+        {
+            case "events":
+                <button @onclick="OnCreateEventDefinitionCollection" class="btn btn-outline-dark" title="Create a new collection"><small class="bi bi-plus"></small><span class="btn-label"> New collection</span></button>
+                break;
+            case "authentications":
+                <button @onclick="OnCreateAuthenticationDefinitionCollection" class="btn btn-outline-dark" title="Create a new collection"><small class="bi bi-plus"></small><span class="btn-label"> New collection</span></button>
+                break;
+            default:
+                <button @onclick="OnCreateFunctionDefinitionCollection" class="btn btn-outline-dark" title="Create a new collection"><small class="bi bi-plus"></small><span class="btn-label"> New collection</span></button>
+                break;
+        }
+    </Toolbar>
+</AppRightSidebar>
+
+<TabControl ContainerCssClass="d-flex flex-column w-100 h-100" OnTabPageChange="OnTabPageChanged">
+    <TabPage Header="Functions" IsActive="@(selectedDefinitionType == "functions")">
         <div class="p-5">
             <div class="row">
                 <div class="col-6">
@@ -55,10 +75,10 @@
                                         Name="Uri"
                                         ValueProvider="@(c => $"/api/v1/resources/collections/functions/{c.Id}")">
                                             <CellTemplate Context="context">
-                                                <a href="@context.Value">@context.Value</a>
+                                                <a href="@context.Value" target="_blank">@context.Value</a>
                                             </CellTemplate>
                                         </Column>
-                                        <ViewDetailsColumn T="V1FunctionDefinitionCollection" OnViewDetails="collection => OnViewCollection(collection)" />
+                                        <ViewDetailsColumn T="V1FunctionDefinitionCollection" OnViewDetails="collection => OnViewFunctionDefinitionCollection(collection)" />
                                     </Columns>
                                 </Table>
                             </td>
@@ -76,21 +96,21 @@
                     Name="Latest version"
                     ValueProvider="c => c.Value.Max(c => SemVersion.Parse(c.Version, SemVersionStyles.Any, 1024))" />
                     <Column T="KeyValuePair<string, List<V1FunctionDefinitionCollection>>"
-                    Name="Uri"
-                    ValueProvider="@(c => $"/api/v1/resources/collections/functions/{c.Key.ToLowerInvariant().Slugify("-", false, null)}:latest")">
+                    Name="Resource Uri"
+                    ValueProvider="@(c => $"/api/v1/resources/collections/functions/{c.Key.ToLowerInvariant().Slugify("-", false, null)}:latest/raw")">
                         <CellTemplate Context="context">
-                            <a href="@context.Value">@context.Value</a>
+                            <a href="@context.Value" target="_blank">@context.Value</a>
                         </CellTemplate>
                     </Column>
-                    <ViewDetailsColumn T="KeyValuePair<string, List<V1FunctionDefinitionCollection>>" OnViewDetails="kvp => OnViewCollection(kvp.Value.First())" />
+                    <ViewDetailsColumn T="KeyValuePair<string, List<V1FunctionDefinitionCollection>>" OnViewDetails="kvp => OnViewFunctionDefinitionCollection(kvp.Value.First())" />
                 </Columns>
             </Table>
         </div>     
     </TabPage>
-    <TabPage Header="Events">
+    <TabPage Header="Events" IsActive="@(selectedDefinitionType == "events")">
 
     </TabPage>
-    <TabPage Header="Authentications">
+    <TabPage Header="Authentications" IsActive="@(selectedDefinitionType == "authentications")">
 
     </TabPage>
 </TabControl>
@@ -98,15 +118,20 @@
 @code {
     private Dictionary<string, List<V1FunctionDefinitionCollection>> functionDefinitionCollections = null!;
     private IDisposable functionDefinitionCollectionSubscription = null!;
+    private TabPage? activeTabPage;
+    private string selectedDefinitionType = "functions";
+
+    private string? definitionType;
+    [Parameter]
+    public string? DefinitionType { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        await this.BreadcrumbService.Use(KnownBreadcrumbs.Resources);
         this.functionDefinitionCollectionSubscription = this.Feature
             .Subscribe(state =>
             {
-                this.functionDefinitionCollections = state.Collections
+                this.functionDefinitionCollections = state.FunctionDefinitionCollections
                     .GroupBy(c => c.Name)
                     .ToDictionary(g => g.Key, g => g.OrderByDescending(c => SemVersion.Parse(c.Version, SemVersionStyles.Any)).ToList())!;
                 this.StateHasChanged();
@@ -114,19 +139,72 @@
         this.Dispatcher.Dispatch(new QueryV1FunctionDefinitionCollections());
     }
 
-    protected virtual async Task OnSearchFunctionDefinitionCollection(string searchTerm)
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        if (this.definitionType != this.DefinitionType)
+        {
+            this.definitionType = this.DefinitionType;
+            this.selectedDefinitionType = this.definitionType?.ToLower()!;
+            await this.UpdateBreadcrumbAsync();
+            this.StateHasChanged();
+        }  
+    }
+
+    protected virtual async Task UpdateBreadcrumbAsync()
+    {
+        IEnumerable<IBreadcrumbItem> breadcrumb;
+        switch (this.selectedDefinitionType)
+        {
+            case "events":
+                breadcrumb = KnownBreadcrumbs.EventDefinitionCollections;
+                break;
+            case "authentications":
+                breadcrumb = KnownBreadcrumbs.AuthenticationDefinitionCollections;
+                break;
+            default:
+                breadcrumb = KnownBreadcrumbs.FunctionDefinitionCollections;
+                break;
+        }
+        await this.BreadcrumbService.Use(breadcrumb);
+    }
+
+    protected virtual void OnSearchFunctionDefinitionCollection(string searchTerm)
     {
         this.Dispatcher.Dispatch(new QueryV1FunctionDefinitionCollections(searchTerm));
     }
 
-    protected virtual async Task OnClearFunctionDefinitionCollectionSearch()
+    protected virtual void OnClearFunctionDefinitionCollectionSearch()
     {
         this.Dispatcher.Dispatch(new QueryV1FunctionDefinitionCollections());
     }
 
-    protected virtual async Task OnViewCollection(V1FunctionDefinitionCollection collection)
+    protected virtual void OnViewFunctionDefinitionCollection(V1FunctionDefinitionCollection collection)
     {
-        
+        this.NavigationManager.NavigateTo($"/resources/collections/functions/{collection.Id}");
+    }
+
+    protected virtual async Task OnTabPageChanged(TabPage page)
+    {
+        this.activeTabPage = page;
+        this.selectedDefinitionType = page.Header?.ToLower()!;
+        await this.UpdateBreadcrumbAsync();
+        this.StateHasChanged();
+    }
+
+    protected virtual void OnCreateFunctionDefinitionCollection()
+    {
+        this.NavigationManager.NavigateTo("/resources/collections/functions/new");
+    }
+
+    protected virtual void OnCreateEventDefinitionCollection()
+    {
+        this.NavigationManager.NavigateTo("/resources/collections/events/new");
+    }
+
+    protected virtual void OnCreateAuthenticationDefinitionCollection()
+    {
+        this.NavigationManager.NavigateTo("/resources/collections/authentications/new");
     }
 
 }

@@ -16,7 +16,7 @@
 
 using Neuroglia.Data.Flux;
 using Neuroglia.Mapping;
-using Synapse.Dashboard.Pages.Resources.Collections.Functions;
+using Synapse.Dashboard.Pages.Resources.Collections;
 using Synapse.Integration.Events.FunctionDefinitionCollections;
 using Synapse.Integration.Models;
 

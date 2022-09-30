@@ -16,23 +16,24 @@
  */
 
 using Neuroglia.Data.Flux;
-using Synapse.Dashboard.Pages.Workflows.Editor.Actions;
-using Synapse.Dashboard.Pages.Workflows.Editor.State;
 
-namespace Synapse.Dashboard.Pages.Workflows.Editor
+namespace Synapse.Dashboard.Pages.Resources.Collections.Functions
 {
 
+    /// <summary>
+    /// Defines Flux reducers that apply to <see cref="FunctionDefinitionCollectionEditorState"/>-related Flux actions
+    /// </summary>
     [Reducer]
-    public static class WorkflowEditorReducer
+    public static class FunctionDefinitionCollectionEditorReducers
     {
 
         /// <summary>
-        /// Initialize the state
+        /// Reduces the <see cref="FunctionDefinitionCollectionEditorState"/> for the specified <see cref="InitializeStateSuccessful"/>
         /// </summary>
-        /// <param name="state">The state to reduce</param>
-        /// <param name="action">The action to reduce</param>
-        /// <returns>The reduced state</returns>
-        public static WorkflowEditorState On(WorkflowEditorState state, InitializeStateSuccessful action)
+        /// <param name="state">The <see cref="FunctionDefinitionCollectionEditorState"/> to reduce</param>
+        /// <param name="action">The Flux action to reduce</param>
+        /// <returns>The reduced <see cref="FunctionDefinitionCollectionEditorState"/></returns>
+        public static FunctionDefinitionCollectionEditorState On(FunctionDefinitionCollectionEditorState state, InitializeStateSuccessful action)
         {
             if (action.IfNotExists && state.Initialized)
                 return state;
@@ -45,7 +46,7 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor
         /// <param name="state">The state to reduce</param>
         /// <param name="action">The action to reduce</param>
         /// <returns>The reduced state</returns>
-        public static WorkflowEditorState On(WorkflowEditorState state, StartUpdating action)
+        public static FunctionDefinitionCollectionEditorState On(FunctionDefinitionCollectionEditorState state, StartUpdating action)
         {
             return state with
             {
@@ -59,7 +60,7 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor
         /// <param name="state">The state to reduce</param>
         /// <param name="action">The action to reduce</param>
         /// <returns>The reduced state</returns>
-        public static WorkflowEditorState On(WorkflowEditorState state, StopUpdating action)
+        public static FunctionDefinitionCollectionEditorState On(FunctionDefinitionCollectionEditorState state, StopUpdating action)
         {
             return state with
             {
@@ -73,11 +74,11 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor
         /// <param name="state">The state to reduce</param>
         /// <param name="action">The action to reduce</param>
         /// <returns>The reduced state</returns>
-        public static WorkflowEditorState On(WorkflowEditorState state, UpdateDefinition action)
+        public static FunctionDefinitionCollectionEditorState On(FunctionDefinitionCollectionEditorState state, UpdateCollection action)
         {
             return state with
             {
-                WorkflowDefinition = action.WorkflowDefinition
+                Collection = action.Collection
             };
         }
 
@@ -87,7 +88,7 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor
         /// <param name="state">The state to reduce</param>
         /// <param name="action">The action to reduce</param>
         /// <returns>The reduced state</returns>
-        public static WorkflowEditorState On(WorkflowEditorState state, SaveWorkflowDefinition action)
+        public static FunctionDefinitionCollectionEditorState On(FunctionDefinitionCollectionEditorState state, SaveCollection action)
         {
             return state with
             {
@@ -101,11 +102,11 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor
         /// <param name="state">The state to reduce</param>
         /// <param name="action">The action to reduce</param>
         /// <returns>The reduced state</returns>
-        public static WorkflowEditorState On(WorkflowEditorState state, WorkflowDefinitionSaved action)
+        public static FunctionDefinitionCollectionEditorState On(FunctionDefinitionCollectionEditorState state, CollectionSaved action)
         {
             return state with
             {
-                WorkflowDefinition = action.WorkflowDefinition,
+                Collection = action.Collection,
                 Saving = false
             };
         }
@@ -116,7 +117,7 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor
         /// <param name="state">The state to reduce</param>
         /// <param name="action">The action to reduce</param>
         /// <returns>The reduced state</returns>
-        public static WorkflowEditorState On(WorkflowEditorState state, WorkflowDefinitionSaveFailed action)
+        public static FunctionDefinitionCollectionEditorState On(FunctionDefinitionCollectionEditorState state, CollectionSaveFailed action)
         {
             return state with
             {
@@ -130,11 +131,11 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor
         /// <param name="state">The state to reduce</param>
         /// <param name="action">The action to reduce</param>
         /// <returns>The reduced state</returns>
-        public static WorkflowEditorState On(WorkflowEditorState state, UpdateDefinitionText action)
+        public static FunctionDefinitionCollectionEditorState On(FunctionDefinitionCollectionEditorState state, UpdateSerializedCollection action)
         {
             return state with
             {
-                WorkflowDefinitionText = action.WorkflowDefinitionText
+                SerializedCollection = action.SerializedCollection
             };
         }
 
@@ -144,56 +145,12 @@ namespace Synapse.Dashboard.Pages.Workflows.Editor
         /// <param name="state">The state to reduce</param>
         /// <param name="action">The action to reduce</param>
         /// <returns>The reduced state</returns>
-        public static WorkflowEditorState On(WorkflowEditorState state, ToggleExpand action)
+        public static FunctionDefinitionCollectionEditorState On(FunctionDefinitionCollectionEditorState state, ToggleExpand action)
         {
             state.ExpanderStates![action.Name] = action.IsExpanded;
             return state;
         }
 
-        /// <summary>
-        /// Clears the validation messages
-        /// </summary>
-        /// <param name="state">The state to reduce</param>
-        /// <param name="action">The action to reduce</param>
-        /// <returns></returns>
-        public static WorkflowEditorState On(WorkflowEditorState state, ClearValidationMessages action)
-        {
-            return state with
-            {
-                ValidationMessages = new List<string>()
-            };
-        }
-
-        /// <summary>
-        /// Sets the validation messages
-        /// </summary>
-        /// <param name="state">The state to reduce</param>
-        /// <param name="action">The action to reduce</param>
-        /// <returns></returns>
-        public static WorkflowEditorState On(WorkflowEditorState state, SetValidationMessages action)
-        {
-
-            return state with
-            {
-                ValidationMessages = new List<string>(action.ValidationMessages)
-            };
-
-        }
-
-        /// <summary>
-        /// Toggles the diagram visibiliy
-        /// </summary>
-        /// <param name="state">The state to reduce</param>
-        /// <param name="action">The action to reduce</param>
-        /// <returns></returns>
-        public static WorkflowEditorState On(WorkflowEditorState state, ToggleDiagramVisibility action)
-        {
-            return state with
-            {
-                IsDiagramVisible = !state.IsDiagramVisible
-            };
-        }
-    
     }
 
 }

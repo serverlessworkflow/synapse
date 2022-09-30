@@ -24,14 +24,14 @@
 @code 
 {
 
-    [CascadingParameter]
-    private TabControl Parent { get; set; }
+    [CascadingParameter] private TabControl Parent { get; set; } = null!;
 
-    [Parameter]
-    public string Header { get; set; }
+    [Parameter] public string? Header { get; set; }
 
-    [Parameter]
-    public RenderFragment ChildContent { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private bool isActive;
+    [Parameter] public bool IsActive { get; set; }
 
     protected override void OnInitialized()
     {
@@ -39,6 +39,18 @@
             throw new ArgumentNullException(nameof(Parent), "The TabPage component must exist within a TabControl");
         this.Parent.AddPage(this);
         base.OnInitialized();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        if (this.isActive != this.IsActive)
+        {
+            this.isActive = this.IsActive;
+            if (this.isActive && this.Parent.ActivePage != this)
+                await this.Parent.ActivatePageAsync(this);
+            this.StateHasChanged();
+        } 
     }
 
 }
