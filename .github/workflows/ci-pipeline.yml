@@ -23,7 +23,8 @@ jobs:
     uses: ./.github/workflows/release.yml
     secrets: inherit
 
-  publish:
-    needs: [build]
-    uses: ./.github/workflows/publish.yml
-    secrets: inherit
+  ## Automatically triggered on release(?)
+  # publish:
+  #   needs: [build]
+  #   uses: ./.github/workflows/publish.yml
+  #   secrets: inherit
