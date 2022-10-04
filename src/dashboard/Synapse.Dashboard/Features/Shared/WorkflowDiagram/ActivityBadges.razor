@@ -17,7 +17,7 @@
 @namespace Synapse.Dashboard
 @using System.Collections.ObjectModel
 
-@if (ActiveInstances.Any()) 
+@if (ActiveInstances > 0) 
 {
     <g class="badge activity-badge activity-badge--active" transform="translate(@ActiveX, @ActiveY)">
         <circle cx="0" cy="0" r="@ActivityRadius" />
@@ -28,12 +28,12 @@
             height="@CountSize"
         >
             <div style="width: @(CountSize)px;height: @(CountSize)px;">
-                <span>@ActiveInstances.Count</span>
+                <span>@ActiveInstances</span>
             </div>
         </foreignObject>
     </g>
 }
-@if (CompensatedInstances.Any()) 
+@if (CompensatedInstances > 0) 
 {
     <g class="badge activity-badge activity-badge--compensated" transform="translate(@CompensatedX, @CompensatedY)">>
         <circle cx="0" cy="0" r="@ActivityRadius" />
@@ -44,12 +44,12 @@
             height="@CountSize"
         >
             <div style="width: @(CountSize)px;height: @(CountSize)px;">
-                <span>@CompensatedInstances.Count</span>
+                <span>@CompensatedInstances</span>
             </div>
         </foreignObject>
     </g>
 }
-@if (FaultedInstances.Any()) 
+@if (FaultedInstances > 0) 
 {
     <g class="badge activity-badge activity-badge--faulted" transform="translate(@FaultedX, @FaultedY)">>
         <circle cx="0" cy="0" r="@ActivityRadius" />
@@ -60,18 +60,18 @@
             height="@CountSize"
         >
             <div style="width: @(CountSize)px;height: @(CountSize)px;">
-                <span>@FaultedInstances.Count</span>
+                <span>@FaultedInstances</span>
             </div>
         </foreignObject>
     </g>
 }
 
 @code {
-    [CascadingParameter(Name = "ActiveInstances")] public ObservableCollection<V1WorkflowInstance> ActiveInstances { get; set; } = new();
+    [CascadingParameter(Name = "ActiveInstances")] public int ActiveInstances { get; set; } = new();
 
-    [CascadingParameter(Name = "FaultedInstances")] public ObservableCollection<V1WorkflowInstance> FaultedInstances { get; set; } = new();
+    [CascadingParameter(Name = "FaultedInstances")] public int FaultedInstances { get; set; } = new();
 
-    [CascadingParameter(Name = "CompensatedInstances")] public ObservableCollection<V1WorkflowInstance> CompensatedInstances { get; set; } = new();
+    [CascadingParameter(Name = "CompensatedInstances")] public int CompensatedInstances { get; set; } = new();
 
     [CascadingParameter(Name = "Node")] public INodeViewModel Node { get; set; } = null!;
 
@@ -101,16 +101,16 @@
         double activeOffset = 0;
         double compensatedOffset = 0;
         double faultedOffset = 0;
-        if (this.ActiveInstances.Any())
+        if (this.ActiveInstances > 0)
         {
             compensatedOffset += 1;
             faultedOffset += 1;
-            if (this.CompensatedInstances.Any())
+            if (this.CompensatedInstances > 0)
             {
                 faultedOffset += 1;
             }
         }
-        else if (this.CompensatedInstances.Any())
+        else if (this.CompensatedInstances > 0)
         {
             faultedOffset += 1;
         }        

@@ -17,9 +17,6 @@
 
 using Neuroglia.Blazor.Dagre.Models;
 using ServerlessWorkflow.Sdk.Models;
-using Synapse.Integration.Models;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 
 namespace Synapse.Dashboard
 {
@@ -28,7 +25,7 @@ namespace Synapse.Dashboard
     /// Represents a <see cref="StateDefinition"/> <see cref="NodeViewModel"/>
     /// </summary>
     public class StateNodeViewModel
-        : ClusterViewModel, IWorkflowNodeViewModel, IDisposable
+        : ClusterViewModel, IWorkflowNodeViewModel
     {
 
         /// <summary>
@@ -45,9 +42,6 @@ namespace Synapse.Dashboard
             {
                 this.CssClass = (this.CssClass ?? "") + " used-for-compensation";
             }
-            this.ActiveInstances.CollectionChanged += this.OnCollectionChanged;
-            this.FaultedInstances.CollectionChanged += this.OnCollectionChanged;
-            this.CompensatedInstances.CollectionChanged += this.OnCollectionChanged;
         }
 
         /// <summary>
@@ -62,40 +56,48 @@ namespace Synapse.Dashboard
         /// </summary>
         public bool IsFirst { get; }
 
+        private int _activeInstances = 0;
         /// <inheritdoc/>
-        public ObservableCollection<V1WorkflowInstance> ActiveInstances { get; } = new();
-
-        /// <inheritdoc/>
-        public ObservableCollection<V1WorkflowInstance> FaultedInstances { get; } = new();
-
-        /// <inheritdoc/>
-        public ObservableCollection<V1WorkflowInstance> CompensatedInstances { get; } = new();
-
-        protected void OnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        public int ActiveInstancesCount
         {
-            this.OnChange();
-        }
-
-        private bool disposed;
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposed)
+            get => this._activeInstances;
+            set
             {
-                if (disposing)
-                {
-                    this.ActiveInstances.CollectionChanged -= this.OnCollectionChanged;
-                    this.FaultedInstances.CollectionChanged -= this.OnCollectionChanged;
-                    this.CompensatedInstances.CollectionChanged -= this.OnCollectionChanged;
-                }
-                disposed = true;
+                this._activeInstances = value;
+                this.OnChange();
             }
         }
 
-        public void Dispose()
+        private int _faultedInstances = 0;
+        /// <inheritdoc/>
+        public int FaultedInstancesCount
         {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
+            get => this._faultedInstances;
+            set
+            {
+                this._faultedInstances = value;
+                this.OnChange();
+            }
+        }
+        private int _compensatedInstances = 0;
+        /// <inheritdoc/>
+        public int CompensatedInstancesCount
+        {
+            get => this._compensatedInstances;
+            set
+            {
+                this._compensatedInstances = value;
+                this.OnChange();
+            }
+        }
+
+        /// <inheritdoc/>
+        public void ResetInstancesCount()
+        {
+            this._activeInstances = 0;
+            this._faultedInstances = 0;
+            this._compensatedInstances = 0;
+            this.OnChange();
         }
 
     }
