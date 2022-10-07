@@ -15,6 +15,7 @@
  *
  */
 
+using Neuroglia.Blazor.Dagre;
 using Neuroglia.Blazor.Dagre.Models;
 using Synapse.Integration.Models;
 
@@ -23,7 +24,7 @@ namespace Synapse.Dashboard
     public static class GraphExtensions
     {
 
-        public static void DisplayActivityStatusFor(this IGraphViewModel graph, IEnumerable<V1WorkflowInstance> instances, bool highlightPath = false)
+        public static async Task DisplayActivityStatusFor(this IGraphViewModel graph, Dictionary<string, IEnumerable<StateNodeViewModel>> statesMap, IEnumerable<V1WorkflowInstance> instances, IEnumerable<V1WorkflowActivity> activities, bool highlightPath = false)
         {
             graph.ClearActivityStatus();
             foreach (var instance in instances)
@@ -33,44 +34,43 @@ namespace Synapse.Dashboard
                 {
                     var node = graph.Nodes.Values.OfType<StartNodeViewModel>().FirstOrDefault();
                     if (node != null)
-                        node.ActiveInstances.Add(instance);
+                        node.ActiveInstancesCount += 1;
                     continue;
-                }
-                if (instance.Activities != null)
-                {
-                    foreach (var activity in instance.Activities)
-                    {
-                        var nodes = graph.GetNodesFor(activity);
-                        if (nodes != null && nodes.Any())
-                        {
-                            if (activity.Status == V1WorkflowActivityStatus.Pending || activity.Status == V1WorkflowActivityStatus.Running)
-                            {
-                                nodes.ToList().ForEach(node => node.ActiveInstances.Add(instance));
-                            }
-                            else if(activity.Status == V1WorkflowActivityStatus.Compensating)
-                            {
-                                nodes.ToList().ForEach(node => node.CompensatedInstances.Add(instance));
-                            }
-                            else if (activity.Status == V1WorkflowActivityStatus.Faulted)
-                            {
-                                nodes.ToList().ForEach(node => node.FaultedInstances.Add(instance));
-                            }
-                            if (highlightPath)
-                            {
-                                nodes.ToList().ForEach(node =>
-                                {
-                                    ((INodeViewModel)node).CssClass = (((INodeViewModel)node).CssClass ?? "") + " active";
-                                });
-                            }
-                        }
-                    }
                 }
                 if (instance.Status == V1WorkflowInstanceStatus.Completed)
                 {
                     var node = graph.Nodes.Values.OfType<EndNodeViewModel>().FirstOrDefault();
                     if (node != null)
-                        node.ActiveInstances.Add(instance);
+                        node.ActiveInstancesCount += 1;
                 }
+                await Task.Yield(); // useless? 
+            }
+            foreach (var activity in activities)
+            {
+                var nodes = graph.GetNodesFor(statesMap, activity);
+                if (nodes != null && nodes.Any())
+                {
+                    if (activity.Status == V1WorkflowActivityStatus.Running)
+                    {
+                        nodes.ToList().ForEach(node => { node.ActiveInstancesCount += 1; });
+                    }
+                    else if (activity.Status == V1WorkflowActivityStatus.Compensating)
+                    {
+                        nodes.ToList().ForEach(node => { node.CompensatedInstancesCount += 1; });
+                    }
+                    else if (activity.Status == V1WorkflowActivityStatus.Faulted)
+                    {
+                        nodes.ToList().ForEach(node => { node.FaultedInstancesCount += 1; });
+                    }
+                    if (highlightPath)
+                    {
+                        nodes.ToList().ForEach(node =>
+                        {
+                            ((INodeViewModel)node).CssClass = (((INodeViewModel)node).CssClass ?? "") + " active";
+                        });
+                    }
+                }
+                await Task.Yield(); // useless?
             }
         }
 
@@ -82,44 +82,42 @@ namespace Synapse.Dashboard
             {
                 if (node is IWorkflowNodeViewModel wfNode)
                 {
-                    wfNode.ActiveInstances.Clear();
-                    wfNode.FaultedInstances.Clear();
-                    wfNode.CompensatedInstances.Clear();
+                    wfNode.ResetInstancesCount();
                 }
                 node.CssClass = node.CssClass?.Replace(" active", "");
             }
         }
 
-        public static IEnumerable<IWorkflowNodeViewModel>? GetNodesFor(this IGraphViewModel graph, V1WorkflowActivity activity)
+        public static IEnumerable<IWorkflowNodeViewModel>? GetNodesFor(this IGraphViewModel graph, Dictionary<string, IEnumerable<StateNodeViewModel>> statesMap, V1WorkflowActivity activity)
         {
             if (activity == null)
                 return null;
             switch (activity.Type)
             {
                 case V1WorkflowActivityType.Action:
-                    return graph.GetActionNodesFor(activity);
+                    return graph.GetActionNodesFor(statesMap, activity);
                 case V1WorkflowActivityType.Function:
-                    return graph.GetActionNodesFor(activity);
+                    return graph.GetActionNodesFor(statesMap, activity);
                 case V1WorkflowActivityType.Transition:
-                    return graph.GetTransitionNodesFor(activity);
+                    return graph.GetTransitionNodesFor(statesMap, activity);
                 case V1WorkflowActivityType.Branch:
                     throw new NotImplementedException(); //todo
                 case V1WorkflowActivityType.ConsumeEvent:
-                    return graph.GetConsumeEventNodesFor(activity);
+                    return graph.GetConsumeEventNodesFor(statesMap, activity);
                 case V1WorkflowActivityType.End:
                     return graph.Nodes.Values.OfType<EndNodeViewModel>();
                 case V1WorkflowActivityType.Error:
                     throw new NotImplementedException(); //todo
                 case V1WorkflowActivityType.EventTrigger:
-                    return graph.GetEventTriggerNodesFor(activity);
+                    return graph.GetEventTriggerNodesFor(statesMap, activity);
                 case V1WorkflowActivityType.Iteration:
-                    return graph.GetIterationNodesFor(activity);
+                    return graph.GetIterationNodesFor(statesMap, activity);
                 case V1WorkflowActivityType.ProduceEvent:
                     throw new NotImplementedException(); //todo
                 case V1WorkflowActivityType.Start:
                     return graph.Nodes.Values.OfType<StartNodeViewModel>();
                 case V1WorkflowActivityType.State:
-                    return graph.GetInnerStateNodesFor(activity);
+                    return graph.GetInnerStateNodesFor(statesMap, activity);
                 case V1WorkflowActivityType.SubFlow:
                     throw new NotImplementedException(); //todo
                 default:
@@ -127,25 +125,27 @@ namespace Synapse.Dashboard
             }
         }
 
-        private static IEnumerable<StateNodeViewModel> GetStateNodesFor(this IGraphViewModel graph, V1WorkflowActivity activity)
+        private static IEnumerable<StateNodeViewModel> GetStateNodesFor(this IGraphViewModel graph, Dictionary<string, IEnumerable<StateNodeViewModel>> statesMap, V1WorkflowActivity activity)
         {
             if (!activity.Metadata.TryGetValue("state", out var stateName))
                 throw new InvalidDataException($"The specified activity's metadata does not define a 'state' value");
-            return graph.Clusters.Values.OfType<StateNodeViewModel>().Where(g => g.State.Name == stateName);
+            if (!statesMap.ContainsKey(stateName))
+                return new List<StateNodeViewModel>().AsEnumerable();
+            return statesMap[stateName];
         }
 
-        private static IEnumerable<IWorkflowNodeViewModel> GetInnerStateNodesFor(this IGraphViewModel graph, V1WorkflowActivity activity)
+        private static IEnumerable<IWorkflowNodeViewModel> GetInnerStateNodesFor(this IGraphViewModel graph, Dictionary<string, IEnumerable<StateNodeViewModel>> statesMap, V1WorkflowActivity activity)
         {
-            var stateNodes = graph.GetStateNodesFor(activity);
+            var stateNodes = graph.GetStateNodesFor(statesMap, activity);
             return stateNodes
                 .Concat(stateNodes.SelectMany(node => node.Children.Values.OfType<InjectNodeViewModel>()) as IEnumerable<IWorkflowNodeViewModel>)
                 .Concat(stateNodes.SelectMany(node => node.Children.Values.OfType<SleepNodeViewModel>()) as IEnumerable<IWorkflowNodeViewModel>)
             ;
         }
 
-        private static IEnumerable<IWorkflowNodeViewModel>? GetActionNodesFor(this IGraphViewModel graph, V1WorkflowActivity activity)
+        private static IEnumerable<IWorkflowNodeViewModel>? GetActionNodesFor(this IGraphViewModel graph, Dictionary<string, IEnumerable<StateNodeViewModel>> statesMap, V1WorkflowActivity activity)
         {
-            var stateNodes = graph.GetStateNodesFor(activity);
+            var stateNodes = graph.GetStateNodesFor(statesMap, activity);
             if (!activity.Metadata.TryGetValue("action", out var actionName))
                 throw new InvalidDataException($"The specified activity's metadata does not define a 'action' value");
             return stateNodes.SelectMany(node => node.Children.Values
@@ -155,9 +155,9 @@ namespace Synapse.Dashboard
             );
         }
 
-        private static IEnumerable<IWorkflowNodeViewModel>? GetTransitionNodesFor(this IGraphViewModel graph, V1WorkflowActivity activity)
+        private static IEnumerable<IWorkflowNodeViewModel>? GetTransitionNodesFor(this IGraphViewModel graph, Dictionary<string, IEnumerable<StateNodeViewModel>> statesMap, V1WorkflowActivity activity)
         {
-            var stateNodes = graph.GetStateNodesFor(activity);
+            var stateNodes = graph.GetStateNodesFor(statesMap, activity);
             if (!activity.Metadata.TryGetValue("case", out var caseName))
                 return null;
             return stateNodes.SelectMany(node => 
@@ -165,15 +165,15 @@ namespace Synapse.Dashboard
             );
         }
 
-        private static IEnumerable<IWorkflowNodeViewModel>? GetIterationNodesFor(this IGraphViewModel graph, V1WorkflowActivity activity)
+        private static IEnumerable<IWorkflowNodeViewModel>? GetIterationNodesFor(this IGraphViewModel graph, Dictionary<string, IEnumerable<StateNodeViewModel>> statesMap, V1WorkflowActivity activity)
         {
-            var stateNodes = graph.GetStateNodesFor(activity);
+            var stateNodes = graph.GetStateNodesFor(statesMap, activity);
             return stateNodes.SelectMany(node => node.Children.Values.OfType<ForEachNodeViewModel>());
         }
 
-        private static IEnumerable<IWorkflowNodeViewModel>? GetEventTriggerNodesFor(this IGraphViewModel graph, V1WorkflowActivity activity)
+        private static IEnumerable<IWorkflowNodeViewModel>? GetEventTriggerNodesFor(this IGraphViewModel graph, Dictionary<string, IEnumerable<StateNodeViewModel>> statesMap, V1WorkflowActivity activity)
         {
-            var stateNodes = graph.GetStateNodesFor(activity);
+            var stateNodes = graph.GetStateNodesFor(statesMap, activity);
             if (!activity.Metadata.TryGetValue("trigger", out var eventName))
                 throw new InvalidDataException($"The specified activity's metadata does not define a 'trigger' value");
             return stateNodes.SelectMany(node => node.Children.Values.OfType<EventNodeViewModel>()
@@ -181,16 +181,15 @@ namespace Synapse.Dashboard
             );
         }
 
-        private static IEnumerable<IWorkflowNodeViewModel>? GetConsumeEventNodesFor(this IGraphViewModel graph, V1WorkflowActivity activity)
+        private static IEnumerable<IWorkflowNodeViewModel>? GetConsumeEventNodesFor(this IGraphViewModel graph, Dictionary<string, IEnumerable<StateNodeViewModel>> statesMap, V1WorkflowActivity activity)
         {
-            var stateNodes = graph.GetStateNodesFor(activity);
+            var stateNodes = graph.GetStateNodesFor(statesMap, activity);
             if (!activity.Metadata.TryGetValue("event", out var eventName))
                 throw new InvalidDataException($"The specified activity's metadata does not define a 'event' value");
             return stateNodes.SelectMany(node => node.Children.Values.OfType<EventNodeViewModel>()
                 .Where(eventNode => eventNode.RefName == eventName /* && eventNode.Kind == ServerlessWorkflow.Sdk.EventKind.Consumed */)
             );
         }
-
 
     }
 

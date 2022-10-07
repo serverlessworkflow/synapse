@@ -21,7 +21,7 @@ using Synapse.Integration.Models;
 
 namespace Synapse.Dashboard
 {
-
+    /*
     [Feature]
     public class V1WorkflowInstanceCollectionState
         : List<V1WorkflowInstance>
@@ -104,7 +104,6 @@ namespace Synapse.Dashboard
             return state;
         }
 
-
         public static V1WorkflowInstanceCollectionState OnMarkV1WorkflowInstanceAsCancelling(V1WorkflowInstanceCollectionState state, MarkV1WorkflowInstanceAsCancelling action)
         {
             var instance = state.FirstOrDefault(i => i.Id == action.Id);
@@ -162,6 +161,7 @@ namespace Synapse.Dashboard
         }
 
     }
+    */
 
     [Effect]
     public static class V1WorkflowInstanceCollectionEffects
@@ -199,7 +199,6 @@ namespace Synapse.Dashboard
         }
 
     }
-
     public class SetV1WorkflowInstanceCollection
     {
 

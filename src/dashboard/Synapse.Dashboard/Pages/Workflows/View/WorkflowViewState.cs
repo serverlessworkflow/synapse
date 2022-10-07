@@ -15,35 +15,36 @@
  *
  */
 
+using Neuroglia.Data.Flux;
 using Synapse.Integration.Models;
 
-namespace Synapse.Dashboard
+namespace Synapse.Dashboard.Pages.Workflows.View.State
 {
+
     /// <summary>
-    /// Defines the fundamentals of a workflow node
+    /// The <see cref="State{TState}"/> of the workflow details view
     /// </summary>
-    public interface IWorkflowNodeViewModel
+    [Feature]
+    public record WorkflowViewState
     {
+        /// <summary>
+        /// The displayed <see cref="V1Workflow"/>
+        /// </summary>
+        public V1Workflow? Workflow { get; set; }
 
         /// <summary>
-        /// Gets/Sets the number of active <see cref="V1WorkflowInstance"/>s for which the activity described by the node is active
+        /// The workflow instances
         /// </summary>
-        int ActiveInstancesCount { get; set; }
+        public Dictionary<string, V1WorkflowInstance>? Instances { get; set; }
 
         /// <summary>
-        /// Gets/Sets the number of active faulted <see cref="V1WorkflowInstance"/>s for which the activity described by the node is active
+        /// The instances activities
         /// </summary>
-        int FaultedInstancesCount { get; set; }
+        public Dictionary<string, V1WorkflowActivity>? Activities { get; set; }
 
         /// <summary>
-        /// Gets/Sets the number of active compensated <see cref="V1WorkflowInstance"/>s for which the activity described by the node is active
+        ///  The displayed <see cref="V1WorkflowInstance"/>, if any focused
         /// </summary>
-        int CompensatedInstancesCount { get; set; }
-
-        /// <summary>
-        /// Resets the active, faulted and compensated instances counts
-        /// </summary>
-        void ResetInstancesCount();
+        public V1WorkflowInstance? ActiveInstance { get; set; }
     }
-
 }

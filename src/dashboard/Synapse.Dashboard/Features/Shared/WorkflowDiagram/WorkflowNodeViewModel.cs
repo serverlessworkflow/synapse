@@ -15,11 +15,8 @@
  *
  */
 
-using Neuroglia.Blazor.Dagre;
 using Neuroglia.Blazor.Dagre.Models;
-using Synapse.Integration.Models;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
+using Synapse.Dashboard.Services;
 
 namespace Synapse.Dashboard
 {
@@ -28,17 +25,42 @@ namespace Synapse.Dashboard
     /// Represents the base class for all workflow-related <see cref="NodeModel"/>s
     /// </summary>
     public abstract class WorkflowNodeViewModel
-        : NodeViewModel, IWorkflowNodeViewModel, IDisposable
+        : NodeViewModel, IWorkflowNodeViewModel
     {
 
+        private int _activeInstances = 0;
         /// <inheritdoc/>
-        public ObservableCollection<V1WorkflowInstance> ActiveInstances { get; } = new();
+        public int ActiveInstancesCount {
+            get => this._activeInstances;
+            set
+            {
+                this._activeInstances = value;
+                this.OnChange();
+            }
+        }
 
+        private int _faultedInstances = 0;
         /// <inheritdoc/>
-        public ObservableCollection<V1WorkflowInstance> FaultedInstances { get; } = new();
-
+        public int FaultedInstancesCount
+        {
+            get => this._faultedInstances;
+            set
+            {
+                this._faultedInstances = value;
+                this.OnChange();
+            }
+        }
+        private int _compensatedInstances = 0;
         /// <inheritdoc/>
-        public ObservableCollection<V1WorkflowInstance> CompensatedInstances { get; } = new();
+        public int CompensatedInstancesCount
+        {
+            get => this._compensatedInstances;
+            set
+            {
+                this._compensatedInstances = value;
+                this.OnChange();
+            }
+        }
 
         public WorkflowNodeViewModel(
             string? label = "",
@@ -56,36 +78,15 @@ namespace Synapse.Dashboard
             : base(label, cssClass, shape, width, height, radiusX, radiusY, x, y, componentType, parentId)
         {
             this.ComponentType = typeof(WorkflowNodeTemplate);
-            this.ActiveInstances.CollectionChanged += this.OnCollectionChanged;
-            this.FaultedInstances.CollectionChanged += this.OnCollectionChanged;
-            this.CompensatedInstances.CollectionChanged += this.OnCollectionChanged;
         }
 
-        protected void OnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        /// <inheritdoc/>
+        public void ResetInstancesCount()
         {
+            this._activeInstances = 0;
+            this._faultedInstances = 0;
+            this._compensatedInstances = 0;
             this.OnChange();
-        }
-
-        private bool disposed;
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposed)
-            {
-                if (disposing)
-                {
-                    this.ActiveInstances.CollectionChanged -= this.OnCollectionChanged;
-                    this.FaultedInstances.CollectionChanged -= this.OnCollectionChanged;
-                    this.CompensatedInstances.CollectionChanged -= this.OnCollectionChanged;
-                }
-                disposed = true;
-            }
-        }
-
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
         }
     }
 

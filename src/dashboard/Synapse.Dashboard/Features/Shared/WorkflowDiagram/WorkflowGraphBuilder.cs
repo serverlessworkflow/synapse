@@ -16,6 +16,7 @@
  */
 
 using Microsoft.JSInterop;
+using Neuroglia.Blazor.Dagre;
 using Neuroglia.Blazor.Dagre.Models;
 using ServerlessWorkflow.Sdk;
 using ServerlessWorkflow.Sdk.Models;
@@ -51,7 +52,7 @@ namespace Synapse.Dashboard
                 await this.BuildEdgeBetween(graph, startNode, endNode, false);
             }
             await graph.AddElementAsync(endNode);
-            return await Task.FromResult(graph);
+            return graph;
         }
 
         protected NodeViewModel BuildStartNode(bool hasSuccessor = false)

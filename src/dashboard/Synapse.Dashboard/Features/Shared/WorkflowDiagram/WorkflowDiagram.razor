@@ -34,6 +34,9 @@
     public IGraphViewModel? Graph { get; set; }
     protected DagreGraph? dagre { get; set; }
     protected IDagreGraphOptions? options { get; set; } = null;
+    protected bool isDirty = true;
+    // Maps a state name to its cluster(s) in the graph
+    protected Dictionary<string, IEnumerable<StateNodeViewModel>>? StatesMap = null;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -46,14 +49,37 @@
                 };
             var graph = await this.WorkflowGraphBuilder.BuildGraph(this.workflowDefinition);
             this.Graph = graph;
+            this.StatesMap = this.Graph.AllClusters.Values.OfType<StateNodeViewModel>()
+                .GroupBy(cluster => cluster.State.Name)
+                .ToDictionary(group => group.Key, group => group.AsEnumerable())
+                ;
+            this.isDirty = true;
         }
     }
 
-    public virtual void DisplayActivityStatusFor(IEnumerable<V1WorkflowInstance> instances, bool highlightPath = false)
+    protected override bool ShouldRender()
     {
+        if (!this.isDirty) return false;
+        this.isDirty = false;
+        return true;
+    }
+
+    public virtual async Task DisplayActivityStatusFor(IEnumerable<V1WorkflowInstance> instances, IEnumerable<V1WorkflowActivity> activities, bool highlightPath = false)
+    {
+        this.isDirty = false;
+        await Task.Yield();
         if (this.Graph != null) {
-            this.Graph.DisplayActivityStatusFor(instances, highlightPath);
+            await this.Graph.DisplayActivityStatusFor(this.StatesMap, instances, activities, highlightPath);
         }
+        this.isDirty = true;
+        this.StateHasChanged();
+    }
+
+    public virtual async Task DisplayActivityStatusFor(V1WorkflowInstance instance, IEnumerable<V1WorkflowActivity> activities, bool highlightPath = false)
+    {
+        var instances = new List<V1WorkflowInstance>();
+        instances.Add(instance);
+        await this.DisplayActivityStatusFor(instances, activities, highlightPath);
     }
 
     public virtual async Task RefreshAsync()

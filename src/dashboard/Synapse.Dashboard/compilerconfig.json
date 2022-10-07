@@ -24,8 +24,8 @@
     "inputFile": "Features/Shared/Toast/Toaster.razor.scss"
   },
   {
-    "outputFile": "Pages/Workflows/View.razor.css",
-    "inputFile": "Pages/Workflows/View.razor.scss"
+    "outputFile": "Pages/Workflows/View/View.razor.css",
+    "inputFile": "Pages/Workflows/View/View.razor.scss"
   },
   {
     "outputFile": "Features/Shared/Layout/Header.razor.css",

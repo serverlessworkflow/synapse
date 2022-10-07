@@ -73,9 +73,16 @@ builder.Services.AddScoped<IStyleManager, StyleManager>();
 builder.Services.AddScoped<WorkflowGraphBuilder>();
 builder.Services.AddFlux(flux =>
 {
-    flux
-        .ScanMarkupTypeAssembly<App>()
-        .UseReduxDevTools();
+    if (builder.HostEnvironment.IsDevelopment())
+    {
+        flux.ScanMarkupTypeAssembly<App>()
+            //.UseReduxDevTools() // leads to unresponsive UI, manually enable it if required.
+            ;
+    }
+    else
+    {
+        flux.ScanMarkupTypeAssembly<App>();
+    }
 });
 builder.Services.AddSingleton(provider =>
 {

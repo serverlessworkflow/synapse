@@ -21,7 +21,7 @@ using System.Collections.ObjectModel;
 
 namespace Synapse.Dashboard
 {
-
+    /*
     [Feature]
     public class V1WorkflowActivityCollectionState
         : List<V1WorkflowActivity>
@@ -33,7 +33,7 @@ namespace Synapse.Dashboard
             : base(activities)
         {}
     }
-
+    */
     public class SetV1WorkflowActivityCollection
     {
 
@@ -199,6 +199,7 @@ namespace Synapse.Dashboard
 
     }
 
+    /*
     [Reducer]
     public static class V1WorkflowActivityCollectionReducers
     {
@@ -314,7 +315,7 @@ namespace Synapse.Dashboard
                 state.Remove(activity);
             return state;
         }
-
     }
+    */
 
 }
