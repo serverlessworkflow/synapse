@@ -25,4 +25,4 @@ jobs:
 
       - name: Increment Version
         run: |
-          dotnet-version increment-version-with-git -g "." --branch-name ${{ github.ref_name }} --author-email ${{ secrets.BOT_EMAIL }}
+          dotnet-version increment-version-with-git-hints -g "." --branch-name ${{ github.ref_name }} --author-email ${{ secrets.BOT_EMAIL }}
