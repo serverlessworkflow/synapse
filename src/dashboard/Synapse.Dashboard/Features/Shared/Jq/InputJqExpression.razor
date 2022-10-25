@@ -105,12 +105,15 @@
     {
         if (string.IsNullOrWhiteSpace(this.CurrentValue))
             return;
+        var trimmedExpression = this.CurrentValue.TrimStart('$').TrimStart('{').TrimEnd('}').Trim();
+        if (string.IsNullOrWhiteSpace(trimmedExpression))
+            return;
         var json = await this.editor.GetValue();
         if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)
         {
             json = await this.YamlConverter.YamlToJson(json);
         }
-        this.output = await this.JsRuntime.InvokeAsync<string>("jq.raw", json, this.CurrentValue);
+        this.output = await this.JsRuntime.InvokeAsync<string>("jq.raw", json, trimmedExpression);
         // todo: try/catch, display error ?
     }
 
