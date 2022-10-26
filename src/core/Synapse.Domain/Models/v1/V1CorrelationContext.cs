@@ -16,6 +16,7 @@
  */
 
 using System.Collections.ObjectModel;
+using System.Text.RegularExpressions;
 
 namespace Synapse.Domain.Models
 {
@@ -73,7 +74,7 @@ namespace Synapse.Domain.Models
             foreach (var mapping in this.Mappings)
             {
                 if (!e.TryGetAttribute(mapping.Key, out var attributeValue)
-                    || attributeValue != mapping.Value)
+                    || !Regex.IsMatch(attributeValue, mapping.Value, RegexOptions.IgnoreCase))
                     return false;
             }
             return true;
