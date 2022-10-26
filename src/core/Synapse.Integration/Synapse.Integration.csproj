@@ -3,7 +3,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
-    <VersionPrefix>0.2.4</VersionPrefix>
+    <VersionPrefix>0.2.3</VersionPrefix>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <Authors>The Synapse Authors</Authors>
     <Company>Cloud Native Computing Foundation</Company>
@@ -31,12 +31,12 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" />
-    <PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="6.0.9" />
+    <PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="6.0.10" />
     <PackageReference Include="Neuroglia.Serialization.Dynamic" Version="2.0.3" />
     <PackageReference Include="Neuroglia.Serialization.Json" Version="2.0.3" />
     <PackageReference Include="Neuroglia.Serialization.NewtonsoftJson" Version="2.0.3" />
     <PackageReference Include="Neuroglia.Serialization.Protobuf" Version="2.0.3" />
-    <PackageReference Include="ServerlessWorkflow.Sdk" Version="0.8.1.16" />
+    <PackageReference Include="ServerlessWorkflow.Sdk" Version="0.8.3" />
     <PackageReference Include="System.ServiceModel.Primitives" Version="4.10.0" />
   </ItemGroup>
   <ItemGroup>

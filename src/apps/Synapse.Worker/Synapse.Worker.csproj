@@ -4,7 +4,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <OutputType>Exe</OutputType>
-    <VersionPrefix>0.2.4</VersionPrefix>
+    <VersionPrefix>0.2.3</VersionPrefix>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <Authors>The Synapse Authors</Authors>
     <Company>Cloud Native Computing Foundation</Company>
@@ -30,7 +30,7 @@
     <PackageReference Include="GraphQL.Client" Version="5.1.0" />
     <PackageReference Include="GraphQL.Client.Serializer.Newtonsoft" Version="5.1.0" />
     <PackageReference Include="IdentityModel" Version="6.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.KeyPerFile" Version="6.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.KeyPerFile" Version="6.0.10" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
     <PackageReference Include="Microsoft.OpenApi" Version="1.4.3" />
     <PackageReference Include="Microsoft.OpenApi.Readers" Version="1.4.1" />

@@ -3,7 +3,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <VersionPrefix>0.2.4</VersionPrefix>
+    <VersionPrefix>0.2.3</VersionPrefix>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <Authors>The Synapse Authors</Authors>
     <Company>Cloud Native Computing Foundation</Company>
@@ -24,7 +24,7 @@
     <ProjectReference Include="..\Synapse.Infrastructure\Synapse.Infrastructure.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="CloudNative.CloudEvents.NewtonsoftJson" Version="2.4.0" />
+    <PackageReference Include="CloudNative.CloudEvents.NewtonsoftJson" Version="2.5.0" />
     <PackageReference Include="Microsoft.AspNetCore.OData" Version="8.0.11" />
     <PackageReference Include="Microsoft.OData.ModelBuilder" Version="1.0.9" />
     <PackageReference Include="Neuroglia.AspNetCore.JsonPatch" Version="2.0.3" />

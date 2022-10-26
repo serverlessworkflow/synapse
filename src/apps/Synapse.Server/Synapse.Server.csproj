@@ -3,7 +3,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <VersionPrefix>0.2.4</VersionPrefix>
+    <VersionPrefix>0.2.3</VersionPrefix>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <Authors>The Synapse Authors</Authors>
     <Company>Cloud Native Computing Foundation</Company>
@@ -30,7 +30,7 @@
     <Content Include="synapse-icon.ico" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="6.0.9" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="6.0.10" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.0" />
     <PackageReference Include="Neuroglia.Caching.InMemory" Version="2.0.3" />
     <PackageReference Include="Neuroglia.Data.Expressions.JQ" Version="2.0.3" />

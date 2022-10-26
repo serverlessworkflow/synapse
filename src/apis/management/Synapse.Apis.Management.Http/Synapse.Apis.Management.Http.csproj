@@ -3,7 +3,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <VersionPrefix>0.2.4</VersionPrefix>
+    <VersionPrefix>0.2.3</VersionPrefix>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <Authors>The Synapse Authors</Authors>
     <Company>Cloud Native Computing Foundation</Company>
@@ -25,7 +25,7 @@
     <ProjectReference Include="..\Synapse.Apis.Management.Http.Client\Synapse.Apis.Management.Http.Client.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.9" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.OData" Version="8.0.11" />
     <PackageReference Include="Microsoft.AspNetCore.OData.NewtonsoftJson" Version="8.0.4" />
     <PackageReference Include="Neuroglia.Mediation.AspNetCore" Version="2.0.3" />
