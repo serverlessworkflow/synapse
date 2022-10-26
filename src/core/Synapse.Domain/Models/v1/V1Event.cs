@@ -185,12 +185,9 @@ namespace Synapse.Domain.Models
             {
                 foreach (EventCorrelationDefinition correlationDefinition in eventDefinition.Correlations)
                 {
-                    if (!this.TryGetAttribute(correlationDefinition.ContextAttributeName, out string value))
-                        return false;
-                    if (string.IsNullOrWhiteSpace(correlationDefinition.ContextAttributeValue))
-                        continue;
-                    if (!Regex.IsMatch(value, correlationDefinition.ContextAttributeValue, RegexOptions.IgnoreCase))
-                        return false;
+                    if (!this.TryGetAttribute(correlationDefinition.ContextAttributeName, out string value)) return false;
+                    if (string.IsNullOrWhiteSpace(correlationDefinition.ContextAttributeValue)) continue;
+                    if (!Regex.IsMatch(value, correlationDefinition.ContextAttributeValue, RegexOptions.IgnoreCase)) return false;
                 }
             }
             return true;

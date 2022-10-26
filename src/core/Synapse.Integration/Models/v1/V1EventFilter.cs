@@ -42,8 +42,8 @@ namespace Synapse.Integration.Models
             {
                 if (!e.TryGetAttribute(mapping.Key, out var value))
                     return false;
-                if (!string.IsNullOrWhiteSpace(mapping.Value) 
-                    && !mapping.Value.Equals(value, StringComparison.OrdinalIgnoreCase))
+                if (!string.IsNullOrWhiteSpace(mapping.Value)
+                && !Regex.IsMatch(value, mapping.Value, RegexOptions.IgnoreCase))
                     return false;
             }
             return true;
