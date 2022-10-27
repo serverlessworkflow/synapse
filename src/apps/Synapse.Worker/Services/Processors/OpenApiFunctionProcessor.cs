@@ -262,32 +262,10 @@ namespace Synapse.Worker.Services.Processors
                 this.Parameters = new Dictionary<string, object>();
             if (this.FunctionReference.Arguments == null)
                 return;
-            var jsonInput = JsonConvert.SerializeObject(this.Activity.Input!.ToObject()!, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
-            var jsonArgs = JsonConvert.SerializeObject(this.FunctionReference.Arguments, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
-            foreach (Match match in Regex.Matches(jsonArgs, @"""\$\{.+?\}"""))
-            {
-                var expression = match.Value[3..^2].Trim().Replace(@"\""", @"""");
-                var evaluationResult = await this.Context.EvaluateAsync(expression, this.Activity.Input!.ToObject()!, cancellationToken);
-                if(evaluationResult == null)
-                {
-                    this.Logger.LogWarning("Failed to evaluate the result of parameter expression '{expression}' on input data '{input}'", expression, jsonInput);
-                    continue;
-                }
-                var valueToken = JToken.FromObject(evaluationResult);
-                var value = null as string;
-                if (valueToken != null)
-                {
-                    value = valueToken.Type switch
-                    {
-                        JTokenType.String => @$"""{valueToken}""",
-                        _ => valueToken.ToString(),
-                    };
-                }
-                if (string.IsNullOrEmpty(value))
-                    value = "null";
-                jsonArgs = jsonArgs.Replace(match.Value, value);
-            }
-            this.Parameters = JsonConvert.DeserializeObject<ExpandoObject>(jsonArgs)!;
+            var parameters = this.FunctionReference.Arguments.ToObject()!;
+            var inputData = this.Activity.Input!.ToObject()!;
+            parameters = (await this.Context.EvaluateObjectAsync(parameters, inputData, cancellationToken))!;
+            this.Parameters = ((ExpandoObject)parameters)!;
         }
 
         /// <summary>

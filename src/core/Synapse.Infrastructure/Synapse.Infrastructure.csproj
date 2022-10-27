@@ -25,9 +25,9 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Cronos" Version="0.7.1" />
-    <PackageReference Include="Neuroglia.Data.Expressions" Version="2.0.3" />
-    <PackageReference Include="Neuroglia.Eventing.CloudEvents" Version="2.0.3" />
-    <PackageReference Include="Neuroglia.Mapping" Version="2.0.3" />
-    <PackageReference Include="Neuroglia.Mediation" Version="2.0.3" />
+    <PackageReference Include="Neuroglia.Data.Expressions" Version="2.0.4" />
+    <PackageReference Include="Neuroglia.Eventing.CloudEvents" Version="2.0.4" />
+    <PackageReference Include="Neuroglia.Mapping" Version="2.0.4" />
+    <PackageReference Include="Neuroglia.Mediation" Version="2.0.4" />
   </ItemGroup>
 </Project>

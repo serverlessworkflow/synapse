@@ -45,7 +45,9 @@ namespace Synapse.Worker.Services.Processors
         protected override async Task ProcessAsync(CancellationToken cancellationToken)
         {
             var output = this.Activity.Input!.ToObject()!;
-            output = output.Merge(this.State.Data!.ToObject()!);
+            var toInject = this.State.Data!.ToObject()!;
+            toInject = await this.Context.EvaluateObjectAsync(toInject, output, cancellationToken);
+            output = output.Merge(toInject);
             await this.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, output), cancellationToken);
             await this.OnCompletedAsync(cancellationToken);
         }
