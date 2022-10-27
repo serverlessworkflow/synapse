@@ -16,6 +16,10 @@
  */
 
 using Neuroglia.Data.Expressions;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Dynamic;
+using System.Text.RegularExpressions;
 
 namespace Synapse.Worker
 {
@@ -25,6 +29,38 @@ namespace Synapse.Worker
     /// </summary>
     public static class IWorkflowRuntimeContextExtensions
     {
+
+        /// <summary>
+        /// Evaluates an object against the specified data
+        /// </summary>
+        /// <param name="context">The current <see cref="IWorkflowRuntimeContext"/></param>
+        /// <param name="expressionObject">The object to evaluate</param>
+        /// <param name="data">The data to evaluate the object against</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The evaluated object</returns>
+        public static async Task<object?> EvaluateObjectAsync(this IWorkflowRuntimeContext context, object expressionObject, object data, CancellationToken cancellationToken = default)
+        {
+            var json = JsonConvert.SerializeObject(expressionObject, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore }); ;
+            foreach (var match in Regex.Matches(json, @"""\$\{.+?\}""", RegexOptions.Compiled).Cast<Match>())
+            {
+                var expression = match.Value[3..^2].Trim().Replace(@"\""", @"""");
+                var evaluationResult = await context.EvaluateAsync(expression, data, cancellationToken);
+                if (evaluationResult == null) continue;
+                var valueToken = JToken.FromObject(evaluationResult);
+                var value = null as string;
+                if (valueToken != null)
+                {
+                    value = valueToken.Type switch
+                    {
+                        JTokenType.String => @$"""{valueToken}""",
+                        _ => valueToken.ToString(),
+                    };
+                }
+                if (string.IsNullOrEmpty(value)) value = "null";
+                json = json.Replace(match.Value, value);
+            }
+            return JsonConvert.DeserializeObject<ExpandoObject>(json)!;
+        }
 
         /// <summary>
         /// Evaluates the specified condition expression
