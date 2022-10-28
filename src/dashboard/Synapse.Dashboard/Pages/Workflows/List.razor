@@ -22,7 +22,7 @@
 @using System.Reactive.Linq
 @inherits StatefulComponent<V1WorkflowCollectionState>
 @inject IServiceProvider ServiceProvider
-@inject IBreadcrumbService BreadcrumbService
+@inject IBreadcrumbManager BreadcrumbService
 @inject NavigationManager NavigationManager
 
 <PageTitle>Workflows</PageTitle>
@@ -97,7 +97,7 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        await this.BreadcrumbService.Use(KnownBreadcrumbs.Workflows);
+        await this.BreadcrumbService.Use(Breadcrumbs.Workflows);
         this._Subscription = this.Feature
             .Subscribe(workflows =>
             {

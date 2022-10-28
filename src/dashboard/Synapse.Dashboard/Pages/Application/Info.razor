@@ -17,7 +17,7 @@
 @page "/application/info"
 @using Synapse.Dashboard.Features
 @inherits StatefulComponent<V1ApplicationState>
-@inject IBreadcrumbService BreadcrumbService
+@inject IBreadcrumbManager BreadcrumbService
 
 <PageTitle>Application Info</PageTitle>
 
@@ -250,7 +250,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        await this.BreadcrumbService.Use(KnownBreadcrumbs.About);
+        await this.BreadcrumbService.Use(Breadcrumbs.About);
         this.subscription = this.Feature
             .Subscribe(applicationState =>
             {

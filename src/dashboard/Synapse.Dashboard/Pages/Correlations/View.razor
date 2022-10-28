@@ -27,7 +27,7 @@
 @inject IDispatcher Dispatcher
 @inject ISynapseManagementApi SynapseApi
 @inject IMonacoEditorHelper MonacoEditorHelper
-@inject IBreadcrumbService BreadcrumbService
+@inject IBreadcrumbManager BreadcrumbService
 @inject IJsonSerializer Serializer
 @inject IJSRuntime JS
 @inject HubConnection HubConnection
@@ -226,7 +226,7 @@ else
                 this.correlation = correlations.FirstOrDefault(wf => wf.Id == this.CorrelationId);
                 this.StateHasChanged();
             });
-        await this.BreadcrumbService.Use(KnownBreadcrumbs.Correlations);
+        await this.BreadcrumbService.Use(Breadcrumbs.Correlations);
         await this.BreadcrumbService.AddItem(new BreadcrumbItem(this.CorrelationId.ToString(), $"/correlations/{this.CorrelationId}"));
     }
 

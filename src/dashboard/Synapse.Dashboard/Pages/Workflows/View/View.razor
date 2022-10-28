@@ -30,7 +30,7 @@
 @inherits StatefulComponent<WorkflowViewState>
 @inject ISynapseManagementApi SynapseApi
 @inject IMonacoEditorHelper MonacoEditorHelper
-@inject IBreadcrumbService BreadcrumbService
+@inject IBreadcrumbManager BreadcrumbService
 @inject IJsonSerializer Serializer
 @inject IJSRuntime JS
 @inject IYamlConverter YamlConverter
@@ -235,7 +235,7 @@ else
                 await this.Refresh();
             });
         this.Dispatcher.Dispatch(new InitializeState());
-        await this.BreadcrumbService.Use(KnownBreadcrumbs.Workflows);
+        await this.BreadcrumbService.Use(Breadcrumbs.Workflows);
         await this.BreadcrumbService.AddItem(new BreadcrumbItem(this.WorkflowId.ToString(), $"/workflows/{this.WorkflowId}"));
     }
 

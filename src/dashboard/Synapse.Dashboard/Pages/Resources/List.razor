@@ -20,7 +20,7 @@
 @using Synapse.Dashboard.Pages.Resources.Collections
 @using Synapse.Dashboard.Pages.Resources.Collections.Functions
 @inherits StatefulComponent<ResourceListState>
-@inject IBreadcrumbService BreadcrumbService
+@inject IBreadcrumbManager BreadcrumbService
 @inject NavigationManager NavigationManager
 
 <PageTitle>Resources</PageTitle>
@@ -293,13 +293,13 @@
         switch (this.selectedDefinitionType)
         {
             case "events":
-                breadcrumb = KnownBreadcrumbs.EventDefinitionCollections;
+                breadcrumb = Breadcrumbs.EventDefinitionCollections;
                 break;
             case "authentications":
-                breadcrumb = KnownBreadcrumbs.AuthenticationDefinitionCollections;
+                breadcrumb = Breadcrumbs.AuthenticationDefinitionCollections;
                 break;
             default:
-                breadcrumb = KnownBreadcrumbs.FunctionDefinitionCollections;
+                breadcrumb = Breadcrumbs.FunctionDefinitionCollections;
                 break;
         }
         await this.BreadcrumbService.Use(breadcrumb);

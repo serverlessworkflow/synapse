@@ -17,13 +17,14 @@
 
 namespace Synapse.Dashboard
 {
-    public static class KnownBreadcrumbs
+    public static class Breadcrumbs
     {
         public static IEnumerable<IBreadcrumbItem> Home = new List<IBreadcrumbItem>() { new BreadcrumbItem("Home", "/", "bi-house") };
         public static IEnumerable<IBreadcrumbItem> Workflows = new List<IBreadcrumbItem>(Home) { new BreadcrumbItem("Workflows", "/workflows", "bi-gear") };
         public static IEnumerable<IBreadcrumbItem> CreateWorkflow = new List<IBreadcrumbItem>(Workflows) { new BreadcrumbItem("Create Workflow", "/workflows/new") };
-        public static IEnumerable<IBreadcrumbItem> UploadWorkflow = new List<IBreadcrumbItem>(KnownBreadcrumbs.Workflows) { new BreadcrumbItem("Upload Workflow", "/workflows/upload") };
+        public static IEnumerable<IBreadcrumbItem> UploadWorkflow = new List<IBreadcrumbItem>(Breadcrumbs.Workflows) { new BreadcrumbItem("Upload Workflow", "/workflows/upload") };
         public static IEnumerable<IBreadcrumbItem> WorkflowEditor = new List<IBreadcrumbItem>(Workflows) { new BreadcrumbItem("Workflow Editor", "/workflows/editor") };
+        public static IEnumerable<IBreadcrumbItem> Schedules = new List<IBreadcrumbItem>(Home) { new BreadcrumbItem("Schedules", "/schedules", "bi-stopwatch") };
         public static IEnumerable<IBreadcrumbItem> Correlations = new List<IBreadcrumbItem>(Home) { new BreadcrumbItem("Correlations", "/correlations", "bi-link-45deg") };
         public static IEnumerable<IBreadcrumbItem> Resources = new List<IBreadcrumbItem>(Home) { new BreadcrumbItem("Resources", "/resources", "bi-files") };
         public static IEnumerable<IBreadcrumbItem> FunctionDefinitionCollections = new List<IBreadcrumbItem>(Resources) { new BreadcrumbItem("Functions", "/resources/collections/functions", "bi-files") };

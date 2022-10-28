@@ -24,8 +24,8 @@ namespace Synapse.Dashboard
     /// <summary>
     /// The service used to manage the breadcrumb
     /// </summary>
-    public class BreadcrumbService
-        : IBreadcrumbService, INotifyPropertyChanged
+    public class BreadcrumbManager
+        : IBreadcrumbManager, INotifyPropertyChanged
     {
         /// <summary>
         /// Notifies when the list has changed
@@ -43,13 +43,13 @@ namespace Synapse.Dashboard
         protected NavigationManager NavigationManager { get; init; }
 
         /// <summary>
-        /// Initializes a new <see cref="BreadcrumbService"/>
+        /// Initializes a new <see cref="BreadcrumbManager"/>
         /// </summary>
         /// <param name="navigationManager"></param>
-        public BreadcrumbService(NavigationManager navigationManager)
+        public BreadcrumbManager(NavigationManager navigationManager)
         {
             this.NavigationManager = navigationManager;
-            this.Items = new List<IBreadcrumbItem>(KnownBreadcrumbs.Home);
+            this.Items = new List<IBreadcrumbItem>(Breadcrumbs.Home);
         }
 
         /// <summary>

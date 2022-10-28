@@ -1,0 +1,77 @@
+﻿@*
+    Copyright © 2022-Present The Synapse Authors
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*@
+
+@page "/schedules"
+@inherits StatefulComponent<ScheduleCollectionState>
+@inject IBreadcrumbManager BreadcrumbManager
+
+<PageTitle>Schedules</PageTitle>
+
+@if(workflows != null)
+{
+    <Table Items="workflows" AutoGenerateColumns="false">
+        <Columns>
+            <Column 
+                T="V1Workflow" 
+                Name="Workflow"
+                ValueProvider="w => w.Id"/>
+            <Column T="V1Workflow"
+                Name="CRON"
+                ValueProvider="w => w.Definition.Start!.Schedule!.Cron!.Expression"/>
+            <Column T="V1Workflow"
+                Name="Valid until"
+                ValueProvider="w => w.Definition.Start!.Schedule!.Cron!.ValidUntil" />
+            <Column T="V1Workflow"
+                Name="Interval"
+                ValueProvider="w => w.Definition.Start!.Schedule!.Interval" />
+            <Column T="V1Workflow"
+                Name="Last run"
+                ValueProvider="w => w.LastInstanciated" />
+            <Column T="V1Workflow"
+                Name="Total instances"
+                ValueProvider="w => w.TotalInstanceCount"/>
+        </Columns>
+    </Table>
+}
+else
+{
+    <Loader />
+}
+@code{
+
+    private IDisposable subscription = null!;
+    private List<V1Workflow>? workflows;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await this.BreadcrumbManager.Use(Breadcrumbs.Schedules);
+        this.subscription = ScheduleCollectionStateSelectors.SelectedScheduledWorkflows(this.Store)
+            .Subscribe(workflows => 
+            {
+                this.workflows = workflows;
+                this.StateHasChanged();
+            });
+        this.Dispatcher.Dispatch(new QueryScheduledWorkflows());
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        base.Dispose(disposing);
+        if (disposing) this.subscription?.Dispose();
+    }
+
+}

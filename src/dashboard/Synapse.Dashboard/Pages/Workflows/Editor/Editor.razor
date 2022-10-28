@@ -20,7 +20,7 @@
 @using System.Reactive.Linq
 @using Synapse.Dashboard.Pages.Workflows.Editor.Actions
 @using Synapse.Dashboard.Pages.Workflows.Editor.State
-@inject IBreadcrumbService BreadcrumbService
+@inject IBreadcrumbManager BreadcrumbService
 @inject IMonacoEditorHelper MonacoEditorHelper
 @inherits StatefulComponent<WorkflowEditorState>
 
@@ -117,7 +117,7 @@ else if(!string.IsNullOrWhiteSpace(this.workflowId))
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        await this.BreadcrumbService.Use(KnownBreadcrumbs.WorkflowEditor);
+        await this.BreadcrumbService.Use(Breadcrumbs.WorkflowEditor);
         this.disposeNotifier = new Subject<bool>();
         this.editorValue = new Subject<string>();
         this.editorValue

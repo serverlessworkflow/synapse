@@ -19,7 +19,7 @@
 @using System.Reactive.Subjects
 @using System.Reactive.Linq
 @inherits StatefulComponent<AuthenticationDefinitionCollectionEditorState>
-@inject IBreadcrumbService BreadcrumbService
+@inject IBreadcrumbManager BreadcrumbService
 @inject IMonacoEditorHelper MonacoEditorHelper
 @inject NavigationManager NavigationManager
 
@@ -135,7 +135,7 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        await this.BreadcrumbService.Use(KnownBreadcrumbs.CreateAuthenticationDefinitionCollection);
+        await this.BreadcrumbService.Use(Breadcrumbs.CreateAuthenticationDefinitionCollection);
         this.disposeNotifier = new Subject<bool>();
         this.editorValue = new Subject<string>();
         this.editorValue
