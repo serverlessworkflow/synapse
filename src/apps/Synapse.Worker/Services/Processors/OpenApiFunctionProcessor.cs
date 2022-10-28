@@ -182,7 +182,7 @@ namespace Synapse.Worker.Services.Processors
                     .Where(p => p.In == ParameterLocation.Cookie)
                     .GroupBy(p => p.Name))
                 {
-                    var match = await this.TryGetParameterAsync($@".""{param.Name}""", cancellationToken);
+                    var match = await this.TryGetParameterAsync($@".[""{param.Name}""]", cancellationToken);
                     if (match.HasMatch)
                         this.Cookies.Add(param.Name, match.Value);
                     else if (param.Required)
@@ -191,7 +191,7 @@ namespace Synapse.Worker.Services.Processors
                 foreach (OpenApiParameter param in parameters
                     .Where(p => p.In == ParameterLocation.Header))
                 {
-                    var match = await this.TryGetParameterAsync($@".""{param.Name}""", cancellationToken);
+                    var match = await this.TryGetParameterAsync($@".[""{param.Name}""]", cancellationToken);
                     if (match.HasMatch)
                         this.Headers.Add(param.Name, match.Value);
                     else if (param.Required)
@@ -200,7 +200,7 @@ namespace Synapse.Worker.Services.Processors
                 foreach (OpenApiParameter param in parameters
                     .Where(p => p.In == ParameterLocation.Path))
                 {
-                    var match = await this.TryGetParameterAsync($@".""{param.Name}""", cancellationToken);
+                    var match = await this.TryGetParameterAsync($@".[""{param.Name}""]", cancellationToken);
                     if (match.HasMatch)
                         this.Path = this.Path.Replace($"{{{param.Name}}}", match.Value);
                     else if (param.Required)
@@ -210,7 +210,7 @@ namespace Synapse.Worker.Services.Processors
                 foreach (OpenApiParameter param in parameters
                     .Where(p => p.In == ParameterLocation.Query))
                 {
-                    var match = await this.TryGetParameterAsync($@".""{param.Name}""", cancellationToken);
+                    var match = await this.TryGetParameterAsync($@".[""{param.Name}""]", cancellationToken);
                     if (match.HasMatch)
                         queryParameters.Add(param.Name, match.Value);
                     else if (param.Required)
@@ -278,8 +278,7 @@ namespace Synapse.Worker.Services.Processors
         {
             var value = null as string;
             var token = await this.Context.EvaluateAsync(expression, this.Parameters, cancellationToken);
-            if (token == null)
-                return (false, value!);
+            if (token == null) return (false, value!);
             value = token.ToString()!;
             return (true, value);
         }
