@@ -22,7 +22,7 @@ namespace Synapse.Dashboard
     /// <summary>
     /// The service used to manage the breadcrumb
     /// </summary>
-    public interface IBreadcrumbService
+    public interface IBreadcrumbManager
     {
         /// <summary>
         /// Notifies when the list has changed

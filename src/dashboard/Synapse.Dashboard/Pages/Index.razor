@@ -19,7 +19,7 @@
 @using System.Dynamic
 @using System.Collections.ObjectModel
 @inject ISynapseManagementApi SynapseManagementApi
-@inject IBreadcrumbService BreadcrumbService
+@inject IBreadcrumbManager BreadcrumbService
 @inject IStyleManager StyleManager
 
 <PageTitle>Overview</PageTitle>
@@ -112,7 +112,7 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        await this.BreadcrumbService.Use(KnownBreadcrumbs.Home);
+        await this.BreadcrumbService.Use(Breadcrumbs.Home);
         try
         {
             this.dailyReport = await this.SynapseManagementApi.GetOperationalReportAsync();

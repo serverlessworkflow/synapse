@@ -21,7 +21,7 @@
 @using System.Reactive.Linq
 @inherits StatefulComponent<V1CorrelationCollectionState>
 @inject IServiceProvider ServiceProvider
-@inject IBreadcrumbService BreadcrumbService
+@inject IBreadcrumbManager BreadcrumbService
 @inject NavigationManager NavigationManager
 
 <PageTitle>Correlations</PageTitle>
@@ -74,7 +74,7 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        await this.BreadcrumbService.Use(KnownBreadcrumbs.Correlations);
+        await this.BreadcrumbService.Use(Breadcrumbs.Correlations);
         this.subscription = this.Feature
             .Subscribe(correlations =>
             {

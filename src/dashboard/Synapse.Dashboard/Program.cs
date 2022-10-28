@@ -64,7 +64,7 @@ builder.Services.AddSingleton<IToastManager, ToastManager>();
 builder.Services.AddSingleton<IAccordionManager, AccordionManager>();
 builder.Services.AddSingleton<IIntegrationEventStream, IntegrationEventStream>();
 builder.Services.AddSingleton<IMonacoEditorHelper, MonacoEditorHelper>();
-builder.Services.AddSingleton<IBreadcrumbService, BreadcrumbService>();
+builder.Services.AddSingleton<IBreadcrumbManager, BreadcrumbManager>();
 builder.Services.AddSingleton<IDagreService, DagreService>();
 builder.Services.AddSingleton<ICloner, Cloner>();
 builder.Services.AddSingleton<IChartService, ChartService>();
