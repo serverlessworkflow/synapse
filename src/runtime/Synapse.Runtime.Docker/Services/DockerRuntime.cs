@@ -25,6 +25,7 @@ using Synapse.Domain.Models;
 using Synapse.Infrastructure.Services;
 using Synapse.Runtime.Docker;
 using Synapse.Runtime.Docker.Configuration;
+using System.Reactive.Linq;
 
 namespace Synapse.Runtime.Services
 {
@@ -145,9 +146,13 @@ namespace Synapse.Runtime.Services
         /// <returns>A new awaitable <see cref="Task"/></returns>
         protected virtual async Task PullWorkerImageAsync(CancellationToken cancellationToken)
         {
+            var image = this.Options.Runtime.Container.Image;
+            var tagIndex = image.IndexOf(':');
+            var tag = "latest";
+            if (tagIndex >= 1) tag = image.Substring(tagIndex + 1);
             if (this.Options.Runtime.ImagePullPolicy == ImagePullPolicy.Always)
             {
-                await this.Docker.Images.CreateImageAsync(new() { FromImage = this.Options.Runtime.Container.Image, Repo = this.Options.Runtime.ImageRepository }, new(), new Progress<JSONMessage>(), cancellationToken);
+                await this.Docker.Images.CreateImageAsync(new() { FromImage = this.Options.Runtime.Container.Image, Tag = tag, Repo = this.Options.Runtime.ImageRepository }, new(), new Progress<JSONMessage>(), cancellationToken);
             }
             else
             {
@@ -157,7 +162,7 @@ namespace Synapse.Runtime.Services
                 }
                 catch (DockerImageNotFoundException)
                 {
-                    await this.Docker.Images.CreateImageAsync(new() { FromImage = this.Options.Runtime.Container.Image, Repo = this.Options.Runtime.ImageRepository }, new(), new Progress<JSONMessage>(), cancellationToken);
+                    await this.Docker.Images.CreateImageAsync(new() { FromImage = this.Options.Runtime.Container.Image, Tag = tag, Repo = this.Options.Runtime.ImageRepository }, new(), new Progress<JSONMessage>(), cancellationToken);
                 }
             }
         }
