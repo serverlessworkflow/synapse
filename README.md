@@ -139,7 +139,7 @@ Synapse provides 2 different UIs for interacting with the server:
 
 ### GUI
 <p align="center">
-  <img src="assets/images/dashboard.png" alt="Dashboard screenshot"/>
+  <img src="assets/images/synapse_demo.gif" alt="Dashboard demo"/>
 </p>
 The `Dashboard` is a Blazor Web Assembly (WASM) Graphical User Interface (GUI) that comes bundled with the Synapse Server. 
 
