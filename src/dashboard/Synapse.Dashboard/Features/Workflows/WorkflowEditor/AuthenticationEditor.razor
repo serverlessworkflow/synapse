@@ -28,7 +28,7 @@
             <tr>
                 <td>Scheme</td>
                 <td>
-                    <select class="form-control bg-secondary text-white"
+                    <select class="form-select bg-secondary text-white"
                     @onchange="async e => await OnAuthenticationSchemeChangedAsync(EnumHelper.Parse<AuthenticationScheme>((string)e.Value!))">
                         @foreach(var scheme in Enum.GetValues<AuthenticationScheme>())
                         {
