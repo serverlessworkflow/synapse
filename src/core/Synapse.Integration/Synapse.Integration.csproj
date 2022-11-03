@@ -90,6 +90,27 @@
     <Compile Update="Commands\Generic\v1\Generated\V1PatchCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\Generic\v1\V1PatchCommand.cs</CustomToolNamespace>
     </Compile>
+    <Compile Update="Commands\Schedules\v1\Generated\V1CreateScheduleCommand.cs">
+      <CustomToolNamespace>..\Synapse.Application\Commands\Schedules\v1\V1CreateScheduleCommand.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Commands\Schedules\v1\Generated\V1MakeScheduleObsoleteCommand.cs">
+      <CustomToolNamespace>..\Synapse.Application\Commands\Schedules\v1\V1MakeScheduleObsoleteCommand.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Commands\Schedules\v1\Generated\V1ObsoleteScheduleCommand.cs">
+      <CustomToolNamespace>..\Synapse.Application\Commands\Schedules\v1\V1ObsoleteScheduleCommand.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Commands\Schedules\v1\Generated\V1ResumeScheduleCommand.cs">
+      <CustomToolNamespace>..\Synapse.Application\Commands\Schedules\v1\V1ResumeScheduleCommand.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Commands\Schedules\v1\Generated\V1RetireScheduleCommand.cs">
+      <CustomToolNamespace>..\Synapse.Application\Commands\Schedules\v1\V1RetireScheduleCommand.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Commands\Schedules\v1\Generated\V1SuspendScheduleCommand.cs">
+      <CustomToolNamespace>..\Synapse.Application\Commands\Schedules\v1\V1SuspendScheduleCommand.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Commands\Schedules\v1\Generated\V1TriggerScheduleCommand.cs">
+      <CustomToolNamespace>..\Synapse.Application\Commands\Schedules\v1\V1TriggerScheduleCommand.cs</CustomToolNamespace>
+    </Compile>
     <Compile Update="Commands\WorkflowActivities\v1\Generated\V1CancelWorkflowActivityCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\WorkflowActivities\v1\V1CancelWorkflowActivityCommand.cs</CustomToolNamespace>
     </Compile>
@@ -227,6 +248,30 @@
     </Compile>
     <Compile Update="Events\FunctionDefinitionCollections\v1\Generated\V1FunctionDefinitionRemovedFromCollectionIntegrationEvent.cs">
       <CustomToolNamespace>..\Synapse.Domain\Events\FunctionDefinitionCollections\v1\V1FunctionDefinitionRemovedFromCollectionDomainEvent.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\Schedules\v1\Generated\V1ScheduleCreatedIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\Schedules\v1\V1ScheduleCreatedDomainEvent.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\Schedules\v1\Generated\V1ScheduleDefinitionChangedIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\Schedules\v1\V1ScheduleDefinitionChangedDomainEvent.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\Schedules\v1\Generated\V1ScheduleDeletedIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\Schedules\v1\V1ScheduleDeletedDomainEvent.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\Schedules\v1\Generated\V1ScheduleObsolitedIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\Schedules\v1\V1ScheduleObsolitedDomainEvent.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\Schedules\v1\Generated\V1ScheduleOccuredIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\Schedules\v1\V1ScheduleOccuredDomainEvent.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\Schedules\v1\Generated\V1ScheduleResumedIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\Schedules\v1\V1ScheduleResumedDomainEvent.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\Schedules\v1\Generated\V1ScheduleRetiredIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\Schedules\v1\V1ScheduleRetiredDomainEvent.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\Schedules\v1\Generated\V1ScheduleSuspendedIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\Schedules\v1\V1ScheduleSuspendedDomainEvent.cs</CustomToolNamespace>
     </Compile>
     <Compile Update="Events\WorkflowActivities\v1\Generated\V1WorkflowActivityCancelledIntegrationEvent.cs">
       <CustomToolNamespace>..\Synapse.Domain\Events\WorkflowActivities\v1\V1WorkflowActivityCancelledDomainEvent.cs</CustomToolNamespace>
@@ -374,6 +419,9 @@
     </Compile>
     <Compile Update="Models\v1\Generated\V1FunctionDefinitionCollection.cs">
       <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1FunctionDefinitionCollection.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Models\v1\Generated\V1Schedule.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1Schedule.cs</CustomToolNamespace>
     </Compile>
     <Compile Update="Models\v1\Generated\V1WorkflowActivity.cs">
       <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1WorkflowActivity.cs</CustomToolNamespace>

@@ -17,29 +17,33 @@
 
 namespace Synapse
 {
-
     /// <summary>
-    /// Enumerates all the statuses of a process
+    /// Enumerates all possibles workflow schedule statuses
     /// </summary>
     [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
     [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.StringEnumConverterFactory))]
-    public enum ProcessStatus
+    public enum V1ScheduleStatus
     {
         /// <summary>
-        /// Indicates that the process is pending startup
+        /// Indicates that the schedule is active
         /// </summary>
-        [EnumMember(Value = "pending")]
-        Pending,
+        [EnumMember(Value = "active")]
+        Active = 1,
         /// <summary>
-        /// Indicates that the process is running
+        /// Indicates that the schedule has been suspended
         /// </summary>
-        [EnumMember(Value = "running")]
-        Running,
+        [EnumMember(Value = "suspended")]
+        Suspended = 2,
         /// <summary>
-        /// Indicates that the process has exited
+        /// Indicates that the schedule has been retired, either manually or automatically because it reached its deadline
         /// </summary>
-        [EnumMember(Value = "exited")]
-        Exited
+        [EnumMember(Value = "retired")]
+        Retired = 4,
+        /// <summary>
+        /// Indicates that the schedule has been made obsolete by a newer version
+        /// </summary>
+        [EnumMember(Value = "obsolete")]
+        Obsolete = 8
     }
 
 }

@@ -29,6 +29,7 @@ using Synapse.Integration.Commands.AuthenticationDefinitionCollections;
 using Synapse.Integration.Commands.Correlations;
 using Synapse.Integration.Commands.EventDefinitionCollections;
 using Synapse.Integration.Commands.FunctionDefinitionCollections;
+using Synapse.Integration.Commands.Schedules;
 using Synapse.Integration.Commands.Workflows;
 using Synapse.Integration.Models;
 
@@ -322,6 +323,70 @@ namespace Synapse.Apis.Management.Grpc
         public virtual async Task<GrpcApiResult<V1OperationalReport>> GetOperationalReportAsync(GrpcApiRequest<DateTime> request, CallContext context = default)
         {
             return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new V1FindByIdQuery<V1OperationalReport, string>(V1OperationalReport.GetIdFor(request.Data)), context.CancellationToken));
+        }
+
+        #endregion
+
+        #region Schedules
+
+        /// <inheritdoc/>
+        public virtual async Task<GrpcApiResult<V1Schedule>> CreateScheduleAsync(V1CreateScheduleCommand command, CallContext context = default)
+        {
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(this.Mapper.Map<Application.Commands.Schedules.V1CreateScheduleCommand>(command), context.CancellationToken));
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<GrpcApiResult<V1Schedule>> GetScheduleByIdAsync(string id, CallContext context = default)
+        {
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new V1FindByIdQuery<V1Schedule, string>(id), context.CancellationToken));
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<GrpcApiResult<List<V1Schedule>>> GetSchedulesAsync(string? query = null, CallContext context = default)
+        {
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new V1FilterQuery<V1Schedule>(this.QueryOptionsParser.Parse<V1Schedule>(query)), context.CancellationToken));
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<GrpcApiResult> TriggerScheduleAsync(string id, CallContext context = default)
+        {
+            if (string.IsNullOrWhiteSpace(id)) throw new ArgumentNullException(nameof(id));
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(this.Mapper.Map<Application.Commands.Schedules.V1TriggerScheduleCommand>(id), context.CancellationToken));
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<GrpcApiResult> SuspendScheduleAsync(string id, CallContext context = default)
+        {
+            if (string.IsNullOrWhiteSpace(id)) throw new ArgumentNullException(nameof(id));
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(this.Mapper.Map<Application.Commands.Schedules.V1SuspendScheduleCommand>(id), context.CancellationToken));
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<GrpcApiResult> ResumeScheduleAsync(string id, CallContext context = default)
+        {
+            if (string.IsNullOrWhiteSpace(id)) throw new ArgumentNullException(nameof(id));
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(this.Mapper.Map<Application.Commands.Schedules.V1ResumeScheduleCommand>(id), context.CancellationToken));
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<GrpcApiResult> RetireScheduleAsync(string id, CallContext context = default)
+        {
+            if (string.IsNullOrWhiteSpace(id)) throw new ArgumentNullException(nameof(id));
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(this.Mapper.Map<Application.Commands.Schedules.V1RetireScheduleCommand>(id), context.CancellationToken));
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<GrpcApiResult> MakeScheduleObsoleteAsync(string id, CallContext context = default)
+        {
+            if (string.IsNullOrWhiteSpace(id)) throw new ArgumentNullException(nameof(id));
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(this.Mapper.Map<Application.Commands.Schedules.V1MakeScheduleObsoleteCommand>(id), context.CancellationToken));
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<GrpcApiResult> DeleteScheduleAsync(string id, CallContext context = default)
+        {
+            if (string.IsNullOrWhiteSpace(id)) throw new ArgumentNullException(nameof(id));
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(new V1DeleteCommand<Domain.Models.V1Schedule, string>(id), context.CancellationToken));
         }
 
         #endregion

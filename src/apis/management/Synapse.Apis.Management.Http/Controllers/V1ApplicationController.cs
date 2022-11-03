@@ -27,11 +27,7 @@ namespace Synapse.Apis.Management.Http.Controllers
     {
 
         /// <inheritdoc/>
-        public V1ApplicationController(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper)
-            : base(loggerFactory, mediator, mapper)
-        {
-
-        }
+        public V1ApplicationController(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper) : base(loggerFactory, mediator, mapper) { }
 
         /// <summary>
         /// Gets information about the running Synapse instance

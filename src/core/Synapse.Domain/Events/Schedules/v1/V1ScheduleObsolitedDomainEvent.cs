@@ -15,31 +15,29 @@
  *
  */
 
-namespace Synapse
-{
+using Synapse.Integration.Events.Schedules;
 
+namespace Synapse.Domain.Events.Schedules
+{
     /// <summary>
-    /// Enumerates all the statuses of a process
+    /// Represents the <see cref="IDomainEvent"/> fired whenever a <see cref="V1Schedule"/> has been made obsolete
     /// </summary>
-    [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-    [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.StringEnumConverterFactory))]
-    public enum ProcessStatus
+    [DataTransferObjectType(typeof(V1ScheduleObsolitedIntegrationEvent))]
+    public class V1ScheduleObsolitedDomainEvent
+        : DomainEvent<Models.V1Schedule, string>
     {
+
         /// <summary>
-        /// Indicates that the process is pending startup
+        /// Initializes a new <see cref="V1ScheduleObsolitedDomainEvent"/>
         /// </summary>
-        [EnumMember(Value = "pending")]
-        Pending,
+        protected V1ScheduleObsolitedDomainEvent() { }
+
         /// <summary>
-        /// Indicates that the process is running
+        /// Initializes a new <see cref="V1ScheduleObsolitedDomainEvent"/>
         /// </summary>
-        [EnumMember(Value = "running")]
-        Running,
-        /// <summary>
-        /// Indicates that the process has exited
-        /// </summary>
-        [EnumMember(Value = "exited")]
-        Exited
+        /// <param name="id">The id of the <see cref="V1Schedule"/> that has been made obsolete</param>
+        public V1ScheduleObsolitedDomainEvent(string id) : base(id) { }
+
     }
 
 }

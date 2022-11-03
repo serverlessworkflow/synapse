@@ -24,6 +24,7 @@ using Synapse.Integration.Commands.AuthenticationDefinitionCollections;
 using Synapse.Integration.Commands.Correlations;
 using Synapse.Integration.Commands.EventDefinitionCollections;
 using Synapse.Integration.Commands.FunctionDefinitionCollections;
+using Synapse.Integration.Commands.Schedules;
 using Synapse.Integration.Commands.WorkflowInstances;
 using Synapse.Integration.Commands.Workflows;
 using Synapse.Integration.Models;
@@ -88,8 +89,7 @@ namespace Synapse.Apis.Management.Ipc
         /// <inheritdoc/>
         public virtual async Task<V1Workflow> CreateWorkflowAsync(V1CreateWorkflowCommand command, CancellationToken cancellationToken = default)
         {
-            if(command == null)
-                throw new ArgumentNullException(nameof(command));
+            if(command == null) throw new ArgumentNullException(nameof(command));
             return await this.Mediator.ExecuteAndUnwrapAsync(this.Mapper.Map<Application.Commands.Workflows.V1CreateWorkflowCommand>(command), cancellationToken);
         }
 
@@ -378,6 +378,76 @@ namespace Synapse.Apis.Management.Ipc
             if (!date.HasValue)
                 date = DateTime.Now;
             return await this.Mediator.ExecuteAndUnwrapAsync(new Application.Queries.Generic.V1FindByIdQuery<V1OperationalReport, string>(V1OperationalReport.GetIdFor(date.Value)), cancellationToken);
+        }
+
+        #endregion
+
+        #region Schedules
+
+        /// <inheritdoc/>
+        public virtual async Task<V1Schedule> CreateScheduleAsync(V1CreateScheduleCommand command, CancellationToken cancellationToken = default)
+        {
+            if (command == null) throw new ArgumentNullException(nameof(command));
+            return await this.Mediator.ExecuteAndUnwrapAsync(this.Mapper.Map<Application.Commands.Schedules.V1CreateScheduleCommand>(command), cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<V1Schedule> GetScheduleByIdAsync(string id, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                throw new ArgumentNullException(nameof(id));
+            return await this.Mediator.ExecuteAndUnwrapAsync(new Application.Queries.Generic.V1FindByIdQuery<V1Schedule, string>(id), cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<List<V1Schedule>> GetSchedulesAsync(CancellationToken cancellationToken = default) => await this.GetSchedulesAsync(null!, cancellationToken);
+
+        /// <inheritdoc/>
+        public virtual async Task<List<V1Schedule>> GetSchedulesAsync(string query, CancellationToken cancellationToken = default)
+        {
+            return await this.Mediator.ExecuteAndUnwrapAsync(new Application.Queries.Generic.V1FilterQuery<V1Schedule>(this.QueryOptionsParser.Parse<V1Schedule>(query)), cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task TriggerScheduleAsync(string id, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(id)) throw new ArgumentNullException(nameof(id));
+            await this.Mediator.ExecuteAndUnwrapAsync(new Application.Commands.Schedules.V1TriggerScheduleCommand(id), cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task SuspendScheduleAsync(string id, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(id)) throw new ArgumentNullException(nameof(id));
+            await this.Mediator.ExecuteAndUnwrapAsync(new Application.Commands.Schedules.V1SuspendScheduleCommand(id), cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task ResumeScheduleAsync(string id, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(id)) throw new ArgumentNullException(nameof(id));
+            await this.Mediator.ExecuteAndUnwrapAsync(new Application.Commands.Schedules.V1ResumeScheduleCommand(id), cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task RetireScheduleAsync(string id, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(id)) throw new ArgumentNullException(nameof(id));
+            await this.Mediator.ExecuteAndUnwrapAsync(new Application.Commands.Schedules.V1RetireScheduleCommand(id), cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task MakeScheduleObsoleteAsync(string id, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(id)) throw new ArgumentNullException(nameof(id));
+            await this.Mediator.ExecuteAndUnwrapAsync(new Application.Commands.Schedules.V1MakeScheduleObsoleteCommand(id), cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task DeleteScheduleAsync(string id, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(id)) throw new ArgumentNullException(nameof(id));
+            await this.Mediator.ExecuteAndUnwrapAsync(new Application.Commands.Generic.V1DeleteCommand<Domain.Models.V1Schedule, string>(id), cancellationToken);
         }
 
         #endregion

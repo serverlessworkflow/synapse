@@ -14,32 +14,29 @@
  * limitations under the License.
  *
  */
+using Synapse.Integration.Events.Schedules;
 
-namespace Synapse
+namespace Synapse.Domain.Events.Schedules
 {
-
     /// <summary>
-    /// Enumerates all the statuses of a process
+    /// Represents the <see cref="IDomainEvent"/> fired whenever a <see cref="V1Schedule"/> has been resumed
     /// </summary>
-    [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-    [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.StringEnumConverterFactory))]
-    public enum ProcessStatus
+    [DataTransferObjectType(typeof(V1ScheduleResumedIntegrationEvent))]
+    public class V1ScheduleResumedDomainEvent
+        : DomainEvent<Models.V1Schedule, string>
     {
+
         /// <summary>
-        /// Indicates that the process is pending startup
+        /// Initializes a new <see cref="V1ScheduleResumedDomainEvent"/>
         /// </summary>
-        [EnumMember(Value = "pending")]
-        Pending,
+        protected V1ScheduleResumedDomainEvent() { }
+
         /// <summary>
-        /// Indicates that the process is running
+        /// Initializes a new <see cref="V1ScheduleResumedDomainEvent"/>
         /// </summary>
-        [EnumMember(Value = "running")]
-        Running,
-        /// <summary>
-        /// Indicates that the process has exited
-        /// </summary>
-        [EnumMember(Value = "exited")]
-        Exited
+        /// <param name="id">The id of the resumed <see cref="V1Schedule"/></param>
+        public V1ScheduleResumedDomainEvent(string id) : base(id) { }
+
     }
 
 }

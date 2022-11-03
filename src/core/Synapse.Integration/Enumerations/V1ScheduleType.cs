@@ -17,29 +17,23 @@
 
 namespace Synapse
 {
-
     /// <summary>
-    /// Enumerates all the statuses of a process
+    /// Enumerates all types of workflow schedules
     /// </summary>
     [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
     [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.StringEnumConverterFactory))]
-    public enum ProcessStatus
+    public enum V1ScheduleType
     {
         /// <summary>
-        /// Indicates that the process is pending startup
+        /// Indicates that the schedule has been explicitly created
         /// </summary>
-        [EnumMember(Value = "pending")]
-        Pending,
+        [EnumMember(Value = "manual")]
+        Explicit = 1,
         /// <summary>
-        /// Indicates that the process is running
+        /// Indicates that the schedule has been implicitly created following the creation of a workflow defining a scheduled start
         /// </summary>
-        [EnumMember(Value = "running")]
-        Running,
-        /// <summary>
-        /// Indicates that the process has exited
-        /// </summary>
-        [EnumMember(Value = "exited")]
-        Exited
+        [EnumMember(Value = "implicit")]
+        Implicit = 2
     }
 
 }

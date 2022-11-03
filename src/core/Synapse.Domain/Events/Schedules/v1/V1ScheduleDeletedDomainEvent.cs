@@ -15,31 +15,29 @@
  *
  */
 
-namespace Synapse
-{
+using Synapse.Integration.Events.Schedules;
 
+namespace Synapse.Domain.Events.Schedules
+{
     /// <summary>
-    /// Enumerates all the statuses of a process
+    /// Represents the <see cref="IDomainEvent"/> fired whenever a <see cref="V1Schedule"/> has been deleted
     /// </summary>
-    [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-    [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.StringEnumConverterFactory))]
-    public enum ProcessStatus
+    [DataTransferObjectType(typeof(V1ScheduleDeletedIntegrationEvent))]
+    public class V1ScheduleDeletedDomainEvent
+        : DomainEvent<Models.V1Schedule, string>
     {
+
         /// <summary>
-        /// Indicates that the process is pending startup
+        /// Initializes a new <see cref="V1ScheduleDeletedDomainEvent"/>
         /// </summary>
-        [EnumMember(Value = "pending")]
-        Pending,
+        protected V1ScheduleDeletedDomainEvent() { }
+
         /// <summary>
-        /// Indicates that the process is running
+        /// Initializes a new <see cref="V1ScheduleDeletedDomainEvent"/>
         /// </summary>
-        [EnumMember(Value = "running")]
-        Running,
-        /// <summary>
-        /// Indicates that the process has exited
-        /// </summary>
-        [EnumMember(Value = "exited")]
-        Exited
+        /// <param name="id">The id of the deleted <see cref="V1Schedule"/></param>
+        public V1ScheduleDeletedDomainEvent(string id) : base(id) { }
+
     }
 
 }

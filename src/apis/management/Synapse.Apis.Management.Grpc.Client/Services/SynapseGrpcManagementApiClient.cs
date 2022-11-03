@@ -19,6 +19,7 @@ using Synapse.Integration.Commands.AuthenticationDefinitionCollections;
 using Synapse.Integration.Commands.Correlations;
 using Synapse.Integration.Commands.EventDefinitionCollections;
 using Synapse.Integration.Commands.FunctionDefinitionCollections;
+using Synapse.Integration.Commands.Schedules;
 using Synapse.Integration.Commands.WorkflowInstances;
 using Synapse.Integration.Commands.Workflows;
 
@@ -413,6 +414,79 @@ namespace Synapse.Apis.Management.Grpc
             if (!result.Succeeded)
                 throw new SynapseApiException(result);
             return result.Data!;
+        }
+
+        #endregion
+
+        #region Schedules
+
+        /// <inheritdoc/>
+        public virtual async Task<V1Schedule> CreateScheduleAsync(V1CreateScheduleCommand command, CancellationToken cancellationToken = default)
+        {
+            var result = await this.Adapter.CreateScheduleAsync(command, cancellationToken);
+            if (!result.Succeeded) throw new SynapseApiException(result);
+            return result.Data!;
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<V1Schedule> GetScheduleByIdAsync(string id, CancellationToken cancellationToken = default)
+        {
+            var result = await this.Adapter.GetScheduleByIdAsync(id, cancellationToken);
+            if (!result.Succeeded) throw new SynapseApiException(result);
+            return result.Data!;
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<List<V1Schedule>> GetSchedulesAsync(CancellationToken cancellationToken = default) => await this.GetSchedulesAsync(null!, cancellationToken);
+
+        /// <inheritdoc/>
+        public virtual async Task<List<V1Schedule>> GetSchedulesAsync(string query, CancellationToken cancellationToken = default)
+        {
+            var result = await this.Adapter.GetSchedulesAsync(query, cancellationToken);
+            if (!result.Succeeded) throw new SynapseApiException(result);
+            return result.Data!;
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task TriggerScheduleAsync(string id, CancellationToken cancellationToken = default)
+        {
+            var result = await this.Adapter.TriggerScheduleAsync(id, cancellationToken);
+            if (!result.Succeeded) throw new SynapseApiException(result);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task SuspendScheduleAsync(string id, CancellationToken cancellationToken = default)
+        {
+            var result = await this.Adapter.SuspendScheduleAsync(id, cancellationToken);
+            if (!result.Succeeded) throw new SynapseApiException(result);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task ResumeScheduleAsync(string id, CancellationToken cancellationToken = default)
+        {
+            var result = await this.Adapter.ResumeScheduleAsync(id, cancellationToken);
+            if (!result.Succeeded) throw new SynapseApiException(result);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task RetireScheduleAsync(string id, CancellationToken cancellationToken = default)
+        {
+            var result = await this.Adapter.RetireScheduleAsync(id, cancellationToken);
+            if (!result.Succeeded) throw new SynapseApiException(result);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task MakeScheduleObsoleteAsync(string id, CancellationToken cancellationToken = default)
+        {
+            var result = await this.Adapter.MakeScheduleObsoleteAsync(id, cancellationToken);
+            if (!result.Succeeded) throw new SynapseApiException(result);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task DeleteScheduleAsync(string id, CancellationToken cancellationToken = default)
+        {
+            var result = await this.Adapter.DeleteScheduleAsync(id, cancellationToken);
+            if (!result.Succeeded) throw new SynapseApiException(result);
         }
 
         #endregion
