@@ -16,7 +16,7 @@
 
 @namespace Synapse.Dashboard
 
-<select class="form-control @CssClass" @onchange="OnStateSelectorValueChangedAsync">
+<select class="form-select @CssClass" @onchange="OnStateSelectorValueChangedAsync">
     @if(Selected == null)
     {
         <option disabled selected value> -- select an authentication -- </option>

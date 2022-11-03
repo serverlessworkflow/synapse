@@ -41,7 +41,7 @@
                                 <tr>
                                     <td>Type</td>
                                     <td>
-                                        <select class="form-control bg-secondary text-white"
+                                        <select class="form-select bg-secondary text-white"
                                         @onchange="async e => await OnStateTypeChangedAsync(EnumHelper.Parse<StateType>((string)e.Value!))">
                                             @foreach(var type in Enum.GetValues<StateType>().OrderBy(v => v.ToString()))
                                             {

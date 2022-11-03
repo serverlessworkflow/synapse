@@ -21,7 +21,7 @@
         <tr>
             <td>Type</td>
             <td>
-                <select class="form-control bg-secondary text-white" @onchange="OnOutcomeTypeChangedAsync">
+                <select class="form-select bg-secondary text-white" @onchange="OnOutcomeTypeChangedAsync">
                     <option value="@EnumHelper.Stringify(SwitchCaseOutcomeType.End)" selected="@(outcome?.Type == WorkflowOutcomeType.End)">End</option>
                     <option value="@EnumHelper.Stringify(SwitchCaseOutcomeType.Transition)" selected="@(outcome?.Type == WorkflowOutcomeType.Transition)">Transition</option>
                 </select>
