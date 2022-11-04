@@ -15,6 +15,8 @@
  *
  */
 
+using Neuroglia.Mediation;
+
 namespace Synapse.Application.Commands.Schedules
 {
     /// <summary>
@@ -22,7 +24,7 @@ namespace Synapse.Application.Commands.Schedules
     /// </summary>
     [DataTransferObjectType(typeof(Integration.Commands.Schedules.V1ResumeScheduleCommand))]
     public class V1ResumeScheduleCommand
-        : Command
+        : Command<Integration.Models.V1Schedule>
     {
 
         /// <summary>
@@ -51,7 +53,7 @@ namespace Synapse.Application.Commands.Schedules
     /// </summary>
     public class V1ResumeScheduleCommandHandler
         : CommandHandlerBase,
-        ICommandHandler<V1ResumeScheduleCommand>
+        ICommandHandler<V1ResumeScheduleCommand, Integration.Models.V1Schedule>
     {
 
         /// <summary>
@@ -73,14 +75,14 @@ namespace Synapse.Application.Commands.Schedules
         protected IRepository<V1Schedule> Schedules { get; }
 
         /// <inheritdoc/>
-        public virtual async Task<IOperationResult> HandleAsync(V1ResumeScheduleCommand command, CancellationToken cancellationToken = default)
+        public virtual async Task<IOperationResult<Integration.Models.V1Schedule>> HandleAsync(V1ResumeScheduleCommand command, CancellationToken cancellationToken = default)
         {
             var schedule = await this.Schedules.FindAsync(command.ScheduleId, cancellationToken);
             if (schedule == null) throw DomainException.NullReference(typeof(V1Schedule), command.ScheduleId);
             schedule.Resume();
-            await this.Schedules.UpdateAsync(schedule, cancellationToken);
+            schedule = await this.Schedules.UpdateAsync(schedule, cancellationToken);
             await this.Schedules.SaveChangesAsync(cancellationToken);
-            return this.Ok();
+            return this.Ok(this.Mapper.Map<Integration.Models.V1Schedule>(schedule));
         }
 
     }

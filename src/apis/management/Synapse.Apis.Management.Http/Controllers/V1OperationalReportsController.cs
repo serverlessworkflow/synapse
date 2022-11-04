@@ -15,12 +15,15 @@
  *
  */
 
+using Microsoft.AspNetCore.Http;
+
 namespace Synapse.Apis.Management.Http.Controllers
 {
 
     /// <summary>
     /// Represents the <see cref="ApiController"/> used to manage application metrics
     /// </summary>
+    [Tags("OperationalReports")]
     [Route("api/v1/reports/operations")]
     public class V1OperationalReportsController
         : ApiController

@@ -15,6 +15,7 @@
  *
  */
 
+using Microsoft.AspNetCore.Http;
 using ServerlessWorkflow.Sdk.Models;
 
 namespace Synapse.Apis.Management.Http.Controllers
@@ -23,6 +24,7 @@ namespace Synapse.Apis.Management.Http.Controllers
     /// <summary>
     /// Represents the <see cref="ApiController"/> used to manage event definition collections
     /// </summary>
+    [Tags("EventDefinitionCollections")]
     [Route("api/v1/resources/collections/events")]
     public class V1EventDefinitionCollectionsController
         : ApiController

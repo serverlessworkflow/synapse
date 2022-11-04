@@ -15,6 +15,7 @@
  *
  */
 
+using Synapse.Application.Commands.Schedules;
 using Synapse.Application.Commands.Workflows;
 using Synapse.Infrastructure.Plugins;
 
@@ -56,28 +57,66 @@ namespace Synapse.Application.Services
         /// </summary>
         protected IPluginManager PluginManager { get; }
 
+        /// <summary>
+        /// Gets <see cref="WorkflowScheduler"/>'s <see cref="System.Threading.CancellationTokenSource"/>
+        /// </summary>
+        protected CancellationTokenSource CancellationTokenSource { get; private set; }
+
         /// <inheritdoc/>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            this.CancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
             await this.PluginManager.WaitForStartupAsync(stoppingToken);
             using var scope = this.ServiceProvider.CreateScope();
-            var workflows = scope.ServiceProvider.GetRequiredService<IRepository<Integration.Models.V1Workflow>>();
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-            foreach(var workflow in workflows.AsQueryable()
-                .ToList()
-                .Where(w => w.Definition.Start != null && w.Definition.Start.Schedule != null)
-                .GroupBy(w => w.Definition.Id)
-                .Select(w => w.OrderByDescending(w => w.Definition.Version).First()))
+            var schedules = scope.ServiceProvider.GetRequiredService<IRepository<Integration.Models.V1Schedule>>();
+            foreach(var schedule in schedules.AsQueryable()
+                .Where(s => s.Status == V1ScheduleStatus.Active)
+                .ToList())
             {
-                try
-                {
-                    await mediator.ExecuteAndUnwrapAsync(new V1ScheduleWorkflowCommand(workflow.Id, true), stoppingToken);
-                }
-                catch(Exception ex)
-                {
-                    this.Logger.LogError("An error occured while scheduling the workflow with id '{workflowId}': {ex}", workflow.Id, ex.ToString());
-                }
+
             }
+        }
+
+        public async Task ScheduleJobAsync(V1Schedule schedule)
+        {
+
+        }
+
+    }
+
+    /// <summary>
+    /// Represents a scheduled job
+    /// </summary>
+    public class ScheduledJob
+    {
+
+        /// <summary>
+        /// Gets the <see cref="ScheduledJob"/>'s id. Equals to the id of the <see cref="V1Schedule"/> it is bound to
+        /// </summary>
+        public string Id { get; }
+
+        /// <summary>
+        /// Gets the current <see cref="IServiceProvider"/>
+        /// </summary>
+        public IServiceProvider ServiceProvider { get; }
+
+        /// <summary>
+        /// Gets the <see cref="System.Threading.Timer"/> used to clock the next job occurence
+        /// </summary>
+        protected Timer Timer { get; private set; } = null!;
+
+        /// <inheritdoc/>
+        public virtual async Task ScheduleAsync(CancellationToken cancellationToken = default)
+        {
+            this.Timer = new(this.OnNextOccurenceAsync, null, delay, Timeout.InfiniteTimeSpan);
+        }
+
+        protected virtual async Task OnNextOccurenceAsync(CancellationToken cancellationToken = default)
+        {
+            using var scope = this.ServiceProvider.CreateScope();
+            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+            var schedule = await mediator.ExecuteAndUnwrapAsync(new V1TriggerScheduleCommand(this.Id), cancellationToken);
         }
 
     }

@@ -78,23 +78,16 @@ namespace Synapse.Application.Commands.Workflows
         /// <param name="mediator">The service used to mediate calls</param>
         /// <param name="mapper">The service used to map objects</param>
         /// <param name="workflows">The <see cref="IRepository"/> used to manage <see cref="V1Workflow"/>s</param>
-        /// <param name="cronJobScheduler">The service used to schedule CRON jobs</param>
-        public V1ScheduleWorkflowCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IRepository<V1Workflow> workflows, ICronJobScheduler cronJobScheduler) 
+        public V1ScheduleWorkflowCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IRepository<V1Workflow> workflows) 
             : base(loggerFactory, mediator, mapper)
         {
             this.Workflows = workflows;
-            this.CronJobScheduler = cronJobScheduler;
         }
 
         /// <summary>
         /// Gets the <see cref="IRepository"/> used to manage <see cref="V1Workflow"/>s
         /// </summary>
         protected IRepository<V1Workflow> Workflows { get; }
-
-        /// <summary>
-        /// Gets the service used to schedule CRON jobs
-        /// </summary>
-        protected ICronJobScheduler CronJobScheduler { get; }
 
         /// <inheritdoc/>
         public virtual async Task<IOperationResult> HandleAsync(V1ScheduleWorkflowCommand command, CancellationToken cancellationToken = default)
@@ -124,7 +117,7 @@ namespace Synapse.Application.Commands.Workflows
                     await this.Mediator.ExecuteAndUnwrapAsync(new V1CreateWorkflowInstanceCommand(workflow.Id, V1WorkflowInstanceActivationType.Cron, new(), null, true, null), cancellationToken);
                 }
             }
-            await this.CronJobScheduler.ScheduleJobAsync(workflow.Definition.Id!, cronExpression, timeZone, job, workflow.Definition.Start.Schedule.Cron?.ValidUntil, cancellationToken);
+            //await this.CronJobScheduler.ScheduleJobAsync(workflow.Definition.Id!, cronExpression, timeZone, job, workflow.Definition.Start.Schedule.Cron?.ValidUntil, cancellationToken);
             return this.Ok();
         }
 

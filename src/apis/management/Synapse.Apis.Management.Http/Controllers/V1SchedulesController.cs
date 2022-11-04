@@ -15,12 +15,15 @@
  *
  */
 
+using Microsoft.AspNetCore.Http;
+
 namespace Synapse.Apis.Management.Http.Controllers
 {
 
     /// <summary>
     /// Represents the <see cref="ApiController"/> used to manage schedules
     /// </summary>
+    [Tags("Schedules")]
     [Route("api/v1/schedules")]
     public class V1SchedulesController
         : ApiController
@@ -100,7 +103,7 @@ namespace Synapse.Apis.Management.Http.Controllers
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A new <see cref="IActionResult"/></returns>
         [HttpPut("{id}/trigger")]
-        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType(typeof(Integration.Models.V1Schedule), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.Forbidden)]
@@ -132,7 +135,7 @@ namespace Synapse.Apis.Management.Http.Controllers
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A new <see cref="IActionResult"/></returns>
         [HttpPut("{id}/resume")]
-        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType(typeof(Integration.Models.V1Schedule), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.Forbidden)]

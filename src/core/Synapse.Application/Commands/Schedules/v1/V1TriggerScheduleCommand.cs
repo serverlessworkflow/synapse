@@ -23,7 +23,7 @@ namespace Synapse.Application.Commands.Schedules
     /// </summary>
     [DataTransferObjectType(typeof(Integration.Commands.Schedules.V1TriggerScheduleCommand))]
     public class V1TriggerScheduleCommand
-        : Command
+        : Command<Integration.Models.V1Schedule>
     {
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace Synapse.Application.Commands.Schedules
     /// </summary>
     public class V1TriggerScheduleCommandHandler
         : CommandHandlerBase,
-        ICommandHandler<V1TriggerScheduleCommand>
+        ICommandHandler<V1TriggerScheduleCommand, Integration.Models.V1Schedule>
     {
 
         /// <summary>
@@ -74,14 +74,14 @@ namespace Synapse.Application.Commands.Schedules
         protected IRepository<V1Schedule> Schedules { get; }
 
         /// <inheritdoc/>
-        public virtual async Task<IOperationResult> HandleAsync(V1TriggerScheduleCommand command, CancellationToken cancellationToken = default)
+        public virtual async Task<IOperationResult<Integration.Models.V1Schedule>> HandleAsync(V1TriggerScheduleCommand command, CancellationToken cancellationToken = default)
         {
             var schedule = await this.Schedules.FindAsync(command.ScheduleId, cancellationToken);
             if (schedule == null) throw DomainException.NullReference(typeof(V1Schedule), command.ScheduleId);
             schedule.Trigger();
-            await this.Schedules.UpdateAsync(schedule, cancellationToken);
+            schedule = await this.Schedules.UpdateAsync(schedule, cancellationToken);
             await this.Schedules.SaveChangesAsync(cancellationToken);
-            return this.Ok();
+            return this.Ok(this.Mapper.Map<Integration.Models.V1Schedule>(schedule));
         }
 
     }

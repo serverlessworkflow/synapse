@@ -15,12 +15,15 @@
  *
  */
 
+using Microsoft.AspNetCore.Http;
+
 namespace Synapse.Apis.Management.Http.Controllers
 {
 
     /// <summary>
     /// Represents the <see cref="ApiController"/> used to manage the Synapse application
     /// </summary>
+    [Tags("Application")]
     [Route("api/v1/application")]
     public class V1ApplicationController
         : ApiController
