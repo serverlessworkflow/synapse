@@ -23,6 +23,7 @@ namespace Synapse.Application.Commands.Schedules
     /// <summary>
     /// Represents the <see cref="ICommand"/> used to create a new <see cref="V1Schedule"/>
     /// </summary>
+    [DataTransferObjectType(typeof(Integration.Commands.Schedules.V1CreateScheduleCommand))]
     public class V1CreateScheduleCommand
         : Command<Integration.Models.V1Schedule>
     {
@@ -98,8 +99,10 @@ namespace Synapse.Application.Commands.Schedules
         /// <inheritdoc/>
         public virtual async Task<IOperationResult<Integration.Models.V1Schedule>> HandleAsync(V1CreateScheduleCommand command, CancellationToken cancellationToken = default)
         {
-            var workflow = await this.Workflows.FindAsync(command.WorkflowId, cancellationToken);
-            if (workflow == null) throw DomainException.NullReference(typeof(V1Workflow), command.WorkflowId);
+            var workflowId = (await this.Mediator.ExecuteAndUnwrapAsync(Queries.Workflows.V1GetWorkflowByIdQuery.Parse(command.WorkflowId), cancellationToken))?.Id;
+            if(string.IsNullOrWhiteSpace(workflowId)) throw DomainException.NullReference(typeof(V1Workflow), command.WorkflowId);
+            var workflow = await this.Workflows.FindAsync(workflowId, cancellationToken);
+            if (workflow == null) throw DomainException.NullReference(typeof(V1Workflow), workflowId);
             var schedule = await this.Schedules.AddAsync(new(command.Type, command.Definition, workflow), cancellationToken);
             await this.Schedules.SaveChangesAsync(cancellationToken);
             return this.Ok(this.Mapper.Map<Integration.Models.V1Schedule>(schedule));

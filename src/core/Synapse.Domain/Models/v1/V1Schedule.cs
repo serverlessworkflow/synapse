@@ -17,6 +17,7 @@
 
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
+using ServerlessWorkflow.Sdk;
 using Synapse.Domain.Events.Schedules;
 using System.Text.RegularExpressions;
 
@@ -44,21 +45,21 @@ namespace Synapse.Domain.Models
         /// <summary>
         /// Initializes a new <see cref="V1Schedule"/>
         /// </summary>
-        /// <param name="type">The <see cref="V1Schedule"/>'s type</param>
+        /// <param name="activationType">The <see cref="V1Schedule"/>'s activation type</param>
         /// <param name="definition">The <see cref="V1Schedule"/>'s <see cref="ScheduleDefinition"/></param>
         /// <param name="workflow">The <see cref="V1Workflow"/> to schedule</param>
-        public V1Schedule(V1ScheduleType type, ScheduleDefinition definition, V1Workflow workflow)
+        public V1Schedule(V1ScheduleType activationType, ScheduleDefinition definition, V1Workflow workflow)
             : base(BuildId(workflow?.Id!))
         {
             if (definition == null) throw DomainException.ArgumentNull(nameof(definition));
             if (workflow == null) throw DomainException.ArgumentNull(nameof(workflow));
-            this.On(this.RegisterEvent(new V1ScheduleCreatedDomainEvent(this.Id, type, definition, workflow.Id, this.Definition.GetNextOccurence())));
+            this.On(this.RegisterEvent(new V1ScheduleCreatedDomainEvent(this.Id, activationType, definition, workflow.Id, definition.GetNextOccurence())));
         }
 
         /// <summary>
-        /// Gets the <see cref="V1Schedule"/>'s type
+        /// Gets the <see cref="V1Schedule"/>'s activation type
         /// </summary>
-        public virtual V1ScheduleType Type { get; protected set; }
+        public virtual V1ScheduleType ActivationType { get; protected set; }
 
         /// <summary>
         /// Gets the <see cref="V1Schedule"/>'s status
@@ -96,6 +97,11 @@ namespace Synapse.Domain.Models
         public virtual DateTimeOffset? LastOccuredAt { get; protected set; }
 
         /// <summary>
+        /// Gets the date and time at which the scheduled <see cref="V1Workflow"/> has last completed
+        /// </summary>
+        public virtual DateTimeOffset? LastCompletedAt { get; protected set; }
+
+        /// <summary>
         /// Gets the date and time at which the <see cref="V1Schedule"/> will next occur
         /// </summary>
         public virtual DateTimeOffset? NextOccurenceAt { get; protected set; }
@@ -122,7 +128,16 @@ namespace Synapse.Domain.Models
         public virtual void Trigger()
         {
             if (this.Status != V1ScheduleStatus.Active) throw DomainException.UnexpectedState(typeof(V1Schedule), this.Id, this.Status);
-            this.On(this.RegisterEvent(new V1ScheduleOccuredDomainEvent(this.Id, this.Definition.GetNextOccurence())));
+            this.On(this.RegisterEvent(new V1ScheduleOccuredDomainEvent(this.Id, this.Definition.Type == ScheduleDefinitionType.Interval ? null : this.Definition.GetNextOccurence())));
+        }
+
+        /// <summary>
+        /// Notifies that a triggered occurence has completed
+        /// </summary>
+        public virtual void NotifyOccurenceCompleted()
+        {
+            if(this.Status != V1ScheduleStatus.Active) throw DomainException.UnexpectedState(typeof(V1Schedule), this.Id, this.Status);
+            this.On(this.RegisterEvent(new V1ScheduleOccurenceCompletedDomainEvent(this.Id, this.Definition.Type == ScheduleDefinitionType.Interval ? null : this.Definition.GetNextOccurence())));
         }
 
         /// <summary>
@@ -130,7 +145,7 @@ namespace Synapse.Domain.Models
         /// </summary>
         public virtual void Suspend()
         {
-            if (this.Status == V1ScheduleStatus.Active) throw DomainException.UnexpectedState(typeof(V1Schedule), this.Id, this.Status);
+            if (this.Status != V1ScheduleStatus.Active) throw DomainException.UnexpectedState(typeof(V1Schedule), this.Id, this.Status);
             this.On(this.RegisterEvent(new V1ScheduleSuspendedDomainEvent(this.Id)));
         }
 
@@ -139,8 +154,8 @@ namespace Synapse.Domain.Models
         /// </summary>
         public virtual void Resume()
         {
-            if (this.Status == V1ScheduleStatus.Suspended) throw DomainException.UnexpectedState(typeof(V1Schedule), this.Id, this.Status);
-            this.On(this.RegisterEvent(new V1ScheduleResumedDomainEvent(this.Id)));
+            if (this.Status != V1ScheduleStatus.Suspended) throw DomainException.UnexpectedState(typeof(V1Schedule), this.Id, this.Status);
+            this.On(this.RegisterEvent(new V1ScheduleResumedDomainEvent(this.Id, this.Definition.GetNextOccurence())));
         }
 
         /// <summary>
@@ -189,7 +204,7 @@ namespace Synapse.Domain.Models
             this.Id = e.AggregateId;
             this.CreatedAt = e.CreatedAt;
             this.LastModified = e.CreatedAt;
-            this.Type = e.Type;
+            this.ActivationType = e.ActivationType;
             this.Status = V1ScheduleStatus.Active;
             this.Definition = e.Definition;
             this.WorkflowId = e.WorkflowId;
@@ -206,6 +221,17 @@ namespace Synapse.Domain.Models
             this.LastOccuredAt = e.CreatedAt;
             this.NextOccurenceAt = e.NextOccurenceAt;
             this.TotalOccurences++;
+        }
+
+        /// <summary>
+        /// Handles the specified <see cref="V1ScheduleOccurenceCompletedDomainEvent"/>
+        /// </summary>
+        /// <param name="e">The <see cref="V1ScheduleOccurenceCompletedDomainEvent"/> to handle</param>
+        protected virtual void On(V1ScheduleOccurenceCompletedDomainEvent e)
+        {
+            this.LastModified = e.CreatedAt;
+            this.LastCompletedAt = e.CreatedAt;
+            this.NextOccurenceAt = e.NextOccurenceAt;
         }
 
         /// <summary>
@@ -228,6 +254,7 @@ namespace Synapse.Domain.Models
         {
             this.LastModified = e.CreatedAt;
             this.SuspendedAt = null;
+            this.NextOccurenceAt = e.NextOccurenceAt;
             this.Status = V1ScheduleStatus.Active;
         }
 
@@ -274,7 +301,7 @@ namespace Synapse.Domain.Models
         public static string BuildId(string workflowId)
         {
             if (string.IsNullOrWhiteSpace(workflowId)) throw DomainException.ArgumentNullOrWhitespace(nameof(workflowId));
-            return $"{workflowId}-{Regex.Replace(Convert.ToBase64String(Guid.NewGuid().ToByteArray()), "[/+=]", string.Empty)}";
+            return $"{workflowId}-{Regex.Replace(Convert.ToBase64String(Guid.NewGuid().ToByteArray()), "[/+=]", string.Empty).ToLowerInvariant()}";
         }
 
     }

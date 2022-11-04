@@ -19,25 +19,25 @@ using Synapse.Integration.Events.Schedules;
 namespace Synapse.Domain.Events.Schedules
 {
     /// <summary>
-    /// Represents the <see cref="IDomainEvent"/> fired whenever a <see cref="V1Schedule"/> has been resumed
+    /// Represents the <see cref="IDomainEvent"/> fired whenever a scheduled <see cref="V1Workflow"/> has been executed
     /// </summary>
-    [DataTransferObjectType(typeof(V1ScheduleResumedIntegrationEvent))]
-    public class V1ScheduleResumedDomainEvent
+    [DataTransferObjectType(typeof(V1ScheduleOccurenceCompletedIntegrationEvent))]
+    public class V1ScheduleOccurenceCompletedDomainEvent
         : DomainEvent<Models.V1Schedule, string>
     {
 
         /// <summary>
-        /// Initializes a new <see cref="V1ScheduleResumedDomainEvent"/>
+        /// Initializes a new <see cref="V1ScheduleOccurenceCompletedDomainEvent"/>
         /// </summary>
-        protected V1ScheduleResumedDomainEvent() { }
+        protected V1ScheduleOccurenceCompletedDomainEvent() { }
 
         /// <summary>
-        /// Initializes a new <see cref="V1ScheduleResumedDomainEvent"/>
+        /// Initializes a new <see cref="V1ScheduleOccurenceCompletedDomainEvent"/>
         /// </summary>
-        /// <param name="id">The id of the resumed <see cref="V1Schedule"/></param>
-        /// <param name="nextOccurenceAt">The <see cref="V1Schedule"/>'s next occurence</param>
-        public V1ScheduleResumedDomainEvent(string id, DateTimeOffset? nextOccurenceAt)
-            : base(id) 
+        /// <param name="id">The id of the <see cref="V1Schedule"/> which's occurence has been completed</param>
+        /// <param name="nextOccurenceAt">The date and time at which the <see cref="V1Schedule"/> will next occur</param>
+        public V1ScheduleOccurenceCompletedDomainEvent(string id, DateTimeOffset? nextOccurenceAt)
+            : base(id)
         {
             this.NextOccurenceAt = nextOccurenceAt;
         }

@@ -24,10 +24,10 @@ namespace Synapse.Integration.Events.Schedules
 {
 
 	/// <summary>
-	/// Represents the IDomainEvent fired whenever a new V1Schedule has been created
+	/// Represents the IDomainEvent fired whenever a scheduled V1Workflow has been executed
 	/// </summary>
 	[DataContract]
-	public partial class V1ScheduleCreatedIntegrationEvent
+	public partial class V1ScheduleOccurenceCompletedIntegrationEvent
 		: V1IntegrationEvent
 	{
 
@@ -46,30 +46,9 @@ namespace Synapse.Integration.Events.Schedules
 		public virtual DateTime CreatedAt { get; set; }
 
 		/// <summary>
-		/// The activation type of the newly created V1Schedule
-		/// </summary>
-		[DataMember(Name = "ActivationType", Order = 3)]
-		[Description("The activation type of the newly created V1Schedule")]
-		public virtual V1ScheduleType ActivationType { get; set; }
-
-		/// <summary>
-		/// The definition of the newly created V1Schedule
-		/// </summary>
-		[DataMember(Name = "Definition", Order = 4)]
-		[Description("The definition of the newly created V1Schedule")]
-		public virtual ScheduleDefinition Definition { get; set; }
-
-		/// <summary>
-		/// The id of the V1Workflow scheduled by the newly created V1Schedule
-		/// </summary>
-		[DataMember(Name = "WorkflowId", Order = 5)]
-		[Description("The id of the V1Workflow scheduled by the newly created V1Schedule")]
-		public virtual string WorkflowId { get; set; }
-
-		/// <summary>
 		/// The V1Schedule's next occurence
 		/// </summary>
-		[DataMember(Name = "NextOccurenceAt", Order = 6)]
+		[DataMember(Name = "NextOccurenceAt", Order = 3)]
 		[Description("The V1Schedule's next occurence")]
 		public virtual DateTime? NextOccurenceAt { get; set; }
 

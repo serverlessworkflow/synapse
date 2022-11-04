@@ -36,7 +36,7 @@
     <PackageReference Include="Neuroglia.Serialization.Json" Version="2.0.6" />
     <PackageReference Include="Neuroglia.Serialization.NewtonsoftJson" Version="2.0.6" />
     <PackageReference Include="Neuroglia.Serialization.Protobuf" Version="2.0.6" />
-    <PackageReference Include="ServerlessWorkflow.Sdk" Version="0.8.3" />
+    <PackageReference Include="ServerlessWorkflow.Sdk" Version="0.8.4" />
     <PackageReference Include="System.ServiceModel.Primitives" Version="4.10.0" />
   </ItemGroup>
   <ItemGroup>
@@ -95,9 +95,6 @@
     </Compile>
     <Compile Update="Commands\Schedules\v1\Generated\V1MakeScheduleObsoleteCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\Schedules\v1\V1MakeScheduleObsoleteCommand.cs</CustomToolNamespace>
-    </Compile>
-    <Compile Update="Commands\Schedules\v1\Generated\V1ObsoleteScheduleCommand.cs">
-      <CustomToolNamespace>..\Synapse.Application\Commands\Schedules\v1\V1ObsoleteScheduleCommand.cs</CustomToolNamespace>
     </Compile>
     <Compile Update="Commands\Schedules\v1\Generated\V1ResumeScheduleCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\Schedules\v1\V1ResumeScheduleCommand.cs</CustomToolNamespace>
@@ -263,6 +260,9 @@
     </Compile>
     <Compile Update="Events\Schedules\v1\Generated\V1ScheduleOccuredIntegrationEvent.cs">
       <CustomToolNamespace>..\Synapse.Domain\Events\Schedules\v1\V1ScheduleOccuredDomainEvent.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\Schedules\v1\Generated\V1ScheduleOccurenceCompletedIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\Schedules\v1\V1ScheduleOccurenceCompletedDomainEvent.cs</CustomToolNamespace>
     </Compile>
     <Compile Update="Events\Schedules\v1\Generated\V1ScheduleResumedIntegrationEvent.cs">
       <CustomToolNamespace>..\Synapse.Domain\Events\Schedules\v1\V1ScheduleResumedDomainEvent.cs</CustomToolNamespace>

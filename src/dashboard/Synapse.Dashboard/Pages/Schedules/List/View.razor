@@ -15,6 +15,8 @@
 *@
 
 @page "/schedules"
+@using System.Reactive.Subjects
+@using System.Reactive.Linq
 @inherits StatefulComponent<ScheduleCollectionState>
 @inject IBreadcrumbManager BreadcrumbManager
 @inject NavigationManager NavigationManager
@@ -31,19 +33,48 @@
 {
     <Table Items="schedules" AutoGenerateColumns="false">
         <Columns>
-            <Column 
-                T="V1Schedule" 
-                Name="Workflow"
-                ValueProvider="s => s.Id"/>
             <Column T="V1Schedule"
-                Name="CRON"
-                ValueProvider="s => s.Definition.Cron!.Expression"/>
+                Name="Activation"
+                ValueProvider="s => s.ActivationType">
+                <CellTemplate Context="context">
+                    <label class="badge bg-secondary">@EnumHelper.Stringify((V1ScheduleType)context.Value!)</label>
+                </CellTemplate>
+            </Column>
+            <Column T="V1Schedule"
+                Name="Status"
+                ValueProvider="s => s.Status">
+                <CellTemplate Context="context">
+                    @{
+                        var background = (V1ScheduleStatus)context.Value! switch
+                        {
+                            V1ScheduleStatus.Active => "bg-primary",
+                            V1ScheduleStatus.Suspended => "bg-warning",
+                            _ => "bg-secondary",
+                        };
+                    }
+                    <label class="badge @background">@EnumHelper.Stringify((V1ScheduleStatus)context.Value)</label>
+                </CellTemplate>
+            </Column>
+            <Column T="V1Schedule"
+                Name="Created at"
+                ValueProvider="s => s.CreatedAt" />
+            <Column T="V1Schedule" 
+                Name="Workflow"
+                ValueProvider="s => s.WorkflowId"/>
+            <Column T="V1Schedule"
+                Name="Type"
+                ValueProvider="s => s.Definition.Type">
+                <CellTemplate Context="context">
+                    <label class="badge bg-secondary">@EnumHelper.Stringify((ScheduleDefinitionType)context.Value!)</label>
+                </CellTemplate>
+            </Column>
+            <Column T="V1Schedule"
+                Name="Expression"
+                ValueProvider="s => s.Definition.Type == ScheduleDefinitionType.Cron ? s.Definition.Cron!.Expression : s.Definition.Interval.ToString()">
+            </Column>
             <Column T="V1Schedule"
                 Name="Valid until"
                 ValueProvider="s => s.Definition.Cron!.ValidUntil" />
-            <Column T="V1Schedule"
-                Name="Interval"
-                ValueProvider="s => s.Definition.Interval" />
             <Column T="V1Schedule"
                 Name="Last occurence"
                 ValueProvider="s => s.LastOccuredAt" />
@@ -53,6 +84,8 @@
             <Column T="V1Schedule"
                 Name="Total occurences"
                 ValueProvider="s => s.TotalOccurences"/>
+            <ViewDetailsColumn T="V1Schedule" 
+                OnViewDetails="OnViewSchedule" />
         </Columns>
     </Table>
 }
@@ -62,14 +95,16 @@ else
 }
 @code{
 
-    private IDisposable subscription = null!;
+    private Subject<bool>? disposeNotifier = null!;
     private List<V1Schedule>? schedules;
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
         await this.BreadcrumbManager.Use(Breadcrumbs.Schedules);
-        this.subscription = ScheduleCollectionStateSelectors.SelectedSchedules(this.Store)
+        this.disposeNotifier = new Subject<bool>();
+        ScheduleCollectionStateSelectors.SelectedSchedules(this.Store)
+            .TakeUntil(this.disposeNotifier)
             .Subscribe(schedules =>
             {
                 this.schedules = schedules;
@@ -83,10 +118,19 @@ else
         this.NavigationManager.NavigateTo("/schedules/new");
     }
 
+    void OnViewSchedule(V1Schedule schedule)
+    {
+        this.NavigationManager.NavigateTo($"/schedules/{schedule.Id}");
+    }
+
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);
-        if (disposing) this.subscription?.Dispose();
+        if (!disposing) return;
+        this.disposeNotifier?.OnNext(true);
+        this.disposeNotifier?.OnCompleted();
+        this.disposeNotifier?.Dispose();
+        this.disposeNotifier = null;
     }
 
 }

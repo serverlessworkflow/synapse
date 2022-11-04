@@ -33,11 +33,11 @@ namespace Synapse.Integration.Models
 	{
 
 		/// <summary>
-		/// The V1Schedule's type
+		/// The V1Schedule's activation type
 		/// </summary>
-		[DataMember(Name = "type", Order = 1)]
-		[Description("The V1Schedule's type")]
-		public virtual V1ScheduleType Type { get; set; }
+		[DataMember(Name = "activationType", Order = 1)]
+		[Description("The V1Schedule's activation type")]
+		public virtual V1ScheduleType ActivationType { get; set; }
 
 		/// <summary>
 		/// The V1Schedule's status
@@ -89,16 +89,23 @@ namespace Synapse.Integration.Models
 		public virtual DateTime? LastOccuredAt { get; set; }
 
 		/// <summary>
+		/// The date and time at which the scheduled V1Workflow has last completed
+		/// </summary>
+		[DataMember(Name = "lastCompletedAt", Order = 9)]
+		[Description("The date and time at which the scheduled V1Workflow has last completed")]
+		public virtual DateTime? LastCompletedAt { get; set; }
+
+		/// <summary>
 		/// The date and time at which the V1Schedule will next occur
 		/// </summary>
-		[DataMember(Name = "nextOccurenceAt", Order = 9)]
+		[DataMember(Name = "nextOccurenceAt", Order = 10)]
 		[Description("The date and time at which the V1Schedule will next occur")]
 		public virtual DateTime? NextOccurenceAt { get; set; }
 
 		/// <summary>
 		/// The total number of occurences
 		/// </summary>
-		[DataMember(Name = "totalOccurences", Order = 10)]
+		[DataMember(Name = "totalOccurences", Order = 11)]
 		[Description("The total number of occurences")]
 		public virtual long TotalOccurences { get; set; }
 

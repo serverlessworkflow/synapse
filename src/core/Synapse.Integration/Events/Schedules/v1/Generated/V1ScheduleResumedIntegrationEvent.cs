@@ -45,6 +45,13 @@ namespace Synapse.Integration.Events.Schedules
 		[Description("Gets the date and time at which the event has been produced")]
 		public virtual DateTime CreatedAt { get; set; }
 
+		/// <summary>
+		/// The V1Schedule's next occurence
+		/// </summary>
+		[DataMember(Name = "NextOccurenceAt", Order = 3)]
+		[Description("The V1Schedule's next occurence")]
+		public virtual DateTime? NextOccurenceAt { get; set; }
+
     }
 
 }

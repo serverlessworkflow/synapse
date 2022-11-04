@@ -64,8 +64,9 @@ namespace Synapse.Application.Events.Domain.v1
         public virtual async Task HandleAsync(V1ScheduleSuspendedDomainEvent e, CancellationToken cancellationToken = default)
         {
             var schedule = await this.GetOrReconcileProjectionAsync(e.AggregateId, cancellationToken);
-            schedule.LastModified = e.CreatedAt.DateTime;
-            schedule.SuspendedAt = e.CreatedAt.DateTime;
+            schedule.LastModified = e.CreatedAt.UtcDateTime;
+            schedule.SuspendedAt = e.CreatedAt.UtcDateTime;
+            schedule.NextOccurenceAt = null;
             schedule.Status = V1ScheduleStatus.Suspended;
             await this.Projections.UpdateAsync(schedule, cancellationToken);
             await this.Projections.SaveChangesAsync(cancellationToken);
@@ -76,7 +77,9 @@ namespace Synapse.Application.Events.Domain.v1
         public virtual async Task HandleAsync(V1ScheduleResumedDomainEvent e, CancellationToken cancellationToken = default)
         {
             var schedule = await this.GetOrReconcileProjectionAsync(e.AggregateId, cancellationToken);
-            schedule.LastModified = e.CreatedAt.DateTime;
+            schedule.LastModified = e.CreatedAt.UtcDateTime;
+            schedule.NextOccurenceAt = e.NextOccurenceAt?.UtcDateTime;
+            schedule.SuspendedAt = null;
             schedule.Status = V1ScheduleStatus.Active;
             await this.Projections.UpdateAsync(schedule, cancellationToken);
             await this.Projections.SaveChangesAsync(cancellationToken);
@@ -87,9 +90,9 @@ namespace Synapse.Application.Events.Domain.v1
         public virtual async Task HandleAsync(V1ScheduleOccuredDomainEvent e, CancellationToken cancellationToken = default)
         {
             var schedule = await this.GetOrReconcileProjectionAsync(e.AggregateId, cancellationToken);
-            schedule.LastModified = e.CreatedAt.DateTime;
-            schedule.LastOccuredAt = e.CreatedAt.DateTime;
-            schedule.NextOccurenceAt = e.NextOccurenceAt?.Date;
+            schedule.LastModified = e.CreatedAt.UtcDateTime;
+            schedule.LastOccuredAt = e.CreatedAt.UtcDateTime;
+            schedule.NextOccurenceAt = e.NextOccurenceAt?.UtcDateTime;
             schedule.TotalOccurences++;
             await this.Projections.UpdateAsync(schedule, cancellationToken);
             await this.Projections.SaveChangesAsync(cancellationToken);
@@ -100,7 +103,8 @@ namespace Synapse.Application.Events.Domain.v1
         public virtual async Task HandleAsync(V1ScheduleRetiredDomainEvent e, CancellationToken cancellationToken = default)
         {
             var schedule = await this.GetOrReconcileProjectionAsync(e.AggregateId, cancellationToken);
-            schedule.LastModified = e.CreatedAt.DateTime;
+            schedule.LastModified = e.CreatedAt.UtcDateTime;
+            schedule.NextOccurenceAt = null;
             schedule.Status = V1ScheduleStatus.Retired;
             await this.Projections.UpdateAsync(schedule, cancellationToken);
             await this.Projections.SaveChangesAsync(cancellationToken);
@@ -111,7 +115,8 @@ namespace Synapse.Application.Events.Domain.v1
         public virtual async Task HandleAsync(V1ScheduleObsolitedDomainEvent e, CancellationToken cancellationToken = default)
         {
             var schedule = await this.GetOrReconcileProjectionAsync(e.AggregateId, cancellationToken);
-            schedule.LastModified = e.CreatedAt.DateTime;
+            schedule.LastModified = e.CreatedAt.UtcDateTime;
+            schedule.NextOccurenceAt = null;
             schedule.Status = V1ScheduleStatus.Obsolete;
             await this.Projections.UpdateAsync(schedule, cancellationToken);
             await this.Projections.SaveChangesAsync(cancellationToken);

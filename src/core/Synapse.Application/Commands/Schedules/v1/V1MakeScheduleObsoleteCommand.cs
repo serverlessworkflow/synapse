@@ -20,7 +20,7 @@ namespace Synapse.Application.Commands.Schedules
     /// <summary>
     /// Represents the <see cref="ICommand"/> used to make a <see cref="V1Schedule"/> obsolete
     /// </summary>
-    [DataTransferObjectType(typeof(Integration.Commands.Schedules.V1ObsoleteScheduleCommand))]
+    [DataTransferObjectType(typeof(Integration.Commands.Schedules.V1MakeScheduleObsoleteCommand))]
     public class V1MakeScheduleObsoleteCommand
         : Command
     {
