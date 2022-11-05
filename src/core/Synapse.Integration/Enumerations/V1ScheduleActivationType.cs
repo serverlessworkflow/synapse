@@ -17,34 +17,23 @@
 
 namespace Synapse
 {
-
     /// <summary>
-    /// Enumerates all types of workflow instanciation
+    /// Enumerates all types of workflow schedules
     /// </summary>
     [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
     [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.StringEnumConverterFactory))]
-    public enum V1WorkflowInstanceActivationType
+    public enum V1ScheduleActivationType
     {
         /// <summary>
-        /// Indicates that the workflow instance has been created manually
+        /// Indicates that the schedule has been explicitly created
         /// </summary>
         [EnumMember(Value = "manual")]
-        Manual = 0,
+        Explicit = 1,
         /// <summary>
-        /// Indicates that the workflow instance has been dynamically created by an event trigger
+        /// Indicates that the schedule has been implicitly created following the creation of a workflow defining a scheduled start
         /// </summary>
-        [EnumMember(Value = "trigger")]
-        Trigger = 1,
-        /// <summary>
-        /// Indicates that the workflow instance has been dynamically created by a schedule
-        /// </summary>
-        [EnumMember(Value = "schedule")]
-        Schedule = 2,
-        /// <summary>
-        /// Indicates that the workflow instance has been created by another workflow instance
-        /// </summary>
-        [EnumMember(Value = "subflow")]
-        Subflow = 3
+        [EnumMember(Value = "implicit")]
+        Implicit = 2
     }
 
 }

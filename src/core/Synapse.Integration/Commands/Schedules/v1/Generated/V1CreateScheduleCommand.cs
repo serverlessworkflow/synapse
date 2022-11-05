@@ -34,9 +34,9 @@ namespace Synapse.Integration.Commands.Schedules
 		/// <summary>
 		/// The type of the V1Schedule to create
 		/// </summary>
-		[DataMember(Name = "Type", Order = 1)]
+		[DataMember(Name = "ActivationType", Order = 1)]
 		[Description("The type of the V1Schedule to create")]
-		public virtual V1ScheduleType Type { get; set; }
+		public virtual V1ScheduleActivationType ActivationType { get; set; }
 
 		/// <summary>
 		/// The definition of the V1Schedule to create

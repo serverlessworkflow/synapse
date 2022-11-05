@@ -37,7 +37,7 @@ namespace Synapse.Integration.Models
 		/// </summary>
 		[DataMember(Name = "activationType", Order = 1)]
 		[Description("The V1Schedule's activation type")]
-		public virtual V1ScheduleType ActivationType { get; set; }
+		public virtual V1ScheduleActivationType ActivationType { get; set; }
 
 		/// <summary>
 		/// The V1Schedule's status
@@ -101,13 +101,6 @@ namespace Synapse.Integration.Models
 		[DataMember(Name = "nextOccurenceAt", Order = 10)]
 		[Description("The date and time at which the V1Schedule will next occur")]
 		public virtual DateTime? NextOccurenceAt { get; set; }
-
-		/// <summary>
-		/// The total number of occurences
-		/// </summary>
-		[DataMember(Name = "totalOccurences", Order = 11)]
-		[Description("The total number of occurences")]
-		public virtual long TotalOccurences { get; set; }
 
     }
 

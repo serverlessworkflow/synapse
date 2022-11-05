@@ -46,9 +46,16 @@ namespace Synapse.Integration.Events.Schedules
 		public virtual DateTime CreatedAt { get; set; }
 
 		/// <summary>
+		/// The id of the V1Schedule's occurence V1WorkflowInstance that has been executed
+		/// </summary>
+		[DataMember(Name = "WorkflowInstanceId", Order = 3)]
+		[Description("The id of the V1Schedule's occurence V1WorkflowInstance that has been executed")]
+		public virtual string WorkflowInstanceId { get; set; }
+
+		/// <summary>
 		/// The V1Schedule's next occurence
 		/// </summary>
-		[DataMember(Name = "NextOccurenceAt", Order = 3)]
+		[DataMember(Name = "NextOccurenceAt", Order = 4)]
 		[Description("The V1Schedule's next occurence")]
 		public virtual DateTime? NextOccurenceAt { get; set; }
 

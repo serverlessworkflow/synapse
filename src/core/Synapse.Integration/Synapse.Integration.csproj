@@ -90,6 +90,9 @@
     <Compile Update="Commands\Generic\v1\Generated\V1PatchCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\Generic\v1\V1PatchCommand.cs</CustomToolNamespace>
     </Compile>
+    <Compile Update="Commands\Schedules\v1\Generated\V1CompleteScheduleOccurenceCommand.cs">
+      <CustomToolNamespace>..\Synapse.Application\Commands\Schedules\v1\V1CompleteScheduleOccurenceCommand.cs</CustomToolNamespace>
+    </Compile>
     <Compile Update="Commands\Schedules\v1\Generated\V1CreateScheduleCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\Schedules\v1\V1CreateScheduleCommand.cs</CustomToolNamespace>
     </Compile>
@@ -200,9 +203,6 @@
     </Compile>
     <Compile Update="Commands\Workflows\v1\Generated\V1DeleteWorkflowCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\Workflows\v1\V1DeleteWorkflowCommand.cs</CustomToolNamespace>
-    </Compile>
-    <Compile Update="Commands\Workflows\v1\Generated\V1ScheduleWorkflowCommand.cs">
-      <CustomToolNamespace>..\Synapse.Application\Commands\Workflows\v1\V1ScheduleWorkflowCommand.cs</CustomToolNamespace>
     </Compile>
     <Compile Update="Commands\Workflows\v1\Generated\V1UploadWorkflowCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\Workflows\v1\V1UploadWorkflowCommand.cs</CustomToolNamespace>

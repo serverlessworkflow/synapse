@@ -15,25 +15,26 @@
  *
  */
 
-namespace Synapse
+namespace Synapse.Integration.Models
 {
-    /// <summary>
-    /// Enumerates all types of workflow schedules
-    /// </summary>
-    [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-    [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.StringEnumConverterFactory))]
-    public enum V1ScheduleType
+
+    public partial class V1Schedule
     {
+
         /// <summary>
-        /// Indicates that the schedule has been explicitly created
+        /// Gets the total number of occurences
         /// </summary>
-        [EnumMember(Value = "manual")]
-        Explicit = 1,
+        [DataMember(Name = "totalOccurences", Order = 11)]
+        [Description("The total number of occurences")]
+        public virtual long TotalOccurences { get; set; }
+
         /// <summary>
-        /// Indicates that the schedule has been implicitly created following the creation of a workflow defining a scheduled start
+        /// Gets a list containing the ids of the schedule's active occurences
         /// </summary>
-        [EnumMember(Value = "implicit")]
-        Implicit = 2
+        [DataMember(Name = "activeOccurences", Order = 12)]
+        [Description("A list containing the ids of the schedule's active occurences")]
+        public virtual List<string> ActiveOccurences { get; set; }
+
     }
 
 }

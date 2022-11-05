@@ -15,8 +15,6 @@
  *
  */
 
-using Synapse.Application.Commands.Schedules;
-using Synapse.Application.Commands.Workflows;
 using Synapse.Infrastructure.Plugins;
 
 namespace Synapse.Application.Services
@@ -35,11 +33,13 @@ namespace Synapse.Application.Services
         /// <param name="serviceProvider">The current <see cref="IServiceProvider"/></param>
         /// <param name="logger">The service used to perform logging</param>
         /// <param name="pluginManager">The service used to manage <see cref="IPlugin"/>s</param>
-        public WorkflowScheduler(IServiceProvider serviceProvider, ILogger<WorkflowScheduler> logger, IPluginManager pluginManager)
+        /// <param name="backgroundJobManager">The service used to manage background jobs</param>
+        public WorkflowScheduler(IServiceProvider serviceProvider, ILogger<WorkflowScheduler> logger, IPluginManager pluginManager, IBackgroundJobManager backgroundJobManager)
         {
             this.ServiceProvider = serviceProvider;
             this.Logger = logger;
             this.PluginManager = pluginManager;
+            this.BackgroundJobManager = backgroundJobManager;
         }
 
         /// <summary>
@@ -58,14 +58,13 @@ namespace Synapse.Application.Services
         protected IPluginManager PluginManager { get; }
 
         /// <summary>
-        /// Gets <see cref="WorkflowScheduler"/>'s <see cref="System.Threading.CancellationTokenSource"/>
+        /// Gets the service used to manage background jobs
         /// </summary>
-        protected CancellationTokenSource CancellationTokenSource { get; private set; }
+        protected IBackgroundJobManager BackgroundJobManager { get; }
 
         /// <inheritdoc/>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            this.CancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
             await this.PluginManager.WaitForStartupAsync(stoppingToken);
             using var scope = this.ServiceProvider.CreateScope();
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
@@ -74,49 +73,8 @@ namespace Synapse.Application.Services
                 .Where(s => s.Status == V1ScheduleStatus.Active)
                 .ToList())
             {
-
+                await this.BackgroundJobManager.ScheduleJobAsync(schedule, stoppingToken);
             }
-        }
-
-        public async Task ScheduleJobAsync(V1Schedule schedule)
-        {
-
-        }
-
-    }
-
-    /// <summary>
-    /// Represents a scheduled job
-    /// </summary>
-    public class ScheduledJob
-    {
-
-        /// <summary>
-        /// Gets the <see cref="ScheduledJob"/>'s id. Equals to the id of the <see cref="V1Schedule"/> it is bound to
-        /// </summary>
-        public string Id { get; }
-
-        /// <summary>
-        /// Gets the current <see cref="IServiceProvider"/>
-        /// </summary>
-        public IServiceProvider ServiceProvider { get; }
-
-        /// <summary>
-        /// Gets the <see cref="System.Threading.Timer"/> used to clock the next job occurence
-        /// </summary>
-        protected Timer Timer { get; private set; } = null!;
-
-        /// <inheritdoc/>
-        public virtual async Task ScheduleAsync(CancellationToken cancellationToken = default)
-        {
-            this.Timer = new(this.OnNextOccurenceAsync, null, delay, Timeout.InfiniteTimeSpan);
-        }
-
-        protected virtual async Task OnNextOccurenceAsync(CancellationToken cancellationToken = default)
-        {
-            using var scope = this.ServiceProvider.CreateScope();
-            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-            var schedule = await mediator.ExecuteAndUnwrapAsync(new V1TriggerScheduleCommand(this.Id), cancellationToken);
         }
 
     }

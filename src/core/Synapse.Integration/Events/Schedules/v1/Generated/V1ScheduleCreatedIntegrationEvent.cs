@@ -50,7 +50,7 @@ namespace Synapse.Integration.Events.Schedules
 		/// </summary>
 		[DataMember(Name = "ActivationType", Order = 3)]
 		[Description("The activation type of the newly created V1Schedule")]
-		public virtual V1ScheduleType ActivationType { get; set; }
+		public virtual V1ScheduleActivationType ActivationType { get; set; }
 
 		/// <summary>
 		/// The definition of the newly created V1Schedule

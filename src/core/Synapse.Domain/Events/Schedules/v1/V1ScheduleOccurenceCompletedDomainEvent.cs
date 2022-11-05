@@ -35,12 +35,19 @@ namespace Synapse.Domain.Events.Schedules
         /// Initializes a new <see cref="V1ScheduleOccurenceCompletedDomainEvent"/>
         /// </summary>
         /// <param name="id">The id of the <see cref="V1Schedule"/> which's occurence has been completed</param>
+        /// <param name="workflowInstanceId">The id of the <see cref="V1Schedule"/>'s occurence <see cref="V1WorkflowInstance"/> that has been executed</param>
         /// <param name="nextOccurenceAt">The date and time at which the <see cref="V1Schedule"/> will next occur</param>
-        public V1ScheduleOccurenceCompletedDomainEvent(string id, DateTimeOffset? nextOccurenceAt)
+        public V1ScheduleOccurenceCompletedDomainEvent(string id, string workflowInstanceId, DateTimeOffset? nextOccurenceAt)
             : base(id)
         {
+            this.WorkflowInstanceId = workflowInstanceId;
             this.NextOccurenceAt = nextOccurenceAt;
         }
+
+        /// <summary>
+        /// Gets the id of the <see cref="V1Schedule"/>'s occurence <see cref="V1WorkflowInstance"/> that has been executed
+        /// </summary>
+        public virtual string WorkflowInstanceId { get; protected set; } = null!;
 
         /// <summary>
         /// Gets the <see cref="V1Schedule"/>'s next occurence

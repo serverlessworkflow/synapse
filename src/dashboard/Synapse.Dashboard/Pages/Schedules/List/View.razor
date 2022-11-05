@@ -37,7 +37,7 @@
                 Name="Activation"
                 ValueProvider="s => s.ActivationType">
                 <CellTemplate Context="context">
-                    <label class="badge bg-secondary">@EnumHelper.Stringify((V1ScheduleType)context.Value!)</label>
+                    <label class="badge bg-secondary">@EnumHelper.Stringify((V1ScheduleActivationType)context.Value!)</label>
                 </CellTemplate>
             </Column>
             <Column T="V1Schedule"

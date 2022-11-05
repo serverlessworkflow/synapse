@@ -37,7 +37,7 @@ namespace Synapse
             TimeZoneInfo timeZone = null;
             if (scheduleDefinition.Timezone != null && TimeZoneInfo.TryConvertIanaIdToWindowsId(scheduleDefinition.Timezone, out var timeZoneId)) timeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
             if (timeZone == null) timeZone = TimeZoneInfo.Local;
-            var validUntilDateTime = scheduleDefinition.Cron.ValidUntil;
+            var validUntilDateTime = scheduleDefinition.Cron?.ValidUntil;
             var validUntilDateTimeOffset = (DateTimeOffset?)null;
             if (validUntilDateTime.HasValue) validUntilDateTimeOffset = new(validUntilDateTime.Value, timeZone.GetUtcOffset(validUntilDateTime.Value));
             if (lastOccurence == null) lastOccurence = DateTimeOffset.Now;

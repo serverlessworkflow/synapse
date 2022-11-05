@@ -19,6 +19,7 @@ using ServerlessWorkflow.Sdk;
 using ServerlessWorkflow.Sdk.Models;
 using ServerlessWorkflow.Sdk.Services.Validation;
 using Synapse.Application.Commands.Correlations;
+using Synapse.Application.Commands.Schedules;
 using Synapse.Application.Queries.Workflows;
 using System.ComponentModel.DataAnnotations;
 
@@ -151,9 +152,9 @@ namespace Synapse.Application.Commands.Workflows
                 var outcome = new V1CorrelationOutcome(V1CorrelationOutcomeType.Start, workflow.Id);
                 await this.Mediator.ExecuteAndUnwrapAsync(new V1CreateCorrelationCommand(lifetime, conditionType, conditions, outcome, null), cancellationToken: cancellationToken);
             }
-            else if (!string.IsNullOrWhiteSpace(workflow.Definition.Start?.Schedule?.Cron?.Expression)) 
+            else if (workflow.Definition.Start?.Schedule != null) 
             {
-                await this.Mediator.ExecuteAndUnwrapAsync(new V1ScheduleWorkflowCommand(workflow.Id, false), cancellationToken);
+                await this.Mediator.ExecuteAndUnwrapAsync(new V1CreateScheduleCommand(V1ScheduleActivationType.Implicit, workflow.Definition.Start.Schedule, workflow.Id), cancellationToken);
             }
             return this.Ok(this.Mapper.Map<Integration.Models.V1Workflow>(workflow));
         }

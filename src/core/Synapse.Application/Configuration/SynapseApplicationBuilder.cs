@@ -120,6 +120,7 @@ namespace Synapse.Application.Configuration
             this.Services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<WorkflowProcessManager>());
             this.Services.AddSingleton<IWorkflowRuntimeProxyFactory, WorkflowRuntimeProxyFactory>();
             this.Services.AddSingleton<IWorkflowRuntimeProxyManager, WorkflowRuntimeProxyManager>();
+            this.Services.AddSingleton<IBackgroundJobManager, InMemoryBackgroundJobManager>();
             this.Services.AddHostedService<WorkflowScheduler>();
             this.Services.AddHostedService<WorkflowDefinitionFileMonitor>();
             this.Services.AddTransient(provider => provider.GetRequiredService<IEdmModelBuilder>().Build());

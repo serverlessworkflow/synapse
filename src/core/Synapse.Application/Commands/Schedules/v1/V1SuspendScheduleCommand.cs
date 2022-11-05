@@ -61,16 +61,23 @@ namespace Synapse.Application.Commands.Schedules
         /// <param name="mediator">The service used to mediate calls</param>
         /// <param name="mapper">The service used to map objects</param>
         /// <param name="schedules">The <see cref="IRepository"/> used to manage <see cref="V1Schedule"/>s</param>
-        public V1SuspendScheduleCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IRepository<V1Schedule> schedules)
+        /// <param name="backgroundJobManager">The service used to manage background jobs</param>
+        public V1SuspendScheduleCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IRepository<V1Schedule> schedules, IBackgroundJobManager backgroundJobManager)
             : base(loggerFactory, mediator, mapper)
         {
             this.Schedules = schedules;
+            this.BackgroundJobManager = backgroundJobManager;
         }
 
         /// <summary>
         /// Gets the <see cref="IRepository"/> used to manage <see cref="V1Schedule"/>s
         /// </summary>
         protected IRepository<V1Schedule> Schedules { get; }
+
+        /// <summary>
+        /// Gets the service used to manage background jobs
+        /// </summary>
+        protected IBackgroundJobManager BackgroundJobManager { get; }
 
         /// <inheritdoc/>
         public virtual async Task<IOperationResult> HandleAsync(V1SuspendScheduleCommand command, CancellationToken cancellationToken = default)
@@ -80,6 +87,7 @@ namespace Synapse.Application.Commands.Schedules
             schedule.Suspend();
             await this.Schedules.UpdateAsync(schedule, cancellationToken);
             await this.Schedules.SaveChangesAsync(cancellationToken);
+            await this.BackgroundJobManager.CancelJobAsync(schedule.Id, cancellationToken);
             return this.Ok();
         }
 

@@ -36,12 +36,12 @@ namespace Synapse.Application.Commands.Schedules
         /// <summary>
         /// Initializes a new <see cref="V1CreateScheduleCommand"/>
         /// </summary>
-        /// <param name="type">The type of the <see cref="V1Schedule"/> to create</param>
+        /// <param name="activationType">The type of the <see cref="V1Schedule"/> to create</param>
         /// <param name="definition">The definition of the <see cref="V1Schedule"/> to create</param>
         /// <param name="workflowId">The id of the <see cref="V1Workflow"/> to schedule</param>
-        public V1CreateScheduleCommand(V1ScheduleType type, ScheduleDefinition definition, string workflowId)
+        public V1CreateScheduleCommand(V1ScheduleActivationType activationType, ScheduleDefinition definition, string workflowId)
         {
-            this.Type = type;
+            this.ActivationType = activationType;
             this.Definition = definition;
             this.WorkflowId = workflowId;
         }
@@ -49,7 +49,7 @@ namespace Synapse.Application.Commands.Schedules
         /// <summary>
         /// Gets the type of the <see cref="V1Schedule"/> to create
         /// </summary>
-        public virtual V1ScheduleType Type { get; protected set; }
+        public virtual V1ScheduleActivationType ActivationType { get; protected set; }
 
         /// <summary>
         /// Gets the definition of the <see cref="V1Schedule"/> to create
@@ -79,11 +79,13 @@ namespace Synapse.Application.Commands.Schedules
         /// <param name="mapper">The service used to map objects</param>
         /// <param name="workflows">The <see cref="IRepository"/> used to manage <see cref="V1Workflow"/>s</param>
         /// <param name="schedules">The <see cref="IRepository"/> used to manage <see cref="V1Schedule"/>s</param>
-        public V1CreateScheduleCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IRepository<V1Workflow> workflows, IRepository<V1Schedule> schedules) 
+        /// <param name="backgroundJobManager">The service used to manage background jobs</param>
+        public V1CreateScheduleCommandHandler(ILoggerFactory loggerFactory, IMediator mediator, IMapper mapper, IRepository<V1Workflow> workflows, IRepository<V1Schedule> schedules, IBackgroundJobManager backgroundJobManager) 
             : base(loggerFactory, mediator, mapper)
         {
             this.Workflows = workflows;
             this.Schedules = schedules;
+            this.BackgroundJobManager = backgroundJobManager;
         }
 
         /// <summary>
@@ -96,6 +98,11 @@ namespace Synapse.Application.Commands.Schedules
         /// </summary>
         protected IRepository<V1Schedule> Schedules { get; }
 
+        /// <summary>
+        /// Gets the service used to manage background jobs
+        /// </summary>
+        protected IBackgroundJobManager BackgroundJobManager { get; }
+
         /// <inheritdoc/>
         public virtual async Task<IOperationResult<Integration.Models.V1Schedule>> HandleAsync(V1CreateScheduleCommand command, CancellationToken cancellationToken = default)
         {
@@ -103,8 +110,9 @@ namespace Synapse.Application.Commands.Schedules
             if(string.IsNullOrWhiteSpace(workflowId)) throw DomainException.NullReference(typeof(V1Workflow), command.WorkflowId);
             var workflow = await this.Workflows.FindAsync(workflowId, cancellationToken);
             if (workflow == null) throw DomainException.NullReference(typeof(V1Workflow), workflowId);
-            var schedule = await this.Schedules.AddAsync(new(command.Type, command.Definition, workflow), cancellationToken);
+            var schedule = await this.Schedules.AddAsync(new(command.ActivationType, command.Definition, workflow), cancellationToken);
             await this.Schedules.SaveChangesAsync(cancellationToken);
+            if (schedule.NextOccurenceAt.HasValue) await this.BackgroundJobManager.ScheduleJobAsync(schedule, cancellationToken);
             return this.Ok(this.Mapper.Map<Integration.Models.V1Schedule>(schedule));
         }
 

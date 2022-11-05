@@ -48,7 +48,7 @@ namespace Synapse.Domain.Models
         /// <param name="activationType">The <see cref="V1Schedule"/>'s activation type</param>
         /// <param name="definition">The <see cref="V1Schedule"/>'s <see cref="ScheduleDefinition"/></param>
         /// <param name="workflow">The <see cref="V1Workflow"/> to schedule</param>
-        public V1Schedule(V1ScheduleType activationType, ScheduleDefinition definition, V1Workflow workflow)
+        public V1Schedule(V1ScheduleActivationType activationType, ScheduleDefinition definition, V1Workflow workflow)
             : base(BuildId(workflow?.Id!))
         {
             if (definition == null) throw DomainException.ArgumentNull(nameof(definition));
@@ -59,7 +59,7 @@ namespace Synapse.Domain.Models
         /// <summary>
         /// Gets the <see cref="V1Schedule"/>'s activation type
         /// </summary>
-        public virtual V1ScheduleType ActivationType { get; protected set; }
+        public virtual V1ScheduleActivationType ActivationType { get; protected set; }
 
         /// <summary>
         /// Gets the <see cref="V1Schedule"/>'s status
@@ -107,11 +107,6 @@ namespace Synapse.Domain.Models
         public virtual DateTimeOffset? NextOccurenceAt { get; protected set; }
 
         /// <summary>
-        /// Gets the total number of occurences
-        /// </summary>
-        public virtual long TotalOccurences { get; protected set; }
-
-        /// <summary>
         /// Sets the <see cref="V1Schedule"/>'s definition
         /// </summary>
         /// <param name="definition">The <see cref="V1Schedule"/>'s definition</param>
@@ -123,21 +118,24 @@ namespace Synapse.Domain.Models
         }
 
         /// <summary>
-        /// Triggers a new occurence of the <see cref="V1Schedule"/>
+        /// Occurs the <see cref="V1Schedule"/>
         /// </summary>
-        public virtual void Trigger()
+        /// <param name="workflowInstanceId">The id of the <see cref="V1WorkflowInstance"/> the <see cref="V1Schedule"/> has created as a result of its occurence</param>
+        public virtual void Occur(string workflowInstanceId)
         {
+            if (string.IsNullOrWhiteSpace(workflowInstanceId)) throw DomainException.ArgumentNullOrWhitespace(nameof(workflowInstanceId));
             if (this.Status != V1ScheduleStatus.Active) throw DomainException.UnexpectedState(typeof(V1Schedule), this.Id, this.Status);
-            this.On(this.RegisterEvent(new V1ScheduleOccuredDomainEvent(this.Id, this.Definition.Type == ScheduleDefinitionType.Interval ? null : this.Definition.GetNextOccurence())));
+            this.On(this.RegisterEvent(new V1ScheduleOccuredDomainEvent(this.Id, workflowInstanceId, this.Definition.Type == ScheduleDefinitionType.Interval ? null : this.Definition.GetNextOccurence())));
         }
 
         /// <summary>
-        /// Notifies that a triggered occurence has completed
+        /// Completes a triggered occurence
         /// </summary>
-        public virtual void NotifyOccurenceCompleted()
+        /// <param name="workflowInstanceId">The id of the <see cref="V1Schedule"/>'s occurence <see cref="V1WorkflowInstance"/> that has been executed</param>
+        public virtual void CompleteOccurence(string workflowInstanceId)
         {
             if(this.Status != V1ScheduleStatus.Active) throw DomainException.UnexpectedState(typeof(V1Schedule), this.Id, this.Status);
-            this.On(this.RegisterEvent(new V1ScheduleOccurenceCompletedDomainEvent(this.Id, this.Definition.Type == ScheduleDefinitionType.Interval ? null : this.Definition.GetNextOccurence())));
+            this.On(this.RegisterEvent(new V1ScheduleOccurenceCompletedDomainEvent(this.Id, workflowInstanceId, this.Definition.Type == ScheduleDefinitionType.Interval ? this.Definition.GetNextOccurence() : null)));
         }
 
         /// <summary>
@@ -220,7 +218,6 @@ namespace Synapse.Domain.Models
             this.LastModified = e.CreatedAt;
             this.LastOccuredAt = e.CreatedAt;
             this.NextOccurenceAt = e.NextOccurenceAt;
-            this.TotalOccurences++;
         }
 
         /// <summary>

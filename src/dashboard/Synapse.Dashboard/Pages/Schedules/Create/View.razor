@@ -63,7 +63,7 @@ else
 {
 
     private Subject<bool>? disposeNotifier = null!;
-    private V1CreateScheduleCommand command = new() { Type = V1ScheduleType.Explicit };
+    private V1CreateScheduleCommand command = new() { ActivationType = V1ScheduleActivationType.Explicit };
     private V1WorkflowReference? workflowReference => string.IsNullOrWhiteSpace(command.WorkflowId) ? null : V1WorkflowReference.Parse(command.WorkflowId);
 
     protected override async Task OnInitializedAsync()

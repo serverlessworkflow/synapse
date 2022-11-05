@@ -19,6 +19,7 @@ using ServerlessWorkflow.Sdk.Services.Validation;
 
 namespace Synapse
 {
+
     /// <summary>
     /// Defines extensions for <see cref="IWorkflowValidationResult"/>
     /// </summary>
