@@ -37,7 +37,7 @@
                                 <tr>
                                     <td>Type</td>
                                     <td>
-                                        <select class="form-control bg-secondary text-white" title="The type of the action to perform" required @onchange="async e => await OnActionTypeChangedAsync(EnumHelper.Parse<ActionType>((string)e.Value!))">
+                                        <select class="form-select bg-secondary text-white" title="The type of the action to perform" required @onchange="async e => await OnActionTypeChangedAsync(EnumHelper.Parse<ActionType>((string)e.Value!))">
                                             <option value="@EnumHelper.Stringify(ActionType.Function)">@EnumHelper.Stringify(ActionType.Function)</option>
                                             <option value="@EnumHelper.Stringify(ActionType.Subflow)">@EnumHelper.Stringify(ActionType.Subflow)</option>
                                             <option value="@EnumHelper.Stringify(ActionType.Trigger)">@EnumHelper.Stringify(ActionType.Trigger)</option>
@@ -47,7 +47,7 @@
                                 <tr>
                                     <td>Retry policy</td>
                                     <td>
-                                        <select class="form-control" title="The retry policy associated to the action, if any">
+                                        <select class="form-select" title="The retry policy associated to the action, if any">
                         
                                         </select>
                                     </td>
