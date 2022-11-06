@@ -18533,16 +18533,6 @@ body {
   height: 100%;
 }
 
-.full-splash {
-  background: var(--bs-primary) !important;
-}
-
-#logo-container svg {
-  fill: white;
-  stroke: white;
-  max-width: 200px;
-}
-
 .spinner-border {
   margin-top: 3rem;
   color: white;
@@ -18551,7 +18541,9 @@ body {
 #logo-container, #animation-container {
   width: 100%;
   height: 100%;
-  background-color: var(--bs-white);
+  background: var(--bs-primary) !important;
+  fill: white;
+  stroke: white;
   position: absolute;
   top: 0;
   left: 0;
@@ -18561,6 +18553,9 @@ body {
   align-items: center;
   justify-content: center;
   flex-direction: column;
+}
+#logo-container svg, #animation-container svg {
+  max-width: 200px;
 }
 
 #svg-definitions {
