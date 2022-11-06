@@ -1,12 +1,12 @@
 ﻿/*
  * Copyright © 2022-Present The Synapse Authors
- * <p>
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p>
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,32 +15,33 @@
  *
  */
 
-namespace Synapse.Infrastructure.Services
+using Neuroglia.Data.Flux;
+using Synapse.Integration.Models;
+
+namespace Synapse.Dashboard.Pages.Schedules.View
 {
 
     /// <summary>
-    /// Defines the fundamentals of a CRON-based job
+    /// Represents the Flux state used by the schedule view
     /// </summary>
-    public interface ICronJob
-        : IDisposable, IAsyncDisposable
+    [Feature]
+    public record ScheduleViewState
     {
 
         /// <summary>
-        /// Gets the event fired whenever the <see cref="ICronJob"/> expires
+        /// Gets a boolean indicating whether or not the application is processing
         /// </summary>
-        event EventHandler Expired;
+        public bool Processing { get; set; }
 
         /// <summary>
-        /// Gets the <see cref="ICronJob"/>'s id
+        /// Gets a boolean indicating whether or not the current <see cref="V1Schedule"/> has been deleted
         /// </summary>
-        string Id { get; }
+        public bool IsDeleted { get; init; }
 
         /// <summary>
-        /// Schedules the <see cref="ICronJob"/>
+        /// Gets the current <see cref="V1Schedule"/>, if any
         /// </summary>
-        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-        /// <returns>A new awaitable <see cref="Task"/></returns>
-        Task ScheduleAsync(CancellationToken cancellationToken = default);
+        public V1Schedule? Schedule { get; init; }
 
     }
 

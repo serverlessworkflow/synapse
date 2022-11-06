@@ -18,55 +18,52 @@
 using Synapse.Infrastructure.Plugins;
 using Synapse.Integration.Models;
 
-namespace Synapse.Infrastructure.Services
+namespace Synapse.Infrastructure.Services;
+
+/// <summary>
+/// Defines the fundamentals of an object used to handle a plugin
+/// </summary>
+public interface IPluginHandle
+    : IDisposable, IAsyncDisposable
 {
 
     /// <summary>
-    /// Defines the fundamentals of an object used to handle a plugin
+    /// Gets the event fired whenever the <see cref="IPluginHandle"/> has been disposed of
     /// </summary>
-    public interface IPluginHandle
-        : IDisposable, IAsyncDisposable
-    {
+    event EventHandler Disposed;
 
-        /// <summary>
-        /// Gets the event fired whenever the <see cref="IPluginHandle"/> has been disposed of
-        /// </summary>
-        event EventHandler Disposed;
+    /// <summary>
+    /// Gets the path to the handled <see cref="IPlugin"/>'s metadata file
+    /// </summary>
+    string MetadataFilePath { get; }
 
-        /// <summary>
-        /// Gets the path to the handled <see cref="IPlugin"/>'s metadata file
-        /// </summary>
-        string MetadataFilePath { get; }
+    /// <summary>
+    /// Gets a boolean indicating whether or not the <see cref="IPlugin"/> is loaded
+    /// </summary>
+    bool IsLoaded{ get; }
 
-        /// <summary>
-        /// Gets a boolean indicating whether or not the <see cref="IPlugin"/> is loaded
-        /// </summary>
-        bool IsLoaded{ get; }
+    /// <summary>
+    /// Gets an object used to describe the handled <see cref="IPlugin"/>
+    /// </summary>
+    V1PluginMetadata Metadata { get; }
 
-        /// <summary>
-        /// Gets an object used to describe the handled <see cref="IPlugin"/>
-        /// </summary>
-        V1PluginMetadata Metadata { get; }
+    /// <summary>
+    /// Loads and initializes the <see cref="IPlugin"/>
+    /// </summary>
+    /// <param name="stoppingToken">A <see cref="CancellationToken"/> used to manage the handled <see cref="IPlugin"/>'s lifetime</param>
+    /// <returns>A new awaitable <see cref="ValueTask"/></returns>
+    ValueTask LoadAsync(CancellationToken stoppingToken);
 
-        /// <summary>
-        /// Loads and initializes the <see cref="IPlugin"/>
-        /// </summary>
-        /// <param name="stoppingToken">A <see cref="CancellationToken"/> used to manage the handled <see cref="IPlugin"/>'s lifetime</param>
-        /// <returns>A new awaitable <see cref="ValueTask"/></returns>
-        ValueTask LoadAsync(CancellationToken stoppingToken);
+    /// <summary>
+    /// Gets the <see cref="IPlugin"/>
+    /// </summary>
+    /// <remarks>Will throw a new <see cref="AppDomainUnloadedException"/> if the <see cref="IPluginHandle"/> is not loaded</remarks>
+    /// <returns>The loaded <see cref="IPlugin"/></returns>
+    IPlugin GetPlugin();
 
-        /// <summary>
-        /// Gets the <see cref="IPlugin"/>
-        /// </summary>
-        /// <remarks>Will throw a new <see cref="AppDomainUnloadedException"/> if the <see cref="IPluginHandle"/> is not loaded</remarks>
-        /// <returns>The loaded <see cref="IPlugin"/></returns>
-        IPlugin GetPlugin();
-
-        /// <summary>
-        /// Unloads the <see cref="IPlugin"/>
-        /// </summary>
-        void Unload();
-
-    }
+    /// <summary>
+    /// Unloads the <see cref="IPlugin"/>
+    /// </summary>
+    void Unload();
 
 }

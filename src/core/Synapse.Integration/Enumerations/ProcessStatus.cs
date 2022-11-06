@@ -17,6 +17,7 @@
 
 namespace Synapse
 {
+
     /// <summary>
     /// Enumerates all the statuses of a process
     /// </summary>

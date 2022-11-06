@@ -12,14 +12,14 @@ namespace Synapse.Dashboard.Pages.Schedules.List
     {
 
         /// <summary>
-        /// Selects the schedules workflows
+        /// Selects all available schedules
         /// </summary>
         /// <param name="store">The global <see cref="IStore"/></param>
         /// <returns>A new <see cref="IObservable{T}"/></returns>
-        public static IObservable<List<V1Workflow>?> SelectedScheduledWorkflows(IStore store)
+        public static IObservable<List<V1Schedule>?> SelectedSchedules(IStore store)
         {
             return store.GetFeature<ScheduleCollectionState>()
-                .Select(state => state.Workflows)
+                .Select(state => state.Schedules)
                 .DistinctUntilChanged();
         }
 

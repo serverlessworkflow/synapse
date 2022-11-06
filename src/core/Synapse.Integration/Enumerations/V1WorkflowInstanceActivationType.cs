@@ -36,10 +36,10 @@ namespace Synapse
         [EnumMember(Value = "trigger")]
         Trigger = 1,
         /// <summary>
-        /// Indicates that the workflow instance has been dynamically created by a CRON schedule
+        /// Indicates that the workflow instance has been dynamically created by a schedule
         /// </summary>
-        [EnumMember(Value = "cron")]
-        Cron = 2,
+        [EnumMember(Value = "schedule")]
+        Schedule = 2,
         /// <summary>
         /// Indicates that the workflow instance has been created by another workflow instance
         /// </summary>

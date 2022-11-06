@@ -20,31 +20,23 @@
  * -----------------------------------------------------------------------
  */
 
-namespace Synapse.Integration.Commands.Workflows
+namespace Synapse.Integration.Commands.Schedules
 {
 
 	/// <summary>
-	/// Represents the ICommand used to schedule a V1Workflow
+	/// Represents the ICommand used to make a V1Schedule obsolete
 	/// </summary>
 	[DataContract]
-	public partial class V1ScheduleWorkflowCommand
+	public partial class V1MakeScheduleObsoleteCommand
 		: Command
 	{
 
 		/// <summary>
-		/// The id of the V1Workflow to schedule
+		/// The id of the V1Schedule to make obsolete
 		/// </summary>
-		[DataMember(Name = "WorkflowId", Order = 1)]
-		[Description("The id of the V1Workflow to schedule")]
-		[Required, MinLength(1)]
-		public virtual string WorkflowId { get; set; }
-
-		/// <summary>
-		/// A boolean indicating whether or not to catch up missed CRON occurences
-		/// </summary>
-		[DataMember(Name = "CatchUpMissedOccurences", Order = 2)]
-		[Description("A boolean indicating whether or not to catch up missed CRON occurences")]
-		public virtual bool CatchUpMissedOccurences { get; set; }
+		[DataMember(Name = "ScheduleId", Order = 1)]
+		[Description("The id of the V1Schedule to make obsolete")]
+		public virtual string ScheduleId { get; set; }
 
     }
 

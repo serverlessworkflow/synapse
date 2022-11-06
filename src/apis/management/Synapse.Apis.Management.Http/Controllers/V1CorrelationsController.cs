@@ -15,12 +15,15 @@
  *
  */
 
+using Microsoft.AspNetCore.Http;
+
 namespace Synapse.Apis.Management.Http.Controllers
 {
 
     /// <summary>
     /// Represents the <see cref="ApiController"/> used to manage correlation definitions
     /// </summary>
+    [Tags("Correlations")]
     [Route("api/v1/correlations")]
     public class V1CorrelationsController
         : ApiController

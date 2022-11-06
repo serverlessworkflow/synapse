@@ -19,6 +19,7 @@ using Synapse.Integration.Commands.AuthenticationDefinitionCollections;
 using Synapse.Integration.Commands.Correlations;
 using Synapse.Integration.Commands.EventDefinitionCollections;
 using Synapse.Integration.Commands.FunctionDefinitionCollections;
+using Synapse.Integration.Commands.Schedules;
 using Synapse.Integration.Commands.WorkflowInstances;
 using Synapse.Integration.Commands.Workflows;
 using Synapse.Integration.Models;
@@ -398,6 +399,100 @@ namespace Synapse.Apis.Management
         /// <returns>The <see cref="V1OperationalReport"/></returns>
         [OperationContract]
         Task<V1OperationalReport> GetOperationalReportAsync(DateTime? date = null, CancellationToken cancellationToken = default);
+
+        #endregion
+
+        #region Schedules
+
+        /// <summary>
+        /// Creates a new <see cref="V1Schedule"/>
+        /// </summary>
+        /// <param name="command">The object that describes the command to execute</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The newly created <see cref="V1Schedule"/></returns>
+        [OperationContract]
+        Task<V1Schedule> CreateScheduleAsync(V1CreateScheduleCommand command, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Gets the <see cref="V1Schedule"/> with the specified id
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1Schedule"/> to get</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The <see cref="V1Schedule"/> with the specified id</returns>
+
+        [OperationContract]
+        Task<V1Schedule> GetScheduleByIdAsync(string id, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Lists existing <see cref="V1Schedule"/>s
+        /// </summary>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new <see cref="List{T}"/> containing all existing <see cref="V1Schedule"/>s</returns>
+        [OperationContract]
+        Task<List<V1Schedule>> GetSchedulesAsync(CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Lists existing <see cref="V1Schedule"/>s
+        /// </summary>
+        /// <param name="query">The OData query string</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new <see cref="List{T}"/> containing all existing <see cref="V1Schedule"/>s</returns>
+        [OperationContract]
+        Task<List<V1Schedule>> GetSchedulesAsync(string query, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Triggers the specified <see cref="V1Schedule"/>
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1Schedule"/> to trigger</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        [OperationContract]
+        Task TriggerScheduleAsync(string id, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Suspends the specified <see cref="V1Schedule"/>
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1Schedule"/> to suspend</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        [OperationContract]
+        Task SuspendScheduleAsync(string id, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Resumes the specified <see cref="V1Schedule"/>
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1Schedule"/> to resume</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        [OperationContract]
+        Task ResumeScheduleAsync(string id, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Retires the specified <see cref="V1Schedule"/>
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1Schedule"/> to retire</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        [OperationContract]
+        Task RetireScheduleAsync(string id, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Makes the specified <see cref="V1Schedule"/> obsolete
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1Schedule"/> to make obsolete</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        [OperationContract]
+        Task MakeScheduleObsoleteAsync(string id, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Deletes the <see cref="V1Schedule"/> with the specified id
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1Schedule"/> to delete</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        [OperationContract]
+        Task DeleteScheduleAsync(string id, CancellationToken cancellationToken = default);
 
         #endregion
 

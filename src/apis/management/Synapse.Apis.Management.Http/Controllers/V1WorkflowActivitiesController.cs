@@ -15,12 +15,15 @@
  *
  */
 
+using Microsoft.AspNetCore.Http;
+
 namespace Synapse.Apis.Management.Http.Controllers
 {
 
     /// <summary>
     /// Represents the <see cref="ApiController"/> used to manage workflow activities
     /// </summary>
+    [Tags("WorkflowActivities")]
     [Route("api/v1/workflow-activities")]
     public class V1WorkflowActivitiesController
         : ApiController

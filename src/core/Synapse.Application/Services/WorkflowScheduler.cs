@@ -15,7 +15,6 @@
  *
  */
 
-using Synapse.Application.Commands.Workflows;
 using Synapse.Infrastructure.Plugins;
 
 namespace Synapse.Application.Services
@@ -34,11 +33,13 @@ namespace Synapse.Application.Services
         /// <param name="serviceProvider">The current <see cref="IServiceProvider"/></param>
         /// <param name="logger">The service used to perform logging</param>
         /// <param name="pluginManager">The service used to manage <see cref="IPlugin"/>s</param>
-        public WorkflowScheduler(IServiceProvider serviceProvider, ILogger<WorkflowScheduler> logger, IPluginManager pluginManager)
+        /// <param name="backgroundJobManager">The service used to manage background jobs</param>
+        public WorkflowScheduler(IServiceProvider serviceProvider, ILogger<WorkflowScheduler> logger, IPluginManager pluginManager, IBackgroundJobManager backgroundJobManager)
         {
             this.ServiceProvider = serviceProvider;
             this.Logger = logger;
             this.PluginManager = pluginManager;
+            this.BackgroundJobManager = backgroundJobManager;
         }
 
         /// <summary>
@@ -56,27 +57,23 @@ namespace Synapse.Application.Services
         /// </summary>
         protected IPluginManager PluginManager { get; }
 
+        /// <summary>
+        /// Gets the service used to manage background jobs
+        /// </summary>
+        protected IBackgroundJobManager BackgroundJobManager { get; }
+
         /// <inheritdoc/>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             await this.PluginManager.WaitForStartupAsync(stoppingToken);
             using var scope = this.ServiceProvider.CreateScope();
-            var workflows = scope.ServiceProvider.GetRequiredService<IRepository<Integration.Models.V1Workflow>>();
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-            foreach(var workflow in workflows.AsQueryable()
-                .ToList()
-                .Where(w => w.Definition.Start != null && w.Definition.Start.Schedule != null)
-                .GroupBy(w => w.Definition.Id)
-                .Select(w => w.OrderByDescending(w => w.Definition.Version).First()))
+            var schedules = scope.ServiceProvider.GetRequiredService<IRepository<Integration.Models.V1Schedule>>();
+            foreach(var schedule in schedules.AsQueryable()
+                .Where(s => s.Status == V1ScheduleStatus.Active)
+                .ToList())
             {
-                try
-                {
-                    await mediator.ExecuteAndUnwrapAsync(new V1ScheduleWorkflowCommand(workflow.Id, true), stoppingToken);
-                }
-                catch(Exception ex)
-                {
-                    this.Logger.LogError("An error occured while scheduling the workflow with id '{workflowId}': {ex}", workflow.Id, ex.ToString());
-                }
+                await this.BackgroundJobManager.ScheduleJobAsync(schedule, stoppingToken);
             }
         }
 

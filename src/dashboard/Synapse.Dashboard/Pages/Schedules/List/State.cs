@@ -27,11 +27,9 @@ namespace Synapse.Dashboard.Pages.Schedules.List;
 public record ScheduleCollectionState
 {
 
-    public ScheduleCollectionState()
-    {
-
-    }
-
-    public List<V1Workflow> Workflows { get; init; }
+    /// <summary>
+    /// Gets a <see cref="List{T}"/> containing all available <see cref="V1Schedule"/>s
+    /// </summary>
+    public List<V1Schedule>? Schedules { get; init; }
 
 }

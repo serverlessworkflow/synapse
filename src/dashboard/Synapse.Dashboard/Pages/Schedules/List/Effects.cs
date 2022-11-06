@@ -28,21 +28,16 @@ public static class ScheduleCollectionStateEffects
 {
 
     /// <summary>
-    /// Handles the specified <see cref="QueryScheduledWorkflows"/>
+    /// Handles the specified <see cref="QuerySchedules"/>
     /// </summary>
-    /// <param name="action">The <see cref="QueryScheduledWorkflows"/> to handle</param>
+    /// <param name="action">The <see cref="QuerySchedules"/> to handle</param>
     /// <param name="context">The current <see cref="IEffectContext"/></param>
     /// <returns>A new awaitable <see cref="Task"/></returns>
-    public static async Task On(QueryScheduledWorkflows action, IEffectContext context)
+    public static async Task On(QuerySchedules action, IEffectContext context)
     {
         var api = context.Services.GetRequiredService<ISynapseManagementApi>();
-        var workflows = await api.GetWorkflowsAsync(action.Query);
-        workflows = workflows
-            .Where(w => w.Definition.Start != null && w.Definition.Start.Schedule != null)
-            .GroupBy(w => w.Definition.Id)
-            .Select(w => w.OrderByDescending(w => w.Definition.Version).First())
-            .ToList();
-        context.Dispatcher.Dispatch(new HandleScheduledWorkflowQueryResults(workflows));
+        var schedules = await api.GetSchedulesAsync(action.Query);
+        context.Dispatcher.Dispatch(new HandleScheduleQueryResults(schedules));
     }
 
 }

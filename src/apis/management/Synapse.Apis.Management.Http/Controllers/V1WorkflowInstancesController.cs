@@ -15,6 +15,7 @@
  *
  */
 
+using Microsoft.AspNetCore.Http;
 using System.Net.Mime;
 
 namespace Synapse.Apis.Management.Http.Controllers
@@ -23,6 +24,7 @@ namespace Synapse.Apis.Management.Http.Controllers
     /// <summary>
     /// Represents the <see cref="ApiController"/> used to manage workflow instances
     /// </summary>
+    [Tags("WorkflowInstances")]
     [Route("api/v1/workflow-instances")]
     public class V1WorkflowInstancesController
         : ApiController

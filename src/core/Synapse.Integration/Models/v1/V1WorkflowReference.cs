@@ -52,6 +52,21 @@ namespace Synapse.Integration.Models
         /// </summary>
         public virtual string Version { get; set; }
 
+        /// <summary>
+        /// Parses the specified input into a new <see cref="V1WorkflowReference"/>
+        /// </summary>
+        /// <param name="input">The input to parse</param>
+        /// <returns>A new <see cref="V1WorkflowReference"/></returns>
+        public static V1WorkflowReference Parse(string input)
+        {
+            var components = input.Split(':', StringSplitOptions.RemoveEmptyEntries);
+            var id = components.First();
+            var version = string.Empty;
+            if (components.Length >= 2) version = input.Substring(id.Length + 1);
+            if (string.IsNullOrWhiteSpace(version)) version = "latest";
+            return new(id, version);
+        }
+
     }
 
 }

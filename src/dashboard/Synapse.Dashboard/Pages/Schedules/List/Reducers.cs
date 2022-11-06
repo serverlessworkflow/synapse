@@ -27,16 +27,16 @@ public static class ScheduleCollectionStateReducers
 {
 
     /// <summary>
-    /// Handles the specified <see cref="HandleScheduledWorkflowQueryResults"/>
+    /// Handles the specified <see cref="HandleScheduleQueryResults"/>
     /// </summary>
     /// <param name="state">The state to reduce</param>
-    /// <param name="action">The <see cref="HandleScheduledWorkflowQueryResults"/> action to reduce</param>
+    /// <param name="action">The <see cref="HandleScheduleQueryResults"/> action to reduce</param>
     /// <returns>The reduced state</returns>
-    public static ScheduleCollectionState On(ScheduleCollectionState state, HandleScheduledWorkflowQueryResults action)
+    public static ScheduleCollectionState On(ScheduleCollectionState state, HandleScheduleQueryResults action)
     {
         return state with
         {
-            Workflows = action.Results
+            Schedules = action.Results
         };
     }
 

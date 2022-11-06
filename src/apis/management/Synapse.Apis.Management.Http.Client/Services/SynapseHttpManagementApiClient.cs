@@ -17,10 +17,12 @@
 
 using Microsoft.Extensions.Logging;
 using Neuroglia.Serialization;
+using Synapse.Integration.Commands;
 using Synapse.Integration.Commands.AuthenticationDefinitionCollections;
 using Synapse.Integration.Commands.Correlations;
 using Synapse.Integration.Commands.EventDefinitionCollections;
 using Synapse.Integration.Commands.FunctionDefinitionCollections;
+using Synapse.Integration.Commands.Schedules;
 using Synapse.Integration.Commands.WorkflowInstances;
 using Synapse.Integration.Commands.Workflows;
 using Synapse.Integration.Models;
@@ -580,6 +582,126 @@ namespace Synapse.Apis.Management.Http
                 this.Logger.LogError("An error occured while querying operation reports: {details}", json);
             response.EnsureSuccessStatusCode();
             return await this.Serializer.DeserializeAsync<V1OperationalReport>(json, cancellationToken);
+        }
+
+        #endregion
+
+        #region Schedules
+
+        /// <inheritdoc/>
+        public virtual async Task<V1Schedule> CreateScheduleAsync(V1CreateScheduleCommand command, CancellationToken cancellationToken = default)
+        {
+            var requestUri = "/api/v1/schedules";
+            using var request = this.CreateRequest(HttpMethod.Post, requestUri);
+            var json = await this.Serializer.SerializeAsync(command, cancellationToken);
+            request.Content = new StringContent(json, Encoding.UTF8, MediaTypeNames.Application.Json);
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while creating a new schedule: {details}", json);
+            response.EnsureSuccessStatusCode();
+            return await this.Serializer.DeserializeAsync<V1Schedule>(json, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<V1Schedule> GetScheduleByIdAsync(string id, CancellationToken cancellationToken = default)
+        {
+            using var request = this.CreateRequest(HttpMethod.Get, $"/api/v1/schedules/{id}");
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while querying schedules: {details}", json);
+            response.EnsureSuccessStatusCode();
+            return await this.Serializer.DeserializeAsync<V1Schedule>(json, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<List<V1Schedule>> GetSchedulesAsync(string query, CancellationToken cancellationToken = default)
+        {
+            var requestUri = "/api/v1/schedules";
+            if (!string.IsNullOrWhiteSpace(query))
+                requestUri += $"?{query}";
+            using var request = this.CreateRequest(HttpMethod.Get, requestUri);
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while querying schedules: {details}", json);
+            response.EnsureSuccessStatusCode();
+            return await this.Serializer.DeserializeAsync<List<V1Schedule>>(json, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<List<V1Schedule>> GetSchedulesAsync(CancellationToken cancellationToken = default) => await this.GetSchedulesAsync(null!, cancellationToken);
+
+        /// <inheritdoc/>
+        public virtual async Task TriggerScheduleAsync(string id, CancellationToken cancellationToken = default)
+        {
+            var requestUri = $"/api/v1/schedules/{id}/trigger";
+            using var request = this.CreateRequest(HttpMethod.Put, requestUri);
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while triggering a new schedule occurence: {details}", json);
+            response.EnsureSuccessStatusCode();
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task SuspendScheduleAsync(string id, CancellationToken cancellationToken = default)
+        {
+            var requestUri = $"/api/v1/schedules/{id}/suspend";
+            using var request = this.CreateRequest(HttpMethod.Put, requestUri);
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while suspending a schedule: {details}", json);
+            response.EnsureSuccessStatusCode();
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task ResumeScheduleAsync(string id, CancellationToken cancellationToken = default)
+        {
+            var requestUri = $"/api/v1/schedules/{id}/resume";
+            using var request = this.CreateRequest(HttpMethod.Put, requestUri);
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while resuming a schedule: {details}", json);
+            response.EnsureSuccessStatusCode();
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task RetireScheduleAsync(string id, CancellationToken cancellationToken = default)
+        {
+            var requestUri = $"/api/v1/schedules/{id}/retire";
+            using var request = this.CreateRequest(HttpMethod.Put, requestUri);
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while retiring a schedule: {details}", json);
+            response.EnsureSuccessStatusCode();
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task MakeScheduleObsoleteAsync(string id, CancellationToken cancellationToken = default)
+        {
+            var requestUri = $"/api/v1/schedules/{id}/obsolete";
+            using var request = this.CreateRequest(HttpMethod.Put, requestUri);
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while making a schedule obsolete: {details}", json);
+            response.EnsureSuccessStatusCode();
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task DeleteScheduleAsync(string id, CancellationToken cancellationToken = default)
+        {
+            using var request = this.CreateRequest(HttpMethod.Delete, $"/api/v1/schedules/{id}");
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+            var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
+            if (!response.IsSuccessStatusCode)
+                this.Logger.LogError("An error occured while deleting the schedule with the specified id '{id}': {details}", id, json);
+            response.EnsureSuccessStatusCode();
         }
 
         #endregion

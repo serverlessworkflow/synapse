@@ -5,18 +5,18 @@ namespace Synapse.Dashboard.Pages.Schedules.List
 {
 
     /// <summary>
-    /// Represents the action used to query scheduled <see cref="V1Workflow"/>s
+    /// Represents the action used to query scheduled <see cref="V1Schedule"/>s
     /// </summary>
-    public class QueryScheduledWorkflows
+    public class QuerySchedules
     {
 
         /// <summary>
-        /// Initializes a new <see cref="V1Workflow"/>
+        /// Initializes a new <see cref="QuerySchedules"/>
         /// </summary>
-        public QueryScheduledWorkflows()
+        public QuerySchedules()
         {
             var builder = new ODataQueryBuilder(new Uri("https://test.com"))
-                .For<V1Workflow>("V1Workflows")
+                .For<V1Workflow>("V1Schedules")
                 .ByList();
             this.Query = builder.ToUri(UriKind.Absolute).Query;
             if (!string.IsNullOrWhiteSpace(this.Query)) this.Query = this.Query[1..];
@@ -30,24 +30,24 @@ namespace Synapse.Dashboard.Pages.Schedules.List
     }
 
     /// <summary>
-    /// Represents the action used to handle the differed results of a <see cref="QueryScheduledWorkflows"/> action
+    /// Represents the action used to handle the differed results of a <see cref="QuerySchedules"/> action
     /// </summary>
-    public class HandleScheduledWorkflowQueryResults
+    public class HandleScheduleQueryResults
     {
 
         /// <summary>
-        /// Initializes a new <see cref="HandleScheduledWorkflowQueryResults"/>
+        /// Initializes a new <see cref="HandleScheduleQueryResults"/>
         /// </summary>
-        /// <param name="results">A <see cref="List{T}"/> that contains the differed results of the <see cref="QueryScheduledWorkflows"/> action</param>
-        public HandleScheduledWorkflowQueryResults(List<V1Workflow> results)
+        /// <param name="results">A <see cref="List{T}"/> that contains the differed results of the <see cref="QuerySchedules"/> action</param>
+        public HandleScheduleQueryResults(List<V1Schedule> results)
         {
             this.Results = results;
         }
 
         /// <summary>
-        /// Gets a <see cref="List{T}"/> that contains the differed results of the <see cref="QueryScheduledWorkflows"/> action
+        /// Gets a <see cref="List{T}"/> that contains the differed results of the <see cref="QuerySchedules"/> action
         /// </summary>
-        public List<V1Workflow> Results { get; }
+        public List<V1Schedule> Results { get; }
 
     }
 

@@ -20,6 +20,7 @@ using Synapse.Integration.Commands.AuthenticationDefinitionCollections;
 using Synapse.Integration.Commands.Correlations;
 using Synapse.Integration.Commands.EventDefinitionCollections;
 using Synapse.Integration.Commands.FunctionDefinitionCollections;
+using Synapse.Integration.Commands.Schedules;
 using Synapse.Integration.Commands.WorkflowInstances;
 using Synapse.Integration.Commands.Workflows;
 
@@ -373,6 +374,92 @@ namespace Synapse.Apis.Management.Grpc
         /// <returns>The <see cref="V1OperationalReport"/></returns>
         [OperationContract]
         Task<GrpcApiResult<V1OperationalReport>> GetOperationalReportAsync(GrpcApiRequest<DateTime> request, CallContext context = default);
+
+        #endregion
+
+        #region Schedules
+
+        /// <summary>
+        /// Creates a new <see cref="V1Schedule"/>
+        /// </summary>
+        /// <param name="command">The object that describes the command to execute</param>
+        /// <param name="context">The current <see cref="CallContext" /></param>
+        /// <returns>The newly created <see cref="V1Schedule"/></returns>
+        [OperationContract]
+        Task<GrpcApiResult<V1Schedule>> CreateScheduleAsync(V1CreateScheduleCommand command, CallContext context = default);
+
+        /// <summary>
+        /// Gets the <see cref="V1Schedule"/> with the specified id
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1Schedule"/> to get</param>
+        /// <param name="context">The current <see cref="CallContext" /></param>
+        /// <returns>The <see cref="V1Schedule"/> with the specified id</returns>
+
+        [OperationContract]
+        Task<GrpcApiResult<V1Schedule>> GetScheduleByIdAsync(string id, CallContext context = default);
+
+        /// <summary>
+        /// Lists existing <see cref="V1Schedule"/>s
+        /// </summary>
+        /// <param name="query">The OData query string</param>
+        /// <param name="context">The current <see cref="CallContext" /></param>
+        /// <returns>A new <see cref="List{T}"/> containing all existing <see cref="V1Schedule"/>s</returns>
+        [OperationContract]
+        Task<GrpcApiResult<List<V1Schedule>>> GetSchedulesAsync(string? query = null, CallContext context = default);
+
+        /// <summary>
+        /// Triggers the specified <see cref="V1Schedule"/>
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1Schedule"/> to trigger</param>
+        /// <param name="context">The current <see cref="CallContext" /></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        [OperationContract]
+        Task<GrpcApiResult> TriggerScheduleAsync(string id, CallContext context = default);
+
+        /// <summary>
+        /// Suspends the specified <see cref="V1Schedule"/>
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1Schedule"/> to suspend</param>
+        /// <param name="context">The current <see cref="CallContext" /></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        [OperationContract]
+        Task<GrpcApiResult> SuspendScheduleAsync(string id, CallContext context = default);
+
+        /// <summary>
+        /// Resumes the specified <see cref="V1Schedule"/>
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1Schedule"/> to resume</param>
+        /// <param name="context">The current <see cref="CallContext" /></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        [OperationContract]
+        Task<GrpcApiResult> ResumeScheduleAsync(string id, CallContext context = default);
+
+        /// <summary>
+        /// Retires the specified <see cref="V1Schedule"/>
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1Schedule"/> to retire</param>
+        /// <param name="context">The current <see cref="CallContext" /></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        [OperationContract]
+        Task<GrpcApiResult> RetireScheduleAsync(string id, CallContext context = default);
+
+        /// <summary>
+        /// Makes the specified <see cref="V1Schedule"/> obsolete
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1Schedule"/> to make obsolete</param>
+        /// <param name="context">The current <see cref="CallContext" /></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        [OperationContract]
+        Task<GrpcApiResult> MakeScheduleObsoleteAsync(string id, CallContext context = default);
+
+        /// <summary>
+        /// Deletes the <see cref="V1Schedule"/> with the specified id
+        /// </summary>
+        /// <param name="id">The id of the <see cref="V1Schedule"/> to delete</param>
+        /// <param name="context">The current <see cref="CallContext" /></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        [OperationContract]
+        Task<GrpcApiResult> DeleteScheduleAsync(string id, CallContext context = default);
 
         #endregion
 

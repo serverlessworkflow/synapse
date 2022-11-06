@@ -15,12 +15,14 @@
  *
  */
 
+using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.OData;
 using Microsoft.AspNetCore.OData.NewtonsoftJson;
 using Microsoft.AspNetCore.OData.Query.Expressions;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
+using Neuroglia;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Synapse.Apis.Management.Http.Services;
@@ -72,6 +74,12 @@ namespace Synapse.Apis.Management.Http
                 .AddApplicationPart(typeof(MetadataController).Assembly);
             synapse.Services.AddSwaggerGen(builder =>
             {
+                builder.CustomOperationIds(o =>
+                {
+                    if (!string.IsNullOrWhiteSpace(o.RelativePath) && o.RelativePath.StartsWith("odata")) return o.RelativePath;
+                    var action = (ControllerActionDescriptor)o.ActionDescriptor;
+                    return $"{action.ActionName}".ToCamelCase();
+                });
                 builder.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
                 builder.SwaggerDoc("v1", new OpenApiInfo
                 {
