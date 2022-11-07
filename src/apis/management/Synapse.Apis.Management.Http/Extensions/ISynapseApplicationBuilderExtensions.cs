@@ -34,7 +34,7 @@ namespace Synapse.Apis.Management.Http
 {
 
     /// <summary>
-    /// Defines extensions for <see cref="ISynapseApplicationBuilder"/>s
+    /// Defines extensions for <see cref="ISynapseApplicationBuilder"/>s 
     /// </summary>
     public static class ISynapseApplicationBuilderExtensions
     {
