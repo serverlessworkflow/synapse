@@ -74,6 +74,9 @@ namespace Synapse.Apis.Management.Http
                 .AddApplicationPart(typeof(MetadataController).Assembly);
             synapse.Services.AddSwaggerGen(builder =>
             {
+                builder.OperationFilter<IgnoreODataQueryOptionOperationFilter>();
+                builder.SchemaFilter<IgnorExternalSchemaFilter>();
+                builder.DocumentFilter<IgnorExternalSchemaFilter>();
                 builder.CustomOperationIds(o =>
                 {
                     if (!string.IsNullOrWhiteSpace(o.RelativePath) && o.RelativePath.StartsWith("odata")) return o.RelativePath;
