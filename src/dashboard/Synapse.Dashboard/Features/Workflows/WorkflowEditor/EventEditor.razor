@@ -28,8 +28,8 @@
         <tr>
             <td>Kind</td>
             <td>
-                <select name="@nameof(evt.Kind)" required class="form-control bg-secondary text-white" 
-                @onchange="async e => await OnPropertyChanged(nameof(evt.Kind), ed => { ed.Kind = EnumHelper.Parse<EventKind>((string)e.Value!); })">
+                    <select name="@nameof(evt.Kind)" required class="form-select bg-secondary text-white"
+                        @onchange="async e => await OnPropertyChanged(nameof(evt.Kind), ed => { ed.Kind = EnumHelper.Parse<EventKind>((string)e.Value!); })">
                     @foreach (EventKind eventKind in Enum.GetValues(typeof(EventKind)))
                     {
                         var eventKindStr = @EnumHelper.Stringify(eventKind);

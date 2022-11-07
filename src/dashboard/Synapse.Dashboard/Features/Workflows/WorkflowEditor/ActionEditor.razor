@@ -146,7 +146,7 @@
                                         <tr>
                                             <td>Invocation mode</td>
                                             <td>
-                                                <select value="@action.Subflow?.InvocationMode" title="Configures the subflow's invocation mode" class="form-control bg-secondary text-white"
+                                            <select value="@action.Subflow?.InvocationMode" title="Configures the subflow's invocation mode" class="form-select bg-secondary text-white"
                                                 @onchange="async e => await OnPropertyChangedAsync(nameof(action.Subflow.InvocationMode), a => { if(a.Subflow == null) a.Subflow = new(); a.Subflow.InvocationMode = EnumHelper.Parse<InvocationMode>((string)e.Value!); })"> 
                                                     @foreach(var invocationMode in Enum.GetValues<InvocationMode>())
                                                     {

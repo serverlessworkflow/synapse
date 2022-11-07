@@ -23,7 +23,7 @@
             <tr>
                 <td>Completion type</td>
                 <td>
-                    <select required title="Configure the way the state completes" class="form-control bg-secondary text-white"
+                    <select required title="Configure the way the state completes" class="form-select bg-secondary text-white"
                     @onchange="async e => await OnChangedAsync(s => s.CompletionType = EnumHelper.Parse<ParallelCompletionType>((string)e.Value!))">
                         @foreach(var completionType in Enum.GetValues<ParallelCompletionType>())
                         {
