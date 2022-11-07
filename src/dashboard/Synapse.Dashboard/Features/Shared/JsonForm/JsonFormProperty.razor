@@ -52,7 +52,7 @@
                 <label for="@Name" class="form-label">@displayName@RequiredPropertySuffix</label>
                 @if(Schema.Enum != null && Schema.Enum.Any())
                 {
-                    <select name="@Name" title="@Schema.Description" readonly="@Schema.ReadOnly" value="@Value" class="form-control" required="@IsRequired" @onchange="OnInputValueChanged">
+                    <select class="form-select" name="@Name" title="@Schema.Description" readonly="@Schema.ReadOnly" value="@Value" required="@IsRequired" @onchange="OnInputValueChanged">
                         @foreach (var option in Schema.Enum)
                         {
                             <option value="@option">@option</option>

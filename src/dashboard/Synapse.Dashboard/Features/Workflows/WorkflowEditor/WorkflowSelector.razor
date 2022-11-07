@@ -21,7 +21,7 @@
 @if(workflowsByDefinitionId != null)
 {
     <div class="input-group">
-        <select value="@selectedId" class="form-control"
+        <select value="@selectedId" class="form-select"
         @onchange="async e => await OnIdChangedAsync((string)e.Value!)">
             <option disabled selected="@(string.IsNullOrWhiteSpace(selectedId))" value> -- select a workflow -- </option>
             @foreach(var workflowGroup in workflowsByDefinitionId)
@@ -29,7 +29,7 @@
                 <option value="@workflowGroup.Key" title="@workflowGroup.Value.First().Definition.Description" selected="@(workflowGroup.Key == selectedId)">@workflowGroup.Key</option>
             }
         </select>
-        <select value="@selectedVersion" class="form-control"
+        <select value="@selectedVersion" class="form-select"
         @onchange="async e => await OnVersionChangedAsync((string)e.Value!)">
             <option value="latest" selected="@(string.IsNullOrWhiteSpace(selectedVersion) || selectedVersion == "latest")" title="The latest version">latest</option>
             @if(!string.IsNullOrWhiteSpace(selectedId))

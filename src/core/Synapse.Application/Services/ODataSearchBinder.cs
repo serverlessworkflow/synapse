@@ -17,17 +17,16 @@
 
 using Microsoft.AspNetCore.OData.Query.Expressions;
 using Microsoft.OData.UriParser;
-using Neuroglia;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace Synapse.Apis.Management.Http.Services
+namespace Synapse.Application.Services
 {
 
     /// <summary>
     /// Represents the default <see cref="ISearchBinder"/> implementation
     /// </summary>
-    public partial class ODataSearchBinder
+    public class ODataSearchBinder
         : QueryBinder, ISearchBinder
     {
 
@@ -42,6 +41,7 @@ namespace Synapse.Apis.Management.Http.Services
         private static readonly MethodInfo FilterWorkflowActivityMethod = typeof(ODataSearchBinder).GetMethod(nameof(FilterWorkflowActivity), BindingFlags.Static | BindingFlags.NonPublic)!;
         private static readonly MethodInfo FilterCorrelationMethod = typeof(ODataSearchBinder).GetMethod(nameof(FilterCorrelation), BindingFlags.Static | BindingFlags.NonPublic)!;
         private static readonly MethodInfo FilterFunctionCollectionMethod = typeof(ODataSearchBinder).GetMethod(nameof(FilterFunctionCollection), BindingFlags.Static | BindingFlags.NonPublic)!;
+        private static readonly MethodInfo FilterScheduleMethod = typeof(ODataSearchBinder).GetMethod(nameof(FilterSchedule), BindingFlags.Static | BindingFlags.NonPublic)!;
 
         /// <inheritdoc/>
         public Expression BindSearch(SearchClause searchClause, QueryBinderContext context)
@@ -101,6 +101,8 @@ namespace Synapse.Apis.Management.Http.Services
                 return this.BindCorrelationSearchTerm(term, context);
             else if (context.ElementClrType == typeof(Integration.Models.V1FunctionDefinitionCollection))
                 return this.BindFunctionCollectionSearchTerm(term, context);
+            else if (context.ElementClrType == typeof(Integration.Models.V1Schedule))
+                return this.BindScheduleSearchTerm(term, context);
             else
                 throw new NotSupportedException($"Search is not allowed on element type '{context.ElementClrType.Name}'");
         }
@@ -170,6 +172,19 @@ namespace Synapse.Apis.Management.Http.Services
             return searchQuery;
         }
 
+        /// <summary>
+        /// Binds the specified <see cref="Domain.Models.V1Schedule"/> <see cref="SearchTermNode"/>
+        /// </summary>
+        /// <param name="searchTermNode">The <see cref="Domain.Models.V1Schedule"/> <see cref="SearchTermNode"/> to bind</param>
+        /// <param name="context">The current <see cref="QueryBinderContext"/></param>
+        /// <returns>A new <see cref="Expression"/></returns>
+        protected virtual Expression BindScheduleSearchTerm(SearchTermNode searchTermNode, QueryBinderContext context)
+        {
+            var searchTerm = searchTermNode.Text.ToLowerInvariant();
+            var searchQuery = Expression.IsTrue(Expression.Call(null, FilterScheduleMethod, context.CurrentParameter, Expression.Constant(searchTerm)));
+            return searchQuery;
+        }
+
         static bool FilterWorkflow(Integration.Models.V1Workflow workflow, string searchTerm)
         {
             return workflow.Id.ToLower().Contains(searchTerm)
@@ -224,6 +239,22 @@ namespace Synapse.Apis.Management.Http.Services
                 || (collection.Functions != null && collection.Functions.Any(f => f.Operation.Contains(searchTerm, StringComparison.InvariantCultureIgnoreCase)))
                 || (collection.Functions != null && collection.Functions.Any(f => EnumHelper.Stringify(f.Type).Contains(searchTerm, StringComparison.InvariantCultureIgnoreCase)));
         }
+
+        static bool FilterSchedule(Integration.Models.V1Schedule schedule, string searchTerm)
+        {
+            return schedule.Id.Contains(searchTerm, StringComparison.InvariantCultureIgnoreCase)
+                || schedule.WorkflowId.Contains(searchTerm, StringComparison.InvariantCultureIgnoreCase)
+                || EnumHelper.Stringify(schedule.ActivationType).Contains(searchTerm, StringComparison.InvariantCultureIgnoreCase)
+                || EnumHelper.Stringify(schedule.Status).Contains(searchTerm, StringComparison.InvariantCultureIgnoreCase)
+                || (schedule.Definition.Cron != null && schedule.Definition.Cron!.Expression.Contains(searchTerm, StringComparison.InvariantCultureIgnoreCase))
+                || (schedule.Definition.Interval.HasValue && schedule.Definition.Interval.Value.ToString().Contains(searchTerm, StringComparison.InvariantCultureIgnoreCase))
+                || schedule.CreatedAt.ToString().Contains(searchTerm, StringComparison.InvariantCultureIgnoreCase)
+                || schedule.LastModified.ToString().Contains(searchTerm, StringComparison.InvariantCultureIgnoreCase)
+                || (schedule.LastOccuredAt.HasValue && schedule.LastOccuredAt.Value.ToString().Contains(searchTerm, StringComparison.InvariantCultureIgnoreCase))
+                || (schedule.NextOccurenceAt.HasValue && schedule.NextOccurenceAt.Value.ToString().Contains(searchTerm, StringComparison.InvariantCultureIgnoreCase))
+                || (schedule.LastCompletedAt.HasValue && schedule.LastCompletedAt.Value.ToString().Contains(searchTerm, StringComparison.InvariantCultureIgnoreCase));
+        }
+
 
     }
 

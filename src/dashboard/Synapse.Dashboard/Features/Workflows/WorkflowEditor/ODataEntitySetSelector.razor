@@ -20,8 +20,8 @@
 @using Neuroglia.Data.Services
 @inject ISchemaRegistry SchemaRegistry
 
-<select required class="form-control" 
-@onchange="async e => await OnOperationChangedAsync((string?)e.Value)">
+<select required class="form-select"
+        @onchange="async e => await OnOperationChangedAsync((string?)e.Value)">
     @if(string.IsNullOrWhiteSpace(OperationId))
     {
         <option disabled selected value> -- select an entity set -- </option>
