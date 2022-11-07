@@ -23,9 +23,27 @@
 namespace Synapse.Integration.Commands.Schedules
 {
 
+	/// <summary>
+	/// Represents the ICommand used to complete a V1Schedule's occurence
+	/// </summary>
 	[DataContract]
 	public partial class V1CompleteScheduleOccurenceCommand
+		: Command
 	{
+
+		/// <summary>
+		/// The id of the V1Schedule to complete an occurence of
+		/// </summary>
+		[DataMember(Name = "ScheduleId", Order = 1)]
+		[Description("The id of the V1Schedule to complete an occurence of")]
+		public virtual string ScheduleId { get; set; }
+
+		/// <summary>
+		/// The id of the V1WorkflowInstance that has been executed
+		/// </summary>
+		[DataMember(Name = "WorkflowInstanceId", Order = 2)]
+		[Description("The id of the V1WorkflowInstance that has been executed")]
+		public virtual string WorkflowInstanceId { get; set; }
 
     }
 
