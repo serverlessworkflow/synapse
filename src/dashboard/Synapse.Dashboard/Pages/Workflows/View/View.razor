@@ -77,6 +77,14 @@
                                 ValueProvider="source => source.Key"
                                 PropertyPath="@PropertyPath.Parse(nameof(V1WorkflowInstance.Key))" />
                                 <Column T="V1WorkflowInstance"
+                                Name="ActivationType"
+                                ValueProvider="source => source.ActivationType"
+                                PropertyPath="@PropertyPath.Parse(nameof(V1WorkflowInstance.ActivationType))">
+                                    <CellTemplate Context="context">
+                                        <span class="badge rounded-pill bg-secondary">@(EnumHelper.Stringify((V1WorkflowInstanceActivationType)context.Value))</span>
+                                    </CellTemplate>
+                                </Column>
+                                <Column T="V1WorkflowInstance"
                                 Name="Status"
                                 ValueProvider="source => source.Status"
                                 PropertyPath="@PropertyPath.Parse(nameof(V1WorkflowInstance.Status))">
@@ -314,9 +322,9 @@ else
         await this.workflowToolbar.OnShowWorkflowInputModal(serializedInput);
     }
 
-    protected string GetCssClassFor(V1WorkflowInstanceStatus workflowInstanceStatus)
+    protected string GetCssClassFor(V1WorkflowInstanceStatus status)
     {
-        return workflowInstanceStatus switch
+        return status switch
         {
             V1WorkflowInstanceStatus.Pending => "bg-secondary",
             V1WorkflowInstanceStatus.Scheduling => "border-primary",

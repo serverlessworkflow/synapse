@@ -25,6 +25,7 @@ using Microsoft.OpenApi.Models;
 using Neuroglia;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using Synapse.Apis.Management.Http.Services;
 using Synapse.Application.Configuration;
 using Synapse.Application.Services;
 using Synapse.Integration.Serialization.Converters;
@@ -33,7 +34,7 @@ namespace Synapse.Apis.Management.Http
 {
 
     /// <summary>
-    /// Defines extensions for <see cref="ISynapseApplicationBuilder"/>s
+    /// Defines extensions for <see cref="ISynapseApplicationBuilder"/>s 
     /// </summary>
     public static class ISynapseApplicationBuilderExtensions
     {
@@ -73,6 +74,9 @@ namespace Synapse.Apis.Management.Http
                 .AddApplicationPart(typeof(MetadataController).Assembly);
             synapse.Services.AddSwaggerGen(builder =>
             {
+                builder.OperationFilter<IgnoreODataQueryOptionOperationFilter>();
+                builder.SchemaFilter<IgnorExternalSchemaFilter>();
+                builder.DocumentFilter<IgnorExternalSchemaFilter>();
                 builder.CustomOperationIds(o =>
                 {
                     if (!string.IsNullOrWhiteSpace(o.RelativePath) && o.RelativePath.StartsWith("odata")) return o.RelativePath;
