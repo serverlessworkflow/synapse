@@ -23,7 +23,7 @@
             <tr>
                 <td>Execution mode</td>
                 <td>
-                    <select required title="The mode in which the state's operations are to be executed" class="form-control bg-secondary text-white"
+                    <select required title="The mode in which the state's operations are to be executed" class="form-select bg-secondary text-white"
                     @onchange="async e => await OnChangedAsync(s => s.ActionMode = EnumHelper.Parse<ActionExecutionMode>((string)e.Value!))">
                         @foreach(var mode in Enum.GetValues<ActionExecutionMode>())
                         {
