@@ -35,7 +35,7 @@ namespace Synapse.Integration.Models
         /// <summary>
         /// Initializes a new <see cref="V1PluginInfo"/>
         /// </summary>
-        /// <param name="location">The plugin's location/param>
+        /// <param name="location">The plugin's location</param>
         /// <param name="metadata">The plugin's metadata</param>
         /// <param name="isLoaded">A boolean indicating whether or not the described plugin is loaded</param>
         public V1PluginInfo(string location, V1PluginMetadata metadata, bool isLoaded)
