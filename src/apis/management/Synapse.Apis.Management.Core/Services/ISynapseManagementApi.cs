@@ -80,19 +80,11 @@ namespace Synapse.Apis.Management
         /// <summary>
         /// Lists existing <see cref="V1Workflow"/>s
         /// </summary>
-        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-        /// <returns>A new <see cref="List{T}"/> containing all existing <see cref="V1Workflow"/>s</returns>
-        [OperationContract]
-        Task<List<V1Workflow>> GetWorkflowsAsync(CancellationToken cancellationToken = default);
-
-        /// <summary>
-        /// Lists existing <see cref="V1Workflow"/>s
-        /// </summary>
         /// <param name="query">The OData query string</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A new <see cref="List{T}"/> containing all existing <see cref="V1Workflow"/>s</returns>
         [OperationContract]
-        Task<List<V1Workflow>> GetWorkflowsAsync(string query, CancellationToken cancellationToken = default);
+        Task<List<V1Workflow>> GetWorkflowsAsync(string? query = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Gets the id of the <see cref="V1Workflow"/> to archive
@@ -147,19 +139,11 @@ namespace Synapse.Apis.Management
         /// <summary>
         /// Lists existing workflow instances
         /// </summary>
-        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-        /// <returns>A new <see cref="List{T}"/> containing all existing workflow instances</returns>
-        [OperationContract]
-        Task<List<V1WorkflowInstance>> GetWorkflowInstancesAsync(CancellationToken cancellationToken = default);
-
-        /// <summary>
-        /// Lists existing workflow instances
-        /// </summary>
         /// <param name="query">The ODATA query</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A new <see cref="List{T}"/> containing all existing workflow instances</returns>
         [OperationContract]
-        Task<List<V1WorkflowInstance>> GetWorkflowInstancesAsync(string query, CancellationToken cancellationToken = default);
+        Task<List<V1WorkflowInstance>> GetWorkflowInstancesAsync(string? query = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Suspends the execution of the <see cref="V1WorkflowInstance"/> with the specified id
@@ -241,19 +225,11 @@ namespace Synapse.Apis.Management
         /// <summary>
         /// Lists existing <see cref="V1Correlation"/>s
         /// </summary>
-        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-        /// <returns>A new <see cref="List{T}"/> containing all existing <see cref="V1Correlation"/>s</returns>
-        [OperationContract]
-        Task<List<V1Correlation>> GetCorrelationsAsync(CancellationToken cancellationToken = default);
-
-        /// <summary>
-        /// Lists existing <see cref="V1Correlation"/>s
-        /// </summary>
         /// <param name="query">The OData query string</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A new <see cref="List{T}"/> containing all existing <see cref="V1Correlation"/>s</returns>
         [OperationContract]
-        Task<List<V1Correlation>> GetCorrelationsAsync(string query, CancellationToken cancellationToken = default);
+        Task<List<V1Correlation>> GetCorrelationsAsync(string? query = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Deletes the <see cref="V1Correlation"/> with the specified id
@@ -294,7 +270,7 @@ namespace Synapse.Apis.Management
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A new <see cref="List{T}"/> containing all existing <see cref="V1AuthenticationDefinitionCollection"/>s</returns>
         [OperationContract]
-        Task<List<V1AuthenticationDefinitionCollection>> GetAuthenticationDefinitionCollectionsAsync(string? query, CancellationToken cancellationToken = default);
+        Task<List<V1AuthenticationDefinitionCollection>> GetAuthenticationDefinitionCollectionsAsync(string? query = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Deletes the <see cref="V1AuthenticationDefinitionCollection"/> with the specified id
@@ -335,7 +311,7 @@ namespace Synapse.Apis.Management
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A new <see cref="List{T}"/> containing all existing <see cref="V1EventDefinitionCollection"/>s</returns>
         [OperationContract]
-        Task<List<V1EventDefinitionCollection>> GetEventDefinitionCollectionsAsync(string? query, CancellationToken cancellationToken = default);
+        Task<List<V1EventDefinitionCollection>> GetEventDefinitionCollectionsAsync(string? query = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Deletes the <see cref="V1EventDefinitionCollection"/> with the specified id
@@ -376,7 +352,7 @@ namespace Synapse.Apis.Management
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A new <see cref="List{T}"/> containing all existing <see cref="V1FunctionDefinitionCollection"/>s</returns>
         [OperationContract]
-        Task<List<V1FunctionDefinitionCollection>> GetFunctionDefinitionCollectionsAsync(string? query, CancellationToken cancellationToken = default);
+        Task<List<V1FunctionDefinitionCollection>> GetFunctionDefinitionCollectionsAsync(string? query = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Deletes the <see cref="V1FunctionDefinitionCollection"/> with the specified id
@@ -422,14 +398,6 @@ namespace Synapse.Apis.Management
 
         [OperationContract]
         Task<V1Schedule> GetScheduleByIdAsync(string id, CancellationToken cancellationToken = default);
-
-        /// <summary>
-        /// Lists existing <see cref="V1Schedule"/>s
-        /// </summary>
-        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-        /// <returns>A new <see cref="List{T}"/> containing all existing <see cref="V1Schedule"/>s</returns>
-        [OperationContract]
-        Task<List<V1Schedule>> GetSchedulesAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Lists existing <see cref="V1Schedule"/>s
