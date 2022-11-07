@@ -23,7 +23,7 @@
             <tr>
                 <td>Action execution mode</td>
                 <td>
-                    <select required title="The way actions should be executed when the trigger fires" class="form-control bg-secondary text-white"
+                    <select required title="The way actions should be executed when the trigger fires" class="form-select bg-secondary text-white"
                     @onchange="async e => await OnChangeAsync(t => t.ActionMode = EnumHelper.Parse<ActionExecutionMode>((string)e.Value!))">
                         @foreach (var mode in Enum.GetValues<ActionExecutionMode>())
                         {

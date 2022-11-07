@@ -20,7 +20,7 @@
 @using Neuroglia.Data.Services
 @inject ISchemaRegistry SchemaRegistry
 
-<select required class="form-control" 
+<select required class="form-select" 
 @onchange="async e => await OnOperationChangedAsync((string?)e.Value)">
     @if(string.IsNullOrWhiteSpace(OperationId))
     {

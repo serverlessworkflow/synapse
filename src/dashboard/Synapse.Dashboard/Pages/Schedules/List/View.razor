@@ -31,6 +31,11 @@
 
 @if(schedules != null)
 {
+    <div class="row">
+        <div class="col-6">
+            <SearchBox PlaceHolder="Search schedules..." OnSearch="OnSearchSchedules" OnClear="OnClearScheduleSearch" />
+        </div>
+    </div>
     <Table Items="schedules" AutoGenerateColumns="false">
         <Columns>
             <Column T="V1Schedule"
@@ -121,6 +126,16 @@ else
     void OnViewSchedule(V1Schedule schedule)
     {
         this.NavigationManager.NavigateTo($"/schedules/{schedule.Id}");
+    }
+
+    void OnSearchSchedules(string searchTerm)
+    {
+        this.Dispatcher.Dispatch(new QuerySchedules(searchTerm));
+    }
+
+    void OnClearScheduleSearch()
+    {
+        this.Dispatcher.Dispatch(new QuerySchedules());
     }
 
     protected override void Dispose(bool disposing)

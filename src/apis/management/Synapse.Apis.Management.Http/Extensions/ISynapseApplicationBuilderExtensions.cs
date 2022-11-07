@@ -25,7 +25,6 @@ using Microsoft.OpenApi.Models;
 using Neuroglia;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using Synapse.Apis.Management.Http.Services;
 using Synapse.Application.Configuration;
 using Synapse.Application.Services;
 using Synapse.Integration.Serialization.Converters;
