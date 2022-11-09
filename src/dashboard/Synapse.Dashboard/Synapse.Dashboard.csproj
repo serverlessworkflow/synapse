@@ -17,6 +17,7 @@
   <ItemGroup>
     <PackageReference Include="BlazorMonaco" Version="2.1.0" />
     <PackageReference Include="BuildWebCompiler2022" Version="1.14.8" Condition="$([MSBuild]::IsOsPlatform('Windows'))" />
+    <PackageReference Include="CloudNative.CloudEvents.NewtonsoftJson" Version="2.5.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.10" PrivateAssets="all" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="6.0.10" />
@@ -40,7 +41,7 @@
     <ProjectReference Include="..\..\apis\monitoring\Synapse.Apis.Monitoring.Core\Synapse.Apis.Monitoring.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Content Update="Pages\Correlations\View.razor">
+    <Content Update="Pages\Correlations\View\View.razor">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>
   </ItemGroup>

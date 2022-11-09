@@ -135,7 +135,7 @@
                 if (isDeleted) this.OnViewScheduleList();
             });
         await this.BreadcrumbManager.Use(Breadcrumbs.Schedules);
-        await this.BreadcrumbManager.AddItem(new BreadcrumbItem(this.ScheduleId.ToString(), $"/schedules/{this.ScheduleId}"));
+        await this.BreadcrumbManager.AddItem(new BreadcrumbItem(this.ScheduleId, $"/schedules/{this.ScheduleId}"));
         this.Dispatcher.Dispatch(new InitializeState());
     }
 

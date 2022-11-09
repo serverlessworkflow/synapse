@@ -150,7 +150,7 @@ namespace Synapse.Application.Commands.Workflows
                     conditions.Add(new(filters.ToArray()));
                 }
                 var outcome = new V1CorrelationOutcome(V1CorrelationOutcomeType.Start, workflow.Id);
-                await this.Mediator.ExecuteAndUnwrapAsync(new V1CreateCorrelationCommand(lifetime, conditionType, conditions, outcome, null), cancellationToken: cancellationToken);
+                await this.Mediator.ExecuteAndUnwrapAsync(new V1CreateCorrelationCommand(V1CorrelationActivationType.Implicit, lifetime, conditionType, conditions, outcome, null), cancellationToken: cancellationToken);
             }
             else if (workflow.Definition.Start?.Schedule != null) 
             {

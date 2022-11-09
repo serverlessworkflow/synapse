@@ -69,13 +69,14 @@
 @code {
 
     protected IDisposable? subscription = null!;
-    private List<V1Correlation> correlations = null!;
+    private List<V1Correlation>? correlations;
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
         await this.BreadcrumbService.Use(Breadcrumbs.Correlations);
-        this.subscription = this.Feature
+        this.subscription = V1CorrelationCollectionSelectors
+            .SelectCurrentCorrelations(this.Store)
             .Subscribe(correlations =>
             {
                 this.correlations = correlations;

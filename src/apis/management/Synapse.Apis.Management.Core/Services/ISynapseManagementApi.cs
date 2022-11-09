@@ -232,6 +232,27 @@ namespace Synapse.Apis.Management
         Task<List<V1Correlation>> GetCorrelationsAsync(string? query = null, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Deletes the specified <see cref="V1CorrelationContext"/>
+        /// </summary>
+        /// <param name="correlationId">The id of the <see cref="V1Correlation"/> the <see cref="V1CorrelationContext"/> to delete belongs to</param>
+        /// <param name="contextId">The id of the <see cref="V1CorrelationContext"/> to delete</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        [OperationContract]
+        Task DeleteCorrelationContextAsync(string correlationId, string contextId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Deletes the specified correlated <see cref="V1Event"/>
+        /// </summary>
+        /// <param name="correlationId">The id of the <see cref="V1Correlation"/> the correlated <see cref="V1Event"/> to delete belongs to</param>
+        /// <param name="contextId">The id of the <see cref="V1CorrelationContext"/> the correlated <see cref="V1Event"/> to delete belongs to</param>
+        /// <param name="eventId">The id of the correlated <see cref="V1Event"/> to delete</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        [OperationContract]
+        Task DeleteCorrelationContextEventAsync(string correlationId, string contextId, string eventId, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Deletes the <see cref="V1Correlation"/> with the specified id
         /// </summary>
         /// <param name="id">The id of the <see cref="V1Correlation"/> to delete</param>

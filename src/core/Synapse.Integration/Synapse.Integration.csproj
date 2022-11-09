@@ -78,6 +78,15 @@
     <Compile Update="Commands\Correlations\v1\Generated\V1CorrelateEventCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\Correlations\v1\V1CorrelateEventCommand.cs</CustomToolNamespace>
     </Compile>
+    <Compile Update="Commands\Correlations\v1\Generated\V1CreateCorrelationCommand.cs">
+      <CustomToolNamespace>..\Synapse.Application\Commands\Correlations\v1\V1CreateCorrelationCommand.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Commands\Correlations\v1\Generated\V1DeleteCorrelatedEventCommand.cs">
+      <CustomToolNamespace>..\Synapse.Application\Commands\Correlations\v1\V1DeleteCorrelatedEventCommand.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Commands\Correlations\v1\Generated\V1DeleteCorrelationContextCommand.cs">
+      <CustomToolNamespace>..\Synapse.Application\Commands\Correlations\v1\V1DeleteCorrelationContextCommand.cs</CustomToolNamespace>
+    </Compile>
     <Compile Update="Commands\EventDefinitionCollections\v1\Generated\V1CreateEventDefinitionCollectionCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\EventDefinitionCollections\v1\V1CreateEventDefinitionCollectionCommand.cs</CustomToolNamespace>
     </Compile>
@@ -215,6 +224,9 @@
     </Compile>
     <Compile Update="Events\Correlations\v1\Generated\V1ContextAddedToCorrelationIntegrationEvent.cs">
       <CustomToolNamespace>..\Synapse.Domain\Events\Correlations\v1\V1ContextAddedToCorrelationDomainEvent.cs</CustomToolNamespace>
+    </Compile>
+    <Compile Update="Events\Correlations\v1\Generated\V1CorrelatedEventReleasedIntegrationEvent.cs">
+      <CustomToolNamespace>..\Synapse.Domain\Events\Correlations\v1\V1CorrelatedEventReleasedDomainEvent.cs</CustomToolNamespace>
     </Compile>
     <Compile Update="Events\Correlations\v1\Generated\V1CorrelationContextReleasedIntegrationEvent.cs">
       <CustomToolNamespace>..\Synapse.Domain\Events\Correlations\v1\V1CorrelationContextReleasedDomainEvent.cs</CustomToolNamespace>

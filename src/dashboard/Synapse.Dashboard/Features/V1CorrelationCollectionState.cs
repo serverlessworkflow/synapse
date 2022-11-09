@@ -18,13 +18,13 @@
 using Neuroglia.Data.Flux;
 using Synapse.Apis.Management;
 using Synapse.Integration.Models;
+using System.Reactive.Linq;
 
 namespace Synapse.Dashboard
 {
 
     [Feature]
-    public class V1CorrelationCollectionState
-        : List<V1Correlation>
+    public record V1CorrelationCollectionState
     {
 
         public V1CorrelationCollectionState()
@@ -33,10 +33,11 @@ namespace Synapse.Dashboard
         }
 
         public V1CorrelationCollectionState(IEnumerable<V1Correlation> correlations)
-            : base(correlations)
         {
-
+            this.Correlations = new(correlations);
         }
+
+        public List<V1Correlation>? Correlations { get; init; }
 
     }
 
@@ -46,30 +47,34 @@ namespace Synapse.Dashboard
 
         public static V1CorrelationCollectionState OnSetV1CorrelationCollection(V1CorrelationCollectionState state, SetV1CorrelationCollection action)
         {
-            state = new(action.Correlations);
-            return state;
+            return new(action.Correlations);
         }
 
         public static V1CorrelationCollectionState OnAddV1Correlation(V1CorrelationCollectionState state, AddV1Correlation action)
         {
-            state.Add(action.Correlation);
-            return state;
+            var correlations = state.Correlations;
+            if (correlations == null) correlations = new();
+            correlations.Add(action.Correlation);
+            return state with { Correlations = correlations };
         }
 
         public static V1CorrelationCollectionState OnAddContextToV1Correlation(V1CorrelationCollectionState state, AddContextToV1Correlation action)
         {
-            var correl = state.FirstOrDefault(c => c.Id == action.CorrelationId);
+            var correlations = state.Correlations == null ? new List<V1Correlation>() : new List<V1Correlation>(state.Correlations);
+            var correl = correlations.FirstOrDefault(c => c.Id == action.CorrelationId);
             if (correl == null)
                 return state;
             if (correl.Contexts == null)
                 correl.Contexts = new List<V1CorrelationContext>();
+            else
+                correl.Contexts = new List<V1CorrelationContext>(correl.Contexts);
             correl.Contexts.Add(action.Context);
-            return state;
+            return state with { Correlations = correlations };
         }
 
         public static V1CorrelationCollectionState OnRemoveContextFromV1Correlation(V1CorrelationCollectionState state, RemoveContextFromV1Correlation action)
         {
-            var correl = state.FirstOrDefault(c => c.Id == action.CorrelationId);
+            var correl = state.Correlations?.FirstOrDefault(c => c.Id == action.CorrelationId);
             if (correl == null)
                 return state;
             if (correl.Contexts == null)
@@ -77,12 +82,12 @@ namespace Synapse.Dashboard
             var context = correl.Contexts.FirstOrDefault(c => c.Id == action.ContextId);
             if (context != null)
                 correl.Contexts.Remove(context);
-            return state;
+            return state with { };
         }
 
         public static V1CorrelationCollectionState OnCorrelateV1Event(V1CorrelationCollectionState state, CorrelateV1Event action)
         {
-            var correl = state.FirstOrDefault(c => c.Id == action.CorrelationId);
+            var correl = state.Correlations?.FirstOrDefault(c => c.Id == action.CorrelationId);
             if (correl == null)
                 return state;
             if (correl.Contexts == null)
@@ -93,7 +98,7 @@ namespace Synapse.Dashboard
             if (context.PendingEvents == null)
                 context.PendingEvents = new List<V1Event>();
             context.PendingEvents.Add(action.Event);
-            return state;
+            return state with { };
         }
 
     }
@@ -225,6 +230,18 @@ namespace Synapse.Dashboard
         public string ContextId { get; }
 
         public V1Event Event { get; }
+
+    }
+
+    public static class V1CorrelationCollectionSelectors
+    {
+
+        public static IObservable<List<V1Correlation>?> SelectCurrentCorrelations(IStore store)
+        {
+            return store.GetFeature<V1CorrelationCollectionState>()
+                  .Select(featureState => featureState.Correlations)
+                  .DistinctUntilChanged();
+        }
 
     }
 

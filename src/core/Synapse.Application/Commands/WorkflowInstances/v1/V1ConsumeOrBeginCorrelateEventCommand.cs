@@ -99,7 +99,7 @@ namespace Synapse.Application.Commands.WorkflowInstances
             {
                 var conditions = new List<V1CorrelationCondition>() { V1CorrelationCondition.Match(command.EventDefinition) };
                 var outcome = new V1CorrelationOutcome(V1CorrelationOutcomeType.Correlate, command.WorkflowInstanceId);
-                await this.Mediator.ExecuteAndUnwrapAsync(new V1CreateCorrelationCommand(V1CorrelationLifetime.Singleton, V1CorrelationConditionType.AnyOf, conditions, outcome, workflowInstance.CorrelationContext), cancellationToken);
+                await this.Mediator.ExecuteAndUnwrapAsync(new V1CreateCorrelationCommand(V1CorrelationActivationType.Implicit, V1CorrelationLifetime.Singleton, V1CorrelationConditionType.AnyOf, conditions, outcome, workflowInstance.CorrelationContext), cancellationToken);
             }
             else
             {

@@ -46,37 +46,44 @@ namespace Synapse.Integration.Events.Correlations
 		public virtual DateTime CreatedAt { get; set; }
 
 		/// <summary>
+		/// The newly created V1Correlation's activation type
+		/// </summary>
+		[DataMember(Name = "ActivationType", Order = 3)]
+		[Description("The newly created V1Correlation's activation type")]
+		public virtual V1CorrelationActivationType ActivationType { get; set; }
+
+		/// <summary>
 		/// The lifetime of the newly created V1Correlation
 		/// </summary>
-		[DataMember(Name = "Lifetime", Order = 3)]
+		[DataMember(Name = "Lifetime", Order = 4)]
 		[Description("The lifetime of the newly created V1Correlation")]
 		public virtual V1CorrelationLifetime Lifetime { get; set; }
 
 		/// <summary>
 		/// The type of V1CorrelationCondition evaluation the newly created V1Correlation should use
 		/// </summary>
-		[DataMember(Name = "ConditionType", Order = 4)]
+		[DataMember(Name = "ConditionType", Order = 5)]
 		[Description("The type of V1CorrelationCondition evaluation the newly created V1Correlation should use")]
 		public virtual V1CorrelationConditionType ConditionType { get; set; }
 
 		/// <summary>
 		/// An IEnumerable`1 containing all V1CorrelationConditions the newly created V1Correlation is made out of
 		/// </summary>
-		[DataMember(Name = "Conditions", Order = 5)]
+		[DataMember(Name = "Conditions", Order = 6)]
 		[Description("An IEnumerable`1 containing all V1CorrelationConditions the newly created V1Correlation is made out of")]
 		public virtual IEnumerable<V1CorrelationCondition> Conditions { get; set; }
 
 		/// <summary>
 		/// The V1CorrelationOutcome of the newly created V1Correlation
 		/// </summary>
-		[DataMember(Name = "Outcome", Order = 6)]
+		[DataMember(Name = "Outcome", Order = 7)]
 		[Description("The V1CorrelationOutcome of the newly created V1Correlation")]
 		public virtual V1CorrelationOutcome Outcome { get; set; }
 
 		/// <summary>
 		/// The initial V1CorrelationContext of the newly created V1Correlation
 		/// </summary>
-		[DataMember(Name = "Context", Order = 7)]
+		[DataMember(Name = "Context", Order = 8)]
 		[Description("The initial V1CorrelationContext of the newly created V1Correlation")]
 		public virtual V1CorrelationContext Context { get; set; }
 

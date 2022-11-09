@@ -102,6 +102,41 @@ namespace Synapse.Apis.Management.Http.Controllers
         }
 
         /// <summary>
+        /// Deletes an existing correlation context
+        /// </summary>
+        /// <param name="correlationId">The id of the correlation the context to delete belongs to</param>
+        /// <param name="contextId">The id of the correlation context to delete</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new <see cref="IActionResult"/></returns>
+        [HttpDelete("byid/{correlationId}/context/{contextId}")]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.Forbidden)]
+        public async Task<IActionResult> DeleteCorrelationContext(string correlationId, string contextId, CancellationToken cancellationToken)
+        {
+            return this.Process(await this.Mediator.ExecuteAsync(new Application.Commands.Correlations.V1DeleteCorrelationContextCommand(correlationId, contextId), cancellationToken), (int)HttpStatusCode.NoContent);
+        }
+
+        /// <summary>
+        /// Deletes a correlated event
+        /// </summary>
+        /// <param name="correlationId">The id of the correlation the correlated event to delete belongs to</param>
+        /// <param name="contextId">The id of the context the correlated event to delete belongs to</param>
+        /// <param name="eventId">The id of the correlated event to delete</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new <see cref="IActionResult"/></returns>
+        [HttpDelete("byid/{correlationId}/context/{contextId}/events/{eventId}")]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.Forbidden)]
+        public async Task<IActionResult> DeleteCorrelatedEvent(string correlationId, string contextId, string eventId, CancellationToken cancellationToken)
+        {
+            return this.Process(await this.Mediator.ExecuteAsync(new Application.Commands.Correlations.V1DeleteCorrelatedEventCommand(correlationId, contextId, eventId), cancellationToken), (int)HttpStatusCode.NoContent);
+        }
+
+        /// <summary>
         /// Deletes an existing correlation
         /// </summary>
         /// <param name="id">The id of the correlation to delete</param>
@@ -114,7 +149,7 @@ namespace Synapse.Apis.Management.Http.Controllers
         [ProducesResponseType((int)HttpStatusCode.Forbidden)]
         public async Task<IActionResult> DeleteCorrelation(string id, CancellationToken cancellationToken)
         {
-            return this.Process(await this.Mediator.ExecuteAsync(new Application.Commands.Generic.V1DeleteCommand<Domain.Models.V1Correlation, string>(id), cancellationToken), (int)HttpStatusCode.Created);
+            return this.Process(await this.Mediator.ExecuteAsync(new Application.Commands.Generic.V1DeleteCommand<Domain.Models.V1Correlation, string>(id), cancellationToken), (int)HttpStatusCode.NoContent);
         }
 
     }

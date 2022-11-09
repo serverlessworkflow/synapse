@@ -33,6 +33,7 @@ namespace Synapse.Application.Mapping.Configuration
         void IMappingConfiguration<V1Event, Integration.Models.V1Event>.Configure(IMappingExpression<V1Event, Integration.Models.V1Event> mapping)
         {
             mapping.ForMember(e => e.Attributes, options => options.Ignore());
+            mapping.ForMember(e => e.ContextAttributes, options => options.Ignore());
         }
 
         void IMappingConfiguration<Integration.Models.V1Event, V1Event>.Configure(IMappingExpression<Integration.Models.V1Event, V1Event> mapping)

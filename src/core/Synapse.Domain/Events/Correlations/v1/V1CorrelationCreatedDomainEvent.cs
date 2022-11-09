@@ -41,21 +41,28 @@ namespace Synapse.Domain.Events.Correlations
         /// Initializes a new <see cref="V1CorrelationCreatedDomainEvent"/>
         /// </summary>
         /// <param name="id">The id of the newly created <see cref="V1Correlation"/></param>
+        /// <param name="activationType">The newly created <see cref="V1Correlation"/>'s activation type</param>
         /// <param name="lifetime">The lifetime of the newly created <see cref="V1Correlation"/></param>
         /// <param name="conditionType">The type of <see cref="V1CorrelationCondition"/> evaluation the newly created <see cref="V1Correlation"/> should use</param>
         /// <param name="conditions">An <see cref="IEnumerable{T}"/> containing all <see cref="V1CorrelationCondition"/>s the newly created <see cref="V1Correlation"/> is made out of</param>
         /// <param name="outcome">The <see cref="V1CorrelationOutcome"/> of the newly created <see cref="V1Correlation"/></param>
         /// <param name="context">The initial <see cref="V1CorrelationContext"/> of the newly created <see cref="V1Correlation"/></param>
-        public V1CorrelationCreatedDomainEvent(string id, V1CorrelationLifetime lifetime, V1CorrelationConditionType conditionType,
+        public V1CorrelationCreatedDomainEvent(string id, V1CorrelationActivationType activationType, V1CorrelationLifetime lifetime, V1CorrelationConditionType conditionType,
             IEnumerable<Models.V1CorrelationCondition> conditions, Models.V1CorrelationOutcome outcome, Models.V1CorrelationContext? context)
             : base(id)
         {
+            this.ActivationType = activationType;
             this.Lifetime = lifetime;
             this.ConditionType = conditionType;
             this.Conditions = conditions;
             this.Outcome = outcome;
             this.Context = context;
         }
+
+        /// <summary>
+        /// Gets the newly created <see cref="V1Correlation"/>'s activation type
+        /// </summary>
+        public virtual V1CorrelationActivationType ActivationType { get; protected set; }
 
         /// <summary>
         /// Gets the lifetime of the newly created <see cref="V1Correlation"/>

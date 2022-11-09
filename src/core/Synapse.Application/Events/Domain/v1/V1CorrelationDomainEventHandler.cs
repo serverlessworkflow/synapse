@@ -28,6 +28,7 @@ namespace Synapse.Application.Events.Domain
         INotificationHandler<V1CorrelationCreatedDomainEvent>,
         INotificationHandler<V1ContextAddedToCorrelationDomainEvent>,
         INotificationHandler<V1EventCorrelatedDomainEvent>,
+        INotificationHandler<V1CorrelatedEventReleasedDomainEvent>,
         INotificationHandler<V1CorrelationContextReleasedDomainEvent>,
         INotificationHandler<V1CorrelationDeletedDomainEvent>
     {
@@ -77,14 +78,26 @@ namespace Synapse.Application.Events.Domain
         }
 
         /// <inheritdoc/>
+        public virtual async Task HandleAsync(V1CorrelatedEventReleasedDomainEvent e, CancellationToken cancellationToken = default)
+        {
+            var correlation = await this.GetOrReconcileProjectionAsync(e.AggregateId, cancellationToken);
+            if (correlation.Contexts == null) correlation.Contexts = new List<Integration.Models.V1CorrelationContext>();
+            var context = correlation.Contexts.FirstOrDefault(c => c.Id == e.ContextId);
+            if (context == null) return;
+            var evt = context.PendingEvents?.FirstOrDefault(x => x.Id.Equals(e.EventId, StringComparison.InvariantCultureIgnoreCase));
+            if (evt == null) return;
+            context.PendingEvents!.Remove(evt);
+            await this.Projections.UpdateAsync(context, cancellationToken);
+            await this.Projections.SaveChangesAsync(cancellationToken);
+        }
+
+        /// <inheritdoc/>
         public virtual async Task HandleAsync(V1CorrelationContextReleasedDomainEvent e, CancellationToken cancellationToken = default)
         {
             var correlation = await this.GetOrReconcileProjectionAsync(e.AggregateId, cancellationToken);
-            if (correlation.Contexts == null)
-                correlation.Contexts = new List<Integration.Models.V1CorrelationContext>();
+            if (correlation.Contexts == null) correlation.Contexts = new List<Integration.Models.V1CorrelationContext>();
             var context = correlation.Contexts.FirstOrDefault(c => c.Id == e.ContextId);
-            if (context == null)
-                return;
+            if (context == null) return;
             correlation.Contexts.Remove(context);
             await this.Projections.UpdateAsync(correlation, cancellationToken);
             await this.Projections.SaveChangesAsync(cancellationToken);
