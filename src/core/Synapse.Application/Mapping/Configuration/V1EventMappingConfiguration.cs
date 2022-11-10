@@ -42,5 +42,4 @@ namespace Synapse.Application.Mapping.Configuration
         }
 
     }
-
 }

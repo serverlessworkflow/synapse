@@ -52,8 +52,7 @@ namespace Synapse.Application.Events.Domain
         public virtual async Task HandleAsync(V1ContextAddedToCorrelationDomainEvent e, CancellationToken cancellationToken = default)
         {
             var correlation = await this.GetOrReconcileProjectionAsync(e.AggregateId, cancellationToken);
-            if (correlation.Contexts == null)
-                correlation.Contexts = new List<Integration.Models.V1CorrelationContext>();
+            if (correlation.Contexts == null) correlation.Contexts = new List<Integration.Models.V1CorrelationContext>();
             correlation.Contexts.Add(this.Mapper.Map<Integration.Models.V1CorrelationContext>(e.Context));
             await this.Projections.UpdateAsync(correlation, cancellationToken);
             await this.Projections.SaveChangesAsync(cancellationToken);
@@ -65,12 +64,9 @@ namespace Synapse.Application.Events.Domain
         {
             var correlation = await this.GetOrReconcileProjectionAsync(e.AggregateId, cancellationToken);
             var context = correlation.Contexts.FirstOrDefault(c => c.Id == e.ContextId);
-            if (context == null)
-                return;
-            if (context.PendingEvents == null)
-                context.PendingEvents = new List<Integration.Models.V1Event>();
-            if (context.PendingEvents.Any(evt => evt.Id == e.Event.Id))
-                return;
+            if (context == null) return;
+            if (context.PendingEvents == null) context.PendingEvents = new List<Integration.Models.V1Event>();
+            if (context.PendingEvents.Any(evt => evt.Id == e.Event.Id)) return;
             context.PendingEvents.Add(this.Mapper.Map< Integration.Models.V1Event>(e.Event));
             await this.Projections.UpdateAsync(correlation, cancellationToken);
             await this.Projections.SaveChangesAsync(cancellationToken);
@@ -87,7 +83,7 @@ namespace Synapse.Application.Events.Domain
             var evt = context.PendingEvents?.FirstOrDefault(x => x.Id.Equals(e.EventId, StringComparison.InvariantCultureIgnoreCase));
             if (evt == null) return;
             context.PendingEvents!.Remove(evt);
-            await this.Projections.UpdateAsync(context, cancellationToken);
+            await this.Projections.UpdateAsync(correlation, cancellationToken);
             await this.Projections.SaveChangesAsync(cancellationToken);
         }
 

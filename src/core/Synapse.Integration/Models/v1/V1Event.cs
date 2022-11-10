@@ -140,7 +140,13 @@ namespace Synapse.Integration.Models
         /// <returns>A new <see cref="V1Event"/></returns>
         public static V1Event Create()
         {
-            return new() { Id = Guid.NewGuid().ToString(), SpecVersion = CloudEventsSpecVersion.Default.VersionId, DataContentType = MediaTypeNames.Application.Json };
+            return new()
+            {
+                Id = Guid.NewGuid().ToString(),
+                SpecVersion = CloudEventsSpecVersion.Default.VersionId,
+                DataContentType = MediaTypeNames.Application.Json,
+                Data = DynamicObject.FromObject(new())
+            };
         }
 
         /// <summary>

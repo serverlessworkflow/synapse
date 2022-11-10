@@ -60,7 +60,7 @@ namespace Synapse.Integration.Commands.Correlations
 		[DataMember(Name = "Conditions", Order = 4)]
 		[Description("An IEnumerable`1 containing all V1CorrelationConditions the V1Correlation to create is made out of")]
 		[MinLength(1)]
-		public virtual IEnumerable<V1CorrelationCondition> Conditions { get; set; }
+		public virtual ICollection<V1CorrelationCondition> Conditions { get; set; }
 
 		/// <summary>
 		/// The V1CorrelationOutcome of the V1Correlation to create

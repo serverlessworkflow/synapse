@@ -108,7 +108,7 @@ namespace Synapse.Apis.Management.Http.Controllers
         /// <param name="contextId">The id of the correlation context to delete</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A new <see cref="IActionResult"/></returns>
-        [HttpDelete("byid/{correlationId}/context/{contextId}")]
+        [HttpDelete("byid/{correlationId}/contexts/{contextId}")]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
@@ -126,7 +126,7 @@ namespace Synapse.Apis.Management.Http.Controllers
         /// <param name="eventId">The id of the correlated event to delete</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>A new <see cref="IActionResult"/></returns>
-        [HttpDelete("byid/{correlationId}/context/{contextId}/events/{eventId}")]
+        [HttpDelete("byid/{correlationId}/contexts/{contextId}/events/{eventId}")]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]

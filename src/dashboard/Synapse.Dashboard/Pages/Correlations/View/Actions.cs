@@ -165,3 +165,75 @@ public class HandleDeleteCorrelationContextResult
 {
 
 }
+
+/// <summary>
+/// Represents the Flux action used to delete a <see cref="V1Event"/> correlated to a specified <see cref="V1CorrelationContext"/>
+/// </summary>
+public class DeleteCorrelatedEvent
+{
+
+    /// <summary>
+    /// Initializes a new <see cref="DeleteCorrelatedEvent"/>
+    /// </summary>
+    /// <param name="correlationId">The id of the <see cref="V1Correlation"/> the <see cref="V1Event"/> to delete belongs to</param>
+    /// <param name="contextId">The id of the <see cref="V1CorrelationContext"/> the <see cref="V1Event"/> to delete belongs to</param>
+    /// <param name="eventId">The id of the correlated <see cref="V1Event"/> to delete</param>
+    public DeleteCorrelatedEvent(string correlationId, string contextId, string eventId)
+    {
+        this.CorrelationId = correlationId;
+        this.ContextId = contextId;
+        this.EventId = eventId;
+    }
+
+    /// <summary>
+    /// Gets the id of the <see cref="V1Correlation"/> the <see cref="V1Event"/> to delete belongs to
+    /// </summary>
+    public string CorrelationId { get; }
+
+    /// <summary>
+    /// Gets the id of the <see cref="V1CorrelationContext"/> the <see cref="V1Event"/> to delete belongs to
+    /// </summary>
+    public string ContextId { get; }
+
+    /// <summary>
+    /// Gets the id of the correlated <see cref="V1Event"/> to delete
+    /// </summary>
+    public string EventId { get; }
+
+}
+
+/// <summary>
+/// Represents the Flux action used to handle the differed result of a <see cref="DeleteCorrelatedEvent"/> action
+/// </summary>
+public class HandleDeleteCorrelatedEventResult
+{
+
+    /// <summary>
+    /// Initializes a new <see cref="HandleDeleteCorrelatedEventResult"/>
+    /// </summary>
+    /// <param name="correlationId">The id of the <see cref="V1Correlation"/> the deleted <see cref="V1Event"/> belongs to</param>
+    /// <param name="contextId">The id of the <see cref="V1CorrelationContext"/> the deleted <see cref="V1Event"/> belongs to</param>
+    /// <param name="eventId">The id of the deleted correlated <see cref="V1Event"/></param>
+    public HandleDeleteCorrelatedEventResult(string correlationId, string contextId, string eventId)
+    {
+        this.CorrelationId = correlationId;
+        this.ContextId = contextId;
+        this.EventId = eventId;
+    }
+
+    /// <summary>
+    /// Gets the id of the <see cref="V1Correlation"/> the deleted <see cref="V1Event"/> belongs to
+    /// </summary>
+    public string CorrelationId { get; }
+
+    /// <summary>
+    /// Gets the id of the <see cref="V1CorrelationContext"/> the deleted <see cref="V1Event"/> belongs to
+    /// </summary>
+    public string ContextId { get; }
+
+    /// <summary>
+    /// Gets the id of the deleted correlated <see cref="V1Event"/>
+    /// </summary>
+    public string EventId { get; }
+
+}

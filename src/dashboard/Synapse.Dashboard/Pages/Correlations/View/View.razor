@@ -39,16 +39,16 @@
 @if (correlation != null)
 {
 
-        <AppRightSidebar>
-            <Toolbar>
-                <button @onclick="OnNavigateToCorrelationList" class="btn btn-outline-dark" title="Back to list"><small class="bi bi-arrow-left"></small><span class="btn-label">&nbsp; Back to list</span></button>
-                @if(correlation.ActivationType == V1CorrelationActivationType.Explicit)
-                {
-                    <button @onclick="OnSaveChanges" class="btn btn-outline-dark" title="Save changes made to the correlation"><small class="bi bi-cloud-upload"></small><span class="btn-label"> Save changes</span></button>
-                    <button @onclick="OnDeleteCorrelation" class="btn btn-outline-dark" title="Delete the correlation"><small class="bi bi-trash"></small><span class="btn-label"> Delete</span></button>
-                }
-            </Toolbar>
-        </AppRightSidebar>
+    <AppRightSidebar>
+        <Toolbar>
+            <button @onclick="OnNavigateToCorrelationList" class="btn btn-outline-dark" title="Back to list"><small class="bi bi-arrow-left"></small><span class="btn-label">&nbsp; Back to list</span></button>
+            @if(correlation.ActivationType == V1CorrelationActivationType.Explicit)
+            {
+                <button @onclick="OnSaveChanges" class="btn btn-outline-dark" title="Save changes made to the correlation"><small class="bi bi-cloud-upload"></small><span class="btn-label"> Save changes</span></button>
+                <button @onclick="OnDeleteCorrelation" class="btn btn-outline-dark" title="Delete the correlation"><small class="bi bi-trash"></small><span class="btn-label"> Delete</span></button>
+            }
+        </Toolbar>
+    </AppRightSidebar>
 
     var highlightedAttributes = correlation.Conditions.SelectMany(c => c.Filters.SelectMany(f => f.Attributes.Select(a => a.Key).Union(f.CorrelationMappings.Select(a => a.Key)))).Distinct();
     <div class="container-fluid h-100">
@@ -58,35 +58,51 @@
                 <h4 class="mb-2">Information</h4>
                 <div class="border border-secondary rounded-2 p-3 mb-3">
                     <table class="table table-striped">
-                    <tbody>
-                        <tr>
-                            <td>Id</td>
-                            <td>@correlation.Id</td>
-                        </tr>
-                           <tr>
-                            <td>Created at</td>
-                            <td>@correlation.CreatedAt</td>
-                        </tr>
-                           <tr>
-                            <td>Last Modified</td>
-                            <td>@correlation.LastModified</td>
-                        </tr>
-                        <tr>
-                            <td>Activation</td>
-                            <td><span class="badge bg-secondary">@EnumHelper.Stringify(correlation.ActivationType)</span></td>
-                        </tr>
-                        <tr>
-                            <td>Lifetime</td>
-                            <td><span class="badge bg-secondary">@EnumHelper.Stringify(correlation.Lifetime)</span></td>
-                        </tr>
-                        <tr>
-                            <td>Condition Type</td>
-                            <td><span class="badge bg-secondary">@EnumHelper.Stringify(correlation.ConditionType)</span></td>
-                        </tr>
-                    </tbody>
-                </table>
+                        <tbody>
+                            <tr>
+                                <td>Id</td>
+                                <td>@correlation.Id</td>
+                            </tr>
+                               <tr>
+                                <td>Created at</td>
+                                <td>@correlation.CreatedAt</td>
+                            </tr>
+                               <tr>
+                                <td>Last Modified</td>
+                                <td>@correlation.LastModified</td>
+                            </tr>
+                            <tr>
+                                <td>Activation</td>
+                                <td><span class="badge bg-secondary">@EnumHelper.Stringify(correlation.ActivationType)</span></td>
+                            </tr>
+                            <tr>
+                                <td>Lifetime</td>
+                                <td><span class="badge bg-secondary">@EnumHelper.Stringify(correlation.Lifetime)</span></td>
+                            </tr>
+                            <tr>
+                                <td>Condition Type</td>
+                                <td><span class="badge bg-secondary">@EnumHelper.Stringify(correlation.ConditionType)</span></td>
+                            </tr>
+                            <tr>
+                                <td>Outcome</td>
+                                <td>
+                                    <table class="table table-striped">
+                                        <tbody>
+                                            <tr>
+                                                <td>Type</td>
+                                                <td><span class="badge bg-secondary">@EnumHelper.Stringify(correlation.Outcome.Type)</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Target</td>
+                                                <td><a href="@(correlation.Outcome.Type == V1CorrelationOutcomeType.Start ? $"/workflows/{correlation.Outcome.Target}" : $"/workflows/instance/{correlation.Outcome.Target}")">@correlation.Outcome.Target</a></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-                
 
                 <h4 class="mb-2">Conditions</h4>
                 @foreach (var condition in correlation.Conditions)
@@ -217,23 +233,33 @@
                                 <h5>Correlated Events (count: @context.PendingEvents.Count)</h5>
                                 @foreach(var e in context.PendingEvents)
                                 {
-                                    <div class="border border-dark rounded-2 p-3 my-3">
-                                        <table class="table table-striped table-bordered">
-                                            <tbody>
-                                                @foreach(var attr in e.Attributes)
-                                                {
+                                    <Expander Class="border border-dark rounded-2 p-3 my-3">
+                                        <Header>
+                                            <div class="row">
+                                                <div class="col-10"><span>@e.Id</span></div>
+                                                <div class="col-2 align-content-end">
+                                                    <button @onclick="args => OnDeleteCorrelatedEvent(context, e)" @onclick:preventDefault="true" @onclick:stopPropagation="true" title="Delete the correlated event" class="btn btn-danger d-flex ms-auto"><span class="bi bi-trash-fill"></span></button>
+                                                </div>
+                                            </div>
+                                        </Header>
+                                        <Body>
+                                            <table class="table table-striped table-bordered">
+                                                <tbody>
+                                                    @foreach (var attr in e.Attributes)
+                                                    {
+                                                        <tr>
+                                                            <td>@attr.Key</td>
+                                                            <td><span class="badge bg-@(highlightedAttributes.Contains(attr.Key) ? "warning" : "secondary")">@attr.Value</span></td>
+                                                        </tr>
+                                                    }
                                                     <tr>
-                                                        <td>@attr.Key</td>
-                                                        <td><span class="badge bg-@(highlightedAttributes.Contains(attr.Key) ? "warning" : "secondary")">@attr.Value</span></td>
+                                                        <td>data</td>
+                                                        <td><pre class="text-white fw-bold p-1 bg-secondary">@JsonConvert.SerializeObject(e.Data, Formatting.Indented)</pre></td>
                                                     </tr>
-                                                }
-                                                <tr>
-                                                    <td>data</td>
-                                                    <td><pre class="text-white fw-bold p-1 bg-secondary">@JsonConvert.SerializeObject(e.Data, Formatting.Indented)</pre></td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                                </tbody>
+                                            </table>
+                                        </Body>
+                                    </Expander>
                                 }
                             </Body>
                         </Expander>
@@ -274,8 +300,8 @@ else
             .TakeUntil(this.disposeNotifier)
             .Subscribe(async isOpen =>
             {
-                if (isOpen) await this.publishEventModal!.ShowAsync();
-                else await this.publishEventModal!.HideAsync();
+                if (isOpen && this.publishEventModal != null) await this.publishEventModal.ShowAsync();
+                else if (this.publishEventModal != null) await this.publishEventModal.HideAsync();
                 this.StateHasChanged();
             });
         Selectors.SelectCurrentEvent(this.Store)
@@ -325,7 +351,14 @@ else
 
     private void OnDeleteCorrelationContext(V1CorrelationContext context)
     {
-        this.Dispatcher.Dispatch(new DeleteCorrelationContext(context.Id))
+        if (this.correlation == null) return;
+        this.Dispatcher.Dispatch(new DeleteCorrelationContext(this.correlation.Id, context.Id));
+    }
+
+    private void OnDeleteCorrelatedEvent(V1CorrelationContext context, V1Event e)
+    {
+        if (this.correlation == null) return;
+        this.Dispatcher.Dispatch(new DeleteCorrelatedEvent(this.correlation.Id, context.Id, e.Id));
     }
 
     private void OnSaveChanges()

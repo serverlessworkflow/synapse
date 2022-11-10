@@ -25,6 +25,13 @@
 @inject NavigationManager NavigationManager
 
 <PageTitle>Correlations</PageTitle>
+
+<AppRightSidebar>
+    <Toolbar>
+        <button @onclick="OnNewCorrelation" class="btn btn-outline-dark" title="Back to list"><small class="bi bi-plus"></small><span class="btn-label">&nbsp; New correlation</span></button>
+    </Toolbar>
+</AppRightSidebar>
+
 <div class="row">
     <div class="col-3">
         <SearchBox PlaceHolder="Search correlations..." OnSearch="OnSearchCorrelations" OnClear="OnClearCorrelationSearch" />
@@ -32,6 +39,13 @@
 </div>
 <Table Items="correlations" AutoGenerateColumns="false">
     <Columns>
+        <Column T="V1Correlation"
+            Name="Activation"
+                ValueProvider="c => EnumHelper.Stringify(c.ActivationType)">
+            <CellTemplate Context="correl">
+                <span class="badge bg-secondary">@EnumHelper.Stringify(correl.Item.ActivationType)</span>
+            </CellTemplate>
+        </Column>
         <Column T="V1Correlation"
             Name="Outcome Type"
             ValueProvider="c => EnumHelper.Stringify(c.Outcome.Type)">
@@ -98,6 +112,11 @@
     void OnViewCorrelation(V1Correlation correlation)
     {
         this.NavigationManager.NavigateTo($"/correlations/{correlation.Id}");
+    }
+
+    void OnNewCorrelation()
+    {
+        this.NavigationManager.NavigateTo("/correlations/new");
     }
 
     protected override void Dispose(bool disposing)

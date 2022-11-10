@@ -145,8 +145,9 @@
     private async Task OnPayloadEditorInit(MonacoEditorBase editor)
     {
         await this.SetPayloadEditorLanguageAsync();
-        if (this.cloudEvent == null) return;
-        var text = await this.JsonSerializer.SerializeAsync(this.cloudEvent);
+        var text = "{ }";
+        if (this.cloudEvent?.Data != null)
+            text = await this.JsonSerializer.SerializeAsync(this.cloudEvent.Data);
         if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)
             text = await this.YamlConverter.JsonToYaml(text);
         await this.payloadEditor!.SetValue(text);

@@ -117,4 +117,21 @@ public static class Reducers
         return state with { Correlation = correlation };
     }
 
+    /// <summary>
+    /// Handles the specified <see cref="HandleDeleteCorrelatedEventResult"/>
+    /// </summary>
+    /// <param name="state">The state to reduce</param>
+    /// <param name="action">The <see cref="HandleDeleteCorrelatedEventResult"/> action to reduce</param>
+    /// <returns>The reduced state</returns>
+    public static CorrelationViewState On(CorrelationViewState state, HandleDeleteCorrelatedEventResult action)
+    {
+        var correlation = state.Correlation.Clone()!;
+        var context = correlation.Contexts?.FirstOrDefault(c => c.Id == action.ContextId);
+        if (context == null) return state;
+        var evt = context.PendingEvents?.FirstOrDefault(e => e.Id.Equals(action.EventId, StringComparison.InvariantCultureIgnoreCase));
+        if(evt == null) return state;
+        context.PendingEvents!.Remove(evt);
+        return state with { Correlation = correlation };
+    }
+
 }

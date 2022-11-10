@@ -62,7 +62,27 @@ public static class Effects
         }
         catch (Exception ex)
         {
-            context.Services.GetRequiredService<ILogger<GetCorrelationById>>().LogError("An error occured while retrieving the correlation with the specified id '{correlationId}': {ex}", action.Id, ex);
+            context.Services.GetRequiredService<ILogger<GetCorrelationById>>().LogError("An error occured while deleting the context with id '{correlationContextId}', owned by the correlation with id '{correlationId}': {ex}", action.ContextId, action.CorrelationId, ex);
+        }
+    }
+
+    /// <summary>
+    /// Handles the specified <see cref="DeleteCorrelatedEvent"/>
+    /// </summary>
+    /// <param name="action">The <see cref="DeleteCorrelatedEvent"/> to handle</param>
+    /// <param name="context">The current <see cref="IEffectContext"/></param>
+    /// <returns>A new awaitable <see cref="Task"/></returns>
+    public static async Task On(DeleteCorrelatedEvent action, IEffectContext context)
+    {
+        var api = context.Services.GetRequiredService<ISynapseManagementApi>();
+        try
+        {
+            await api.DeleteCorrelationContextEventAsync(action.CorrelationId, action.ContextId, action.EventId);
+            context.Dispatcher.Dispatch(new HandleDeleteCorrelatedEventResult(action.CorrelationId, action.ContextId, action.EventId));
+        }
+        catch (Exception ex)
+        {
+            context.Services.GetRequiredService<ILogger<GetCorrelationById>>().LogError("An error occured while deleting the event with id '{eventId}' in the context with id '{contextId}', owned by the correlation with id '{correlationId}': {ex}", action.EventId, action.ContextId, action.CorrelationId, ex);
         }
     }
 

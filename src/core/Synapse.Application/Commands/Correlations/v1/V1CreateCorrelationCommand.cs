@@ -24,7 +24,7 @@ namespace Synapse.Application.Commands.Correlations
     /// <summary>
     /// Represents the <see cref="ICommand"/> used to create a new <see cref="V1Correlation"/>
     /// </summary>
-    [DataTransferObjectType(typeof(Integration.Commands.Correlations.V1CorrelateEventCommand))]
+    [DataTransferObjectType(typeof(Integration.Commands.Correlations.V1CreateCorrelationCommand))]
     public class V1CreateCorrelationCommand
         : Command<Integration.Models.V1Correlation>
     {
@@ -53,7 +53,7 @@ namespace Synapse.Application.Commands.Correlations
             this.ActivationType = activationType;
             this.Lifetime = lifetime;
             this.ConditionType = conditionType;
-            this.Conditions = conditions;
+            this.Conditions = conditions.ToList();
             this.Outcome = outcome;
             this.Context = context;
         }
@@ -79,7 +79,7 @@ namespace Synapse.Application.Commands.Correlations
         /// Gets an <see cref="IEnumerable{T}"/> containing all <see cref="V1CorrelationCondition"/>s the <see cref="V1Correlation"/> to create is made out of
         /// </summary>
         [MinLength(1)]
-        public virtual IEnumerable<V1CorrelationCondition> Conditions { get; protected set; }
+        public virtual ICollection<V1CorrelationCondition> Conditions { get; protected set; }
 
         /// <summary>
         /// Gets the <see cref="V1CorrelationOutcome"/> of the <see cref="V1Correlation"/> to create

@@ -188,9 +188,11 @@ namespace Synapse.Domain.Models
             if (e == null) throw DomainException.ArgumentNull(nameof(e));
             var matchedContext = this.Contexts.FirstOrDefault(c => c.Id == context.Id);
             if (matchedContext == null) throw DomainException.NullReference(typeof(V1CorrelationContext), context.Id);
-            var matchedEvent = matchedContext.PendingEvents?.FirstOrDefault(e => e.Id.Equals(e.Id, StringComparison.InvariantCultureIgnoreCase));
+            var matchedEvent = matchedContext.PendingEvents?.FirstOrDefault(evt => evt.Id.Equals(e.Id, StringComparison.InvariantCultureIgnoreCase));
             if (matchedEvent == null) throw DomainException.NullReference(typeof(V1Event), e.Id);
             this.On(this.RegisterEvent(new V1CorrelatedEventReleasedDomainEvent(this.Id, context.Id, e.Id)));
+            if (matchedContext.PendingEvents?.Any() == true) return;
+            this.ReleaseContext(matchedContext);
         }
 
         /// <summary>
@@ -281,7 +283,7 @@ namespace Synapse.Domain.Models
         {
             var context = this.Contexts.FirstOrDefault(c => c.Id == e.ContextId);
             if (context == null) throw DomainException.NullReference(typeof(V1CorrelationContext), e.ContextId);
-            var evt = context.PendingEvents?.FirstOrDefault(e => e.Id.Equals(e.Id, StringComparison.InvariantCultureIgnoreCase));
+            var evt = context.PendingEvents?.FirstOrDefault(x => x.Id.Equals(e.EventId, StringComparison.InvariantCultureIgnoreCase));
             if (evt == null) throw DomainException.NullReference(typeof(V1Event), e.EventId);
             context.RemoveEvent(evt);
         }
