@@ -115,7 +115,7 @@ namespace Synapse.Runtime.Services
                 target = "osx-x64.tar.gz";
             else
                 throw new PlatformNotSupportedException();
-            using var packageStream = await this.HttpClient.GetStreamAsync($"https://github.com/serverlessworkflow/synapse/releases/download/{typeof(NativeRuntime).Assembly.GetName().Version!.ToString(3)!}/synapse-worker-{target}", cancellationToken); //todo: config based
+            using var packageStream = await this.HttpClient.GetStreamAsync($"https://github.com/serverlessworkflow/synapse/releases/download/v{typeof(NativeRuntime).Assembly.GetName().Version!.ToString(3)!}/synapse-worker-{target}", cancellationToken); //todo: config based
             using ZipArchive archive = new(packageStream, ZipArchiveMode.Read);
             this.Logger.LogInformation("Worker app successfully downloaded. Extracting...");
             archive.ExtractToDirectory(workerDirectory.FullName, true);
