@@ -28,7 +28,7 @@
                     <td colspan="2"><h6>General</h6></td>
                 </Header>
                 <Body>
-                    <td colspan="2">
+                    <td colspan="3">
                         <table class="table table-striped">
                             <tbody>
                                 <tr>
@@ -89,7 +89,7 @@
                     <td colspan="2"><h6>Data filter</h6></td>
                 </Header>
                 <Body>
-                    <td colspan="2">
+                    <td colspan="3">
                         <StateDataFilterEditor 
                             DataFilter="state.DataFilter"
                             OnChange="async e => await OnPropertyChangedAsync(nameof(state.DataFilter), s => s.DataFilter = e)"/>
@@ -103,7 +103,7 @@
                     <td colspan="2"><h6>Outcome</h6></td>
                 </Header>
                 <Body>
-                    <td colspan="2">
+                    <td colspan="3">
                         <OutcomeEditor 
                         Outcome="@(state.GetOutcome())" 
                         ControlFlow="state.UsedForCompensation ? ControlFlow.Compensation : ControlFlow.Default"
@@ -119,7 +119,7 @@
                     <td colspan="2"><h6>Metadata</h6></td>
                 </Header>
                 <Body>
-                    <td colspan="2">
+                    <td colspan="3">
                         <MetadataEditor 
                         Metadata="state.Metadata" 
                         OnChange="async metadata => await this.OnPropertyChangedAsync(nameof(state.Metadata), d => state.Metadata = metadata)" />
@@ -133,7 +133,7 @@
                     <td colspan="2"><h6>@state.Type.ToString()</h6></td>
                 </Header>
                 <Body>
-                    <td colspan="2">
+                    <td colspan="3">
                         @switch (state)
                         {
                             case CallbackStateDefinition callbackState:

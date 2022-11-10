@@ -19,11 +19,11 @@
 
 <div class="@Class">
     <Dynamic Tag="@HeaderContainerTagName" Class="expander" OnClick="ToggleExpandAsync">
-    @HeaderTemplate(this)
-</Dynamic>
-<Dynamic Tag="@BodyContainerTagName" Class="@GetBodyCssClass()">
-    @Body
-</Dynamic>
+        @HeaderTemplate(this)
+    </Dynamic>
+    <Dynamic Tag="@BodyContainerTagName" Class="@GetBodyCssClass()">
+        @Body
+    </Dynamic>
 </div>
 
 @code

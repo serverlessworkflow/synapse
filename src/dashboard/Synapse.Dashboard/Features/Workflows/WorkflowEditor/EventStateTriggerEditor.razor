@@ -47,7 +47,7 @@
                     <td colspan="2"><h6>Data filter</h6></td>
                 </Header>
                 <Body>
-                    <td colspan="2">
+                    <td colspan="3">
                         <EventDataFilterEditor
                         DataFilter="trigger.DataFilter"
                         OnChange="async df => await OnChangeAsync(t => t.DataFilter = df)"/>
@@ -59,7 +59,7 @@
                     <td colspan="2"><h6>Actions</h6></td>
                 </Header>
                 <Body>
-                    <td colspan="2">
+                    <td colspan="3">
                         <ActionCollectionEditor 
                         Actions="trigger.Actions"
                         OnChange="async _ => await OnChangeAsync(_ => {})" />

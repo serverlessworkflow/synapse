@@ -102,7 +102,7 @@
                                             <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChanged(nameof(collection.Functions), d => d.Functions?.Remove(function))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="bi bi-trash"></small></button></td>
                                             </Header>
                                             <Body>
-                                                <td colspan="5">
+                                                <td colspan="6">
                                                     <FunctionEditor Function="@function" OnChange="OnFunctionChanged" />
                                                 </td>
                                             </Body>

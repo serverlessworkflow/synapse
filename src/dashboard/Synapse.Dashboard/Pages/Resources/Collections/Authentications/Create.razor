@@ -96,7 +96,7 @@
                                             <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChanged(nameof(collection.Authentications), d => d.Authentications?.Remove(authentication))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="bi bi-trash"></small></button></td>
                                             </Header>
                                             <Body>
-                                                <td colspan="5">
+                                                <td colspan="6">
                                                     <AuthenticationEditor Authentication="@authentication" OnChange="OnAuthenticationChanged" />
                                                 </td>
                                             </Body>

@@ -23,7 +23,7 @@
             <ExpandableDataRow>
                 <Header><td colspan="2"><h6>Action</h6></td></Header>
                 <Body>
-                    <td colspan="2">
+                    <td colspan="3">
                          <ActionEditor
                         Action="state.Action"
                         OnChange="async a => await OnChangeAsync(s => s.Action = a)" />
@@ -43,7 +43,7 @@
             <ExpandableDataRow>
                 <Header><td colspan="2"><h6>Event data filter</h6></td></Header>
                 <Body>
-                    <td colspan="2">
+                    <td colspan="3">
                         <EventDataFilterEditor
                         DataFilter="state.EventDataFilter"
                         OnChange="async f => await OnChangeAsync(s => s.EventDataFilter = f)"/>

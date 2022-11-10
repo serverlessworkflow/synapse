@@ -21,13 +21,13 @@
     <table class="table">
         <thead>
             <tr>
-                <th scope="col"></th>
                 <th scope="col">Type</th>
                 <th scope="col">Name</th>
                 <th scope="col">Status</th>
                 <th scope="col">Started At</th>
                 <th scope="col">Executed At</th>
                 <th scope="col">Duration</th>
+                <th scope="col"></th>
             </tr>
         </thead>
         <tbody>
@@ -35,15 +35,6 @@
             {
                 <ExpandableDataRow @ref="rows[Activities.IndexOf(activity)]">
                     <Header>
-                        <td>
-                            @if (rows[Activities.IndexOf(activity)].IsExpanded)
-                            {
-                                <small class="bi bi-caret-up"></small>
-                            } else
-                            {
-                                <small class="bi bi-caret-down"></small>
-                            }
-                        </td>
                         <td>@activity.Type</td>
                         <td>
                             @switch(activity.Type)
