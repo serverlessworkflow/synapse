@@ -21,6 +21,7 @@
 
 <tr class="cursor-pointer" @onclick="Toggle">
     @Header
+    <td class="text-end"><span class="ml-2 text-secondary bi @(IsExpanded ? "bi-caret-up" : "bi-caret-down")"></span></td>
 </tr>
 @if (IsExpanded) {
     <tr>

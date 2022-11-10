@@ -120,7 +120,7 @@
                                             <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChangedAsync(nameof(workflow.States), d => d.States?.Remove(state))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="bi bi-trash"></small></button></td>
                                         </Header>
                                         <Body>
-                                            <td colspan="5">
+                                            <td colspan="6">
                                                 <StateEditor State="@state" OnChange="async () => await OnStatePropertyChangedAsync(state)" />
                                             </td>
                                         </Body>
@@ -174,7 +174,7 @@
                                             <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Events), d => d.Events?.Remove(e))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="bi bi-trash"></small></button></td>
                                         </Header>
                                         <Body>
-                                            <td colspan="6">
+                                            <td colspan="7">
                                                 <EventEditor Event="@e" OnChange="OnEventEditorChanged" />
                                             </td>
                                         </Body>
@@ -223,7 +223,7 @@
                                             <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Functions), d => d.Functions?.Remove(function))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="bi bi-trash"></small></button></td>
                                         </Header>
                                         <Body>
-                                            <td colspan="5">
+                                            <td colspan="6">
                                                 <FunctionEditor Function="@function" OnChange="OnFunctionEditorChanged" />
                                             </td>
                                         </Body>
@@ -258,7 +258,7 @@
                                             <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Secrets), d => d.Secrets?.Remove(secret))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="bi bi-trash"></small></button></td>
                                         </Header>
                                         <Body>
-                                            <td colspan="2">
+                                            <td colspan="3">
                                                 <table class="table table-striped">
                                                     <tbody>
                                                         <tr>
@@ -307,7 +307,7 @@
                                             <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Auth), d => d.Auth?.Remove(authentication))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="bi bi-trash"></small></button></td>
                                         </Header>
                                         <Body>
-                                            <td colspan="3">
+                                            <td colspan="4">
                                                 <AuthenticationEditor Authentication="authentication" OnChange="async e => await OnPropertyChangedAsync(nameof(Workflow.Auth), _ => { })" />
                                             </td>
                                         </Body>
@@ -342,7 +342,7 @@
                                             <td class="d-flex justify-content-end"><button @onclick="async () => await OnPropertyChangedAsync(nameof(Workflow.Annotations), d => d.Annotations?.Remove(annotation))" @onclick:stopPropagation="true" class="btn btn-outline-dark"><small class="bi bi-trash"></small></button></td>
                                         </Header>
                                         <Body>
-                                            <td colspan="2">
+                                            <td colspan="3">
                                                 <table class="table table-striped">
                                                     <tr>
                                                         <td>Annotation</td>
