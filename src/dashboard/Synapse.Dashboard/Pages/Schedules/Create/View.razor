@@ -28,6 +28,8 @@
 <AppRightSidebar>
     <Toolbar>
         <button @onclick="OnCreateSchedule" disabled="@State.Creating" class="btn btn-outline-dark" title="Save the current workflow"><small class="bi bi-cloud-upload"></small><span class="btn-label">Create</span></button>
+        <hr class="m-0" />
+        <button @onclick="OnViewScheduleList" class="btn btn-outline-dark" title="Back to list"><small class="bi bi-arrow-left"></small><span class="btn-label">&nbsp; Back to list</span></button>
     </Toolbar>
 </AppRightSidebar>
 
@@ -97,6 +99,11 @@ else
     {
         if (this.command == null) return;
         this.Dispatcher.Dispatch(new CreateSchedule(this.command));
+    }
+
+    void OnViewScheduleList()
+    {
+        this.NavigationManager.NavigateTo("/schedules");
     }
 
     protected override void Dispose(bool disposing)
