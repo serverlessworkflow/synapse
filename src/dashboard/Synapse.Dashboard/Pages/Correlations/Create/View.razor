@@ -137,49 +137,52 @@ else
                                             </div>
                                         </Header>
                                         <Body>
-                                            <b>Context Attributes</b>
-                                            <KeyValuePairEditor OnAdd="((e) => OnAddOrUpdateConditionFilterAttribute(condition, filter, e.Key, e.Value))" />
-                                            <hr />
-                                            <table class="table table-striped">
-                                                <tbody>
-                                                    @if (filter.Attributes != null
-                                                   && filter.Attributes.Any())
-                                                    {
-                                                        foreach (var attr in filter.Attributes)
+                                            <div title="Context attributes are used to filter inbound cloud events. If you set a context attribute with no value, inbound cloud events will need to have said attribute, no matter their value. The value can be a constant, a regular expression or a runtime expressions.">
+                                                <b>Context Attributes</b>
+                                                <KeyValuePairEditor OnAdd="((e) => OnAddOrUpdateConditionFilterAttribute(condition, filter, e.Key, e.Value))" />
+                                                <hr />
+                                                <table class="table table-striped">
+                                                    <tbody>
+                                                        @if (filter.Attributes != null
+                                                       && filter.Attributes.Any())
                                                         {
-                                                            <tr>
-                                                                <td><input type="text" value="@attr.Key" readonly class="form-control" /></td>
-                                                                <td>
-                                                                    <KeyValuePairEditor Kvp="attr" OnChange="((e) => OnAddOrUpdateConditionFilterAttribute(condition, filter, attr.Key, e.Value))" />
-                                                                </td>
-                                                                <td><button @onclick="e => OnRemoveAttributeFromConditionFilter(condition, filter, attr.Key)" class="btn btn-danger"><small class="bi bi-trash-fill"></small></button></td>
-                                                            </tr>
+                                                            foreach (var attr in filter.Attributes)
+                                                            {
+                                                                <tr>
+                                                                    <td><input type="text" value="@attr.Key" readonly class="form-control" /></td>
+                                                                    <td>
+                                                                        <KeyValuePairEditor Kvp="attr" OnChange="((e) => OnAddOrUpdateConditionFilterAttribute(condition, filter, attr.Key, e.Value))" />
+                                                                    </td>
+                                                                    <td><button @onclick="e => OnRemoveAttributeFromConditionFilter(condition, filter, attr.Key)" class="btn btn-danger"><small class="bi bi-trash-fill"></small></button></td>
+                                                                </tr>
+                                                            }
                                                         }
-                                                    }
-                                                </tbody>
-                                            </table>
-
-                                            <b>Correlation Mappings</b>
-                                            <KeyValuePairEditor OnAdd="((e) => OnAddOrUpdateConditionFilterCorrelationMapping(condition, filter, e.Key, e.Value))" />
-                                            <hr />
-                                            <table class="table table-striped">
-                                                <tbody>
-                                                    @if (filter.CorrelationMappings != null
-                                                   && filter.CorrelationMappings.Any())
-                                                    {
-                                                        foreach (var mapping in filter.CorrelationMappings)
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div title="Correlation mappings define the context attributes to use to correlate events. If you set a correlation mapping with no value, the value of the specified attribute will be evaluated to match an existing correlation context or to create a new one. ">
+                                                <b>Correlation Mappings</b>
+                                                <KeyValuePairEditor OnAdd="((e) => OnAddOrUpdateConditionFilterCorrelationMapping(condition, filter, e.Key, e.Value))" />
+                                                <hr />
+                                                <table class="table table-striped">
+                                                    <tbody>
+                                                        @if (filter.CorrelationMappings != null
+                                                       && filter.CorrelationMappings.Any())
                                                         {
-                                                            <tr>
-                                                                <td><input type="text" value="@mapping.Key" readonly class="form-control" /></td>
-                                                                <td>
-                                                                    <KeyValuePairEditor Kvp="mapping" OnChange="((e) => OnAddOrUpdateConditionFilterCorrelationMapping(condition, filter, mapping.Key, e.Value))" />
-                                                                </td>
-                                                                <td><button @onclick="e => OnRemoveCorrelationMappingFromConditionFilter(condition, filter, mapping.Key)" class="btn btn-danger"><small class="bi bi-trash-fill"></small></button></td>
-                                                            </tr>
+                                                            foreach (var mapping in filter.CorrelationMappings)
+                                                            {
+                                                                <tr>
+                                                                    <td><input type="text" value="@mapping.Key" readonly class="form-control" /></td>
+                                                                    <td>
+                                                                        <KeyValuePairEditor Kvp="mapping" OnChange="((e) => OnAddOrUpdateConditionFilterCorrelationMapping(condition, filter, mapping.Key, e.Value))" />
+                                                                    </td>
+                                                                    <td><button @onclick="e => OnRemoveCorrelationMappingFromConditionFilter(condition, filter, mapping.Key)" class="btn btn-danger"><small class="bi bi-trash-fill"></small></button></td>
+                                                                </tr>
+                                                            }
                                                         }
-                                                    }
-                                                </tbody>
-                                            </table>
+                                                    </tbody>
+                                                </table>
+                                            </div>
                                         </Body>
                                     </Expander>
                                 }
