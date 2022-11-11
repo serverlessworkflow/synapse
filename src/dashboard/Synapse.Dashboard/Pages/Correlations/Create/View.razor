@@ -138,6 +138,7 @@ else
                                         </Header>
                                         <Body>
                                             <h5>Context Attributes</h5>
+                                            <KeyValuePairEditor OnAdd="((e) => OnAddOrUpdateConditionFilterAttribute(condition, filter, e.Key, e.Value))" />
                                             <table class="table table-striped">
                                                 <thead>
                                                     <tr>
@@ -164,6 +165,7 @@ else
                                             </table>
 
                                             <h5>Correlation Mappings</h5>
+                                            <KeyValuePairEditor OnAdd="((e) => OnAddOrUpdateConditionFilterCorrelationMapping(condition, filter, e.Key, e.Value))" />
                                             <table class="table table-striped">
                                                 <thead>
                                                     <tr>
