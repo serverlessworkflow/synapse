@@ -1,16 +1,16 @@
 ﻿@namespace Synapse.Dashboard
 
-<div>
-    @if (Kvp == null)
-    {
-        <input class="form-control" placeholder="Key" type="text" value="@key" @onchange="e => OnPropertyChanged((editor) => editor.key = (string?)e.Value ?? string.Empty)" />
-    }
-    <input class="form-control" placeholder="Value" type="text" value="@value" @onchange="e => OnPropertyChanged((editor) => editor.value = (string?)e.Value ?? string.Empty)" />
-    @if (Kvp == null)
-    {
-        <button class="btn btn-outline-dark" type="button" @onclick="OnAddClicked">Add</button>
-    }
-</div>
+<tr>
+    <td>
+        <input type="text" value="@key" placeholder="Key" class="form-control" @onchange="e => OnPropertyChanged((editor) => editor.key = (string?)e.Value ?? string.Empty)" />
+    </td>
+    <td>
+        <input class="form-control" placeholder="Value" type="text" value="@value" @onchange="e => OnPropertyChanged((editor) => editor.value = (string?)e.Value ?? string.Empty)" />
+    </td>
+    <td>
+        <button class="btn btn-outline-dark" type="button" @onclick="OnAddClicked"><small class="bi bi-plus-circle"></small></button>
+    </td>
+</tr>
 
 @code {
     private string key = "";

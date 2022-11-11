@@ -138,7 +138,6 @@ else
                                         </Header>
                                         <Body>
                                             <h5>Context Attributes</h5>
-                                            <KeyValuePairEditor OnAdd="((e) => OnAddOrUpdateConditionFilterAttribute(condition, filter, e.Key, e.Value))" />
                                             <table class="table table-striped">
                                                 <thead>
                                                     <tr>
@@ -157,15 +156,15 @@ else
                                                                 <td>
                                                                     <input type="text" value="@attr.Value" @onchange="e => OnAddOrUpdateConditionFilterAttribute(condition, filter, attr.Key, (string)e.Value!)" placeholder="Value" title="The value of the context attribute to filter events by. Supports regular expressions" class="form-control" />
                                                                 </td>
-                                                                <td><button @onclick="e => OnRemoveAttributeFromConditionFilter(condition, filter, attr.Key)" class="btn btn-danger"><span class="bi bi-trash-fill"></span></button></td>
+                                                                <td><button @onclick="e => OnRemoveAttributeFromConditionFilter(condition, filter, attr.Key)" class="btn btn-danger"><small class="bi bi-trash-fill"></small></button></td>
                                                             </tr>
                                                         }
                                                     }
+                                                    <KeyValuePairEditor OnAdd="((e) => OnAddOrUpdateConditionFilterAttribute(condition, filter, e.Key, e.Value))" />
                                                 </tbody>
                                             </table>
 
                                             <h5>Correlation Mappings</h5>
-                                            <KeyValuePairEditor OnAdd="((e) => OnAddOrUpdateConditionFilterCorrelationMapping(condition, filter, e.Key, e.Value))" />
                                             <table class="table table-striped">
                                                 <thead>
                                                     <tr>
@@ -184,16 +183,17 @@ else
                                                                 <td>
                                                                     <input type="text" value="@mapping.Value" @onchange="e => OnAddOrUpdateConditionFilterCorrelationMapping(condition, filter, mapping.Key, (string)e.Value!)" placeholder="Value" title="The value of the context attribute used to correlate filtered cloud events. Supports regular expressions" class="form-control" />
                                                                 </td>
-                                                                <td><button @onclick="e => OnRemoveCorrelationMappingFromConditionFilter(condition, filter, mapping.Key)" class="btn btn-danger"><span class="bi bi-trash-fill"></span></button></td>
+                                                                <td><button @onclick="e => OnRemoveCorrelationMappingFromConditionFilter(condition, filter, mapping.Key)" class="btn btn-danger"><small class="bi bi-trash-fill"></small></button></td>
                                                             </tr>
                                                         }
                                                     }
+                                                    <KeyValuePairEditor OnAdd="((e) => OnAddOrUpdateConditionFilterCorrelationMapping(condition, filter, e.Key, e.Value))" />
                                                 </tbody>
                                             </table>
                                         </Body>
                                     </Expander>
                                 }
-                                <button @onclick="e => OnAddFilterToCondition(condition)" class="btn btn-primary w-100"><span class="bi bi-cloud-arrow-up"></span><span>Add new filter</span></button>
+                                <button @onclick="e => OnAddFilterToCondition(condition)" class="btn btn-primary w-100"><small class="bi bi-cloud-arrow-up"></small><span>Add new filter</span></button>
                             </div>
                         </Body>
                     </Expander>
