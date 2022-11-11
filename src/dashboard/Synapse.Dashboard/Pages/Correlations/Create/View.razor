@@ -20,6 +20,7 @@
 @using Synapse.Integration.Commands.Correlations
 @inherits StatefulComponent<CreateCorrelationState>
 @inject IBreadcrumbManager BreadcrumbManager
+@inject NavigationManager NavigationManager
 
 <PageTitle>New correlation</PageTitle>
 
@@ -32,157 +33,174 @@ else
 
     <AppRightSidebar>
         <Toolbar>
-            <button @onclick="OnCreateCorrelation" class="btn btn-outline-dark" title="Back to list"><small class="bi bi-cloud-upload"></small><span class="btn-label">&nbsp; Create</span></button>
+            <button @onclick="OnSaveCorrelation" class="btn btn-outline-dark" title="Save"><small class="bi bi-cloud-upload"></small><span class="btn-label">&nbsp; Save</span></button>
+            <button @onclick="OnReset" class="btn btn-outline-dark" title="Reset"><small class="bi bi-x-circle"></small><span class="btn-label">&nbsp; Reset</span></button>
+            <hr class="m-0" />
+            <button @onclick="OnNavigateToCorrelationList" class="btn btn-outline-dark" title="Back to list"><small class="bi bi-arrow-left"></small><span class="btn-label">&nbsp; Back to list</span></button>
         </Toolbar>
     </AppRightSidebar>
 
     <div class="container">
-        <h4 class="mb-2">Information</h4>
-        <div class="border border-dark rounded-2 p-3">
-            <table class="table table-striped">
-                <tbody>
-                    <tr>
-                        <td>Activation</td>
-                        <td><span class="badge bg-secondary">@EnumHelper.Stringify(command.ActivationType)</span></td>
-                    </tr>
-                    <tr>
-                        <td>Lifetime</td>
-                        <td>
-                            <select @onchange="e => OnPropertyChanged(c => c.Lifetime = EnumHelper.Parse<V1CorrelationLifetime>((string)e.Value!))" class="form-control">
-                                @foreach (V1CorrelationLifetime lifetime in Enum.GetValues<V1CorrelationLifetime>())
-                                {
-                                    <option value="@EnumHelper.Stringify(lifetime)">@EnumHelper.Stringify(lifetime)</option>
-                                }
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Condition Type</td>
-                        <td>
-                            <select @onchange="e => OnPropertyChanged(c => c.ConditionType = EnumHelper.Parse<V1CorrelationConditionType>((string)e.Value!))" class="form-control">
-                                @foreach (V1CorrelationConditionType conditionType in Enum.GetValues<V1CorrelationConditionType>())
-                                {
-                                    <option value="@EnumHelper.Stringify(conditionType)">@EnumHelper.Stringify(conditionType)</option>
-                                }
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Outcome</td>
-                        <td>
-                            <table class="table table-striped">
-                                <tbody>
-                                    <tr>
-                                        <td>Type</td>
-                                        <td><span class="badge bg-secondary">@EnumHelper.Stringify(command.Outcome.Type)</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Target</td>
-                                        <td>
-                                            <WorkflowSelector SelectedId="@targetWorkflowRef?.Id" SelectedVersion="@targetWorkflowRef?.Version" OnChange="@(e => OnPropertyChanged(c => c.Outcome.Target = $"{e.Id}:{e.Version}"))" />
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+        <div class="card my-3">
+            <div class="card-header">
+                <h4 class="mb-2">Information</h4>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <tbody>
+                        <tr title="Indicates the way the correlation has been created.&#013;If set to 'implicit', it has been implicitly created by a workflow defining an event start state or by a workflow instance when consuming incoming cloud events.&#013;If set to 'explicit', it has been manually created by a user.">
+                            <td>Activation</td>
+                            <td><span class="badge bg-secondary">@EnumHelper.Stringify(command.ActivationType)</span></td>
+                        </tr>
+                        <tr title="Configures the lifetime of the correlation.&#013;If set to 'singleton', the correlation will be consumed upon being triggered.&#013;If set to 'transient', the correlation can be triggered any number of times as long as it remains active.">
+                            <td>Lifetime</td>
+                            <td>
+                                <select @onchange="e => OnPropertyChanged(c => c.Lifetime = EnumHelper.Parse<V1CorrelationLifetime>((string)e.Value!))" class="form-control">
+                                    @foreach (V1CorrelationLifetime lifetime in Enum.GetValues<V1CorrelationLifetime>())
+                                    {
+                                        <option value="@EnumHelper.Stringify(lifetime)">@EnumHelper.Stringify(lifetime)</option>
+                                    }
+                                </select>
+                            </td>
+                        </tr>
+                        <tr title="Determines the way defined conditions should be evaluated.&#013;If Set to 'any', any matching condition will trigger the correlation.&#013;If set to 'all', all conditions must be met for the correlation to be triggered.">
+                            <td>Condition Type</td>
+                            <td>
+                                <select @onchange="e => OnPropertyChanged(c => c.ConditionType = EnumHelper.Parse<V1CorrelationConditionType>((string)e.Value!))" class="form-control">
+                                    @foreach (V1CorrelationConditionType conditionType in Enum.GetValues<V1CorrelationConditionType>())
+                                    {
+                                        <option value="@EnumHelper.Stringify(conditionType)">@EnumHelper.Stringify(conditionType)</option>
+                                    }
+                                </select>
+                            </td>
+                        </tr>
+                        <tr title="Defines the outcome of the correlation">
+                            <td>Outcome</td>
+                            <td>
+                                <table class="table table-striped">
+                                    <tbody>
+                                        <tr title="Configures the correlation's outcome type. The only type supported for correlations with 'explicit' activation type is 'start'">
+                                            <td>Type</td>
+                                            <td><span class="badge bg-secondary">@EnumHelper.Stringify(command.Outcome.Type)</span></td>
+                                        </tr>
+                                        <tr title="Defines the workflow to start when the correlation has been triggered.">
+                                            <td>Target</td>
+                                            <td>
+                                                <WorkflowSelector SelectedId="@targetWorkflowRef?.Id" SelectedVersion="@targetWorkflowRef?.Version" OnChange="@(e => OnPropertyChanged(c => c.Outcome.Target = $"{e.Id}:{e.Version}"))" />
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
-        <h4 class="my-2">Conditions</h4>
-        @for (int conditionIndex = 0; conditionIndex < command.Conditions.Count; conditionIndex++)
-        {
-            var condition = command.Conditions.ElementAt(conditionIndex);
-            <Expander Class="border border-dark rounded-2 p-3 my-3">
-                <Header>
-                    <div class="row">
-                        <div class="col-10">
-                            Condition @conditionIndex
-                        </div>
-                        <div class="col-2">
-                            <button @onclick="e => OnRemoveCondition(condition)" title="Remove condition" class="btn btn-danger d-flex ms-auto"><span class="bi bi-trash-fill"></span></button>
-                        </div>
-                    </div>
-                </Header>
-                <Body>
-                    <div class="border border-dark rounded-2 p-3">
-                        <h5>Filters</h5>
-                        @for (int filterIndex = 0; filterIndex < condition.Filters.Count; filterIndex++)
-                        {
-                            var filter = condition.Filters.ElementAt(filterIndex);
-                            <Expander Class="border border-secondary rounded-2 p-3 mb-3" IsExpanded="true">
-                                <Header>
-                                    <div class="row">
-                                        <div class="col-10">
-                                            Filter @filterIndex
-                                        </div>
-                                        <div class="col-2">
-                                            <button @onclick="e => OnRemoveFilterFromCondition(condition, filter)" title="Remove filter" class="btn btn-danger d-flex ms-auto"><span class="bi bi-trash-fill"></span></button>
-                                        </div>
-                                    </div>
-                                </Header>
-                                <Body>
-                                    <h5>Attributes</h5>
-                                    <table class="table table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>Attribute</th>
-                                                <th>Value</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @if (filter.Attributes != null
-                                           && filter.Attributes.Any())
-                                            {
-                                                foreach (var attr in filter.Attributes)
-                                                {
+        <div class="card my-3" title="The conditions the correlation is made out of">
+            <div class="card-header">
+                <h4 class="my-2">Conditions</h4>
+            </div>
+            <div class="card-body">
+                @for (int i = 0; i < command.Conditions.Count; i++)
+                {
+                    var conditionIndex = i;
+                    var condition = command.Conditions.ElementAt(conditionIndex);
+                    <Expander Class="border border-dark rounded-2 p-3 my-3">
+                        <Header>
+                            <div class="row">
+                                <div class="col-10">
+                                    <h5>Condition @(conditionIndex + 1)</h5>
+                                </div>
+                                <div class="col-2">
+                                    <button @onclick="e => OnRemoveCondition(condition)" title="Remove condition" class="btn btn-danger d-flex ms-auto"><span class="bi bi-trash-fill"></span></button>
+                                </div>
+                            </div>
+                        </Header>
+                        <Body>
+                            <div title="The filters the correlation condition is made out of">
+                                <h6>Filters</h6>
+                                @for (int j = 0; j < condition.Filters.Count; j++)
+                                {
+                                    var filterIndex = j;
+                                    var filter = condition.Filters.ElementAt(filterIndex);
+                                    <Expander Class="border border-secondary rounded-2 p-3 mb-3" IsExpanded="true">
+                                        <Header>
+                                            <div class="row">
+                                                <div class="col-10">
+                                                    Filter @(filterIndex + 1)
+                                                </div>
+                                                <div class="col-2">
+                                                    <button @onclick="e => OnRemoveFilterFromCondition(condition, filter)" title="Remove filter" class="btn btn-danger d-flex ms-auto"><span class="bi bi-trash-fill"></span></button>
+                                                </div>
+                                            </div>
+                                        </Header>
+                                        <Body>
+                                            <h5>Context Attributes</h5>
+                                            <table class="table table-striped">
+                                                <thead>
                                                     <tr>
-                                                        <td>@attr.Key</td>
-                                                        <td>
-                                                            <input type="text" value="@attr.Value" @onchange="e => OnAddOrUpdateConditionFilterAttribute(condition, filter, attr.Key, (string)e.Value!)" placeholder="Value" title="The value of the context attribute to filter events by. Supports regular expressions" class="form-control" />
-                                                        </td>
-                                                        <td><button @onclick="e => OnRemoveAttributeFromConditionFilter(condition, filter, attr.Key)" class="btn btn-danger"><span class="bi bi-trash-fill"></span></button></td>
+                                                        <th>Attribute</th>
+                                                        <th>Value</th>
                                                     </tr>
-                                                }
-                                            }
-                                        </tbody>
-                                    </table>
+                                                </thead>
+                                                <tbody>
+                                                    @if (filter.Attributes != null
+                                                   && filter.Attributes.Any())
+                                                    {
+                                                        foreach (var attr in filter.Attributes)
+                                                        {
+                                                            <tr>
+                                                                <td>@attr.Key</td>
+                                                                <td>
+                                                                    <input type="text" value="@attr.Value" @onchange="e => OnAddOrUpdateConditionFilterAttribute(condition, filter, attr.Key, (string)e.Value!)" placeholder="Value" title="The value of the context attribute to filter events by. Supports regular expressions" class="form-control" />
+                                                                </td>
+                                                                <td><button @onclick="e => OnRemoveAttributeFromConditionFilter(condition, filter, attr.Key)" class="btn btn-danger"><span class="bi bi-trash-fill"></span></button></td>
+                                                            </tr>
+                                                        }
+                                                    }
+                                                </tbody>
+                                            </table>
 
-                                    <h5>Correlation Mappings</h5>
-                                    <table class="table table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>Attribute</th>
-                                                <th>Value</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @if (filter.CorrelationMappings != null
-                                            && filter.CorrelationMappings.Any())
-                                            {
-                                                foreach (var mapping in filter.CorrelationMappings)
-                                                {
+                                            <h5>Correlation Mappings</h5>
+                                            <table class="table table-striped">
+                                                <thead>
                                                     <tr>
-                                                        <td>@mapping.Key</td>
-                                                        <td>
-                                                            <input type="text" value="@mapping.Value" @onchange="e => OnAddOrUpdateConditionFilterCorrelationMapping(condition, filter, mapping.Key, (string)e.Value!)" placeholder="Value" title="The value of the context attribute used to correlate filtered cloud events. Supports regular expressions" class="form-control" />
-                                                        </td>
-                                                        <td><button @onclick="e => OnRemoveCorrelationMappingFromConditionFilter(condition, filter, mapping.Key)" class="btn btn-danger"><span class="bi bi-trash-fill"></span></button></td>
+                                                        <th>Attribute</th>
+                                                        <th>Value</th>
                                                     </tr>
-                                                }
-                                            }
-                                        </tbody>
-                                    </table>
-                                </Body>
-                            </Expander>
-                        }
-                        <button @onclick="e => OnAddFilterToCondition(condition)" class="btn btn-primary w-100"><span class="bi bi-cloud-arrow-up"></span><span>Add new filter</span></button>
-                    </div>
-                </Body>
-            </Expander>
-        }
-        <button @onclick="OnAddCondition" class="btn btn-primary w-100"><span class="bi bi-cloud-arrow-up"></span><span>Add new condition</span></button>
+                                                </thead>
+                                                <tbody>
+                                                    @if (filter.CorrelationMappings != null
+                                                   && filter.CorrelationMappings.Any())
+                                                    {
+                                                        foreach (var mapping in filter.CorrelationMappings)
+                                                        {
+                                                            <tr>
+                                                                <td>@mapping.Key</td>
+                                                                <td>
+                                                                    <input type="text" value="@mapping.Value" @onchange="e => OnAddOrUpdateConditionFilterCorrelationMapping(condition, filter, mapping.Key, (string)e.Value!)" placeholder="Value" title="The value of the context attribute used to correlate filtered cloud events. Supports regular expressions" class="form-control" />
+                                                                </td>
+                                                                <td><button @onclick="e => OnRemoveCorrelationMappingFromConditionFilter(condition, filter, mapping.Key)" class="btn btn-danger"><span class="bi bi-trash-fill"></span></button></td>
+                                                            </tr>
+                                                        }
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </Body>
+                                    </Expander>
+                                }
+                                <button @onclick="e => OnAddFilterToCondition(condition)" class="btn btn-primary w-100"><span class="bi bi-cloud-arrow-up"></span><span>Add new filter</span></button>
+                            </div>
+                        </Body>
+                    </Expander>
+                }
+            </div>
+            <div class="card-footer">
+                <button @onclick="OnAddCondition" class="btn btn-primary w-100"><span class="bi bi-cloud-arrow-up"></span><span>Add new condition</span></button>
+            </div>
+        </div>
     </div>
    
 }
@@ -261,10 +279,20 @@ else
         this.Dispatcher.Dispatch(new RemoveConditionFromCorrelation(condition));
     }
 
-    private void OnCreateCorrelation()
+    private void OnNavigateToCorrelationList()
+    {
+        this.NavigationManager.NavigateTo("/correlations");
+    }
+
+    private void OnSaveCorrelation()
     {
         if(this.command == null) return;
         this.Dispatcher.Dispatch(new CreateCorrelation(this.command));
+    }
+
+    private void OnReset()
+    {
+        this.Dispatcher.Dispatch(new InitializeState(true));
     }
 
     protected override void Dispose(bool disposing)

@@ -41,12 +41,13 @@
 
     <AppRightSidebar>
         <Toolbar>
-            <button @onclick="OnNavigateToCorrelationList" class="btn btn-outline-dark" title="Back to list"><small class="bi bi-arrow-left"></small><span class="btn-label">&nbsp; Back to list</span></button>
             @if(correlation.ActivationType == V1CorrelationActivationType.Explicit)
             {
                 <button @onclick="OnSaveChanges" class="btn btn-outline-dark" title="Save changes made to the correlation"><small class="bi bi-cloud-upload"></small><span class="btn-label"> Save changes</span></button>
                 <button @onclick="OnDeleteCorrelation" class="btn btn-outline-dark" title="Delete the correlation"><small class="bi bi-trash"></small><span class="btn-label"> Delete</span></button>
+                <hr class="m-0" />
             }
+            <button @onclick="OnNavigateToCorrelationList" class="btn btn-outline-dark" title="Back to list"><small class="bi bi-arrow-left"></small><span class="btn-label">&nbsp; Back to list</span></button>
         </Toolbar>
     </AppRightSidebar>
 
@@ -71,7 +72,7 @@
                                 <td>Last Modified</td>
                                 <td>@correlation.LastModified</td>
                             </tr>
-                            <tr>
+                            <tr title="Indicates the way the correlation has been created.<br>If set to 'implicit', it has been implicitly created by a workflow defining an event start state or by a workflow instance when consuming incoming cloud events.<br>If set to 'explicit', it has been manually created by a user.">
                                 <td>Activation</td>
                                 <td><span class="badge bg-secondary">@EnumHelper.Stringify(correlation.ActivationType)</span></td>
                             </tr>
@@ -110,7 +111,7 @@
                     <div class="border border-secondary rounded-2 p-3 mb-3">
                         @foreach(var filter in condition.Filters)
                         {
-                            <h5>Attributes</h5>
+                            <h5>Context Attributes</h5>
                             @if(filter.Attributes != null
                             && filter.Attributes.Any())
                             {

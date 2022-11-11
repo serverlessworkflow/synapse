@@ -20,9 +20,10 @@
 @using System.Reactive.Linq
 @using Synapse.Dashboard.Pages.Workflows.Editor.Actions
 @using Synapse.Dashboard.Pages.Workflows.Editor.State
+@inherits StatefulComponent<WorkflowEditorState>
 @inject IBreadcrumbManager BreadcrumbService
 @inject IMonacoEditorHelper MonacoEditorHelper
-@inherits StatefulComponent<WorkflowEditorState>
+@inject NavigationManager NavigationManager
 
 <PageTitle>Workflow editor</PageTitle>
 <AppRightSidebar>
@@ -31,6 +32,7 @@
         <button @onclick="OnResetWorkflow" disabled="@State.Saving" class="btn btn-outline-dark" title="Reset the current workflow"><small class="bi bi-x-circle"></small><span class="btn-label">Reset</span></button>
         <hr class="m-0" />
         <a target="_blank" href="https://github.com/serverlessworkflow/specification/blob/main/specification.md#abstract" class="btn btn-outline-dark" title="View the Serverless Workflow Specification documentation"><small class="bi bi-book"></small><span class="btn-label">Documentation</span></a>
+        <button @onclick="OnNavigateToWorkflowList" class="btn btn-outline-dark" title="Back to list"><small class="bi bi-arrow-left"></small><span class="btn-label">&nbsp; Back to list</span></button>
     </Toolbar>
 </AppRightSidebar>
 
@@ -230,6 +232,11 @@ else if(!string.IsNullOrWhiteSpace(this.workflowId))
             return;
         this.Dispatcher.Dispatch(new ValidateWorkflowDefinition(this.workflowDefinition, true));
         this.StateHasChanged();
+    }
+
+    protected void OnNavigateToWorkflowList()
+    {
+        this.NavigationManager.NavigateTo("/workflows");
     }
 
     private bool disposed;
