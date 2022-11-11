@@ -91,14 +91,15 @@ else
         </div>
 
         <h4 class="my-2">Conditions</h4>
-        @for (int conditionIndex = 0; conditionIndex < command.Conditions.Count; conditionIndex++)
+        @for (int i = 0; i < command.Conditions.Count; i++)
         {
+            var conditionIndex = i;
             var condition = command.Conditions.ElementAt(conditionIndex);
             <Expander Class="border border-dark rounded-2 p-3 my-3">
                 <Header>
                     <div class="row">
                         <div class="col-10">
-                            Condition @conditionIndex
+                            Condition @(conditionIndex + 1)
                         </div>
                         <div class="col-2">
                             <button @onclick="e => OnRemoveCondition(condition)" title="Remove condition" class="btn btn-danger d-flex ms-auto"><span class="bi bi-trash-fill"></span></button>
@@ -108,14 +109,15 @@ else
                 <Body>
                     <div class="border border-dark rounded-2 p-3">
                         <h5>Filters</h5>
-                        @for (int filterIndex = 0; filterIndex < condition.Filters.Count; filterIndex++)
+                        @for (int j = 0; j < condition.Filters.Count; j++)
                         {
+                            var filterIndex = j;
                             var filter = condition.Filters.ElementAt(filterIndex);
                             <Expander Class="border border-secondary rounded-2 p-3 mb-3" IsExpanded="true">
                                 <Header>
                                     <div class="row">
                                         <div class="col-10">
-                                            Filter @filterIndex
+                                            Filter @(filterIndex + 1)
                                         </div>
                                         <div class="col-2">
                                             <button @onclick="e => OnRemoveFilterFromCondition(condition, filter)" title="Remove filter" class="btn btn-danger d-flex ms-auto"><span class="bi bi-trash-fill"></span></button>
@@ -124,6 +126,7 @@ else
                                 </Header>
                                 <Body>
                                     <h5>Attributes</h5>
+                                    <KeyValuePairEditor OnAdd="((e) => OnAddOrUpdateConditionFilterAttribute(condition, filter, e.Key, e.Value))" />
                                     <table class="table table-striped">
                                         <thead>
                                             <tr>
@@ -133,14 +136,14 @@ else
                                         </thead>
                                         <tbody>
                                             @if (filter.Attributes != null
-                                           && filter.Attributes.Any())
+                                                && filter.Attributes.Any())
                                             {
                                                 foreach (var attr in filter.Attributes)
                                                 {
                                                     <tr>
                                                         <td>@attr.Key</td>
                                                         <td>
-                                                            <input type="text" value="@attr.Value" @onchange="e => OnAddOrUpdateConditionFilterAttribute(condition, filter, attr.Key, (string)e.Value!)" placeholder="Value" title="The value of the context attribute to filter events by. Supports regular expressions" class="form-control" />
+                                                            <KeyValuePairEditor Kvp="attr" OnChange="((e) => OnAddOrUpdateConditionFilterAttribute(condition, filter, attr.Key, e.Value))" />
                                                         </td>
                                                         <td><button @onclick="e => OnRemoveAttributeFromConditionFilter(condition, filter, attr.Key)" class="btn btn-danger"><span class="bi bi-trash-fill"></span></button></td>
                                                     </tr>
@@ -150,6 +153,7 @@ else
                                     </table>
 
                                     <h5>Correlation Mappings</h5>
+                                    <KeyValuePairEditor OnAdd="((e) => OnAddOrUpdateConditionFilterCorrelationMapping(condition, filter, e.Key, e.Value))" />
                                     <table class="table table-striped">
                                         <thead>
                                             <tr>
@@ -166,7 +170,7 @@ else
                                                     <tr>
                                                         <td>@mapping.Key</td>
                                                         <td>
-                                                            <input type="text" value="@mapping.Value" @onchange="e => OnAddOrUpdateConditionFilterCorrelationMapping(condition, filter, mapping.Key, (string)e.Value!)" placeholder="Value" title="The value of the context attribute used to correlate filtered cloud events. Supports regular expressions" class="form-control" />
+                                                            <KeyValuePairEditor Kvp="mapping" OnChange="((e) => OnAddOrUpdateConditionFilterCorrelationMapping(condition, filter, mapping.Key, e.Value))" />
                                                         </td>
                                                         <td><button @onclick="e => OnRemoveCorrelationMappingFromConditionFilter(condition, filter, mapping.Key)" class="btn btn-danger"><span class="bi bi-trash-fill"></span></button></td>
                                                     </tr>

@@ -1,0 +1,43 @@
+﻿@namespace Synapse.Dashboard
+
+<div>
+    @if (Kvp == null)
+    {
+        <input class="form-control" placeholder="Key" type="text" value="@key" @onchange="e => OnPropertyChanged((editor) => editor.key = (string?)e.Value ?? string.Empty)" />
+    }
+    <input class="form-control" placeholder="Value" type="text" value="@value" @onchange="e => OnPropertyChanged((editor) => editor.value = (string?)e.Value ?? string.Empty)" />
+    @if (Kvp == null)
+    {
+        <button class="btn btn-outline-dark" type="button" @onclick="OnAddClicked">Add</button>
+    }
+</div>
+
+@code {
+    private string key = "";
+    private string value = "";
+    [Parameter] public KeyValuePair<string, string>? Kvp { get; set; }
+    [Parameter] public EventCallback<KeyValuePair<string, string>> OnAdd { get; set; }
+    [Parameter] public EventCallback<KeyValuePair<string, string>> OnChange { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if (this.Kvp.HasValue && (this.Kvp.Value.Key != this.key || this.Kvp.Value.Value != this.value))
+        {
+            this.key = this.Kvp.Value.Key;
+            this.value = this.Kvp.Value.Value;
+        }
+    }
+
+    private void OnPropertyChanged(Action<KeyValuePairEditor> patch)
+    {
+        patch(this);
+        this.OnChange.InvokeAsync(new KeyValuePair<string, string>(this.key, this.value));
+    }
+
+    private void OnAddClicked()
+    {
+        this.OnAdd.InvokeAsync(new KeyValuePair<string, string>(this.key, this.value));
+        this.key = "";
+        this.value = "";
+    }
+}
