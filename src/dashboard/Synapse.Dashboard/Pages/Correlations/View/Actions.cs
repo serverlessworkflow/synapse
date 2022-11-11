@@ -94,6 +94,7 @@ public class ShowPublishCloudEventModal
             }
             foreach (var attribute in filter.CorrelationMappings)
             {
+                if (e.Attributes.ContainsKey(attribute.Key) && string.IsNullOrWhiteSpace(attribute.Value)) continue;
                 e.SetAttribute(attribute.Key, attribute.Value);
             }
         }
@@ -126,6 +127,36 @@ public class HidePublishCloudEventModal
     /// Gets a boolean indicating whether or not to reset the modal's fields
     /// </summary>
     public bool Reset { get; }
+
+}
+
+/// <summary>
+/// Represents the Flux action used to delete an existing <see cref="V1Correlation"/>
+/// </summary>
+public class DeleteCorrelation
+{
+
+    /// <summary>
+    /// Initializes a new <see cref="DeleteCorrelation"/>
+    /// </summary>
+    /// <param name="correlationId">The id of the <see cref="V1Correlation"/> to delete</param>
+    public DeleteCorrelation(string correlationId)
+    {
+        this.CorrelationId = correlationId;
+    }
+
+    /// <summary>
+    /// Gets the id of the <see cref="V1Correlation"/> to delete
+    /// </summary>
+    public string CorrelationId { get; }
+
+}
+
+/// <summary>
+/// Represents the Flux action used to handle the differed result of a <see cref="DeleteCorrelation"/> action
+/// </summary>
+public class HandleDeleteCorrelationResult
+{
 
 }
 

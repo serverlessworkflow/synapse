@@ -1,16 +1,28 @@
 ﻿@namespace Synapse.Dashboard
 
-<tr>
-    <td>
-        <input type="text" value="@key" placeholder="Key" class="form-control" @onchange="e => OnPropertyChanged((editor) => editor.key = (string?)e.Value ?? string.Empty)" />
-    </td>
-    <td>
-        <input class="form-control" placeholder="Value" type="text" value="@value" @onchange="e => OnPropertyChanged((editor) => editor.value = (string?)e.Value ?? string.Empty)" />
-    </td>
-    <td>
-        <button class="btn btn-outline-dark" type="button" @onclick="OnAddClicked"><small class="bi bi-plus-circle"></small></button>
-    </td>
-</tr>
+@if(Kvp == null)
+{
+    <table class="table table-striped">
+        <tbody>
+            <tr>
+                <td>
+                    <input class="form-control" placeholder="Key" type="text" value="@key" @onchange="e => OnPropertyChanged((editor) => editor.key = (string?)e.Value ?? string.Empty)" />
+                </td>
+                <td>
+                    <input class="form-control" placeholder="Value" type="text" value="@value" @onchange="e => OnPropertyChanged((editor) => editor.value = (string?)e.Value ?? string.Empty)" />
+                </td>
+                <td>
+                    <button class="btn btn-outline-dark" type="button" @onclick="OnAddClicked"><small class="bi bi-plus-circle"></small></button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+}
+else
+{
+    <input class="form-control" placeholder="Value" type="text" value="@value" @onchange="e => OnPropertyChanged((editor) => editor.value = (string?)e.Value ?? string.Empty)" />
+}
+
 
 @code {
     private string key = "";

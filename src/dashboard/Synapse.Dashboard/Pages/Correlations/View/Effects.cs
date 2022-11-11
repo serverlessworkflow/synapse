@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+using Microsoft.AspNetCore.Components;
 using Neuroglia.Data.Flux;
 using Synapse.Apis.Management;
 
@@ -43,6 +44,27 @@ public static class Effects
         catch (Exception ex)
         {
             context.Services.GetRequiredService<ILogger<GetCorrelationById>>().LogError("An error occured while retrieving the correlation with the specified id '{correlationId}': {ex}", action.Id, ex);
+        }
+    }
+
+    /// <summary>
+    /// Handles the specified <see cref="DeleteCorrelation"/>
+    /// </summary>
+    /// <param name="action">The <see cref="DeleteCorrelation"/> to handle</param>
+    /// <param name="context">The current <see cref="IEffectContext"/></param>
+    /// <returns>A new awaitable <see cref="Task"/></returns>
+    public static async Task On(DeleteCorrelation action, IEffectContext context)
+    {
+        var api = context.Services.GetRequiredService<ISynapseManagementApi>();
+        try
+        {
+            await api.DeleteCorrelationAsync(action.CorrelationId);
+            context.Dispatcher.Dispatch(new HandleDeleteCorrelationResult());
+            context.Services.GetRequiredService<NavigationManager>().NavigateTo("/correlations");
+        }
+        catch (Exception ex)
+        {
+            context.Services.GetRequiredService<ILogger<GetCorrelationById>>().LogError("An error occured while deleting the correlation with id '{correlationId}': {ex}", action.CorrelationId, ex);
         }
     }
 

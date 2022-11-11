@@ -119,7 +119,7 @@
     private ExtensionAttribute extensionAttribute = new();
 
     private V1Event? cloudEvent;
-    [Parameter] public V1Event? CloudEvent{ get; set; }
+    [Parameter] public V1Event? CloudEvent { get; set; }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -145,7 +145,7 @@
     private async Task OnPayloadEditorInit(MonacoEditorBase editor)
     {
         await this.SetPayloadEditorLanguageAsync();
-        var text = "{ }";
+        var text = "{}";
         if (this.cloudEvent?.Data != null)
             text = await this.JsonSerializer.SerializeAsync(this.cloudEvent.Data);
         if (this.MonacoEditorHelper.PreferedLanguage == PreferedLanguage.YAML)

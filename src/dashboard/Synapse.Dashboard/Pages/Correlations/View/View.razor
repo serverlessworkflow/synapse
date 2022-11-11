@@ -347,7 +347,8 @@ else
 
     private void OnDeleteCorrelation()
     {
-
+        if (this.correlation == null) return;
+        this.Dispatcher.Dispatch(new DeleteCorrelation(this.correlation.Id));
     }
 
     private void OnDeleteCorrelationContext(V1CorrelationContext context)
