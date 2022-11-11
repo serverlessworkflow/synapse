@@ -15,6 +15,8 @@
  *
  */
 
+using CloudNative.CloudEvents;
+using CloudNative.CloudEvents.NewtonsoftJson;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -50,6 +52,7 @@ builder.Services.AddNewtonsoftJsonSerializer(options =>
     options.DateParseHandling = DateParseHandling.DateTime;
     options.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
 });
+builder.Services.AddSingleton<CloudEventFormatter, JsonEventFormatter>();
 builder.Services.AddServerlessWorkflow();
 builder.Services.AddPluralizer();
 builder.Services.AddMapper(typeof(Program).Assembly);

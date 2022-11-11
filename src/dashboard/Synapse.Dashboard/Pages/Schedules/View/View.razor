@@ -28,7 +28,6 @@
 
     <AppRightSidebar>
         <Toolbar>
-            <button @onclick="OnViewScheduleList" class="btn btn-outline-dark" title="Back to list"><small class="bi bi-arrow-left"></small><span class="btn-label">&nbsp; Back to list</span></button>
             @if (schedule.Status == V1ScheduleStatus.Active)
             {
                 <button @onclick="OnTriggerSchedule" class="btn btn-outline-dark" title="Trigger"><small class="bi bi-fire"></small><span class="btn-label">&nbsp; Trigger</span></button>
@@ -43,6 +42,8 @@
                 <button @onclick="OnRetireSchedule" class="btn btn-outline-dark" title="Retire"><small class="bi bi-recycle"></small><span class="btn-label">&nbsp; Retire</span></button>
             }
             <button @onclick="OnDeleteSchedule" class="btn btn-outline-dark" title="Delete"><small class="bi bi-trash-fill"></small><span class="btn-label">&nbsp; Delete</span></button>
+            <hr class="m-0" />
+            <button @onclick="OnViewScheduleList" class="btn btn-outline-dark" title="Back to list"><small class="bi bi-arrow-left"></small><span class="btn-label">&nbsp; Back to list</span></button>
         </Toolbar>
     </AppRightSidebar>
 
@@ -135,7 +136,7 @@
                 if (isDeleted) this.OnViewScheduleList();
             });
         await this.BreadcrumbManager.Use(Breadcrumbs.Schedules);
-        await this.BreadcrumbManager.AddItem(new BreadcrumbItem(this.ScheduleId.ToString(), $"/schedules/{this.ScheduleId}"));
+        await this.BreadcrumbManager.AddItem(new BreadcrumbItem(this.ScheduleId, $"/schedules/{this.ScheduleId}"));
         this.Dispatcher.Dispatch(new InitializeState());
     }
 

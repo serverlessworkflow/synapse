@@ -117,10 +117,7 @@ namespace Synapse.Application.Commands.Correlations
                             this.Logger.LogInformation("Correlation context with id '{contextId}' successfully created", matchingContext.Id);
                             this.Logger.LogInformation("Event successfully correlated to context with id '{contextId}'", matchingContext.Id);
                         }
-                        else
-                        {
-                            await this.CorrelateAsync(correlation, matchingContext, command.Event, matchingFilter, cancellationToken);
-                        }
+                        await this.CorrelateAsync(correlation, matchingContext, command.Event, matchingFilter, cancellationToken);
                         break;
                     case V1CorrelationLifetime.Transient:
                         matchingContext = matchingContexts.FirstOrDefault();

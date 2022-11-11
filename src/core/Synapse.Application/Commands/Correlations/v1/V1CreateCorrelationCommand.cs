@@ -24,7 +24,7 @@ namespace Synapse.Application.Commands.Correlations
     /// <summary>
     /// Represents the <see cref="ICommand"/> used to create a new <see cref="V1Correlation"/>
     /// </summary>
-    [DataTransferObjectType(typeof(Integration.Commands.Correlations.V1CorrelateEventCommand))]
+    [DataTransferObjectType(typeof(Integration.Commands.Correlations.V1CreateCorrelationCommand))]
     public class V1CreateCorrelationCommand
         : Command<Integration.Models.V1Correlation>
     {
@@ -41,20 +41,27 @@ namespace Synapse.Application.Commands.Correlations
         /// <summary>
         /// Initializes a new <see cref="V1CreateWorkflowInstanceCommand"/>
         /// </summary>
+        /// <param name="activationType">The activation type of the <see cref="V1Correlation"/> to create</param>
         /// <param name="lifetime">The lifetime of the <see cref="V1Correlation"/> to create</param>
         /// <param name="conditionType">The type of <see cref="V1CorrelationCondition"/> evaluation the <see cref="V1Correlation"/> should use</param>
         /// <param name="conditions">An <see cref="IEnumerable{T}"/> containing all <see cref="V1CorrelationCondition"/>s the <see cref="V1Correlation"/> to create is made out of</param>
         /// <param name="outcome">The <see cref="V1CorrelationOutcome"/> of the <see cref="V1Correlation"/> to create</param>
         /// <param name="context">The initial <see cref="V1CorrelationContext"/> of the <see cref="V1Correlation"/> to create</param>
-        public V1CreateCorrelationCommand(V1CorrelationLifetime lifetime, V1CorrelationConditionType conditionType, 
+        public V1CreateCorrelationCommand(V1CorrelationActivationType activationType, V1CorrelationLifetime lifetime, V1CorrelationConditionType conditionType, 
             IEnumerable<V1CorrelationCondition> conditions, V1CorrelationOutcome outcome, V1CorrelationContext? context)
         {
+            this.ActivationType = activationType;
             this.Lifetime = lifetime;
             this.ConditionType = conditionType;
-            this.Conditions = conditions;
+            this.Conditions = conditions.ToList();
             this.Outcome = outcome;
             this.Context = context;
         }
+
+        /// <summary>
+        /// Gets the activation type of the <see cref="V1Correlation"/> to create
+        /// </summary>
+        public virtual V1CorrelationActivationType ActivationType { get; protected set; }
 
         /// <summary>
         /// Gets the lifetime of the <see cref="V1Correlation"/> to create
@@ -72,7 +79,7 @@ namespace Synapse.Application.Commands.Correlations
         /// Gets an <see cref="IEnumerable{T}"/> containing all <see cref="V1CorrelationCondition"/>s the <see cref="V1Correlation"/> to create is made out of
         /// </summary>
         [MinLength(1)]
-        public virtual IEnumerable<V1CorrelationCondition> Conditions { get; protected set; }
+        public virtual ICollection<V1CorrelationCondition> Conditions { get; protected set; }
 
         /// <summary>
         /// Gets the <see cref="V1CorrelationOutcome"/> of the <see cref="V1Correlation"/> to create
@@ -116,7 +123,7 @@ namespace Synapse.Application.Commands.Correlations
         /// <inheritdoc/>
         public virtual async Task<IOperationResult<Integration.Models.V1Correlation>> HandleAsync(V1CreateCorrelationCommand command, CancellationToken cancellationToken = default)
         {
-            var correlation = new V1Correlation(command.Lifetime, command.ConditionType, command.Conditions, command.Outcome, command.Context);
+            var correlation = new V1Correlation(command.ActivationType, command.Lifetime, command.ConditionType, command.Conditions, command.Outcome, command.Context);
             correlation = await this.Correlations.AddAsync(correlation, cancellationToken);
             await this.Correlations.SaveChangesAsync(cancellationToken);
             return this.Ok(this.Mapper.Map<Integration.Models.V1Correlation>(correlation));

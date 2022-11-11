@@ -27,6 +27,7 @@ namespace Synapse.Dashboard
         public static IEnumerable<IBreadcrumbItem> Schedules = new List<IBreadcrumbItem>(Home) { new BreadcrumbItem("Schedules", "/schedules", "bi-stopwatch") };
         public static IEnumerable<IBreadcrumbItem> CreateSchedule = new List<IBreadcrumbItem>(Schedules) { new BreadcrumbItem("New Schedule", "/schedules/new") };
         public static IEnumerable<IBreadcrumbItem> Correlations = new List<IBreadcrumbItem>(Home) { new BreadcrumbItem("Correlations", "/correlations", "bi-link-45deg") };
+        public static IEnumerable<IBreadcrumbItem> CreateCorrelation = new List<IBreadcrumbItem>(Correlations) { new BreadcrumbItem("New Correlation", "/correlations/new") };
         public static IEnumerable<IBreadcrumbItem> Resources = new List<IBreadcrumbItem>(Home) { new BreadcrumbItem("Resources", "/resources", "bi-files") };
         public static IEnumerable<IBreadcrumbItem> FunctionDefinitionCollections = new List<IBreadcrumbItem>(Resources) { new BreadcrumbItem("Functions", "/resources/collections/functions", "bi-files") };
         public static IEnumerable<IBreadcrumbItem> EventDefinitionCollections = new List<IBreadcrumbItem>(Resources) { new BreadcrumbItem("Events", "/resources/collections/events", "bi-files") };

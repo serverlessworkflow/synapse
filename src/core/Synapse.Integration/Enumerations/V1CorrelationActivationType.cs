@@ -18,19 +18,19 @@
 namespace Synapse
 {
     /// <summary>
-    /// Enumerates all supported schedule activation types
+    /// Enumerates all supported correlation activation types
     /// </summary>
     [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
     [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.StringEnumConverterFactory))]
-    public enum V1ScheduleActivationType
+    public enum V1CorrelationActivationType
     {
         /// <summary>
-        /// Indicates that the schedule has been explicitly created
+        /// Indicates that the correlation has been explicitly created
         /// </summary>
         [EnumMember(Value = "explicit")]
         Explicit = 1,
         /// <summary>
-        /// Indicates that the schedule has been implicitly created following the creation of a workflow defining a scheduled start
+        /// Indicates that the correlation has been implicitly created following the creation of a workflow defining an event-based start
         /// </summary>
         [EnumMember(Value = "implicit")]
         Implicit = 2

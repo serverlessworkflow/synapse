@@ -32,9 +32,16 @@ namespace Synapse.Integration.Commands.Correlations
 	{
 
 		/// <summary>
+		/// The activation type of the V1Correlation to create
+		/// </summary>
+		[DataMember(Name = "ActivationType", Order = 1)]
+		[Description("The activation type of the V1Correlation to create")]
+		public virtual V1CorrelationActivationType ActivationType { get; set; }
+
+		/// <summary>
 		/// The lifetime of the V1Correlation to create
 		/// </summary>
-		[DataMember(Name = "Lifetime", Order = 1)]
+		[DataMember(Name = "Lifetime", Order = 2)]
 		[Description("The lifetime of the V1Correlation to create")]
 		[Required]
 		public virtual V1CorrelationLifetime Lifetime { get; set; }
@@ -42,7 +49,7 @@ namespace Synapse.Integration.Commands.Correlations
 		/// <summary>
 		/// The type of V1CorrelationCondition evaluation the V1Correlation should use
 		/// </summary>
-		[DataMember(Name = "ConditionType", Order = 2)]
+		[DataMember(Name = "ConditionType", Order = 3)]
 		[Description("The type of V1CorrelationCondition evaluation the V1Correlation should use")]
 		[Required]
 		public virtual V1CorrelationConditionType ConditionType { get; set; }
@@ -50,15 +57,15 @@ namespace Synapse.Integration.Commands.Correlations
 		/// <summary>
 		/// An IEnumerable`1 containing all V1CorrelationConditions the V1Correlation to create is made out of
 		/// </summary>
-		[DataMember(Name = "Conditions", Order = 3)]
+		[DataMember(Name = "Conditions", Order = 4)]
 		[Description("An IEnumerable`1 containing all V1CorrelationConditions the V1Correlation to create is made out of")]
 		[MinLength(1)]
-		public virtual IEnumerable<V1CorrelationCondition> Conditions { get; set; }
+		public virtual ICollection<V1CorrelationCondition> Conditions { get; set; }
 
 		/// <summary>
 		/// The V1CorrelationOutcome of the V1Correlation to create
 		/// </summary>
-		[DataMember(Name = "Outcome", Order = 4)]
+		[DataMember(Name = "Outcome", Order = 5)]
 		[Description("The V1CorrelationOutcome of the V1Correlation to create")]
 		[Required]
 		public virtual V1CorrelationOutcome Outcome { get; set; }
@@ -66,7 +73,7 @@ namespace Synapse.Integration.Commands.Correlations
 		/// <summary>
 		/// The initial V1CorrelationContext of the V1Correlation to create
 		/// </summary>
-		[DataMember(Name = "Context", Order = 5)]
+		[DataMember(Name = "Context", Order = 6)]
 		[Description("The initial V1CorrelationContext of the V1Correlation to create")]
 		public virtual V1CorrelationContext Context { get; set; }
 

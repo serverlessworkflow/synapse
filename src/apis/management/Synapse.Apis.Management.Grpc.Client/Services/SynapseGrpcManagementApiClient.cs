@@ -88,18 +88,12 @@ namespace Synapse.Apis.Management.Grpc
         }
 
         /// <inheritdoc/>
-        public virtual async Task<List<V1Workflow>> GetWorkflowsAsync(string query, CancellationToken cancellationToken = default)
+        public virtual async Task<List<V1Workflow>> GetWorkflowsAsync(string? query = null, CancellationToken cancellationToken = default)
         {
             var result = await this.Adapter.GetWorkflowsAsync(query, cancellationToken);
             if (!result.Succeeded)
                 throw new SynapseApiException(result);
             return result.Data!;
-        }
-
-        /// <inheritdoc/>
-        public virtual async Task<List<V1Workflow>> GetWorkflowsAsync(CancellationToken cancellationToken = default)
-        {
-            return await this.GetWorkflowsAsync(null!, cancellationToken);
         }
 
         /// <inheritdoc/>
@@ -158,18 +152,12 @@ namespace Synapse.Apis.Management.Grpc
         }
 
         /// <inheritdoc/>
-        public virtual async Task<List<V1WorkflowInstance>> GetWorkflowInstancesAsync(string query, CancellationToken cancellationToken = default)
+        public virtual async Task<List<V1WorkflowInstance>> GetWorkflowInstancesAsync(string? query = null, CancellationToken cancellationToken = default)
         {
             var result = await this.Adapter.GetWorkflowInstancesAsync(query, cancellationToken);
             if (!result.Succeeded)
                 throw new SynapseApiException(result);
             return result.Data!;
-        }
-
-        /// <inheritdoc/>
-        public virtual async Task<List<V1WorkflowInstance>> GetWorkflowInstancesAsync(CancellationToken cancellationToken = default)
-        {
-            return await this.GetWorkflowInstancesAsync(null!, cancellationToken);
         }
 
         /// <inheritdoc/>
@@ -236,7 +224,7 @@ namespace Synapse.Apis.Management.Grpc
         }
 
         /// <inheritdoc/>
-        public virtual async Task<List<V1Correlation>> GetCorrelationsAsync(string query, CancellationToken cancellationToken = default)
+        public virtual async Task<List<V1Correlation>> GetCorrelationsAsync(string? query = null, CancellationToken cancellationToken = default)
         {
             var result = await this.Adapter.GetCorrelationsAsync(query, cancellationToken);
             if (!result.Succeeded)
@@ -245,18 +233,34 @@ namespace Synapse.Apis.Management.Grpc
         }
 
         /// <inheritdoc/>
-        public virtual async Task<List<V1Correlation>> GetCorrelationsAsync(CancellationToken cancellationToken = default)
-        {
-            return await this.GetCorrelationsAsync(null!, cancellationToken);
-        }
-
-        /// <inheritdoc/>
         public virtual async Task<V1Correlation> GetCorrelationByIdAsync(string id, CancellationToken cancellationToken = default)
         {
+            if (string.IsNullOrWhiteSpace(id)) throw new ArgumentNullException(nameof(id));
             var result = await this.Adapter.GetCorrelationByIdAsync(id, cancellationToken);
             if (!result.Succeeded)
                 throw new SynapseApiException(result);
             return result.Data!;
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task DeleteCorrelationContextAsync(string correlationId, string contextId, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(correlationId)) throw new ArgumentNullException(nameof(correlationId));
+            if (string.IsNullOrWhiteSpace(contextId)) throw new ArgumentNullException(nameof(contextId));
+            var result = await this.Adapter.DeleteCorrelationContextAsync(new() { CorrelationId = correlationId, ContextId = contextId }, cancellationToken);
+            if (!result.Succeeded)
+                throw new SynapseApiException(result);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task DeleteCorrelationContextEventAsync(string correlationId, string contextId, string eventId, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(correlationId)) throw new ArgumentNullException(nameof(correlationId));
+            if (string.IsNullOrWhiteSpace(contextId)) throw new ArgumentNullException(nameof(contextId));
+            if (string.IsNullOrWhiteSpace(eventId)) throw new ArgumentNullException(nameof(eventId));
+            var result = await this.Adapter.DeleteCorrelationContextEventAsync(new() { CorrelationId = correlationId, ContextId = contextId, EventId = eventId }, cancellationToken);
+            if (!result.Succeeded)
+                throw new SynapseApiException(result);
         }
 
         /// <inheritdoc/>
@@ -288,14 +292,9 @@ namespace Synapse.Apis.Management.Grpc
             return result.Data!;
         }
 
-        /// <inheritdoc/>
-        public virtual async Task<List<V1AuthenticationDefinitionCollection>> GetAuthenticationDefinitionCollectionsAsync(CancellationToken cancellationToken = default)
-        {
-            return await this.GetAuthenticationDefinitionCollectionsAsync(null!, cancellationToken);
-        }
 
         /// <inheritdoc/>
-        public virtual async Task<List<V1AuthenticationDefinitionCollection>> GetAuthenticationDefinitionCollectionsAsync(string? query, CancellationToken cancellationToken = default)
+        public virtual async Task<List<V1AuthenticationDefinitionCollection>> GetAuthenticationDefinitionCollectionsAsync(string? query = null, CancellationToken cancellationToken = default)
         {
             var result = await this.Adapter.GetAuthenticationDefinitionCollectionsAsync(query, cancellationToken);
             if (!result.Succeeded)
@@ -334,13 +333,7 @@ namespace Synapse.Apis.Management.Grpc
         }
 
         /// <inheritdoc/>
-        public virtual async Task<List<V1EventDefinitionCollection>> GetEventDefinitionCollectionsAsync(CancellationToken cancellationToken = default)
-        {
-            return await this.GetEventDefinitionCollectionsAsync(null!, cancellationToken);
-        }
-
-        /// <inheritdoc/>
-        public virtual async Task<List<V1EventDefinitionCollection>> GetEventDefinitionCollectionsAsync(string? query, CancellationToken cancellationToken = default)
+        public virtual async Task<List<V1EventDefinitionCollection>> GetEventDefinitionCollectionsAsync(string? query = null, CancellationToken cancellationToken = default)
         {
             var result = await this.Adapter.GetEventDefinitionCollectionsAsync(query, cancellationToken);
             if (!result.Succeeded)
@@ -379,13 +372,7 @@ namespace Synapse.Apis.Management.Grpc
         }
 
         /// <inheritdoc/>
-        public virtual async Task<List<V1FunctionDefinitionCollection>> GetFunctionDefinitionCollectionsAsync(CancellationToken cancellationToken = default)
-        {
-            return await this.GetFunctionDefinitionCollectionsAsync(null!, cancellationToken);
-        }
-
-        /// <inheritdoc/>
-        public virtual async Task<List<V1FunctionDefinitionCollection>> GetFunctionDefinitionCollectionsAsync(string query, CancellationToken cancellationToken = default)
+        public virtual async Task<List<V1FunctionDefinitionCollection>> GetFunctionDefinitionCollectionsAsync(string? query = null, CancellationToken cancellationToken = default)
         {
             var result = await this.Adapter.GetFunctionDefinitionCollectionsAsync(query, cancellationToken);
             if (!result.Succeeded)
@@ -437,10 +424,7 @@ namespace Synapse.Apis.Management.Grpc
         }
 
         /// <inheritdoc/>
-        public virtual async Task<List<V1Schedule>> GetSchedulesAsync(CancellationToken cancellationToken = default) => await this.GetSchedulesAsync(null!, cancellationToken);
-
-        /// <inheritdoc/>
-        public virtual async Task<List<V1Schedule>> GetSchedulesAsync(string query, CancellationToken cancellationToken = default)
+        public virtual async Task<List<V1Schedule>> GetSchedulesAsync(string? query = null, CancellationToken cancellationToken = default)
         {
             var result = await this.Adapter.GetSchedulesAsync(query, cancellationToken);
             if (!result.Succeeded) throw new SynapseApiException(result);

@@ -41,12 +41,13 @@ namespace Synapse.Domain.Models
         /// <summary>
         /// Initializes a new <see cref="V1Correlation"/>
         /// </summary>
+        /// <param name="activationType">The <see cref="V1Correlation"/>'s activation type</param>
         /// <param name="lifetime">The <see cref="V1Correlation"/>'s lifetime</param>
         /// <param name="conditionType">A value determining the type of the <see cref="V1Correlation"/>'s <see cref="V1CorrelationCondition"/> evaluation</param>
         /// <param name="conditions">An <see cref="IReadOnlyCollection{T}"/> containing the <see cref="V1Correlation"/>'s conditions</param>
         /// <param name="outcome">The outcome of the <see cref="V1Correlation"/></param>
         /// <param name="context">The initial <see cref="V1CorrelationContext"/></param>
-        public V1Correlation(V1CorrelationLifetime lifetime, V1CorrelationConditionType conditionType, IEnumerable<V1CorrelationCondition> conditions, V1CorrelationOutcome outcome, V1CorrelationContext? context = null)
+        public V1Correlation(V1CorrelationActivationType activationType, V1CorrelationLifetime lifetime, V1CorrelationConditionType conditionType, IEnumerable<V1CorrelationCondition> conditions, V1CorrelationOutcome outcome, V1CorrelationContext? context = null)
             : base(Guid.NewGuid().ToString())
         {
             if(conditions == null 
@@ -54,8 +55,13 @@ namespace Synapse.Domain.Models
                 throw DomainException.ArgumentNull(nameof(conditions));
             if(outcome == null)
                 throw DomainException.ArgumentNull(nameof(outcome));
-            this.On(this.RegisterEvent(new V1CorrelationCreatedDomainEvent(this.Id, lifetime, conditionType, conditions, outcome, context)));
+            this.On(this.RegisterEvent(new V1CorrelationCreatedDomainEvent(this.Id, activationType, lifetime, conditionType, conditions, outcome, context)));
         }
+
+        /// <summary>
+        /// Gets the <see cref="V1Correlation"/>'s activation type
+        /// </summary>
+        public virtual V1CorrelationActivationType ActivationType { get; protected set; }
 
         /// <summary>
         /// Gets the <see cref="V1Correlation"/>'s lifetime
@@ -172,6 +178,24 @@ namespace Synapse.Domain.Models
         }
 
         /// <summary>
+        /// Releases the specified <see cref="V1Event"/>
+        /// </summary>
+        /// <param name="context">The <see cref="V1CorrelationContext"/> the <see cref="V1Event"/> to release belongs to</param>
+        /// <param name="e">The <see cref="V1Event"/> to release</param>
+        public virtual void ReleaseEvent(V1CorrelationContext context, V1Event e)
+        {
+            if (context == null) throw DomainException.ArgumentNull(nameof(context));
+            if (e == null) throw DomainException.ArgumentNull(nameof(e));
+            var matchedContext = this.Contexts.FirstOrDefault(c => c.Id == context.Id);
+            if (matchedContext == null) throw DomainException.NullReference(typeof(V1CorrelationContext), context.Id);
+            var matchedEvent = matchedContext.PendingEvents?.FirstOrDefault(evt => evt.Id.Equals(e.Id, StringComparison.InvariantCultureIgnoreCase));
+            if (matchedEvent == null) throw DomainException.NullReference(typeof(V1Event), e.Id);
+            this.On(this.RegisterEvent(new V1CorrelatedEventReleasedDomainEvent(this.Id, context.Id, e.Id)));
+            if (matchedContext.PendingEvents?.Any() == true) return;
+            this.ReleaseContext(matchedContext);
+        }
+
+        /// <summary>
         /// Attempts to complete the <see cref="V1Correlation"/> in the specified <see cref="V1CorrelationContext"/>
         /// </summary>
         /// <param name="context">The <see cref="V1CorrelationContext"/> to attempt completing the <see cref="V1Correlation"/> in</param>
@@ -207,6 +231,7 @@ namespace Synapse.Domain.Models
             this.Id = e.AggregateId;
             this.CreatedAt = e.CreatedAt;
             this.LastModified = e.CreatedAt;
+            this.ActivationType = e.ActivationType;
             this.Lifetime = e.Lifetime;
             this.ConditionType = e.ConditionType;
             this._Conditions = e.Conditions.ToList();
@@ -248,6 +273,19 @@ namespace Synapse.Domain.Models
             if (context == null)
                 throw DomainException.NullReference(typeof(V1CorrelationContext), e.ContextId);
             this._Contexts.Remove(context);
+        }
+
+        /// <summary>
+        /// Handles the specified <see cref="V1CorrelatedEventReleasedDomainEvent"/>
+        /// </summary>
+        /// <param name="e">The <see cref="V1CorrelatedEventReleasedDomainEvent"/> to handle</param>
+        protected virtual void On(V1CorrelatedEventReleasedDomainEvent e)
+        {
+            var context = this.Contexts.FirstOrDefault(c => c.Id == e.ContextId);
+            if (context == null) throw DomainException.NullReference(typeof(V1CorrelationContext), e.ContextId);
+            var evt = context.PendingEvents?.FirstOrDefault(x => x.Id.Equals(e.EventId, StringComparison.InvariantCultureIgnoreCase));
+            if (evt == null) throw DomainException.NullReference(typeof(V1Event), e.EventId);
+            context.RemoveEvent(evt);
         }
 
         /// <summary>
