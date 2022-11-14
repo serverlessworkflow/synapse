@@ -31,10 +31,12 @@ namespace Synapse.Application.Services
         /// Initializes a new <see cref="WorkflowProcessManager"/>
         /// </summary>
         /// <param name="serviceProvider">The current <see cref="IServiceProvider"/></param>
+        /// <param name="logger">The service used to perform logging</param>
         /// <param name="runtime">The <see cref="IWorkflowRuntime"/> used to create <see cref="IWorkflowProcess"/>es</param>
-        public WorkflowProcessManager(IServiceProvider serviceProvider, IWorkflowRuntime runtime)
+        public WorkflowProcessManager(IServiceProvider serviceProvider, ILogger<WorkflowProcessManager> logger, IWorkflowRuntime runtime)
         {
             this.ServiceProvider = serviceProvider;
+            this.Logger = logger;
             this.Runtime = runtime;
         }
 
@@ -42,6 +44,11 @@ namespace Synapse.Application.Services
         /// Gets the current <see cref="IServiceProvider"/>
         /// </summary>
         protected IServiceProvider ServiceProvider { get; }
+
+        /// <summary>
+        /// Gets the service used to perform logging
+        /// </summary>
+        protected ILogger Logger { get; }
 
         /// <summary>
         /// Gets the <see cref="IWorkflowRuntime"/> used to create <see cref="IWorkflowProcess"/>es
@@ -105,10 +112,26 @@ namespace Synapse.Application.Services
         {
             using var scope = this.ServiceProvider.CreateScope();
             var processStates = scope.ServiceProvider.GetRequiredService<IRepository<V1WorkflowProcess>>();
-            var processState = await processStates.FindAsync(process.Id);
-            processState.AppendLog(log);
-            await processStates.UpdateAsync(processState, this.CancellationTokenSource.Token);
-            await processStates.SaveChangesAsync(this.CancellationTokenSource.Token);
+            while (true)
+            {
+                try
+                {
+                    var processState = await processStates.FindAsync(process.Id);
+                    processState.AppendLog(log);
+                    await processStates.UpdateAsync(processState, this.CancellationTokenSource.Token);
+                    await processStates.SaveChangesAsync(this.CancellationTokenSource.Token);
+                    break;
+                }
+                catch (OptimisticConcurrencyException ex)
+                {
+                    this.Logger.LogWarning("An optimistic concurrency exception has occured while the logs of the process with id '{processId}'. Retrying with latest state: {ex}", process.Id, ex);
+                    continue;
+                }
+                catch (Exception ex)
+                {
+                    this.Logger.LogError("An error occured while processing the logs of the process with id '{processId}': {ex}", process.Id, ex);
+                }
+            }
         }
 
         /// <summary>
@@ -119,11 +142,28 @@ namespace Synapse.Application.Services
         {
             using var scope = this.ServiceProvider.CreateScope();
             var processStates = scope.ServiceProvider.GetRequiredService<IRepository<V1WorkflowProcess>>();
-            var processState = await processStates.FindAsync(process.Id);
-            processState.Exit(process.ExitCode!.Value);
-            await processStates.UpdateAsync(processState, this.CancellationTokenSource.Token);
-            await processStates.SaveChangesAsync(this.CancellationTokenSource.Token);
-            await process.DisposeAsync();
+            while (true)
+            {
+                try
+                {
+                    var processState = await processStates.FindAsync(process.Id);
+                    processState.Exit(process.ExitCode!.Value);
+                    await processStates.UpdateAsync(processState, this.CancellationTokenSource.Token);
+                    await processStates.SaveChangesAsync(this.CancellationTokenSource.Token);
+                    await process.DisposeAsync();
+                    break;
+                }
+                catch (OptimisticConcurrencyException ex)
+                {
+                    this.Logger.LogWarning("An optimistic concurrency exception has occured while updating the process with id '{processId}'. Retrying with latest state: {ex}", process.Id, ex);
+                    continue;
+                }
+                catch (Exception ex)
+                {
+                    this.Logger.LogError("An error occured while updating the process with id '{processId}': {ex}", process.Id, ex);
+                }
+            }
+           
         }
 
         /// <summary>

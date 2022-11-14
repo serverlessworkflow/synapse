@@ -17,6 +17,7 @@
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Neuroglia.Data;
 using Neuroglia.Data.EventSourcing;
 using Neuroglia.Data.EventSourcing.Services;
@@ -88,8 +89,9 @@ namespace Synapse.Plugins.Persistence.EventStore
                 throw new ArgumentNullException(nameof(entityType));
             if (keyType == null)
                 throw new ArgumentNullException(nameof(keyType));
+            using var scope = this.ServiceProvider.CreateScope();
             var repositoryType = typeof(EventSourcingRepository<,>).MakeGenericType(entityType, keyType);
-            var repository = (IRepository)ActivatorUtilities.CreateInstance(this.ServiceProvider, repositoryType);
+            var repository = (IRepository)ActivatorUtilities.CreateInstance(scope.ServiceProvider, repositoryType);
             return repository;
         }
 

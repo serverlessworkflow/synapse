@@ -17,19 +17,19 @@
   <ItemGroup>
     <PackageReference Include="BlazorMonaco" Version="2.1.0" />
     <PackageReference Include="BuildWebCompiler2022" Version="1.14.8" Condition="$([MSBuild]::IsOsPlatform('Windows'))" />
-    <PackageReference Include="CloudNative.CloudEvents.NewtonsoftJson" Version="2.5.0" />
+    <PackageReference Include="CloudNative.CloudEvents.NewtonsoftJson" Version="2.5.1" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.10" PrivateAssets="all" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="6.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.NewtonsoftJson" Version="6.0.10" />
     <PackageReference Include="Microsoft.OpenApi.Readers" Version="1.4.1" />
-    <PackageReference Include="Neuroglia.Blazor.Dagre" Version="2.0.7" />
-    <PackageReference Include="Neuroglia.Core" Version="2.0.7" />
-    <PackageReference Include="Neuroglia.Data.Flux" Version="2.0.7" />
-    <PackageReference Include="Neuroglia.Data.Flux.ReduxDevTools" Version="2.0.7" />
-    <PackageReference Include="Neuroglia.Data.OData" Version="2.0.7" />
-    <PackageReference Include="Neuroglia.Data.Schemas" Version="2.0.7" />
-    <PackageReference Include="Neuroglia.Mapping" Version="2.0.7" />
+    <PackageReference Include="Neuroglia.Blazor.Dagre" Version="2.0.9" />
+    <PackageReference Include="Neuroglia.Core" Version="2.0.9" />
+    <PackageReference Include="Neuroglia.Data.Flux" Version="2.0.9" />
+    <PackageReference Include="Neuroglia.Data.Flux.ReduxDevTools" Version="2.0.9" />
+    <PackageReference Include="Neuroglia.Data.OData" Version="2.0.9" />
+    <PackageReference Include="Neuroglia.Data.Schemas" Version="2.0.9" />
+    <PackageReference Include="Neuroglia.Mapping" Version="2.0.9" />
     <PackageReference Include="OData.QueryBuilder" Version="2.9.7" />
     <PackageReference Include="Semver" Version="2.2.0" />
   </ItemGroup>
