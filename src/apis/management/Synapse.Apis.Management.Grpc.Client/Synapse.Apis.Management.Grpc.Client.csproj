@@ -35,7 +35,7 @@
     <ProjectReference Include="..\Synapse.Apis.Management.Core\Synapse.Apis.Management.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="protobuf-net.Grpc" Version="1.0.177" />
-    <PackageReference Include="protobuf-net.Grpc.ClientFactory" Version="1.0.177" />
+    <PackageReference Include="protobuf-net.Grpc" Version="1.0.179" />
+    <PackageReference Include="protobuf-net.Grpc.ClientFactory" Version="1.0.179" />
   </ItemGroup>
 </Project>
