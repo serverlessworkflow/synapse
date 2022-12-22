@@ -43,7 +43,7 @@ namespace Synapse.Worker
             var json = JsonConvert.SerializeObject(expressionObject, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore }); ;
             foreach (var match in Regex.Matches(json, @"""\$\{.+?\}""", RegexOptions.Compiled).Cast<Match>())
             {
-                var expression = match.Value[3..^2].Trim().Replace(@"\""", @"""");
+                var expression = Regex.Unescape(match.Value[3..^2].Trim().Replace(@"\""", @""""));
                 var evaluationResult = await context.EvaluateAsync(expression, data, cancellationToken);
                 if (evaluationResult == null) continue;
                 var valueToken = JToken.FromObject(evaluationResult);
@@ -52,7 +52,7 @@ namespace Synapse.Worker
                 {
                     value = valueToken.Type switch
                     {
-                        JTokenType.String => @$"""{valueToken}""",
+                        JTokenType.String => JsonConvert.SerializeObject(valueToken),
                         _ => valueToken.ToString(),
                     };
                 }
