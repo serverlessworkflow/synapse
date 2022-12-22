@@ -68,10 +68,14 @@ namespace Synapse.Domain.Models
         /// </summary>
         public virtual string? Description { get; protected set; }
 
+        [Newtonsoft.Json.JsonProperty(nameof(Events))]
+        [System.Text.Json.Serialization.JsonPropertyName(nameof(Events))]
         private List<EventDefinition> _Events = new();
         /// <summary>
         /// Gets an <see cref="IReadOnlyCollection{T}"/> containing the <see cref="EventDefinition"/>s the <see cref="V1EventDefinitionCollection"/> is made out of
         /// </summary>
+        [Newtonsoft.Json.JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public virtual IReadOnlyCollection<EventDefinition> Events => this._Events.AsReadOnly();
 
         /// <summary>

@@ -3,7 +3,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <VersionPrefix>0.3.15</VersionPrefix>
+    <VersionPrefix>0.3.16</VersionPrefix>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <Authors>The Synapse Authors</Authors>
     <Company>Cloud Native Computing Foundation</Company>
@@ -23,7 +23,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="6.0.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
-    <PackageReference Include="Neuroglia.Data.MongoDB" Version="2.0.9" />
+    <PackageReference Include="Neuroglia.Data.MongoDB" Version="2.0.12" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\core\Synapse.Infrastructure\Synapse.Infrastructure.csproj">

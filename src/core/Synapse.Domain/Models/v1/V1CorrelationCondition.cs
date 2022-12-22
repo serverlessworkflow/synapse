@@ -15,6 +15,8 @@
  *
  */
 
+using k8s.KubeConfigModels;
+
 namespace Synapse.Domain.Models
 {
 
@@ -45,10 +47,14 @@ namespace Synapse.Domain.Models
             this._Filters = filters.ToList();
         }
 
+        [Newtonsoft.Json.JsonProperty(nameof(Filters))]
+        [System.Text.Json.Serialization.JsonPropertyName(nameof(Filters))]
         private List<V1EventFilter> _Filters = new();
         /// <summary>
         /// Gets an <see cref="IReadOnlyCollection{T}"/> containing the <see cref="V1EventFilter"/> used to configure the filtering of events that can fire the <see cref="V1Correlation"/>
         /// </summary>
+        [Newtonsoft.Json.JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public IReadOnlyCollection<V1EventFilter> Filters => this._Filters.AsReadOnly();
 
         /// <summary>

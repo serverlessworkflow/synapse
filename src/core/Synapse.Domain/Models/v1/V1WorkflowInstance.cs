@@ -120,10 +120,14 @@ namespace Synapse.Domain.Models
         /// </summary>
         public virtual V1CorrelationContext CorrelationContext { get; protected set; }
 
+        [Newtonsoft.Json.JsonProperty(nameof(Sessions))]
+        [System.Text.Json.Serialization.JsonPropertyName(nameof(Sessions))]
         private readonly List<V1WorkflowRuntimeSession> _Sessions = new();
         /// <summary>
         /// Gets an <see cref="IReadOnlyCollection{T}"/> containing the sessions the <see cref="V1WorkflowInstance"/> is made out of
         /// </summary>
+        [Newtonsoft.Json.JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public virtual IReadOnlyCollection<V1WorkflowRuntimeSession> Sessions
         {
             get
@@ -137,10 +141,14 @@ namespace Synapse.Domain.Models
         /// </summary>
         public virtual V1WorkflowRuntimeSession? ActiveSession => this.Sessions.FirstOrDefault(s => s.IsActive);
 
+        [Newtonsoft.Json.JsonProperty(nameof(Activities))]
+        [System.Text.Json.Serialization.JsonPropertyName(nameof(Activities))]
         private readonly List<V1WorkflowActivity> _Activities = new();
         /// <summary>
         /// Gets an <see cref="IReadOnlyCollection{T}"/> containing the activities the <see cref="V1WorkflowInstance"/> is made out of
         /// </summary>
+        [Newtonsoft.Json.JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public virtual IReadOnlyCollection<V1WorkflowActivity> Activities
         {
             get

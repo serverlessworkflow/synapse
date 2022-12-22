@@ -55,9 +55,9 @@ namespace Synapse.Integration.Models
                     yield return new KeyValuePair<string, string>(nameof(Subject).ToLower(), this.Subject);
                 if (this.Time.HasValue)
                     yield return new KeyValuePair<string, string>(nameof(Time).ToLower(), this.Time.ToString()!);
-                if(this.ExtensionAttributes != null)
+                if(this.Extensions != null)
                 {
-                    foreach (var extension in this.ExtensionAttributes)
+                    foreach (var extension in this.Extensions)
                         yield return new(extension.Key, extension.Value.ToString()!);
                 }
             }
@@ -129,8 +129,8 @@ namespace Synapse.Integration.Models
             else
             {
                 var dynamicValue = value == null ? null : Dynamic.FromObject(value);
-                if (this.ExtensionAttributes == null) this.ExtensionAttributes = new();
-                this.ExtensionAttributes[name.ToLowerInvariant()] = dynamicValue;
+                if (this.Extensions == null) this.Extensions = new();
+                this.Extensions[name.ToLowerInvariant()] = dynamicValue;
             }
         }
 
@@ -172,10 +172,10 @@ namespace Synapse.Integration.Models
             };
             if(cloudEvent.ExtensionAttributes != null)
             {
-                e.ExtensionAttributes = new();
+                e.Extensions = new();
                 foreach (var extensionsAttribute in cloudEvent.ExtensionAttributes)
                 {
-                    e.ExtensionAttributes.Add(extensionsAttribute.Name, Dynamic.FromObject(extensionsAttribute.Format(cloudEvent[extensionsAttribute]!)));
+                    e.Extensions.Add(extensionsAttribute.Name, Dynamic.FromObject(extensionsAttribute.Format(cloudEvent[extensionsAttribute]!)));
                 }
             }
             return e;
@@ -198,9 +198,9 @@ namespace Synapse.Integration.Models
                 DataSchema = this.DataSchema,
                 Data = this.Data?.ToObject()
             };
-            if(this.ExtensionAttributes != null)
+            if(this.Extensions != null)
             {
-                foreach (var attribute in this.ExtensionAttributes)
+                foreach (var attribute in this.Extensions)
                 {
                     e[attribute.Key] = attribute.Value.ToObject();
                 }
