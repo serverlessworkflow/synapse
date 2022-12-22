@@ -355,7 +355,7 @@ ${
         output.AppendLine(Indent(2, $"public virtual DateTime CreatedAt {{ get; set; }}"));
         order++;
 <#+ break; }#>
-        foreach(Property property in c.Properties.Where(p => !p.Attributes.Any(a => a.Name == "JsonIgnore") && !p.Attributes.Any(a => a.Name == "ProjectNever") || p.Attributes.Any(a => a.Name == "Map")))
+        foreach(Property property in c.Properties.Where(p => !p.Attributes.Any(a => a.Name == "ProjectNever") || p.Attributes.Any(a => a.Name == "Map")))
         {
             output.AppendLine();
             if(property.DocComment != null)

@@ -98,7 +98,7 @@ namespace Synapse.Integration.Models
 		/// </summary>
 		[DataMember(Name = "extensions", Order = 10)]
 		[Description("An IDictionary`2 that contains the event's extension key/value mappings")]
-		public virtual NameValueCollection<Dynamic> ExtensionAttributes { get; set; }
+		public virtual NameValueCollection<Dynamic> Extensions { get; set; }
 
     }
 

@@ -68,10 +68,14 @@ namespace Synapse.Domain.Models
         /// </summary>
         public virtual string? Description { get; protected set; }
 
+        [Newtonsoft.Json.JsonProperty(nameof(Authentications))]
+        [System.Text.Json.Serialization.JsonPropertyName(nameof(Authentications))]
         private List<AuthenticationDefinition> _Authentications = new();
         /// <summary>
         /// Gets an <see cref="IReadOnlyCollection{T}"/> containing the <see cref="AuthenticationDefinition"/>s the <see cref="V1AuthenticationDefinitionCollection"/> is made out of
         /// </summary>
+        [Newtonsoft.Json.JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public virtual IReadOnlyCollection<AuthenticationDefinition> Authentications => this._Authentications.AsReadOnly();
 
         /// <summary>

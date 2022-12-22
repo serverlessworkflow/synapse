@@ -32,10 +32,10 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" />
     <PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="6.0.10" />
-    <PackageReference Include="Neuroglia.Serialization.Dynamic" Version="2.0.9" />
-    <PackageReference Include="Neuroglia.Serialization.Json" Version="2.0.9" />
-    <PackageReference Include="Neuroglia.Serialization.NewtonsoftJson" Version="2.0.9" />
-    <PackageReference Include="Neuroglia.Serialization.Protobuf" Version="2.0.9" />
+    <PackageReference Include="Neuroglia.Serialization.Dynamic" Version="2.0.12" />
+    <PackageReference Include="Neuroglia.Serialization.Json" Version="2.0.12" />
+    <PackageReference Include="Neuroglia.Serialization.NewtonsoftJson" Version="2.0.12" />
+    <PackageReference Include="Neuroglia.Serialization.Protobuf" Version="2.0.12" />
     <PackageReference Include="ServerlessWorkflow.Sdk" Version="0.8.4" />
     <PackageReference Include="System.ServiceModel.Primitives" Version="4.10.0" />
   </ItemGroup>
@@ -406,7 +406,7 @@
       <CustomToolNamespace>..\Synapse.Domain\Events\Workflows\v1\V1WorkflowInstanciatedDomainEvent.cs</CustomToolNamespace>
     </Compile>
     <Compile Update="Models\v1\Generated\V1AuthenticationDefinitionCollection.cs">
-      <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1EventDefinitionCollection - Copy.cs</CustomToolNamespace>
+      <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1AuthenticationDefinitionCollection.cs</CustomToolNamespace>
     </Compile>
     <Compile Update="Models\v1\Generated\V1Correlation.cs">
       <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1Correlation.cs</CustomToolNamespace>
@@ -424,7 +424,7 @@
       <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1Event.cs</CustomToolNamespace>
     </Compile>
     <Compile Update="Models\v1\Generated\V1EventDefinitionCollection.cs">
-      <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1EventDefinitionCollection - Copy.cs</CustomToolNamespace>
+      <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1EventDefinitionCollection.cs</CustomToolNamespace>
     </Compile>
     <Compile Update="Models\v1\Generated\V1EventFilter.cs">
       <CustomToolNamespace>..\Synapse.Domain\Models\v1\V1EventFilter.cs</CustomToolNamespace>

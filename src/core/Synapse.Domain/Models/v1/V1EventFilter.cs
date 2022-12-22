@@ -46,16 +46,24 @@ public class V1EventFilter
         this._CorrelationMappings = correlationMappings ?? throw new ArgumentNullException(nameof(correlationMappings));
     }
 
+    [Newtonsoft.Json.JsonProperty(nameof(Attributes))]
+    [System.Text.Json.Serialization.JsonPropertyName(nameof(Attributes))]
     private Dictionary<string, string> _Attributes = new();
     /// <summary>
     /// Gets an <see cref="IDictionary{TKey, TValue}"/> containing the attributes to filter <see cref="V1Event"/>s by
     /// </summary>
+    [Newtonsoft.Json.JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     public IReadOnlyDictionary<string, string> Attributes => this._Attributes;
 
+    [Newtonsoft.Json.JsonProperty(nameof(CorrelationMappings))]
+    [System.Text.Json.Serialization.JsonPropertyName(nameof(CorrelationMappings))]
     private Dictionary<string, string> _CorrelationMappings = new();
     /// <summary>
     /// Gets an <see cref="IReadOnlyDictionary{TKey, TValue}"/> containing the attributes key/value to use when correlating an incoming event to the <see cref="V1Correlation"/>
     /// </summary>
+    [Newtonsoft.Json.JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     public IReadOnlyDictionary<string, string> CorrelationMappings => this._CorrelationMappings;
 
     /// <summary>

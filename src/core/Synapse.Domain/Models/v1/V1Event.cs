@@ -117,6 +117,7 @@ namespace Synapse.Domain.Models
         /// <summary>
         /// Gets an <see cref="IReadOnlyDictionary{TKey, TValue}"/> containing all the <see cref="V1Event"/> attributes
         /// </summary>
+        [ProjectNever]
         [Newtonsoft.Json.JsonIgnore]
         [System.Text.Json.Serialization.JsonIgnore]
         public virtual IReadOnlyDictionary<string, string> Attributes

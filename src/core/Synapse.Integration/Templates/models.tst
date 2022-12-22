@@ -258,7 +258,7 @@ ${
     {
         StringBuilder output = new StringBuilder();
         var order = 1;
-        foreach(Property property in c.Properties.Where(p => !p.Attributes.Any(a => a.Name == "JsonIgnore") && !p.Attributes.Any(a => a.Name == "ProjectNever") || p.Attributes.Any(a => a.Name == "Map")))
+        foreach(Property property in c.Properties.Where(p => !p.Attributes.Any(a => a.Name == "ProjectNever") || p.Attributes.Any(a => a.Name == "Map")))
         {
             output.AppendLine();
             if(property.DocComment != null)

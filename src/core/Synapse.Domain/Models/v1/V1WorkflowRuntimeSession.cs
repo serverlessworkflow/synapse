@@ -69,6 +69,7 @@ namespace Synapse.Domain.Models
         /// <summary>
         /// Gets a boolean indicating whether or not the <see cref="V1WorkflowRuntimeSession"/> is active
         /// </summary>
+        [ProjectNever]
         [Newtonsoft.Json.JsonIgnore]
         [System.Text.Json.Serialization.JsonIgnore]
         public virtual bool IsActive => !this.EndedAt.HasValue;
@@ -76,6 +77,7 @@ namespace Synapse.Domain.Models
         /// <summary>
         /// Gets the <see cref="V1WorkflowRuntimeSession"/>'s duration
         /// </summary>
+        [ProjectNever]
         [Newtonsoft.Json.JsonIgnore]
         [System.Text.Json.Serialization.JsonIgnore]
         public virtual TimeSpan? Duration => this.EndedAt.HasValue ? this.EndedAt.Value.Subtract(this.StartedAt) : null;
