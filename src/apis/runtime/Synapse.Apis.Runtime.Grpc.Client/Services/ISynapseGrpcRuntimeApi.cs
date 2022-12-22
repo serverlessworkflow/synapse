@@ -19,6 +19,7 @@ using Neuroglia.Serialization;
 using ProtoBuf.Grpc;
 using ServerlessWorkflow.Sdk.Models;
 using Synapse.Apis.Runtime.Grpc.Models;
+using Synapse.Integration.Commands.Events;
 using Synapse.Integration.Commands.WorkflowActivities;
 using Synapse.Integration.Commands.WorkflowInstances;
 using Synapse.Integration.Models;
@@ -79,6 +80,15 @@ namespace Synapse.Apis.Runtime.Grpc
         /// <returns>A new object that describes the result of the operation</returns>
         [OperationContract]
         Task<GrpcApiResult<V1WorkflowInstance>> SetCorrelationMappingAsync(V1SetWorkflowInstanceCorrelationMappingCommand command, CallContext context = default);
+
+        /// <summary>
+        /// Publishes the specified <see cref="V1Event"/>
+        /// </summary>
+        /// <param name="command">The object that describes the command to execute</param>
+        /// <param name="context">The current <see cref="CallContext"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        [OperationContract]
+        Task<GrpcApiResult> PublishEventAsync(V1PublishEventCommand command, CallContext context = default);
 
         /// <summary>
         /// Gets the activities (including non-operative ones) of the specified workflow instance

@@ -22,6 +22,7 @@ using Neuroglia.Serialization;
 using ProtoBuf.Grpc;
 using Synapse.Apis.Runtime.Grpc.Models;
 using Synapse.Infrastructure.Services;
+using Synapse.Integration.Commands.Events;
 using Synapse.Integration.Commands.WorkflowActivities;
 using Synapse.Integration.Commands.WorkflowInstances;
 using Synapse.Integration.Models;
@@ -101,6 +102,12 @@ namespace Synapse.Apis.Runtime.Grpc
         public virtual async Task<GrpcApiResult<V1Event?>> ConsumeOrBeginCorrelateEventAsync(V1ConsumeWorkflowInstancePendingEventCommand command, CallContext context = default)
         {
             return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(Mapper.Map<Application.Commands.WorkflowInstances.V1ConsumeOrBeginCorrelateEventCommand>(command), context.CancellationToken));
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task<GrpcApiResult> PublishEventAsync(V1PublishEventCommand command, CallContext context = default)
+        {
+            return GrpcApiResult.CreateFor(await this.Mediator.ExecuteAsync(Mapper.Map<Application.Commands.Events.V1PublishEventCommand>(command), context.CancellationToken));
         }
 
         /// <inheritdoc/>

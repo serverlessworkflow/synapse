@@ -18,6 +18,7 @@
 using Microsoft.Extensions.Logging;
 using Neuroglia;
 using Neuroglia.Serialization;
+using Synapse.Integration.Commands.Events;
 using Synapse.Integration.Commands.Generic;
 using Synapse.Integration.Commands.WorkflowActivities;
 using Synapse.Integration.Commands.WorkflowInstances;
@@ -87,9 +88,15 @@ namespace Synapse.Apis.Runtime.Grpc
         public virtual async Task<V1Event?> ConsumeOrBeginCorrelateEventAsync(V1ConsumeWorkflowInstancePendingEventCommand command, CancellationToken cancellationToken = default)
         {
             var result = await this.RuntimeApi.ConsumeOrBeginCorrelateEventAsync(command, cancellationToken);
-            if (!result.Succeeded)
-                throw new OperationResultException(new OperationResult(result.Code, result.Errors?.Select(e => new Neuroglia.Error(e.Code, e.Message))?.ToArray()));
+            if (!result.Succeeded) throw new OperationResultException(new OperationResult(result.Code, result.Errors?.Select(e => new Neuroglia.Error(e.Code, e.Message))?.ToArray()));
             return result.Data!;
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task PublishEventAsync(V1PublishEventCommand command, CancellationToken cancellationToken = default)
+        {
+            var result = await this.RuntimeApi.PublishEventAsync(command, cancellationToken);
+            if (!result.Succeeded) throw new OperationResultException(new OperationResult(result.Code, result.Errors?.Select(e => new Neuroglia.Error(e.Code, e.Message))?.ToArray()));
         }
 
         /// <inheritdoc/>

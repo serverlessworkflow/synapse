@@ -74,9 +74,9 @@
                 <h6>Extension attributes</h6>
                 <table class="table table-striped mb-3">
                     <tbody>
-                        @if (cloudEvent != null && cloudEvent.Extensions != null)
+                        @if (cloudEvent != null && cloudEvent.ExtensionAttributes != null)
                         {
-                            foreach (var attr in cloudEvent.Extensions)
+                            foreach (var attr in cloudEvent.ExtensionAttributes)
                             {
                                 <tr>
                                     <td>@attr.Key</td>
@@ -172,7 +172,7 @@
     private void OnRemoveExtensionAttribute(string name)
     {
         if (this.cloudEvent == null) return;
-        this.cloudEvent.Extensions.Remove(name);
+        this.cloudEvent.ExtensionAttributes.Remove(name);
         this.StateHasChanged();
     }
 
@@ -180,8 +180,8 @@
     {
         if (this.cloudEvent == null) this.cloudEvent = V1Event.Create();
         Neuroglia.Serialization.Dynamic dynamic = (string.IsNullOrWhiteSpace(this.extensionAttribute.Value) ? null : Neuroglia.Serialization.Dynamic.FromObject(this.extensionAttribute.Value))!;
-        if (this.cloudEvent.Extensions == null) this.cloudEvent.Extensions = new();
-        this.cloudEvent.Extensions[this.extensionAttribute.Name] = dynamic;
+        if (this.cloudEvent.ExtensionAttributes == null) this.cloudEvent.ExtensionAttributes = new();
+        this.cloudEvent.ExtensionAttributes[this.extensionAttribute.Name] = dynamic;
         this.extensionAttribute = new();
         this.StateHasChanged();
     }

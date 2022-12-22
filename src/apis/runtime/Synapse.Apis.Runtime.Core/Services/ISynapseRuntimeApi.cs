@@ -16,6 +16,7 @@
  */
 using Neuroglia.Serialization;
 using ServerlessWorkflow.Sdk.Models;
+using Synapse.Integration.Commands.Events;
 using Synapse.Integration.Commands.Generic;
 using Synapse.Integration.Commands.WorkflowActivities;
 using Synapse.Integration.Commands.WorkflowInstances;
@@ -75,6 +76,15 @@ namespace Synapse.Apis.Runtime
         /// <returns>A new awaitable <see cref="Task"/></returns>
         [OperationContract]
         Task SetCorrelationMappingAsync(V1SetWorkflowInstanceCorrelationMappingCommand command, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Publishes the specified <see cref="V1Event"/>
+        /// </summary>
+        /// <param name="command">The object that describes the command to execute</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        [OperationContract]
+        Task PublishEventAsync(V1PublishEventCommand command, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Gets all the activities (including non-operative ones) of the specified workflow instance

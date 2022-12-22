@@ -108,11 +108,11 @@ namespace Synapse.Domain.Models
         public virtual Neuroglia.Serialization.Dynamic? Data { get; protected set; }
 
         /// <summary>
-        /// Gets an <see cref="IDictionary{TKey, TValue}"/> that contains the event's extension key/value mappings
+        /// Gets an <see cref="IDictionary{TKey, TValue}"/> that contains the event's extension attributes key/value mappings
         /// </summary>
         [Newtonsoft.Json.JsonExtensionData]
         [System.Text.Json.Serialization.JsonExtensionData]
-        public virtual IDictionary<string, object> Extensions { get; protected set; } = new Dictionary<string, object>();
+        public virtual IDictionary<string, object> ExtensionAttributes { get; protected set; } = new Dictionary<string, object>();
 
         /// <summary>
         /// Gets an <see cref="IReadOnlyDictionary{TKey, TValue}"/> containing all the <see cref="V1Event"/> attributes
@@ -146,9 +146,9 @@ namespace Synapse.Domain.Models
                     yield return new KeyValuePair<string, string>(nameof(Subject).ToLower(), this.Subject);
                 if (this.Time.HasValue)
                     yield return new KeyValuePair<string, string>(nameof(Time).ToLower(), this.Time.ToString()!);
-                if(this.Extensions != null)
+                if(this.ExtensionAttributes != null)
                 {
-                    foreach (var extension in this.Extensions)
+                    foreach (var extension in this.ExtensionAttributes)
                         yield return new(extension.Key, extension.Value.ToString()!);
                 }
             }
@@ -216,7 +216,7 @@ namespace Synapse.Domain.Models
             e.Data = Neuroglia.Serialization.Dynamic.FromObject(data);
             foreach(var extensionsAttribute in cloudEvent.ExtensionAttributes)
             {
-                e.Extensions.Add(extensionsAttribute.Name, extensionsAttribute.Format(cloudEvent[extensionsAttribute]!));
+                e.ExtensionAttributes.Add(extensionsAttribute.Name, extensionsAttribute.Format(cloudEvent[extensionsAttribute]!));
             }
             return e;
         }
