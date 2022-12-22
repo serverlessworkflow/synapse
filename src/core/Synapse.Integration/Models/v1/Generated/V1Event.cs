@@ -94,10 +94,10 @@ namespace Synapse.Integration.Models
 		public virtual Dynamic Data { get; set; }
 
 		/// <summary>
-		/// An IDictionary`2 that contains the event's extension key/value mappings
+		/// An IDictionary`2 that contains the event's extension attributes key/value mappings
 		/// </summary>
-		[DataMember(Name = "extensions", Order = 10)]
-		[Description("An IDictionary`2 that contains the event's extension key/value mappings")]
+		[DataMember(Name = "extensionAttributes", Order = 10)]
+		[Description("An IDictionary`2 that contains the event's extension attributes key/value mappings")]
 		public virtual NameValueCollection<Dynamic> ExtensionAttributes { get; set; }
 
     }
