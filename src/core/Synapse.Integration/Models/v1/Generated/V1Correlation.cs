@@ -54,11 +54,25 @@ namespace Synapse.Integration.Models
 		public virtual V1CorrelationConditionType ConditionType { get; set; }
 
 		/// <summary>
+		/// An IReadOnlyCollection`1 containing the V1Correlation's conditions
+		/// </summary>
+		[DataMember(Name = "conditions", Order = 4)]
+		[Description("An IReadOnlyCollection`1 containing the V1Correlation's conditions")]
+		public virtual ICollection<V1CorrelationCondition> Conditions { get; set; }
+
+		/// <summary>
 		/// The outcome of the V1Correlation
 		/// </summary>
-		[DataMember(Name = "outcome", Order = 4)]
+		[DataMember(Name = "outcome", Order = 5)]
 		[Description("The outcome of the V1Correlation")]
 		public virtual V1CorrelationOutcome Outcome { get; set; }
+
+		/// <summary>
+		/// An IReadOnlyCollection`1 containing the V1CorrelationContexts affected by the V1Correlation
+		/// </summary>
+		[DataMember(Name = "contexts", Order = 6)]
+		[Description("An IReadOnlyCollection`1 containing the V1CorrelationContexts affected by the V1Correlation")]
+		public virtual ICollection<V1CorrelationContext> Contexts { get; set; }
 
     }
 

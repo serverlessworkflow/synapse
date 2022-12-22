@@ -15,6 +15,7 @@
  *
  */
 
+using Org.BouncyCastle.Asn1.Cms;
 using Semver;
 using Synapse.Domain.Events.FunctionDefinitionCollections;
 
@@ -69,10 +70,14 @@ namespace Synapse.Domain.Models
         /// </summary>
         public virtual string? Description { get; protected set; }
 
+        [Newtonsoft.Json.JsonProperty(nameof(Functions))]
+        [System.Text.Json.Serialization.JsonPropertyName(nameof(Functions))]
         private List<FunctionDefinition> _Functions = new();
         /// <summary>
         /// Gets an <see cref="IReadOnlyCollection{T}"/> containing the <see cref="FunctionDefinition"/>s the <see cref="V1FunctionDefinitionCollection"/> is made out of
         /// </summary>
+        [Newtonsoft.Json.JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public virtual IReadOnlyCollection<FunctionDefinition> Functions => this._Functions.AsReadOnly();
 
         /// <summary>

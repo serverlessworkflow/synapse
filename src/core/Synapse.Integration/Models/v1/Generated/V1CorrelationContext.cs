@@ -31,6 +31,20 @@ namespace Synapse.Integration.Models
 		: Entity
 	{
 
+		/// <summary>
+		/// An IReadOnlyDictionary`2 containing the correlations' value by key mappings
+		/// </summary>
+		[DataMember(Name = "mappings", Order = 1)]
+		[Description("An IReadOnlyDictionary`2 containing the correlations' value by key mappings")]
+		public virtual NameValueCollection<string> Mappings { get; set; }
+
+		/// <summary>
+		/// An IReadOnlyCollection`1 containing all correlated V1Events pending processing
+		/// </summary>
+		[DataMember(Name = "pendingEvents", Order = 2)]
+		[Description("An IReadOnlyCollection`1 containing all correlated V1Events pending processing")]
+		public virtual ICollection<V1Event> PendingEvents { get; set; }
+
     }
 
 }

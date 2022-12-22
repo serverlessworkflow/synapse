@@ -53,6 +53,20 @@ namespace Synapse.Integration.Models
 		[Description("The V1WorkflowProcess's exit code")]
 		public virtual long? ExitCode { get; set; }
 
+		/// <summary>
+		/// A boolean indicating whether or not the V1WorkflowProcess is running
+		/// </summary>
+		[DataMember(Name = "isRunning", Order = 4)]
+		[Description("A boolean indicating whether or not the V1WorkflowProcess is running")]
+		public virtual bool IsRunning { get; set; }
+
+		/// <summary>
+		/// The V1WorkflowRuntimeSession's duration
+		/// </summary>
+		[DataMember(Name = "duration", Order = 5)]
+		[Description("The V1WorkflowRuntimeSession's duration")]
+		public virtual TimeSpan? Duration { get; set; }
+
     }
 
 }

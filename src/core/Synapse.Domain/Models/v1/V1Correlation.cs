@@ -50,11 +50,8 @@ namespace Synapse.Domain.Models
         public V1Correlation(V1CorrelationActivationType activationType, V1CorrelationLifetime lifetime, V1CorrelationConditionType conditionType, IEnumerable<V1CorrelationCondition> conditions, V1CorrelationOutcome outcome, V1CorrelationContext? context = null)
             : base(Guid.NewGuid().ToString())
         {
-            if(conditions == null 
-                || !conditions.Any())
-                throw DomainException.ArgumentNull(nameof(conditions));
-            if(outcome == null)
-                throw DomainException.ArgumentNull(nameof(outcome));
+            if(conditions == null || !conditions.Any()) throw DomainException.ArgumentNull(nameof(conditions));
+            if(outcome == null) throw DomainException.ArgumentNull(nameof(outcome));
             this.On(this.RegisterEvent(new V1CorrelationCreatedDomainEvent(this.Id, activationType, lifetime, conditionType, conditions, outcome, context)));
         }
 
