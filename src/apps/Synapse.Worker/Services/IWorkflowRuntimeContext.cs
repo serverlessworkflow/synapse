@@ -59,6 +59,14 @@ namespace Synapse.Worker.Services
         /// <returns>The secret with the specified name</returns>
         Task<T> GetSecretAsync<T>(string secret, CancellationToken cancellationToken = default);
 
+        /// <summary>
+        /// Publishes the specified <see cref="V1Event"/>
+        /// </summary>
+        /// <param name="e">The <see cref="V1Event"/> to publish</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A new awaitable <see cref="Task"/></returns>
+        Task PublishEventAsync(V1Event e, CancellationToken cancellationToken = default);
+
     }
 
 }

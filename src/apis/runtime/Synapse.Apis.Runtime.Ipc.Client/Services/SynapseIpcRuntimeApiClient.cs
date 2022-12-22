@@ -4,6 +4,7 @@ using Neuroglia.Mapping;
 using Neuroglia.Mediation;
 using Neuroglia.Serialization;
 using Synapse.Infrastructure.Services;
+using Synapse.Integration.Commands.Events;
 using Synapse.Integration.Commands.WorkflowActivities;
 using Synapse.Integration.Commands.WorkflowInstances;
 using Synapse.Integration.Models;
@@ -91,6 +92,13 @@ namespace Synapse.Apis.Runtime.Ipc
             if(command == null)
                 throw new ArgumentNullException(nameof(command));
             return await this.Mediator.ExecuteAndUnwrapAsync(this.Mapper.Map<Application.Commands.WorkflowInstances.V1ConsumeOrBeginCorrelateEventCommand>(command), cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual async Task PublishEventAsync(V1PublishEventCommand command, CancellationToken cancellationToken = default)
+        {
+            if (command == null) throw new ArgumentNullException(nameof(command));
+            await this.Mediator.ExecuteAndUnwrapAsync(this.Mapper.Map<Application.Commands.Events.V1PublishEventCommand>(command), cancellationToken);
         }
 
         /// <inheritdoc/>

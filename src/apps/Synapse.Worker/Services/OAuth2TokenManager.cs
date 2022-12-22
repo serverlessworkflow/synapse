@@ -15,6 +15,7 @@
  *
  */
 
+using GraphQL.Client.Abstractions.Utilities;
 using IdentityModel.Client;
 
 namespace Synapse.Worker.Services
@@ -68,7 +69,7 @@ namespace Synapse.Worker.Services
             var tokenKey = $"{oauthProperties.ClientId}@{oauthProperties.Authority}";
             var json = await this.JsonSerializer.SerializeAsync(oauthProperties, cancellationToken);
             var properties = await this.JsonSerializer.DeserializeAsync<Dictionary<string, string>>(json, cancellationToken);
-            properties = properties.Where(kvp => !string.IsNullOrWhiteSpace(kvp.Value)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            properties = properties.Where(kvp => !string.IsNullOrWhiteSpace(kvp.Value)).ToDictionary(kvp => kvp.Key.ToSnakeCase(), kvp => kvp.Value);
             properties.Remove("authority");
             if(this.Tokens.TryGetValue(tokenKey, out var token)
                 && token != null)

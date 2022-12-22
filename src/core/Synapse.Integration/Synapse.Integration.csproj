@@ -90,6 +90,9 @@
     <Compile Update="Commands\EventDefinitionCollections\v1\Generated\V1CreateEventDefinitionCollectionCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\EventDefinitionCollections\v1\V1CreateEventDefinitionCollectionCommand.cs</CustomToolNamespace>
     </Compile>
+    <Compile Update="Commands\Events\v1\Generated\V1PublishEventCommand.cs">
+      <CustomToolNamespace>..\Synapse.Application\Commands\Events\v1\V1PublishEventCommand.cs</CustomToolNamespace>
+    </Compile>
     <Compile Update="Commands\FunctionDefinitionCollections\v1\Generated\V1CreateFunctionDefinitionCollectionCommand.cs">
       <CustomToolNamespace>..\Synapse.Application\Commands\FunctionDefinitionCollections\v1\V1CreateFunctionDefinitionCollectionCommand.cs</CustomToolNamespace>
     </Compile>

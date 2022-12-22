@@ -171,6 +171,13 @@ namespace Synapse.Worker.Services
             };
         }
 
+        /// <inheritdoc/>
+        public virtual async Task PublishEventAsync(V1Event e, CancellationToken cancellationToken = default)
+        {
+            if (e == null) throw new ArgumentNullException(nameof(e));
+            await this.RuntimeApi.PublishEventAsync(new() { Event = e }, cancellationToken);
+        }
+
         /// <summary>
         /// Builds the runtime expression arguments
         /// </summary>

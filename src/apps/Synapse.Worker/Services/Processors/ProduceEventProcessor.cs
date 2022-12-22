@@ -15,7 +15,6 @@
  *
  */
 
-using CloudNative.CloudEvents;
 using Synapse.Integration.Events.WorkflowActivities;
 using System.Net.Mime;
 
@@ -67,13 +66,14 @@ namespace Synapse.Worker.Services.Processors
         {
             try
             {
-                var e = new CloudEvent()
+                var e = new V1Event()
                 {
                     Id = Guid.NewGuid().ToString(),
                     Type = this.EventDefinition.Type,
                     Source = new(this.EventDefinition.Source!),
                     DataContentType = MediaTypeNames.Application.Json,
-                    Data = this.Activity.Input
+                    Data = this.Activity.Input,
+                    ExtensionAttributes = new()
                 };
                 if(this.EventDefinition.Correlations != null)
                 {
@@ -91,10 +91,12 @@ namespace Synapse.Worker.Services.Processors
                                 value = (await this.Context.EvaluateAsync(value, await this.Context.Workflow.GetActivityStateDataAsync(this.Activity, cancellationToken), cancellationToken)!)!.ToString();
                             await this.Context.Workflow.SetCorrelationMappingAsync(correlation.ContextAttributeName, value!, cancellationToken);
                         }
-                        e.SetAttributeFromString(correlation.ContextAttributeName, value!);
+                        e.ExtensionAttributes.Add(correlation.ContextAttributeName, Dynamic.FromObject(value));
                     }
                 }
-                this.IntegrationEventBus.OutboundStream.OnNext(e);
+
+                await this.Context.PublishEventAsync(e, cancellationToken);
+
                 await this.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, this.Activity.Input), cancellationToken);
                 await this.OnCompletedAsync(cancellationToken);
             }
