@@ -15,6 +15,8 @@
  *
  */
 
+using IdentityModel.Client;
+using Newtonsoft.Json;
 using Simple.OData.Client;
 using Synapse.Integration.Events.WorkflowActivities;
 
@@ -80,7 +82,13 @@ namespace Synapse.Worker.Services.Processors
         {
             await base.InitializeAsync(cancellationToken);
             await this.HttpClient.ConfigureAuthorizationAsync(this.ServiceProvider, this.Authentication, cancellationToken);
-            var components = this.Function.Operation.Split("#", StringSplitOptions.RemoveEmptyEntries);
+            var odataUriString = this.Function.Operation;
+            if (odataUriString.IsRuntimeExpression())
+            {
+                var evaluationResult = (string?)await this.Context.EvaluateAsync(odataUriString, this.Activity.Input, cancellationToken);
+                if (!string.IsNullOrWhiteSpace(evaluationResult)) odataUriString = evaluationResult;
+            }
+            var components = odataUriString.Split("#", StringSplitOptions.RemoveEmptyEntries);
             if (components.Length != 2)
                 throw new FormatException($"The 'operation' property of the ODATA function with name '{this.Function.Name}' has an invalid value '{this.Function.Operation}'. ODATA functions expect a value in the following format: <URI_to_odata_service>#<Entity_Set_Name>");
             this.ServiceUri = new(components.First());
@@ -97,7 +105,11 @@ namespace Synapse.Worker.Services.Processors
                 return;
             try
             {
-                var commandOptions = this.FunctionReference.Arguments?.ToObject<ODataCommandOptions>();
+                var parameters = this.FunctionReference.Arguments?.ToObject()!;
+                var inputData = this.Activity.Input!.ToObject()!;
+                parameters = (await this.Context.EvaluateObjectAsync(parameters, inputData, cancellationToken))!;
+
+                var commandOptions = JsonConvert.DeserializeObject<ODataCommandOptions>(JsonConvert.SerializeObject(parameters));
                 var command = this.EntitySet;
                 if (!string.IsNullOrWhiteSpace(commandOptions?.Key))
                     command += $"({commandOptions.Key})";
