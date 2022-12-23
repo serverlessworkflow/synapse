@@ -41,9 +41,12 @@ namespace Synapse
             ce.DataContentType = e.DataContentType;
             ce.DataSchema = e.DataSchema;
             ce.Data = e.Data;
-            foreach(var extension in e.ExtensionAttributes)
+            if(e.ExtensionAttributes != null)
             {
-                ce.SetAttributeFromString(extension.Key, extension.Value?.ToString()!);
+                foreach (var extension in e.ExtensionAttributes)
+                {
+                    ce.SetAttributeFromString(extension.Key, extension.Value?.ToString()!);
+                }
             }
             return ce;
         }
