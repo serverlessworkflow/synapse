@@ -102,6 +102,8 @@ namespace Synapse.Worker.Services.Processors
             if (this.Activity.Status == V1WorkflowActivityStatus.Pending)
             {
                 var input = await this.Context.FilterInputAsync(this.Action, this.Activity.Input.ToObject()!, cancellationToken);
+                if (!string.IsNullOrWhiteSpace(this.Action.Event!.DataExpression)) input = await this.Context.EvaluateAsync(this.Action.Event!.DataExpression, input, cancellationToken);
+                else if (this.Action.Event.Data != null) input = await this.Context.EvaluateObjectAsync(this.Action.Event!.Data.ToObject()!, input!, cancellationToken);
                 var metadata = new Dictionary<string, string>() 
                 {
                     {  V1WorkflowActivityMetadata.State, this.State.Name },
