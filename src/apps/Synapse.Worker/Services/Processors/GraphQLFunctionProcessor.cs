@@ -97,7 +97,7 @@ namespace Synapse.Worker.Services.Processors
         protected override async Task InitializeAsync(CancellationToken cancellationToken)
         {
             await base.InitializeAsync(cancellationToken);
-            await this.HttpClient.ConfigureAuthorizationAsync(this.ServiceProvider, this.Authentication, cancellationToken);
+            this.HttpClient.UseAuthorization(this.Authorization);
             var operationComponents = this.Function.Operation.Split('#', StringSplitOptions.RemoveEmptyEntries);
             if (operationComponents.Length != 3)
                 throw new FormatException($"The 'operation' property of the GraphQL function with name '{this.Function.Name}' has an invalid value '{this.Function.Operation}'. GraphQL functions expect a value in the following format: <url_to_graphql_endpoint>#<literal 'mutation' or 'query'>#<mutation_or_query_field>");

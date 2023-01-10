@@ -86,7 +86,7 @@ namespace Synapse.Worker.Services
                 }
             }
             var discoveryDocument = await this.HttpClient.GetDiscoveryDocumentAsync(oauthProperties.Authority.ToString(), cancellationToken);
-            using var request = new HttpRequestMessage(HttpMethod.Post, discoveryDocument.TokenEndpoint)
+            using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(oauthProperties.Authority, discoveryDocument.TokenEndpoint))
             {
                 Content = new FormUrlEncodedContent(properties)
             };

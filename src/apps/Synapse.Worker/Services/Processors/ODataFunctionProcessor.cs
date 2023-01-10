@@ -81,7 +81,7 @@ namespace Synapse.Worker.Services.Processors
         protected override async Task InitializeAsync(CancellationToken cancellationToken)
         {
             await base.InitializeAsync(cancellationToken);
-            await this.HttpClient.ConfigureAuthorizationAsync(this.ServiceProvider, this.Authentication, cancellationToken);
+            this.HttpClient.UseAuthorization(this.Authorization);
             var odataUriString = this.Function.Operation;
             if (odataUriString.IsRuntimeExpression())
             {

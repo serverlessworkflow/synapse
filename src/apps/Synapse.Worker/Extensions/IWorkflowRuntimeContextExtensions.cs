@@ -36,15 +36,16 @@ namespace Synapse.Worker
         /// <param name="context">The current <see cref="IWorkflowRuntimeContext"/></param>
         /// <param name="expressionObject">The object to evaluate</param>
         /// <param name="data">The data to evaluate the object against</param>
+        /// <param name="authorization">The current <see cref="AuthorizationInfo"/>, if any</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>The evaluated object</returns>
-        public static async Task<object?> EvaluateObjectAsync(this IWorkflowRuntimeContext context, object expressionObject, object data, CancellationToken cancellationToken = default)
+        public static async Task<object?> EvaluateObjectAsync(this IWorkflowRuntimeContext context, object expressionObject, object data, AuthorizationInfo? authorization, CancellationToken cancellationToken = default)
         {
             var json = JsonConvert.SerializeObject(expressionObject, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore }); ;
             foreach (var match in Regex.Matches(json, @"""\$\{.+?\}""", RegexOptions.Compiled).Cast<Match>())
             {
                 var expression = Regex.Unescape(match.Value[3..^2].Trim().Replace(@"\""", @""""));
-                var evaluationResult = await context.EvaluateAsync(expression, data, cancellationToken);
+                var evaluationResult = await context.EvaluateAsync(expression, data, authorization, cancellationToken);
                 if (evaluationResult == null) continue;
                 var valueToken = JToken.FromObject(evaluationResult);
                 var value = null as string;
@@ -60,6 +61,19 @@ namespace Synapse.Worker
                 json = json.Replace(match.Value, value);
             }
             return JsonConvert.DeserializeObject<ExpandoObject>(json)!;
+        }
+
+        /// <summary>
+        /// Evaluates an object against the specified data
+        /// </summary>
+        /// <param name="context">The current <see cref="IWorkflowRuntimeContext"/></param>
+        /// <param name="expressionObject">The object to evaluate</param>
+        /// <param name="data">The data to evaluate the object against</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The evaluated object</returns>
+        public static Task<object?> EvaluateObjectAsync(this IWorkflowRuntimeContext context, object expressionObject, object data, CancellationToken cancellationToken = default)
+        {
+            return EvaluateObjectAsync(context, expressionObject, data, null, cancellationToken);
         }
 
         /// <summary>
@@ -123,10 +137,25 @@ namespace Synapse.Worker
         /// <returns>The filtered output</returns>
         public static async Task<object?> FilterOutputAsync(this IWorkflowRuntimeContext context, StateDefinition state, object output, CancellationToken cancellationToken = default)
         {
-            if (state.DataFilter == null
-                || string.IsNullOrWhiteSpace(state.DataFilter.Output))
-                return output;
+            if (state.DataFilter == null || string.IsNullOrWhiteSpace(state.DataFilter.Output)) return output;
             return await context.EvaluateAsync(state.DataFilter.Output, output, cancellationToken);
+        }
+
+        /// <summary>
+        /// Filters the output of the specified <see cref="ActionDefinition"/>
+        /// </summary>
+        /// <param name="context">The <see cref="IWorkflowRuntimeContext"/> to use</param>
+        /// <param name="action">The <see cref="ActionDefinition"/> to filter the output for</param>
+        /// <param name="output">The output data to filter</param>
+        /// <param name="authorization">The current <see cref="AuthorizationInfo"/>, if any</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The filtered output</returns>
+        public static async Task<object?> FilterOutputAsync(this IWorkflowRuntimeContext context, ActionDefinition action, object output, AuthorizationInfo? authorization, CancellationToken cancellationToken = default)
+        {
+            if (action.ActionDataFilter == null
+                || string.IsNullOrWhiteSpace(action.ActionDataFilter.Results))
+                return output;
+            return await context.EvaluateAsync(action.ActionDataFilter.Results, output, authorization, cancellationToken);
         }
 
         /// <summary>
@@ -137,12 +166,9 @@ namespace Synapse.Worker
         /// <param name="output">The output data to filter</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>The filtered output</returns>
-        public static async Task<object?> FilterOutputAsync(this IWorkflowRuntimeContext context, ActionDefinition action, object output, CancellationToken cancellationToken = default)
+        public static Task<object?> FilterOutputAsync(this IWorkflowRuntimeContext context, ActionDefinition action, object output, CancellationToken cancellationToken = default)
         {
-            if (action.ActionDataFilter == null
-                || string.IsNullOrWhiteSpace(action.ActionDataFilter.Results))
-                return output;
-            return await context.EvaluateAsync(action.ActionDataFilter.Results, output, cancellationToken);
+            return FilterOutputAsync(context, action, output, cancellationToken);
         }
 
         /// <summary>

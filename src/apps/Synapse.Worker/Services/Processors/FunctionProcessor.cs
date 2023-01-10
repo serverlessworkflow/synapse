@@ -18,108 +18,104 @@
 using Synapse.Integration.Events;
 using Synapse.Integration.Events.WorkflowActivities;
 
-namespace Synapse.Worker.Services.Processors
+namespace Synapse.Worker.Services.Processors;
+
+
+/// <summary>
+/// Represents the base class for all <see cref="IWorkflowActivityProcessor"/>s used to process <see cref="FunctionDefinition"/>s
+/// </summary>
+public abstract class FunctionProcessor
+    : ActionProcessor
 {
 
     /// <summary>
-    /// Represents the base class for all <see cref="IWorkflowActivityProcessor"/>s used to process <see cref="FunctionDefinition"/>s
+    /// Initializes a new <see cref="WorkflowActivityProcessor"/>
     /// </summary>
-    public abstract class FunctionProcessor
-        : ActionProcessor
+    /// <param name="serviceProvider">The current <see cref="IServiceProvider"/></param>
+    /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
+    /// <param name="context">The current <see cref="IWorkflowRuntimeContext"/></param>
+    /// <param name="activityProcessorFactory">The service used to create <see cref="IWorkflowActivityProcessor"/>s</param>
+    /// <param name="options">The service used to access the current <see cref="ApplicationOptions"/></param>
+    /// <param name="activity">The <see cref="V1WorkflowActivity"/> to process</param>
+    /// <param name="action">The <see cref="ActionDefinition"/> to process</param>
+    /// <param name="function">The <see cref="FunctionDefinition"/> to process</param>
+    public FunctionProcessor(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory,
+        IOptions<ApplicationOptions> options, V1WorkflowActivity activity, ActionDefinition action, FunctionDefinition function) 
+        : base(loggerFactory, context, activityProcessorFactory, options, activity, action)
     {
+        this.ServiceProvider = serviceProvider;
+        this.Function = function;
+    }
 
-        /// <summary>
-        /// Initializes a new <see cref="WorkflowActivityProcessor"/>
-        /// </summary>
-        /// <param name="serviceProvider">The current <see cref="IServiceProvider"/></param>
-        /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
-        /// <param name="context">The current <see cref="IWorkflowRuntimeContext"/></param>
-        /// <param name="activityProcessorFactory">The service used to create <see cref="IWorkflowActivityProcessor"/>s</param>
-        /// <param name="options">The service used to access the current <see cref="ApplicationOptions"/></param>
-        /// <param name="activity">The <see cref="V1WorkflowActivity"/> to process</param>
-        /// <param name="action">The <see cref="ActionDefinition"/> to process</param>
-        /// <param name="function">The <see cref="FunctionDefinition"/> to process</param>
-        public FunctionProcessor(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory,
-            IOptions<ApplicationOptions> options, V1WorkflowActivity activity, ActionDefinition action, FunctionDefinition function) 
-            : base(loggerFactory, context, activityProcessorFactory, options, activity, action)
+    /// <summary>
+    /// Gets the current <see cref="IServiceProvider"/>
+    /// </summary>
+    protected IServiceProvider ServiceProvider { get; }
+
+    /// <summary>
+    /// Gets the <see cref="FunctionDefinition"/> to process
+    /// </summary>
+    protected FunctionDefinition Function { get; }
+
+    /// <summary>
+    /// Gets the <see cref="ServerlessWorkflow.Sdk.Models.FunctionReference"/> to process
+    /// </summary>
+    protected FunctionReference FunctionReference
+    {
+        get
         {
-            this.ServiceProvider = serviceProvider;
-            this.Function = function;
+            return this.Action.Function!;
         }
+    }
 
-        /// <summary>
-        /// Gets the current <see cref="IServiceProvider"/>
-        /// </summary>
-        protected IServiceProvider ServiceProvider { get; }
+    /// <summary>
+    /// Gets the object used to configure the authentication mechanism to use when invoking the function
+    /// </summary>
+    protected AuthenticationDefinition? Authentication { get; private set; }
 
-        /// <summary>
-        /// Gets the <see cref="FunctionDefinition"/> to process
-        /// </summary>
-        protected FunctionDefinition Function { get; }
+    /// <summary>
+    /// Gets the object that describes the authorization resolved using the specified <see cref="Authentication"/>
+    /// </summary>
+    protected AuthorizationInfo? Authorization { get; private set; }
 
-        /// <summary>
-        /// Gets the <see cref="ServerlessWorkflow.Sdk.Models.FunctionReference"/> to process
-        /// </summary>
-        protected FunctionReference FunctionReference
+    /// <inheritdoc/>
+    protected override async Task InitializeAsync(CancellationToken cancellationToken)
+    {
+        if (!string.IsNullOrWhiteSpace(this.Function.AuthRef))
         {
-            get
+            if (this.Context.Workflow.Definition.TryGetAuthentication(this.Function.AuthRef, out var auth))
             {
-                return this.Action.Function!;
-            }
-        }
-
-        /// <summary>
-        /// Gets the object used to configure the authentication mechanism to use when invoking the function
-        /// </summary>
-        protected AuthenticationDefinition? Authentication { get; private set; }
-
-        /// <inheritdoc/>
-        protected override async Task InitializeAsync(CancellationToken cancellationToken)
-        {
-            if (!string.IsNullOrWhiteSpace(this.Function.AuthRef))
-            {
-                if (this.Context.Workflow.Definition.TryGetAuthentication(this.Function.AuthRef, out var auth))
+                if (auth.Properties is SecretBasedAuthenticationProperties secretBased)
                 {
-                    if (auth.Properties is SecretBasedAuthenticationProperties secretBased)
+                    auth.Properties = auth.Scheme switch
                     {
-                        switch (auth.Scheme)
-                        {
-                            case AuthenticationScheme.Basic:
-                                auth.Properties = await this.Context.GetSecretAsync<BasicAuthenticationProperties>(secretBased.Secret);
-                                break;
-                            case AuthenticationScheme.Bearer:
-                                auth.Properties = await this.Context.GetSecretAsync<BearerAuthenticationProperties>(secretBased.Secret);
-                                break;
-                            case AuthenticationScheme.OAuth2:
-                                auth.Properties = await this.Context.GetSecretAsync<OAuth2AuthenticationProperties>(secretBased.Secret);
-                                break;
-                            default:
-                                throw new NotSupportedException($"The specified {nameof(AuthenticationScheme)} '{auth.Scheme}' is not supported");
-                        }
-                    }
-                    this.Authentication = auth;
+                        AuthenticationScheme.Basic => await this.Context.GetSecretAsync<BasicAuthenticationProperties>(secretBased.Secret),
+                        AuthenticationScheme.Bearer => await this.Context.GetSecretAsync<BearerAuthenticationProperties>(secretBased.Secret),
+                        AuthenticationScheme.OAuth2 => await this.Context.GetSecretAsync<OAuth2AuthenticationProperties>(secretBased.Secret),
+                        _ => throw new NotSupportedException($"The specified {nameof(AuthenticationScheme)} '{auth.Scheme}' is not supported"),
+                    };
                 }
-                else
-                    throw new NullReferenceException($"Failed to find the authentication definition with name '{this.Function.AuthRef}'");
-            }
-        }
-
-        /// <inheritdoc/>
-        protected override async Task OnNextAsync(IV1WorkflowActivityIntegrationEvent e, CancellationToken cancellationToken)
-        {
-            if (e is V1WorkflowActivityCompletedIntegrationEvent completedEvent)
-            {
-                var output = completedEvent.Output.ToObject();
-                if (this.Action.ActionDataFilter != null)
-                    output = await this.Context.FilterOutputAsync(this.Action, output!, cancellationToken);
-                await base.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, output), cancellationToken);
+                this.Authentication = auth;
+                if (this.Authentication != null) this.Authorization = await AuthorizationInfo.CreateAsync(this.ServiceProvider, this.Authentication, cancellationToken);
             }
             else
-            {
-                await base.OnNextAsync(e, cancellationToken);
-            }
+                throw new NullReferenceException($"Failed to find the authentication definition with name '{this.Function.AuthRef}'");
         }
+    }
 
+    /// <inheritdoc/>
+    protected override async Task OnNextAsync(IV1WorkflowActivityIntegrationEvent e, CancellationToken cancellationToken)
+    {
+        if (e is V1WorkflowActivityCompletedIntegrationEvent completedEvent)
+        {
+            var output = completedEvent.Output.ToObject();
+            if (this.Action.ActionDataFilter != null) output = await this.Context.FilterOutputAsync(this.Action, output!, this.Authorization, cancellationToken);
+            await base.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, output), cancellationToken);
+        }
+        else
+        {
+            await base.OnNextAsync(e, cancellationToken);
+        }
     }
 
 }

@@ -21,7 +21,6 @@ using Newtonsoft.Json.Linq;
 using ServerlessWorkflow.Sdk.Services.IO;
 using Synapse.Apis.Management;
 using Synapse.Apis.Runtime;
-using Synapse.Worker.Services;
 using System.Text.RegularExpressions;
 
 namespace Synapse.Worker.Services
@@ -131,37 +130,38 @@ namespace Synapse.Worker.Services
         }
 
         /// <inheritdoc/>
-        public virtual async Task<object?> EvaluateAsync(string runtimeExpression, object? data, CancellationToken cancellationToken)
+        public virtual async Task<object?> EvaluateAsync(string runtimeExpression, object? data, AuthorizationInfo? authorization, CancellationToken cancellationToken)
         {
             runtimeExpression = runtimeExpression.Trim();
-            if (runtimeExpression.StartsWith("${"))
-                runtimeExpression = runtimeExpression[2..^1].Trim();
+            if (runtimeExpression.StartsWith("${")) runtimeExpression = runtimeExpression[2..^1].Trim();
             var args = await this.BuildRuntimExpressionArgumentsAsync(cancellationToken);
+            if (authorization != null) args.Add("AUTHZ", authorization);
             foreach (Match functionMatch in Regex.Matches(runtimeExpression, @"(fn:[\w\-_]*)"))
             {
                 var functionName = functionMatch.Value.Trim();
                 functionName = functionName[3..];
-                if (!this.Workflow.Definition.TryGetFunction(functionName, out var function))
-                    throw new NullReferenceException($"Failed to find a function with the specified name '{functionName}' in the workflow '{this.Workflow.Definition}'");
-                if (function.Type != FunctionType.Expression)
-                    throw new InvalidOperationException($"The function with name '{function.Name}' is of type '{EnumHelper.Stringify(function.Type)}' and cannot be called in an expression");
+                if (!this.Workflow.Definition.TryGetFunction(functionName, out var function)) throw new NullReferenceException($"Failed to find a function with the specified name '{functionName}' in the workflow '{this.Workflow.Definition}'");
+                if (function.Type != FunctionType.Expression) throw new InvalidOperationException($"The function with name '{function.Name}' is of type '{EnumHelper.Stringify(function.Type)}' and cannot be called in an expression");
                 var value = this.ExpressionEvaluator.Evaluate(function.Operation, data!, args);
                 var serializedValue = null as string;
-                if (value != null)
-                    serializedValue = JsonConvert.SerializeObject(value, Formatting.None, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
+                if (value != null) serializedValue = JsonConvert.SerializeObject(value, Formatting.None, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
                 runtimeExpression = runtimeExpression.Replace(functionMatch.Value, serializedValue);
             }
             return this.ExpressionEvaluator.Evaluate(runtimeExpression, data!, args);
         }
 
         /// <inheritdoc/>
+        public virtual Task<object?> EvaluateAsync(string runtimeExpression, object? data, CancellationToken cancellationToken)
+        {
+            return this.EvaluateAsync(runtimeExpression, data, null, cancellationToken);
+        }
+
+        /// <inheritdoc/>
         public virtual async Task<T> GetSecretAsync<T>(string secret, CancellationToken cancellationToken = default)
         {
-            if (string.IsNullOrWhiteSpace(secret))
-                throw new ArgumentNullException(nameof(secret));
+            if (string.IsNullOrWhiteSpace(secret)) throw new ArgumentNullException(nameof(secret));
             var secrets = await this.SecretManager.GetSecretsAsync(cancellationToken);
-            if (!secrets.TryGetValue(secret, out var secretValue))
-                throw new NullReferenceException($"Failed to find the specified secret '{secret}'");
+            if (!secrets.TryGetValue(secret, out var secretValue)) throw new NullReferenceException($"Failed to find the specified secret '{secret}'");
             return secretValue switch
             {
                 T t => t,
