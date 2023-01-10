@@ -127,7 +127,7 @@ namespace Synapse.Worker.Services.Processors
             try
             {
                 await base.InitializeAsync(cancellationToken);
-                await this.HttpClient.ConfigureAuthorizationAsync(this.ServiceProvider, this.Authentication, cancellationToken);
+                this.HttpClient.UseAuthorization(this.Authorization);
                 var openApiUriString = this.Function.Operation;
                 if (openApiUriString.IsRuntimeExpression())
                 {
@@ -163,19 +163,15 @@ namespace Synapse.Worker.Services.Processors
                 var operation = this.Document.Paths
                     .SelectMany(p => p.Value.Operations)
                     .FirstOrDefault(o => o.Value.OperationId == operationId);
-                if (operation.Value == null)
-                    throw new NullReferenceException($"Failed to find an operation with id '{this.Operation}' in OpenAPI document at '{openApiUri}'");
+                if (operation.Value == null) throw new NullReferenceException($"Failed to find an operation with id '{this.Operation}' in OpenAPI document at '{openApiUri}'");
                 this.HttpMethod = operation.Key.ToHttpMethod();
                 this.Operation = operation.Value;
                 this.Servers = this.Document.Servers.Select(s => s.Url).ToList();
-                if (!this.Servers.Any())
-                    this.Servers.Add(openApiUri.ToString().Replace(openApiUri.PathAndQuery, string.Empty));
-                KeyValuePair<string, OpenApiPathItem> path = this.Document.Paths
-                    .Single(p => p.Value.Operations.Any(o => o.Value.OperationId == operation.Value.OperationId));
+                if (!this.Servers.Any()) this.Servers.Add(openApiUri.ToString().Replace(openApiUri.PathAndQuery, string.Empty));
+                KeyValuePair<string, OpenApiPathItem> path = this.Document.Paths.Single(p => p.Value.Operations.Any(o => o.Value.OperationId == operation.Value.OperationId));
                 this.Path = path.Key;
                 await this.BuildParametersAsync(cancellationToken);
-                if (this.Parameters == null)
-                    return;
+                if (this.Parameters == null)return;
                 var parameters = path.Value.Parameters.ToList();
                 parameters.AddRange(this.Operation.Parameters);
                 foreach (OpenApiParameter param in parameters
@@ -221,13 +217,13 @@ namespace Synapse.Worker.Services.Processors
                 {
                     if (operation.Value.RequestBody.Extensions.TryGetValue("x-bodyName", out IOpenApiExtension? bodyNameExtension))
                     {
-                        this.Body = await this.Context.EvaluateAsync($".{((OpenApiString)bodyNameExtension).Value}", this.Parameters, cancellationToken);
+                        this.Body = await this.Context.EvaluateAsync($".{((OpenApiString)bodyNameExtension).Value}", this.Parameters, this.Authorization, cancellationToken);
                     }
                     else
                     {
                         if (this.Parameters.TryGetValue("body", out var bodyValue))
                         {
-                            this.Body = await this.Context.EvaluateAsync(".body", this.Parameters, cancellationToken);
+                            this.Body = await this.Context.EvaluateAsync(".body", this.Parameters, this.Authorization, cancellationToken);
                         }
                         else
                         {
@@ -264,7 +260,7 @@ namespace Synapse.Worker.Services.Processors
                 return;
             var parameters = this.FunctionReference.Arguments.ToObject()!;
             var inputData = this.Activity.Input!.ToObject()!;
-            parameters = (await this.Context.EvaluateObjectAsync(parameters, inputData, cancellationToken))!;
+            parameters = (await this.Context.EvaluateObjectAsync(parameters, inputData, this.Authorization, cancellationToken))!;
             this.Parameters = ((ExpandoObject)parameters)!;
         }
 
@@ -277,7 +273,7 @@ namespace Synapse.Worker.Services.Processors
         protected virtual async Task<(bool HasMatch, string Value)> TryGetParameterAsync(string expression, CancellationToken cancellationToken)
         {
             var value = null as string;
-            var token = await this.Context.EvaluateAsync(expression, this.Parameters, cancellationToken);
+            var token = await this.Context.EvaluateAsync(expression, this.Parameters, this.Authorization, cancellationToken);
             if (token == null) return (false, value!);
             value = token.ToString()!;
             return (true, value);

@@ -15,9 +15,7 @@
  *
  */
 
-using Microsoft.Extensions.DependencyInjection;
 using System.Net.Http.Headers;
-using System.Text;
 
 namespace Synapse.Worker
 {
@@ -29,40 +27,15 @@ namespace Synapse.Worker
     {
 
         /// <summary>
-        /// Configures the <see cref="HttpClient"/> to use the specified <see cref="AuthenticationDefinition"/>
+        /// Configures the <see cref="HttpClient"/> to use the specified <see cref="AuthorizationInfo"/>
         /// </summary>
         /// <param name="httpClient">The <see cref="HttpClient"/> to configure</param>
-        /// <param name="serviceProvider">The current <see cref="IServiceProvider"/></param>
-        /// <param name="authentication">The <see cref="AuthenticationDefinition"/> that describes how to configure authorization</param>
-        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <param name="authorization">An object that describes the authorization mechanism to use</param>
         /// <returns>A new awaitable <see cref="Task"/></returns>
-        public static async Task ConfigureAuthorizationAsync(this HttpClient httpClient, IServiceProvider serviceProvider, AuthenticationDefinition? authentication, CancellationToken cancellationToken = default)
+        public static void UseAuthorization(this HttpClient httpClient, AuthorizationInfo? authorization)
         {
-            if (authentication == null)
-                return;
-            string? scheme;
-            string? value;
-            switch (authentication.Properties)
-            {
-                case BasicAuthenticationProperties basic:
-                    scheme = "Basic";
-                    value = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{basic.Username}:{basic.Password}"));
-                    break;
-                case BearerAuthenticationProperties bearer:
-                    scheme = "Bearer";
-                    value = bearer.Token;
-                    break;
-                case OAuth2AuthenticationProperties oauth:
-                    scheme = "Bearer";
-                    var token = await serviceProvider.GetRequiredService<IOAuth2TokenManager>().GetTokenAsync(oauth, cancellationToken);
-                    if (token == null)
-                        throw new NullReferenceException($"Failed to generate an OAUTH2 token");
-                    value = token.AccessToken;
-                    break;
-                default:
-                    throw new NotSupportedException($"The specified authentication schema '{EnumHelper.Stringify(authentication.Scheme)}' is not supported");
-            }
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(scheme, value);
+            if (authorization == null) return;
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(authorization.Scheme, authorization.Parameters);
         }
 
     }

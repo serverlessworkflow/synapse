@@ -46,6 +46,16 @@ namespace Synapse.Worker.Services
         /// </summary>
         /// <param name="runtimeExpression">The runtime expression to evaluate</param>
         /// <param name="data">The data to evaluate the expression against</param>
+        /// <param name="authorization">The current <see cref="AuthorizationInfo"/>, if any</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>The evaluation result</returns>
+        Task<object?> EvaluateAsync(string runtimeExpression, object? data, AuthorizationInfo? authorization, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Evaluates a runtime expression against an object
+        /// </summary>
+        /// <param name="runtimeExpression">The runtime expression to evaluate</param>
+        /// <param name="data">The data to evaluate the expression against</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
         /// <returns>The evaluation result</returns>
         Task<object?> EvaluateAsync(string runtimeExpression, object? data, CancellationToken cancellationToken = default);
