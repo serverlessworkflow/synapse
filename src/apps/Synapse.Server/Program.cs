@@ -19,7 +19,6 @@ using Microsoft.AspNetCore.OData;
 using Neuroglia.Caching;
 using Neuroglia.Data.Expressions.JQ;
 using Neuroglia.Eventing;
-using Neuroglia.Serialization;
 using ProtoBuf.Grpc.Server;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using Synapse;
@@ -28,7 +27,6 @@ using Synapse.Apis.Management.Http;
 using Synapse.Apis.Monitoring.WebSocket;
 using Synapse.Apis.Runtime.Grpc;
 using Synapse.Application.Configuration;
-using Synapse.Domain.Models;
 using Synapse.Runtime;
 
 var builder = WebApplication.CreateBuilder(args);
