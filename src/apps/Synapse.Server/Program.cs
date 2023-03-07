@@ -29,34 +29,46 @@ using Synapse.Apis.Runtime.Grpc;
 using Synapse.Application.Configuration;
 using Synapse.Runtime;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddLogging(builder =>
 {
-    builder.AddSimpleConsole(options =>
-    {
-        options.TimestampFormat = "[MM/dd/yyyy HH:mm:ss] ";
-    });
+	builder.AddSimpleConsole(options =>
+	{
+		options.TimestampFormat = "[MM/dd/yyyy HH:mm:ss] ";
+	});
 });
 builder.Services.AddMemoryDistributedCache();
 builder.Services.AddCodeFirstGrpc();
 builder.Services.AddSynapse(builder.Configuration, synapse =>
 {
-    synapse
-        .UseHttpManagementApi()
-        .UseWebSocketMonitoringApi();
-    if (builder.Environment.RunsInKubernetes())
-        synapse.UseKubernetesRuntime();
-    else if (builder.Environment.RunsInDocker())
-        synapse.UseDockerRuntime();
-    else
-        synapse.UseNativeRuntime();
+	synapse
+		.UseHttpManagementApi()
+		.UseWebSocketMonitoringApi();
+
+	if (builder.Environment.RunsInKubernetes())
+	{
+		synapse.UseKubernetesRuntime();
+	}
+	else if (builder.Environment.RunsInDocker())
+	{
+		synapse.UseDockerRuntime();
+	}
+	else
+	{
+		synapse.UseNativeRuntime();
+	}
 });
 builder.Services.AddJQExpressionEvaluator();
-using var app = builder.Build();
+
+using WebApplication app = builder.Build();
 if (app.Environment.IsDevelopment())
-    app.UseWebAssemblyDebugging();
+{
+	app.UseWebAssemblyDebugging();
+}
 else
-    app.UseExceptionHandler("/error");
+{
+	app.UseExceptionHandler("/error");
+}
 app.UseCloudEvents();
 app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
@@ -66,14 +78,14 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseSwagger(builder =>
 {
-    builder.RouteTemplate = "api/{documentName}/doc/oas.{json|yaml}";
+	builder.RouteTemplate = "api/{documentName}/doc/oas.{json|yaml}";
 });
 app.UseSwaggerUI(builder =>
 {
-    builder.DocExpansion(DocExpansion.None);
-    builder.SwaggerEndpoint("/api/v1/doc/oas.json", "Synapse API v1");
-    builder.RoutePrefix = "api/doc";
-    builder.DisplayOperationId();
+	builder.DocExpansion(DocExpansion.None);
+	builder.SwaggerEndpoint("/api/v1/doc/oas.json", "Synapse API v1");
+	builder.RoutePrefix = "api/doc";
+	builder.DisplayOperationId();
 });
 app.MapControllers();
 app.MapGrpcService<SynapseGrpcManagementApi>();
