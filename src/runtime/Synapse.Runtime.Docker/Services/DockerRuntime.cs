@@ -25,7 +25,6 @@ using Synapse.Domain.Models;
 using Synapse.Infrastructure.Services;
 using Synapse.Runtime.Docker;
 using Synapse.Runtime.Docker.Configuration;
-using System.Reactive.Linq;
 
 namespace Synapse.Runtime.Services
 {

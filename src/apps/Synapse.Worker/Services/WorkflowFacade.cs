@@ -16,8 +16,6 @@
  */
 
 using CloudNative.CloudEvents;
-using Microsoft.AspNetCore.JsonPatch;
-using Newtonsoft.Json;
 using Synapse.Apis.Runtime;
 using Synapse.Integration.Events;
 using Synapse.Integration.Events.WorkflowActivities;

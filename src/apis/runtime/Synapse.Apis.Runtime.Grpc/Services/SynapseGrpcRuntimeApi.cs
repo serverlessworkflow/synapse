@@ -26,7 +26,6 @@ using Synapse.Integration.Commands.Events;
 using Synapse.Integration.Commands.WorkflowActivities;
 using Synapse.Integration.Commands.WorkflowInstances;
 using Synapse.Integration.Models;
-using System;
 using System.Threading.Channels;
 
 namespace Synapse.Apis.Runtime.Grpc

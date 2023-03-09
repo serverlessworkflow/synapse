@@ -20,7 +20,6 @@ using k8s.Models;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Neuroglia;
 using Neuroglia.K8s;
 using Newtonsoft.Json;
 using Synapse.Application.Configuration;

@@ -17,7 +17,6 @@
 using Neuroglia.Serialization;
 using ServerlessWorkflow.Sdk.Models;
 using Synapse.Integration.Commands.Events;
-using Synapse.Integration.Commands.Generic;
 using Synapse.Integration.Commands.WorkflowActivities;
 using Synapse.Integration.Commands.WorkflowInstances;
 using Synapse.Integration.Models;

@@ -19,7 +19,6 @@ using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Interfaces;
 using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi.Readers;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Synapse.Integration.Events.WorkflowActivities;
 using System.Collections;
@@ -27,7 +26,6 @@ using System.Dynamic;
 using System.Net;
 using System.Net.Mime;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace Synapse.Worker.Services.Processors
 {
