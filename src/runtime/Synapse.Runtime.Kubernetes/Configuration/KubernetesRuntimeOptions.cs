@@ -15,8 +15,6 @@
  *
  */
 
-using k8s.Models;
-
 namespace Synapse.Runtime.Kubernetes.Configuration
 {
 

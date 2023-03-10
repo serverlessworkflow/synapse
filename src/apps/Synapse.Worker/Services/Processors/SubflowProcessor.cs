@@ -15,10 +15,7 @@
  *
  */
 
-using CloudNative.CloudEvents;
-using Synapse.Integration.Events.WorkflowActivities;
 using Synapse.Integration.Events.WorkflowInstances;
-using System.Reactive.Linq;
 
 namespace Synapse.Worker.Services.Processors
 {
@@ -41,7 +38,7 @@ namespace Synapse.Worker.Services.Processors
         /// <param name="state">The <see cref="StateDefinition"/> the <see cref="SubflowReference"/> to process belongs to</param>
         /// <param name="action">The <see cref="ActionDefinition"/> to process</param>
         public SubflowProcessor(ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory,
-            IIntegrationEventBus integrationEventBus, IOptions<ApplicationOptions> options, V1WorkflowActivity activity, StateDefinition state, ActionDefinition action) 
+            IIntegrationEventBus integrationEventBus, IOptions<ApplicationOptions> options, V1WorkflowActivity activity, StateDefinition state, ActionDefinition action)
             : base(loggerFactory, context, activityProcessorFactory, options, activity, action)
         {
             this.IntegrationEventBus = integrationEventBus;

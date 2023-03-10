@@ -15,10 +15,6 @@
  *
  */
 
-using CloudNative.CloudEvents;
-using Synapse.Integration.Events.WorkflowActivities;
-using System.Text.RegularExpressions;
-
 namespace Synapse.Worker.Services.Processors
 {
 
@@ -39,8 +35,8 @@ namespace Synapse.Worker.Services.Processors
         /// <param name="options">The service used to access the current <see cref="ApplicationOptions"/></param>
         /// <param name="activity">The <see cref="V1WorkflowActivity"/> to process</param>
         /// <param name="eventDefinition">The <see cref="ServerlessWorkflow.Sdk.Models.EventDefinition"/> that defines the <see cref="V1Event"/> to consume</param>
-        public ConsumeEventProcessor(ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory, 
-            IIntegrationEventBus integrationEventBus, IOptions<ApplicationOptions> options, V1WorkflowActivity activity, EventDefinition eventDefinition) 
+        public ConsumeEventProcessor(ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory,
+            IIntegrationEventBus integrationEventBus, IOptions<ApplicationOptions> options, V1WorkflowActivity activity, EventDefinition eventDefinition)
             : base(loggerFactory, context, activityProcessorFactory, options, activity)
         {
             this.IntegrationEventBus = integrationEventBus;
@@ -72,13 +68,13 @@ namespace Synapse.Worker.Services.Processors
         {
             if (this.EventDefinition.Correlations != null)
             {
-                foreach(var correlation in this.EventDefinition.Correlations)
+                foreach (var correlation in this.EventDefinition.Correlations)
                 {
                     var value = correlation.ContextAttributeValue;
                     if (!string.IsNullOrWhiteSpace(value)
                         && value.IsRuntimeExpression())
                         value = (await this.Context.EvaluateAsync(value, this.Activity.Input.ToObject()!, cancellationToken))!.ToString();
-                    if(!string.IsNullOrWhiteSpace(value))
+                    if (!string.IsNullOrWhiteSpace(value))
                         await this.Context.Workflow.SetCorrelationMappingAsync(correlation.ContextAttributeName, value!, cancellationToken);
                 }
             }

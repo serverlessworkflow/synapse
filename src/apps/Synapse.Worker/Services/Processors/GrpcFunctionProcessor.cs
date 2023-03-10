@@ -58,14 +58,14 @@ namespace Synapse.Worker.Services.Processors
             fileDescriptorSet.Process();
             var errors = fileDescriptorSet.GetErrors();
 
-            foreach(var file in fileDescriptorSet.Files)
+            foreach (var file in fileDescriptorSet.Files)
             {
-                foreach(var service in file.Services)
+                foreach (var service in file.Services)
                 {
-                    foreach(var method in service.Methods)
+                    foreach (var method in service.Methods)
                     {
                         //todo: if method.Deprecated => display warning
-                        
+
                     }
                 }
             }
@@ -93,7 +93,7 @@ namespace Synapse.Worker.Services.Processors
         {
             if (disposing)
             {
-                
+
             }
         }
 

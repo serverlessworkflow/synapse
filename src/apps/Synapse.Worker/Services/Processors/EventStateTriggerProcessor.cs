@@ -15,9 +15,6 @@
  *
  */
 
-using Synapse.Integration.Events.WorkflowActivities;
-using System.Reactive.Linq;
-
 namespace Synapse.Worker.Services.Processors
 {
 
@@ -39,8 +36,8 @@ namespace Synapse.Worker.Services.Processors
         /// <param name="activity">The <see cref="V1WorkflowActivity"/> to process</param>
         /// <param name="state">The <see cref="EventStateDefinition"/> to process</param>
         /// <param name="trigger">The <see cref="EventStateTriggerDefinition"/> to process</param>
-        public EventStateTriggerProcessor(ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory, IJsonSerializer jsonSerializer, 
-            IOptions<ApplicationOptions> options, V1WorkflowActivity activity, EventStateDefinition state, EventStateTriggerDefinition trigger) 
+        public EventStateTriggerProcessor(ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory, IJsonSerializer jsonSerializer,
+            IOptions<ApplicationOptions> options, V1WorkflowActivity activity, EventStateDefinition state, EventStateTriggerDefinition trigger)
             : base(loggerFactory, context, activityProcessorFactory, options, activity)
         {
             this.JsonSerializer = jsonSerializer;

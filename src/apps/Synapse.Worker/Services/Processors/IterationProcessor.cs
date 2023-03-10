@@ -15,9 +15,6 @@
  *
  */
 
-using Synapse.Integration.Events;
-using Synapse.Integration.Events.WorkflowActivities;
-
 namespace Synapse.Worker.Services.Processors
 {
 
@@ -40,7 +37,7 @@ namespace Synapse.Worker.Services.Processors
         /// <param name="state">The <see cref="ForEachStateDefinition"/> that defines the iteration to process</param>
         /// <param name="iterationIndex">The index of the iteration to process</param>
         public IterationProcessor(ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory,
-            IJsonSerializer jsonSerializer, IOptions<ApplicationOptions> options, V1WorkflowActivity activity, ForEachStateDefinition state, int iterationIndex) 
+            IJsonSerializer jsonSerializer, IOptions<ApplicationOptions> options, V1WorkflowActivity activity, ForEachStateDefinition state, int iterationIndex)
             : base(loggerFactory, context, activityProcessorFactory, options, activity)
         {
             this.JsonSerializer = jsonSerializer;

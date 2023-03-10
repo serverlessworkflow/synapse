@@ -15,9 +15,6 @@
  *
  */
 
-using Synapse.Integration.Events;
-using Synapse.Integration.Events.WorkflowActivities;
-
 namespace Synapse.Worker.Services.Processors
 {
 
@@ -51,7 +48,7 @@ namespace Synapse.Worker.Services.Processors
         /// <inheritdoc/>
         protected override async Task OnNextAsync(IV1WorkflowActivityIntegrationEvent e, CancellationToken cancellationToken)
         {
-            if(e is V1WorkflowActivityCompletedIntegrationEvent completedEvent)
+            if (e is V1WorkflowActivityCompletedIntegrationEvent completedEvent)
                 await base.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, await this.Context.FilterOutputAsync(this.State, completedEvent.Output!.ToObject()!, cancellationToken)), cancellationToken);
             else
                 await base.OnNextAsync(e, cancellationToken);
@@ -69,7 +66,7 @@ namespace Synapse.Worker.Services.Processors
     {
 
         /// <inheritdoc/>
-        protected StateProcessor(ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory, IOptions<ApplicationOptions> options, V1WorkflowActivity activity, TState state) 
+        protected StateProcessor(ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory, IOptions<ApplicationOptions> options, V1WorkflowActivity activity, TState state)
             : base(loggerFactory, context, activityProcessorFactory, options, activity, state)
         {
         }

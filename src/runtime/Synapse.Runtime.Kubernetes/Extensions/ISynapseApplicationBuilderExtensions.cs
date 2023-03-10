@@ -15,7 +15,6 @@
  *
  */
 
-using k8s;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -60,4 +59,4 @@ namespace Synapse.Runtime
 
     }
 
-} 
+}

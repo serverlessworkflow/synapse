@@ -15,8 +15,6 @@
  *
  */
 
-using Synapse.Runtime.Services;
-
 namespace Synapse.Runtime.Docker.Configuration
 {
 

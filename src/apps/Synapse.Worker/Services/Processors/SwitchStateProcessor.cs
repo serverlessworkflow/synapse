@@ -15,9 +15,6 @@
  *
  */
 
-using Synapse.Integration.Events.WorkflowActivities;
-using System.Reactive.Linq;
-
 namespace Synapse.Worker.Services.Processors
 {
 
@@ -97,7 +94,7 @@ namespace Synapse.Worker.Services.Processors
                     bool caseMatched = false;
                     foreach (var caseDefinition in State.DataConditions!)
                     {
-                        if(await this.Context.EvaluateConditionAsync(caseDefinition.Condition, this.Activity.Input!.ToObject()!, cancellationToken))
+                        if (await this.Context.EvaluateConditionAsync(caseDefinition.Condition, this.Activity.Input!.ToObject()!, cancellationToken))
                         {
                             await this.OnNextAsync(caseDefinition.Name!, cancellationToken);
                             caseMatched = true;
@@ -142,7 +139,7 @@ namespace Synapse.Worker.Services.Processors
         {
             this.Processors.TryRemove(processor);
             processor.Dispose();
-            foreach(var childProcessor in this.Processors)
+            foreach (var childProcessor in this.Processors)
             {
                 await childProcessor.TerminateAsync(cancellationToken);
                 this.Processors.TryRemove(childProcessor);

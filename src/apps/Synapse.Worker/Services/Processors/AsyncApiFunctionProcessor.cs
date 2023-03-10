@@ -20,12 +20,7 @@ using Neuroglia.AsyncApi.Client;
 using Neuroglia.AsyncApi.Client.Services;
 using Neuroglia.AsyncApi.Models;
 using Neuroglia.AsyncApi.Services.IO;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Synapse.Integration.Events.WorkflowActivities;
 using System.Dynamic;
-using System.Reactive;
-using System.Text.RegularExpressions;
 
 namespace Synapse.Worker.Services.Processors
 {
@@ -144,7 +139,7 @@ namespace Synapse.Worker.Services.Processors
                     .FirstOrDefault(c => c.Value.DefinesOperationWithId(operationId));
                 this.ChannelKey = channel.Key;
                 this.Channel = channel.Value;
-                if(this.Channel == null)
+                if (this.Channel == null)
                     throw new NullReferenceException($"Failed to find an operation with id '{this.Operation}' in the specified AsyncAPI document");
                 this.Operation = this.Channel.GetOperationById(operationId);
                 this.OperationType = this.Channel.Publish == this.Operation ? OperationType.Publish : OperationType.Subscribe;

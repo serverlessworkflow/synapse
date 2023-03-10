@@ -84,7 +84,7 @@ namespace Synapse.Worker.Services
                     _ => throw new NotSupportedException($"The specified {typeof(V1WorkflowActivityType).Name} '{activity.Type}' is not supported"),
                 };
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 this.Logger.LogError("An error occured while creating a new processor for the activity with id '{activityId}': {ex}", activity.Id, ex.ToString());
                 throw;
@@ -121,7 +121,7 @@ namespace Synapse.Worker.Services
         /// <returns>A new <see cref="IWorkflowActivityProcessor"/></returns>
         protected virtual IWorkflowActivityProcessor CreateActionActivityProcessor(StateDefinition state, V1WorkflowActivity activity)
         {
-            if(!state.TryGetAction(activity.Metadata, out var action))
+            if (!state.TryGetAction(activity.Metadata, out var action))
                 throw new NullReferenceException($"Failed to find an action that matches the metadata specified by the activity with id '{activity.Id}'");
             return action.Type switch
             {
@@ -188,7 +188,7 @@ namespace Synapse.Worker.Services
         {
             if (!state.TryGetAction(activity.Metadata, out var action))
                 throw new NullReferenceException($"Failed to find an action that matches the metadata specified by the activity with id '{activity.Id}'");
-            if (action.Type != ActionType.Subflow 
+            if (action.Type != ActionType.Subflow
                 || action.Subflow == null)
                 throw new InvalidCastException($"The action with name '{action.Name}' is not of type '{ActionType.Subflow}'");
             return ActivatorUtilities.CreateInstance<SubflowProcessor>(this.ServiceProvider, state, activity, action);
@@ -225,7 +225,7 @@ namespace Synapse.Worker.Services
                 throw new ArgumentException($"The specified state definition with name '{state.Name}' is not the definition of a parallel state");
             if (!activity.Metadata.TryGetValue(V1WorkflowActivityMetadata.Branch, out var branchName))
                 throw new ArgumentException($"The specified activity '{activity.Id}' is missing the required metadata field '{V1WorkflowActivityMetadata.Branch}'");
-            if(!parallelState.TryGetBranch(branchName, out var branch))
+            if (!parallelState.TryGetBranch(branchName, out var branch))
                 throw new NullReferenceException($"Failed to find a branch with the specified name '{branchName}' in the parallel state with name '{parallelState.Name}'");
             return ActivatorUtilities.CreateInstance<BranchProcessor>(this.ServiceProvider, activity, parallelState, branch);
         }

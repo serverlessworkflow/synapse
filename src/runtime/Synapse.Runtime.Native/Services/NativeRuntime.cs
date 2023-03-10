@@ -23,12 +23,9 @@ using Synapse.Application.Services;
 using Synapse.Domain.Models;
 using Synapse.Infrastructure.Services;
 using Synapse.Runtime.Docker.Configuration;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO.Compression;
-using System.Linq;
-using System.Reactive.Linq;
 using System.Runtime.InteropServices;
 
 namespace Synapse.Runtime.Services
@@ -49,7 +46,7 @@ namespace Synapse.Runtime.Services
         /// <param name="httpClientFactory">The service used to create <see cref="System.Net.Http.HttpClient"/>s</param>
         /// <param name="applicationOptions">The service used to access the current <see cref="SynapseApplicationOptions"/></param>
         /// <param name="options">The service used to access the current <see cref="NativeRuntimeOptions"/></param>
-        public NativeRuntime(ILoggerFactory loggerFactory, IHostEnvironment environment, IHttpClientFactory httpClientFactory, 
+        public NativeRuntime(ILoggerFactory loggerFactory, IHostEnvironment environment, IHttpClientFactory httpClientFactory,
             IOptions<SynapseApplicationOptions> applicationOptions, IOptions<NativeRuntimeOptions> options)
             : base(loggerFactory)
         {
@@ -173,7 +170,7 @@ namespace Synapse.Runtime.Services
         /// <inheritdoc/>
         protected override async ValueTask DisposeAsync()
         {
-            foreach(var process in this.Processes)
+            foreach (var process in this.Processes)
             {
                 process.Value.Dispose();
             }

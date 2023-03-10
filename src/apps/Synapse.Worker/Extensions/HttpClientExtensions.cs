@@ -15,8 +15,6 @@
  *
  */
 
-using System.Net.Http.Headers;
-
 namespace Synapse.Worker
 {
 

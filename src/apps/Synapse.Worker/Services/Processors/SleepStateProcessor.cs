@@ -15,8 +15,6 @@
  *
  */
 
-using Synapse.Integration.Events.WorkflowActivities;
-
 namespace Synapse.Worker.Services.Processors
 {
 
@@ -28,8 +26,8 @@ namespace Synapse.Worker.Services.Processors
     {
 
         /// <inheritdoc/>
-        public SleepStateProcessor(ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory, 
-            IOptions<ApplicationOptions> options, V1WorkflowActivity activity, SleepStateDefinition state) 
+        public SleepStateProcessor(ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory,
+            IOptions<ApplicationOptions> options, V1WorkflowActivity activity, SleepStateDefinition state)
             : base(loggerFactory, context, activityProcessorFactory, options, activity, state)
         {
 
@@ -48,7 +46,7 @@ namespace Synapse.Worker.Services.Processors
         /// <inheritdoc/>
         protected override Task InitializeAsync(CancellationToken cancellationToken)
         {
-            if(this.Activity.Status == V1WorkflowActivityStatus.Suspended)
+            if (this.Activity.Status == V1WorkflowActivityStatus.Suspended)
                 this.Duration = this.State.Duration.Subtract(this.Context.Workflow.Instance.Sessions.Last(s => !s.IsActive).EndedAt!.Value.Subtract(this.Activity.StartedAt!.Value));
             else
                 this.Duration = this.State.Duration;

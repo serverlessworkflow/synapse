@@ -15,8 +15,6 @@
  *
  */
 
-using k8s;
-using k8s.Models;
 using Synapse.Application.Services;
 using Synapse.Infrastructure.Services;
 using System.Reactive.Linq;
@@ -81,17 +79,17 @@ namespace Synapse.Runtime.Kubernetes.Services
             _ = Task.Run(() => this.ReadPodLogsAsync(cancellationToken), cancellationToken);
         }
 
-        private async Task PollPodUntilReadyAsync(CancellationToken cancellationToken = default) 
+        private async Task PollPodUntilReadyAsync(CancellationToken cancellationToken = default)
         {
             this.Pod = await this.Kubernetes.ReadNamespacedPodAsync(this.Pod.Name(), this.Pod.Namespace(), cancellationToken: cancellationToken);
-            while (this.Pod.Status.Phase == "Pending") 
+            while (this.Pod.Status.Phase == "Pending")
             {
                 await Task.Delay(250, cancellationToken);
                 this.Pod = await this.Kubernetes.ReadNamespacedPodAsync(this.Pod.Name(), this.Pod.Namespace(), cancellationToken: cancellationToken);
             }
         }
 
-        private async Task ReadPodLogsAsync(CancellationToken cancellationToken = default) 
+        private async Task ReadPodLogsAsync(CancellationToken cancellationToken = default)
         {
             await this.PollPodUntilReadyAsync(cancellationToken);
             var tcs = new TaskCompletionSource<string>();

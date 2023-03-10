@@ -85,7 +85,7 @@ namespace Synapse.Runtime.Services
             {
                 response = await this.Docker.Networks.InspectNetworkAsync(this.Options.Network, stoppingToken);
             }
-            catch(DockerNetworkNotFoundException)
+            catch (DockerNetworkNotFoundException)
             {
                 await this.Docker.Networks.CreateNetworkAsync(new() { Name = this.Options.Network }, stoppingToken);
             }
