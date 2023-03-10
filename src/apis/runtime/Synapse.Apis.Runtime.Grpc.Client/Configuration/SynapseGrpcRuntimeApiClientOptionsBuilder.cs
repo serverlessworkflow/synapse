@@ -15,7 +15,6 @@
  *
  */
 
-using Grpc.Net.Client;
 using Synapse.Apis.Runtime.Grpc.Configuration;
 
 namespace Synapse.Apis.Runtime.Grpc
@@ -36,7 +35,7 @@ namespace Synapse.Apis.Runtime.Grpc
         /// <inheritdoc/>
         public virtual ISynapseGrpcRuntimeApiClientOptionsBuilder ForAddress(Uri address)
         {
-            if(address == null)
+            if (address == null)
                 throw new ArgumentNullException(nameof(address));
             this.Options.Address = address;
             return this;

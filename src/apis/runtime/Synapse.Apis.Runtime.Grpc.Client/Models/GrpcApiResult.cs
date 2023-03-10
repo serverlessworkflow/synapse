@@ -15,11 +15,6 @@
  *
  */
 
-using Neuroglia;
-using ProtoBuf;
-using System.Runtime.Serialization;
-using Error = Synapse.Integration.Models.Error;
-
 namespace Synapse.Apis.Runtime.Grpc.Models
 {
 

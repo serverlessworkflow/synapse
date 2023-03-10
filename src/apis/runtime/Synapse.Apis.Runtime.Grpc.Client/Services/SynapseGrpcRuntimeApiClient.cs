@@ -15,9 +15,6 @@
  *
  */
 
-using Microsoft.Extensions.Logging;
-using Neuroglia;
-using Neuroglia.Serialization;
 using Synapse.Integration.Commands.Events;
 using Synapse.Integration.Commands.WorkflowActivities;
 using Synapse.Integration.Commands.WorkflowInstances;
@@ -184,7 +181,7 @@ namespace Synapse.Apis.Runtime.Grpc
         {
             var result = await this.RuntimeApi.FaultActivityAsync(command, cancellationToken);
             if (!result.Succeeded)
-                   throw new OperationResultException(new OperationResult(result.Code, result.Errors?.Select(e => new Neuroglia.Error(e.Code, e.Message))?.ToArray()));
+                throw new OperationResultException(new OperationResult(result.Code, result.Errors?.Select(e => new Neuroglia.Error(e.Code, e.Message))?.ToArray()));
             return result.Data!;
         }
 

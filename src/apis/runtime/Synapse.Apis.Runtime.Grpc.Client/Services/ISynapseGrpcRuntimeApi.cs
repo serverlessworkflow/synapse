@@ -15,16 +15,12 @@
  *
  */
 
-using Neuroglia.Serialization;
-using ProtoBuf.Grpc;
-using ServerlessWorkflow.Sdk.Models;
 using Synapse.Apis.Runtime.Grpc.Models;
 using Synapse.Integration.Commands.Events;
 using Synapse.Integration.Commands.WorkflowActivities;
 using Synapse.Integration.Commands.WorkflowInstances;
 using Synapse.Integration.Models;
 using Synapse.Integration.Queries.WorkflowActivities;
-using System.ServiceModel;
 
 namespace Synapse.Apis.Runtime.Grpc
 {

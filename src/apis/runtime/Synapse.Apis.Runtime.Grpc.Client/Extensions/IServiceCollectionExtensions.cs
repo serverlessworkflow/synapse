@@ -15,11 +15,6 @@
  *
  */
 
-using Grpc.Net.Client;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Options;
-using ProtoBuf.Grpc.Client;
 using Synapse.Apis.Runtime.Grpc.Configuration;
 
 namespace Synapse.Apis.Runtime.Grpc
@@ -39,7 +34,7 @@ namespace Synapse.Apis.Runtime.Grpc
         /// <returns>The configured <see cref="IServiceCollection"/></returns>
         public static IServiceCollection AddSynapseGrpcRuntimeApiClient(this IServiceCollection services, Action<ISynapseGrpcRuntimeApiClientOptionsBuilder> configurationAction)
         {
-            if(configurationAction == null)
+            if (configurationAction == null)
                 throw new ArgumentNullException(nameof(configurationAction));
             var builder = new SynapseGrpcRuntimeApiClientOptionsBuilder();
             configurationAction(builder);
