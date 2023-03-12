@@ -166,7 +166,7 @@
             {
                 AuthenticationScheme.Basic => new BasicAuthenticationProperties(),
                 AuthenticationScheme.Bearer => new BearerAuthenticationProperties(),
-                AuthenticationScheme.OAuth2 => new BearerAuthenticationProperties(),
+                AuthenticationScheme.OAuth2 => new OAuth2AuthenticationProperties(),
                 _ => throw new NotSupportedException($"The specified {nameof(AuthenticationScheme)} '{a.Scheme}' is not supported")
             };
         });
