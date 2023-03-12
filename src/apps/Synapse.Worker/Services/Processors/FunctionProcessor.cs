@@ -96,10 +96,15 @@ public abstract class FunctionProcessor
                     };
                 }
                 this.Authentication = auth;
-                if (this.Authentication != null) this.Authorization = await AuthorizationInfo.CreateAsync(this.ServiceProvider, this.Authentication, cancellationToken);
+                if (this.Authentication != null)
+                {
+                    this.Authorization = await AuthorizationInfo.CreateAsync(this.ServiceProvider, this.Authentication, cancellationToken);
+                }
             }
             else
+            {
                 throw new NullReferenceException($"Failed to find the authentication definition with name '{this.Function.AuthRef}'");
+            }
         }
     }
 
@@ -109,7 +114,10 @@ public abstract class FunctionProcessor
         if (e is V1WorkflowActivityCompletedIntegrationEvent completedEvent)
         {
             var output = completedEvent.Output.ToObject();
-            if (this.Action.ActionDataFilter != null) output = await this.Context.FilterOutputAsync(this.Action, output!, this.Authorization, cancellationToken);
+            if (this.Action.ActionDataFilter != null)
+            {
+                output = await this.Context.FilterOutputAsync(this.Action, output!, this.Authorization, cancellationToken);
+            }
             await base.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, output), cancellationToken);
         }
         else
