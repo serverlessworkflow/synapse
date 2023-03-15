@@ -149,14 +149,14 @@ namespace Synapse.Worker.Services.Processors
                 if ((!string.IsNullOrWhiteSpace(this.EventDefinition.Source) && !Regex.IsMatch(e.Source!.ToString(), this.EventDefinition.Source, RegexOptions.IgnoreCase))
                     || (!string.IsNullOrWhiteSpace(this.EventDefinition.Type) && !Regex.IsMatch(e.Type!, this.EventDefinition.Type, RegexOptions.IgnoreCase)))
                     return;
-                var enveloppe = V1Event.CreateFrom(e);
-                if (!await this.Context.Workflow.TryCorrelateAsync(enveloppe, this.EventDefinition.Correlations?.Select(c => c.ContextAttributeName)!, this.CancellationTokenSource.Token))
+                var envelop = V1Event.CreateFrom(e);
+                if (!await this.Context.Workflow.TryCorrelateAsync(envelop, this.EventDefinition.Correlations?.Select(c => c.ContextAttributeName)!, this.CancellationTokenSource.Token))
                     return;
                 object output;
                 if (this.EventDefinition.DataOnly)
                     output = e.Data!;
                 else
-                    output = enveloppe;
+                    output = envelop;
                 await this.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, output), this.CancellationTokenSource.Token);
                 await this.OnCompletedAsync(this.CancellationTokenSource.Token);
             }

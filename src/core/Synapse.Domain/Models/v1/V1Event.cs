@@ -148,8 +148,11 @@ namespace Synapse.Domain.Models
                     yield return new KeyValuePair<string, string>(nameof(Time).ToLower(), this.Time.ToString()!);
                 if(this.ExtensionAttributes != null)
                 {
-                    foreach (var extension in this.ExtensionAttributes)
-                        yield return new(extension.Key, extension.Value.ToString()!);
+                    foreach (KeyValuePair<string, object> extension in this.ExtensionAttributes)
+                    {
+                        var value = Neuroglia.Serialization.Dynamic.FromObject(extension.Value)?.ToObject<string>();
+                        yield return new(extension.Key, value!);
+                    }
                 }
             }
         }

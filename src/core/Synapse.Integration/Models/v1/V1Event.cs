@@ -57,8 +57,10 @@ namespace Synapse.Integration.Models
                     yield return new KeyValuePair<string, string>(nameof(Time).ToLower(), this.Time.ToString()!);
                 if(this.ExtensionAttributes != null)
                 {
-                    foreach (var extension in this.ExtensionAttributes)
-                        yield return new(extension.Key, extension.Value.ToString()!);
+                    foreach (KeyValuePair<string, Dynamic> extension in this.ExtensionAttributes)
+                    {
+                        yield return new(extension.Key, extension.Value.ToObject<string>()!);
+                    }
                 }
             }
         }
