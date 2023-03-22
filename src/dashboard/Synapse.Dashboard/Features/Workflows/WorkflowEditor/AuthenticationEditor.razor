@@ -1,4 +1,4 @@
-﻿@*
+﻿@* 
     Copyright © 2022-Present The Synapse Authors
 
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,16 +22,14 @@
         <tbody>
             <tr>
                 <td>Name</td>
-                <td>
-                    <input type="text" value="@authentication.Name" required placeholder="Name" title="The authentication name" class="form-control"
-                       @onchange="async e => await OnPropertyChangedAsync(nameof(authentication.Name), a => a.Name = (string)e.Value!)" />
-                </td>
+                <td><input type="text" value="@authentication.Name" required placeholder="Name" title="The authentication name" class="form-control"
+                    @onchange="async e => await OnPropertyChangedAsync(nameof(authentication.Name), a => a.Name = (string)e.Value!)"/></td>
             </tr>
             <tr>
                 <td>Scheme</td>
                 <td>
                     <select class="form-select bg-secondary text-white"
-                        @onchange="async e => await OnAuthenticationSchemeChangedAsync(EnumHelper.Parse<AuthenticationScheme>((string)e.Value!))">
+                    @onchange="async e => await OnAuthenticationSchemeChangedAsync(EnumHelper.Parse<AuthenticationScheme>((string)e.Value!))">
                         @foreach (var scheme in Enum.GetValues<AuthenticationScheme>())
                         {
                             var schemeStr = @EnumHelper.Stringify(scheme);
@@ -42,27 +40,28 @@
             </tr>
             <ExpandableDataRow IsExpanded="true">
                 <Header>
-                <td>Properties</td>
-                <td>
-                    <div class="input-group">
-                        <div class="input-group-text">
-                            <input class="form-check-input mt-0 me-2" type="checkbox" value="@useSecretBasedProperties" checked="@useSecretBasedProperties"
-                               @onclick="OnUseSecretBasedPropertiesChanged">
-                            <label title="Indicates whether or not to load the authentication properties from a secret">Load properties from secret</label>
-                        </div>
+                    <td>Properties</td>
+                    <td>
+                        <div class="input-group">
+                            <div class="input-group-text">
+                                <input class="form-check-input mt-0 me-2" type="checkbox" value="@useSecretBasedProperties" checked="@useSecretBasedProperties"
+                                @onclick="OnUseSecretBasedPropertiesChanged">
+                                <label title="Indicates whether or not to load the authentication properties from a secret">Load properties from secret</label>
+                            </div>
                             @if (useSecretBasedProperties)
                             {
-                            <SecretSelector Secrets="Workflow.Secrets"
+                                <SecretSelector 
+                                    Secrets="Workflow.Secrets"
                                     Selected="@(((SecretBasedAuthenticationProperties)authentication.Properties).Secret)"
-                                    OnChange="async secret => await OnPropertyChangedAsync(nameof(authentication.Properties), a => a.SecretRef = secret)" />
+                                    OnChange="async secret => await OnPropertyChangedAsync(nameof(authentication.Properties), a => a.SecretRef = secret)"/>
                             }
-                    </div>
-                </td>
+                        </div>
+                    </td>
                 </Header>
                 <Body>
                     @if (!useSecretBasedProperties)
                     {
-                    <td colspan="3">
+                        <td colspan="3">
                             @switch (authentication.Scheme)
                             {
                                 case AuthenticationScheme.Basic:
@@ -71,24 +70,20 @@
                                         basic = new();
                                         authentication.Properties = basic;
                                     }
-                                <table class="table table-striped">
-                                    <tbody>
-                                        <tr>
-                                            <td>Username</td>
-                                            <td>
-                                                <input type="text" value="@basic.Username" required placeholder="Username" title="The username to use to authenticate" class="form-control"
-                                       @onchange="async e => await OnAuthenticationPropertiesChangedAsync<BasicAuthenticationProperties>(p => p.Username =  (string)e.Value!)" />
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>Password</td>
-                                            <td>
-                                                <input type="text" value="@basic.Password" required placeholder="Password" title="The password to use to authenticate" class="form-control"
-                                       @onchange="async e => await OnAuthenticationPropertiesChangedAsync<BasicAuthenticationProperties>(p => p.Password =  (string)e.Value!)" />
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                    <table class="table table-striped">
+                                        <tbody>
+                                            <tr>
+                                                <td>Username</td>
+                                                <td><input type="text" value="@basic.Username" required placeholder="Username" title="The username to use to authenticate" class="form-control"
+                                                    @onchange="async e => await OnAuthenticationPropertiesChangedAsync<BasicAuthenticationProperties>(p => p.Username =  (string)e.Value!)"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Password</td>
+                                                <td><input type="text" value="@basic.Password" required placeholder="Password" title="The password to use to authenticate" class="form-control"
+                                                    @onchange="async e => await OnAuthenticationPropertiesChangedAsync<BasicAuthenticationProperties>(p => p.Password =  (string)e.Value!)"/></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                     break;
                                 case AuthenticationScheme.Bearer:
                                     if (authentication.Properties is not BearerAuthenticationProperties bearer)
@@ -96,17 +91,15 @@
                                         bearer = new();
                                         authentication.Properties = bearer;
                                     }
-                                <table class="table table-striped">
-                                    <tbody>
-                                        <tr>
-                                            <td>Token</td>
-                                            <td>
-                                                <textarea placeholder="Token" title="The token to use to authenticate" class="form-control"
-                                          @onchange="async e => await OnPropertyChangedAsync(nameof(authentication.Properties), a => ((BearerAuthenticationProperties)a.Properties).Token = (string)e.Value!)">@bearer.Token</textarea>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                    <table class="table table-striped">
+                                        <tbody>
+                                            <tr>
+                                                <td>Token</td>
+                                                <td><textarea placeholder="Token" title="The token to use to authenticate" class="form-control"
+                                                    @onchange="async e => await OnPropertyChangedAsync(nameof(authentication.Properties), a => ((BearerAuthenticationProperties)a.Properties).Token = (string)e.Value!)">@bearer.Token</textarea></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                     break;
                                 case AuthenticationScheme.OAuth2:
                                     if (authentication.Properties is not OAuth2AuthenticationProperties oauth2)
@@ -116,10 +109,10 @@
                                     }
                                     break;
                                 default:
-                                <span class="text-danger">The specified authentication scheme '@(EnumHelper.Stringify(authentication.Scheme))' is not supported</span>
+                                    <span class="text-danger">The specified authentication scheme '@(EnumHelper.Stringify(authentication.Scheme))' is not supported</span>
                                     break;
                             }
-                    </td>
+                        </td>
                     }
                 </Body>
             </ExpandableDataRow>
