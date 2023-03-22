@@ -15,12 +15,9 @@
  *
  */
 
-using k8s;
-using k8s.Models;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Neuroglia;
 using Neuroglia.K8s;
 using Newtonsoft.Json;
 using Synapse.Application.Configuration;
@@ -47,7 +44,7 @@ namespace Synapse.Runtime.Kubernetes.Services
         /// <param name="applicationOptions">The service used to access the current <see cref="SynapseApplicationOptions"/></param>
         /// <param name="options">The service used to access the current <see cref="KubernetesRuntimeOptions"/></param>
         /// <param name="kubernetes">The service used to interact with the Kubernetes API</param>
-        public KubernetesRuntime(ILoggerFactory loggerFactory, IHostEnvironment environment, 
+        public KubernetesRuntime(ILoggerFactory loggerFactory, IHostEnvironment environment,
             IOptions<SynapseApplicationOptions> applicationOptions, IOptions<KubernetesRuntimeOptions> options, IKubernetes kubernetes)
             : base(loggerFactory)
         {
@@ -121,7 +118,7 @@ namespace Synapse.Runtime.Kubernetes.Services
                 || !pod.Spec.Containers.Any())
                 throw new InvalidOperationException("The specified V1Pod is not valid");
             var volumeMounts = new List<V1VolumeMount>();
-            if(pod.Spec.Volumes == null)
+            if (pod.Spec.Volumes == null)
                 pod.Spec.Volumes = new List<V1Volume>();
             if (workflow.Definition.Secrets != null
                 && workflow.Definition.Secrets.Any())
@@ -138,8 +135,8 @@ namespace Synapse.Runtime.Kubernetes.Services
                 volumeMounts.Add(secretsVolumeMount);
                 foreach (var secret in workflow.Definition.Secrets)
                 {
-                    secretsVolume.Projected.Sources.Add(new() 
-                    { 
+                    secretsVolume.Projected.Sources.Add(new()
+                    {
                         Secret = new()
                         {
                             Name = secret,

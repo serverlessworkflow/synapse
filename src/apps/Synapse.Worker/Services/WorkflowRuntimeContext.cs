@@ -21,7 +21,6 @@ using Newtonsoft.Json.Linq;
 using ServerlessWorkflow.Sdk.Services.IO;
 using Synapse.Apis.Management;
 using Synapse.Apis.Runtime;
-using System.Text.RegularExpressions;
 
 namespace Synapse.Worker.Services
 {
@@ -43,7 +42,7 @@ namespace Synapse.Worker.Services
         /// <param name="secretManager">The service used to manage secrets</param>
         /// <param name="managementApi">The service used to interact with the Synapse Public API</param>
         /// <param name="runtimeApi">The service used to interact with the Synapse Runtime API</param>
-        public WorkflowRuntimeContext(IServiceProvider serviceProvider, ILogger<WorkflowRuntimeContext> logger, IWorkflowExternalDefinitionResolver workflowExternalDefinitionResolver, 
+        public WorkflowRuntimeContext(IServiceProvider serviceProvider, ILogger<WorkflowRuntimeContext> logger, IWorkflowExternalDefinitionResolver workflowExternalDefinitionResolver,
             IExpressionEvaluatorProvider expressionEvaluatorProvider, ISecretManager secretManager, ISynapseManagementApi managementApi, ISynapseRuntimeApi runtimeApi)
         {
             this.ServiceProvider = serviceProvider;
@@ -122,7 +121,7 @@ namespace Synapse.Worker.Services
                 this.Workflow = ActivatorUtilities.CreateInstance<WorkflowFacade>(this.ServiceProvider, workflowInstance, workflowDefinition);
                 this.Logger.LogInformation("Runtime context initialized");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 this.Logger.LogError("An error occured while initializing the workflow runtime context: {ex}", ex.ToString());
                 throw;

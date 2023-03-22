@@ -14,8 +14,6 @@
  * limitations under the License.
  *
  */
-using CloudNative.CloudEvents;
-using Synapse.Integration.Events;
 
 namespace Synapse.Worker.Services
 {

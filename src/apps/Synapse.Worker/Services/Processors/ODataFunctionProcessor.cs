@@ -15,10 +15,7 @@
  *
  */
 
-using IdentityModel.Client;
-using Newtonsoft.Json;
 using Simple.OData.Client;
-using Synapse.Integration.Events.WorkflowActivities;
 
 namespace Synapse.Worker.Services.Processors
 {

@@ -19,15 +19,10 @@ using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Interfaces;
 using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi.Readers;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Synapse.Integration.Events.WorkflowActivities;
-using System.Collections;
 using System.Dynamic;
 using System.Net;
 using System.Net.Mime;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace Synapse.Worker.Services.Processors
 {
@@ -52,9 +47,9 @@ namespace Synapse.Worker.Services.Processors
         /// <param name="activity">The <see cref="V1WorkflowActivity"/> to process</param>
         /// <param name="action">The <see cref="ActionDefinition"/> to process</param>
         /// <param name="function">The <see cref="FunctionDefinition"/> to process</param>
-        public OpenApiFunctionProcessor(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory, 
-            IHttpClientFactory httpClientFactory, ISerializerProvider serializerProvider, IOptions<ApplicationOptions> options, V1WorkflowActivity activity, 
-            ActionDefinition action, FunctionDefinition function) 
+        public OpenApiFunctionProcessor(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory,
+            IHttpClientFactory httpClientFactory, ISerializerProvider serializerProvider, IOptions<ApplicationOptions> options, V1WorkflowActivity activity,
+            ActionDefinition action, FunctionDefinition function)
             : base(serviceProvider, loggerFactory, context, activityProcessorFactory, options, activity, action, function)
         {
             this.HttpClient = httpClientFactory.CreateClient();
@@ -171,7 +166,7 @@ namespace Synapse.Worker.Services.Processors
                 KeyValuePair<string, OpenApiPathItem> path = this.Document.Paths.Single(p => p.Value.Operations.Any(o => o.Value.OperationId == operation.Value.OperationId));
                 this.Path = path.Key;
                 await this.BuildParametersAsync(cancellationToken);
-                if (this.Parameters == null)return;
+                if (this.Parameters == null) return;
                 var parameters = path.Value.Parameters.ToList();
                 parameters.AddRange(this.Operation.Parameters);
                 foreach (OpenApiParameter param in parameters
@@ -227,7 +222,7 @@ namespace Synapse.Worker.Services.Processors
                         }
                         else
                         {
-                            if(this.Parameters is not ExpandoObject expando)
+                            if (this.Parameters is not ExpandoObject expando)
                             {
                                 expando = new ExpandoObject();
                                 foreach (var param in this.Parameters)
@@ -236,7 +231,7 @@ namespace Synapse.Worker.Services.Processors
                                 }
                             }
                             this.Body = expando;
-                        }  
+                        }
                     }
                     if (this.Body == null && operation.Value.RequestBody.Required)
                         throw new NullReferenceException($"Failed to determine the required body parameter for the function with name '{this.Function.Name}'");
@@ -312,7 +307,7 @@ namespace Synapse.Worker.Services.Processors
                         continue;
                     var rawContent = await response.Content.ReadAsByteArrayAsync(cancellationToken)!;
                     var contentString = null as string;
-                    if(rawContent != null)
+                    if (rawContent != null)
                         contentString = Encoding.UTF8.GetString(rawContent);
                     if (!response.IsSuccessStatusCode)
                     {
@@ -320,7 +315,7 @@ namespace Synapse.Worker.Services.Processors
                         this.Logger.LogDebug("Response content:\r\n{responseContent}", contentString ?? "None");
                         response.EnsureSuccessStatusCode(contentString);
                     }
-                    if (rawContent!= null)
+                    if (rawContent != null)
                     {
                         var mediaType = response.Content?.Headers.ContentType?.MediaType;
                         var serializer = this.SerializerProvider.GetSerializersFor(mediaType).FirstOrDefault();

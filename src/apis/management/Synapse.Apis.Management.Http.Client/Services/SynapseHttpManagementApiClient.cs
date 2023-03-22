@@ -17,7 +17,6 @@
 
 using Microsoft.Extensions.Logging;
 using Neuroglia.Serialization;
-using Synapse.Integration.Commands;
 using Synapse.Integration.Commands.AuthenticationDefinitionCollections;
 using Synapse.Integration.Commands.Correlations;
 using Synapse.Integration.Commands.EventDefinitionCollections;

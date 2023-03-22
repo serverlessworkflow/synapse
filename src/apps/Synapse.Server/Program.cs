@@ -19,7 +19,6 @@ using Microsoft.AspNetCore.OData;
 using Neuroglia.Caching;
 using Neuroglia.Data.Expressions.JQ;
 using Neuroglia.Eventing;
-using Neuroglia.Serialization;
 using ProtoBuf.Grpc.Server;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using Synapse;
@@ -28,10 +27,9 @@ using Synapse.Apis.Management.Http;
 using Synapse.Apis.Monitoring.WebSocket;
 using Synapse.Apis.Runtime.Grpc;
 using Synapse.Application.Configuration;
-using Synapse.Domain.Models;
 using Synapse.Runtime;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddLogging(builder =>
 {
     builder.AddSimpleConsole(options =>
@@ -46,19 +44,31 @@ builder.Services.AddSynapse(builder.Configuration, synapse =>
     synapse
         .UseHttpManagementApi()
         .UseWebSocketMonitoringApi();
+
     if (builder.Environment.RunsInKubernetes())
+    {
         synapse.UseKubernetesRuntime();
+    }
     else if (builder.Environment.RunsInDocker())
+    {
         synapse.UseDockerRuntime();
+    }
     else
+    {
         synapse.UseNativeRuntime();
+    }
 });
 builder.Services.AddJQExpressionEvaluator();
-using var app = builder.Build();
+
+using WebApplication app = builder.Build();
 if (app.Environment.IsDevelopment())
+{
     app.UseWebAssemblyDebugging();
+}
 else
+{
     app.UseExceptionHandler("/error");
+}
 app.UseCloudEvents();
 app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();

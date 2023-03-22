@@ -15,11 +15,6 @@
  *
  */
 
-using CloudNative.CloudEvents;
-using Synapse.Integration.Events;
-using Synapse.Integration.Events.WorkflowActivities;
-using System.Reactive.Linq;
-
 namespace Synapse.Worker.Services.Processors
 {
     /// <summary>
@@ -104,7 +99,7 @@ namespace Synapse.Worker.Services.Processors
                 var input = await this.Context.FilterInputAsync(this.Action, this.Activity.Input.ToObject()!, cancellationToken);
                 if (!string.IsNullOrWhiteSpace(this.Action.Event!.DataExpression)) input = await this.Context.EvaluateAsync(this.Action.Event!.DataExpression, input, cancellationToken);
                 else if (this.Action.Event.Data != null) input = await this.Context.EvaluateObjectAsync(this.Action.Event!.Data.ToObject()!, input!, cancellationToken);
-                var metadata = new Dictionary<string, string>() 
+                var metadata = new Dictionary<string, string>()
                 {
                     {  V1WorkflowActivityMetadata.State, this.State.Name },
                     {  V1WorkflowActivityMetadata.Action, this.Action.Name! },
@@ -160,7 +155,7 @@ namespace Synapse.Worker.Services.Processors
         {
             this.Processors.TryRemove(processor);
             processor.Dispose();
-            foreach(var childProcessor in this.Processors)
+            foreach (var childProcessor in this.Processors)
             {
                 await childProcessor.ProcessAsync(cancellationToken);
             }

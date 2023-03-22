@@ -15,8 +15,6 @@
  *
  */
 
-using k8s.Models;
-
 namespace Synapse.Runtime
 {
     /// <summary>
@@ -32,7 +30,7 @@ namespace Synapse.Runtime
         /// <param name="variable">The environment variable to set</param>
         public static void AddOrUpdateEnvironmentVariable(this V1Container config, V1EnvVar variable)
         {
-            if(variable == null)
+            if (variable == null)
                 throw new ArgumentNullException(nameof(variable));
             if (config.Env == null)
                 config.Env = new List<V1EnvVar>();

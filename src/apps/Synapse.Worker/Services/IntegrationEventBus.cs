@@ -15,7 +15,6 @@
  *
  */
 
-using CloudNative.CloudEvents;
 using System.Reactive.Subjects;
 
 namespace Synapse.Worker.Services

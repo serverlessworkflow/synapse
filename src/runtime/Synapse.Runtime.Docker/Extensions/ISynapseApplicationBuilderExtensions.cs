@@ -23,7 +23,6 @@ using Microsoft.Extensions.Options;
 using Synapse.Application.Configuration;
 using Synapse.Infrastructure.Services;
 using Synapse.Runtime.Docker.Configuration;
-using Synapse.Runtime.Services;
 
 namespace Synapse.Runtime
 {

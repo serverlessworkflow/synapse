@@ -15,8 +15,6 @@
  *
  */
 
-using Synapse.Integration.Events.WorkflowActivities;
-
 namespace Synapse.Worker.Services.Processors
 {
 

@@ -25,7 +25,6 @@ using Synapse.Domain.Models;
 using Synapse.Infrastructure.Services;
 using Synapse.Runtime.Docker;
 using Synapse.Runtime.Docker.Configuration;
-using System.Reactive.Linq;
 
 namespace Synapse.Runtime.Services
 {
@@ -86,7 +85,7 @@ namespace Synapse.Runtime.Services
             {
                 response = await this.Docker.Networks.InspectNetworkAsync(this.Options.Network, stoppingToken);
             }
-            catch(DockerNetworkNotFoundException)
+            catch (DockerNetworkNotFoundException)
             {
                 await this.Docker.Networks.CreateNetworkAsync(new() { Name = this.Options.Network }, stoppingToken);
             }

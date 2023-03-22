@@ -15,8 +15,6 @@
  *
  */
 
-using Synapse.Integration.Events.WorkflowActivities;
-
 namespace Synapse.Worker.Services.Processors
 {
 
@@ -28,7 +26,7 @@ namespace Synapse.Worker.Services.Processors
     {
 
         /// <inheritdoc/>
-        public InjectStateProcessor(ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory, 
+        public InjectStateProcessor(ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory,
             IOptions<ApplicationOptions> options, V1WorkflowActivity activity, InjectStateDefinition state)
             : base(loggerFactory, context, activityProcessorFactory, options, activity, state)
         {

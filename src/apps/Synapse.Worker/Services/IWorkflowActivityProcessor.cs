@@ -1,6 +1,4 @@
-﻿using Synapse.Integration.Events;
-
-namespace Synapse.Worker.Services
+﻿namespace Synapse.Worker.Services
 {
 
     /// <summary>

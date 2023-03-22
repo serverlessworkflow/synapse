@@ -15,10 +15,6 @@
  *
  */
 
-using Synapse.Integration.Events.WorkflowActivities;
-using System.Collections;
-using System.Reactive.Linq;
-
 namespace Synapse.Worker.Services.Processors
 {
 

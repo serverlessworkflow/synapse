@@ -15,9 +15,6 @@
  *
  */
 
-using Synapse.Integration.Events;
-using Synapse.Integration.Events.WorkflowActivities;
-
 namespace Synapse.Worker.Services.Processors;
 
 
@@ -40,7 +37,7 @@ public abstract class FunctionProcessor
     /// <param name="action">The <see cref="ActionDefinition"/> to process</param>
     /// <param name="function">The <see cref="FunctionDefinition"/> to process</param>
     public FunctionProcessor(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory,
-        IOptions<ApplicationOptions> options, V1WorkflowActivity activity, ActionDefinition action, FunctionDefinition function) 
+        IOptions<ApplicationOptions> options, V1WorkflowActivity activity, ActionDefinition action, FunctionDefinition function)
         : base(loggerFactory, context, activityProcessorFactory, options, activity, action)
     {
         this.ServiceProvider = serviceProvider;

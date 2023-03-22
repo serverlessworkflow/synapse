@@ -16,8 +16,6 @@
  */
 
 using ConcurrentCollections;
-using Synapse.Integration.Events;
-using Synapse.Integration.Events.WorkflowActivities;
 using System.Reactive.Subjects;
 
 namespace Synapse.Worker.Services
@@ -208,7 +206,7 @@ namespace Synapse.Worker.Services
         {
             try
             {
-                if(e is V1WorkflowActivityCompletedIntegrationEvent)
+                if (e is V1WorkflowActivityCompletedIntegrationEvent)
                     this.Logger.LogInformation("Activity '{activityId}' (type: '{activityType}') completed", this.Activity.Id, this.Activity.Type);
                 await this.Context.Workflow.On(this.Activity, e, cancellationToken);
                 this.Subject.OnNext(e);

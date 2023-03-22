@@ -15,9 +15,6 @@
  *
  */
 
-using Synapse.Integration.Events.WorkflowActivities;
-using System.Reactive.Linq;
-
 namespace Synapse.Worker.Services.Processors
 {
 
@@ -29,8 +26,8 @@ namespace Synapse.Worker.Services.Processors
     {
 
         /// <inheritdoc/>
-        public ParallelStateProcessor(ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory, 
-            IOptions<ApplicationOptions> options, V1WorkflowActivity activity, ParallelStateDefinition state) 
+        public ParallelStateProcessor(ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory,
+            IOptions<ApplicationOptions> options, V1WorkflowActivity activity, ParallelStateDefinition state)
             : base(loggerFactory, context, activityProcessorFactory, options, activity, state)
         {
 

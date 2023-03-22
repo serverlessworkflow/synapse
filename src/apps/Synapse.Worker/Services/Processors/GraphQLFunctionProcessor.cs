@@ -19,12 +19,7 @@ using GraphQL;
 using GraphQL.Client.Abstractions;
 using GraphQL.Client.Abstractions.Websocket;
 using GraphQL.Client.Http;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Synapse.Integration.Events.WorkflowActivities;
-using System.Collections;
 using System.Dynamic;
-using System.Text.RegularExpressions;
 
 namespace Synapse.Worker.Services.Processors
 {

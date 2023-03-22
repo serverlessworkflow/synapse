@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Hosting;
-using System.Dynamic;
 using System.Runtime.InteropServices;
 
 namespace Synapse.Worker.Services
@@ -73,7 +72,7 @@ namespace Synapse.Worker.Services
                     var secret = await serializer.DeserializeAsync<Neuroglia.Serialization.DynamicObject>(stream, stoppingToken);
                     this.Secrets.Add(file.Name, secret);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     this.Logger.LogWarning("Skipped loading secret '{secretFile}': an exception occured while deserializing the secret object: {ex}", file.Name, ex.ToString());
                     continue;

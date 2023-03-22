@@ -15,12 +15,7 @@
  *
  */
 
-using CloudNative.CloudEvents;
-using Microsoft.AspNetCore.JsonPatch;
-using Newtonsoft.Json;
 using Synapse.Apis.Runtime;
-using Synapse.Integration.Events;
-using Synapse.Integration.Events.WorkflowActivities;
 
 namespace Synapse.Worker.Services
 {
@@ -65,7 +60,7 @@ namespace Synapse.Worker.Services
         /// <inheritdoc/>
         public virtual async Task<CloudEvent?> ConsumeOrBeginCorrelateEventAsync(EventDefinition eventDefinition, CancellationToken cancellationToken = default)
         {
-            if(eventDefinition == null)
+            if (eventDefinition == null)
                 throw new ArgumentNullException(nameof(eventDefinition));
             var e = await this.SynapseRuntimeApi.ConsumeOrBeginCorrelateEventAsync(new() { WorkflowInstanceId = this.Instance.Id, EventDefinition = eventDefinition }, cancellationToken);
             if (e == null)
@@ -186,7 +181,7 @@ namespace Synapse.Worker.Services
                 throw new ArgumentNullException(nameof(activity));
             if (error == null)
                 throw new ArgumentNullException(nameof(error));
-            await this.SynapseRuntimeApi.FaultActivityAsync(new() { Id = activity.Id, Error = error }, cancellationToken);;
+            await this.SynapseRuntimeApi.FaultActivityAsync(new() { Id = activity.Id, Error = error }, cancellationToken); ;
         }
 
         /// <inheritdoc/>

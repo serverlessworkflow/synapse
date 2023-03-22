@@ -15,8 +15,6 @@
  *
  */
 
-using Synapse.Integration.Events.WorkflowActivities;
-
 namespace Synapse.Worker.Services.Processors
 {
 
@@ -38,7 +36,7 @@ namespace Synapse.Worker.Services.Processors
         /// <param name="activity">The <see cref="V1WorkflowActivity"/> to process</param>
         /// <param name="action">The <see cref="ActionDefinition"/> to process</param>
         /// <param name="function">The <see cref="FunctionDefinition"/> to process</param>
-        public RuntimeExpressionFunctionProcessor(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, 
+        public RuntimeExpressionFunctionProcessor(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, IWorkflowRuntimeContext context,
             IWorkflowActivityProcessorFactory activityProcessorFactory, IOptions<ApplicationOptions> options, V1WorkflowActivity activity,
             ActionDefinition action, FunctionDefinition function)
             : base(serviceProvider, loggerFactory, context, activityProcessorFactory, options, activity, action, function)

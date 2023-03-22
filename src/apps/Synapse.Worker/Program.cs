@@ -23,14 +23,13 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Http;
 using Neuroglia.AsyncApi;
 using Neuroglia.Data.Expressions.JQ;
-using Newtonsoft.Json;
 using Synapse.Apis.Management.Grpc;
 using Synapse.Apis.Runtime.Grpc;
 using Synapse.Integration.Serialization.Converters;
 using System.Diagnostics;
 
-if (args.Any() 
-    && args.Contains("--debug") 
+if (args.Any()
+    && args.Contains("--debug")
     && !Debugger.IsAttached)
     Debugger.Launch();
 AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
@@ -53,7 +52,7 @@ using var host = Host.CreateDefaultBuilder(args)
                 options.TimestampFormat = "[HH:mm:ss] ";
             });
         });
-        services.AddAsyncApiClientFactory(asyncApi => 
+        services.AddAsyncApiClientFactory(asyncApi =>
         {
             asyncApi.UseAllBindings();
         });

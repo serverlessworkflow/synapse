@@ -15,12 +15,9 @@
  *
  */
 
-using CloudNative.CloudEvents;
 using ConcurrentCollections;
 using Microsoft.Extensions.Hosting;
 using Synapse.Apis.Runtime;
-using Synapse.Integration.Events.WorkflowActivities;
-using System.Reactive.Linq;
 
 namespace Synapse.Worker.Services
 {
@@ -202,7 +199,7 @@ namespace Synapse.Worker.Services
                         throw new NotSupportedException($"The specified {nameof(V1WorkflowActivityType)} '{nameof(lastTopLevelActivity.Type)}' is not supported in this context");
                 }
             }
-            foreach(var activity in activities)
+            foreach (var activity in activities)
             {
                 var processor = this.CreateActivityProcessor(activity);
                 await processor.ProcessAsync(this.CancellationToken);
@@ -403,7 +400,7 @@ namespace Synapse.Worker.Services
                         break;
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 this.Logger.LogError("An error occured while handling a server runtime signal: {ex}", ex.ToString());
                 await this.Context.Workflow.FaultAsync(ex, this.CancellationToken);
@@ -446,7 +443,7 @@ namespace Synapse.Worker.Services
                 //todo: publish the event to the server
                 await Task.CompletedTask;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 this.Logger.LogError("An error occured while publishing the specified event: {ex}", ex.ToString());
             }
@@ -537,8 +534,8 @@ namespace Synapse.Worker.Services
             if (!this.Context.Workflow.Definition.TryGetState(processor.Transition.NextState, out StateDefinition nextState))
                 throw new NullReferenceException($"Failed to find a state with name '{processor.Transition.NextState}' in workflow '{this.Context.Workflow.Definition.Id} {this.Context.Workflow.Definition.Version}'");
             await this.Context.Workflow.TransitionToAsync(nextState, this.CancellationToken);
-            var metadata = new Dictionary<string, string>() 
-            { 
+            var metadata = new Dictionary<string, string>()
+            {
                 { V1WorkflowActivityMetadata.State, nextState.Name }
             };
             if (processor.Activity.Metadata.TryGetValue(V1WorkflowActivityMetadata.CompensationSource, out var compensationSource))

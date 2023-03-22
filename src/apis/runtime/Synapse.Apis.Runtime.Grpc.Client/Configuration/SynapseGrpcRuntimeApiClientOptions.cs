@@ -15,8 +15,6 @@
  *
  */
 
-using Grpc.Net.Client;
-
 namespace Synapse.Apis.Runtime.Grpc
 {
 

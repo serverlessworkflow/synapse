@@ -15,9 +15,6 @@
  *
  */
 
-using Synapse.Integration.Events;
-using Synapse.Integration.Events.WorkflowActivities;
-
 namespace Synapse.Worker.Services.Processors
 {
 
@@ -40,7 +37,7 @@ namespace Synapse.Worker.Services.Processors
         /// <param name="state">The <see cref="ParallelStateDefinition"/> that defines the <see cref="BranchDefinition"/> to process</param>
         /// <param name="branch">The <see cref="BranchDefinition"/> to process</param>
         public BranchProcessor(ILoggerFactory loggerFactory, IWorkflowRuntimeContext context, IWorkflowActivityProcessorFactory activityProcessorFactory,
-            IJsonSerializer jsonSerializer, IOptions<ApplicationOptions> options, V1WorkflowActivity activity, ParallelStateDefinition state, BranchDefinition branch) 
+            IJsonSerializer jsonSerializer, IOptions<ApplicationOptions> options, V1WorkflowActivity activity, ParallelStateDefinition state, BranchDefinition branch)
             : base(loggerFactory, context, activityProcessorFactory, options, activity)
         {
             this.JsonSerializer = jsonSerializer;

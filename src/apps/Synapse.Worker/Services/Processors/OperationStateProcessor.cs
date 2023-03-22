@@ -15,11 +15,7 @@
  *
  */
 
-using Newtonsoft.Json;
-using Synapse.Integration.Events;
-using Synapse.Integration.Events.WorkflowActivities;
 using Synapse.Integration.Serialization.Converters;
-using System.Reactive.Linq;
 
 namespace Synapse.Worker.Services.Processors
 {

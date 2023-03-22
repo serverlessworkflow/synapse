@@ -15,11 +15,7 @@
  *
  */
 
-using Neuroglia.Data.Expressions;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System.Dynamic;
-using System.Text.RegularExpressions;
 
 namespace Synapse.Worker
 {
