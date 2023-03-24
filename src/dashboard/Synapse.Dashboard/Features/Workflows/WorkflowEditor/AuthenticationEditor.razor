@@ -16,7 +16,7 @@
 
 @namespace Synapse.Dashboard
 
-@if(authentication != null)
+@if (authentication != null)
 {
     <table class="table table-striped">
         <tbody>
@@ -30,7 +30,7 @@
                 <td>
                     <select class="form-select bg-secondary text-white"
                     @onchange="async e => await OnAuthenticationSchemeChangedAsync(EnumHelper.Parse<AuthenticationScheme>((string)e.Value!))">
-                        @foreach(var scheme in Enum.GetValues<AuthenticationScheme>())
+                        @foreach (var scheme in Enum.GetValues<AuthenticationScheme>())
                         {
                             var schemeStr = @EnumHelper.Stringify(scheme);
                             <option value="@schemeStr" selected="@(authentication.Scheme == scheme)">@schemeStr</option>
@@ -59,13 +59,13 @@
                     </td>
                 </Header>
                 <Body>
-                    @if(!useSecretBasedProperties)
+                    @if (!useSecretBasedProperties)
                     {
                         <td colspan="3">
                             @switch (authentication.Scheme)
                             {
                                 case AuthenticationScheme.Basic:
-                                    if(authentication.Properties is not BasicAuthenticationProperties basic)
+                                    if (authentication.Properties is not BasicAuthenticationProperties basic)
                                     {
                                         basic = new();
                                         authentication.Properties = basic;
@@ -86,7 +86,7 @@
                                     </table>
                                     break;
                                 case AuthenticationScheme.Bearer:
-                                    if(authentication.Properties is not BearerAuthenticationProperties bearer)
+                                    if (authentication.Properties is not BearerAuthenticationProperties bearer)
                                     {
                                         bearer = new();
                                         authentication.Properties = bearer;
@@ -102,7 +102,7 @@
                                     </table>
                                     break;
                                 case AuthenticationScheme.OAuth2:
-                                    if(authentication.Properties is not OAuth2AuthenticationProperties oauth2)
+                                    if (authentication.Properties is not OAuth2AuthenticationProperties oauth2)
                                     {
                                         oauth2 = new();
                                         authentication.Properties = oauth2;
@@ -147,7 +147,7 @@
         if (Authentication == null)
             return;
         this.useSecretBasedProperties = !useSecretBasedProperties;
-        if(!this.useSecretBasedProperties)
+        if (!this.useSecretBasedProperties)
             return;
         this.Authentication.SecretRef = "undefined";
         await this.OnChange.InvokeAsync(this.Authentication);
@@ -166,7 +166,7 @@
             {
                 AuthenticationScheme.Basic => new BasicAuthenticationProperties(),
                 AuthenticationScheme.Bearer => new BearerAuthenticationProperties(),
-                AuthenticationScheme.OAuth2 => new BearerAuthenticationProperties(),
+                AuthenticationScheme.OAuth2 => new OAuth2AuthenticationProperties(),
                 _ => throw new NotSupportedException($"The specified {nameof(AuthenticationScheme)} '{a.Scheme}' is not supported")
             };
         });
