@@ -287,10 +287,8 @@ namespace Synapse.Worker.Services.Processors
                 foreach (string server in this.Servers)
                 {
                     var requestUri = $"{server}{this.Path}";
-                    if (requestUri.StartsWith("//"))
-                        requestUri = $"https:{requestUri}";
-                    if (!string.IsNullOrWhiteSpace(this.QueryString))
-                        requestUri += $"?{this.QueryString}";
+                    if (requestUri.StartsWith("//"))requestUri = $"https:{requestUri}";
+                    if (!string.IsNullOrWhiteSpace(this.QueryString)) requestUri += $"?{this.QueryString}";
                     using var request = new HttpRequestMessage(this.HttpMethod, requestUri);
                     foreach (var header in this.Headers)
                     {
@@ -303,34 +301,29 @@ namespace Synapse.Worker.Services.Processors
                         request.Content = new StringContent(json, Encoding.UTF8, MediaTypeNames.Application.Json); //todo: support other media types?
                     }
                     using var response = await this.HttpClient.SendAsync(request, cancellationToken);
-                    if (response.StatusCode == HttpStatusCode.ServiceUnavailable)
-                        continue;
+                    if (response.StatusCode == HttpStatusCode.ServiceUnavailable)continue;
                     var rawContent = await response.Content.ReadAsByteArrayAsync(cancellationToken)!;
                     var contentString = null as string;
-                    if (rawContent != null)
-                        contentString = Encoding.UTF8.GetString(rawContent);
+                    if (rawContent != null) contentString = Encoding.UTF8.GetString(rawContent);
                     if (!response.IsSuccessStatusCode)
                     {
-                        this.Logger.LogInformation("Failed to execute the Open API operation '{operationId}' at '{uri}'. The remote server responded with a non-success status code '{statusCode}'.", this.Operation.OperationId, response.RequestMessage!.RequestUri, response.StatusCode);
+                        this.Logger.LogError("Failed to execute the Open API operation '{operationId}' at '{uri}'. The remote server responded with a non-success status code '{statusCode}'.", this.Operation.OperationId, response.RequestMessage!.RequestUri, response.StatusCode);
                         this.Logger.LogDebug("Response content:\r\n{responseContent}", contentString ?? "None");
                         response.EnsureSuccessStatusCode(contentString);
                     }
-                    if (rawContent != null)
+                    if (rawContent != null && rawContent.Length > 0)
                     {
                         var mediaType = response.Content?.Headers.ContentType?.MediaType;
-                        var serializer = this.SerializerProvider.GetSerializersFor(mediaType).FirstOrDefault();
-                        if (serializer == null)
-                            throw new NotSupportedException($"Failed to find a serializer for the specified media type '{mediaType}'");
+                        if(string.IsNullOrWhiteSpace(mediaType)) this.Logger.LogWarning("Failed to determine the response's content type. Assuming {json}", MediaTypeNames.Application.Json);
+                        var serializer = this.SerializerProvider.GetSerializersFor(mediaType).FirstOrDefault() ?? throw new NotSupportedException($"Failed to find a serializer for the specified media type '{mediaType}'");
                         using var stream = new MemoryStream(rawContent!);
                         output = (await serializer.DeserializeAsync<JToken>(stream, cancellationToken)).ToObject();
                     }
                     success = true;
                     break;
                 }
-                if (output == null)
-                    output = new();
-                if (!success)
-                    throw new HttpRequestException($"Failed to execute the operation activity '{this.Operation.OperationId}' (id: '{this.Activity.Id}'): No service available", null, HttpStatusCode.ServiceUnavailable);
+                output ??= new();
+                if (!success)throw new HttpRequestException($"Failed to execute the operation activity '{this.Operation.OperationId}' (id: '{this.Activity.Id}'): No service available", null, HttpStatusCode.ServiceUnavailable);
                 await this.OnNextAsync(new V1WorkflowActivityCompletedIntegrationEvent(this.Activity.Id, output), cancellationToken);
                 await this.OnCompletedAsync(cancellationToken);
             }
