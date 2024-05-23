@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	<VersionPrefix>0.1.0</VersionPrefix>
+	<AssemblyVersion>$(VersionPrefix)</AssemblyVersion>
+	<FileVersion>$(VersionPrefix)</FileVersion>
+	<NeutralLanguage>en</NeutralLanguage>
+	<GenerateDocumentationFile>true</GenerateDocumentationFile>
+	<DebugType>embedded</DebugType>
+	<RootNamespace>$(MSBuildProjectName.Replace(" ", "_").Replace(".Core", ""))</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Resources\Workflow.yaml" />
+    <None Remove="Resources\WorkflowInstance.yaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Workflow.yaml" />
+    <EmbeddedResource Include="Resources\WorkflowInstance.yaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+	<PackageReference Include="Neuroglia.Data.Infrastructure.ResourceOriented" Version="4.9.15" />
+    <PackageReference Include="Semver" Version="2.3.0" />
+    <PackageReference Include="ServerlessWorkflow.Sdk" Version="1.0.0-alpha1" />
+  </ItemGroup>
+
+</Project>

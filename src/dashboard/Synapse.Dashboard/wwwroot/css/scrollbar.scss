@@ -1,0 +1,43 @@
+﻿@import "./theme/_variables.scss";
+
+::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+::-webkit-scrollbar-button {
+    width: 0px;
+    height: 0px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: $primary-bg-subtle-dark;
+    border: 0px none #ffffff;
+    border-radius: $border-radius;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: $primary-dark;
+}
+
+::-webkit-scrollbar-thumb:active {
+    background: $primary-dark;
+}
+
+::-webkit-scrollbar-track {
+    background: $body-bg-dark;
+    border: 0px none #ffffff;
+    border-radius: $border-radius;
+}
+
+::-webkit-scrollbar-track:hover {
+    background: $dark-bg-subtle-dark;
+}
+
+::-webkit-scrollbar-track:active {
+    background: $dark-bg-subtle-dark;
+}
+
+::-webkit-scrollbar-corner {
+    background: transparent;
+}

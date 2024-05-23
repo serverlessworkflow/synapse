@@ -1,39 +1,8 @@
-﻿@* 
-    Copyright © 2022-Present The Synapse Authors
-    <p>
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-    <p>
-    http://www.apache.org/licenses/LICENSE-2.0
-    <p>
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-*@
+﻿@inject IApplicationLayout Layout
 
-@using Microsoft.AspNetCore.SignalR.Client
-@using Neuroglia.Data.Flux
-@using Neuroglia.Data.Flux.Components
-@using System.Reactive.Linq
-@using Newtonsoft.Json.Linq
-@using Synapse.Dashboard.CloudEvents
-@using Synapse.Integration.Events.Correlations
-@using Synapse.Integration.Events.WorkflowActivities
-@using Synapse.Integration.Events.WorkflowInstances
-@using Synapse.Integration.Events.Workflows
-@implements IDisposable
-@inject IServiceProvider ServiceProvider
-@inject HubConnection HubConnection
-@inject IIntegrationEventStream IntegrationEventStream
-@inject IDispatcher Dispatcher;
-@inject Neuroglia.Mapping.IMapper Mapper
-
-<FluxStore />
 <Router AppAssembly="@typeof(App).Assembly">
     <Found Context="routeData">
+        <PageTitle>Synapse - @Layout.Title?.ChildContent</PageTitle>
         <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
         <FocusOnNavigate RouteData="@routeData" Selector="h1" />
     </Found>
@@ -48,34 +17,10 @@
 @code
 {
 
-    private readonly List<IDisposable> subscriptions = new();
-
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        this.InitializeCloudEventSubscriptions();
-        await this.HubConnection.StartAsync();
-    }
-
-    public void InitializeCloudEventSubscriptions()
-    {
-        foreach(var subscriptionType in TypeCacheUtil.FindFilteredTypes("syndash:ce-subs", t => t.IsClass && !t.IsAbstract && !t.IsInterface && typeof(ICloudEventSubscription).IsAssignableFrom(t)))
-        {
-            var subscription = (ICloudEventSubscription)ActivatorUtilities.CreateInstance(this.ServiceProvider, subscriptionType);
-            var handle = this.IntegrationEventStream
-                .Where(subscription.Filters)
-                .Subscribe(subscription.Handle);
-            this.subscriptions.Add(handle);
-        }
-    }
-
-    public virtual void Dispose()
-    {
-        foreach (var subscription in this.subscriptions.ToList())
-        {
-            subscription.Dispose();
-            this.subscriptions.Remove(subscription);
-        }
+        this.Layout.PropertyChanged += (_, _) => this.StateHasChanged();
     }
 
 }

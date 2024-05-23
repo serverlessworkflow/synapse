@@ -1,0 +1,18 @@
+﻿@import "../../wwwroot/css/theme/_variables.scss";
+
+.page.h-100 {
+    max-height:100%;
+    overflow: hidden;
+}
+
+.content {
+    max-height: 100%;
+    overflow: hidden;
+}
+
+nav.header.navbar {
+    border-top: 1px solid;
+    border-image-slice: 1;
+    border-width: 1px;
+    border-image-source: linear-gradient(90deg, $primary-dark 0%, $primary-bg-subtle-dark 100%);
+}

@@ -1,0 +1,17 @@
+﻿@import "../../lib/bootstrap/scss/functions";
+
+$primary: #4DCEF3 !default;
+$primary-text: $primary;
+$primary-bg-subtle: #38CFC7 !default;
+$primary-border-subtle: #43F9BD !default;
+
+@import "../../lib/bootstrap/scss/variables";
+
+$primary-dark: $primary;
+$primary-text-dark: $primary;
+$primary-bg-subtle-dark: $primary-bg-subtle;
+$primary-border-subtle-dark: $primary-border-subtle;
+$link-color-dark: $cyan-400 !default;
+$link-hover-color-dark: $cyan-200 !default;
+
+@import "../../lib/bootstrap/scss/variables-dark";

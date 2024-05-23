@@ -1,0 +1,175 @@
+﻿// Copyright © 2024-Present Neuroglia SRL. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"),
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using Synapse.Api.Application.Commands.Resources.Generic;
+using Synapse.Api.Application.Commands.WorkflowDataDocuments;
+using Synapse.Api.Application.Queries.Resources.Generic;
+using Synapse.Api.Application.Queries.WorkflowDataDocuments;
+using Synapse.Resources;
+using ServerlessWorkflow.Sdk.IO;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Neuroglia.Data.Infrastructure;
+using Neuroglia.Data.Infrastructure.Mongo.Services;
+using Neuroglia.Data.Infrastructure.ResourceOriented.Redis;
+using Neuroglia.Data.Infrastructure.Services;
+using Neuroglia.Data.PatchModel.Services;
+using Neuroglia.Plugins;
+using Neuroglia.Security.Services;
+using Neuroglia.Serialization;
+
+namespace Synapse.Api.Application;
+
+/// <summary>
+/// Defines extensions for <see cref="IServiceCollection"/>s
+/// </summary>
+public static class IServiceCollectionExtensions
+{
+
+    /// <summary>
+    /// Adds and configures runtime infrastructure services
+    /// </summary>
+    /// <param name="services">The <see cref="IServiceCollection"/> to configure</param>
+    /// <param name="configuration">The current <see cref="IConfiguration"/></param>
+    /// <returns>The configured <see cref="IServiceCollection"/></returns>
+    public static IServiceCollection AddSynapseApi(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddHttpClient();
+        services.AddSerialization();
+        services.AddJsonSerializer();
+        services.AddYamlDotNetSerializer();
+        services.AddScoped<IUserInfoProvider, UserInfoProvider>();
+        services.AddMediator();
+        services.AddApiCommands();
+        services.AddApiQueries();
+        services.AddServerlessWorkflowIO();
+        services.AddPluginProvider();
+
+        var redisConnectionString = configuration.GetConnectionString(RedisDatabase.ConnectionStringName);
+        services.AddPlugin(typeof(IDatabase), string.IsNullOrWhiteSpace(redisConnectionString) ? null : provider => provider.GetRequiredService<RedisDatabase>(), serviceLifetime: ServiceLifetime.Scoped);
+
+        if (!string.IsNullOrWhiteSpace(redisConnectionString)) services.AddRedisDatabase(redisConnectionString, ServiceLifetime.Scoped);
+        services.AddHostedService<Infrastructure.Services.DatabaseInitializer>();
+
+        services.AddPlugin(typeof(IRepository<Document>), provider => provider.GetRequiredService<MongoRepository<Document, string>>(), serviceLifetime: ServiceLifetime.Scoped);
+        services.AddMongoDatabase("cloud-flows");
+        services.AddMongoRepository<Document, string>(lifetime: ServiceLifetime.Scoped);
+
+        services.AddScoped<IResourceRepository, ResourceRepository>();
+        services.AddScoped<IAdmissionControl, AdmissionControl>();
+        services.AddScoped<IVersionControl, VersionControl>();
+        services.AddSingleton<IPatchHandler, JsonMergePatchHandler>();
+        services.AddSingleton<IPatchHandler, JsonPatchHandler>();
+        services.AddSingleton<IPatchHandler, JsonStrategicMergePatchHandler>();
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers and configures generic query handlers
+    /// </summary>
+    /// <param name="services">The <see cref="IServiceCollection"/> to configure</param>
+    /// <returns>The configured <see cref="IServiceCollection"/></returns>
+    public static IServiceCollection AddApiQueries(this IServiceCollection services)
+    {
+        var resourceTypes = typeof(Workflow).Assembly.GetTypes().Where(t => t.IsClass && !t.IsAbstract && !t.IsGenericType && !t.IsInterface && typeof(Resource).IsAssignableFrom(t)).ToList();
+        resourceTypes.Add(typeof(Namespace));
+        foreach (var queryableType in resourceTypes)
+        {
+            var serviceLifetime = ServiceLifetime.Scoped;
+            Type queryType;
+            Type resultType;
+            Type handlerServiceType;
+            Type handlerImplementationType;
+
+            queryType = typeof(GetResourceQuery<>).MakeGenericType(queryableType);
+            resultType = typeof(IOperationResult<>).MakeGenericType(queryableType);
+            handlerServiceType = typeof(IRequestHandler<,>).MakeGenericType(queryType, resultType);
+            handlerImplementationType = typeof(GetResourceQueryHandler<>).MakeGenericType(queryableType);
+            services.Add(new ServiceDescriptor(handlerServiceType, handlerImplementationType, serviceLifetime));
+
+            queryType = typeof(GetResourceDefinitionQuery<>).MakeGenericType(queryableType);
+            resultType = typeof(IOperationResult<IResourceDefinition>);
+            handlerServiceType = typeof(IRequestHandler<,>).MakeGenericType(queryType, resultType);
+            handlerImplementationType = typeof(GetResourceDefinitionQueryHandler<>).MakeGenericType(queryableType);
+            services.Add(new ServiceDescriptor(handlerServiceType, handlerImplementationType, serviceLifetime));
+
+            queryType = typeof(GetResourcesQuery<>).MakeGenericType(queryableType);
+            resultType = typeof(IOperationResult<>).MakeGenericType(typeof(IAsyncEnumerable<>).MakeGenericType(queryableType));
+            handlerServiceType = typeof(IRequestHandler<,>).MakeGenericType(queryType, resultType);
+            handlerImplementationType = typeof(GetResourcesQueryHandler<>).MakeGenericType(queryableType);
+            services.Add(new ServiceDescriptor(handlerServiceType, handlerImplementationType, serviceLifetime));
+
+            queryType = typeof(ListResourcesQuery<>).MakeGenericType(queryableType);
+            resultType = typeof(IOperationResult<>).MakeGenericType(typeof(Neuroglia.Data.Infrastructure.ResourceOriented.ICollection<>).MakeGenericType(queryableType));
+            handlerServiceType = typeof(IRequestHandler<,>).MakeGenericType(queryType, resultType);
+            handlerImplementationType = typeof(ListResourcesQueryHandler<>).MakeGenericType(queryableType);
+            services.Add(new ServiceDescriptor(handlerServiceType, handlerImplementationType, serviceLifetime));
+
+            queryType = typeof(WatchResourcesQuery<>).MakeGenericType(queryableType);
+            resultType = typeof(IOperationResult<>).MakeGenericType(typeof(IResourceWatch<>).MakeGenericType(queryableType));
+            handlerServiceType = typeof(IRequestHandler<,>).MakeGenericType(queryType, resultType);
+            handlerImplementationType = typeof(WatchResourcesQueryHandler<>).MakeGenericType(queryableType);
+            services.Add(new ServiceDescriptor(handlerServiceType, handlerImplementationType, serviceLifetime));
+        }
+        services.AddScoped<IRequestHandler<GetWorkflowDataDocumentQuery, IOperationResult<Document>>, GetWorkflowDataQueryHandler>();
+        return services;
+    }
+
+    /// <summary>
+    /// Registers and configures generic command handlers
+    /// </summary>
+    /// <param name="services">The <see cref="IServiceCollection"/> to configure</param>
+    /// <returns>The configured <see cref="IServiceCollection"/></returns>
+    public static IServiceCollection AddApiCommands(this IServiceCollection services)
+    {
+        var resourceTypes = typeof(Workflow).Assembly.GetTypes().Where(t => t.IsClass && !t.IsAbstract && !t.IsGenericType && !t.IsInterface && typeof(Resource).IsAssignableFrom(t)).ToList();
+        resourceTypes.Add(typeof(Namespace));
+        foreach (var resourceType in resourceTypes)
+        {
+            var serviceLifetime = ServiceLifetime.Scoped;
+            Type commandType;
+            Type resultType;
+            Type handlerServiceType;
+            Type handlerImplementationType;
+
+            commandType = typeof(CreateResourceCommand<>).MakeGenericType(resourceType);
+            resultType = typeof(IOperationResult<>).MakeGenericType(resourceType);
+            handlerServiceType = typeof(IRequestHandler<,>).MakeGenericType(commandType, resultType);
+            handlerImplementationType = typeof(CreateResourceCommandHandler<>).MakeGenericType(resourceType);
+            services.Add(new ServiceDescriptor(handlerServiceType, handlerImplementationType, serviceLifetime));
+
+            commandType = typeof(ReplaceResourceCommand<>).MakeGenericType(resourceType);
+            resultType = typeof(IOperationResult<>).MakeGenericType(resourceType);
+            handlerServiceType = typeof(IRequestHandler<,>).MakeGenericType(commandType, resultType);
+            handlerImplementationType = typeof(ReplaceResourceCommandHandler<>).MakeGenericType(resourceType);
+            services.Add(new ServiceDescriptor(handlerServiceType, handlerImplementationType, serviceLifetime));
+
+            commandType = typeof(PatchResourceCommand<>).MakeGenericType(resourceType);
+            resultType = typeof(IOperationResult<>).MakeGenericType(resourceType);
+            handlerServiceType = typeof(IRequestHandler<,>).MakeGenericType(commandType, resultType);
+            handlerImplementationType = typeof(PatchResourceCommandHandler<>).MakeGenericType(resourceType);
+            services.Add(new ServiceDescriptor(handlerServiceType, handlerImplementationType, serviceLifetime));
+
+            commandType = typeof(DeleteResourceCommand<>).MakeGenericType(resourceType);
+            resultType = typeof(IOperationResult<>).MakeGenericType(resourceType);
+            handlerServiceType = typeof(IRequestHandler<,>).MakeGenericType(commandType, resultType);
+            handlerImplementationType = typeof(DeleteResourceCommandHandler<>).MakeGenericType(resourceType);
+            services.Add(new ServiceDescriptor(handlerServiceType, handlerImplementationType, serviceLifetime));
+
+        }
+        services.AddScoped<IRequestHandler<CreateWorkflowDataDocumentCommand, IOperationResult<Document>>, CreateWorkflowDataDocumentCommandHandler>();
+        return services;
+    }
+
+}

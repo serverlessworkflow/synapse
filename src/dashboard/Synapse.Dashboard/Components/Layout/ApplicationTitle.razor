@@ -1,0 +1,35 @@
+﻿@namespace Synapse.Dashboard.Components
+@implements IDisposable
+@inject IApplicationLayout Layout
+@code
+{
+
+    /// <summary>
+    /// Gets the application's title content
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <inheritdoc/>
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        if (this.Layout != null) this.Layout.Title = this;
+    }
+
+    /// <inheritdoc/>
+    protected override bool ShouldRender()
+    {
+        var shouldRender = base.ShouldRender();
+        if (shouldRender) this.Layout.OnTitleChanged();
+        return shouldRender;
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        if (this.Layout != null) this.Layout.Title = null;
+        GC.SuppressFinalize(this);
+    }
+
+}

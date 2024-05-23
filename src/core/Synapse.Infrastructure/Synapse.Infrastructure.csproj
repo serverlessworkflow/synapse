@@ -1,33 +1,18 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <VersionPrefix>0.4.3</VersionPrefix>
-    <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <Authors>The Synapse Authors</Authors>
-    <Company>Cloud Native Computing Foundation</Company>
-    <Copyright>Copyright © 2022-Present The Synapse Authors. All Rights Reserved.</Copyright>
-    <RepositoryUrl>https://github.com/serverlessworkflow/synapse</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <PackageProjectUrl>https://github.com/serverlessworkflow/synapse</PackageProjectUrl>
-    <PackageTags>synapse infrastructure</PackageTags>
-    <NeutralLanguage>en</NeutralLanguage>
-    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
-    <AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
-    <FileVersion>$(VersionPrefix).0</FileVersion>
-    <DebugType>embedded</DebugType>
   </PropertyGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\..\apis\runtime\Synapse.Apis.Runtime.Core\Synapse.Apis.Runtime.Core.csproj" />
-    <ProjectReference Include="..\Synapse.Domain\Synapse.Domain.csproj" />
+	<PackageReference Include="IdentityModel" Version="7.0.0" />
+	<PackageReference Include="Neuroglia.Data.Expressions.Abstractions" Version="4.9.15" />
   </ItemGroup>
+	
   <ItemGroup>
-    <PackageReference Include="Cronos" Version="0.7.1" />
-    <PackageReference Include="Neuroglia.Data.Expressions" Version="2.0.12" />
-    <PackageReference Include="Neuroglia.Eventing.CloudEvents" Version="2.0.12" />
-    <PackageReference Include="Neuroglia.Mapping" Version="2.0.12" />
-    <PackageReference Include="Neuroglia.Mediation" Version="2.0.12" />
+    <ProjectReference Include="..\Synapse.Core\Synapse.Core.csproj" />
   </ItemGroup>
+
 </Project>

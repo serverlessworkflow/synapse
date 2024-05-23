@@ -1,0 +1,86 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,300;0,400;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@500&display=swap');
+
+$font-family-base: 'Source Sans Pro', sans-serif;
+$font-size-root: 15px;
+
+@import "../../lib/bootstrap/scss/mixins/banner";
+@include bsBanner("");
+
+// scss-docs-start import-stack
+// Configuration
+@import "./_variables.scss";
+@import "../../lib/bootstrap/scss/maps";
+@import "../../lib/bootstrap/scss/mixins";
+@import "../../lib/bootstrap/scss/utilities";
+
+// Layout & components
+@import "../../lib/bootstrap/scss/root";
+@import "../../lib/bootstrap/scss/reboot";
+@import "../../lib/bootstrap/scss/type";
+@import "../../lib/bootstrap/scss/images";
+@import "../../lib/bootstrap/scss/containers";
+@import "../../lib/bootstrap/scss/grid";
+@import "../../lib/bootstrap/scss/tables";
+@import "../../lib/bootstrap/scss/forms";
+@import "../../lib/bootstrap/scss/buttons";
+@import "../../lib/bootstrap/scss/transitions";
+@import "../../lib/bootstrap/scss/dropdown";
+@import "../../lib/bootstrap/scss/button-group";
+@import "../../lib/bootstrap/scss/nav";
+@import "../../lib/bootstrap/scss/navbar";
+@import "../../lib/bootstrap/scss/card";
+@import "../../lib/bootstrap/scss/accordion";
+@import "../../lib/bootstrap/scss/breadcrumb";
+@import "../../lib/bootstrap/scss/pagination";
+@import "../../lib/bootstrap/scss/badge";
+@import "../../lib/bootstrap/scss/alert";
+@import "../../lib/bootstrap/scss/progress";
+@import "../../lib/bootstrap/scss/list-group";
+@import "../../lib/bootstrap/scss/close";
+@import "../../lib/bootstrap/scss/toasts";
+@import "../../lib/bootstrap/scss/modal";
+@import "../../lib/bootstrap/scss/tooltip";
+@import "../../lib/bootstrap/scss/popover";
+@import "../../lib/bootstrap/scss/carousel";
+@import "../../lib/bootstrap/scss/spinners";
+@import "../../lib/bootstrap/scss/offcanvas";
+@import "../../lib/bootstrap/scss/placeholders";
+
+// Helpers
+@import "../../lib/bootstrap/scss/helpers";
+
+// Utilities
+@import "../../lib/bootstrap/scss/utilities/api";
+// scss-docs-end import-stack
+
+
+:root {
+    --bs-gray-100-rgb: #{to-rgb($gray-100)};
+    --bs-gray-200-rgb: #{to-rgb($gray-200)};
+    --bs-gray-300-rgb: #{to-rgb($gray-300)};
+    --bs-gray-400-rgb: #{to-rgb($gray-400)};
+    --bs-gray-500-rgb: #{to-rgb($gray-500)};
+    --bs-gray-600-rgb: #{to-rgb($gray-600)};
+    --bs-gray-700-rgb: #{to-rgb($gray-700)};
+    --bs-gray-800-rgb: #{to-rgb($gray-800)};
+    --bs-gray-900-rgb: #{to-rgb($gray-900)};
+    --scroll-size: 8px;
+    --scroll-radius: 0px;
+    --scroll-track: var(--bs-light);
+    --scroll-thumb-color: var(--bs-primary);
+    --bb-offcanvas-horizontal-width-lg: 768px !important;
+}
+
+$btn-padding-y-xsm: .20rem !default;
+$btn-padding-x-xsm: .30rem !default;
+$btn-font-size-xsm: $font-size-base * .7 !default;
+$btn-border-radius-xsm: .25rem !default;
+
+.btn-xsm {
+    @include button-size($btn-padding-y-xsm, $btn-padding-x-xsm, $btn-font-size-xsm, $btn-border-radius-xsm);
+}
+
+.btn-group-xsm > .btn {
+    @extend .btn-xsm;
+}

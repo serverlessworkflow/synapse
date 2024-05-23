@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+	<OutputType>Library</OutputType>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+	<PackageReference Include="Neuroglia.Data.Infrastructure.Mongo" Version="4.9.15" />
+	<PackageReference Include="Neuroglia.Data.Infrastructure.ResourceOriented.Redis" Version="4.9.15" />
+	<PackageReference Include="Neuroglia.Mediation" Version="4.9.15" />
+	<PackageReference Include="Neuroglia.Plugins" Version="4.9.15" />
+	<PackageReference Include="ServerlessWorkflow.Sdk.IO" Version="1.0.0-alpha1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\core\Synapse.Infrastructure\Synapse.Infrastructure.csproj" />
+    <ProjectReference Include="..\Synapse.Api.Client.Core\Synapse.Api.Client.Core.csproj" />
+  </ItemGroup>
+
+</Project>
