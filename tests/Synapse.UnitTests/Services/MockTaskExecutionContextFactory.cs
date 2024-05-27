@@ -1,4 +1,4 @@
-﻿using Synapse.Worker.Application.Services;
+﻿using Synapse.Runner.Application.Services;
 
 namespace Synapse.UnitTests.Services;
 

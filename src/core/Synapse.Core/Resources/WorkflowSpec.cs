@@ -21,10 +21,10 @@ public record WorkflowSpec
 {
 
     /// <summary>
-    /// Gets/sets the configured workflow's definition
+    /// Gets/sets the versions of the configured workflow
     /// </summary>
-    [Required]
-    [DataMember(Name = "definition", Order = 1), JsonPropertyName("definition"), JsonPropertyOrder(1), YamlMember(Alias = "definition", Order = 1)]
-    public virtual WorkflowDefinition Definition { get; set; } = null!;
+    [Required, MinLength(1)]
+    [DataMember(Name = "versions", Order = 1), JsonPropertyName("versions"), JsonPropertyOrder(1), YamlMember(Alias = "versions", Order = 1)]
+    public virtual EquatableList<WorkflowDefinition> Versions { get; set; } = null!;
 
 }

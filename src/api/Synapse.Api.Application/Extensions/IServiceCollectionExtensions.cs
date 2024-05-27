@@ -59,10 +59,10 @@ public static class IServiceCollectionExtensions
         services.AddPlugin(typeof(IDatabase), string.IsNullOrWhiteSpace(redisConnectionString) ? null : provider => provider.GetRequiredService<RedisDatabase>(), serviceLifetime: ServiceLifetime.Scoped);
 
         if (!string.IsNullOrWhiteSpace(redisConnectionString)) services.AddRedisDatabase(redisConnectionString, ServiceLifetime.Scoped);
-        services.AddHostedService<Infrastructure.Services.DatabaseInitializer>();
+        services.AddHostedService<Core.Infrastructure.Services.DatabaseInitializer>();
 
         services.AddPlugin(typeof(IRepository<Document>), provider => provider.GetRequiredService<MongoRepository<Document, string>>(), serviceLifetime: ServiceLifetime.Scoped);
-        services.AddMongoDatabase("cloud-flows");
+        services.AddMongoDatabase("synapse");
         services.AddMongoRepository<Document, string>(lifetime: ServiceLifetime.Scoped);
 
         services.AddScoped<IResourceRepository, ResourceRepository>();

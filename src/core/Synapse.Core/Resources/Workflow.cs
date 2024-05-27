@@ -16,7 +16,7 @@ using Neuroglia.Data.Infrastructure.ResourceOriented;
 namespace Synapse.Resources;
 
 /// <summary>
-/// Represents the resource used to describe a workflow
+/// Represents the resource used to describe and configure a workflow
 /// </summary>
 [DataContract]
 public record Workflow

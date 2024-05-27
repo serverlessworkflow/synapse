@@ -26,7 +26,61 @@ public static class SynapseDefaults
     /// <summary>
     /// Gets the default group for Synapse resources
     /// </summary>
-    public const string ResourceGroup = "cloud-flows.io";
+    public const string ResourceGroup = "synapse.io";
+
+    /// <summary>
+    /// Exposes Synapse environment variables
+    /// </summary>
+    public static class EnvironmentVariables
+    {
+
+        /// <summary>
+        /// Gets the prefix for all Synapse environment variables
+        /// </summary>
+        public const string Prefix = "SYNAPSE_";
+
+        /// <summary>
+        /// Gets the environment variable used to configure Synapse to skip certificate validation by default, for example when performing HTTP requests
+        /// </summary>
+        public const string SkipCertificateValidation = Prefix + "SKIP_CERTIFICATE_VALIDATION";
+
+        /// <summary>
+        /// Exposes constants about API-related environment variables
+        /// </summary>
+        public static class Api
+        {
+
+            /// <summary>
+            /// Gets the prefix for all API related environment variables
+            /// </summary>
+            public const string Prefix = EnvironmentVariables.Prefix + "API_";
+
+            /// <summary>
+            /// Gets the environment variable used to configure the base uri of the Synapse API to use
+            /// </summary>
+            public const string Uri = Prefix + "HOST";
+
+        }
+
+        /// <summary>
+        /// Exposes constants about workflow-related environment variables
+        /// </summary>
+        public static class Workflow
+        {
+
+            /// <summary>
+            /// Gets the prefix for all api related environment variables
+            /// </summary>
+            public const string Prefix = EnvironmentVariables.Prefix + "WORKFLOW_";
+
+            /// <summary>
+            /// Gets the environment variable that holds the qualified name of workflow instance to run
+            /// </summary>
+            public const string Instance = Prefix + "INSTANCE";
+
+        }
+
+    }
 
     /// <summary>
     /// Exposes Synapse default resources
@@ -59,6 +113,23 @@ public static class SynapseDefaults
                 yield return Workflow;
                 yield return WorkflowInstance;
             }
+
+        }
+
+        /// <summary>
+        /// Exposes the resource labels used by Synapse
+        /// </summary>
+        public static class Labels
+        {
+
+            /// <summary>
+            /// Gets the prefix of all Synapse labels
+            /// </summary>
+            public const string Prefix = "synapse.io/";
+            /// <summary>
+            /// Gets the label used by Synapse operators to claim workflows or workflow instances
+            /// </summary>
+            public const string Operator = Prefix + "operator";
 
         }
 

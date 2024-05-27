@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using System.Security.Cryptography;
 
 namespace Synapse;
 

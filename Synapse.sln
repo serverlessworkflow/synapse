@@ -11,13 +11,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dashboard", "dashboard", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cli", "cli", "{D3B3B95D-B598-4B13-B754-4A7E530405A6}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "agent", "agent", "{32EAD165-3D99-42CD-B3AF-05136DCC7F35}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "operator", "operator", "{32EAD165-3D99-42CD-B3AF-05136DCC7F35}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "worker", "worker", "{1DA47E5F-B23A-4D3C-96AA-4BD2662AB946}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "runner", "runner", "{1DA47E5F-B23A-4D3C-96AA-4BD2662AB946}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Core", "src\core\Synapse.Core\Synapse.Core.csproj", "{F2804D69-04C9-463D-B5E5-D3185163EBC0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Infrastructure.Containers.Docker", "src\core\Synapse.Infrastructure.Containers.Docker\Synapse.Infrastructure.Containers.Docker.csproj", "{40EB503E-6E97-4375-A172-6EF55F9E0FF3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Core.Infrastructure.Containers.Docker", "src\core\Synapse.Core.Infrastructure.Containers.Docker\Synapse.Core.Infrastructure.Containers.Docker.csproj", "{40EB503E-6E97-4375-A172-6EF55F9E0FF3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "api", "api", "{63715FC0-736D-4972-A865-41126155DF45}"
 EndProject
@@ -35,15 +35,25 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{F041A1CB
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Api.Server", "src\api\Synapse.Api.Server\Synapse.Api.Server.csproj", "{8DFC5C6C-830A-481F-8E88-632CF5065793}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Infrastructure", "src\core\Synapse.Infrastructure\Synapse.Infrastructure.csproj", "{03F9EC99-55D5-4880-9972-592A366418FD}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Worker.Application", "src\worker\Synapse.Worker.Application\Synapse.Worker.Application.csproj", "{1C655B22-507A-434D-941A-F63F0BC84A5A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Core.Infrastructure", "src\core\Synapse.Core.Infrastructure\Synapse.Core.Infrastructure.csproj", "{03F9EC99-55D5-4880-9972-592A366418FD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.IntegrationTests", "tests\Synapse.IntegrationTests\Synapse.IntegrationTests.csproj", "{6F7ED286-A02C-4E78-9FE3-2689BD94B97C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.UnitTests", "tests\Synapse.UnitTests\Synapse.UnitTests.csproj", "{CB1DF439-BFBA-408D-BC09-3FF94E6C4F0F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Api.Client.Core", "src\api\Synapse.Api.Client.Core\Synapse.Api.Client.Core.csproj", "{3E650D2D-B018-4056-8922-FC7DF68233B1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Runner.Application", "src\runner\Synapse.Runner.Application\Synapse.Runner.Application.csproj", "{DDC90022-43B5-48CC-A967-0826C2A385F2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Operator.Application", "src\operator\Synapse.Operator.Application\Synapse.Operator.Application.csproj", "{7627C036-B55A-479C-AB0D-C859D4A11238}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "runtime", "runtime", "{175CE1C5-FE17-4C8B-8823-E812BAD4E527}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synapse.Runtime.Abstractions", "src\runtime\Synapse.Runtime.Abstractions\Synapse.Runtime.Abstractions.csproj", "{A0E5E7F2-8C9C-4F36-B3FD-C09074893023}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Runtime.Native", "src\runtime\Synapse.Runtime.Native\Synapse.Runtime.Native.csproj", "{DC24E506-602F-4FD9-B8C0-CEA6B2AD8888}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synapse.Runtime.Containerized", "src\runtime\Synapse.Runtime.Containerized\Synapse.Runtime.Containerized.csproj", "{F327B8F1-9A13-4924-AE1B-E69788AC73E7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -83,10 +93,6 @@ Global
 		{03F9EC99-55D5-4880-9972-592A366418FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{03F9EC99-55D5-4880-9972-592A366418FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{03F9EC99-55D5-4880-9972-592A366418FD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1C655B22-507A-434D-941A-F63F0BC84A5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1C655B22-507A-434D-941A-F63F0BC84A5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1C655B22-507A-434D-941A-F63F0BC84A5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1C655B22-507A-434D-941A-F63F0BC84A5A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6F7ED286-A02C-4E78-9FE3-2689BD94B97C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6F7ED286-A02C-4E78-9FE3-2689BD94B97C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6F7ED286-A02C-4E78-9FE3-2689BD94B97C}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -99,6 +105,26 @@ Global
 		{3E650D2D-B018-4056-8922-FC7DF68233B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3E650D2D-B018-4056-8922-FC7DF68233B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3E650D2D-B018-4056-8922-FC7DF68233B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DDC90022-43B5-48CC-A967-0826C2A385F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DDC90022-43B5-48CC-A967-0826C2A385F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DDC90022-43B5-48CC-A967-0826C2A385F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DDC90022-43B5-48CC-A967-0826C2A385F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7627C036-B55A-479C-AB0D-C859D4A11238}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7627C036-B55A-479C-AB0D-C859D4A11238}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7627C036-B55A-479C-AB0D-C859D4A11238}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7627C036-B55A-479C-AB0D-C859D4A11238}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A0E5E7F2-8C9C-4F36-B3FD-C09074893023}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0E5E7F2-8C9C-4F36-B3FD-C09074893023}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A0E5E7F2-8C9C-4F36-B3FD-C09074893023}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A0E5E7F2-8C9C-4F36-B3FD-C09074893023}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC24E506-602F-4FD9-B8C0-CEA6B2AD8888}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC24E506-602F-4FD9-B8C0-CEA6B2AD8888}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC24E506-602F-4FD9-B8C0-CEA6B2AD8888}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC24E506-602F-4FD9-B8C0-CEA6B2AD8888}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F327B8F1-9A13-4924-AE1B-E69788AC73E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F327B8F1-9A13-4924-AE1B-E69788AC73E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F327B8F1-9A13-4924-AE1B-E69788AC73E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F327B8F1-9A13-4924-AE1B-E69788AC73E7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -118,10 +144,15 @@ Global
 		{F8D7F756-16A1-420B-AED4-8EF9A65B640E} = {63715FC0-736D-4972-A865-41126155DF45}
 		{8DFC5C6C-830A-481F-8E88-632CF5065793} = {63715FC0-736D-4972-A865-41126155DF45}
 		{03F9EC99-55D5-4880-9972-592A366418FD} = {9E296C8A-4D78-4592-B046-11A3A953FD25}
-		{1C655B22-507A-434D-941A-F63F0BC84A5A} = {1DA47E5F-B23A-4D3C-96AA-4BD2662AB946}
 		{6F7ED286-A02C-4E78-9FE3-2689BD94B97C} = {F041A1CB-45FA-4432-BAD2-DE2EE174C6FC}
 		{CB1DF439-BFBA-408D-BC09-3FF94E6C4F0F} = {F041A1CB-45FA-4432-BAD2-DE2EE174C6FC}
 		{3E650D2D-B018-4056-8922-FC7DF68233B1} = {63715FC0-736D-4972-A865-41126155DF45}
+		{DDC90022-43B5-48CC-A967-0826C2A385F2} = {1DA47E5F-B23A-4D3C-96AA-4BD2662AB946}
+		{7627C036-B55A-479C-AB0D-C859D4A11238} = {32EAD165-3D99-42CD-B3AF-05136DCC7F35}
+		{175CE1C5-FE17-4C8B-8823-E812BAD4E527} = {4B9AF05C-9D6D-48C0-994D-D4A5C28FA24D}
+		{A0E5E7F2-8C9C-4F36-B3FD-C09074893023} = {175CE1C5-FE17-4C8B-8823-E812BAD4E527}
+		{DC24E506-602F-4FD9-B8C0-CEA6B2AD8888} = {175CE1C5-FE17-4C8B-8823-E812BAD4E527}
+		{F327B8F1-9A13-4924-AE1B-E69788AC73E7} = {175CE1C5-FE17-4C8B-8823-E812BAD4E527}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2A6C03D6-355A-4B39-9F2B-D0FDE429C0E2}

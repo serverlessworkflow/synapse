@@ -1,0 +1,10 @@
+﻿global using Microsoft.Extensions.Hosting;
+global using Microsoft.Extensions.Logging;
+global using Microsoft.Extensions.Options;
+global using Synapse.Resources;
+global using Synapse.Runtime.Configuration;
+global using System.Collections.Concurrent;
+global using System.Diagnostics;
+global using System.IO.Compression;
+global using System.Reactive.Linq;
+global using System.Runtime.InteropServices;

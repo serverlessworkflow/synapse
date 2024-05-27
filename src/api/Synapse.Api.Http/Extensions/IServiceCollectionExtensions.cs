@@ -58,7 +58,7 @@ public static class IServiceCollectionExtensions
                 License = new OpenApiLicense()
                 {
                     Name = "Apache-2.0",
-                    Url = new("https://raw.githubusercontent.com/cloud-flows/dsl/main/LICENSE")
+                    Url = new("https://raw.githubusercontent.com/synapse/dsl/main/LICENSE")
                 },
                 Contact = new()
                 {

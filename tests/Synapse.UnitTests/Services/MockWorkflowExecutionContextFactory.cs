@@ -1,4 +1,4 @@
-﻿using Synapse.Worker.Application.Services;
+﻿using Synapse.Runner.Application.Services;
 using Neuroglia.Data.Infrastructure.ResourceOriented;
 using Neuroglia.Data.Infrastructure.ResourceOriented.Services;
 
@@ -22,7 +22,7 @@ internal static class MockWorkflowExecutionContextFactory
             },
             Spec = new()
             {
-                Definition = workflowDefinition
+                Versions = [ workflowDefinition ]
             }
         });
         var workflowInstance = await resources.AddAsync(new WorkflowInstance()

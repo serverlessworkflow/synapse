@@ -1,7 +1,7 @@
 ﻿using Synapse.Api;
-using Synapse.Infrastructure.Containers;
-using Synapse.Infrastructure.Services;
-using Synapse.Worker.Application.Services;
+using Synapse.Core.Infrastructure.Containers;
+using Synapse.Core.Infrastructure.Services;
+using Synapse.Runner.Application.Services;
 using ServerlessWorkflow.Sdk.IO;
 using Synapse.UnitTests.Containers;
 using Docker.DotNet;
@@ -92,7 +92,7 @@ public abstract class ConformanceTestsBase
         services.AddHostedService<ContainerBootstrapper>();
         services.AddSingleton<IConnectionMultiplexer>(provider => ConnectionMultiplexer.Connect($"localhost:{provider.GetRequiredKeyedService<DotNet.Testcontainers.Containers.IContainer>("redis").GetMappedPublicPort(RedisContainerBuilder.PublicPort)}"));
         services.AddScoped<Neuroglia.Data.Infrastructure.ResourceOriented.Services.IDatabase, RedisDatabase>();
-        services.AddHostedService<Infrastructure.Services.DatabaseInitializer>();
+        services.AddHostedService<Core.Infrastructure.Services.DatabaseInitializer>();
         services.AddScoped<IResourceRepository, ResourceRepository>();
         services.AddKeyedSingleton("mongo", MongoContainerBuilder.Build());
         services.AddSingleton(provider => provider.GetRequiredKeyedService<DotNet.Testcontainers.Containers.IContainer>("mongo"));
@@ -119,7 +119,7 @@ public abstract class ConformanceTestsBase
             },
             Spec = new()
             {
-                Definition = Definition
+                Versions = [ Definition ]
             }
         });
     }

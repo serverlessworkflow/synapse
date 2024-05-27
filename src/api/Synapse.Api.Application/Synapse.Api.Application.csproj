@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\core\Synapse.Infrastructure\Synapse.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\core\Synapse.Core.Infrastructure\Synapse.Core.Infrastructure.csproj" />
     <ProjectReference Include="..\Synapse.Api.Client.Core\Synapse.Api.Client.Core.csproj" />
   </ItemGroup>
 

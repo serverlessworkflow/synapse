@@ -15,14 +15,14 @@ Feature: Raise Task
         raise:
           error:
             status: 400
-            type: https://cloud-flows.io/errors/types/compliance
+            type: https://synapse.io/errors/types/compliance
             title: Compliance Error
     """
     When the workflow is executed
     Then the workflow should fault with error:
     """yaml
     status: 400
-    type: https://cloud-flows.io/errors/types/compliance
+    type: https://synapse.io/errors/types/compliance
     title: Compliance Error
     instance: /do/raiseComplianceError
     """

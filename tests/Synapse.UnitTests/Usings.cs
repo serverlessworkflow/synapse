@@ -13,7 +13,7 @@
 
 global using Synapse;
 global using Synapse.Resources;
-global using Synapse.Worker.Application.Services.Executors;
+global using Synapse.Runner.Application.Services.Executors;
 global using ServerlessWorkflow.Sdk;
 global using ServerlessWorkflow.Sdk.Models;
 global using ServerlessWorkflow.Sdk.Models.Calls;

@@ -30,7 +30,7 @@ public class WorkflowsControllerTests(HttpApiFactory factory)
     {
         //arrange
         var definition = WorkflowDefinitionFactory.Create();
-        var resource = new Workflow(new() { Name = "fake", Namespace = "default" }, new() { Definition = definition });
+        var resource = new Workflow(new() { Name = "fake", Namespace = "default" }, new() { Versions = [ definition ] });
         using var client = this.Factory.CreateClient();
 
         //act
@@ -46,7 +46,7 @@ public class WorkflowsControllerTests(HttpApiFactory factory)
     {
         //arrange
         var definition = WorkflowDefinitionFactory.Create();
-        var resource = new Workflow(new() { Name = "fake", Namespace = "default" }, new() { Definition = definition });
+        var resource = new Workflow(new() { Name = "fake", Namespace = "default" }, new() { Versions = [definition] });
         using var client = this.Factory.CreateClient();
         resource = (await (await client.PostAsJsonAsync(this.Path, resource)).Content.ReadFromJsonAsync<Workflow>())!;
 
@@ -62,7 +62,7 @@ public class WorkflowsControllerTests(HttpApiFactory factory)
     {
         //arrange
         var definition = WorkflowDefinitionFactory.Create();
-        var resource = new Workflow(new() { Name = "fake", Namespace = "default" }, new() { Definition = definition });
+        var resource = new Workflow(new() { Name = "fake", Namespace = "default" }, new() { Versions = [definition] });
         using var client = this.Factory.CreateClient();
         resource = (await (await client.PostAsJsonAsync(this.Path, resource)).Content.ReadFromJsonAsync<Workflow>())!;
 
@@ -80,7 +80,7 @@ public class WorkflowsControllerTests(HttpApiFactory factory)
     {
         //arrange
         var definition = WorkflowDefinitionFactory.Create();
-        var resource = new Workflow(new() { Name = "fake", Namespace = "default" }, new() { Definition = definition });
+        var resource = new Workflow(new() { Name = "fake", Namespace = "default" }, new() { Versions = [definition] });
         using var client = this.Factory.CreateClient();
         resource = (await (await client.PostAsJsonAsync(this.Path, resource)).Content.ReadFromJsonAsync<Workflow>())!;
 
