@@ -1,7 +1,7 @@
 ﻿namespace Synapse.UnitTests.Cases.Runner.TaskExecutors;
 
 public class RaiseTaskExecutorTests
-    : WorkerTestsBase
+    : RunnerTestsBase
 {
 
     [Fact]

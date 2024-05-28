@@ -17,7 +17,7 @@ using Neuroglia.Data.Infrastructure.Services;
 namespace Synapse.Api.Application.Commands.WorkflowDataDocuments;
 
 /// <summary>
-/// Represents the <see cref="ICommand"/> used to create a new workflow data <see cref="Resources.Document"/>
+/// Represents the <see cref="ICommand"/> used to create a new workflow data <see cref="Synapse.Resources.Document"/>
 /// </summary>
 /// <param name="document">The workflow data document to create</param>
 public class CreateWorkflowDataDocumentCommand(Document document)

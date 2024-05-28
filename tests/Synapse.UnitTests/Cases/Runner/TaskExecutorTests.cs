@@ -1,12 +1,10 @@
-﻿using MongoDB.Bson.Serialization;
-using MongoDB.Driver;
-using System.Net;
+﻿using System.Net;
 using System.Text.Json;
 
 namespace Synapse.UnitTests.Cases.Runner;
 
 public class TaskExecutorTests
-    : WorkerTestsBase
+    : RunnerTestsBase
 {
 
     [Fact]

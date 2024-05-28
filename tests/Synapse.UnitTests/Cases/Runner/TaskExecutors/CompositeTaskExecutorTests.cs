@@ -1,11 +1,10 @@
 ﻿using Json.Pointer;
-using MongoDB.Bson.Serialization;
 using System.Text.Json;
 
 namespace Synapse.UnitTests.Cases.Runner.TaskExecutors;
 
 public class CompositeTaskExecutorTests
-    : WorkerTestsBase
+    : RunnerTestsBase
 {
 
     [Fact]

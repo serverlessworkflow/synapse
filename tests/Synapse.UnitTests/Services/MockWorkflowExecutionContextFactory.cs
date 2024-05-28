@@ -1,4 +1,4 @@
-﻿using Synapse.Runner.Application.Services;
+﻿using Synapse.Runner.Services;
 using Neuroglia.Data.Infrastructure.ResourceOriented;
 using Neuroglia.Data.Infrastructure.ResourceOriented.Services;
 

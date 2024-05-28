@@ -2,7 +2,7 @@
 
 namespace Synapse.UnitTests.Cases.Conformance.Features;
 
-[FeatureFile("./Cases/Conformance/Features/Switch.feature")]
+[FeatureFile("./Cases/Conformance/Features/switch.feature")]
 public class SwitchFeatureTests
     : ConformanceTestsBase
 {

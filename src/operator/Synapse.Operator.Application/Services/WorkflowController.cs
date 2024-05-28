@@ -7,6 +7,7 @@
 /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
 /// <param name="controllerOptions">The service used to access the current <see cref="IOptions{TOptions}"/></param>
 /// <param name="resources">The service used to manage <see cref="IResource"/>s</param>
+/// <param name="operator">The service used to monitor the current <see cref="Resources.Operator"/></param>
 public class WorkflowController(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, IOptions<ResourceControllerOptions<Workflow>> controllerOptions, IResourceRepository resources, IResourceMonitor<Resources.Operator> @operator)
     : ResourceController<Workflow>(loggerFactory, controllerOptions, resources)
 {
@@ -17,7 +18,7 @@ public class WorkflowController(IServiceProvider serviceProvider, ILoggerFactory
     protected IServiceProvider ServiceProvider { get; } = serviceProvider;
 
     /// <summary>
-    /// Gets the service used to monitor the current <see cref="Operator"/>
+    /// Gets the service used to monitor the current <see cref="Resources.Operator"/>
     /// </summary>
     protected IResourceMonitor<Resources.Operator> Operator { get; } = @operator;
 

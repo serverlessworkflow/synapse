@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Synapse.Api;
 using Neuroglia.Data.Infrastructure.Services;
+using Synapse.Api.Client.Services;
 
 namespace Synapse.UnitTests.Services;
 

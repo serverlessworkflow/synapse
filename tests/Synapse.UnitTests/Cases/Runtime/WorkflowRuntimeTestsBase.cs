@@ -11,10 +11,10 @@ using Neuroglia.Eventing.CloudEvents.Infrastructure;
 using Neuroglia.Security.Services;
 using ServerlessWorkflow.Sdk.IO;
 using StackExchange.Redis;
-using Synapse.Api;
+using Synapse.Api.Client.Services;
 using Synapse.Core.Infrastructure.Containers;
 using Synapse.Core.Infrastructure.Services;
-using Synapse.Runner.Application.Services;
+using Synapse.Runner.Services;
 using Synapse.Runtime.Services;
 using Synapse.UnitTests.Containers;
 

@@ -3,7 +3,7 @@
 namespace Synapse.UnitTests.Cases.Runner.TaskExecutors;
 
 public class EmitTaskExecutorTests
-    : WorkerTestsBase
+    : RunnerTestsBase
 {
 
     [Fact]

@@ -24,6 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
+	<PackageReference Include="MongoDB.Bson" Version="2.25.0" />
 	<PackageReference Include="Neuroglia.Data.Infrastructure.ResourceOriented" Version="4.9.15" />
     <PackageReference Include="Semver" Version="2.3.0" />
     <PackageReference Include="ServerlessWorkflow.Sdk" Version="1.0.0-alpha1" />

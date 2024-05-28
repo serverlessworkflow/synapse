@@ -82,7 +82,6 @@ public abstract class ClusterResourceController<TResource>(IMediator mediator)
     /// Deletes the resource with the specified name
     /// </summary>
     /// <param name="name">The name of the resource to delete</param>
-    /// <param name="namespace">The namespace the delete to get belongs to</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>A new <see cref="IActionResult"/></returns>
     [HttpDelete("{name}")]

@@ -19,9 +19,11 @@ using Neuroglia;
 using Neuroglia.Serialization;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using System.Net.Mime;
+using Synapse;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddSynapseApi(builder.Configuration);
+builder.Services.AddSynapse(builder.Configuration);
+builder.Services.AddSynapseApi();
 builder.Services.AddSynapseHttpApi();
 using var app = builder.Build();
 
@@ -56,4 +58,7 @@ app.UseSwaggerUI(builder =>
 
 await app.RunAsync();
 
+/// <summary>
+/// The API server's program
+/// </summary>
 public partial class Program { }

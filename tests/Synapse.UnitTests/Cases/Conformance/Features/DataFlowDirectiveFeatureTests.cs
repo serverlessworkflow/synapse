@@ -2,7 +2,7 @@
 
 namespace Synapse.UnitTests.Cases.Conformance.Features;
 
-[FeatureFile("./Cases/Conformance/Features/DataFlow.feature")]
+[FeatureFile("./Cases/Conformance/Features/data-flow.feature")]
 public class DataFlowDirectiveFeatureTests
     : ConformanceTestsBase
 {

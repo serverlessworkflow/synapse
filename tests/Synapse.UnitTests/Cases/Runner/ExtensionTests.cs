@@ -3,7 +3,7 @@
 namespace Synapse.UnitTests.Cases.Runner;
 
 public class ExtensionTests
-    : WorkerTestsBase
+    : RunnerTestsBase
 {
 
     [Fact]

@@ -56,7 +56,7 @@ public class NativeRuntime(ILoggerFactory loggerFactory, IHostEnvironment enviro
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) target = "linux-x64.tar.gz";
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) target = "osx-x64.tar.gz";
         else throw new PlatformNotSupportedException();
-        using var packageStream = await this.HttpClient.GetStreamAsync($"https://github.com/serverlessworkflow/synapse/releases/download/v{typeof(NativeRuntime).Assembly.GetName().Version!.ToString(3)!}/synapse-worker-{target}", cancellationToken); //todo: config based
+        using var packageStream = await this.HttpClient.GetStreamAsync($"https://github.com/serverlessworkflow/synapse/releases/download/v{typeof(NativeRuntime).Assembly.GetName().Version!.ToString(3)!}/synapse-runner-{target}", cancellationToken); //todo: config based
         using ZipArchive archive = new(packageStream, ZipArchiveMode.Read);
         this.Logger.LogInformation("Runner application successfully downloaded. Extracting...");
         archive.ExtractToDirectory(workerDirectory.FullName, true);
@@ -95,7 +95,7 @@ public class NativeRuntime(ILoggerFactory loggerFactory, IHostEnvironment enviro
     /// <summary>
     /// Handles the exit of a <see cref="Process"/>
     /// </summary>
-    /// <param name="workflowInstanceQualifiedName">The id of the <see cref="V1WorkflowInstance"/> the <see cref="Process"/> belongs to</param>
+    /// <param name="workflowInstanceQualifiedName">The id of the <see cref="WorkflowInstance"/> the <see cref="Process"/> belongs to</param>
     /// <param name="process">The <see cref="Process"/> that has exited</param>
     protected virtual void OnProcessExited(string workflowInstanceQualifiedName, Process process)
     {

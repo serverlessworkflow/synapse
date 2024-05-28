@@ -1,15 +1,7 @@
-﻿using Synapse.Api;
-using Synapse.Core.Infrastructure.Containers;
-using Synapse.Core.Infrastructure.Services;
-using Synapse.Runner.Application.Services;
-using ServerlessWorkflow.Sdk.IO;
-using Synapse.UnitTests.Containers;
-using Docker.DotNet;
+﻿using Docker.DotNet;
 using Gherkin.Ast;
 using Json.Pointer;
 using Microsoft.Extensions.Hosting;
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 using Moq;
 using Neuroglia;
@@ -21,9 +13,14 @@ using Neuroglia.Data.Infrastructure.Services;
 using Neuroglia.Data.PatchModel.Services;
 using Neuroglia.Eventing.CloudEvents.Infrastructure;
 using Neuroglia.Security.Services;
+using ServerlessWorkflow.Sdk.IO;
 using StackExchange.Redis;
+using Synapse.Api.Client.Services;
+using Synapse.Core.Infrastructure.Containers;
+using Synapse.Core.Infrastructure.Services;
+using Synapse.Runner.Services;
+using Synapse.UnitTests.Containers;
 using System.Text;
-using System.Text.Json.Nodes;
 using Xunit.Gherkin.Quick;
 
 namespace Synapse.UnitTests.Cases.Conformance;
@@ -31,11 +28,6 @@ namespace Synapse.UnitTests.Cases.Conformance;
 public abstract class ConformanceTestsBase
     : Xunit.Gherkin.Quick.Feature, IAsyncLifetime
 {
-
-    static ConformanceTestsBase()
-    {
-        BsonSerializer.TryRegisterSerializer(new ObjectSerializer(_ => true));
-    }
 
     public ConformanceTestsBase() => Services = ConfigureServices(new ServiceCollection()).BuildServiceProvider();
 
@@ -160,14 +152,21 @@ public abstract class ConformanceTestsBase
     [Then(@"the workflow should complete with output:")]
     public void Then_Workflow_Should_Complete_With_Output(DocString outputString)
     {
-        var output = ExecutionContext.Output switch
+        var expectedOutput = ExecutionContext.Output switch
         {
             IDictionary<string, object> => JsonSerializer.Convert(YamlSerializer.Deserialize<object>(outputString.Content), typeof(EquatableDictionary<string, object>)),
             IEnumerable<object> => YamlSerializer.Deserialize<EquatableList<object>>(outputString.Content),
             null => null,
             _ => YamlSerializer.Deserialize(outputString.Content, ExecutionContext.Output?.GetType() ?? typeof(object))
         };
-        ExecutionContext.Output.ConvertTo<EquatableDictionary<string, object>>().Should().BeEquivalentTo(output);
+        var actualOutput = ExecutionContext.Output switch
+        {
+            IDictionary<string, object> => ExecutionContext.Output.ConvertTo<EquatableDictionary<string, object>>(),
+            IEnumerable<object> => ExecutionContext.Output.ConvertTo<EquatableList<object>>()!,
+            null => null,
+            _ => ExecutionContext.Output
+        };
+        ExecutionContext.Output.ConvertTo<EquatableDictionary<string, object>>().Should().BeEquivalentTo(expectedOutput);
     }
 
     [Then(@"the workflow should fault")]

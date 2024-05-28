@@ -1,6 +1,4 @@
-﻿using Synapse.Resources;
-
-namespace Synapse.Operator.Application.Services;
+﻿namespace Synapse.Operator.Application.Services;
 
 /// <summary>
 /// Represents the service used to manage the scheduling and execution of a specific <see cref="Workflow"/>
@@ -40,9 +38,10 @@ public class WorkflowScheduler(ILogger<WorkflowScheduler> logger, IResourceRepos
     /// </summary>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>A new awaitable <see cref="Task"/></returns>
-    public virtual async Task ScheduleAsync(CancellationToken cancellationToken = default)
+    public virtual Task ScheduleAsync(CancellationToken cancellationToken = default)
     {
         //todo
+        throw new NotImplementedException();
     }
 
     /// <summary>

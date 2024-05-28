@@ -2,7 +2,7 @@
 
 namespace Synapse.UnitTests.Cases.Conformance.Features;
 
-[FeatureFile("./Cases/Conformance/Features/Raise.feature")]
+[FeatureFile("./Cases/Conformance/Features/raise.feature")]
 public class RaiseFeatureTests
     : ConformanceTestsBase
 {

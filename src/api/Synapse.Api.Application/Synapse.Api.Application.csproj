@@ -5,15 +5,9 @@
 	<OutputType>Library</OutputType>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+	<NeutralLanguage>en</NeutralLanguage>
+	<GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
-
-  <ItemGroup>
-	<PackageReference Include="Neuroglia.Data.Infrastructure.Mongo" Version="4.9.15" />
-	<PackageReference Include="Neuroglia.Data.Infrastructure.ResourceOriented.Redis" Version="4.9.15" />
-	<PackageReference Include="Neuroglia.Mediation" Version="4.9.15" />
-	<PackageReference Include="Neuroglia.Plugins" Version="4.9.15" />
-	<PackageReference Include="ServerlessWorkflow.Sdk.IO" Version="1.0.0-alpha1" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\core\Synapse.Core.Infrastructure\Synapse.Core.Infrastructure.csproj" />

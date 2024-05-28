@@ -63,7 +63,7 @@ public class WorkflowDataControllerTests(HttpApiFactory factory)
         document = (await response.Content.ReadFromJsonAsync<Document>())!;
 
         //act
-        var result = await client.GetFromJsonAsync<Document>($"{this.Path}/{document.Name}");
+        var result = await client.GetFromJsonAsync<Document>($"{this.Path}/{document.Id}");
 
         //assert
         //result.Should().BeEquivalentTo(document);

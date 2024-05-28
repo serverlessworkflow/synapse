@@ -4,7 +4,7 @@ using Neuroglia;
 namespace Synapse.UnitTests.Cases.Runner.TaskExecutors;
 
 public class OpenApiCallExecutorTests
-    : WorkerTestsBase
+    : RunnerTestsBase
 {
 
     [Fact]

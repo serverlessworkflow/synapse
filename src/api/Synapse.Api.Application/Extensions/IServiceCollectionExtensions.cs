@@ -11,22 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Synapse.Api.Application.Commands.Resources.Generic;
 using Synapse.Api.Application.Commands.WorkflowDataDocuments;
 using Synapse.Api.Application.Queries.Resources.Generic;
 using Synapse.Api.Application.Queries.WorkflowDataDocuments;
 using Synapse.Resources;
-using ServerlessWorkflow.Sdk.IO;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Neuroglia.Data.Infrastructure;
-using Neuroglia.Data.Infrastructure.Mongo.Services;
-using Neuroglia.Data.Infrastructure.ResourceOriented.Redis;
-using Neuroglia.Data.Infrastructure.Services;
-using Neuroglia.Data.PatchModel.Services;
-using Neuroglia.Plugins;
-using Neuroglia.Security.Services;
-using Neuroglia.Serialization;
 
 namespace Synapse.Api.Application;
 
@@ -40,37 +31,11 @@ public static class IServiceCollectionExtensions
     /// Adds and configures runtime infrastructure services
     /// </summary>
     /// <param name="services">The <see cref="IServiceCollection"/> to configure</param>
-    /// <param name="configuration">The current <see cref="IConfiguration"/></param>
     /// <returns>The configured <see cref="IServiceCollection"/></returns>
-    public static IServiceCollection AddSynapseApi(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddSynapseApi(this IServiceCollection services)
     {
-        services.AddHttpClient();
-        services.AddSerialization();
-        services.AddJsonSerializer();
-        services.AddYamlDotNetSerializer();
-        services.AddScoped<IUserInfoProvider, UserInfoProvider>();
-        services.AddMediator();
         services.AddApiCommands();
         services.AddApiQueries();
-        services.AddServerlessWorkflowIO();
-        services.AddPluginProvider();
-
-        var redisConnectionString = configuration.GetConnectionString(RedisDatabase.ConnectionStringName);
-        services.AddPlugin(typeof(IDatabase), string.IsNullOrWhiteSpace(redisConnectionString) ? null : provider => provider.GetRequiredService<RedisDatabase>(), serviceLifetime: ServiceLifetime.Scoped);
-
-        if (!string.IsNullOrWhiteSpace(redisConnectionString)) services.AddRedisDatabase(redisConnectionString, ServiceLifetime.Scoped);
-        services.AddHostedService<Core.Infrastructure.Services.DatabaseInitializer>();
-
-        services.AddPlugin(typeof(IRepository<Document>), provider => provider.GetRequiredService<MongoRepository<Document, string>>(), serviceLifetime: ServiceLifetime.Scoped);
-        services.AddMongoDatabase("synapse");
-        services.AddMongoRepository<Document, string>(lifetime: ServiceLifetime.Scoped);
-
-        services.AddScoped<IResourceRepository, ResourceRepository>();
-        services.AddScoped<IAdmissionControl, AdmissionControl>();
-        services.AddScoped<IVersionControl, VersionControl>();
-        services.AddSingleton<IPatchHandler, JsonMergePatchHandler>();
-        services.AddSingleton<IPatchHandler, JsonPatchHandler>();
-        services.AddSingleton<IPatchHandler, JsonStrategicMergePatchHandler>();
 
         return services;
     }

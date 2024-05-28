@@ -5,7 +5,7 @@ using System.Text.Json;
 namespace Synapse.UnitTests.Cases.Runner.TaskExecutors;
 
 public class ForTaskExecutorTests
-    : WorkerTestsBase
+    : RunnerTestsBase
 {
 
     [Fact]
@@ -43,7 +43,7 @@ public class ForTaskExecutorTests
                 new("todo-1", taskDefinition)
             ]
         };
-        var workflowDefinitionNode = Neuroglia.Serialization.Json.JsonSerializer.Default.SerializeToNode(workflowDefinition);
+        var workflowDefinitionNode = Neuroglia.Serialization.Json.JsonSerializer.Default.SerializeToNode(workflowDefinition)!;
 
         var json = workflowDefinitionNode.ToJsonString();
 

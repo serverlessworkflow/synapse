@@ -36,8 +36,8 @@ public class WorkflowInstanceController(IServiceProvider serviceProvider, ILogge
     /// <summary>
     /// Creates a new <see cref="IWorkflowProcess"/> for the specified workflow
     /// </summary>
-    /// <param name="resource">The resource of the workflow to create a new scheduler for</param>
-    /// <param name="workflow">The definition of the workflow to create a new scheduler for</param>
+    /// <param name="workflow">The definition of the workflow to create a new process for</param>
+    /// <param name="workflowInstance">The workflow instance to create a new process for</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>A new <see cref="IWorkflowProcess"/></returns>
     protected virtual async Task<IWorkflowProcess> CreateProcessAsync(Workflow workflow, WorkflowInstance workflowInstance, CancellationToken cancellationToken)
