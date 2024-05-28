@@ -27,6 +27,8 @@ internal class MockNamespacedResourceApiClient<TResource>(IResourceRepository re
 
     public Task DeleteAsync(string name, string @namespace, CancellationToken cancellationToken = default) => resources.RemoveAsync<TResource>(name, @namespace, false, cancellationToken);
 
+    public Task<IAsyncEnumerable<TResource>> ListAsync(string @namespace, IEnumerable<LabelSelector>? labelSelectors = null, CancellationToken cancellationToken = default) => Task.FromResult(resources.GetAllAsync<TResource>(@namespace, labelSelectors, cancellationToken: cancellationToken)!);
+
     public Task<TResource> GetAsync(string name, string @namespace, CancellationToken cancellationToken = default) => resources.GetAsync<TResource>(name, @namespace, cancellationToken)!;
 
     public async Task<ResourceDefinition> GetDefinitionAsync(CancellationToken cancellationToken = default) => ((ResourceDefinition)(await resources.GetDefinitionAsync<TResource>(cancellationToken))!)!;

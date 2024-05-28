@@ -13,7 +13,7 @@ public interface IDocumentApiClient
     /// <param name="content">The <see cref="Document"/>'s content</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>The newly created <see cref="Document"/></returns>
-    Task<Document> CreateAsync(string name, object? content, CancellationToken cancellationToken = default);
+    Task<Document> CreateAsync(string name, object content, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets the <see cref="Document"/> with the specified id

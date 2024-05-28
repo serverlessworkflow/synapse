@@ -166,7 +166,7 @@ public abstract class ConformanceTestsBase
             null => null,
             _ => ExecutionContext.Output
         };
-        ExecutionContext.Output.ConvertTo<EquatableDictionary<string, object>>().Should().BeEquivalentTo(expectedOutput);
+        actualOutput.Should().BeEquivalentTo(expectedOutput);
     }
 
     [Then(@"the workflow should fault")]

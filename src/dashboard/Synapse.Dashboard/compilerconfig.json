@@ -1,0 +1,26 @@
+﻿[
+  {
+    "outputFile": "wwwroot/css/app.css",
+    "inputFile": "wwwroot/css/app.scss"
+  },
+  {
+    "outputFile": "Components/Layout/MainLayout.razor.css",
+    "inputFile": "Components/Layout/MainLayout.razor.scss"
+  },
+  {
+    "outputFile": "Components/Table/Table.razor.css",
+    "inputFile": "Components/Table/Table.razor.scss"
+  },
+  {
+    "outputFile": "Components/Table/ColumnHeaderCollectionPresenter.razor.css",
+    "inputFile": "Components/Table/ColumnHeaderCollectionPresenter.razor.scss"
+  },
+  {
+    "outputFile": "wwwroot/css/theme.css",
+    "inputFile": "wwwroot/css/theme.scss"
+  },
+  {
+    "outputFile": "Components/ResourceEditor/ResourceEditor.razor.css",
+    "inputFile": "Components/ResourceEditor/ResourceEditor.razor.scss"
+  }
+]

@@ -1,5 +1,36 @@
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
+<!--
+                                      ___                       ___           ___           ___         ___           ___
+                                     /  /\          ___        /__/\         /  /\         /  /\       /  /\         /  /\
+                                    /  /:/_        /__/|       \  \:\       /  /::\       /  /::\     /  /:/_       /  /:/_
+                                   /  /:/ /\      |  |:|        \  \:\     /  /:/\:\     /  /:/\:\   /  /:/ /\     /  /:/ /\
+                                  /  /:/ /::\     |  |:|    _____\__\:\   /  /:/~/::\   /  /:/~/:/  /  /:/ /::\   /  /:/ /:/_
+                                 /__/:/ /:/\:\  __|__|:|   /__/::::::::\ /__/:/ /:/\:\ /__/:/ /:/  /__/:/ /:/\:\ /__/:/ /:/ /\
+                                 \  \:\/:/~/:/ /__/::::\   \  \:\~~\~~\/ \  \:\/:/__\/ \  \:\/:/   \  \:\/:/~/:/ \  \:\/:/ /:/
+                                  \  \::/ /:/     ~\~~\:\   \  \:\  ~~~   \  \::/       \  \::/     \  \::/ /:/   \  \::/ /:/
+                                   \__\/ /:/        \  \:\   \  \:\        \  \:\        \  \:\      \__\/ /:/     \  \:\/:/
+                                     /__/:/          \__\/    \  \:\        \  \:\        \  \:\       /__/:/       \  \::/
+                                     \__\/                     \__\/         \__\/         \__\/       \__\/         \__\/
+
+ _______                               __                         ________              __     ___ __                      ______               __   __
+|     __|.-----.----.--.--.-----.----.|  |.-----.-----.-----.    |  |  |  |.-----.----.|  |--.'  _|  |.-----.--.--.--.    |   __ \.--.--.-----.|  |_|__|.--------.-----.
+|__     ||  -__|   _|  |  |  -__|   _||  ||  -__|__ --|__ --|    |  |  |  ||  _  |   _||    <|   _|  ||  _  |  |  |  |    |      <|  |  |     ||   _|  ||        |  -__|
+|_______||_____|__|  \___/|_____|__|  |__||_____|_____|_____|    |________||_____|__|  |__|__|__| |__||_____|________|    |___|__||_____|__|__||____|__||__|__|__|_____|
+
+-->
+<!--
+Copyright © 2022-Present The Synapse Authors
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -49,7 +80,13 @@
         <a href="" class="reload">Reload</a>
         <a class="dismiss">🗙</a>
     </div>
+    <script src="lib/d3/dist/d3.min.js"></script>
+    <script src="lib/neuroglia/event-drops/dist/index.min.js"></script>
+    <script src="lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Add chart.js reference if Chart components are used in the application. <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.0.1/chart.umd.js" integrity="sha512-gQhCDsnnnUfaRzD8k1L5llCCV6O9HN09zClIzzeJ8OJ9MpGmIlCxm+pdCkqTwqJ4JcjbojFr79rl2F1mzcoLMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
     <script src="_content/Blazor.Bootstrap/blazor.bootstrap.js"></script>
+    <script src="_content/BlazorMonaco/jsInterop.js"></script>
+    <script defer src="lib/monaco-yaml-prebuilt/dist/monaco-editor.min.js"></script>
     <script src="_framework/blazor.webassembly.js"></script>
 </body>
 

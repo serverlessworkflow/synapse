@@ -1,0 +1,56 @@
+﻿@namespace Synapse.Dashboard.Components
+@inject IMonacoEditorHelper MonacoEditorHelper
+@implements IDisposable
+
+<div class="width d-flex justify-content-end mb-2">
+    <div class="btn-group btn-group-xsm" role="group" aria-label="Toggle editor language">
+        <Button Color="!isJsonSelected ? ButtonColor.Primary : ButtonColor.Secondary" Outline="true" Active="!isJsonSelected" @onclick="_ => ToggleLanguage()">YAML</Button>
+        <Button Color="isJsonSelected ? ButtonColor.Primary : ButtonColor.Secondary" Outline="true" Active="isJsonSelected" @onclick="_ => ToggleLanguage()">JSON</Button>
+    </div>
+</div>
+
+
+@code {
+
+    [Parameter] public EventCallback<string> PreferedLanguageChange { get; set; }
+
+    protected bool isJsonSelected { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        this.isJsonSelected = this.MonacoEditorHelper.PreferredLanguage == PreferredLanguage.JSON;
+    }
+
+    protected virtual async Task ToggleLanguage()
+    {
+        if (this.MonacoEditorHelper.PreferredLanguage == PreferredLanguage.JSON) {
+            await this.MonacoEditorHelper.ChangePreferredLanguageAsync(PreferredLanguage.YAML);
+        }
+        else
+        {
+            await this.MonacoEditorHelper.ChangePreferredLanguageAsync(PreferredLanguage.JSON);
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        this.MonacoEditorHelper.PreferredLanguageChanged += this.HandlePreferedLanguageChangeAsync;
+    }
+
+    protected async Task HandlePreferedLanguageChangeAsync(string language)
+    {
+        this.isJsonSelected = this.MonacoEditorHelper.PreferredLanguage == PreferredLanguage.JSON;
+        await this.PreferedLanguageChange.InvokeAsync(language);
+        this.StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        if (this.MonacoEditorHelper != null) {
+            this.MonacoEditorHelper.PreferredLanguageChanged -= this.HandlePreferedLanguageChangeAsync;
+        }
+        GC.SuppressFinalize(this);
+    }
+}

@@ -11,22 +11,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Synapse.Api.Application;
-using Synapse.Api.Http;
-using ServerlessWorkflow.Sdk;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.Extensions.Options;
 using Neuroglia;
 using Neuroglia.Serialization;
+using ServerlessWorkflow.Sdk;
 using Swashbuckle.AspNetCore.SwaggerUI;
-using System.Net.Mime;
 using Synapse;
+using Synapse.Api.Application;
+using Synapse.Api.Http;
+using Synapse.Api.Http.Hubs;
+using Synapse.Api.Server.Configuration;
+using System.Net.Mime;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.Configure<SynapseApiServerOptions>(builder.Configuration);
+builder.Services.AddResponseCompression();
 builder.Services.AddSynapse(builder.Configuration);
 builder.Services.AddSynapseApi();
 builder.Services.AddSynapseHttpApi();
 using var app = builder.Build();
+var options = app.Services.GetRequiredService<IOptions<SynapseApiServerOptions>>().Value;
 
+if (app.Environment.IsDevelopment() && options.ServeDashboard) app.UseWebAssemblyDebugging();
+app.UseResponseCompression();
+if (options.ServeDashboard) app.UseBlazorFrameworkFiles();
+app.UseStaticFiles();
+app.UseRouting();
 app.UseExceptionHandler(handler =>
 {
     handler.Run(async context =>
@@ -43,7 +54,6 @@ app.UseExceptionHandler(handler =>
         await context.Response.WriteAsync(json).ConfigureAwait(false);
     });
 });
-app.MapControllers();
 app.UseSwagger(builder =>
 {
     builder.RouteTemplate = "api/{documentName}/doc/oas.{json|yaml}";
@@ -55,6 +65,9 @@ app.UseSwaggerUI(builder =>
     builder.RoutePrefix = "api/doc";
     builder.DisplayOperationId();
 });
+app.MapControllers();
+app.MapHub<ResourceEventWatchHub>("api/ws/resources/watch");
+app.MapFallbackToFile("index.html");
 
 await app.RunAsync();
 

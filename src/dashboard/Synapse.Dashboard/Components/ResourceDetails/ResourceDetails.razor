@@ -1,0 +1,71 @@
+﻿@namespace Synapse.Dashboard.Components
+@using System.Text.Json
+@typeparam TResource where TResource : Resource, new()
+
+<div class="container-fluid">
+    <div class="row">
+        <table class="table table-striped mb-3">
+            <tbody>
+                <tr>
+                    <td>API Version</td>
+                    <td>@resource?.ApiVersion</td>
+                </tr>
+                <tr>
+                    <td>Kind</td>
+                    <td>@resource?.Kind</td>
+                </tr>
+                <tr>
+                    <td>Name</td>
+                    <td>@resource?.GetName()</td>
+                </tr>
+                @if (resource?.IsNamespaced() == true)
+                {
+                    <tr>
+                        <td>Namespace</td>
+                        <td>@resource?.GetNamespace()</td>
+                    </tr>
+                }
+                <tr>
+                    <td>Created At</td>
+                    <td>@resource?.Metadata.CreationTimestamp?.ToString("R")</td>
+                </tr>
+                <tr>
+                    <td>Generation</td>
+                    <td>@resource?.Metadata.Generation</td>
+                </tr>
+                @if (resource?.Metadata.Labels?.Any() == true)
+                {
+                    <tr>
+                        <td>Labels</td>
+                        <td>
+                            @foreach(var label in resource.Metadata.Labels)
+                            {
+                                <span class="badge bg-primary text-dark m-1">@label.Key: @label.Value</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+
+    TResource? resource;
+    /// <summary>
+    /// Gets/sets the resource to display details about
+    /// </summary>
+    [Parameter] public TResource? Resource { get; set; }
+
+    /// <inheritdoc/>
+    protected override Task OnParametersSetAsync()
+    {
+        if(this.resource != this.Resource)
+        {
+            this.resource = this.Resource;
+        }
+        return base.OnParametersSetAsync();
+    }
+
+}

@@ -9,6 +9,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.4" />
+    <PackageReference Include="System.Reactive" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\core\Synapse.Core\Synapse.Core.csproj" />
     <ProjectReference Include="..\Synapse.Api.Client.Core\Synapse.Api.Client.Core.csproj" />
   </ItemGroup>
 

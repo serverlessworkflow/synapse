@@ -44,9 +44,6 @@ public class ForTaskExecutorTests
             ]
         };
         var workflowDefinitionNode = Neuroglia.Serialization.Json.JsonSerializer.Default.SerializeToNode(workflowDefinition)!;
-
-        var json = workflowDefinitionNode.ToJsonString();
-
         var input = new { colors };
         var context = await MockTaskExecutionContextFactory.CreateAsync(this.ServiceProvider, workflowDefinition, taskDefinition, input);
         var executor = ActivatorUtilities.CreateInstance<ForTaskExecutor>(this.ServiceProvider, context);

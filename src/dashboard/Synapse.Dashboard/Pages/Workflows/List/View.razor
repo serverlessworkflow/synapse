@@ -1,0 +1,54 @@
+﻿@namespace Synapse.Dashboard.Pages.Workflows.List
+@page "/"
+@inherits ResourceManagementComponent<Workflow>
+
+<ApplicationTitle>Workflows</ApplicationTitle>
+
+<div class="table-container">
+    @if (Loading)
+    {
+        <div class="loading">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    }
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th class="sticky-header text-start">Namespace</th>
+                <th class="sticky-header text-start">Name</th>
+                <th class="sticky-header text-center">Created At</th>
+                <th class="sticky-header text-center">Versions</th>
+                <th class="sticky-header text-center">Last version</th>
+                <th class="sticky-header text-end"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Resources != null && Resources.Any())
+            {
+                <Virtualize Context="resource" Items="@Resources">
+                    <tr @onclick="async _ => await OnShowResourceDetailsAsync(resource)" class="cursor-pointer">
+                        <td class="text-start">@resource.Metadata.Namespace</td>
+                        <td class="text-center">@resource.Metadata.Name</td>
+                        <td class="text-center">@resource.Metadata.CreationTimestamp.ToString()</td>
+                        <td class="text-center">@resource.Spec.Versions.Count</td>
+                        <td class="text-center">@resource.Spec.Versions.Last().Document.Version</td>
+                        <td class="text-end">
+                            <button class="btn btn-outline-primary btn-sm" title="Edit '@resource.Metadata.Name'" @onclick="async _ => await OnShowResourceEditorAsync(resource)" @onclick:preventDefault @onclick:stopPropagation><Icon Name="IconName.Pencil" /></button>
+                            <button class="btn btn-outline-danger btn-sm" title="Delete '@resource.Metadata.Name'" @onclick="async _ => await OnDeleteResourceAsync(resource)" @onclick:preventDefault @onclick:stopPropagation><Icon Name="IconName.Trash" /></button>
+                        </td>
+                    </tr>
+                </Virtualize>
+            }
+        </tbody>
+    </table>
+</div>
+
+<Button Outline="true" Color="ButtonColor.Primary" @onclick="async _ => await OnShowResourceEditorAsync()"><Icon Name="IconName.Plus" /></Button>
+
+<Offcanvas @ref="DetailsOffCanvas" Size="OffcanvasSize.Large" UseStaticBackdrop="false" BodyCssClass="d-flex flex-column" />
+
+<Offcanvas @ref="EditorOffCanvas" Size="OffcanvasSize.Large" UseStaticBackdrop="false" BodyCssClass="d-flex flex-column" />
+
+<ConfirmDialog @ref="Dialog" />

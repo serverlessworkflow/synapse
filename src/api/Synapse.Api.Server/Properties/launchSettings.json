@@ -7,7 +7,8 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": true,
-      "applicationUrl": "http://localhost:5257"
+      "applicationUrl": "http://localhost:5257",
+      "inspectUri": "{wsProtocol}://{url.hostname}:{url.port}/_framework/debug/ws-proxy?browser={browserInspectUri}"
     },
     "IIS Express": {
       "commandName": "IISExpress",

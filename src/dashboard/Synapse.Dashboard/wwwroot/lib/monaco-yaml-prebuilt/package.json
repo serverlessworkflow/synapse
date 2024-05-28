@@ -1,0 +1,41 @@
+{
+  "name": "monaco-yaml-prebuilt",
+  "version": "1.0.0",
+  "description": "Compiled monaco-yaml for direct in-browser use",
+  "license": "MIT",
+  "main": "./dist/monaco-editor.js",
+  "type": "module",
+  "scripts": {
+    "start": "npm run build:dev && npx http-server . -c-1 -p 8080 -o",
+    "build:dev": "webpack --mode development",
+    "build": "webpack --mode production"
+  },
+  "devDependencies": {
+    "css-loader": "^6.7.3",
+    "http-server": "^14.1.1",
+    "monaco-editor": "^0.34.1",
+    "monaco-editor-webpack-plugin": "^7.0.1",
+    "monaco-yaml": "^4.0.3",
+    "style-loader": "^3.3.1",
+    "webpack": "^5.76.1",
+    "webpack-cli": "^5.0.1"
+  },
+  "keywords": [
+    "monaco",
+    "monaco-editor",
+    "yaml",
+    "monaco-yaml"
+  ],
+  "homepage": "https://github.com/neuroglia-io/monaco-yaml-prebuilt",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/neuroglia-io/monaco-yaml-prebuilt.git"
+  },
+  "bugs": {
+    "url": "https://github.com/neuroglia-io/monaco-yaml-prebuilt/issues"
+  },
+  "author": {
+    "name": "Jean-Baptiste BIANCHI",
+    "url": "https://neuroglia.io"
+  }
+}

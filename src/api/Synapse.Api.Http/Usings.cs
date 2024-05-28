@@ -1,5 +1,11 @@
 ﻿global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.AspNetCore.SignalR;
 global using Neuroglia.Data.Infrastructure.ResourceOriented;
+global using Neuroglia.Data.Infrastructure.ResourceOriented.Services;
 global using Neuroglia.Mediation;
 global using Neuroglia.Mediation.AspNetCore;
+global using Neuroglia.Reactive;
+global using Synapse.Api.Client.Services;
+global using Synapse.Api.Http.Hubs;
+global using System.Collections.Concurrent;
 global using System.Net;

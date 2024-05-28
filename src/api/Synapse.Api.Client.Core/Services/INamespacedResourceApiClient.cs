@@ -12,6 +12,15 @@ public interface INamespacedResourceApiClient<TResource>
 {
 
     /// <summary>
+    /// Lists <see cref="IResource"/>s
+    /// </summary>
+    /// <param name="namespace">The namespace the <see cref="IResource"/>s to list belong to</param>
+    /// <param name="labelSelectors">An <see cref="IEnumerable{T}"/> containing the <see cref="LabelSelector"/>s used to select the <see cref="IResource"/>s to list by, if any</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>A new <see cref="IAsyncEnumerable{T}"/> used to asynchronously enumerate resulting <see cref="IResource"/>s</returns>
+    Task<IAsyncEnumerable<TResource>> ListAsync(string @namespace, IEnumerable<LabelSelector>? labelSelectors = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Gets the resource with the specified name
     /// </summary>
     /// <param name="name">The name of the resource to get</param>

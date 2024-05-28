@@ -25,7 +25,7 @@ internal class MockClusterResourceApiClient<TResource>(IResourceRepository resou
 
     public Task<TResource> CreateAsync(TResource resource, CancellationToken cancellationToken = default) => resources.AddAsync(resource, false, cancellationToken);
 
-    public Task DeleteAsync(string name, CancellationToken cancellationToken = default) => resources.RemoveAsync<TResource>(name, null, false, cancellationToken);
+    public Task<IAsyncEnumerable<TResource>> ListAsync(IEnumerable<LabelSelector>? labelSelectors = null, CancellationToken cancellationToken = default) => Task.FromResult(resources.GetAllAsync<TResource>(null, labelSelectors, cancellationToken)!);
 
     public Task<TResource> GetAsync(string name, CancellationToken cancellationToken = default) => resources.GetAsync<TResource>(name, null, cancellationToken)!;
 
@@ -38,5 +38,8 @@ internal class MockClusterResourceApiClient<TResource>(IResourceRepository resou
     public Task<TResource> ReplaceAsync(TResource resource, CancellationToken cancellationToken = default) => resources.ReplaceAsync(resource, false, cancellationToken);
 
     public Task<TResource> ReplaceStatusAsync(TResource resource, CancellationToken cancellationToken = default) => resources.ReplaceStatusAsync(resource, false, cancellationToken);
+
+    public Task DeleteAsync(string name, CancellationToken cancellationToken = default) => resources.RemoveAsync<TResource>(name, null, false, cancellationToken);
+
 
 }

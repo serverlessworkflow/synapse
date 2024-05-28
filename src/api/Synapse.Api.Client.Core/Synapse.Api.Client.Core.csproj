@@ -13,8 +13,4 @@
     <ProjectReference Include="..\..\core\Synapse.Core\Synapse.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Services\Interfaces\" />
-  </ItemGroup>
-
 </Project>

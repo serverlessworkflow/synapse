@@ -17,6 +17,7 @@
 	<PackageReference Include="DynamicGrpc" Version="1.4.0" />
 	<PackageReference Include="Google.Protobuf" Version="3.26.1" />
 	<PackageReference Include="Grpc.Core" Version="2.46.6" />
+	<PackageReference Include="Microsoft.Extensions.Configuration.KeyPerFile" Version="8.0.5" />
 	<PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
 	<PackageReference Include="Microsoft.OpenApi.Readers" Version="1.6.14" />

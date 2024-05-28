@@ -11,16 +11,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Synapse.Dashboard;
-using Synapse.Dashboard.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
+
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+builder.Services.AddLogging();
+builder.Services.AddSerialization();
+builder.Services.AddJsonSerializer();
+builder.Services.AddYamlDotNetSerializer();
+builder.Services.AddScoped(provider => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+builder.Services.AddSynapseHttpApiClient(options =>
+{
+    options.BaseAddress = new(builder.HostEnvironment.BaseAddress);
+});
+
+builder.Services.AddFlux(flux =>
+{
+    flux.ScanMarkupTypeAssembly<App>();
+});
 builder.Services.AddScoped<IApplicationLayout, ApplicationLayout>();
+builder.Services.AddSingleton<IMonacoEditorHelper, MonacoEditorHelper>();
+builder.Services.AddSingleton<MonacoInterop>();
+builder.Services.AddBlazorBootstrap();
 
 await builder.Build().RunAsync();

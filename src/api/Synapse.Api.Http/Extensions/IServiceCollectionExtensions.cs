@@ -18,6 +18,7 @@ using Microsoft.OpenApi.Models;
 using Neuroglia;
 using Neuroglia.Security.Services;
 using Neuroglia.Serialization.Json;
+using Synapse.Core.Api.Services;
 
 namespace Synapse.Api.Http;
 
@@ -42,6 +43,9 @@ public static class IServiceCollectionExtensions
                 JsonSerializer.DefaultOptionsConfiguration(options.JsonSerializerOptions);
             })
             .AddApplicationPart(typeof(WorkflowsController).Assembly);
+        services.AddSignalR();
+        services.AddSingleton<ResourceWatchEventHubController>();
+        services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<ResourceWatchEventHubController>());
         services.AddSwaggerGen(builder =>
         {
             builder.CustomOperationIds(o =>
@@ -63,7 +67,7 @@ public static class IServiceCollectionExtensions
                 Contact = new()
                 {
                     Name = "The Synapse Authors",
-                    Url = new Uri("https://github.com/neuroglia-io/cloud-streams")
+                    Url = new Uri("https://github.com/neuroglia-io/synapse")
                 }
             });
             builder.IncludeXmlComments(typeof(Workflow).Assembly.Location.Replace(".dll", ".xml"));
