@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Net;
+﻿using System.Net;
 
 namespace Synapse.Runner.Services.Executors;
 

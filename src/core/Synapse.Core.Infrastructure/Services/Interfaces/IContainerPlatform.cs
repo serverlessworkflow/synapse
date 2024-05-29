@@ -16,7 +16,7 @@ using ServerlessWorkflow.Sdk.Models.Processes;
 namespace Synapse.Core.Infrastructure.Services;
 
 /// <summary>
-/// Defines the fundamentals of a service used to interact with a container platform
+/// Defines the fundamentals of a service used to manage containers
 /// </summary>
 public interface IContainerPlatform
 {

@@ -1,0 +1,80 @@
+﻿@namespace Synapse.Dashboard.Pages.WorkflowInstances.List
+@page "/workflow-instances"
+@inherits NamespacedResourceManagementComponent<WorkflowInstance>
+
+<ApplicationTitle>Workflow Instances</ApplicationTitle>
+
+<div class="table-container">
+    @if (Loading)
+    {
+        <div class="loading">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    }
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th class="sticky-header text-start">Namespace</th>
+                <th class="sticky-header text-start">Name</th>
+                <th class="sticky-header text-center">Created At</th>
+                <th class="sticky-header text-center">Operator</th>
+                <th class="sticky-header text-center">Status</th>
+                <th class="sticky-header text-end"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Resources != null && Resources.Any())
+            {
+                <Virtualize Context="resource" Items="@Resources">
+                    <tr @onclick="async _ => await OnShowResourceDetailsAsync(resource)" class="cursor-pointer">
+                        <td class="text-start">@resource.Metadata.Namespace</td>
+                        <td class="text-start">@resource.Metadata.Name</td>
+                        <td class="text-center">@resource.Metadata.CreationTimestamp.ToString()</td>
+                        <td class="text-center">
+                            @if (resource.Metadata.Labels?.TryGetValue(SynapseDefaults.Resources.Labels.Operator, out var operatorName) == true && !string.IsNullOrWhiteSpace(operatorName))
+                            {
+                                <span class="badge rounded-pill bg-primary text-dark">@operatorName</span>
+                            }
+                            else
+                            {
+                                <span class="text-dark">-</span>
+                            }
+                        </td>
+                        <td class="text-center"><span class="badge rounded-pill @GetStatusClass(resource)">@resource.Status?.Phase</span></td>
+                        <td class="text-end">
+                            <button class="btn btn-outline-primary btn-sm" title="Edit '@resource.Metadata.Name'" @onclick="async _ => await OnShowResourceEditorAsync(resource)" @onclick:preventDefault @onclick:stopPropagation><Icon Name="IconName.Pencil" /></button>
+                            <button class="btn btn-outline-danger btn-sm" title="Delete '@resource.Metadata.Name'" @onclick="async _ => await OnDeleteResourceAsync(resource)" @onclick:preventDefault @onclick:stopPropagation><Icon Name="IconName.Trash" /></button>
+                        </td>
+                    </tr>
+                </Virtualize>
+            }
+        </tbody>
+    </table>
+</div>
+
+<Button Outline="true" Color="ButtonColor.Primary" @onclick="async _ => await OnShowResourceEditorAsync()"><Icon Name="IconName.Plus" /></Button>
+
+<Offcanvas @ref="DetailsOffCanvas" Size="OffcanvasSize.Large" UseStaticBackdrop="false" BodyCssClass="d-flex flex-column" />
+
+<Offcanvas @ref="EditorOffCanvas" Size="OffcanvasSize.Large" UseStaticBackdrop="false" BodyCssClass="d-flex flex-column" />
+
+<ConfirmDialog @ref="Dialog" />
+
+@{
+
+    string GetStatusClass(WorkflowInstance instance)
+    {
+        return instance.Status?.Phase switch
+        {
+            WorkflowInstanceStatusPhase.Pending => "bg-secondary",
+            WorkflowInstanceStatusPhase.Running => "bg-primary",
+            WorkflowInstanceStatusPhase.Faulted => "bg-danger",
+            WorkflowInstanceStatusPhase.Cancelled => "bg-warning",
+            WorkflowInstanceStatusPhase.Completed => "bg-success",
+            _ => "bg-secondary"
+        };
+    }
+
+}

@@ -16,10 +16,10 @@ public abstract class WorkflowProcessBase
     public abstract string Id { get; }
 
     /// <inheritdoc/>
-    public abstract IObservable<string> StandardOutput { get; }
+    public abstract IObservable<string>? StandardOutput { get; }
 
     /// <inheritdoc/>
-    public abstract IObservable<string> StandardError { get; }
+    public abstract IObservable<string>? StandardError { get; }
 
     /// <inheritdoc/>
     public abstract long? ExitCode { get; }

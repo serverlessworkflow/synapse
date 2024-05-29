@@ -86,7 +86,7 @@ public class ResourceWatchEventHubController(IServiceProvider serviceProvider, I
             });
         }
         watch = await this.Resources.WatchAsync(definition.Group, definition.Version, definition.Plural, @namespace, cancellationToken: cancellationToken).ConfigureAwait(false);
-        watch.SubscribeAsync(e => this.OnResourceWatchEventAsync(connectionId, e));
+        watch.SubscribeAsync(e => this.OnResourceWatchEventAsync(connectionId, e), this.CancellationTokenSource.Token);
         subscriptions.AddOrUpdate(subscriptionKey, watch, (key, current) =>
         {
             current.Dispose();

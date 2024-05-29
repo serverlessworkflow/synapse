@@ -1,9 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using Neuroglia.Data.Expressions.Services;
 using Synapse.Api.Client.Services;
-using Synapse.Runner.Configuration;
 
 namespace Synapse.Runner.Services;
 

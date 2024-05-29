@@ -1,4 +1,4 @@
-﻿namespace Synapse.Operator.Application.Services;
+﻿namespace Synapse.Operator.Services;
 
 /// <summary>
 /// Represents the service used to manage the scheduling and execution of a specific <see cref="Workflow"/>

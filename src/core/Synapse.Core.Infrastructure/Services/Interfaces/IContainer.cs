@@ -17,6 +17,7 @@ namespace Synapse.Core.Infrastructure.Services;
 /// Defines the fundamentals of a container
 /// </summary>
 public interface IContainer
+    : IDisposable, IAsyncDisposable
 {
 
     /// <summary>
@@ -28,6 +29,11 @@ public interface IContainer
     /// Gets the container's standard error stream
     /// </summary>
     StreamReader? StandardError { get; }
+
+    /// <summary>
+    /// Gets the container's exit code
+    /// </summary>
+    long? ExitCode { get; }
 
     /// <summary>
     /// Starts the container

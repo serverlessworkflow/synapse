@@ -33,6 +33,21 @@ public abstract class NamespacedResourceController<TResource>(IMediator mediator
     /// <summary>
     /// Lists matching resources
     /// </summary>
+    /// <param name="labelSelector">A comma-separated list of label selectors, if any</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>A new <see cref="IActionResult"/></returns>
+    [HttpGet]
+    [ProducesResponseType(typeof(Collection<Resource>), (int)HttpStatusCode.OK)]
+    [ProducesErrorResponseType(typeof(Neuroglia.ProblemDetails))]
+    public virtual async Task<IActionResult> GetResources(string? labelSelector = null, CancellationToken cancellationToken = default)
+    {
+        if (!this.TryParseLabelSelectors(labelSelector, out var labelSelectors)) return this.InvalidLabelSelector(labelSelector!);
+        return this.Process(await this.Mediator.ExecuteAsync(new GetResourcesQuery<TResource>(null, labelSelectors), cancellationToken).ConfigureAwait(false));
+    }
+
+    /// <summary>
+    /// Lists matching resources
+    /// </summary>
     /// <param name="namespace">The namespace to resources to list belong to</param>
     /// <param name="labelSelector">A comma-separated list of label selectors, if any</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
@@ -44,6 +59,23 @@ public abstract class NamespacedResourceController<TResource>(IMediator mediator
     {
         if (!this.TryParseLabelSelectors(labelSelector, out var labelSelectors)) return this.InvalidLabelSelector(labelSelector!);
         return this.Process(await this.Mediator.ExecuteAsync(new GetResourcesQuery<TResource>(@namespace, labelSelectors), cancellationToken).ConfigureAwait(false));
+    }
+
+    /// <summary>
+    /// Lists matching resources
+    /// </summary>
+    /// <param name="labelSelector">A comma-separated list of label selectors, if any</param>
+    /// <param name="maxResults">The maximum amount, if any, of results to list at once</param>
+    /// <param name="continuationToken">A token, defined by a previously retrieved collection, used to continue enumerating through matches</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>A new <see cref="IActionResult"/></returns>
+    [HttpGet("list")]
+    [ProducesResponseType(typeof(Collection<Resource>), (int)HttpStatusCode.OK)]
+    [ProducesErrorResponseType(typeof(Neuroglia.ProblemDetails))]
+    public virtual async Task<IActionResult> ListResources(string? labelSelector = null, ulong? maxResults = null, string? continuationToken = null, CancellationToken cancellationToken = default)
+    {
+        if (!this.TryParseLabelSelectors(labelSelector, out var labelSelectors)) return this.InvalidLabelSelector(labelSelector!);
+        return this.Process(await this.Mediator.ExecuteAsync(new ListResourcesQuery<TResource>(null, labelSelectors, maxResults, continuationToken), cancellationToken).ConfigureAwait(false));
     }
 
     /// <summary>

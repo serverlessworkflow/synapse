@@ -11,8 +11,8 @@ namespace Synapse.Runtime.Services;
 /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
 /// <param name="environment">The current <see cref="IHostEnvironment"/></param>
 /// <param name="httpClientFactory">The service used to create <see cref="System.Net.Http.HttpClient"/>s</param>
-/// <param name="options">The service used to access the current <see cref="NativeRuntimeOptions"/></param>
-public class NativeRuntime(ILoggerFactory loggerFactory, IHostEnvironment environment, IHttpClientFactory httpClientFactory, IOptions<NativeRuntimeOptions> options)
+/// <param name="options">The service used to access the current <see cref="RunnerDefinition"/></param>
+public class NativeRuntime(ILoggerFactory loggerFactory, IHostEnvironment environment, IHttpClientFactory httpClientFactory, IOptionsMonitor<RunnerDefinition> options)
     : WorkflowRuntimeBase(loggerFactory)
 {
 
@@ -27,55 +27,29 @@ public class NativeRuntime(ILoggerFactory loggerFactory, IHostEnvironment enviro
     protected HttpClient HttpClient { get; } = httpClientFactory.CreateClient();
 
     /// <summary>
-    /// Gets the current <see cref="NativeRuntimeOptions"/>
+    /// Gets the current <see cref="RunnerDefinition"/>
     /// </summary>
-    protected NativeRuntimeOptions Options { get; } = options.Value;
+    protected RunnerDefinition Options => options.CurrentValue;
 
     /// <summary>
     /// Gets a <see cref="ConcurrentDictionary{TKey, TValue}"/> containing all known worker processes
     /// </summary>
-    protected ConcurrentDictionary<string, Process> Processes { get; } = new();
-
-    /// <summary>
-    /// Downloads and installs the worker binaries, if not already present
-    /// </summary>
-    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-    /// <returns>A new awaitable <see cref="Task"/></returns>
-    protected virtual async Task InstallWorkerAsync(CancellationToken cancellationToken)
-    {
-        this.Logger.LogInformation("Downloading the Runner application...");
-        var workerDirectory = new DirectoryInfo(this.Options.WorkingDirectory);
-        if (!workerDirectory.Exists) workerDirectory.Create();
-        if (File.Exists(this.Options.GetWorkerFileName()))
-        {
-            this.Logger.LogInformation("Runner application already present locally. Skipping download."); //todo: config based: the user might want to get latest every time
-            return;
-        }
-        string? target;
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) target = "win-x64.zip";
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) target = "linux-x64.tar.gz";
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) target = "osx-x64.tar.gz";
-        else throw new PlatformNotSupportedException();
-        using var packageStream = await this.HttpClient.GetStreamAsync($"https://github.com/serverlessworkflow/synapse/releases/download/v{typeof(NativeRuntime).Assembly.GetName().Version!.ToString(3)!}/synapse-runner-{target}", cancellationToken); //todo: config based
-        using ZipArchive archive = new(packageStream, ZipArchiveMode.Read);
-        this.Logger.LogInformation("Runner application successfully downloaded. Extracting...");
-        archive.ExtractToDirectory(workerDirectory.FullName, true);
-        this.Logger.LogInformation("Runner application successfully extracted");
-    }
+    protected ConcurrentDictionary<string, NativeProcess> Processes { get; } = new();
 
     /// <inheritdoc/>
     public override Task<IWorkflowProcess> CreateProcessAsync(Workflow workflow, WorkflowInstance workflowInstance, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(workflow);
         ArgumentNullException.ThrowIfNull(workflowInstance);
-        var fileName = this.Options.GetWorkerFileName();
+        if (this.Options.Runtime.Native == null) throw new NullReferenceException("The native runtime must be configured");
+        var fileName = this.Options.Runtime.Native.Executable;
         var args = string.Empty;
         if (this.Environment.IsDevelopment()) args += "--debug";
         var startInfo = new ProcessStartInfo()
         {
             FileName = fileName,
             Arguments = args,
-            WorkingDirectory = this.Options.WorkingDirectory,
+            WorkingDirectory = this.Options.Runtime.Native.Directory,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             CreateNoWindow = true,
@@ -83,13 +57,13 @@ public class NativeRuntime(ILoggerFactory loggerFactory, IHostEnvironment enviro
         };
         startInfo.Environment.Add(SynapseDefaults.EnvironmentVariables.Api.Uri, this.Options.Api.Uri.OriginalString);
         startInfo.Environment.Add(SynapseDefaults.EnvironmentVariables.Workflow.Instance, workflowInstance.GetQualifiedName());
-        if (this.Options.SkipCertificateValidation) startInfo.Environment.Add(SynapseDefaults.EnvironmentVariables.SkipCertificateValidation, "true");
+        if (!this.Options.Certificates.Validate) startInfo.Environment.Add(SynapseDefaults.EnvironmentVariables.SkipCertificateValidation, "true");
         var process = new Process()
         {
             StartInfo = startInfo,
             EnableRaisingEvents = true
         };
-        return Task.FromResult<IWorkflowProcess>(new NativeProcess(process));
+        return Task.FromResult<IWorkflowProcess>(this.Processes.AddOrUpdate(workflowInstance.GetQualifiedName(), new NativeProcess(process), (key, current) => current));
     }
 
     /// <summary>

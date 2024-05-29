@@ -20,7 +20,7 @@ namespace Synapse.Resources;
 /// </summary>
 [DataContract]
 public record Operator
-    : Resource<OperatorSpec>
+    : Resource<OperatorSpec, OperatorStatus>
 {
 
     /// <summary>

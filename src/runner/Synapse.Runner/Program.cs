@@ -1,22 +1,19 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Synapse.Api.Client;
-using Synapse.Runner.Services;
-using System.Diagnostics;
-
-if (args.Length != 0 && args.Contains("--debug") && !Debugger.IsAttached) Debugger.Launch();
+﻿if (args.Length != 0 && args.Contains("--debug") && !Debugger.IsAttached) Debugger.Launch();
 
 var builder = Host.CreateDefaultBuilder()
-     .ConfigureAppConfiguration(config =>
-     {
-         config.AddJsonFile("appsettings.json", true, true);
-         config.AddEnvironmentVariables("SYNAPSE");
-         config.AddCommandLine(args);
-         config.AddKeyPerFile("/run/secrets/synapse", true, true);
-     })
+    .ConfigureAppConfiguration((context, config) =>
+    {
+        config.AddJsonFile("appsettings.json", true, true);
+        config.AddJsonFile($"appsettings.{context.HostingEnvironment.EnvironmentName}.json", true, true);
+        config.AddEnvironmentVariables("SYNAPSE");
+        config.AddCommandLine(args);
+        config.AddKeyPerFile("/run/secrets/synapse", true, true);
+    })
     .ConfigureServices((context, services) =>
     {
+        var options = new RunnerOptions();
+        context.Configuration.Bind(options);
+        services.Configure<RunnerOptions>(context.Configuration);
         services.AddLogging(builder =>
         {
             builder.AddSimpleConsole(options =>
@@ -24,7 +21,12 @@ var builder = Host.CreateDefaultBuilder()
                 options.TimestampFormat = "[HH:mm:ss] ";
             });
         });
-        services.AddSynapseHttpApiClient(http => { });
+        services.AddJsonSerializer();
+        services.AddYamlDotNetSerializer();
+        services.AddSynapseHttpApiClient(http =>
+        {
+            http.BaseAddress = options.Api.BaseAddress;
+        });
         services.AddHostedService<WorkflowExecutorInitializer>();
     });
 

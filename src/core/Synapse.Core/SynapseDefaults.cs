@@ -58,7 +58,29 @@ public static class SynapseDefaults
             /// <summary>
             /// Gets the environment variable used to configure the base uri of the Synapse API to use
             /// </summary>
-            public const string Uri = Prefix + "HOST";
+            public const string Uri = Prefix + "URI";
+
+        }
+
+        /// <summary>
+        /// Exposes constants about operator-related environment variables
+        /// </summary>
+        public static class Operator
+        {
+
+            /// <summary>
+            /// Gets the prefix for all operator related environment variables
+            /// </summary>
+            public const string Prefix = EnvironmentVariables.Prefix + "OPERATOR_";
+
+            /// <summary>
+            /// Gets the environment variable used to configure the operator's namespace
+            /// </summary>
+            public const string Namespace = Prefix + "NAMESPACE";
+            /// <summary>
+            /// Gets the environment variable used to configure the operator's name
+            /// </summary>
+            public const string Name = Prefix + "NAME";
 
         }
 
@@ -105,6 +127,11 @@ public static class SynapseDefaults
             public static ResourceDefinition WorkflowInstance { get; } = new WorkflowInstanceResourceDefinition();
 
             /// <summary>
+            /// Gets the definition of Operator resources
+            /// </summary>
+            public static ResourceDefinition Operator { get; } = new OperatorResourceDefinition();
+
+            /// <summary>
             /// Gets a new <see cref="IEnumerable{T}"/> containing Synapse default resource definitions
             /// </summary>
             /// <returns></returns>
@@ -112,6 +139,7 @@ public static class SynapseDefaults
             {
                 yield return Workflow;
                 yield return WorkflowInstance;
+                yield return Operator;
             }
 
         }

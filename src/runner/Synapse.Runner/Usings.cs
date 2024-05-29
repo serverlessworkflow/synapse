@@ -11,13 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-global using Synapse;
-global using Synapse.Core.Infrastructure.Services;
-global using Synapse.Resources;
+global using Microsoft.Extensions.Configuration;
+global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Hosting;
+global using Microsoft.Extensions.Logging;
+global using Neuroglia.Serialization;
 global using ServerlessWorkflow.Sdk;
 global using ServerlessWorkflow.Sdk.Models;
 global using ServerlessWorkflow.Sdk.Models.Calls;
 global using ServerlessWorkflow.Sdk.Models.Processes;
 global using ServerlessWorkflow.Sdk.Models.Tasks;
-global using Microsoft.Extensions.Logging;
-global using Neuroglia.Serialization;
+global using Synapse.Api.Client;
+global using Synapse.Core.Infrastructure.Services;
+global using Synapse.Resources;
+global using Synapse.Runner.Configuration;
+global using Synapse.Runner.Services;
+global using System.Diagnostics;

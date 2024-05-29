@@ -12,6 +12,11 @@ public interface ISynapseApiClient
     IClusterResourceApiClient<Namespace> Namespaces { get; }
 
     /// <summary>
+    /// Gets the Synapse API used to manage <see cref="Operator"/>s
+    /// </summary>
+    INamespacedResourceApiClient<Operator> Operators { get; }
+
+    /// <summary>
     /// Gets the Synapse API used to manage <see cref="Workflow"/>s
     /// </summary>
     INamespacedResourceApiClient<Workflow> Workflows { get; }

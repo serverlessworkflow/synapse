@@ -54,4 +54,18 @@ public class NativeProcess
         return Task.CompletedTask;
     }
 
+    /// <inheritdoc/>
+    protected override async ValueTask DisposeAsync(bool disposing)
+    {
+        this.Process.Dispose();
+        await base.DisposeAsync(disposing).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    protected override void Dispose(bool disposing)
+    {
+        this.Process.Dispose();
+        base.Dispose(disposing);
+    }
+
 }

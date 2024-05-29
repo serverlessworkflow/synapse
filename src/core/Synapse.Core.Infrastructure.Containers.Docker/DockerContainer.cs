@@ -24,6 +24,8 @@ public class DockerContainer(string id, IDockerClient dockerClient)
     : IContainer
 {
 
+    bool _disposed;
+
     /// <summary>
     /// Gets the container's ID
     /// </summary>
@@ -35,15 +37,17 @@ public class DockerContainer(string id, IDockerClient dockerClient)
     protected virtual IDockerClient DockerClient { get; } = dockerClient;
 
     /// <inheritdoc/>
-    public virtual StreamReader? StandardOutput { get; set; }
+    public virtual StreamReader? StandardOutput { get; protected set; }
 
     /// <inheritdoc/>
-    public virtual StreamReader? StandardError { get; set; }
+    public virtual StreamReader? StandardError { get; protected set; }
+
+    /// <inheritdoc/>
+    public long? ExitCode { get; protected set; }
 
     /// <inheritdoc/>
     public virtual async Task StartAsync(CancellationToken cancellationToken = default)
     {
-
         await this.DockerClient.Containers.StartContainerAsync(this.Id, new() { }, cancellationToken).ConfigureAwait(false);
 #pragma warning disable CS0618 // Type or member is obsolete
         var standardOutputStream = await this.DockerClient.Containers.GetContainerLogsAsync(this.Id, new() { Follow = true, ShowStdout = true, ShowStderr = true, Timestamps = false }, cancellationToken).ConfigureAwait(false);
@@ -54,9 +58,49 @@ public class DockerContainer(string id, IDockerClient dockerClient)
     }
 
     /// <inheritdoc/>
-    public virtual Task WaitForExitAsync(CancellationToken cancellationToken = default) => this.DockerClient.Containers.WaitContainerAsync(this.Id, cancellationToken);
+    public virtual async Task WaitForExitAsync(CancellationToken cancellationToken = default)
+    {
+        var response = await this.DockerClient.Containers.WaitContainerAsync(this.Id, cancellationToken).ConfigureAwait(false);
+        this.ExitCode = response.StatusCode;
+    }
 
     /// <inheritdoc/>
     public virtual Task StopAsync(CancellationToken cancellationToken = default) => this.DockerClient.Containers.StopContainerAsync(this.Id, new() { }, cancellationToken);
+
+    /// <summary>
+    /// Disposes of the <see cref="DockerContainer"/>
+    /// </summary>
+    /// <param name="disposing">A boolean indicating whether or not the <see cref="DockerContainer"/> is being disposed of</param>
+    /// <returns>A new awaitable <see cref="ValueTask"/></returns>
+    protected virtual async ValueTask DisposeAsync(bool disposing)
+    {
+        if (!this._disposed) return;
+        this._disposed = true;
+        await Task.CompletedTask.ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async ValueTask DisposeAsync()
+    {
+        await this.DisposeAsync(true).ConfigureAwait(false);
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Disposes of the <see cref="DockerContainer"/>
+    /// </summary>
+    /// <param name="disposing">A boolean indicating whether or not the <see cref="DockerContainer"/> is being disposed of</param>
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!this._disposed) return;
+        this._disposed = true;
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        this.Dispose(true);
+        GC.SuppressFinalize(this);
+    }
 
 }

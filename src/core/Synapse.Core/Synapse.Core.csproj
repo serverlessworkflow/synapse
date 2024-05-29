@@ -14,11 +14,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\Operator.yaml" />
     <None Remove="Resources\Workflow.yaml" />
     <None Remove="Resources\WorkflowInstance.yaml" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Resources\Operator.yaml" />
     <EmbeddedResource Include="Resources\Workflow.yaml" />
     <EmbeddedResource Include="Resources\WorkflowInstance.yaml" />
   </ItemGroup>

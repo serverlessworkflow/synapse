@@ -11,16 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Json.Schema;
+
 namespace Synapse.Dashboard.Components;
 
 /// <summary>
 /// Represents the base class for all components used to manage <see cref="IResource"/>s
 /// </summary>
+/// <typeparam name="TStore">The type of <see cref="ResourceManagementComponentStoreBase{TResource}"/> to use</typeparam>
 /// <typeparam name="TResource">The type of <see cref="IResource"/> to manage</typeparam>
-public abstract class ResourceManagementComponent<TResource>
-    : StatefulComponent<NamespacedResourceManagementComponentStore<TResource>, ResourceManagementComponentState<TResource>>
+public abstract class ResourceManagementComponent<TStore, TResource>
+    : StatefulComponent<TStore, ResourceManagementComponentState<TResource>>
+    where TStore : ResourceManagementComponentStoreBase<TResource>
     where TResource : Resource, new()
 {
+
     /// <summary>
     /// Gets/sets the service to build a bridge with the monaco interop extension
     /// </summary>
@@ -75,7 +80,7 @@ public abstract class ResourceManagementComponent<TResource>
                 this.Definition = definition;
                 if (this.Definition != null && this.MonacoInterop != null)
                 {
-                    await this.MonacoInterop.AddValidationSchemaAsync(this.Serializer.SerializeToText(this.Definition.Spec.Versions.First().Schema.OpenAPIV3Schema), $"https://synapse.io/schemas/{typeof(TResource).Name.ToLower()}.json", $"{typeof(TResource).Name.ToLower()}").ConfigureAwait(false);
+                    await this.MonacoInterop.AddValidationSchemaAsync(this.Serializer.SerializeToText(this.Definition.Spec.Versions.First().Schema.OpenAPIV3Schema ?? new JsonSchemaBuilder().Build()), $"https://synapse.io/schemas/{typeof(TResource).Name.ToLower()}.json", $"{typeof(TResource).Name.ToLower()}").ConfigureAwait(false);
                 }
             }
         }, cancellationToken: this.CancellationTokenSource.Token);
@@ -88,14 +93,14 @@ public abstract class ResourceManagementComponent<TResource>
     /// Patches the <see cref="View"/>'s fields after a change
     /// </summary>
     /// <param name="patch">The patch to apply</param>
-    private void OnStateChanged(Action<ResourceManagementComponent<TResource>> patch)
+    private void OnStateChanged(Action<ResourceManagementComponent<TStore, TResource>> patch)
     {
         patch(this);
         this.StateHasChanged();
     }
 
     /// <summary>
-    /// Updates the <see cref="ResourceManagementComponent{TResource}.Resources"/>
+    /// Updates the <see cref="ResourceManagementComponent{TStore, TResource}.Resources"/>
     /// </summary>
     /// <param name="resources"></param>
     protected void OnResourceCollectionChanged(EquatableList<TResource>? resources)

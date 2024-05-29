@@ -1,4 +1,7 @@
-﻿namespace Synapse.Operator.Application.Services;
+﻿using Neuroglia.Reactive;
+using System.Reactive.Linq;
+
+namespace Synapse.Operator.Services;
 
 /// <summary>
 /// Represents the service used to manage <see cref="Workflow"/> resources
@@ -7,8 +10,9 @@
 /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
 /// <param name="controllerOptions">The service used to access the current <see cref="IOptions{TOptions}"/></param>
 /// <param name="resources">The service used to manage <see cref="IResource"/>s</param>
-/// <param name="operator">The service used to monitor the current <see cref="Resources.Operator"/></param>
-public class WorkflowController(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, IOptions<ResourceControllerOptions<Workflow>> controllerOptions, IResourceRepository resources, IResourceMonitor<Resources.Operator> @operator)
+/// <param name="operatorOptions">The current <see cref="Configuration.OperatorOptions"/></param>
+/// <param name="operatorAccessor">The service used to access the current <see cref="Resources.Operator"/></param>
+public class WorkflowController(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, IOptions<ResourceControllerOptions<Workflow>> controllerOptions, IResourceRepository resources, IOptions<OperatorOptions> operatorOptions, IOperatorController operatorAccessor)
     : ResourceController<Workflow>(loggerFactory, controllerOptions, resources)
 {
 
@@ -18,14 +22,35 @@ public class WorkflowController(IServiceProvider serviceProvider, ILoggerFactory
     protected IServiceProvider ServiceProvider { get; } = serviceProvider;
 
     /// <summary>
+    /// Gets the running <see cref="Resources.Operator"/>'s options
+    /// </summary>
+    protected OperatorOptions OperatorOptions { get; } = operatorOptions.Value;
+
+    /// <summary>
     /// Gets the service used to monitor the current <see cref="Resources.Operator"/>
     /// </summary>
-    protected IResourceMonitor<Resources.Operator> Operator { get; } = @operator;
+    protected IResourceMonitor<Resources.Operator> Operator => operatorAccessor.Operator;
 
     /// <summary>
     /// Gets a <see cref="ConcurrentDictionary{TKey, TValue}"/> that contains current <see cref="WorkflowScheduler"/>s
     /// </summary>
     protected ConcurrentDictionary<string, WorkflowScheduler> Schedulers { get; } = [];
+
+    /// <inheritdoc/>
+    public override async Task StartAsync(CancellationToken cancellationToken)
+    {
+        await base.StartAsync(cancellationToken).ConfigureAwait(false);
+        foreach (var workflowInstance in this.Resources.Values.ToList()) await this.OnResourceCreatedAsync(workflowInstance, cancellationToken).ConfigureAwait(false);
+        this.Operator!.Select(b => b.Resource.Spec.Selector).SubscribeAsync(this.OnResourceSelectorChangedAsync, cancellationToken: cancellationToken);
+        await this.OnResourceSelectorChangedAsync(this.Operator!.Resource.Spec.Selector).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    protected override Task ReconcileAsync(CancellationToken cancellationToken = default)
+    {
+        this.Options.LabelSelectors = this.Operator?.Resource.Spec.Selector?.Select(s => new LabelSelector(s.Key, LabelSelectionOperator.Equals, s.Value)).ToList();
+        return base.ReconcileAsync(cancellationToken);
+    }
 
     /// <summary>
     /// Creates a new <see cref="WorkflowScheduler"/> for the specified workflow
@@ -52,6 +77,7 @@ public class WorkflowController(IServiceProvider serviceProvider, ILoggerFactory
     protected virtual async Task<bool> TryClaimAsync(Workflow resource, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(resource);
+        if (this.Operator == null) throw new Exception("The controller must be started before attempting any operation");
         if (resource.Metadata.Labels != null && resource.Metadata.Labels.TryGetValue(SynapseDefaults.Resources.Labels.Operator, out var operatorQualifiedName) && operatorQualifiedName == this.Operator.Resource.GetQualifiedName()) return true;
         try
         {
@@ -107,9 +133,9 @@ public class WorkflowController(IServiceProvider serviceProvider, ILoggerFactory
     /// <inheritdoc/>
     protected override async Task OnResourceCreatedAsync(Workflow resource, CancellationToken cancellationToken = default)
     {
-        if (!await this.TryClaimAsync(resource, cancellationToken).ConfigureAwait(false)) return;
         var definition = resource.Spec.Versions.GetLatest();
         if (definition.Schedule == null) return;
+        if (!await this.TryClaimAsync(resource, cancellationToken).ConfigureAwait(false)) return;
         var scheduler = await this.CreateSchedulerAsync(resource, definition, cancellationToken).ConfigureAwait(false);
         await scheduler.ScheduleAsync(cancellationToken).ConfigureAwait(false);
     }
@@ -135,5 +161,12 @@ public class WorkflowController(IServiceProvider serviceProvider, ILoggerFactory
             await this.Repository.RemoveAsync<WorkflowInstance>(instance.GetName(), instance.GetNamespace(), false, cancellationToken).ConfigureAwait(false);
         }
     }
+
+    /// <summary>
+    /// Handles changes to the current operator's subscription selector
+    /// </summary>
+    /// <param name="selector">A key/value mapping of the labels both workflows and workflow instances to select must define</param>
+    /// <returns>A new awaitable <see cref="Task"/></returns>
+    protected virtual Task OnResourceSelectorChangedAsync(IDictionary<string, string>? selector) => this.ReconcileAsync(this.CancellationTokenSource.Token);
 
 }

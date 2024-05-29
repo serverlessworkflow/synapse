@@ -96,11 +96,10 @@ public class ResourceHttpApiClient<TResource>(ILogger<ResourceHttpApiClient<TRes
     }
 
     /// <inheritdoc/>
-    public virtual async Task<IAsyncEnumerable<TResource>> ListAsync(string @namespace, IEnumerable<LabelSelector>? labelSelectors = null, CancellationToken cancellationToken = default)
+    public virtual async Task<IAsyncEnumerable<TResource>> ListAsync(string? @namespace = null, IEnumerable<LabelSelector>? labelSelectors = null, CancellationToken cancellationToken = default)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(@namespace);
         var resource = new TResource();
-        var uri = $"/api/{resource.Definition.Version}/{resource.Definition.Plural}/{@namespace}";
+        var uri = string.IsNullOrWhiteSpace(@namespace) ? $"/api/{resource.Definition.Version}/{resource.Definition.Plural}" : $"/api/{resource.Definition.Version}/{resource.Definition.Plural}/{@namespace}";
         var queryStringArguments = new Dictionary<string, string>();
         if (labelSelectors?.Any() == true) queryStringArguments.Add(nameof(labelSelectors), labelSelectors.Select(s => s.ToString()).Join(','));
         if (queryStringArguments.Count != 0) uri += $"?{queryStringArguments.Select(kvp => $"{kvp.Key}={kvp.Value}").Join('&')}";
@@ -228,7 +227,7 @@ public class ResourceHttpApiClient<TResource>(ILogger<ResourceHttpApiClient<TRes
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         ArgumentException.ThrowIfNullOrWhiteSpace(@namespace);
         var resource = new TResource();
-        var uri = $"/api/{resource.Definition.Version}/{@namespace}/{resource.Definition.Plural}/{name}";
+        var uri = $"/api/{resource.Definition.Version}/{resource.Definition.Plural}/{@namespace}/{name}";
         using var request = await this.ProcessRequestAsync(new HttpRequestMessage(HttpMethod.Delete, uri), cancellationToken).ConfigureAwait(false);
         await ProcessResponseAsync(await this.HttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false), cancellationToken).ConfigureAwait(false);
     }

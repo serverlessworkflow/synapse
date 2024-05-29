@@ -20,12 +20,12 @@ public interface IWorkflowProcess
     /// <summary>
     /// Gets an <see cref="IObservable{T}"/> used to observe the <see cref="IWorkflowProcess"/>'s STDOUT
     /// </summary>
-    IObservable<string> StandardOutput { get; }
+    IObservable<string>? StandardOutput { get; }
 
     /// <summary>
     /// Gets an <see cref="IObservable{T}"/> used to observe the <see cref="IWorkflowProcess"/>'s STDERR
     /// </summary>
-    IObservable<string> StandardError { get; }
+    IObservable<string>? StandardError { get; }
 
     /// <summary>
     /// Gets the <see cref="IWorkflowProcess"/>'s exit code
