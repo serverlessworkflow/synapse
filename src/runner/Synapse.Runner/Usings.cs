@@ -15,6 +15,8 @@ global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Hosting;
 global using Microsoft.Extensions.Logging;
+global using Neuroglia.Data.Expressions.JavaScript;
+global using Neuroglia.Data.Expressions.JQ;
 global using Neuroglia.Serialization;
 global using ServerlessWorkflow.Sdk;
 global using ServerlessWorkflow.Sdk.Models;

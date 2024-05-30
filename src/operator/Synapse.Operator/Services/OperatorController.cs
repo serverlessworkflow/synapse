@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using System.Reactive.Linq;
-using static Synapse.SynapseDefaults.EnvironmentVariables;
 
 namespace Synapse.Operator.Services;
 

@@ -21,7 +21,10 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddLogging();
 builder.Services.AddSerialization();
-builder.Services.AddJsonSerializer();
+builder.Services.AddJsonSerializer(options =>
+{
+    options.WriteIndented = true;
+});
 builder.Services.AddYamlDotNetSerializer();
 builder.Services.AddScoped(provider => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 builder.Services.AddSynapseHttpApiClient(options =>

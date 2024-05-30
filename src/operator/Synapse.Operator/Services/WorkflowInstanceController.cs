@@ -39,10 +39,6 @@ public class WorkflowInstanceController(IServiceProvider serviceProvider, ILogge
     public override async Task StartAsync(CancellationToken cancellationToken)
     {
         await base.StartAsync(cancellationToken).ConfigureAwait(false);
-        foreach (var workflowInstance in this.Resources.Values.ToList())
-        {
-            await this.OnResourceCreatedAsync(workflowInstance, cancellationToken).ConfigureAwait(false);
-        }
         this.Operator!.Select(b => b.Resource.Spec.Selector).SubscribeAsync(this.OnResourceSelectorChangedAsync, cancellationToken: cancellationToken);
         await this.OnResourceSelectorChangedAsync(this.Operator!.Resource.Spec.Selector).ConfigureAwait(false);
     }
@@ -140,6 +136,7 @@ public class WorkflowInstanceController(IServiceProvider serviceProvider, ILogge
     /// <inheritdoc/>
     protected override async Task OnResourceCreatedAsync(WorkflowInstance workflowInstance, CancellationToken cancellationToken = default)
     {
+        await base.OnResourceCreatedAsync(workflowInstance, cancellationToken).ConfigureAwait(false);
         if (!await this.TryClaimAsync(workflowInstance, cancellationToken).ConfigureAwait(false)) return;
         var workflow = await this.Repository.GetAsync<Workflow>(workflowInstance.Spec.Definition.Name, workflowInstance.Spec.Definition.Namespace, cancellationToken).ConfigureAwait(false) ?? throw new NullReferenceException($"Failed to find the workflow with name '{workflowInstance.Spec.Definition.Namespace}.{workflowInstance.Spec.Definition.Name}'");
         var process = await this.Runtime.CreateProcessAsync(workflow, workflowInstance, cancellationToken).ConfigureAwait(false);
@@ -149,6 +146,7 @@ public class WorkflowInstanceController(IServiceProvider serviceProvider, ILogge
     /// <inheritdoc/>
     protected override async Task OnResourceDeletedAsync(WorkflowInstance workflowInstance, CancellationToken cancellationToken = default)
     {
+        await base.OnResourceDeletedAsync(workflowInstance, cancellationToken).ConfigureAwait(false);
         if (this.Processes.TryRemove(workflowInstance.GetQualifiedName(), out var process)) await process.DisposeAsync().ConfigureAwait(false);
     }
 

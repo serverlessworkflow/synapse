@@ -23,12 +23,12 @@ public class WorkflowOptions
     /// Gets the namespace of the workflow instance to run
     /// </summary>
     /// <returns>The namespace of the workflow instance to run</returns>
-    public virtual string GetInstanceNamespace() => this.Instance.Split('.', StringSplitOptions.RemoveEmptyEntries).First();
+    public virtual string GetInstanceNamespace() => this.Instance.Split('.', StringSplitOptions.RemoveEmptyEntries).Last();
 
     /// <summary>
     /// Gets the name of the workflow instance to run
     /// </summary>
     /// <returns>The name of the workflow instance to run</returns>
-    public virtual string GetInstanceName() => this.Instance.Split('.', StringSplitOptions.RemoveEmptyEntries).Last();
+    public virtual string GetInstanceName() => this.Instance.Split('.', StringSplitOptions.RemoveEmptyEntries).First();
 
 }

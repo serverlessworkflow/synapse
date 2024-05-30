@@ -21,13 +21,18 @@ var builder = Host.CreateDefaultBuilder()
                 options.TimestampFormat = "[HH:mm:ss] ";
             });
         });
+        services.AddSerialization();
         services.AddJsonSerializer();
         services.AddYamlDotNetSerializer();
+        services.AddJQExpressionEvaluator();
+        services.AddJavaScriptExpressionEvaluator();
         services.AddSynapseHttpApiClient(http =>
         {
             http.BaseAddress = options.Api.BaseAddress;
         });
-        services.AddHostedService<WorkflowExecutorInitializer>();
+        services.AddSingleton<ITaskExecutionContextFactory, TaskExecutionContextFactory>();
+        services.AddSingleton<ITaskExecutorFactory, TaskExecutorFactory>();
+        services.AddHostedService<RunnerApplication>();
     });
 
 using var app = builder.Build();

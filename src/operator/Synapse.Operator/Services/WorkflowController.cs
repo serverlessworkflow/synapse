@@ -1,4 +1,5 @@
 ﻿using Neuroglia.Reactive;
+using Synapse.Resources;
 using System.Reactive.Linq;
 
 namespace Synapse.Operator.Services;
@@ -133,6 +134,7 @@ public class WorkflowController(IServiceProvider serviceProvider, ILoggerFactory
     /// <inheritdoc/>
     protected override async Task OnResourceCreatedAsync(Workflow resource, CancellationToken cancellationToken = default)
     {
+        await base.OnResourceCreatedAsync(resource, cancellationToken).ConfigureAwait(false);
         var definition = resource.Spec.Versions.GetLatest();
         if (definition.Schedule == null) return;
         if (!await this.TryClaimAsync(resource, cancellationToken).ConfigureAwait(false)) return;
@@ -143,6 +145,7 @@ public class WorkflowController(IServiceProvider serviceProvider, ILoggerFactory
     /// <inheritdoc/>
     protected override async Task OnResourceUpdatedAsync(Workflow resource, CancellationToken cancellationToken = default)
     {
+        await base.OnResourceUpdatedAsync(resource, cancellationToken).ConfigureAwait(false);
         if (resource.Metadata.Labels == null || !resource.Metadata.Labels.TryGetValue(SynapseDefaults.Resources.Labels.Operator, out _)) if (!await this.TryClaimAsync(resource, cancellationToken).ConfigureAwait(false)) return;
         if (resource.Metadata.Labels?[SynapseDefaults.Resources.Labels.Operator] != this.Operator.Resource.GetQualifiedName()) return;
         if (this.Schedulers.TryRemove(resource.GetQualifiedName(), out var scheduler)) await scheduler.DisposeAsync().ConfigureAwait(false);
@@ -155,6 +158,7 @@ public class WorkflowController(IServiceProvider serviceProvider, ILoggerFactory
     /// <inheritdoc/>
     protected override async Task OnResourceDeletedAsync(Workflow resource, CancellationToken cancellationToken = default)
     {
+        await base.OnResourceDeletedAsync(resource, cancellationToken).ConfigureAwait(false);
         if (this.Schedulers.TryRemove(resource.GetQualifiedName(), out var scheduler)) await scheduler.DisposeAsync().ConfigureAwait(false);
         await foreach(var instance in this.Repository.GetAllAsync<WorkflowInstance>(cancellationToken: cancellationToken))
         {

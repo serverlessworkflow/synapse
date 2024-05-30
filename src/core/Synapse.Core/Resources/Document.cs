@@ -11,8 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using MongoDB.Bson.Serialization.Attributes;
-
 namespace Synapse.Resources;
 
 /// <summary>
@@ -38,7 +36,7 @@ public record Document
     /// Gets the document's content
     /// </summary>
     [Required]
-    [DataMember(Name = "content", Order = 3), JsonPropertyName("content"), JsonPropertyOrder(3), YamlMember(Alias = "content", Order = 3), BsonSerializer(typeof(Serialization.Bson.ObjectSerializer))]
+    [DataMember(Name = "content", Order = 3), JsonPropertyName("content"), JsonPropertyOrder(3), YamlMember(Alias = "content", Order = 3)]
     public required virtual object Content { get; set; } = null!;
 
     [IgnoreDataMember, JsonIgnore, YamlIgnore]

@@ -19359,3 +19359,7 @@ h1:focus, .h1:focus {
 .modal-confirmation .modal-footer {
   border-top: var(--bs-modal-header-border-width) solid var(--bs-modal-header-border-color) !important;
 }
+
+.h-100-px {
+  height: 100px;
+}

@@ -33,7 +33,7 @@
                             <td class="text-start">@resource.Metadata.Name</td>
                         <td class="text-center">@resource.Metadata.CreationTimestamp.ToString()</td>
                         <td class="text-center">@resource.Spec.Versions.Count</td>
-                        <td class="text-center">@resource.Spec.Versions.Last().Document.Version</td>
+                        <td class="text-center"><span class="badge rounded-pill border border-primary text-primary">@resource.Spec.Versions.Last().Document.Version</span></td>
                         <td class="text-end">
                             <button class="btn btn-outline-primary btn-sm" title="Edit '@resource.Metadata.Name'" @onclick="async _ => await OnShowResourceEditorAsync(resource)" @onclick:preventDefault @onclick:stopPropagation><Icon Name="IconName.Pencil" /></button>
                             <button class="btn btn-outline-danger btn-sm" title="Delete '@resource.Metadata.Name'" @onclick="async _ => await OnDeleteResourceAsync(resource)" @onclick:preventDefault @onclick:stopPropagation><Icon Name="IconName.Trash" /></button>

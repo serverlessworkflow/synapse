@@ -19,8 +19,9 @@
                 <th class="sticky-header text-start">Namespace</th>
                 <th class="sticky-header text-start">Name</th>
                 <th class="sticky-header text-center">Created At</th>
-                <th class="sticky-header text-center">Operator</th>
+                <th class="sticky-header text-center">Definition</th>
                 <th class="sticky-header text-center">Status</th>
+                <th class="sticky-header text-center">Operator</th>
                 <th class="sticky-header text-end"></th>
             </tr>
         </thead>
@@ -32,6 +33,8 @@
                         <td class="text-start">@resource.Metadata.Namespace</td>
                         <td class="text-start">@resource.Metadata.Name</td>
                         <td class="text-center">@resource.Metadata.CreationTimestamp.ToString()</td>
+                        <td class="text-center"><span class="badge rounded-pill border border-primary text-primary">@resource.Spec.Definition.ToString()</span></td>
+                        <td class="text-center"><span class="badge rounded-pill badge rounded-pill border @GetStatusClass(resource)">@resource.Status?.Phase</span></td>
                         <td class="text-center">
                             @if (resource.Metadata.Labels?.TryGetValue(SynapseDefaults.Resources.Labels.Operator, out var operatorName) == true && !string.IsNullOrWhiteSpace(operatorName))
                             {
@@ -42,7 +45,6 @@
                                 <span class="text-dark">-</span>
                             }
                         </td>
-                        <td class="text-center"><span class="badge rounded-pill @GetStatusClass(resource)">@resource.Status?.Phase</span></td>
                         <td class="text-end">
                             <button class="btn btn-outline-primary btn-sm" title="Edit '@resource.Metadata.Name'" @onclick="async _ => await OnShowResourceEditorAsync(resource)" @onclick:preventDefault @onclick:stopPropagation><Icon Name="IconName.Pencil" /></button>
                             <button class="btn btn-outline-danger btn-sm" title="Delete '@resource.Metadata.Name'" @onclick="async _ => await OnDeleteResourceAsync(resource)" @onclick:preventDefault @onclick:stopPropagation><Icon Name="IconName.Trash" /></button>
@@ -68,13 +70,24 @@
     {
         return instance.Status?.Phase switch
         {
-            WorkflowInstanceStatusPhase.Pending => "bg-secondary",
-            WorkflowInstanceStatusPhase.Running => "bg-primary",
-            WorkflowInstanceStatusPhase.Faulted => "bg-danger",
-            WorkflowInstanceStatusPhase.Cancelled => "bg-warning",
-            WorkflowInstanceStatusPhase.Completed => "bg-success",
-            _ => "bg-secondary"
+            WorkflowInstanceStatusPhase.Pending => "border-secondary text-secondary",
+            WorkflowInstanceStatusPhase.Running => "border-primary text-primary",
+            WorkflowInstanceStatusPhase.Faulted => "border-danger text-danger",
+            WorkflowInstanceStatusPhase.Cancelled => "border-warning text-warning",
+            WorkflowInstanceStatusPhase.Completed => "border-success text-success",
+            _ => "border-secondary text-secondary"
         };
+    }
+
+    
+    Task OnShowResourceDetailsAsync(WorkflowInstance workflowInstance)
+    {
+        if (this.DetailsOffCanvas == null) return Task.CompletedTask;
+        var parameters = new Dictionary<string, object>
+        {
+            { nameof(WorkflowInstanceDetails.WorkflowInstance), workflowInstance }
+        };
+        return this.DetailsOffCanvas.ShowAsync<WorkflowInstanceDetails>(title: workflowInstance.GetName(), parameters: parameters);
     }
 
 }

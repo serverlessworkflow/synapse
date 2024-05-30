@@ -31,7 +31,7 @@
                         <td class="text-start">@resource.Metadata.Namespace</td>
                         <td class="text-start">@resource.Metadata.Name</td>
                         <td class="text-center">@resource.Metadata.CreationTimestamp.ToString()</td>
-                        <td class="text-center"><span class="badge rounded-pill @GetStatusClass(resource)">@resource.Status?.Phase</span></td>
+                        <td class="text-center"><span class="badge rounded-pill border border-@GetStatusClass(resource)">@resource.Status?.Phase</span></td>
                         <td class="text-end">
                             <button class="btn btn-outline-primary btn-sm" title="Edit '@resource.Metadata.Name'" @onclick="async _ => await OnShowResourceEditorAsync(resource)" @onclick:preventDefault @onclick:stopPropagation><Icon Name="IconName.Pencil" /></button>
                             <button class="btn btn-outline-danger btn-sm" title="Delete '@resource.Metadata.Name'" @onclick="async _ => await OnDeleteResourceAsync(resource)" @onclick:preventDefault @onclick:stopPropagation><Icon Name="IconName.Trash" /></button>
@@ -57,9 +57,9 @@
     {
         return @operator.Status?.Phase switch
         {
-            OperatorStatusPhase.Running => "bg-primary",
-            OperatorStatusPhase.Stopped => "bg-danger",
-            _ => "bg-secondary"
+            OperatorStatusPhase.Running => "primary",
+            OperatorStatusPhase.Stopped => "danger",
+            _ => "secondary"
         };
     }
 

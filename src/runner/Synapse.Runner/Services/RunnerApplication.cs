@@ -8,21 +8,27 @@ namespace Synapse.Runner.Services;
 /// Represents a service used to initialize the current <see cref="IWorkflowExecutor"/>
 /// </summary>
 /// <param name="serviceProvider">The current <see cref="IServiceProvider"/></param>
-/// <param name="apiClient">The service used to interact with the Synapse API</param>
 /// <param name="options">The service used to access the current <see cref="RunnerOptions"/></param>
-public class WorkflowExecutorInitializer(IServiceProvider serviceProvider, ISynapseApiClient apiClient, IOptions<RunnerOptions> options)
-    : IHostedService
+internal class RunnerApplication(IServiceProvider serviceProvider, IOptions<RunnerOptions> options)
+    : IHostedService, IDisposable
 {
+
+    bool _disposed;
+
+    /// <summary>
+    /// Gets the current <see cref="IServiceScope"/>
+    /// </summary>
+    protected IServiceScope ServiceScope { get; } = serviceProvider.CreateScope();
 
     /// <summary>
     /// Gets the current <see cref="IServiceProvider"/>
     /// </summary>
-    protected IServiceProvider ServiceProvider { get; } = serviceProvider;
+    protected IServiceProvider ServiceProvider => this.ServiceScope.ServiceProvider;
 
     /// <summary>
     /// Gets the service used to interact with the Synapse API
     /// </summary>
-    protected ISynapseApiClient ApiClient { get; } = apiClient;
+    protected ISynapseApiClient ApiClient => this.ServiceProvider.GetRequiredService<ISynapseApiClient>();
 
     /// <summary>
     /// Gets the service used to access the current <see cref="RunnerOptions"/>
@@ -59,6 +65,24 @@ public class WorkflowExecutorInitializer(IServiceProvider serviceProvider, ISyna
             await this.Executor.DisposeAsync().ConfigureAwait(false);
             this.Executor = null;
         }
+    }
+
+    /// <summary>
+    /// Disposes of the <see cref="RunnerApplication"/>
+    /// </summary>
+    /// <param name="disposing">A boolean indicating whether or not the <see cref="RunnerApplication"/> is being disposed of</param>
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!disposing || this._disposed) return;
+        this.ServiceScope.Dispose();
+        this._disposed = true;
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        this.Dispose(true);
+        GC.SuppressFinalize(this);
     }
 
 }

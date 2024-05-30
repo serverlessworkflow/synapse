@@ -1,0 +1,202 @@
+﻿@inject NavigationManager Navigation
+@inject IMonacoEditorHelper MonacoEditorHelper
+@inject IJSRuntime JSRuntime
+@inject Synapse.Api.Client.Services.ISynapseApiClient Api
+@inject IJsonSerializer Serializer
+
+@namespace Synapse.Dashboard.Components
+
+<div class="card mb-3">
+    <h5 class="card-header">Metadata</h5>
+    <div class="card-body">
+        <table class="table table-striped mb-3">
+            <tbody>
+                <tr>
+                    <td>Name</td>
+                    <td>@workflowInstance?.GetName()</td>
+                </tr>
+                <tr>
+                    <td>Namespace</td>
+                    <td>@workflowInstance?.GetNamespace()</td>
+                </tr>
+                <tr>
+                    <td>Created At</td>
+                    <td>@workflowInstance?.Metadata.CreationTimestamp?.ToString("R")</td>
+                </tr>
+                <tr>
+                    <td>Generation</td>
+                    <td>@workflowInstance?.Metadata.Generation</td>
+                </tr>
+                <tr>
+                    <td>Labels</td>
+                    <td>
+                        @if (workflowInstance?.Metadata.Labels?.Any() == true)
+                        {
+                            foreach (var label in workflowInstance.Metadata.Labels)
+                            {
+                                <span class="badge bg-primary text-dark m-1">@label.Key: @label.Value</span>
+                            }
+                        }
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <h5 class="card-header">Spec</h5>
+    <div class="card-body">
+        <table class="table table-striped mb-3">
+            <tbody>
+                <tr>
+                    <td>Definition</td>
+                    <td><a href="#" @onclick="OnNavigateToDefinition">@workflowInstance!.Definition.ToString()</a></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <h5 class="card-header">Status</h5>
+    <div class="card-body">
+        <table class="table table-striped mb-3">
+            <tbody>
+                <tr>
+                    <td>Phase</td>
+                    <td><span class="badge rounded-pill badge rounded-pill border @GetStatusClass()">@workflowInstance.Status?.Phase</span></td>
+                </tr>
+                <tr>
+                    <td>Context Data</td>
+                    <td><a href="#" @onclick:preventDefault>Load</a></td>
+                </tr>
+                <tr>
+                    <td>Output</td>
+                    <td><a href="#" @onclick="LoadOutputAsync" @onclick:preventDefault>Load</a></td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <PreferredLanguageSelector PreferedLanguageChange="ToggleTextBasedEditorLanguageAsync" />
+                        <StandaloneCodeEditor @ref="textBasedEditor"
+                                              ConstructionOptions="MonacoEditorHelper.GetStandaloneEditorConstructionOptions(this.textEditorValue, false, this.MonacoEditorHelper.PreferredLanguage)"
+                                              OnDidInit="OnTextBasedEditorInitAsync"
+                                              OnDidChangeModelContent="OnTextBasedValueChangedAsync"
+                                              CssClass="h-100-px" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>Error</td>
+                    <td>@workflowInstance.Status?.Error</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+
+    bool contextLoaded;
+    bool outputLoaded;
+    StandaloneCodeEditor? textBasedEditor;
+    WorkflowInstance? workflowInstance;
+    TextModel? textEditorModel;
+    Subject<string> textEditorInput = new();
+    string textEditorValue = string.Empty;
+    bool updating = false;
+
+    /// <summary>
+    /// Gets/sets the workflow instance to display details about
+    /// </summary>
+    [Parameter] public WorkflowInstance? WorkflowInstance { get; set; }
+
+    string GetStatusClass()
+    {
+        return this.workflowInstance?.Status?.Phase switch
+        {
+            WorkflowInstanceStatusPhase.Pending => "border-secondary text-secondary",
+            WorkflowInstanceStatusPhase.Running => "border-primary text-primary",
+            WorkflowInstanceStatusPhase.Faulted => "border-danger text-danger",
+            WorkflowInstanceStatusPhase.Cancelled => "border-warning text-warning",
+            WorkflowInstanceStatusPhase.Completed => "border-success text-success",
+            _ => "border-secondary text-secondary"
+        };
+    }
+
+    void OnNavigateToDefinition()
+    {
+        if (this.workflowInstance == null) return;
+        this.Navigation.NavigateTo($"/workflows/{this.workflowInstance.Spec.Definition.Namespace}/{this.workflowInstance.Spec.Definition.Name}/{this.workflowInstance.Spec.Definition.Version}");
+    }
+
+    async Task LoadOutputAsync()
+    {
+        if (string.IsNullOrWhiteSpace(this.workflowInstance?.Status?.OutputReference)) return;
+        var document = await this.Api.WorkflowData.GetAsync(this.workflowInstance.Status.OutputReference);
+        this.outputLoaded = true;
+        this.StateHasChanged();
+        var json = this.Serializer.SerializeToText(document.Content);
+        await this.textBasedEditor.SetValue(json);
+    }
+
+    async Task SetTextEditorValueAsync()
+    {
+        if (this.textBasedEditor != null)
+        {
+            var editorText = await this.textBasedEditor.GetValue();
+            if (this.textEditorValue != editorText) await this.textBasedEditor.SetValue(this.textEditorValue);
+        }
+    }
+
+    async Task SetTextBasedEditorLanguageAsync()
+    {
+        if (this.textBasedEditor != null && this.textEditorModel != null)
+        {
+            await Global.SetModelLanguage(this.JSRuntime, this.textEditorModel, this.MonacoEditorHelper.PreferredLanguage);
+        }
+    }
+
+    async Task ToggleTextBasedEditorLanguageAsync(string language)
+    {
+        var model = await this.textBasedEditor!.GetModel();
+        var editorLanguage = await model.GetLanguageId();
+        if (editorLanguage != language)
+        {
+            await this.SetTextBasedEditorLanguageAsync();
+        }
+    }
+
+    async Task OnTextBasedEditorInitAsync()
+    {
+        var resourceUri = $"inmemory://{typeof(WorkflowInstance).Name.ToLower()}";
+        this.textEditorModel = await Global.GetModel(this.JSRuntime, resourceUri);
+        if (this.textEditorModel == null)
+        {
+            this.textEditorModel = await Global.CreateModel(this.JSRuntime, this.textEditorValue, this.MonacoEditorHelper.PreferredLanguage, resourceUri);
+            await this.textBasedEditor!.SetModel(this.textEditorModel);
+        }
+        else
+        {
+            await this.SetTextEditorValueAsync();
+            await this.SetTextBasedEditorLanguageAsync();
+        }
+        this.StateHasChanged();
+    }
+
+    async Task OnTextBasedValueChangedAsync(ModelContentChangedEvent e)
+    {
+        if (!this.updating && this.textBasedEditor != null && this.textEditorInput != null)
+        {
+            var text = await this.textBasedEditor.GetValue();
+            this.textEditorInput.OnNext(text);
+        }
+    }
+
+    /// <inheritdoc/>
+    protected override Task OnParametersSetAsync()
+    {
+        if (this.workflowInstance != this.WorkflowInstance) this.workflowInstance = this.WorkflowInstance;
+        return base.OnParametersSetAsync();
+    }
+
+}

@@ -44,7 +44,7 @@ public class NativeRuntime(ILoggerFactory loggerFactory, IHostEnvironment enviro
         if (this.Options.Runtime.Native == null) throw new NullReferenceException("The native runtime must be configured");
         var fileName = this.Options.Runtime.Native.Executable;
         var args = string.Empty;
-        if (this.Environment.IsDevelopment()) args += "--debug";
+        //if (this.Environment.IsDevelopment()) args += "--debug";
         var startInfo = new ProcessStartInfo()
         {
             FileName = fileName,
@@ -57,7 +57,7 @@ public class NativeRuntime(ILoggerFactory loggerFactory, IHostEnvironment enviro
         };
         startInfo.Environment.Add(SynapseDefaults.EnvironmentVariables.Api.Uri, this.Options.Api.Uri.OriginalString);
         startInfo.Environment.Add(SynapseDefaults.EnvironmentVariables.Workflow.Instance, workflowInstance.GetQualifiedName());
-        if (!this.Options.Certificates.Validate) startInfo.Environment.Add(SynapseDefaults.EnvironmentVariables.SkipCertificateValidation, "true");
+        if (this.Options.Certificates?.Validate == false) startInfo.Environment.Add(SynapseDefaults.EnvironmentVariables.SkipCertificateValidation, "true");
         var process = new Process()
         {
             StartInfo = startInfo,

@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Neuroglia.Data.Infrastructure;
-using Neuroglia.Data.Infrastructure.Mongo.Services;
+using Neuroglia.Data.Infrastructure.Redis.Services;
 using Neuroglia.Data.Infrastructure.ResourceOriented.Redis;
 using Neuroglia.Data.Infrastructure.ResourceOriented.Services;
 using Neuroglia.Data.Infrastructure.Services;
@@ -33,8 +33,8 @@ public static class IServiceCollectionExtensions
         services.AddSerialization();
         services.AddJsonSerializer();
         services.AddYamlDotNetSerializer();
-        services.AddScoped<IUserInfoProvider, UserInfoProvider>();
         services.AddMediator();
+        services.AddScoped<IUserInfoProvider, UserInfoProvider>();
         services.AddServerlessWorkflowIO();
         services.AddPluginProvider();
 
@@ -44,9 +44,8 @@ public static class IServiceCollectionExtensions
         if (!string.IsNullOrWhiteSpace(redisConnectionString)) services.AddRedisDatabase(redisConnectionString, ServiceLifetime.Singleton);
         services.AddHostedService<Core.Infrastructure.Services.DatabaseInitializer>();
 
-        services.AddPlugin(typeof(IRepository<Document>), provider => provider.GetRequiredService<MongoRepository<Document, string>>(), serviceLifetime: ServiceLifetime.Scoped);
-        services.AddMongoDatabase("synapse");
-        services.AddMongoRepository<Document, string>(lifetime: ServiceLifetime.Scoped);
+        services.AddPlugin(typeof(IRepository<Document>), provider => provider.GetRequiredService<RedisRepository<Document, string>>(), serviceLifetime: ServiceLifetime.Scoped);
+        services.AddRedisRepository<Document, string>(lifetime: ServiceLifetime.Scoped);
 
         services.AddScoped<IResourceRepository, ResourceRepository>();
         services.AddScoped<IAdmissionControl, AdmissionControl>();
