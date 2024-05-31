@@ -2,6 +2,8 @@ FROM mcr.microsoft.com/dotnet/runtime:8.0 AS base
 USER root
 RUN apt-get update
 RUN apt-get install -y jq
+RUN apt-get install -y nodejs
+RUN apt-get install -y python3
 USER app
 WORKDIR /app
 

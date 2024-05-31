@@ -39,6 +39,8 @@ var builder = Host.CreateDefaultBuilder()
         services.AddYamlDotNetSerializer();
         services.AddJQExpressionEvaluator();
         services.AddJavaScriptExpressionEvaluator();
+        services.AddNodeJSScriptExecutor();
+        services.AddPythonScriptExecutor();
         services.AddSynapseHttpApiClient(http =>
         {
             http.BaseAddress = options.Api.BaseAddress;
