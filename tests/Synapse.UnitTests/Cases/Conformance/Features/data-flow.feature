@@ -31,7 +31,7 @@ Feature: Data Flow
     """
     
   # Tests task output filtering 
-  Scenario: Output Filteing
+  Scenario: Output Filtering
     Given a workflow with definition:
     """yaml
     document:
@@ -88,4 +88,38 @@ Feature: Data Flow
     Then the workflow should complete with output:
     """yaml
     ids: [ 1, 2 ]
+    """
+
+  # Tests using and updating the context data
+  Scenario: Use and Update Context
+    Given a workflow with definition:
+    """yaml
+    document:
+      dsl: 1.0.0-alpha1
+      namespace: default
+      name: use-and-update-context
+    do:
+      setRed:
+        set:
+          color: red
+        output:
+          to: .colors += [ $output.color ]
+      setGreen:
+        set:
+          color: green
+        output:
+          to: .colors += [ $output.color ]
+      setBlue:
+        set:
+          color: blue
+        output:
+          to: .colors += [ $output.color ]
+      setColors:
+        set:
+          colors: ${ $context.colors }
+    """
+    When the workflow is executed
+    Then the workflow should complete with output:
+    """yaml
+    colors: [ red, green, blue ]
     """

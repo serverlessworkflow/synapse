@@ -75,8 +75,8 @@ public class ForTaskExecutor(IServiceProvider serviceProvider, ILogger<ForTaskEx
             return;
         }
         var item = this.Collection.ElementAt(index);
-        if (task == null) task = await this.Task.Workflow.CreateTaskAsync(this.Task.Definition.Do, this.GetPathFor("0"), this.Task.Input, this.Task, false, cancellationToken).ConfigureAwait(false);
-        else if(!task.IsOperative) task = await this.Task.Workflow.CreateTaskAsync(this.Task.Definition.Do, this.GetPathFor($"{index + 1}"), this.Task.Input, this.Task, false, cancellationToken).ConfigureAwait(false);
+        if (task == null) task = await this.Task.Workflow.CreateTaskAsync(this.Task.Definition.Do, this.GetPathFor("0"), this.Task.Input, null, this.Task, false, cancellationToken).ConfigureAwait(false);
+        else if(!task.IsOperative) task = await this.Task.Workflow.CreateTaskAsync(this.Task.Definition.Do, this.GetPathFor($"{index + 1}"), this.Task.Input, null, this.Task, false, cancellationToken).ConfigureAwait(false);
         var contextData = this.Task.ContextData.Clone()!;
         var arguments = this.Task.Arguments.Clone()!;
         arguments[this.Task.Definition.For.Each ?? RuntimeExpressions.Arguments.Each] = item;
@@ -124,7 +124,7 @@ public class ForTaskExecutor(IServiceProvider serviceProvider, ILogger<ForTaskEx
         switch (executor.Task.Instance.Next)
         {
             case FlowDirective.Continue:
-                var next = await this.Task.Workflow.CreateTaskAsync(this.Task.Definition.Do, this.GetPathFor(index.ToString()), output, this.Task, false, cancellationToken).ConfigureAwait(false);
+                var next = await this.Task.Workflow.CreateTaskAsync(this.Task.Definition.Do, this.GetPathFor(index.ToString()), output, null, this.Task, false, cancellationToken).ConfigureAwait(false);
                 var item = this.Collection.ElementAt(index);
                 var contextData = this.Task.ContextData.Clone()!;
                 var arguments = this.Task.Arguments.Clone()!;

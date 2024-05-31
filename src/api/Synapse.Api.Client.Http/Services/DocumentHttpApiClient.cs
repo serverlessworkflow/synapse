@@ -73,6 +73,26 @@ public class DocumentHttpApiClient(ILogger<DocumentHttpApiClient> logger, IJsonS
         return this.JsonSerializer.Deserialize<Document>(json)!;
     }
 
+    /// <inheritdoc/>
+    public virtual async Task UpdateAsync(string id, object content, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(id);
+        var json = this.JsonSerializer.SerializeToText(content);
+        using var requestContent = new StringContent(json, Encoding.UTF8, MediaTypeNames.Application.Json);
+        var uri = $"api/v1/workflow-data/{id}";
+        using var request = await this.ProcessRequestAsync(new HttpRequestMessage(HttpMethod.Put, uri) { Content = requestContent }, cancellationToken).ConfigureAwait(false);
+        using var response = await this.ProcessResponseAsync(await this.HttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false), cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public virtual async Task DeletesAsync(string id, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(id);
+        var uri = $"api/v1/workflow-data/{id}";
+        using var request = await this.ProcessRequestAsync(new HttpRequestMessage(HttpMethod.Delete, uri), cancellationToken).ConfigureAwait(false);
+        using var response = await this.ProcessResponseAsync(await this.HttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false), cancellationToken).ConfigureAwait(false);
+    }
+
     /// <summary>
     /// Processes the specified <see cref="HttpRequestMessage"/> before sending it
     /// </summary>

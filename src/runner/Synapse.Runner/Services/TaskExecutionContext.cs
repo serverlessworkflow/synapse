@@ -41,10 +41,10 @@ public class TaskExecutionContext<TDefinition>(IWorkflowExecutionContext workflo
     public virtual object Input => input;
 
     /// <inheritdoc/>
-    public virtual IDictionary<string, object> ContextData => contextData;
+    public virtual IDictionary<string, object> ContextData { get; protected set; } = contextData;
 
     /// <inheritdoc/>
-    public virtual IDictionary<string, object> Arguments => arguments;
+    public virtual IDictionary<string, object> Arguments { get; protected set; } = arguments;
 
     /// <inheritdoc/>
     public virtual object? Output { get; protected set; }
@@ -99,9 +99,18 @@ public class TaskExecutionContext<TDefinition>(IWorkflowExecutionContext workflo
     }
 
     /// <inheritdoc/>
+    public virtual async Task SetContextDataAsync(IDictionary<string, object> context, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        if (string.IsNullOrWhiteSpace(this.Instance.ContextReference)) throw new NullReferenceException($"The context reference of the task '{this.Instance.Reference}' must be set");
+        await this.Workflow.SetWorkflowDataAsync(this.Instance.ContextReference, context, cancellationToken).ConfigureAwait(false);
+        this.ContextData = context;
+    }
+
+    /// <inheritdoc/>
     public virtual async Task CancelAsync(CancellationToken cancellationToken = default)
     {
         this.Instance = await this.Workflow.CancelAsync(this.Instance, cancellationToken);
-    } 
+    }
 
 }

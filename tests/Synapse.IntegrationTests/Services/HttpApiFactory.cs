@@ -26,12 +26,7 @@ public class HttpApiFactory
     {
         builder.ConfigureServices((context, services) =>
         {
-            var container = MongoContainerBuilder.Build();
-            container.StartAsync().GetAwaiter().GetResult();
-            services.AddSingleton(container);
-            context.Configuration.GetSection("ConnectionStrings").GetSection("mongo").Value = $"mongodb://{MongoContainerBuilder.DefaultUserName}:{MongoContainerBuilder.DefaultPassword}@localhost:{container.GetMappedPublicPort(MongoContainerBuilder.PublicPort)}";
-
-            container = RedisContainerBuilder.Build();
+            var container = RedisContainerBuilder.Build();
             container.StartAsync().GetAwaiter().GetResult();
             services.AddSingleton(container);
             context.Configuration.GetSection("ConnectionStrings").GetSection("redis").Value = "redis:6379";

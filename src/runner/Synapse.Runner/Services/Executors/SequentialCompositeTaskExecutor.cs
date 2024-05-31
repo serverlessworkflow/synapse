@@ -67,7 +67,7 @@ public class SequentialCompositeTaskExecutor(IServiceProvider serviceProvider, I
             return;
         }
         var input = last == null ? this.Task.Input : (await this.Task.Workflow.Documents.GetAsync(last.OutputReference!, cancellationToken).ConfigureAwait(false))!;
-        var next = await this.Task.Workflow.CreateTaskAsync(nextDefinition.Value, this.GetPathFor(nextDefinition.Key), input, this.Task, false, cancellationToken).ConfigureAwait(false);
+        var next = await this.Task.Workflow.CreateTaskAsync(nextDefinition.Value, this.GetPathFor(nextDefinition.Key), input, null, this.Task, false, cancellationToken).ConfigureAwait(false);
         var executor = await this.CreateTaskExecutorAsync(next, nextDefinition.Value, this.Task.ContextData, this.Task.Arguments, cancellationToken).ConfigureAwait(false);
         await executor.ExecuteAsync(cancellationToken).ConfigureAwait(false);
     }
@@ -116,7 +116,7 @@ public class SequentialCompositeTaskExecutor(IServiceProvider serviceProvider, I
                 await this.SetResultAsync(output, this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
                 break;
             default:
-                next = await this.Task.Workflow.CreateTaskAsync(nextDefinition.Value, this.GetPathFor(nextDefinition.Key), output, this.Task, false, cancellationToken).ConfigureAwait(false);
+                next = await this.Task.Workflow.CreateTaskAsync(nextDefinition.Value, this.GetPathFor(nextDefinition.Key), output, null, this.Task, false, cancellationToken).ConfigureAwait(false);
                 var nextExecutor = await this.CreateTaskExecutorAsync(next, nextDefinition.Value, this.Task.ContextData, this.Task.Arguments, cancellationToken).ConfigureAwait(false);
                 await nextExecutor.ExecuteAsync(cancellationToken).ConfigureAwait(false);
                 break;

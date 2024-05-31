@@ -36,4 +36,21 @@ public interface IDocumentApiClient
     /// <returns>The <see cref="Document"/> with the specified id</returns>
     Task<Document> GetAsync(string id, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Updates the contents of the <see cref="Document"/> with the specified id
+    /// </summary>
+    /// <param name="id">The id of the <see cref="Document"/> to update the content of</param>
+    /// <param name="content">The <see cref="Document"/>'s content</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>The <see cref="Document"/> with the specified id</returns>
+    Task UpdateAsync(string id, object content, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Deletes the <see cref="Document"/> with the specified id
+    /// </summary>
+    /// <param name="id">The id of the <see cref="Document"/> to delete</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>The <see cref="Document"/> with the specified id</returns>
+    Task DeletesAsync(string id, CancellationToken cancellationToken = default);
+
 }

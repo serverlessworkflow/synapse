@@ -61,7 +61,7 @@ public class ConcurrentCompositeTaskExecutor(IServiceProvider serviceProvider, I
             ? tasks.Where(t => t.IsOperative)
             : this.Tasks
                 .ToAsyncEnumerable()
-                .SelectAwait(async kvp => await this.Task.Workflow.CreateTaskAsync(kvp.Value, this.GetPathFor(kvp.Key), this.Task.Input, this.Task, false, cancellationToken).ConfigureAwait(false));
+                .SelectAwait(async kvp => await this.Task.Workflow.CreateTaskAsync(kvp.Value, this.GetPathFor(kvp.Key), this.Task.Input, null, this.Task, false, cancellationToken).ConfigureAwait(false));
         await System.Threading.Tasks.Task.WhenAll(await tasks
             .SelectAwait(async task =>
             {

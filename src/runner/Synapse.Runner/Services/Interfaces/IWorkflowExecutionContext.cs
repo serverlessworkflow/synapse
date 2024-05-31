@@ -77,11 +77,12 @@ public interface IWorkflowExecutionContext
     /// <param name="definition">The <see cref="TaskDefinition"/> of the <see cref="TaskInstance"/> to create</param>
     /// <param name="path">The path used to reference the <see cref="TaskDefinition"/> of the <see cref="TaskInstance"/> to create</param>
     /// <param name="input">The input data, if any</param>
+    /// <param name="context">The task's context data, if any. If not set, the task will inherit its parent's context data</param>
     /// <param name="parent">The parent of the <see cref="TaskInstance"/> to create, if any</param>
     /// <param name="isExtension">Indicates whether or not the task is part of an extension</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>The updated <see cref="TaskInstance"/></returns>
-    Task<TaskInstance> CreateTaskAsync(TaskDefinition definition, string path, object input, ITaskExecutionContext? parent = null, bool isExtension = false, CancellationToken cancellationToken = default);
+    Task<TaskInstance> CreateTaskAsync(TaskDefinition definition, string path, object input, IDictionary<string, object>? context = null, ITaskExecutionContext? parent = null, bool isExtension = false, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets the workflow's tasks
@@ -202,6 +203,15 @@ public interface IWorkflowExecutionContext
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>The updated <see cref="TaskInstance"/></returns>
     Task<TaskInstance> SetResultAsync(TaskInstance task, object? result, string? then = FlowDirective.Continue, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Sets the specified workflow data
+    /// </summary>
+    /// <param name="reference">A reference to the workflow data to update</param>
+    /// <param name="data">The updated workflow data</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>A new awaitable <see cref="Task"/></returns>
+    Task SetWorkflowDataAsync(string reference, object data, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Cancels the workflow's execution

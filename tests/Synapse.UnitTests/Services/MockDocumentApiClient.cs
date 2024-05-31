@@ -16,12 +16,21 @@ using Synapse.Api.Client.Services;
 
 namespace Synapse.UnitTests.Services;
 
-internal class MockDocumentApiClient(IRepository<Document> documents)
+internal class MockDocumentApiClient(IRepository<Document, string> documents)
     : IDocumentApiClient
 {
 
     public Task<Document> CreateAsync(string name, object? content, CancellationToken cancellationToken = default) => documents.AddAsync(new() { Name = name, Content = content! }, cancellationToken);
 
     public Task<Document> GetAsync(string id, CancellationToken cancellationToken = default) => documents.GetAsync(id, cancellationToken)!;
+
+    public async Task UpdateAsync(string id, object content, CancellationToken cancellationToken = default)
+    {
+        var document = await documents.GetAsync(id, cancellationToken) ?? throw new NullReferenceException($"Failed to find a document with the specified id '{id}'");
+        document.Content = content;
+        await documents.UpdateAsync(document, cancellationToken);
+    }
+
+    public Task DeletesAsync(string id, CancellationToken cancellationToken = default) => documents.RemoveAsync(id, cancellationToken);
 
 }

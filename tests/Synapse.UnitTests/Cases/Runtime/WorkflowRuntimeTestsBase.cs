@@ -13,7 +13,6 @@
 
 using Docker.DotNet;
 using Microsoft.Extensions.Hosting;
-using MongoDB.Driver;
 using Moq;
 using Neuroglia.Data.Expressions.JQ;
 using Neuroglia.Data.Infrastructure;
@@ -68,18 +67,13 @@ public abstract class WorkflowRuntimeTestsBase
                 services.AddScoped<Neuroglia.Data.Infrastructure.ResourceOriented.Services.IDatabase, RedisDatabase>();
                 services.AddHostedService<Core.Infrastructure.Services.DatabaseInitializer>();
                 services.AddScoped<IResourceRepository, ResourceRepository>();
-                services.AddKeyedSingleton("mongo", MongoContainerBuilder.Build());
-                services.AddSingleton(provider => provider.GetRequiredKeyedService<DotNet.Testcontainers.Containers.IContainer>("mongo"));
-                services.AddSingleton<IMongoClient>(provider => new MongoClient(MongoClientSettings.FromConnectionString($"mongodb://{MongoContainerBuilder.DefaultUserName}:{MongoContainerBuilder.DefaultPassword}@localhost:{provider.GetRequiredKeyedService<DotNet.Testcontainers.Containers.IContainer>("mongo").GetMappedPublicPort(MongoContainerBuilder.PublicPort)}")));
-                services.AddMongoDatabase("test");
-                services.AddMongoRepository<Document, string>(lifetime: ServiceLifetime.Scoped);
+                services.AddRedisRepository<Document, string>(lifetime: ServiceLifetime.Scoped);
                 services.AddSingleton<ISynapseApiClient, MockSynapseApiClient>();
                 services.AddSingleton(new Mock<IUserInfoProvider>().Object);
                 services.AddServerlessWorkflowIO();
                 this.ConfigureServices(services);
             })
             .Build();
-
     }
 
     protected IHost Host { get; }

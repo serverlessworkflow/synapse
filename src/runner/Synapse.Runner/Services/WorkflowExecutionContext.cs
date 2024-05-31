@@ -50,7 +50,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
     /// <summary>
     /// Gets the service used to interact with the Synapse API
     /// </summary>
-    protected ISynapseApiClient SynapseApi { get; } = cloudFlowsApi;
+    protected ISynapseApiClient Api { get; } = cloudFlowsApi;
 
     /// <inheritdoc/>
     public WorkflowDefinition Definition { get; } = definition;
@@ -59,7 +59,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
     public WorkflowInstance Instance { get; set; } = instance;
 
     /// <inheritdoc/>
-    public IDocumentApiClient Documents => this.SynapseApi.WorkflowData;
+    public IDocumentApiClient Documents => this.Api.WorkflowData;
 
     /// <summary>
     /// Gets the object used to asynchronously lock the <see cref="TaskExecutor{TDefinition}"/>
@@ -67,10 +67,10 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
     protected AsyncLock Lock { get; } = new();
 
     /// <inheritdoc/>
-    public IDictionary<string, object> ContextData { get; } = new Dictionary<string, object>();
+    public IDictionary<string, object> ContextData { get; protected set; } = new Dictionary<string, object>();
 
     /// <inheritdoc/>
-    public IDictionary<string, object> Arguments { get; } = new Dictionary<string, object>();
+    public IDictionary<string, object> Arguments { get; protected set; } = new Dictionary<string, object>();
 
     /// <inheritdoc/>
     public object? Output { get; protected set; }
@@ -79,24 +79,42 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
     public virtual Task ContinueWith(TaskDefinition task, CancellationToken cancellationToken = default) => Task.CompletedTask;
 
     /// <inheritdoc/>
-    public virtual async Task<TaskInstance> CreateTaskAsync(TaskDefinition definition, string path, object input, ITaskExecutionContext? parent = null, bool isExtension = false, CancellationToken cancellationToken = default)
+    public virtual async Task<TaskInstance> CreateTaskAsync(TaskDefinition definition, string path, object input, IDictionary<string, object>? context = null, ITaskExecutionContext? parent = null, bool isExtension = false, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(definition);
         using var @lock = await this.Lock.LockAsync(cancellationToken).ConfigureAwait(false);
         input ??= new();
         var reference = this.Definition.BuildReferenceTo(definition, path, parent?.Instance.Reference);
-        var contextData = parent?.ContextData
-            ?? (string.IsNullOrWhiteSpace(Instance.Status?.ContextReference) ? new { } : (await this.SynapseApi.WorkflowData.GetAsync(this.Instance.Status!.ContextReference, cancellationToken).ConfigureAwait(false))?.Content)
-            ?? throw new NullReferenceException($"Failed to find the data document with id '{this.Instance.Status!.ContextReference}'");
+        var contextReference = string.Empty;
+        if (context == null)
+        {
+            if(parent?.ContextData != null)
+            {
+                contextReference = parent.Instance.ContextReference;
+                context = parent.ContextData;
+            }
+            else if(!string.IsNullOrWhiteSpace(this.Instance.Status?.ContextReference))
+            {
+                contextReference = this.Instance.Status?.ContextReference;
+                var contextDocument = await this.Api.WorkflowData.GetAsync(this.Instance.Status!.ContextReference, cancellationToken).ConfigureAwait(false);
+                context = contextDocument?.Content.ConvertTo<IDictionary<string, object>>() ?? new Dictionary<string, object>();
+            }
+            else throw new NullReferenceException($"Failed to find the data document with id '{this.Instance.Status!.ContextReference}'");
+        }
+        else
+        {
+            var contextDocument = await this.Api.WorkflowData.CreateAsync($"{reference}/input", context, cancellationToken).ConfigureAwait(false);
+            contextReference = contextDocument.Id;
+        }
         var filteredInput = input;
         var evaluationArguments = new Dictionary<string, object>()
         {
             { RuntimeExpressions.Arguments.Workflow, Instance },
-            { RuntimeExpressions.Arguments.Context, contextData }
+            { RuntimeExpressions.Arguments.Context, context }
         };
         if (definition.Input?.From is string fromExpression) filteredInput = (await this.Expressions.EvaluateAsync<object>(fromExpression, input, evaluationArguments, cancellationToken).ConfigureAwait(false))!;
         else if (definition.Input?.From != null) filteredInput = (await this.Expressions.EvaluateAsync<object>(definition.Input.From, input, evaluationArguments, cancellationToken).ConfigureAwait(false))!;
-        var inputDocument = await this.SynapseApi.WorkflowData.CreateAsync($"{reference}/input", filteredInput, cancellationToken).ConfigureAwait(false);
+        var inputDocument = await this.Api.WorkflowData.CreateAsync($"{reference}/input", filteredInput, cancellationToken).ConfigureAwait(false);
         var task = new TaskInstance()
         {
             Name = path.Split('/', StringSplitOptions.RemoveEmptyEntries).Last(),
@@ -104,24 +122,25 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
             IsExtension = isExtension,
             ParentId = parent?.Instance.Id,
             InputReference = inputDocument.Id,
+            ContextReference = contextReference
         };
         var pointer = JsonPointer.Create<WorkflowInstance>(w => w.Status!.Tasks!).ToCamelCase();
         if (this.Instance.Status?.Tasks != null) pointer = JsonPointer.Parse($"{pointer}/-");
         var patchNode = this.Instance.Status?.Tasks == null ? this.JsonSerializer.SerializeToNode(new TaskInstance[] { task }) : this.JsonSerializer.SerializeToNode(task);
         var jsonPatch = new JsonPatch(PatchOperation.Add(pointer, patchNode));
-        this.Instance = await this.SynapseApi.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), cancellationToken).ConfigureAwait(false);
+        this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), cancellationToken).ConfigureAwait(false);
         return task;
     }
 
     /// <inheritdoc/>
     public virtual async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
-        var document = await this.SynapseApi.WorkflowData.CreateAsync(this.Instance.GetQualifiedName(), this.Instance.Spec.Input ?? [], cancellationToken).ConfigureAwait(false);
+        var document = await this.Api.WorkflowData.CreateAsync(this.Instance.GetQualifiedName(), this.Instance.Spec.Input ?? [], cancellationToken).ConfigureAwait(false);
         var jsonPatch = new JsonPatch(PatchOperation.Add(JsonPointer.Create<WorkflowInstance>(w => w.Status!).ToCamelCase(), this.JsonSerializer.SerializeToNode(new WorkflowInstanceStatus()
         {
             ContextReference = document.Id
         })));
-        this.Instance = await this.SynapseApi.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), cancellationToken).ConfigureAwait(false);
+        this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
@@ -144,7 +163,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         this.Instance.Status.Runs.Add(new() { StartedAt = DateTimeOffset.Now });
         this.Instance.Status.ContextReference ??= (await this.Documents.CreateAsync(this.Instance.GetQualifiedName(), this.ContextData, cancellationToken).ConfigureAwait(false)).Id;
         var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
-        this.Instance = await this.SynapseApi.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), cancellationToken).ConfigureAwait(false);
+        this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
@@ -158,7 +177,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         task.Runs ??= [];
         task.Runs.Add(new() { StartedAt = DateTimeOffset.Now });
         var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
-        this.Instance = await this.SynapseApi.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), cancellationToken).ConfigureAwait(false);
+        this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), cancellationToken).ConfigureAwait(false);
         return this.Instance.Status?.Tasks?.FirstOrDefault(t => t.Id == task.Id) ?? throw new NullReferenceException($"Failed to find the task instance with the specified id '{task.Id}'. Make sure the task instance resource has been created using the workflow context.");
     }
 
@@ -196,7 +215,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         task.Runs ??= [];
         task.Runs.Add(new() { StartedAt = DateTimeOffset.Now });
         var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
-        this.Instance = await this.SynapseApi.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), cancellationToken).ConfigureAwait(false);
+        this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), cancellationToken).ConfigureAwait(false);
         return this.Instance.Status?.Tasks?.FirstOrDefault(t => t.Id == task.Id) ?? throw new NullReferenceException($"Failed to find the task instance with the specified id '{task.Id}'. Make sure the task instance resource has been created using the workflow context.");
     }
 
@@ -213,7 +232,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         var run = this.Instance.Status.Runs?.LastOrDefault();
         if (run != null) run.EndedAt = DateTimeOffset.Now;
         var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
-        this.Instance = await this.SynapseApi.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), cancellationToken).ConfigureAwait(false);
+        this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
@@ -234,7 +253,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
             run.Outcome = task.Status;
         }
         var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
-        this.Instance = await this.SynapseApi.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), cancellationToken).ConfigureAwait(false);
+        this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), cancellationToken).ConfigureAwait(false);
         return this.Instance.Status?.Tasks?.FirstOrDefault(t => t.Id == task.Id) ?? throw new NullReferenceException($"Failed to find the task instance with the specified id '{task.Id}'. Make sure the task instance resource has been created using the workflow context.");
     }
 
@@ -247,13 +266,13 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         this.Instance.Status ??= new();
         this.Instance.Status.Phase = WorkflowInstanceStatusPhase.Completed;
         this.Instance.Status.EndedAt = DateTimeOffset.Now;
-        var document = await this.SynapseApi.WorkflowData.CreateAsync($"{this.Instance.GetQualifiedName()}/output", result, cancellationToken).ConfigureAwait(false);
+        var document = await this.Api.WorkflowData.CreateAsync($"{this.Instance.GetQualifiedName()}/output", result, cancellationToken).ConfigureAwait(false);
         this.Instance.Status.OutputReference = document.Id;
         this.Output = document.Content;
         var run = this.Instance.Status.Runs?.LastOrDefault();
         if (run != null) run.EndedAt = DateTimeOffset.Now;
         var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
-        this.Instance = await this.SynapseApi.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), cancellationToken).ConfigureAwait(false);
+        this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
@@ -266,15 +285,23 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         task = this.Instance.Status?.Tasks?.FirstOrDefault(t => t.Id == task.Id) ?? throw new NullReferenceException($"Failed to find the task instance with the specified id '{task.Id}'. Make sure the task instance resource has been created using the workflow context.");
         task.Status = TaskInstanceStatus.Completed;
         task.EndedAt = DateTimeOffset.Now;
-        var document = await this.SynapseApi.WorkflowData.CreateAsync($"{this.Instance.GetQualifiedName()}/{task.Reference}/output", result, cancellationToken).ConfigureAwait(false);
+        var document = await this.Api.WorkflowData.CreateAsync($"{this.Instance.GetQualifiedName()}/{task.Reference}/output", result, cancellationToken).ConfigureAwait(false);
         task.OutputReference = document.Id;
         task.Next = then;
         var run = task.Runs!.Last();
         run.EndedAt = DateTimeOffset.Now;
         run.Outcome = task.Status;
         var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
-        this.Instance = await this.SynapseApi.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), cancellationToken).ConfigureAwait(false);
+        this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), cancellationToken).ConfigureAwait(false);
         return this.Instance.Status?.Tasks?.FirstOrDefault(t => t.Id == task.Id) ?? throw new NullReferenceException($"Failed to find the task instance with the specified id '{task.Id}'. Make sure the task instance resource has been created using the workflow context.");
+    }
+
+    /// <inheritdoc/>
+    public virtual async Task SetWorkflowDataAsync(string reference, object data, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(reference);
+        await this.Api.WorkflowData.UpdateAsync(reference, data, cancellationToken).ConfigureAwait(false);
+        if (this.Instance.Status?.ContextReference == reference) this.ContextData = data.ConvertTo<IDictionary<string, object>>()!;
     }
 
     /// <inheritdoc/>
@@ -289,7 +316,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         run.EndedAt = DateTimeOffset.Now;
         run.Outcome = task.Status;
         var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
-        this.Instance = await this.SynapseApi.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), cancellationToken).ConfigureAwait(false);
+        this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), cancellationToken).ConfigureAwait(false);
         return this.Instance.Status?.Tasks?.FirstOrDefault(t => t.Id == task.Id) ?? throw new NullReferenceException($"Failed to find the task instance with the specified id '{task.Id}'. Make sure the task instance resource has been created using the workflow context.");
     }
 
@@ -303,7 +330,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         var run = this.Instance.Status.Runs?.LastOrDefault();
         if (run != null) run.EndedAt = DateTimeOffset.Now;
         var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
-        this.Instance = await this.SynapseApi.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), cancellationToken).ConfigureAwait(false);
+        this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
@@ -318,7 +345,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         run.EndedAt = DateTimeOffset.Now;
         run.Outcome = task.Status;
         var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
-        this.Instance = await this.SynapseApi.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), cancellationToken).ConfigureAwait(false);
+        this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), cancellationToken).ConfigureAwait(false);
         return this.Instance.Status?.Tasks?.FirstOrDefault(t => t.Id == task.Id) ?? throw new NullReferenceException($"Failed to find the task instance with the specified id '{task.Id}'. Make sure the task instance resource has been created using the workflow context.");
     }
 
@@ -333,7 +360,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         var run = this.Instance.Status.Runs?.LastOrDefault();
         if (run != null) run.EndedAt = DateTimeOffset.Now;
         var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
-        this.Instance = await this.SynapseApi.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), cancellationToken).ConfigureAwait(false);
+        this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
@@ -349,7 +376,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         run.EndedAt = DateTimeOffset.Now;
         run.Outcome = task.Status;
         var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
-        this.Instance = await this.SynapseApi.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), cancellationToken).ConfigureAwait(false);
+        this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), cancellationToken).ConfigureAwait(false);
         return this.Instance.Status?.Tasks?.FirstOrDefault(t => t.Id == task.Id) ?? throw new NullReferenceException($"Failed to find the task instance with the specified id '{task.Id}'. Make sure the task instance resource has been created using the workflow context.");
     }
 

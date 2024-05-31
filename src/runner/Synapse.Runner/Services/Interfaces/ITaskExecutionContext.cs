@@ -99,6 +99,14 @@ public interface ITaskExecutionContext
     Task SetErrorAsync(Error error, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Sets the task's context data
+    /// </summary>
+    /// <param name="context">The updated context data</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>A new awaitable <see cref="Task"/></returns>
+    Task SetContextDataAsync(IDictionary<string, object> context, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Sets the <see cref="TaskInstance"/>'s result, if any
     /// </summary>
     /// <param name="result">The <see cref="TaskInstance"/>'s result, if any</param>

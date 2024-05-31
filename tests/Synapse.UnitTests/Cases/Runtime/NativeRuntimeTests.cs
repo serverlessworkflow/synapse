@@ -13,7 +13,6 @@
 
 using Neuroglia;
 using Neuroglia.Data.Infrastructure.ResourceOriented;
-using Synapse.Runtime.Configuration;
 using Synapse.Runtime.Services;
 
 namespace Synapse.UnitTests.Cases.Runtime;
@@ -24,13 +23,16 @@ public class NativeRuntimeTests
 
     protected override void ConfigureServices(IServiceCollection services)
     {
-        services.Configure<NativeRuntimeOptions>(options => 
+        services.Configure<RunnerDefinition>(options => 
         {
             options.Api = new()
             {
                 Uri = new("http://localhost")
             };
-            options.WorkingDirectory = Path.Combine("..", "..", "..", "..", "..", "src", "runner", "Synapse.Runner", "bin", "Debug", "net8.0");
+            options.Runtime.Native = new()
+            {
+                Directory = Path.Combine("..", "..", "..", "..", "..", "src", "runner", "Synapse.Runner", "bin", "Debug", "net8.0")
+            };
         });
         services.AddSingleton<IWorkflowRuntime, NativeRuntime>();
     }
