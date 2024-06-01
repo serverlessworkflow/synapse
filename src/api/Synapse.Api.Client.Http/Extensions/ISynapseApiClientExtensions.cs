@@ -11,9 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Neuroglia.Data.Infrastructure.ResourceOriented;
-using Synapse.Api.Client.Services;
-
 namespace Synapse.Api.Client;
 
 /// <summary>

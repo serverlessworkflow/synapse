@@ -11,13 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Microsoft.AspNetCore.SignalR.Client;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Options;
-using Synapse.Api.Client.Http.Configuration;
-using Synapse.Api.Client.Services;
-
 namespace Synapse.Api.Client;
 
 /// <summary>

@@ -11,4 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+global using Microsoft.AspNetCore.SignalR.Client;
+global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.DependencyInjection.Extensions;
+global using Microsoft.Extensions.Logging;
+global using Microsoft.Extensions.Options;
+global using Neuroglia;
+global using Neuroglia.Data;
+global using Neuroglia.Data.Infrastructure.ResourceOriented;
+global using Neuroglia.Eventing.CloudEvents;
+global using Neuroglia.Serialization;
+global using Synapse.Api.Client.Http.Configuration;
+global using Synapse.Api.Client.Services;
 global using Synapse.Resources;
+global using System.Net.Mime;
+global using System.Reactive.Linq;
+global using System.Reactive.Subjects;
+global using System.Text;

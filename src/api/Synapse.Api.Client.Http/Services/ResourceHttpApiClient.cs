@@ -11,14 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Microsoft.Extensions.Logging;
-using Neuroglia;
-using Neuroglia.Data;
-using Neuroglia.Data.Infrastructure.ResourceOriented;
-using Neuroglia.Serialization;
-using System.Net.Mime;
-using System.Text;
-
 namespace Synapse.Api.Client.Services;
 
 /// <summary>
@@ -229,7 +221,7 @@ public class ResourceHttpApiClient<TResource>(ILogger<ResourceHttpApiClient<TRes
         var resource = new TResource();
         var uri = $"/api/{resource.Definition.Version}/{resource.Definition.Plural}/{@namespace}/{name}";
         using var request = await this.ProcessRequestAsync(new HttpRequestMessage(HttpMethod.Delete, uri), cancellationToken).ConfigureAwait(false);
-        await ProcessResponseAsync(await this.HttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false), cancellationToken).ConfigureAwait(false);
+        await this.ProcessResponseAsync(await this.HttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false), cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>

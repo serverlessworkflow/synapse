@@ -21,8 +21,9 @@ namespace Synapse.Runner.Services;
 /// Represents a service used to initialize the current <see cref="IWorkflowExecutor"/>
 /// </summary>
 /// <param name="serviceProvider">The current <see cref="IServiceProvider"/></param>
+/// <param name="applicationLifetime">The current <see cref="IHostApplicationLifetime"/></param>
 /// <param name="options">The service used to access the current <see cref="RunnerOptions"/></param>
-internal class RunnerApplication(IServiceProvider serviceProvider, IOptions<RunnerOptions> options)
+internal class RunnerApplication(IServiceProvider serviceProvider, IHostApplicationLifetime applicationLifetime, IOptions<RunnerOptions> options)
     : IHostedService, IDisposable
 {
 
@@ -37,6 +38,11 @@ internal class RunnerApplication(IServiceProvider serviceProvider, IOptions<Runn
     /// Gets the current <see cref="IServiceProvider"/>
     /// </summary>
     protected IServiceProvider ServiceProvider => this.ServiceScope.ServiceProvider;
+
+    /// <summary>
+    /// Gets the current <see cref="IHostApplicationLifetime"/>
+    /// </summary>
+    protected IHostApplicationLifetime ApplicationLifetime { get; } = applicationLifetime;
 
     /// <summary>
     /// Gets the service used to interact with the Synapse API
@@ -66,7 +72,7 @@ internal class RunnerApplication(IServiceProvider serviceProvider, IOptions<Runn
         var context = ActivatorUtilities.CreateInstance<WorkflowExecutionContext>(this.ServiceProvider, expressionEvaluator, definition, instance);
         this.Executor = ActivatorUtilities.CreateInstance<WorkflowExecutor>(this.ServiceProvider, context);
         await this.Executor.ExecuteAsync(cancellationToken).ConfigureAwait(false);
-
+        this.ApplicationLifetime.StopApplication();
     }
 
     /// <inheritdoc/>

@@ -53,9 +53,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Runtime.Containeriz
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Runner", "src\runner\Synapse.Runner\Synapse.Runner.csproj", "{E5FAA9BA-07C3-49CF-AD3B-897AE1D0B018}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synapse.Dashboard.StateManagement", "src\dashboard\Synapse.Dashboard.StateManagement\Synapse.Dashboard.StateManagement.csproj", "{91EF9F64-4997-407C-B353-C26B1421D0FB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Dashboard.StateManagement", "src\dashboard\Synapse.Dashboard.StateManagement\Synapse.Dashboard.StateManagement.csproj", "{91EF9F64-4997-407C-B353-C26B1421D0FB}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Operator", "src\operator\Synapse.Operator\Synapse.Operator.csproj", "{A9085F4A-5FDF-4F4A-B267-A03BC5E0FDB0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synapse.Cli", "src\cli\Synapse.Cli\Synapse.Cli.csproj", "{C86F6C8B-5946-433D-9E09-2C0269CE6372}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -131,6 +133,10 @@ Global
 		{A9085F4A-5FDF-4F4A-B267-A03BC5E0FDB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A9085F4A-5FDF-4F4A-B267-A03BC5E0FDB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A9085F4A-5FDF-4F4A-B267-A03BC5E0FDB0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C86F6C8B-5946-433D-9E09-2C0269CE6372}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C86F6C8B-5946-433D-9E09-2C0269CE6372}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C86F6C8B-5946-433D-9E09-2C0269CE6372}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C86F6C8B-5946-433D-9E09-2C0269CE6372}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -160,6 +166,7 @@ Global
 		{E5FAA9BA-07C3-49CF-AD3B-897AE1D0B018} = {1DA47E5F-B23A-4D3C-96AA-4BD2662AB946}
 		{91EF9F64-4997-407C-B353-C26B1421D0FB} = {7DF998B8-0FB1-470E-8ED0-EA1CC7B16901}
 		{A9085F4A-5FDF-4F4A-B267-A03BC5E0FDB0} = {32EAD165-3D99-42CD-B3AF-05136DCC7F35}
+		{C86F6C8B-5946-433D-9E09-2C0269CE6372} = {D3B3B95D-B598-4B13-B754-4A7E530405A6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2A6C03D6-355A-4B39-9F2B-D0FDE429C0E2}

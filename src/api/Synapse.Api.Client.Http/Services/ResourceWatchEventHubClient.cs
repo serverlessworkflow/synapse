@@ -11,12 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Microsoft.AspNetCore.SignalR.Client;
-using Neuroglia.Data.Infrastructure.ResourceOriented;
-using Neuroglia.Eventing.CloudEvents;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
-
 namespace Synapse.Api.Client.Services;
 
 /// <summary>

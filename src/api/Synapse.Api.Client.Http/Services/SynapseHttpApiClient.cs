@@ -11,12 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Neuroglia;
-using Neuroglia.Data.Infrastructure.ResourceOriented;
-using Neuroglia.Serialization;
-
 namespace Synapse.Api.Client.Services;
 
 /// <summary>
