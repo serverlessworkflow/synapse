@@ -1,4 +1,7 @@
-﻿namespace Synapse.Cli.Commands.Workflows;
+﻿using Neuroglia.Data;
+using Neuroglia.Data.Infrastructure.ResourceOriented;
+
+namespace Synapse.Cli.Commands.Workflows;
 
 /// <summary>
 /// Represents the <see cref="Command"/> used to delete a single <see cref="Workflow"/>
@@ -38,22 +41,29 @@ internal class DeleteWorkflowCommand
     /// <returns>A new awaitable <see cref="Task"/></returns>
     public async Task HandleAsync(string name, string @namespace, string version, bool y)
     {
-        var components = name.Split(':', StringSplitOptions.RemoveEmptyEntries);
         if (!y)
         {
-            if (components.Length == 2) Console.Write($"Are you sure you wish to delete the workflow '{name}.{@namespace}'? Press 'y' to confirm, or any other key to cancel: ");
-            else Console.Write($"Are you sure you wish to delete all version of the workflow '{name}.{@namespace}'? Press 'y' to confirm, or any other key to cancel: ");
+            if (string.IsNullOrWhiteSpace(version)) Console.Write($"Are you sure you wish to delete all version of the workflow '{name}.{@namespace}'? Press 'y' to confirm, or any other key to cancel: ");
+            else Console.Write($"Are you sure you wish to delete the workflow '{name}.{@namespace}:{version}'? Press 'y' to confirm, or any other key to cancel: ");
             var inputKey = Console.ReadKey();
             Console.WriteLine();
-            if (inputKey.Key != ConsoleKey.Y)
-            {
-                Console.WriteLine("Deletion cancelled");
-                return;
-            }
+            if (inputKey.Key != ConsoleKey.Y) return;
         }
-        await this.Api.Workflows.DeleteAsync(name, @namespace);
-        if (components.Length == 2) Console.WriteLine($"The workflow '{name}.{@namespace}' has been successfully deleted");
-        else Console.WriteLine($"All version of the workflow '{name}.{@namespace}' have been successfully deleted");
+        if (string.IsNullOrWhiteSpace(version))
+        {
+            await this.Api.Workflows.DeleteAsync(name, @namespace);
+            Console.WriteLine($"workflow/{name} deleted");
+        }
+        else
+        {
+            var workflow = await this.Api.Workflows.GetAsync(name, @namespace) ?? throw new NullReferenceException($"Failed to find the specified workflow '{name}.{@namespace}'");
+            var definition = workflow.Spec.Versions.FirstOrDefault(v => v.Document.Version == version) ?? throw new NullReferenceException($"Failed to find the specified workflow version '{name}.{@namespace}:{version}'");
+            var originalWorkflow = workflow.Clone()!;
+            workflow.Spec.Versions.Remove(definition);
+            var patch = JsonPatchUtility.CreateJsonPatchFromDiff(originalWorkflow, workflow);
+            await this.Api.Workflows.PatchAsync(name, @namespace, new(PatchType.JsonPatch, patch));
+            Console.WriteLine($"workflow/{name}:{version} deleted");
+        }
     }
 
     static class CommandOptions

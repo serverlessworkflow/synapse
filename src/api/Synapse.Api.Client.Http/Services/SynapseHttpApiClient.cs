@@ -26,13 +26,13 @@ public class SynapseHttpApiClient
     /// <param name="serviceProvider">The current <see cref="IServiceProvider"/></param>
     /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
     /// <param name="serializer">The service used to serialize/deserialize objects to/from JSON</param>
-    /// <param name="httpClientFactory">The service used to create <see cref="System.Net.Http.HttpClient"/>s</param>
-    public SynapseHttpApiClient(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, IJsonSerializer serializer, IHttpClientFactory httpClientFactory)
+    /// <param name="httpClient">The service used to perform http requests</param>
+    public SynapseHttpApiClient(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, IJsonSerializer serializer, HttpClient httpClient)
     {
         this.ServiceProvider = serviceProvider;
         this.Logger = loggerFactory.CreateLogger(GetType());
         this.Serializer = serializer;
-        this.HttpClient = httpClientFactory.CreateClient(typeof(SynapseHttpApiClient).Name);
+        this.HttpClient = httpClient;
         this.WorkflowData = ActivatorUtilities.CreateInstance<DocumentHttpApiClient>(this.ServiceProvider, this.HttpClient);
         foreach (var apiProperty in GetType().GetProperties().Where(p => p.CanRead && p.PropertyType.GetGenericType(typeof(IResourceApiClient<>)) != null))
         {

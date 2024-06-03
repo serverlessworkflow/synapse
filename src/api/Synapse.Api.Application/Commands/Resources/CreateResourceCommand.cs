@@ -34,6 +34,7 @@ public class CreateResourceCommand
         if (string.IsNullOrWhiteSpace(version)) throw new ArgumentNullException(nameof(version));
         if (string.IsNullOrWhiteSpace(plural)) throw new ArgumentNullException(nameof(plural));
         this.Resource = resource ?? throw new ArgumentNullException(nameof(resource));
+ 
         this.Group = group;
         this.Version = version;
         this.Plural = plural;
@@ -78,6 +79,7 @@ public class CreateResourceCommandHandler(IResourceRepository repository)
     /// <inheritdoc/>
     public virtual async Task<IOperationResult<IResource>> HandleAsync(CreateResourceCommand command, CancellationToken cancellationToken)
     {
+        if (command.Resource.GetName().Trim().EndsWith('-')) command.Resource.Metadata.Name = $"{command.Resource.GetName().Trim()}{Guid.NewGuid().ToString("N")[..15]}";
         var resource = await repository.AddAsync(command.Resource, command.Group, command.Version, command.Plural, command.DryRun, cancellationToken);
         return new OperationResult<IResource>((int)HttpStatusCode.Created, resource);
     }

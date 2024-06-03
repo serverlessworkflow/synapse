@@ -22,7 +22,7 @@ public static class IServiceCollectionExtensions
             typeof(Commands.Command).Assembly)
         )
         {
-            services.AddSingleton(typeof(Command), commandType);
+            services.AddScoped(typeof(Command), commandType);
         }
         return services;
     }

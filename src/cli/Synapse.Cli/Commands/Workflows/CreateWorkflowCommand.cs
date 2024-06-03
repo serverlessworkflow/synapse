@@ -69,7 +69,7 @@ internal class CreateWorkflowCommand
             var patch = JsonPatchUtility.CreateJsonPatchFromDiff(originalWorkflow, workflow);
             workflow = await this.Api.Workflows.PatchAsync(workflowDefinition.Document.Name, workflowDefinition.Document.Namespace, new(PatchType.JsonPatch, patch));
         }
-        Console.WriteLine($"The workflow '{workflow.GetQualifiedName()}:{workflowDefinition.Document.Version}' has been successfully created");
+        Console.WriteLine($"workflow/{workflow.GetName()}:{workflowDefinition.Document.Version} created");
         await stream.DisposeAsync();
     }
 

@@ -12,18 +12,19 @@ static Parser BuildCommandLineParser()
         .Build();
     var services = new ServiceCollection();
     ConfigureServices(services, configuration);
-    using var serviceProvider = services.BuildServiceProvider();
+    var serviceProvider = services.BuildServiceProvider();
+    var scope = serviceProvider.CreateScope();
     var rootCommand = new RootCommand();
-    foreach (var command in serviceProvider.GetServices<Command>()) rootCommand.AddCommand(command);
+    foreach (var command in scope.ServiceProvider.GetServices<Command>()) rootCommand.AddCommand(command);
     return new CommandLineBuilder(rootCommand)
         .UseDefaults()
         .UseExceptionHandler((ex, context) =>
         {
-            AnsiConsole.MarkupLine($"[red]{ex.Message}[/]");
+            AnsiConsole.MarkupLine($"[red]{ex.Message.EscapeMarkup()}[/]");
             var inner = ex.InnerException;
             while (inner != null)
             {
-                AnsiConsole.MarkupLine($"[red]{inner.Message}[/]");
+                AnsiConsole.MarkupLine($"[red]{inner.Message.EscapeMarkup()}[/]");
                 inner = inner.InnerException;
             }
         })
@@ -32,11 +33,17 @@ static Parser BuildCommandLineParser()
 
 static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
 {
+    var applicationOptions = new ApplicationOptions();
+    configuration.Bind(applicationOptions);
     services.AddSingleton(configuration);
     services.Configure<ApplicationOptions>(configuration);
     services.AddLogging();
     services.AddServerlessWorkflowIO();
-    services.AddSynapseHttpApiClient(http => http.BaseAddress = new Uri("http://localhost:42286")); //todo: config based
+    services.AddSynapseHttpApiClient(http =>
+    {
+        if (string.IsNullOrWhiteSpace(applicationOptions.Api.Current)) return; //todo: warn
+        http.BaseAddress = applicationOptions.Api.Configurations[applicationOptions.Api.Current].Server ?? null!; //todo: warn
+    });
     services.AddCliCommands();
     services.AddSingleton<IOptionsManager, OptionsManager>();
 }

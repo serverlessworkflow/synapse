@@ -25,9 +25,9 @@ public class WorkflowCommand
         this.AddAlias("workflows");
         this.AddAlias("wf");
         this.AddCommand(ActivatorUtilities.CreateInstance<CreateWorkflowCommand>(this.ServiceProvider));
-        //this.AddCommand(ActivatorUtilities.CreateInstance<RunWorkflowCommand>(this.ServiceProvider));
-        //this.AddCommand(ActivatorUtilities.CreateInstance<GetWorkflowCommand>(this.ServiceProvider));
-        //this.AddCommand(ActivatorUtilities.CreateInstance<ListWorkflowsCommand>(this.ServiceProvider));
+        this.AddCommand(ActivatorUtilities.CreateInstance<RunWorkflowCommand>(this.ServiceProvider));
+        this.AddCommand(ActivatorUtilities.CreateInstance<GetWorkflowCommand>(this.ServiceProvider));
+        this.AddCommand(ActivatorUtilities.CreateInstance<ListWorkflowsCommand>(this.ServiceProvider));
         this.AddCommand(ActivatorUtilities.CreateInstance<DeleteWorkflowCommand>(this.ServiceProvider));
     }
 

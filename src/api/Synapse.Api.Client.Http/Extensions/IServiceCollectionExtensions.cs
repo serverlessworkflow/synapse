@@ -28,11 +28,10 @@ public static class IServiceCollectionExtensions
     public static IServiceCollection AddSynapseHttpApiClient(this IServiceCollection services, Action<SynapseHttpApiClientOptions> setup)
     {
         services.Configure(setup);
-        services.AddHttpClient(typeof(SynapseHttpApiClient).Name, (provider, http) =>
+        services.AddHttpClient<ISynapseApiClient, SynapseHttpApiClient>((provider, http) =>
         {
             http.BaseAddress = provider.GetRequiredService<IOptions<SynapseHttpApiClientOptions>>().Value.BaseAddress;
         });
-        services.TryAddScoped<ISynapseApiClient, SynapseHttpApiClient>();
         services.TryAddSingleton(provider =>
         {
             var options = provider.GetRequiredService<IOptions<SynapseHttpApiClientOptions>>().Value;

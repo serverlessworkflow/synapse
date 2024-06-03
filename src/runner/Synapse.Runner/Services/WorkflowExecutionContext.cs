@@ -158,7 +158,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         var originalInstance = this.Instance.Clone();
         this.Instance.Status ??= new();
         this.Instance.Status.Phase = WorkflowInstanceStatusPhase.Running;
-        this.Instance.Status.StartedAt ??= DateTimeOffset.UtcNow;
+        this.Instance.Status.StartedAt ??= DateTimeOffset.Now;
         this.Instance.Status.Runs ??= [];
         this.Instance.Status.Runs.Add(new() { StartedAt = DateTimeOffset.Now });
         this.Instance.Status.ContextReference ??= (await this.Documents.CreateAsync(this.Instance.GetQualifiedName(), this.ContextData, cancellationToken).ConfigureAwait(false)).Id;

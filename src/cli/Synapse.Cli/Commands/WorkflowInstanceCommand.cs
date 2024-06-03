@@ -1,4 +1,6 @@
-﻿namespace Synapse.Cli.Commands;
+﻿using Synapse.Cli.Commands.WorkflowInstances;
+
+namespace Synapse.Cli.Commands;
 
 /// <summary>
 /// Represents the <see cref="Command"/> used to manage <see cref="WorkflowInstance"/>s
@@ -21,12 +23,11 @@ public class WorkflowInstanceCommand
         : base(serviceProvider, loggerFactory, api, CommandName, CommandDescription)
     {
         this.AddAlias("workflow-instances");
-        this.AddAlias("instance");
-        this.AddAlias("instances");
         this.AddAlias("wfi");
-        //this.AddCommand(ActivatorUtilities.CreateInstance<GetWorkflowInstanceCommand>(this.ServiceProvider));
-        //this.AddCommand(ActivatorUtilities.CreateInstance<ListWorkflowInstancesCommand>(this.ServiceProvider));
-        //this.AddCommand(ActivatorUtilities.CreateInstance<DeleteWorkflowInstanceCommand>(this.ServiceProvider));
+        this.AddCommand(ActivatorUtilities.CreateInstance<GetWorkflowInstanceCommand>(this.ServiceProvider));
+        this.AddCommand(ActivatorUtilities.CreateInstance<GetWorkflowInstanceOutputCommand>(this.ServiceProvider));
+        this.AddCommand(ActivatorUtilities.CreateInstance<ListWorkflowInstancesCommand>(this.ServiceProvider));
+        this.AddCommand(ActivatorUtilities.CreateInstance<DeleteWorkflowInstanceCommand>(this.ServiceProvider));
         //this.AddCommand(ActivatorUtilities.CreateInstance<SuspendWorkflowInstanceCommand>(this.ServiceProvider));
         //this.AddCommand(ActivatorUtilities.CreateInstance<ResumeWorkflowInstanceCommand>(this.ServiceProvider));
         //this.AddCommand(ActivatorUtilities.CreateInstance<CancelWorkflowInstanceCommand>(this.ServiceProvider));
