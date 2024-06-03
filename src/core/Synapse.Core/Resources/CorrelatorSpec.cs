@@ -11,19 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Synapse.Cli.Configuration;
+namespace Synapse.Resources;
 
 /// <summary>
-/// Represents the named options used to configure a Synapse API to connect to using the Synapse CLI
+/// Represents the object used to configure the desired state of an <see cref="Correlator"/>
 /// </summary>
 [DataContract]
-public class ApiConfiguration
+public record CorrelatorSpec
 {
 
     /// <summary>
-    /// Gets/sets the uri that references the API server to connect to
+    /// Gets/sets a key/value mapping of the labels to select correlations by.<para></para>
+    /// If not set, the broker will attempt to pick up all unclaimed workflows and workflow instances
     /// </summary>
-    [DataMember(Name = "server", Order = 1), JsonPropertyOrder(1), JsonPropertyName("server"), YamlMember(Alias = "server", Order = 1)]
-    public required virtual Uri Server { get; set; }
+    [DataMember(Order = 1, Name = "selector"), JsonPropertyOrder(1), JsonPropertyName("selector"), YamlMember(Order = 1, Alias = "selector")]
+    public virtual IDictionary<string, string>? Selector { get; set; }
 
 }

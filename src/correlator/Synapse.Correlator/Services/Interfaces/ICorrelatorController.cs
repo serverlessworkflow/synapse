@@ -11,19 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Synapse.Cli.Configuration;
+namespace Synapse.Correlator.Services;
 
 /// <summary>
-/// Represents the named options used to configure a Synapse API to connect to using the Synapse CLI
+/// Defines the fundamentals of the service used to access the current Synapse Correlator
 /// </summary>
-[DataContract]
-public class ApiConfiguration
+public interface ICorrelatorController
+    : IHostedService
 {
 
     /// <summary>
-    /// Gets/sets the uri that references the API server to connect to
+    /// Gets the service used to monitor the current <see cref="Resources.Correlator"/>
     /// </summary>
-    [DataMember(Name = "server", Order = 1), JsonPropertyOrder(1), JsonPropertyName("server"), YamlMember(Alias = "server", Order = 1)]
-    public required virtual Uri Server { get; set; }
+    IResourceMonitor<Resources.Correlator> Correlator { get; }
 
 }

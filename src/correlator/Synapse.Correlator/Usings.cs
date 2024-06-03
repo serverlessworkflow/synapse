@@ -11,19 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Synapse.Cli.Configuration;
-
-/// <summary>
-/// Represents the named options used to configure a Synapse API to connect to using the Synapse CLI
-/// </summary>
-[DataContract]
-public class ApiConfiguration
-{
-
-    /// <summary>
-    /// Gets/sets the uri that references the API server to connect to
-    /// </summary>
-    [DataMember(Name = "server", Order = 1), JsonPropertyOrder(1), JsonPropertyName("server"), YamlMember(Alias = "server", Order = 1)]
-    public required virtual Uri Server { get; set; }
-
-}
+global using Microsoft.Extensions.Hosting;
+global using Microsoft.Extensions.Logging;
+global using Microsoft.Extensions.Options;
+global using Neuroglia;
+global using Neuroglia.Data;
+global using Neuroglia.Data.Infrastructure.ResourceOriented;
+global using Neuroglia.Data.Infrastructure.ResourceOriented.Configuration;
+global using Neuroglia.Data.Infrastructure.ResourceOriented.Services;
+global using Neuroglia.Reactive;
+global using Synapse.Correlator.Configuration;
+global using Synapse.Resources;
+global using System.Net;
+global using System.Reactive.Linq;

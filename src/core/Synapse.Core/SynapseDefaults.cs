@@ -63,6 +63,28 @@ public static class SynapseDefaults
         }
 
         /// <summary>
+        /// Exposes constants about correlator-related environment variables
+        /// </summary>
+        public static class Correlator
+        {
+
+            /// <summary>
+            /// Gets the prefix for all correlator related environment variables
+            /// </summary>
+            public const string Prefix = EnvironmentVariables.Prefix + "CORRELATOR_";
+
+            /// <summary>
+            /// Gets the environment variable used to configure the correlator's namespace
+            /// </summary>
+            public const string Namespace = Prefix + "NAMESPACE";
+            /// <summary>
+            /// Gets the environment variable used to configure the correlator's name
+            /// </summary>
+            public const string Name = Prefix + "NAME";
+
+        }
+
+        /// <summary>
         /// Exposes constants about operator-related environment variables
         /// </summary>
         public static class Operator
@@ -154,6 +176,11 @@ public static class SynapseDefaults
             /// Gets the prefix of all Synapse labels
             /// </summary>
             public const string Prefix = "synapse.io/";
+
+            /// <summary>
+            /// Gets the label used by Synapse correlators to claim correlations
+            /// </summary>
+            public const string Correlator = Prefix + "correlator";
             /// <summary>
             /// Gets the label used by Synapse operators to claim workflows or workflow instances
             /// </summary>

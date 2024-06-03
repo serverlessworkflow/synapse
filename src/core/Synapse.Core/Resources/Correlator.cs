@@ -11,19 +11,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Synapse.Cli.Configuration;
+using Neuroglia.Data.Infrastructure.ResourceOriented;
+
+namespace Synapse.Resources;
 
 /// <summary>
-/// Represents the named options used to configure a Synapse API to connect to using the Synapse CLI
+/// Represents the resource used to describe and configure a correlator
 /// </summary>
 [DataContract]
-public class ApiConfiguration
+public record Correlator
+    : Resource<CorrelatorSpec, CorrelatorStatus>
 {
 
     /// <summary>
-    /// Gets/sets the uri that references the API server to connect to
+    /// Gets the <see cref="Correlator"/>'s resource type
     /// </summary>
-    [DataMember(Name = "server", Order = 1), JsonPropertyOrder(1), JsonPropertyName("server"), YamlMember(Alias = "server", Order = 1)]
-    public required virtual Uri Server { get; set; }
+    public static readonly ResourceDefinitionInfo ResourceDefinition = new CorrelatorResourceDefinition()!;
+
+    /// <inheritdoc/>
+    public Correlator() : base(ResourceDefinition) { }
+
+    /// <inheritdoc/>
+    public Correlator(ResourceMetadata metadata, CorrelatorSpec spec) : base(ResourceDefinition, metadata, spec) { }
 
 }

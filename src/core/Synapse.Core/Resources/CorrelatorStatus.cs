@@ -11,19 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Synapse.Cli.Configuration;
+namespace Synapse.Resources;
 
 /// <summary>
-/// Represents the named options used to configure a Synapse API to connect to using the Synapse CLI
+/// Represents an object used to describe the status of an correlator
 /// </summary>
 [DataContract]
-public class ApiConfiguration
+public record CorrelatorStatus
 {
 
     /// <summary>
-    /// Gets/sets the uri that references the API server to connect to
+    /// Gets/sets the correlator's current status phase
     /// </summary>
-    [DataMember(Name = "server", Order = 1), JsonPropertyOrder(1), JsonPropertyName("server"), YamlMember(Alias = "server", Order = 1)]
-    public required virtual Uri Server { get; set; }
+    [DataMember(Name = "phase", Order = 1), JsonPropertyName("phase"), JsonPropertyOrder(1), YamlMember(Alias = "phase", Order = 1)]
+    public virtual string? Phase { get; set; }
 
 }

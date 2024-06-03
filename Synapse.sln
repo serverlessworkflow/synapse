@@ -57,7 +57,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Dashboard.StateMana
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Operator", "src\operator\Synapse.Operator\Synapse.Operator.csproj", "{A9085F4A-5FDF-4F4A-B267-A03BC5E0FDB0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synapse.Cli", "src\cli\Synapse.Cli\Synapse.Cli.csproj", "{C86F6C8B-5946-433D-9E09-2C0269CE6372}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Cli", "src\cli\Synapse.Cli\Synapse.Cli.csproj", "{C86F6C8B-5946-433D-9E09-2C0269CE6372}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "correlator", "correlator", "{F6CA60F0-3A4A-4B27-9805-6FA96F64D94D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synapse.Correlator", "src\correlator\Synapse.Correlator\Synapse.Correlator.csproj", "{1EA900CD-6CDE-4358-8412-060BF2AC3B21}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -137,6 +141,10 @@ Global
 		{C86F6C8B-5946-433D-9E09-2C0269CE6372}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C86F6C8B-5946-433D-9E09-2C0269CE6372}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C86F6C8B-5946-433D-9E09-2C0269CE6372}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1EA900CD-6CDE-4358-8412-060BF2AC3B21}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1EA900CD-6CDE-4358-8412-060BF2AC3B21}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1EA900CD-6CDE-4358-8412-060BF2AC3B21}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1EA900CD-6CDE-4358-8412-060BF2AC3B21}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -167,6 +175,8 @@ Global
 		{91EF9F64-4997-407C-B353-C26B1421D0FB} = {7DF998B8-0FB1-470E-8ED0-EA1CC7B16901}
 		{A9085F4A-5FDF-4F4A-B267-A03BC5E0FDB0} = {32EAD165-3D99-42CD-B3AF-05136DCC7F35}
 		{C86F6C8B-5946-433D-9E09-2C0269CE6372} = {D3B3B95D-B598-4B13-B754-4A7E530405A6}
+		{F6CA60F0-3A4A-4B27-9805-6FA96F64D94D} = {4B9AF05C-9D6D-48C0-994D-D4A5C28FA24D}
+		{1EA900CD-6CDE-4358-8412-060BF2AC3B21} = {F6CA60F0-3A4A-4B27-9805-6FA96F64D94D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2A6C03D6-355A-4B39-9F2B-D0FDE429C0E2}

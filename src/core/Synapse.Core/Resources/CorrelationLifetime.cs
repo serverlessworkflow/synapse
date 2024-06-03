@@ -11,19 +11,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Synapse.Cli.Configuration;
+namespace Synapse.Resources;
 
 /// <summary>
-/// Represents the named options used to configure a Synapse API to connect to using the Synapse CLI
+/// Enumerates default correlation lifetimes
 /// </summary>
-[DataContract]
-public class ApiConfiguration
+public static class CorrelationLifetime
 {
 
     /// <summary>
-    /// Gets/sets the uri that references the API server to connect to
+    /// Indicates a durable correlation
     /// </summary>
-    [DataMember(Name = "server", Order = 1), JsonPropertyOrder(1), JsonPropertyName("server"), YamlMember(Alias = "server", Order = 1)]
-    public required virtual Uri Server { get; set; }
+    public const string Durable = "durable";
+
+    /// <summary>
+    /// Indicates an ephemeral correlation, which is a single use correlation
+    /// </summary>
+    public const string Ephemeral = "ephemeral";
+
+    /// <summary>
+    /// Gets all supported correlation lifetime
+    /// </summary>
+    /// <returns>An <see cref="IEnumerable{T}"/> supporting all default correlation lifetime</returns>
+    public static IEnumerable<string> AsEnumerable()
+    {
+        yield return Durable;
+        yield return Ephemeral;
+    }
 
 }
