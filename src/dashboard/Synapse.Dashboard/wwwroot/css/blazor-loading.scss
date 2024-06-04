@@ -27,7 +27,7 @@
 
     .loading-progress circle {
         fill: none;
-        stroke: $cyan-600;
+        stroke: $purple-500;
         stroke-width: 0.2rem;
         transform-origin: 50% 50%;
         transform: rotate(-90deg);
@@ -42,7 +42,7 @@
     .loading-logo {
         position: absolute;
         fill: $primary-dark;
-        height: 100px;
+        height: 70px;
     }
 
     .loading-progress-text {

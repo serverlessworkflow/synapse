@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/images/synapse-color.png" height="350px" alt="Synapse Logo"/>
+  <img src="assets/images/transparent_logo.png" height="350px" alt="Synapse Logo"/>
 </p>
 
 ---

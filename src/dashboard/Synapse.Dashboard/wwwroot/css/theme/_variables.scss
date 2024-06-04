@@ -1,9 +1,9 @@
 ﻿@import "../../lib/bootstrap/scss/functions";
 
-$primary: #4DCEF3 !default;
+$primary: #8c68cd !default;
 $primary-text: $primary;
-$primary-bg-subtle: #38CFC7 !default;
-$primary-border-subtle: #43F9BD !default;
+$primary-bg-subtle: #7d59bd !default;
+$primary-border-subtle: #714db1 !default;
 
 @import "../../lib/bootstrap/scss/variables";
 
@@ -11,7 +11,7 @@ $primary-dark: $primary;
 $primary-text-dark: $primary;
 $primary-bg-subtle-dark: $primary-bg-subtle;
 $primary-border-subtle-dark: $primary-border-subtle;
-$link-color-dark: $cyan-400 !default;
-$link-hover-color-dark: $cyan-200 !default;
+$link-color-dark: $purple-400 !default;
+$link-hover-color-dark: $purple-200 !default;
 
 @import "../../lib/bootstrap/scss/variables-dark";
