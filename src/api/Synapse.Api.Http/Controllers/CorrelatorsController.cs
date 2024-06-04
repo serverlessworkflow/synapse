@@ -11,19 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Synapse.Resources;
+using Synapse.Resources;
+
+namespace Synapse.Api.Http.Controllers;
 
 /// <summary>
-/// Represents an object used to describe the status of a correlation
+/// Represents the <see cref="NamespacedResourceController{TResource}"/> used to manage <see cref="Correlator"/>s
 /// </summary>
-[DataContract]
-public record CorrelationStatus
+/// <param name="mediator">The service used to mediate calls</param>
+[Route("api/v1/correlators")]
+public class CorrelatorsController(IMediator mediator)
+    : NamespacedResourceController<Correlator>(mediator)
 {
 
-    /// <summary>
-    /// Gets/sets a list containing the contexts that have been created for the described correlation
-    /// </summary>
-    [DataMember(Name = "contexts", Order = 1), JsonPropertyName("contexts"), JsonPropertyOrder(1), YamlMember(Alias = "contexts", Order = 1)]
-    public virtual EquatableList<CorrelationContext> Contexts { get; set; } = [];
+
 
 }

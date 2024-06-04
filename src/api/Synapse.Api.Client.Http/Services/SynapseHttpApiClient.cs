@@ -64,10 +64,13 @@ public class SynapseHttpApiClient
     protected HttpClient HttpClient { get; }
 
     /// <inheritdoc/>
-    public INamespacedResourceApiClient<Operator> Operators { get; private set; } = null!;
+    public INamespacedResourceApiClient<Correlator> Correlators { get; private set; } = null!;
 
     /// <inheritdoc/>
     public IClusterResourceApiClient<Namespace> Namespaces { get; private set; } = null!;
+
+    /// <inheritdoc/>
+    public INamespacedResourceApiClient<Operator> Operators { get; private set; } = null!;
 
     /// <inheritdoc/>
     public IDocumentApiClient WorkflowData { get; }

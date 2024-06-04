@@ -139,6 +139,21 @@ public static class SynapseDefaults
         {
 
             /// <summary>
+            /// Gets the definition of Correlation resources
+            /// </summary>
+            public static ResourceDefinition Correlation { get; } = new CorrelationResourceDefinition();
+
+            /// <summary>
+            /// Gets the definition of Correlator resources
+            /// </summary>
+            public static ResourceDefinition Correlator { get; } = new CorrelatorResourceDefinition();
+
+            /// <summary>
+            /// Gets the definition of Operator resources
+            /// </summary>
+            public static ResourceDefinition Operator { get; } = new OperatorResourceDefinition();
+
+            /// <summary>
             /// Gets the definition of Workflow resources
             /// </summary>
             public static ResourceDefinition Workflow { get; } = new WorkflowResourceDefinition();
@@ -149,19 +164,16 @@ public static class SynapseDefaults
             public static ResourceDefinition WorkflowInstance { get; } = new WorkflowInstanceResourceDefinition();
 
             /// <summary>
-            /// Gets the definition of Operator resources
-            /// </summary>
-            public static ResourceDefinition Operator { get; } = new OperatorResourceDefinition();
-
-            /// <summary>
             /// Gets a new <see cref="IEnumerable{T}"/> containing Synapse default resource definitions
             /// </summary>
             /// <returns></returns>
             public static IEnumerable<ResourceDefinition> AsEnumerable()
             {
+                yield return Correlation;
+                yield return Correlator;
+                yield return Operator;
                 yield return Workflow;
                 yield return WorkflowInstance;
-                yield return Operator;
             }
 
         }
