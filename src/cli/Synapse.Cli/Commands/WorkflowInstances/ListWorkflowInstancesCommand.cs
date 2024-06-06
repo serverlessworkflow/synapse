@@ -105,7 +105,7 @@ internal class ListWorkflowInstancesCommand
         }
         if(isEmpty)
         {
-            AnsiConsole.WriteLine($"No resource found in {@namespace} namespace");
+            AnsiConsole.WriteLine(string.IsNullOrWhiteSpace(@namespace) ? "No resource found" : $"No resource found in {@namespace} namespace");
             return;
         }
         AnsiConsole.Write(table);
@@ -114,7 +114,7 @@ internal class ListWorkflowInstancesCommand
     static class CommandOptions
     {
 
-        public static Option<string> Namespace => new(["-n", "--namespace"], () => "default", "The namespace the workflow instances to list belong to.");
+        public static Option<string> Namespace => new(["-n", "--namespace"], () => string.Empty, "The namespace the workflow instances to list belong to.");
 
     }
 

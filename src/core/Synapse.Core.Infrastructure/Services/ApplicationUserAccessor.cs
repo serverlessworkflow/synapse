@@ -14,7 +14,7 @@
 using Neuroglia.Security.Services;
 using System.Security.Claims;
 
-namespace Synapse.Operator.Services;
+namespace Synapse.Core.Infrastructure.Services;
 
 /// <summary>
 /// Represents an <see cref="IUserAccessor"/> implementation used to access the user that represents the executing application

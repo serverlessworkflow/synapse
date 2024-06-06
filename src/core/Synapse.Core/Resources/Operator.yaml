@@ -8,7 +8,7 @@ spec:
   names:
     plural: operators
     singular: operator
-    kind: Operators
+    kind: Operator
     shortNames:
     - op
   versions:

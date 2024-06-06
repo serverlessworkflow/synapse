@@ -1,7 +1,7 @@
 ﻿﻿﻿apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  name: correlators.synapse.io
+  name: correlations.synapse.io
 spec:
   scope: Namespaced
   group: synapse.io
@@ -21,7 +21,7 @@ spec:
           properties:
             spec:
               type: object
-              description: Configures the Synapse Correlator
+              description: Configures the Synapse Correlation
               properties: {} #todo
             status:
               type: object

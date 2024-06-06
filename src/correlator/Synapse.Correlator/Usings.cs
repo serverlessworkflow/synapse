@@ -11,16 +11,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+global using Json.Patch;
+global using Json.Pointer;
+global using Microsoft.Extensions.Configuration;
+global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Hosting;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Options;
 global using Neuroglia;
 global using Neuroglia.Data;
+global using Neuroglia.Data.Expressions;
+global using Neuroglia.Data.Expressions.Services;
 global using Neuroglia.Data.Infrastructure.ResourceOriented;
 global using Neuroglia.Data.Infrastructure.ResourceOriented.Configuration;
 global using Neuroglia.Data.Infrastructure.ResourceOriented.Services;
+global using Neuroglia.Eventing.CloudEvents;
+global using Neuroglia.Eventing.CloudEvents.Infrastructure.Services;
 global using Neuroglia.Reactive;
+global using Neuroglia.Security.Services;
+global using Neuroglia.Serialization;
+global using ServerlessWorkflow.Sdk.Models;
+global using Synapse;
+global using Synapse.Core.Infrastructure.Services;
 global using Synapse.Correlator.Configuration;
+global using Synapse.Correlator.Services;
 global using Synapse.Resources;
+global using System.Diagnostics;
 global using System.Net;
 global using System.Reactive.Linq;
+global using System.Text.RegularExpressions;

@@ -14,6 +14,7 @@
 using Microsoft.Extensions.Configuration;
 using Synapse.Cli.Configuration;
 using Synapse.Cli.Services;
+using System.Text.Json;
 
 var parser = BuildCommandLineParser();
 await parser.InvokeAsync(args);
@@ -51,6 +52,10 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
     services.AddSingleton(configuration);
     services.Configure<ApplicationOptions>(configuration);
     services.AddLogging();
+    services.Configure<JsonSerializerOptions>(options =>
+    {
+        options.WriteIndented = true;
+    });
     services.AddServerlessWorkflowIO();
     services.AddSynapseHttpApiClient(http =>
     {

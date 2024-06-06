@@ -58,7 +58,9 @@ internal class CreateWorkflowCommand
         if (!string.IsNullOrWhiteSpace(file)) stream = File.OpenRead(file);
         else throw new InvalidOperationException("You must specify exactly one of the following options: --file");
         var workflowDefinition = await this.WorkflowDefinitionReader.ReadAsync(stream);
-        var workflow = await this.Api.Workflows.GetAsync(workflowDefinition.Document.Name, workflowDefinition.Document.Namespace);
+        Workflow? workflow = null;
+        try { workflow = await this.Api.Workflows.GetAsync(workflowDefinition.Document.Name, workflowDefinition.Document.Namespace); }
+        catch { }
         if (workflow == null)
         {
             workflow = new() 

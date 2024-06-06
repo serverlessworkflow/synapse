@@ -59,7 +59,8 @@ public class GetResourceQueryHandler<TResource>(IResourceRepository repository)
     /// <inheritdoc/>
     public virtual async Task<IOperationResult<TResource>> HandleAsync(GetResourceQuery<TResource> query, CancellationToken cancellationToken)
     {
-        return this.Ok(await repository.GetAsync<TResource>(query.Name, query.Namespace, cancellationToken).ConfigureAwait(false));
+        var resource = await repository.GetAsync<TResource>(query.Name, query.Namespace, cancellationToken).ConfigureAwait(false) ?? throw new ProblemDetailsException(ResourceProblemDetails.ResourceNotFound(new ResourceReference<TResource>(query.Name, query.Namespace)));
+        return this.Ok(resource);
     }
 
 }

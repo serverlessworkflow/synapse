@@ -2,7 +2,7 @@
   "profiles": {
     "Synapse.Cli": {
       "commandName": "Project",
-      "commandLineArgs": "workflow-instance get test-b9aeda6df89c40e"
+      "commandLineArgs": "workflow create --file test.yaml"
     }
   }
 }

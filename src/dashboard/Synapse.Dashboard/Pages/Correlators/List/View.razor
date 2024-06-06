@@ -58,7 +58,7 @@
         return correlator.Status?.Phase switch
         {
             CorrelatorStatusPhase.Running => "primary",
-            CorrelatorStatusPhase.Stopped => "danger",
+            CorrelatorStatusPhase.Stopped => "secondary",
             _ => "secondary"
         };
     }

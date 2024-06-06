@@ -11,17 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Json.Patch;
-using Json.Pointer;
-using Neuroglia.Data;
-using Neuroglia.Data.Expressions;
-using Neuroglia.Data.Expressions.Services;
-using Neuroglia.Eventing.CloudEvents;
-using Neuroglia.Eventing.CloudEvents.Infrastructure.Services;
-using Neuroglia.Serialization;
-using ServerlessWorkflow.Sdk.Models;
-using System.Text.RegularExpressions;
-
 namespace Synapse.Operator.Services;
 
 /// <summary>
@@ -116,8 +105,8 @@ public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRep
             .Where(c => c.Succeeded)
             .ToListAsync(cancellationToken).ConfigureAwait(false);
         var filter = matchingFilters.First();
-        var extractionResult = await this.TryExtractCorrelationKeysAsync(e, filter.Value.Correlate, cancellationToken).ConfigureAwait(false);
-        if (!extractionResult.Succeeded) return;
+        var (Succeeded, CorrelationKeys) = await this.TryExtractCorrelationKeysAsync(e, filter.Value.Correlate, cancellationToken).ConfigureAwait(false);
+        if (!Succeeded) return;
         CorrelationContext? context;
         switch (this.Correlation.Spec.Lifetime)
         {
@@ -132,7 +121,7 @@ public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRep
                     {
                         Id = Guid.NewGuid().ToString("N")[..15],
                         Events = [new(filter.Key, e)],
-                        Keys = extractionResult.CorrelationKeys == null ? new() : new(extractionResult.CorrelationKeys)
+                        Keys = CorrelationKeys == null ? new() : new(CorrelationKeys)
                     };
                     this.Logger.LogInformation("Correlation context with id '{contextId}' successfully created", context.Id);
                     this.Logger.LogInformation("Event successfully correlated to context with id '{contextId}'", context.Id);
@@ -140,9 +129,9 @@ public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRep
                 else
                 {
                     context = contextCorrelationResult.Context.Clone()!;
-                    if (extractionResult.CorrelationKeys != null)
+                    if (CorrelationKeys != null)
                     {
-                        foreach(var kvp in extractionResult.CorrelationKeys)
+                        foreach(var kvp in CorrelationKeys)
                         {
                             if (context.Keys.TryGetValue(kvp.Key, out var value) && !string.IsNullOrWhiteSpace(value)) continue;
                             context.Keys[kvp.Key] = kvp.Value;
@@ -161,7 +150,7 @@ public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRep
                     {
                         Id = Guid.NewGuid().ToString("N")[..15],
                         Events = [new(filter.Key, e)],
-                        Keys = extractionResult.CorrelationKeys == null ? new() : new(extractionResult.CorrelationKeys)
+                        Keys = CorrelationKeys == null ? new() : new(CorrelationKeys)
                     };
                     await this.CreateOrUpdateContextAsync(context, cancellationToken).ConfigureAwait(false);
                     this.Logger.LogInformation("Correlation context with id '{contextId}' successfully created", context.Id);
@@ -169,7 +158,7 @@ public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRep
                 }
                 else
                 {
-                    this.Logger.LogInformation("Found {matchingContextCount} matching correlation contexts", contextCorrelationResults.Count());
+                    this.Logger.LogInformation("Found {matchingContextCount} matching correlation contexts", contextCorrelationResults.Count);
                     foreach (var result in contextCorrelationResults)
                     {
                         context = result.Context.Clone()!;

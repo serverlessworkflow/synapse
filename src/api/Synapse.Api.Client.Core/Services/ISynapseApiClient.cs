@@ -20,6 +20,11 @@ public interface ISynapseApiClient
 {
 
     /// <summary>
+    /// Gets the Synapse API used to manage <see cref="Correlation"/>s
+    /// </summary>
+    INamespacedResourceApiClient<Correlation> Correlations { get; }
+
+    /// <summary>
     /// Gets the Synapse API used to manage <see cref="Correlator"/>s
     /// </summary>
     INamespacedResourceApiClient<Correlator> Correlators { get; }

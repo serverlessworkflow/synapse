@@ -58,7 +58,7 @@
         return @operator.Status?.Phase switch
         {
             OperatorStatusPhase.Running => "primary",
-            OperatorStatusPhase.Stopped => "danger",
+            OperatorStatusPhase.Stopped => "secondary",
             _ => "secondary"
         };
     }

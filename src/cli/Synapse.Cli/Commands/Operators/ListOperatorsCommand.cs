@@ -13,26 +13,26 @@
 
 using Neuroglia.Data.Infrastructure.ResourceOriented;
 
-namespace Synapse.Cli.Commands.Workflows;
+namespace Synapse.Cli.Commands.Operators;
 
 /// <summary>
-/// Represents the <see cref="Command"/> used to list<see cref="Workflow"/>s
+/// Represents the <see cref="Command"/> used to list<see cref="Operator"/>s
 /// </summary>
-internal class ListWorkflowsCommand
+internal class ListOperatorsCommand
     : Command
 {
 
     /// <summary>
-    /// Gets the <see cref="ListWorkflowsCommand"/>'s name
+    /// Gets the <see cref="ListOperatorsCommand"/>'s name
     /// </summary>
     public const string CommandName = "list";
     /// <summary>
-    /// Gets the <see cref="ListWorkflowsCommand"/>'s description
+    /// Gets the <see cref="ListOperatorsCommand"/>'s description
     /// </summary>
-    public const string CommandDescription = "Lists workflows";
+    public const string CommandDescription = "Lists operators";
 
     /// <inheritdoc/>
-    public ListWorkflowsCommand(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, ISynapseApiClient api)
+    public ListOperatorsCommand(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, ISynapseApiClient api)
         : base(serviceProvider, loggerFactory, api, CommandName, CommandDescription)
     {
         this.AddAlias("ls");
@@ -41,51 +41,43 @@ internal class ListWorkflowsCommand
     }
 
     /// <summary>
-    /// Handles the <see cref="ListWorkflowsCommand"/>
+    /// Handles the <see cref="ListOperatorsCommand"/>
     /// </summary>
-    /// <param name="namespace">The namespace the workflow to list belong to</param>
+    /// <param name="namespace">The namespace the operators to list belong to</param>
     /// <returns>A new awaitable <see cref="Task"/></returns>
     public async Task HandleAsync(string @namespace)
     {
         var table = new Table();
         var isEmpty = true;
         table.Border(TableBorder.None);
-        table.AddColumn("NAME");
-        table.AddColumn("NAMESPACE");
-        table.AddColumn("LATEST", column =>
+        table.AddColumn("NAME", column =>
+        {
+            column.NoWrap = true;
+        });
+        table.AddColumn("NAMESPACE", column =>
+        {
+            column.NoWrap = true;
+        });
+        table.AddColumn("STATUS", column =>
         {
             column.Alignment = Justify.Center;
         });
-        table.AddColumn("VERSIONS", column =>
+        table.AddColumn("CREATED AT", column =>
         {
             column.Alignment = Justify.Center;
         });
-        table.AddColumn("SCHEDULE", column =>
-        {
-            column.Alignment = Justify.Center;
-        });
-        table.AddColumn("OPERATOR", column =>
-        {
-            column.Alignment = Justify.Center;
-        });
-        await foreach (var workflow in await this.Api.Workflows.ListAsync(@namespace))
+        await foreach (var @operator in await this.Api.Operators.ListAsync(@namespace))
         {
             isEmpty = false;
             table.AddRow
             (
-                workflow.GetName(),
-                workflow.GetNamespace()!,
-                workflow.Spec.Versions.GetLatest().Document.Version,
-                workflow.Spec.Versions.Count.ToString(),
-                workflow.Spec.Versions.GetLatest().Schedule == null 
-                    ? "-" 
-                    : workflow.Spec.Versions.GetLatest().Schedule?.After?.ToString()
-                    ?? workflow.Spec.Versions.GetLatest().Schedule?.Cron
-                    ?? "events",
-                workflow.Metadata.Labels?.TryGetValue(SynapseDefaults.Resources.Labels.Operator, out var @operator) == true ? @operator : "-"
+                @operator.GetName(),
+                @operator.GetNamespace()!,
+                (@operator.Status?.Phase ?? OperatorStatusPhase.Stopped).ToUpperInvariant(),
+                @operator.Metadata.CreationTimestamp.ToString()!
             );
         }
-        if (isEmpty)
+        if(isEmpty)
         {
             AnsiConsole.WriteLine(string.IsNullOrWhiteSpace(@namespace) ? "No resource found" : $"No resource found in {@namespace} namespace");
             return;
@@ -96,7 +88,7 @@ internal class ListWorkflowsCommand
     static class CommandOptions
     {
 
-        public static Option<string> Namespace => new(["-n", "--namespace"], () => string.Empty, "The namespace the workflow to list belong to.");
+        public static Option<string> Namespace => new(["-n", "--namespace"], () => string.Empty, "The namespace the operators to list belong to.");
 
     }
 

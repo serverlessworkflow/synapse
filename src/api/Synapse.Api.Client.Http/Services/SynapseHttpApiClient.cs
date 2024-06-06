@@ -64,6 +64,9 @@ public class SynapseHttpApiClient
     protected HttpClient HttpClient { get; }
 
     /// <inheritdoc/>
+    public INamespacedResourceApiClient<Correlation> Correlations { get; private set; } = null!;
+
+    /// <inheritdoc/>
     public INamespacedResourceApiClient<Correlator> Correlators { get; private set; } = null!;
 
     /// <inheritdoc/>
