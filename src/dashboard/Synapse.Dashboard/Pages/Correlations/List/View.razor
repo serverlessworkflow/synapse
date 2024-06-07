@@ -43,7 +43,7 @@
                         <td class="text-center">@GetConditionCount(resource)</td>
                         <td class="text-center"><span class="badge rounded-pill border border-secondary text-secondary">@GetOutcomeType(resource)</span></td>
                         <td class="text-center"><a @onclick:preventDefault="true" @onclick:stopPropagation="true" href="@GetOutcomeTargetRef(resource)">@GetOutcomeTarget(resource)</a></td>
-                        <td class="text-start">@resource.Status?.Contexts.Count</td>
+                        <td class="text-center">@resource.Status?.Contexts.Count</td>
                         <td class="text-end">
                             <button class="btn btn-outline-primary btn-sm" title="Edit '@resource.Metadata.Name'" @onclick="async _ => await OnShowResourceEditorAsync(resource)" @onclick:preventDefault @onclick:stopPropagation><Icon Name="IconName.Pencil" /></button>
                             <button class="btn btn-outline-danger btn-sm" title="Delete '@resource.Metadata.Name'" @onclick="async _ => await OnDeleteResourceAsync(resource)" @onclick:preventDefault @onclick:stopPropagation><Icon Name="IconName.Trash" /></button>
