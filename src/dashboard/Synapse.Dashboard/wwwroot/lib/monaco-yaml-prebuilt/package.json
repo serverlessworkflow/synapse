@@ -26,13 +26,13 @@
     "yaml",
     "monaco-yaml"
   ],
-  "homepage": "https://github.com/neuroglia-io/monaco-yaml-prebuilt",
+  "homepage": "https://github.com/serverlessworkflow/monaco-yaml-prebuilt",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/neuroglia-io/monaco-yaml-prebuilt.git"
+    "url": "git+https://github.com/serverlessworkflow/monaco-yaml-prebuilt.git"
   },
   "bugs": {
-    "url": "https://github.com/neuroglia-io/monaco-yaml-prebuilt/issues"
+    "url": "https://github.com/serverlessworkflow/monaco-yaml-prebuilt/issues"
   },
   "author": {
     "name": "Jean-Baptiste BIANCHI",

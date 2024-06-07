@@ -11,27 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Neuroglia.Data.Infrastructure.ResourceOriented;
-
 namespace Synapse.Resources;
 
 /// <summary>
-/// Represents the resource used to describe and configure a correlation
+/// Represents the definition of a correlation outcome used to correlation an existing workflow instance
 /// </summary>
 [DataContract]
-public record Correlation
-    : Resource<CorrelationSpec, CorrelationStatus>
+public record CorrelateWorkflowOutcomeDefinition
 {
 
     /// <summary>
-    /// Gets the <see cref="Correlation"/>'s resource type
+    /// Gets/sets a '{name}.{namespace}' reference to the workflow instance to correlate
     /// </summary>
-    public static readonly ResourceDefinitionInfo ResourceDefinition = new CorrelationResourceDefinition()!;
-
-    /// <inheritdoc/>
-    public Correlation() : base(ResourceDefinition) { this.Status = new(); }
-
-    /// <inheritdoc/>
-    public Correlation(ResourceMetadata metadata, CorrelationSpec spec) : base(ResourceDefinition, metadata, spec, new()) { }
+    [Required]
+    [DataMember(Name = "ref", Order = 1), JsonPropertyName("ref"), JsonPropertyOrder(1), YamlMember(Alias = "ref", Order = 1)]
+    public required virtual string Ref { get; set; }
 
 }

@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Neuroglia.Data.Infrastructure.ResourceOriented;
+
 namespace Synapse.Cli.Commands.Correlations;
 
 /// <summary>
@@ -30,29 +32,49 @@ internal class CreateCorrelationCommand
     public const string CommandDescription = "Creates a new correlation.";
 
     /// <inheritdoc/>
-    public CreateCorrelationCommand(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, ISynapseApiClient api)
+    public CreateCorrelationCommand(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, ISynapseApiClient api, IYamlSerializer yamlSerializer)
         : base(serviceProvider, loggerFactory, api, CommandName, CommandDescription)
     {
-        this.Add(new Argument<string>("name") { Description = "The name of the correlation to create." });
+        this.YamlSerializer = yamlSerializer;
+        this.Add(CommandOptions.File);
         this.Handler = CommandHandler.Create<string>(this.HandleAsync);
     }
 
     /// <summary>
+    /// Gets the service used to serialize/deserialize objects to/from YAML
+    /// </summary>
+    protected IYamlSerializer YamlSerializer { get; }
+
+    /// <summary>
     /// Handles the <see cref="CreateCorrelationCommand"/>
     /// </summary>
-    /// <param name="name">The name of the correlation to create</param>
+    /// <param name="file">The file that defines the correlation to create</param>
     /// <returns>A new awaitable <see cref="Task"/></returns>
-    public async Task HandleAsync(string name)
+    public async Task HandleAsync(string file)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
-        await this.Api.Correlations.CreateAsync(new() 
-        { 
-            Metadata = new()
+        ArgumentException.ThrowIfNullOrWhiteSpace(file);
+        var yaml = await File.ReadAllTextAsync(file);
+        var correlation = this.YamlSerializer.Deserialize<Correlation>(yaml) ?? throw new NullReferenceException("Failed to read a correlation resource from the specified file.");
+        correlation = await this.Api.Correlations.CreateAsync(correlation);
+        Console.WriteLine($"correlation/{correlation.GetName()} created");
+    }
+
+    static class CommandOptions
+    {
+
+        public static Option<string> File
+        {
+            get
             {
-                Name = name
+                var option = new Option<string>("--file")
+                {
+                    Description = "The file that contains the definition of the correlation to create."
+                };
+                option.AddAlias("-f");
+                return option;
             }
-        });
-        Console.WriteLine($"correlation/{name} created");
+        }
+
     }
 
 }

@@ -54,7 +54,6 @@ public class WorkflowController(IServiceProvider serviceProvider, ILoggerFactory
     public override async Task StartAsync(CancellationToken cancellationToken)
     {
         await base.StartAsync(cancellationToken).ConfigureAwait(false);
-        foreach (var workflowInstance in this.Resources.Values.ToList()) await this.OnResourceCreatedAsync(workflowInstance, cancellationToken).ConfigureAwait(false);
         this.Operator!.Select(b => b.Resource.Spec.Selector).SubscribeAsync(this.OnResourceSelectorChangedAsync, cancellationToken: cancellationToken);
         await this.OnResourceSelectorChangedAsync(this.Operator!.Resource.Spec.Selector).ConfigureAwait(false);
     }

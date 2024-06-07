@@ -11,19 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.Extensions.Options;
-using Neuroglia;
-using Neuroglia.Serialization;
-using ServerlessWorkflow.Sdk;
-using Swashbuckle.AspNetCore.SwaggerUI;
-using Synapse;
-using Synapse.Api.Application;
-using Synapse.Api.Http;
-using Synapse.Api.Http.Hubs;
-using Synapse.Api.Server.Configuration;
-using System.Net.Mime;
-
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<SynapseApiServerOptions>(builder.Configuration);
 builder.Services.AddResponseCompression();

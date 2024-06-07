@@ -81,7 +81,7 @@ monaco.editor.create(document.getElementById('yaml-editor'), {
 By default, only `yaml` and `json` are supported. If you want to add more, you can edit `webpack.config.js` and rebuild the package:
 
 ```
-git clone https://github.com/neuroglia-io/monaco-yaml-prebuilt.git
+git clone https://github.com/serverlessworkflow/monaco-yaml-prebuilt.git
 cd monaco-yaml-prebuilt
 ... edit webpack.config.js
 npm run build

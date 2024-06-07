@@ -38,9 +38,4 @@ public class CorrelatorOptions
     /// </summary>
     public virtual string Name { get; set; }
 
-    /// <summary>
-    /// Gets/sets the options used to configure the runners spawned by a Synapse Correlator
-    /// </summary>
-    public virtual RunnerDefinition Runner { get; set; } = new();
-
 }

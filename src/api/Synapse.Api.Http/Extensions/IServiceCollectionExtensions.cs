@@ -67,7 +67,7 @@ public static class IServiceCollectionExtensions
                 Contact = new()
                 {
                     Name = "The Synapse Authors",
-                    Url = new Uri("https://github.com/neuroglia-io/synapse")
+                    Url = new Uri("https://github.com/serverlessworkflow/synapse")
                 }
             });
             builder.IncludeXmlComments(typeof(Workflow).Assembly.Location.Replace(".dll", ".xml"));

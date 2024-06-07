@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Synapse.Operator.Services;
+namespace Synapse.Correlator.Services;
 
 /// <summary>
 /// Represents the service used to handle a specific <see cref="Resources.Correlation"/>
@@ -22,7 +22,7 @@ namespace Synapse.Operator.Services;
 /// <param name="expressionEvaluator">The service used to evaluate runtime expressions</param>
 /// <param name="serializer">The service used to serialize/deserialize objects to/from JSON</param>
 /// <param name="correlation">The resource of the correlation to handle</param>
-public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRepository resources, ICloudEventBus cloudEventBus, IExpressionEvaluator expressionEvaluator, IJsonSerializer serializer, Correlation correlation)
+public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRepository resources, ICloudEventBus cloudEventBus, IExpressionEvaluator expressionEvaluator, IJsonSerializer serializer, IResourceMonitor<Correlation> correlation)
     : IDisposable, IAsyncDisposable
 {
 
@@ -56,7 +56,7 @@ public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRep
     /// <summary>
     /// Gets the resource of the correlation to manage the scheduling of
     /// </summary>
-    protected Correlation Correlation { get; set; } = correlation;
+    protected IResourceMonitor<Correlation> Correlation { get; } = correlation;
 
     /// <summary>
     /// Gets the handler's subscription
@@ -70,8 +70,7 @@ public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRep
     /// <returns>A new awaitable <see cref="Task"/></returns>
     public virtual Task CorrelateAsync(CancellationToken cancellationToken = default)
     {
-        this.Subscription = this.CloudEventBus.InputStream
-            .SubscribeAsync(async e => await this.CorrelateEventAsync(e, cancellationToken).ConfigureAwait(false));
+        this.Subscription = this.CloudEventBus.InputStream.SubscribeAsync(async e => await this.CorrelateEventAsync(e, cancellationToken).ConfigureAwait(false));
         return Task.CompletedTask;
     }
 
@@ -84,99 +83,107 @@ public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRep
     protected virtual async Task CorrelateEventAsync(CloudEvent e, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(e);
-        this.Correlation.Status ??= new();
-        Dictionary<int, EventFilterDefinition>? matchingFilters = null;
-        if (this.Correlation.Spec.Events.All != null)
+        try 
         {
-            matchingFilters = (await this.Correlation.Spec.Events.All.ToAsyncEnumerable().Select((Filter, Index) => new KeyValuePair<int, EventFilterDefinition>(Index, Filter)).WhereAwait(async f => await this.TryFilterEventAsync(f.Value, e, cancellationToken).ConfigureAwait(false)).ToListAsync(cancellationToken).ConfigureAwait(false)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-        }
-        else if (this.Correlation.Spec.Events.Any != null) 
-        {
-            matchingFilters = (await this.Correlation.Spec.Events.Any.ToAsyncEnumerable().Select((Filter, Index) => new KeyValuePair<int, EventFilterDefinition>(Index, Filter)).WhereAwait(async f => await this.TryFilterEventAsync(f.Value, e, cancellationToken).ConfigureAwait(false)).ToListAsync(cancellationToken).ConfigureAwait(false)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-        }
-        else if (this.Correlation.Spec.Events.One != null) 
-        { 
-            if (await this.TryFilterEventAsync(this.Correlation.Spec.Events.One, e, cancellationToken).ConfigureAwait(false)) matchingFilters = new(){ { 0, this.Correlation.Spec.Events.One } };
-        }
-        else throw new Exception("The correlation's event consumption strategy must be set");
-        if (matchingFilters == null || matchingFilters.Count < 1) return;
-        var contextCorrelationResults = await this.Correlation.Status.Contexts.ToAsyncEnumerable()
-            .SelectAwait(async c => await this.TryCorrelateToContextAsync(c, e, matchingFilters, cancellationToken).ConfigureAwait(false))
-            .Where(c => c.Succeeded)
-            .ToListAsync(cancellationToken).ConfigureAwait(false);
-        var filter = matchingFilters.First();
-        var (Succeeded, CorrelationKeys) = await this.TryExtractCorrelationKeysAsync(e, filter.Value.Correlate, cancellationToken).ConfigureAwait(false);
-        if (!Succeeded) return;
-        CorrelationContext? context;
-        switch (this.Correlation.Spec.Lifetime)
-        {
-            case CorrelationLifetime.Ephemeral:
-                var contextCorrelationResult = contextCorrelationResults.SingleOrDefault();
-                if (contextCorrelationResult == default)
-                {
-                    this.Logger.LogInformation("Failed to find a matching correlation context");
-                    if (this.Correlation.Status.Contexts.Count != 0) throw new Exception("Failed to correlate event"); //should not happen
-                    this.Logger.LogInformation("Creating a new correlation context...");
-                    context = new CorrelationContext()
+            this.Correlation.Resource.Status ??= new();
+            Dictionary<int, EventFilterDefinition>? matchingFilters = null;
+            if (this.Correlation.Resource.Spec.Events.All != null)
+            {
+                matchingFilters = (await this.Correlation.Resource.Spec.Events.All!.ToAsyncEnumerable().Select((Filter, Index) => new KeyValuePair<int, EventFilterDefinition>(Index, Filter)).WhereAwait(async f => await this.TryFilterEventAsync(f.Value, e, cancellationToken).ConfigureAwait(false)).ToListAsync(cancellationToken).ConfigureAwait(false)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            }
+            else if (this.Correlation.Resource.Spec.Events.Any != null)
+            {
+                matchingFilters = (await this.Correlation.Resource.Spec.Events.Any!.ToAsyncEnumerable().Select((Filter, Index) => new KeyValuePair<int, EventFilterDefinition>(Index, Filter)).WhereAwait(async f => await this.TryFilterEventAsync(f.Value, e, cancellationToken).ConfigureAwait(false)).ToListAsync(cancellationToken).ConfigureAwait(false)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            }
+            else if (this.Correlation.Resource.Spec.Events.One != null)
+            {
+                if (await this.TryFilterEventAsync(this.Correlation.Resource.Spec.Events.One!, e, cancellationToken).ConfigureAwait(false)) matchingFilters = new() { { 0, this.Correlation.Resource.Spec.Events.One! } };
+            }
+            else throw new Exception("The correlation's event consumption strategy must be set");
+            if (matchingFilters == null || matchingFilters.Count < 1) return;
+            var contextCorrelationResults = await this.Correlation.Resource.Status.Contexts.ToAsyncEnumerable()
+                .Where(c => c.Status == CorrelationContextStatus.Active)
+                .SelectAwait(async c => await this.TryCorrelateToContextAsync(c, e, matchingFilters, cancellationToken).ConfigureAwait(false))
+                .Where(c => c.Succeeded)
+                .ToListAsync(cancellationToken).ConfigureAwait(false);
+            var filter = matchingFilters.First();
+            var (Succeeded, CorrelationKeys) = await this.TryExtractCorrelationKeysAsync(e, filter.Value.Correlate, cancellationToken).ConfigureAwait(false);
+            if (!Succeeded) return;
+            CorrelationContext? context;
+            switch (this.Correlation.Resource.Spec.Lifetime)
+            {
+                case CorrelationLifetime.Ephemeral:
+                    var contextCorrelationResult = contextCorrelationResults.SingleOrDefault();
+                    if (contextCorrelationResult == default)
                     {
-                        Id = Guid.NewGuid().ToString("N")[..15],
-                        Events = [new(filter.Key, e)],
-                        Keys = CorrelationKeys == null ? new() : new(CorrelationKeys)
-                    };
-                    this.Logger.LogInformation("Correlation context with id '{contextId}' successfully created", context.Id);
-                    this.Logger.LogInformation("Event successfully correlated to context with id '{contextId}'", context.Id);
-                }
-                else
-                {
-                    context = contextCorrelationResult.Context.Clone()!;
-                    if (CorrelationKeys != null)
-                    {
-                        foreach(var kvp in CorrelationKeys)
+                        this.Logger.LogInformation("Failed to find a matching correlation context");
+                        if (this.Correlation.Resource.Status.Contexts.Count != 0) throw new Exception("Failed to correlate event"); //should not happen
+                        this.Logger.LogInformation("Creating a new correlation context...");
+                        context = new CorrelationContext()
                         {
-                            if (context.Keys.TryGetValue(kvp.Key, out var value) && !string.IsNullOrWhiteSpace(value)) continue;
-                            context.Keys[kvp.Key] = kvp.Value;
-                        }
+                            Id = Guid.NewGuid().ToString("N")[..15],
+                            Events = [new(filter.Key, e)],
+                            Keys = CorrelationKeys == null ? new() : new(CorrelationKeys)
+                        };
+                        this.Logger.LogInformation("Correlation context with id '{contextId}' successfully created", context.Id);
+                        this.Logger.LogInformation("Event successfully correlated to context with id '{contextId}'", context.Id);
                     }
-                    context.Events[contextCorrelationResult.FilterIndex!] = e;
-                }
-                await this.CreateOrUpdateContextAsync(context, cancellationToken).ConfigureAwait(false);
-                break;
-            case CorrelationLifetime.Durable:
-                if (contextCorrelationResults.Count < 1)
-                {
-                    this.Logger.LogInformation("Failed to find a matching correlation context");
-                    this.Logger.LogInformation("Creating a new correlation context...");
-                    context = new CorrelationContext()
+                    else
                     {
-                        Id = Guid.NewGuid().ToString("N")[..15],
-                        Events = [new(filter.Key, e)],
-                        Keys = CorrelationKeys == null ? new() : new(CorrelationKeys)
-                    };
-                    await this.CreateOrUpdateContextAsync(context, cancellationToken).ConfigureAwait(false);
-                    this.Logger.LogInformation("Correlation context with id '{contextId}' successfully created", context.Id);
-                    this.Logger.LogInformation("Event successfully correlated to context with id '{contextId}'", context.Id);
-                }
-                else
-                {
-                    this.Logger.LogInformation("Found {matchingContextCount} matching correlation contexts", contextCorrelationResults.Count);
-                    foreach (var result in contextCorrelationResults)
-                    {
-                        context = result.Context.Clone()!;
-                        if (result.CorrelationKeys != null)
+                        context = contextCorrelationResult.Context.Clone()!;
+                        if (CorrelationKeys != null)
                         {
-                            foreach (var kvp in result.CorrelationKeys)
+                            foreach (var kvp in CorrelationKeys)
                             {
                                 if (context.Keys.TryGetValue(kvp.Key, out var value) && !string.IsNullOrWhiteSpace(value)) continue;
                                 context.Keys[kvp.Key] = kvp.Value;
                             }
                         }
-                        context.Events[result.FilterIndex!] = e;
-                        await this.CreateOrUpdateContextAsync(context, cancellationToken).ConfigureAwait(false);
+                        context.Events[contextCorrelationResult.FilterIndex!] = e;
                     }
-                }
-                break;
-            default: throw new NotSupportedException($"The specified correlation lifetime '{this.Correlation.Spec.Lifetime}' is not supported");
+                    await this.CreateOrUpdateContextAsync(context, cancellationToken).ConfigureAwait(false);
+                    break;
+                case CorrelationLifetime.Durable:
+                    if (contextCorrelationResults.Count < 1)
+                    {
+                        this.Logger.LogInformation("Failed to find a matching correlation context");
+                        this.Logger.LogInformation("Creating a new correlation context...");
+                        context = new CorrelationContext()
+                        {
+                            Id = Guid.NewGuid().ToString("N")[..15],
+                            Events = [new(filter.Key, e)],
+                            Keys = CorrelationKeys == null ? new() : new(CorrelationKeys)
+                        };
+                        await this.CreateOrUpdateContextAsync(context, cancellationToken).ConfigureAwait(false);
+                        this.Logger.LogInformation("Correlation context with id '{contextId}' successfully created", context.Id);
+                        this.Logger.LogInformation("Event successfully correlated to context with id '{contextId}'", context.Id);
+                    }
+                    else
+                    {
+                        this.Logger.LogInformation("Found {matchingContextCount} matching correlation contexts", contextCorrelationResults.Count);
+                        foreach (var result in contextCorrelationResults)
+                        {
+                            context = result.Context.Clone()!;
+                            if (result.CorrelationKeys != null)
+                            {
+                                foreach (var kvp in result.CorrelationKeys)
+                                {
+                                    if (context.Keys.TryGetValue(kvp.Key, out var value) && !string.IsNullOrWhiteSpace(value)) continue;
+                                    context.Keys[kvp.Key] = kvp.Value;
+                                }
+                            }
+                            context.Events[result.FilterIndex!] = e;
+                            await this.CreateOrUpdateContextAsync(context, cancellationToken).ConfigureAwait(false);
+                        }
+                    }
+                    break;
+                default: throw new NotSupportedException($"The specified correlation lifetime '{this.Correlation.Resource.Spec.Lifetime}' is not supported");
+            }
         }
+        catch(Exception ex)
+        {
+            this.Logger.LogError("An error occurred while attempting to correlate the cloud event with id '{eventId}': {ex}", e.Id, ex.Message);
+        }   
     }
 
     /// <summary>
@@ -200,6 +207,13 @@ public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRep
                 else if (!string.IsNullOrWhiteSpace(valueStr) && !Regex.IsMatch(value.ToString() ?? string.Empty, valueStr, RegexOptions.IgnoreCase)) return false;
             }
         }
+        if (filter.Correlate?.Count > 0)
+        {
+            foreach (var keyDefinition in filter.Correlate.Where(k => !k.Value.From.IsRuntimeExpression()))
+            {
+                if (!e.TryGetAttribute(keyDefinition.Value.From, out _)) return false;
+            }
+        }
         return true;
     }
 
@@ -217,7 +231,7 @@ public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRep
         ArgumentNullException.ThrowIfNull(e);
         ArgumentNullException.ThrowIfNull(filters);
         var correlationKeys = new Dictionary<string, string>();
-        foreach (var filter in filters.Where((f, i) => !context.Events.ContainsKey(i)))
+        foreach (var filter in filters.Where(f => !context.Events.ContainsKey(f.Key)))
         {
             if (filter.Value.Correlate?.Count > 0)
             {
@@ -227,7 +241,6 @@ public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRep
                          ? (await this.ExpressionEvaluator.EvaluateAsync<object>(keyDefinition.Value.From, e, cancellationToken: cancellationToken).ConfigureAwait(false))?.ToString()
                          : e.GetAttribute(keyDefinition.Value.From)?.ToString())
                          ?? string.Empty;
-                    if (!e.TryGetAttribute(keyDefinition.Value.From, out var value) || value == null) continue;
                     if (string.IsNullOrWhiteSpace(keyDefinition.Value.Expect))
                     {
                         if (context.Keys.TryGetValue(keyDefinition.Key, out var existingCorrelationTerm) && existingCorrelationTerm != correlationTerm) continue;
@@ -264,10 +277,12 @@ public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRep
                 ? (await this.ExpressionEvaluator.EvaluateAsync<object>(keyDefinition.Value.From, e, cancellationToken: cancellationToken).ConfigureAwait(false))?.ToString()
                 : e.GetAttribute(keyDefinition.Value.From)?.ToString())
                 ?? string.Empty;
-            if (!e.TryGetAttribute(keyDefinition.Value.From, out var value) || value == null) return (false, null);
             if (!string.IsNullOrWhiteSpace(keyDefinition.Value.Expect))
             {
-                if (keyDefinition.Value.Expect.IsRuntimeExpression() && !await this.ExpressionEvaluator.EvaluateAsync<bool>(keyDefinition.Value.Expect, correlationTerm, cancellationToken: cancellationToken).ConfigureAwait(false)) return (false, null);
+                if (keyDefinition.Value.Expect.IsRuntimeExpression())
+                {
+                    if (!await this.ExpressionEvaluator.EvaluateAsync<bool>(keyDefinition.Value.Expect, correlationTerm, cancellationToken: cancellationToken).ConfigureAwait(false)) return (false, null);
+                }
                 else if (!keyDefinition.Value.Expect.Equals(correlationTerm, StringComparison.OrdinalIgnoreCase)) return (false, null);
             }
             correlationKeys[keyDefinition.Key] = correlationTerm;
@@ -284,13 +299,29 @@ public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRep
     protected virtual async Task CreateOrUpdateContextAsync(CorrelationContext context, CancellationToken cancellationToken =default)
     {
         ArgumentNullException.ThrowIfNull(context);
-        var originalResource = this.Correlation.Clone()!;
-        var updatedResource = this.Correlation.Clone();
-        var existingContext = originalResource.Status?.Contexts.FirstOrDefault(c => c.Id == context.Id);
-        var patch = existingContext == null 
-            ? new JsonPatch(PatchOperation.Add(JsonPointer.Create<Correlation>(c => c.Status!.Contexts).ToCamelCase(), this.Serializer.SerializeToNode(context)))
-            : new JsonPatch(PatchOperation.Replace(JsonPointer.Create<Correlation>(c => c.Status!.Contexts[originalResource.Status!.Contexts.IndexOf(existingContext)]).ToCamelCase(), this.Serializer.SerializeToNode(context)));
-        await this.Resources.PatchAsync<Correlation>(new(PatchType.JsonPatch, patch), this.Correlation.GetName(), this.Correlation.GetNamespace(), false, cancellationToken).ConfigureAwait(false);
+        var originalResource = this.Correlation.Resource.Clone()!;
+        var updatedResource = this.Correlation.Resource.Clone()!;
+        updatedResource.Status ??= new();
+        updatedResource.Status.LastModified = DateTimeOffset.Now;
+        var existingContext = updatedResource.Status.Contexts.FirstOrDefault(c => c.Id == context.Id);
+        if (existingContext == null) 
+        {
+            updatedResource.Status.Contexts.Add(context);
+        }
+        else
+        {
+            var index = updatedResource.Status.Contexts.IndexOf(existingContext);
+            updatedResource.Status.Contexts.Remove(existingContext);
+            updatedResource.Status.Contexts.Insert(index, context);
+            if (context.Satisfies(updatedResource.Spec.Events))
+            {
+                context.Status = CorrelationContextStatus.Completed;
+                if (updatedResource.Spec.Lifetime == CorrelationLifetime.Ephemeral) updatedResource.Status.Phase = CorrelationStatusPhase.Completed;
+                //todo: process the correlation's outcome
+            }
+        }
+        var patch = JsonPatchUtility.CreateJsonPatchFromDiff(originalResource, updatedResource);
+        await this.Resources.PatchStatusAsync<Correlation>(new(PatchType.JsonPatch, patch), originalResource.GetName(), originalResource.GetNamespace(), false, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -300,7 +331,9 @@ public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRep
     /// <returns>A new awaitable <see cref="ValueTask"/></returns>
     protected virtual async ValueTask DisposeAsync(bool disposing)
     {
-        if (!this._disposed) return;
+        if (!disposing || this._disposed) return;
+        await this.Correlation.DisposeAsync().ConfigureAwait(false);
+        this.Subscription?.Dispose();
         this._disposed = true;
         await Task.CompletedTask.ConfigureAwait(false);
     }
@@ -318,8 +351,9 @@ public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRep
     /// <param name="disposing">A boolean indicating whether or not the <see cref="CorrelationHandler"/> is being disposed of</param>
     protected virtual void Dispose(bool disposing)
     {
-        if (!this._disposed) return;
-
+        if (!disposing || this._disposed) return;
+        this.Correlation.Dispose();
+        this.Subscription?.Dispose();
         this._disposed = true;
     }
 

@@ -11,6 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Neuroglia.Data.Infrastructure.ResourceOriented;
+using System.Collections.Concurrent;
+
 namespace Synapse.Correlator.Services;
 
 /// <summary>
@@ -20,9 +23,10 @@ namespace Synapse.Correlator.Services;
 /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
 /// <param name="controllerOptions">The service used to access the current <see cref="IOptions{TOptions}"/></param>
 /// <param name="resources">The service used to manage <see cref="IResource"/>s</param>
+/// <param name="expressionEvaluatorProvider">The service used to provide <see cref="IExpressionEvaluator"/>s</param>
 /// <param name="correlatorOptions">The current <see cref="Configuration.CorrelatorOptions"/></param>
 /// <param name="correlatorAccessor">The service used to access the current <see cref="Resources.Correlator"/></param>
-public class CorrelationController(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, IOptions<ResourceControllerOptions<Correlation>> controllerOptions, IResourceRepository resources, IOptions<CorrelatorOptions> correlatorOptions, ICorrelatorController correlatorAccessor)
+public class CorrelationController(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, IOptions<ResourceControllerOptions<Correlation>> controllerOptions, IResourceRepository resources, IExpressionEvaluatorProvider expressionEvaluatorProvider, IOptions<CorrelatorOptions> correlatorOptions, ICorrelatorController correlatorAccessor)
     : ResourceController<Correlation>(loggerFactory, controllerOptions, resources)
 {
 
@@ -30,6 +34,11 @@ public class CorrelationController(IServiceProvider serviceProvider, ILoggerFact
     /// Gets the current <see cref="IServiceProvider"/>
     /// </summary>
     protected IServiceProvider ServiceProvider { get; } = serviceProvider;
+
+    /// <summary>
+    /// Gets the service used to provide <see cref="IExpressionEvaluator"/>s
+    /// </summary>
+    protected IExpressionEvaluatorProvider ExpressionEvaluatorProvider { get; } = expressionEvaluatorProvider;
 
     /// <summary>
     /// Gets the running <see cref="Resources.Correlator"/>'s options
@@ -41,11 +50,15 @@ public class CorrelationController(IServiceProvider serviceProvider, ILoggerFact
     /// </summary>
     protected IResourceMonitor<Resources.Correlator> Correlator => correlatorAccessor.Correlator;
 
+    /// <summary>
+    /// Gets a <see cref="ConcurrentDictionary{TKey, TValue}"/> that contains current <see cref="CorrelationHandler"/>s
+    /// </summary>
+    protected ConcurrentDictionary<string, CorrelationHandler> Correlators { get; } = [];
+
     /// <inheritdoc/>
     public override async Task StartAsync(CancellationToken cancellationToken)
     {
         await base.StartAsync(cancellationToken).ConfigureAwait(false);
-        foreach (var correlationInstance in this.Resources.Values.ToList()) await this.OnResourceCreatedAsync(correlationInstance, cancellationToken).ConfigureAwait(false);
         this.Correlator!.Select(b => b.Resource.Spec.Selector).SubscribeAsync(this.OnResourceSelectorChangedAsync, cancellationToken: cancellationToken);
         await this.OnResourceSelectorChangedAsync(this.Correlator!.Resource.Spec.Selector).ConfigureAwait(false);
     }
@@ -58,23 +71,47 @@ public class CorrelationController(IServiceProvider serviceProvider, ILoggerFact
     }
 
     /// <summary>
+    /// Creates a new <see cref="CorrelationHandler"/> for the specified workflow
+    /// </summary>
+    /// <param name="correlation">The resource of the workflow to create a new scheduler for</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>A new <see cref="CorrelationHandler"/></returns>
+    protected virtual async Task<CorrelationHandler> CreateCorrelatorAsync(Correlation correlation, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(correlation);
+        var expressionEvaluator = this.ExpressionEvaluatorProvider.GetEvaluator(correlation.Spec.Expressions.Language) ?? throw new NullReferenceException($"Failed to find a registered expression evaluator that supports the configured language '{correlation.Spec.Expressions.Language}'");
+        var correlationMonitor = new ResourceMonitor<Correlation>(this.Watch ?? await this.Repository.WatchAsync<Correlation>(cancellationToken: cancellationToken).ConfigureAwait(false), correlation, this.Watch != null);
+        var correlator = ActivatorUtilities.CreateInstance<CorrelationHandler>(this.ServiceProvider, correlationMonitor, expressionEvaluator);
+        if (!this.Correlators.TryAdd(correlation.GetQualifiedName(), correlator)) await correlator.DisposeAsync().ConfigureAwait(false);
+        return correlator;
+    }
+
+    /// <summary>
     /// Attempts to claim the specified <see cref="Correlation"/>
     /// </summary>
-    /// <param name="resource">The <see cref="Correlation"/> to try to claim</param>
+    /// <param name="correlation">The <see cref="Correlation"/> to try to claim</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>A boolean indicating whether or not the instance could be claimed</returns>
-    protected virtual async Task<bool> TryClaimAsync(Correlation resource, CancellationToken cancellationToken)
+    protected virtual async Task<bool> TryClaimAsync(Correlation correlation, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(resource);
+        ArgumentNullException.ThrowIfNull(correlation);
         if (this.Correlator == null) throw new Exception("The controller must be started before attempting any operation");
-        if (resource.Metadata.Labels != null && resource.Metadata.Labels.TryGetValue(SynapseDefaults.Resources.Labels.Correlator, out var correlatorQualifiedName) && correlatorQualifiedName == this.Correlator.Resource.GetQualifiedName()) return true;
+        if (correlation.Metadata.Labels != null && correlation.Metadata.Labels.TryGetValue(SynapseDefaults.Resources.Labels.Correlator, out var correlatorQualifiedName) && correlatorQualifiedName == this.Correlator.Resource.GetQualifiedName()) return true;
         try
         {
-            var originalResource = resource.Clone();
-            resource.Metadata.Labels ??= new Dictionary<string, string>();
-            resource.Metadata.Labels[SynapseDefaults.Resources.Labels.Correlator] = this.Correlator.Resource.GetQualifiedName();
-            var patch = JsonPatchUtility.CreateJsonPatchFromDiff(originalResource, resource);
-            resource = await this.Repository.PatchAsync<Correlation>(new(PatchType.JsonPatch, patch), resource.GetName(), resource.GetNamespace(), false, cancellationToken).ConfigureAwait(false);
+            var originalResource = correlation.Clone();
+            correlation.Metadata.Labels ??= new Dictionary<string, string>();
+            correlation.Metadata.Labels[SynapseDefaults.Resources.Labels.Correlator] = this.Correlator.Resource.GetQualifiedName();
+            var patch = JsonPatchUtility.CreateJsonPatchFromDiff(originalResource, correlation);
+            correlation = await this.Repository.PatchAsync<Correlation>(new(PatchType.JsonPatch, patch), correlation.GetName(), correlation.GetNamespace(), false, cancellationToken).ConfigureAwait(false);
+            if (correlation.Status?.Phase == null || correlation.Status.Phase == CorrelationStatusPhase.Pending)
+            {
+                originalResource = correlation.Clone();
+                correlation.Status ??= new();
+                correlation.Status.Phase = CorrelationStatusPhase.Active;
+                correlation.Status.LastModified = DateTimeOffset.Now;
+                originalResource = await this.Repository.PatchStatusAsync<Correlation>(new(PatchType.JsonPatch, JsonPatchUtility.CreateJsonPatchFromDiff(originalResource, correlation)), correlation.GetName(), correlation.GetNamespace(), false, cancellationToken).ConfigureAwait(false);
+            }
             return true;
         }
         catch (ConcurrencyException)
@@ -86,21 +123,29 @@ public class CorrelationController(IServiceProvider serviceProvider, ILoggerFact
     /// <summary>
     /// Attempts to release the specified <see cref="Correlation"/>
     /// </summary>
-    /// <param name="resource">The <see cref="Correlation"/> to try to release</param>
+    /// <param name="correlation">The <see cref="Correlation"/> to try to release</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>A boolean indicating whether or not the instance could be released</returns>
-    protected virtual async Task<bool> TryReleaseAsync(Correlation resource, CancellationToken cancellationToken)
+    protected virtual async Task<bool> TryReleaseAsync(Correlation correlation, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(resource);
-        if (resource.Metadata.Labels != null && resource.Metadata.Labels.TryGetValue(SynapseDefaults.Resources.Labels.Correlator, out var correlatorQualifiedName) && correlatorQualifiedName == this.Correlator.Resource.GetQualifiedName()) return true;
+        ArgumentNullException.ThrowIfNull(correlation);
+        if (correlation.Metadata.Labels != null && correlation.Metadata.Labels.TryGetValue(SynapseDefaults.Resources.Labels.Correlator, out var correlatorQualifiedName) && correlatorQualifiedName == this.Correlator.Resource.GetQualifiedName()) return true;
         try
         {
-            var originalResource = resource.Clone();
-            resource.Metadata.Labels ??= new Dictionary<string, string>();
-            resource.Metadata.Labels.Remove(SynapseDefaults.Resources.Labels.Correlator);
-            if (resource.Metadata.Labels.Count < 1) resource.Metadata.Labels = null;
-            var patch = JsonPatchUtility.CreateJsonPatchFromDiff(originalResource, resource);
-            resource = await this.Repository.PatchAsync<Correlation>(new(PatchType.JsonPatch, patch), resource.GetName(), resource.GetNamespace(), false, cancellationToken).ConfigureAwait(false);
+            var originalResource = correlation.Clone();
+            if (correlation.Status?.Phase == null || correlation.Status.Phase == CorrelationStatusPhase.Active)
+            {
+                correlation.Status ??= new();
+                correlation.Status.Phase = CorrelationStatusPhase.Pending;
+                correlation.Status.LastModified = DateTimeOffset.Now;
+                originalResource = await this.Repository.PatchStatusAsync<Correlation>(new(PatchType.JsonPatch, JsonPatchUtility.CreateJsonPatchFromDiff(originalResource, correlation)), correlation.GetName(), correlation.GetNamespace(), false, cancellationToken).ConfigureAwait(false);
+                correlation = originalResource.Clone()!;
+            }
+            correlation.Metadata.Labels ??= new Dictionary<string, string>();
+            correlation.Metadata.Labels.Remove(SynapseDefaults.Resources.Labels.Correlator);
+            if (correlation.Metadata.Labels.Count < 1) correlation.Metadata.Labels = null;
+            var patch = JsonPatchUtility.CreateJsonPatchFromDiff(originalResource, correlation);
+            correlation = await this.Repository.PatchAsync<Correlation>(new(PatchType.JsonPatch, patch), correlation.GetName(), correlation.GetNamespace(), false, cancellationToken).ConfigureAwait(false);
             return true;
         }
         catch (ConcurrencyException)
@@ -120,27 +165,19 @@ public class CorrelationController(IServiceProvider serviceProvider, ILoggerFact
     }
 
     /// <inheritdoc/>
-    protected override async Task OnResourceCreatedAsync(Correlation resource, CancellationToken cancellationToken = default)
+    protected override async Task OnResourceCreatedAsync(Correlation correlation, CancellationToken cancellationToken = default)
     {
-        await base.OnResourceCreatedAsync(resource, cancellationToken).ConfigureAwait(false);
-        if (!await this.TryClaimAsync(resource, cancellationToken).ConfigureAwait(false)) return;
-
+        await base.OnResourceCreatedAsync(correlation, cancellationToken).ConfigureAwait(false);
+        if (!await this.TryClaimAsync(correlation, cancellationToken).ConfigureAwait(false)) return;
+        var correlator = await this.CreateCorrelatorAsync(correlation,cancellationToken).ConfigureAwait(false);
+        await correlator.CorrelateAsync(cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
-    protected override async Task OnResourceUpdatedAsync(Correlation resource, CancellationToken cancellationToken = default)
+    protected override async Task OnResourceDeletedAsync(Correlation correlation, CancellationToken cancellationToken = default)
     {
-        await base.OnResourceUpdatedAsync(resource, cancellationToken).ConfigureAwait(false);
-        if (resource.Metadata.Labels == null || !resource.Metadata.Labels.TryGetValue(SynapseDefaults.Resources.Labels.Correlator, out _)) if (!await this.TryClaimAsync(resource, cancellationToken).ConfigureAwait(false)) return;
-        if (resource.Metadata.Labels?[SynapseDefaults.Resources.Labels.Correlator] != this.Correlator.Resource.GetQualifiedName()) return;
-        
-    }
-
-    /// <inheritdoc/>
-    protected override async Task OnResourceDeletedAsync(Correlation resource, CancellationToken cancellationToken = default)
-    {
-        await base.OnResourceDeletedAsync(resource, cancellationToken).ConfigureAwait(false);
-        
+        await base.OnResourceDeletedAsync(correlation, cancellationToken).ConfigureAwait(false);
+        if (this.Correlators.TryRemove(correlation.GetQualifiedName(), out var handler)) await handler.DisposeAsync().ConfigureAwait(false);
     }
 
     /// <summary>

@@ -20,6 +20,10 @@ internal class MockSynapseApiClient(IServiceProvider serviceProvider)
     : ISynapseApiClient
 {
 
+    public INamespacedResourceApiClient<Correlation> Correlations { get; } = ActivatorUtilities.CreateInstance<MockNamespacedResourceApiClient<Correlation>>(serviceProvider);
+
+    public INamespacedResourceApiClient<Resources.Correlator> Correlators { get; } = ActivatorUtilities.CreateInstance<MockNamespacedResourceApiClient<Resources.Correlator>>(serviceProvider);
+
     public IClusterResourceApiClient<Namespace> Namespaces { get; } = ActivatorUtilities.CreateInstance<MockClusterResourceApiClient<Namespace>>(serviceProvider);
 
     public INamespacedResourceApiClient<Operator> Operators { get; } = ActivatorUtilities.CreateInstance<MockNamespacedResourceApiClient<Operator>>(serviceProvider);

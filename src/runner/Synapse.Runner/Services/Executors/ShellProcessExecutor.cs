@@ -12,6 +12,7 @@
 // limitations under the License.
 
 using System.Net;
+using System.Runtime.InteropServices;
 
 namespace Synapse.Runner.Services.Executors;
 
@@ -36,7 +37,11 @@ public class ShellProcessExecutor(IServiceProvider serviceProvider, ILogger<Shel
     /// <inheritdoc/>
     protected override async Task DoExecuteAsync(CancellationToken cancellationToken)
     {
-        var startInfo = new ProcessStartInfo("cmd.exe", ["/c", this.ProcessDefinition.Command, .. this.ProcessDefinition.Arguments ?? []])
+        var fileInfo = string.Empty;
+        var arguments = this.ProcessDefinition.Arguments ?? [];
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) arguments[0] = "-c";
+        else arguments[0] = "/c";
+        var startInfo = new ProcessStartInfo(fileInfo, arguments)
         {
             RedirectStandardOutput = true,
             RedirectStandardError = true,

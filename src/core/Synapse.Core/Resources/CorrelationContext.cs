@@ -29,6 +29,12 @@ public record CorrelationContext
     public required virtual string Id { get; set; }
 
     /// <summary>
+    /// Gets/sets the context's status
+    /// </summary>
+    [DataMember(Name = "status", Order = 2), JsonPropertyName("status"), JsonPropertyOrder(2), YamlMember(Alias = "status", Order = 2)]
+    public virtual string Status { get; set; } = CorrelationContextStatus.Active;
+
+    /// <summary>
     /// Gets a key/value mapping of the context's correlation keys
     /// </summary>
     [DataMember(Name = "keys", Order = 2), JsonPropertyName("keys"), JsonPropertyOrder(2), YamlMember(Alias = "keys", Order = 2)]

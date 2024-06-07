@@ -13,7 +13,11 @@
 
 namespace Synapse.Correlator.Services;
 
-internal class Application(IServiceProvider serviceProvider)
+/// <summary>
+/// Represents the correlator's application service
+/// </summary>
+/// <param name="serviceProvider">The current <see cref="IServiceProvider"/></param>
+public class CorrelatorApplication(IServiceProvider serviceProvider)
     : IHostedService, IDisposable
 {
 
@@ -21,17 +25,22 @@ internal class Application(IServiceProvider serviceProvider)
     IServiceProvider ServiceProvider => this._scope.ServiceProvider;
 
     CorrelatorController _correlatorController = null!;
+    CorrelationController _correlationController = null!;
 
+    /// <inheritdoc/>
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         this._correlatorController = this.ServiceProvider.GetRequiredService<CorrelatorController>();
+        this._correlationController = this.ServiceProvider.GetRequiredService<CorrelationController>();
         await this._correlatorController.StartAsync(cancellationToken).ConfigureAwait(false);
         await Task.WhenAll(
         [
             this._correlatorController.StartAsync(cancellationToken),
+            this._correlationController.StartAsync(cancellationToken),
         ]).ConfigureAwait(false);
     }
 
+    /// <inheritdoc/>
     public async Task StopAsync(CancellationToken cancellationToken) 
     {
         await Task.WhenAll(
@@ -40,6 +49,10 @@ internal class Application(IServiceProvider serviceProvider)
         ]).ConfigureAwait(false);
     }
 
-    void IDisposable.Dispose() => this._scope.Dispose();
+    void IDisposable.Dispose()
+    {
+        this._scope.Dispose();
+        GC.SuppressFinalize(this);
+    }
 
 }

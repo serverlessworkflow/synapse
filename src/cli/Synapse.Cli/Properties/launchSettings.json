@@ -2,7 +2,7 @@
   "profiles": {
     "Synapse.Cli": {
       "commandName": "Project",
-      "commandLineArgs": "workflow create --file test.yaml"
+      "commandLineArgs": "correlation create -f correlation.yaml"
     }
   }
 }

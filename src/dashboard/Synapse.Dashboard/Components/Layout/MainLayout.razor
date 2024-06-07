@@ -17,24 +17,28 @@
                     </NavLink>
                 </li>
                 <li class="nav-item">
-                    <NavLink class="nav-link" href="workflow-instances" Match="NavLinkMatch.All">
-                        <span class="btn-label">Instances</span>
+                    <NavLink class="nav-link" href="correlations" Match="NavLinkMatch.All">
+                        <span class="btn-label">Correlations</span>
                     </NavLink>
                 </li>
                 <li class="nav-item">
-                    <NavLink class="nav-link" href="operators" Match="NavLinkMatch.All">
-                        <span class="btn-label">Operators</span>
-                    </NavLink>
-                </li>
-                <li class="nav-item">
-                    <NavLink class="nav-link" href="correlators" Match="NavLinkMatch.All">
-                        <span class="btn-label">Correlators</span>
-                    </NavLink>
-                </li>
-                <li class="nav-item">
-                    <NavLink class="nav-link" href="namespaces" Match="NavLinkMatch.All">
-                        <span class="btn-label">Namespaces</span>
-                    </NavLink>
+                    <div class="dropdown">
+                        <button class="btn text-muted dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="btn-label">Services</span>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                            <li>
+                                <NavLink class="nav-link" href="correlators" Match="NavLinkMatch.All">
+                                    <span class="btn-label">Correlators</span>
+                                </NavLink>
+                            </li>
+                            <li>
+                                <NavLink class="nav-link" href="operators" Match="NavLinkMatch.All">
+                                    <span class="btn-label">Operators</span>
+                                </NavLink>
+                            </li>
+                        </ul>
+                    </div>
                 </li>
                 <li class="nav-item">
                     <NavLink class="nav-link" href="about" Match="NavLinkMatch.All">

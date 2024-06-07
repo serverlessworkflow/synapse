@@ -21,9 +21,21 @@ public record CorrelationStatus
 {
 
     /// <summary>
+    /// Gets/sets the correlation's status phase
+    /// </summary>
+    [DataMember(Name = "phase", Order = 1), JsonPropertyName("phase"), JsonPropertyOrder(1), YamlMember(Alias = "phase", Order = 1)]
+    public virtual string? Phase { get; set; }
+
+    /// <summary>
+    /// Gets/sets the date and time the correlation was last modified at
+    /// </summary>
+    [DataMember(Name = "lastModified", Order = 2), JsonPropertyName("lastModified"), JsonPropertyOrder(2), YamlMember(Alias = "lastModified", Order = 2)]
+    public virtual DateTimeOffset? LastModified { get; set; }
+
+    /// <summary>
     /// Gets/sets a list containing the contexts that have been created for the described correlation
     /// </summary>
-    [DataMember(Name = "contexts", Order = 1), JsonPropertyName("contexts"), JsonPropertyOrder(1), YamlMember(Alias = "contexts", Order = 1)]
+    [DataMember(Name = "contexts", Order = 3), JsonPropertyName("contexts"), JsonPropertyOrder(3), YamlMember(Alias = "contexts", Order = 3)]
     public virtual EquatableList<CorrelationContext> Contexts { get; set; } = [];
 
 }

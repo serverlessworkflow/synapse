@@ -1,0 +1,12 @@
+﻿global using Microsoft.AspNetCore.Diagnostics;
+global using Microsoft.Extensions.Options;
+global using Neuroglia;
+global using Neuroglia.Serialization;
+global using ServerlessWorkflow.Sdk;
+global using Swashbuckle.AspNetCore.SwaggerUI;
+global using Synapse;
+global using Synapse.Api.Application;
+global using Synapse.Api.Http;
+global using Synapse.Api.Http.Hubs;
+global using Synapse.Api.Server.Configuration;
+global using System.Net.Mime;

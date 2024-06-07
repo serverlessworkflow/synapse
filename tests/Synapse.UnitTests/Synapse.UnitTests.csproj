@@ -35,6 +35,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\core\Synapse.Core.Infrastructure.Containers.Docker\Synapse.Core.Infrastructure.Containers.Docker.csproj" />
+    <ProjectReference Include="..\..\src\correlator\Synapse.Correlator\Synapse.Correlator.csproj" />
     <ProjectReference Include="..\..\src\runner\Synapse.Runner\Synapse.Runner.csproj" />
     <ProjectReference Include="..\..\src\runtime\Synapse.Runtime.Native\Synapse.Runtime.Native.csproj" />
   </ItemGroup>

@@ -35,6 +35,7 @@ internal class DeleteCorrelationCommand
     {
         this.AddAlias("del");
         this.Add(new Argument<string>("name") { Description = "The name of the correlation to delete" });
+        this.Add(CommandOptions.Namespace);
         this.Add(CommandOptions.Confirm);
         this.Handler = CommandHandler.Create<string, string, bool>(this.HandleAsync);
     }
