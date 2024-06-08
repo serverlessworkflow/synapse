@@ -11,6 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Json.Patch;
+using Neuroglia.Data.Infrastructure.ResourceOriented;
+
 namespace Synapse.Correlator.Services;
 
 /// <summary>
@@ -299,6 +302,7 @@ public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRep
     protected virtual async Task CreateOrUpdateContextAsync(CorrelationContext context, CancellationToken cancellationToken =default)
     {
         ArgumentNullException.ThrowIfNull(context);
+        JsonPatch patch;
         var originalResource = this.Correlation.Resource.Clone()!;
         var updatedResource = this.Correlation.Resource.Clone()!;
         updatedResource.Status ??= new();
@@ -317,10 +321,43 @@ public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRep
             {
                 context.Status = CorrelationContextStatus.Completed;
                 if (updatedResource.Spec.Lifetime == CorrelationLifetime.Ephemeral) updatedResource.Status.Phase = CorrelationStatusPhase.Completed;
-                //todo: process the correlation's outcome
+                WorkflowInstance? workflowInstance;
+                switch (this.Correlation.Resource.Spec.Outcome.Type)
+                {
+                    case CorrelationOutcomeType.Correlate:
+                        var qualifiedName = this.Correlation.Resource.Spec.Outcome.Correlate!.Instance.Trim().Split('.', StringSplitOptions.RemoveEmptyEntries);
+                        var name = qualifiedName[0];
+                        var @namespace = qualifiedName[1];
+                        workflowInstance = await this.Resources.GetAsync<WorkflowInstance>(name, @namespace, cancellationToken).ConfigureAwait(false) ?? throw new ProblemDetailsException(ResourceProblemDetails.ResourceNotFound(new ResourceReference<WorkflowInstance>(name, @namespace)));
+                        var updatedWorkflowInstance = workflowInstance.Clone()!;
+                        updatedWorkflowInstance.Status ??= new();
+                        updatedWorkflowInstance.Status.Correlations ??= [];
+                        updatedWorkflowInstance.Status.Correlations[this.Correlation.Resource.Spec.Outcome.Correlate!.Task] = context;
+                        patch = JsonPatchUtility.CreateJsonPatchFromDiff(workflowInstance, updatedWorkflowInstance);
+                        await this.Resources.PatchStatusAsync<WorkflowInstance>(new(PatchType.JsonPatch, patch), workflowInstance.GetName(), workflowInstance.GetNamespace(), false, cancellationToken).ConfigureAwait(false);
+                        break;
+                    case CorrelationOutcomeType.Start:
+                        var input = this.Correlation.Resource.Spec.Outcome.Start!.Input == null ? [] : await this.ExpressionEvaluator.EvaluateAsync<EquatableDictionary<string, object>>(this.Correlation.Resource.Spec.Outcome.Start!.Input!, context, cancellationToken: cancellationToken).ConfigureAwait(false);
+                        workflowInstance = new()
+                        {
+                            Metadata = new()
+                            {
+                                Namespace = this.Correlation.Resource.Spec.Outcome.Start!.Workflow.Namespace,
+                                Name = $"{this.Correlation.Resource.Spec.Outcome.Start!.Workflow.Namespace}-"
+                            },
+                            Spec = new()
+                            {
+                                Definition = this.Correlation.Resource.Spec.Outcome.Start!.Workflow,
+                                Input = input
+                            }
+                        };
+                        await this.Resources.AddAsync(workflowInstance, false, cancellationToken).ConfigureAwait(false);
+                        break;
+                    default: throw new NotSupportedException($"The specified correlation outcome type is not supported '{this.Correlation.Resource.Spec.Outcome.Type}'");
+                }
             }
         }
-        var patch = JsonPatchUtility.CreateJsonPatchFromDiff(originalResource, updatedResource);
+        patch = JsonPatchUtility.CreateJsonPatchFromDiff(originalResource, updatedResource);
         await this.Resources.PatchStatusAsync<Correlation>(new(PatchType.JsonPatch, patch), originalResource.GetName(), originalResource.GetNamespace(), false, cancellationToken).ConfigureAwait(false);
     }
 

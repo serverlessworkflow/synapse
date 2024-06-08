@@ -24,7 +24,13 @@ public record CorrelateWorkflowOutcomeDefinition
     /// Gets/sets a '{name}.{namespace}' reference to the workflow instance to correlate
     /// </summary>
     [Required]
-    [DataMember(Name = "ref", Order = 1), JsonPropertyName("ref"), JsonPropertyOrder(1), YamlMember(Alias = "ref", Order = 1)]
-    public required virtual string Ref { get; set; }
+    [DataMember(Name = "instance", Order = 1), JsonPropertyName("instance"), JsonPropertyOrder(1), YamlMember(Alias = "instance", Order = 1)]
+    public required virtual string Instance { get; set; }
+
+    /// <summary>
+    /// Gets/sets the name of the task that consumes the correlated events
+    /// </summary>
+    [DataMember(Name = "task", Order = 2), JsonPropertyName("task"), JsonPropertyOrder(2), YamlMember(Alias = "task", Order = 2)]
+    public required virtual string Task { get; set; }
 
 }

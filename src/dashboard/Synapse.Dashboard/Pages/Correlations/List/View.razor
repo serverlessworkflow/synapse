@@ -99,13 +99,13 @@
     string GetOutcomeTarget(Correlation correlation)
     {
         if (correlation.Spec.Outcome.Start != null) return correlation.Spec.Outcome.Start.Workflow.ToString();
-        else return correlation.Spec.Outcome.Correlate!.Ref;
+        else return correlation.Spec.Outcome.Correlate!.Instance;
     }
 
     string GetOutcomeTargetRef(Correlation correlation)
     {
         if (correlation.Spec.Outcome.Start != null) return $"/workflows/{correlation.Spec.Outcome.Start.Workflow.ToString()}";
-        else return $"/workflow-instances/{correlation.Spec.Outcome.Correlate!.Ref}";
+        else return $"/workflow-instances/{correlation.Spec.Outcome.Correlate!.Instance}";
     }
 
 }

@@ -51,23 +51,29 @@ public record WorkflowInstanceStatus
     public virtual EquatableList<WorkflowRun>? Runs { get; set; }
 
     /// <summary>
+    /// Gets/sets a name/context map that contains the workflow's pending correlations
+    /// </summary>
+    [DataMember(Order = 6, Name = "correlations"), JsonPropertyName("correlations"), JsonPropertyOrder(6), YamlMember(Alias = "correlations", Order = 6)]
+    public virtual EquatableDictionary<string, CorrelationContext>? Correlations { get; set; }
+
+    /// <summary>
     /// Gets/sets the error, if any, that has occurred during the workflow's execution
     /// </summary>
-    [DataMember(Name = "error", Order = 6), JsonPropertyName("error"), JsonPropertyOrder(6), YamlMember(Alias = "error", Order = 6)]
+    [DataMember(Name = "error", Order = 7), JsonPropertyName("error"), JsonPropertyOrder(7), YamlMember(Alias = "error", Order = 7)]
     public virtual Error? Error { get; set; }
 
     /// <summary>
     /// Gets/sets a reference to the workflow's context data, if any
     /// </summary>
     [Required, MinLength(1)]
-    [DataMember(Order = 7, Name = "contextReference"), JsonPropertyName("contextReference"), JsonPropertyOrder(7), YamlMember(Alias = "contextReference", Order = 7)]
+    [DataMember(Order = 8, Name = "contextReference"), JsonPropertyName("contextReference"), JsonPropertyOrder(8), YamlMember(Alias = "contextReference", Order = 8)]
     public virtual string ContextReference { get; set; } = null!;
 
     /// <summary>
     /// Gets/sets a reference to the workflow's context data, if any
     /// </summary>
     [Required, MinLength(1)]
-    [DataMember(Order = 8, Name = "outputReference"), JsonPropertyName("outputReference"), JsonPropertyOrder(8), YamlMember(Alias = "outputReference", Order = 8)]
+    [DataMember(Order = 9, Name = "outputReference"), JsonPropertyName("outputReference"), JsonPropertyOrder(9), YamlMember(Alias = "outputReference", Order = 9)]
     public virtual string? OutputReference { get; set; }
 
 }

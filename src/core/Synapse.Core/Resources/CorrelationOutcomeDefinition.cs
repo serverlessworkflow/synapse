@@ -21,6 +21,11 @@ public record CorrelationOutcomeDefinition
 {
 
     /// <summary>
+    /// Gets the type of the correlation outcome
+    /// </summary>
+    public virtual string Type => this.Start != null ? CorrelationOutcomeType.Start : this.Correlate != null ? CorrelationOutcomeType.Correlate : throw new NotSupportedException($"The specified correlation outcome type is not supported");
+
+    /// <summary>
     /// Gets/sets an object used to configure the outcome, if any, used to start a new workflow instance,. Is mutually exclusive to <see cref="Correlate"/>
     /// </summary>
 
