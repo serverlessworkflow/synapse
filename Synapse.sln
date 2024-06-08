@@ -30,6 +30,16 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Api.Application", "src\api\Synapse.Api.Application\Synapse.Api.Application.csproj", "{F8D7F756-16A1-420B-AED4-8EF9A65B640E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{C31B1410-C7AF-4D11-8DA5-6877756A9907}"
+	ProjectSection(SolutionItems) = preProject
+		code-of-conduct.md = code-of-conduct.md
+		contributing.md = contributing.md
+		governance.md = governance.md
+		LICENSE = LICENSE
+		maintainer-guidelines.md = maintainer-guidelines.md
+		maintainers.md = maintainers.md
+		owners.md = owners.md
+		README.md = README.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{F041A1CB-45FA-4432-BAD2-DE2EE174C6FC}"
 EndProject
@@ -61,7 +71,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Cli", "src\cli\Syna
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "correlator", "correlator", "{F6CA60F0-3A4A-4B27-9805-6FA96F64D94D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synapse.Correlator", "src\correlator\Synapse.Correlator\Synapse.Correlator.csproj", "{1EA900CD-6CDE-4358-8412-060BF2AC3B21}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Correlator", "src\correlator\Synapse.Correlator\Synapse.Correlator.csproj", "{1EA900CD-6CDE-4358-8412-060BF2AC3B21}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "deployments", "deployments", "{562C91A3-6E91-4489-9D9D-064E7436D900}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker-compose", "docker-compose", "{8DC6DDDC-0676-4FCB-9F82-570B84D1A5C2}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "deployments\docker-compose\docker-compose.dcproj", "{A2D3AFB0-C7E0-4778-9D0A-DFCE0E24AF17}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -145,6 +161,10 @@ Global
 		{1EA900CD-6CDE-4358-8412-060BF2AC3B21}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1EA900CD-6CDE-4358-8412-060BF2AC3B21}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1EA900CD-6CDE-4358-8412-060BF2AC3B21}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2D3AFB0-C7E0-4778-9D0A-DFCE0E24AF17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2D3AFB0-C7E0-4778-9D0A-DFCE0E24AF17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2D3AFB0-C7E0-4778-9D0A-DFCE0E24AF17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2D3AFB0-C7E0-4778-9D0A-DFCE0E24AF17}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -177,6 +197,8 @@ Global
 		{C86F6C8B-5946-433D-9E09-2C0269CE6372} = {D3B3B95D-B598-4B13-B754-4A7E530405A6}
 		{F6CA60F0-3A4A-4B27-9805-6FA96F64D94D} = {4B9AF05C-9D6D-48C0-994D-D4A5C28FA24D}
 		{1EA900CD-6CDE-4358-8412-060BF2AC3B21} = {F6CA60F0-3A4A-4B27-9805-6FA96F64D94D}
+		{8DC6DDDC-0676-4FCB-9F82-570B84D1A5C2} = {562C91A3-6E91-4489-9D9D-064E7436D900}
+		{A2D3AFB0-C7E0-4778-9D0A-DFCE0E24AF17} = {8DC6DDDC-0676-4FCB-9F82-570B84D1A5C2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2A6C03D6-355A-4B39-9F2B-D0FDE429C0E2}

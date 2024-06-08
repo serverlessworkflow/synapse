@@ -103,6 +103,10 @@ public static class SynapseDefaults
             /// Gets the environment variable used to configure the operator's name
             /// </summary>
             public const string Name = Prefix + "NAME";
+            /// <summary>
+            /// Gets the environment variable used to configure the API used by runners spawned by the operator
+            /// </summary>
+            public const string Api = Prefix + "API";
 
         }
 

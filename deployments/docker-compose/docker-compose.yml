@@ -1,0 +1,48 @@
+services:
+
+  garnet:
+    image: ghcr.io/microsoft/garnet
+    volumes:
+      - garnet_data:/data
+ 
+  api:
+    image: ghcr.io/serverlessworkflow/synapse/api
+    environment:
+      CONNECTIONSTRINGS__REDIS: ${GARNET_URI}
+    ports:
+      - 8080:8080
+    depends_on:
+      - garnet
+
+  operator:
+    image: ghcr.io/serverlessworkflow/synapse/operator
+    environment:
+      CONNECTIONSTRINGS__REDIS: ${GARNET_URI}
+      SYNAPSE_OPERATOR_NAMESPACE: default
+      SYNAPSE_OPERATOR_NAME: operator
+      SYNAPSE_OPERATOR_RUNNER_API: http://api
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - garnet
+
+  correlator:
+    image: ghcr.io/serverlessworkflow/synapse/correlator
+    environment:
+      CONNECTIONSTRINGS__REDIS: ${GARNET_URI}
+      SYNAPSE_CORRELATOR_NAMESPACE: default
+      SYNAPSE_CORRELATOR_NAME: operator
+    depends_on:
+      - garnet
+
+volumes:
+
+  garnet_data:
+    driver: local
+
+networks:
+
+  default:
+    name: synapse

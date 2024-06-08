@@ -9,7 +9,7 @@
     <DockerServiceName>synapse</DockerServiceName>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="eventstore+mongo.yml" />
+    <None Include=".env" />
     <None Include="docker-compose.yml" />
   </ItemGroup>
 </Project>

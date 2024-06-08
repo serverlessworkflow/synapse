@@ -26,6 +26,8 @@ public class OperatorOptions
     {
         Namespace = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Operator.Namespace)!;
         Name = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Operator.Name)!;
+        var uri = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Operator.Api);
+        if (!string.IsNullOrWhiteSpace(uri)) this.Runner.Api.Uri = new(uri);
     }
 
     /// <summary>
