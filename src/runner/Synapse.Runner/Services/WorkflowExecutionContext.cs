@@ -16,10 +16,7 @@ using Json.Pointer;
 using Neuroglia;
 using Neuroglia.Data;
 using Neuroglia.Data.Expressions;
-using Neuroglia.Data.Expressions.Services;
 using Neuroglia.Data.Infrastructure.ResourceOriented;
-using Neuroglia.Eventing.CloudEvents;
-using Synapse.Api.Client.Services;
 
 namespace Synapse.Runner.Services;
 
@@ -182,12 +179,68 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
     }
 
     /// <inheritdoc/>
-    public virtual Task<IEnumerable<CloudEvent>> ConsumeOrBeginCorrelateAsync(ListenerDefinition listener, CancellationToken cancellationToken = default)
+    public virtual async Task<CorrelationContext> CorrelateAsync(ITaskExecutionContext task, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
-        //ArgumentNullException.ThrowIfNull(listener);
-        //todo: urgent: implement
-        //return [];
+        ArgumentNullException.ThrowIfNull(task);
+        try
+        {
+            if (task.Definition is not ListenTaskDefinition listenTask) throw new ArgumentException("The specified task's definition must be a 'listen' task", nameof(task));
+            if (this.Instance.Status?.Correlation?.Contexts?.TryGetValue(task.Instance.Reference.OriginalString, out var context) == true && context != null) return context;
+            var @namespace = task.Workflow.Instance.GetNamespace()!;
+            var name = $"{@namespace}.{task.Workflow.Instance.GetName()}.{task.Instance.Id}";
+            Correlation? correlation = null;
+            try { correlation = await this.Api.Correlations.GetAsync(name, @namespace, cancellationToken).ConfigureAwait(false); }
+            catch { }
+            if (correlation == null)
+            {
+                correlation = await this.Api.Correlations.CreateAsync(new()
+                {
+                    Metadata = new()
+                    {
+                        Namespace = @namespace,
+                        Name = name
+                    },
+                    Spec = new()
+                    {
+                        Source = task.Workflow.Instance.GetQualifiedName(),
+                        Lifetime = CorrelationLifetime.Ephemeral,
+                        Events = listenTask.Listen.To,
+                        Expressions = task.Workflow.Definition.Evaluate ?? new(),
+                        Outcome = new()
+                        {
+                            Correlate = new()
+                            {
+                                Instance = task.Workflow.Instance.GetQualifiedName(),
+                                Task = task.Instance.Reference.OriginalString
+                            }
+                        }
+                    }
+                }, cancellationToken).ConfigureAwait(false);
+            }
+            var taskCompletionSource = new TaskCompletionSource<CorrelationContext>();
+            using var cancellationTokenRegistration = cancellationToken.Register(() => taskCompletionSource.TrySetCanceled());
+            using var subscription = (await this.Api.WorkflowInstances.MonitorAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, cancellationToken))
+                .ToObservable()
+                .Where(e => e.Type == ResourceWatchEventType.Updated)
+                .Select(e => e.Resource.Status?.Correlation?.Contexts)
+                .Scan((Previous: (EquatableDictionary<string, CorrelationContext>?)null, Current: (EquatableDictionary<string, CorrelationContext>?)null), (accumulator, current) => (accumulator.Current ?? [], current))
+                .Where(v => v.Current?.Count > v.Previous?.Count) //ensures we are not handling changes in a circular loop: if length of current is smaller than previous, it means a context has been processed
+                .Subscribe(value =>
+                {
+                    var patch = JsonPatchUtility.CreateJsonPatchFromDiff(value.Previous, value.Current);
+                    var patchOperation = patch.Operations.FirstOrDefault(o => o.Op == OperationType.Add && o.Path.Segments.First().Value == task.Instance.Reference.OriginalString);
+                    if (patchOperation == null) return;
+                    context = this.JsonSerializer.Deserialize<CorrelationContext>(patchOperation.Value!)!;
+                    taskCompletionSource.SetResult(context);
+                });
+            //todo: after a given amount of time, stop the execution of the workflow instance and put it to sleep
+            return await taskCompletionSource.Task.ConfigureAwait(false);
+        }
+        catch(Exception ex)
+        {
+            throw;
+        }
+        
     }
 
     /// <inheritdoc/>

@@ -57,7 +57,7 @@ public class NativeRuntime(ILoggerFactory loggerFactory, IHostEnvironment enviro
         if (this.Options.Runtime.Native == null) throw new NullReferenceException("The native runtime must be configured");
         var fileName = this.Options.Runtime.Native.Executable;
         var args = string.Empty;
-        //if (this.Environment.IsDevelopment()) args += "--debug";
+        if (this.Environment.IsDevelopment()) args += "--debug";
         var startInfo = new ProcessStartInfo()
         {
             FileName = fileName,

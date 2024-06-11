@@ -69,6 +69,13 @@ public interface ITaskExecutionContext
     Task ExecuteAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Begins correlating events
+    /// </summary>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>The resulting <see cref="CorrelationContext"/></returns>
+    Task<CorrelationContext> CorrelateAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Suspends the <see cref="TaskInstance"/>
     /// </summary>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>

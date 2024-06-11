@@ -130,12 +130,12 @@ public interface IWorkflowExecutionContext
     Task<TaskInstance> ExecuteAsync(TaskInstance task, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Attempts consuming, or begins correlating, the defined events
+    /// Begins correlating the events defined by the specified task
     /// </summary>
-    /// <param name="listener">The definition of the event subscription to create</param>
+    /// <param name="task">The execution of the task to correlate events for</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-    /// <returns>A new <see cref="IEnumerable{T}"/> containing all consumable <see cref="CloudEvent"/>s, if any</returns>
-    Task<IEnumerable<CloudEvent>> ConsumeOrBeginCorrelateAsync(ListenerDefinition listener, CancellationToken cancellationToken = default);
+    /// <returns>The resulting <see cref="CorrelationContext"/></returns>
+    Task<CorrelationContext> CorrelateAsync(ITaskExecutionContext task, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Suspends the workflow

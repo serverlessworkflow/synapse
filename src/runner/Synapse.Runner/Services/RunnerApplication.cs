@@ -11,10 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Microsoft.Extensions.Options;
-using Neuroglia.Data.Expressions.Services;
-using Synapse.Api.Client.Services;
-
 namespace Synapse.Runner.Services;
 
 /// <summary>

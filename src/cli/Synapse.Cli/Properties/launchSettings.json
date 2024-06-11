@@ -2,7 +2,7 @@
   "profiles": {
     "Synapse.Cli": {
       "commandName": "Project",
-      "commandLineArgs": "correlation create -f correlation.yaml"
+      "commandLineArgs": "workflow-instance monitor listen -n default"
     }
   }
 }

@@ -11,8 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Microsoft.OpenApi.Models;
-
 namespace Synapse.Runner;
 
 /// <summary>
@@ -22,23 +20,23 @@ public static class OperationTypeExtensions
 {
 
     /// <summary>
-    /// Converts the <see cref="OperationType"/> into a new <see cref="HttpMethod"/>
+    /// Converts the <see cref="Microsoft.OpenApi.Models.OperationType"/> into a new <see cref="HttpMethod"/>
     /// </summary>
-    /// <param name="operationType">The <see cref="OperationType"/> to convert</param>
+    /// <param name="operationType">The <see cref="Microsoft.OpenApi.Models.OperationType"/> to convert</param>
     /// <returns>The resulting <see cref="HttpMethod"/></returns>
-    public static HttpMethod ToHttpMethod(this OperationType operationType)
+    public static HttpMethod ToHttpMethod(this Microsoft.OpenApi.Models.OperationType operationType)
     {
         return operationType switch
         {
-            OperationType.Delete => HttpMethod.Delete,
-            OperationType.Get => HttpMethod.Get,
-            OperationType.Head => HttpMethod.Head,
-            OperationType.Options => HttpMethod.Options,
-            OperationType.Patch => HttpMethod.Patch,
-            OperationType.Post => HttpMethod.Post,
-            OperationType.Put => HttpMethod.Put,
-            OperationType.Trace => HttpMethod.Trace,
-            _ => throw new NotSupportedException($"The specified {nameof(OperationType)} '{operationType}' is not supported"),
+            Microsoft.OpenApi.Models.OperationType.Delete => HttpMethod.Delete,
+            Microsoft.OpenApi.Models.OperationType.Get => HttpMethod.Get,
+            Microsoft.OpenApi.Models.OperationType.Head => HttpMethod.Head,
+            Microsoft.OpenApi.Models.OperationType.Options => HttpMethod.Options,
+            Microsoft.OpenApi.Models.OperationType.Patch => HttpMethod.Patch,
+            Microsoft.OpenApi.Models.OperationType.Post => HttpMethod.Post,
+            Microsoft.OpenApi.Models.OperationType.Put => HttpMethod.Put,
+            Microsoft.OpenApi.Models.OperationType.Trace => HttpMethod.Trace,
+            _ => throw new NotSupportedException($"The specified {nameof(Microsoft.OpenApi.Models.OperationType)} '{operationType}' is not supported"),
         };
     }
 

@@ -68,6 +68,9 @@ public class TaskExecutionContext<TDefinition>(IWorkflowExecutionContext workflo
     }
 
     /// <inheritdoc/>
+    public virtual Task<CorrelationContext> CorrelateAsync(CancellationToken cancellationToken = default) => this.Workflow.CorrelateAsync(this, cancellationToken);
+
+    /// <inheritdoc/>
     public virtual async Task SkipAsync(CancellationToken cancellationToken = default)
     {
         this.Instance = await this.Workflow.SkipAsync(this.Instance, cancellationToken).ConfigureAwait(false);

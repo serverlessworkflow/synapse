@@ -12,7 +12,6 @@
 // limitations under the License.
 
 using Synapse.Runner.Services.Executors;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Synapse.Runner.Services;
 

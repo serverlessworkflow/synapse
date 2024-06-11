@@ -40,6 +40,7 @@ public class WorkflowInstanceCommand
         this.AddCommand(ActivatorUtilities.CreateInstance<GetWorkflowInstanceCommand>(this.ServiceProvider));
         this.AddCommand(ActivatorUtilities.CreateInstance<GetWorkflowInstanceOutputCommand>(this.ServiceProvider));
         this.AddCommand(ActivatorUtilities.CreateInstance<ListWorkflowInstancesCommand>(this.ServiceProvider));
+        this.AddCommand(ActivatorUtilities.CreateInstance<MonitorWorkflowInstancesCommand>(this.ServiceProvider));
         this.AddCommand(ActivatorUtilities.CreateInstance<DeleteWorkflowInstanceCommand>(this.ServiceProvider));
         //this.AddCommand(ActivatorUtilities.CreateInstance<SuspendWorkflowInstanceCommand>(this.ServiceProvider));
         //this.AddCommand(ActivatorUtilities.CreateInstance<ResumeWorkflowInstanceCommand>(this.ServiceProvider));

@@ -35,7 +35,8 @@ public class ListenTaskExecutor(IServiceProvider serviceProvider, ILogger<Listen
     /// <inheritdoc/>
     protected override async Task DoExecuteAsync(CancellationToken cancellationToken)
     {
-        
+        var context = await this.Task.CorrelateAsync(cancellationToken).ConfigureAwait(false);
+        await this.SetResultAsync(context, this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
     }
 
 }
