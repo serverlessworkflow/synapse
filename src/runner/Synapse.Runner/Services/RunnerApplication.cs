@@ -1,4 +1,4 @@
-﻿// Copyright © 2024-Present Neuroglia SRL. All rights reserved.
+﻿// Copyright © 2024-Present The Synapse Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -80,7 +80,6 @@ internal class RunnerApplication(IServiceProvider serviceProvider, IHostApplicat
     {
         if(this.Executor != null)
         {
-            await this.Executor.CancelAsync(cancellationToken).ConfigureAwait(false);
             await this.Executor.DisposeAsync().ConfigureAwait(false);
             this.Executor = null;
         }

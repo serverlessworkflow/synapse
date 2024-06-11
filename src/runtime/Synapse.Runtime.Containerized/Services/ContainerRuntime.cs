@@ -1,4 +1,4 @@
-﻿// Copyright © 2024-Present Neuroglia SRL. All rights reserved.
+﻿// Copyright © 2024-Present The Synapse Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ namespace Synapse.Runtime.Services;
 /// <param name="environment">The current <see cref="IHostEnvironment"/></param>
 /// <param name="options">The service used to access the current <see cref="RunnerDefinition"/></param>
 /// <param name="containerPlatform">The service used to manage containers</param>
-public class ContainerRuntime(ILoggerFactory loggerFactory, IHostEnvironment environment, IContainerPlatform containerPlatform, IOptionsMonitor<RunnerDefinition> options)
+public class ContainerRuntime(ILoggerFactory loggerFactory, IHostEnvironment environment, IContainerPlatform containerPlatform, IOptions<RunnerDefinition> options)
     : WorkflowRuntimeBase(loggerFactory)
 {
 
@@ -42,7 +42,7 @@ public class ContainerRuntime(ILoggerFactory loggerFactory, IHostEnvironment env
     /// <summary>
     /// Gets the current <see cref="RunnerDefinition"/>
     /// </summary>
-    protected RunnerDefinition Options => options.CurrentValue;
+    protected RunnerDefinition Options => options.Value;
 
     /// <summary>
     /// Gets a <see cref="ConcurrentDictionary{TKey, TValue}"/> containing all known runner processes

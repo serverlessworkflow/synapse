@@ -1,4 +1,4 @@
-﻿// Copyright © 2024-Present Neuroglia SRL. All rights reserved.
+﻿// Copyright © 2024-Present The Synapse Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -85,6 +85,24 @@ public static class SynapseDefaults
         }
 
         /// <summary>
+        /// Exposes constants about dashboard-related environment variables
+        /// </summary>
+        public static class Dashboard
+        {
+
+            /// <summary>
+            /// Gets the prefix for all dashboard related environment variables
+            /// </summary>
+            public const string Prefix = EnvironmentVariables.Prefix + "DASHBOARD_";
+
+            /// <summary>
+            /// Gets the environment variable used to determine whether or not to serve the dashboard
+            /// </summary>
+            public const string Serve = Prefix + "SERVE";
+
+        }
+
+        /// <summary>
         /// Exposes constants about operator-related environment variables
         /// </summary>
         public static class Operator
@@ -103,10 +121,24 @@ public static class SynapseDefaults
             /// Gets the environment variable used to configure the operator's name
             /// </summary>
             public const string Name = Prefix + "NAME";
+
             /// <summary>
-            /// Gets the environment variable used to configure the API used by runners spawned by the operator
+            /// Exposes constants about an operator's runner-related environment variables
             /// </summary>
-            public const string Api = Prefix + "API";
+            public static class Runner
+            {
+
+                /// <summary>
+                /// Gets the prefix for all operator runner related environment variables
+                /// </summary>
+                public const string Prefix = Operator.Prefix + "RUNNER_";
+
+                /// <summary>
+                /// Gets the environment variable used to configure the API used by runners spawned by the operator
+                /// </summary>
+                public const string Api = Prefix + "API";
+
+            }
 
         }
 

@@ -1,4 +1,4 @@
-﻿// Copyright © 2024-Present Neuroglia SRL. All rights reserved.
+﻿// Copyright © 2024-Present The Synapse Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ namespace Synapse.Api.Application.Queries.Resources.Generic;
 /// <param name="namespace">The namespace the <see cref="IResource"/>s to get belong to, if any</param>
 /// <param name="labelSelectors">A <see cref="List{T}"/> containing the <see cref="LabelSelector"/>s used to filter <see cref="IResource"/>s by</param>
 public class WatchResourcesQuery<TResource>(string? @namespace, IEnumerable<LabelSelector>? labelSelectors)
-    : Query<IResourceWatch<TResource>>
+    : Query<IAsyncEnumerable<IResourceWatchEvent<TResource>>>
     where TResource : class, IResource, new()
 {
 
@@ -44,14 +44,14 @@ public class WatchResourcesQuery<TResource>(string? @namespace, IEnumerable<Labe
 /// <typeparam name="TResource">The type of <see cref="IResource"/> to get</typeparam>
 /// <param name="repository">The service used to manage <see cref="IResource"/>s</param>
 public class WatchResourcesQueryHandler<TResource>(IResourceRepository repository)
-    : IQueryHandler<WatchResourcesQuery<TResource>, IResourceWatch<TResource>>
+    : IQueryHandler<WatchResourcesQuery<TResource>, IAsyncEnumerable<IResourceWatchEvent<TResource>>>
     where TResource : class, IResource, new()
 {
 
     /// <inheritdoc/>
-    public virtual async Task<IOperationResult<IResourceWatch<TResource>>> HandleAsync(WatchResourcesQuery<TResource> query, CancellationToken cancellationToken)
+    public virtual async Task<IOperationResult<IAsyncEnumerable<IResourceWatchEvent<TResource>>>> HandleAsync(WatchResourcesQuery<TResource> query, CancellationToken cancellationToken)
     {
-        return this.Ok(await repository.WatchAsync<TResource>(query.Namespace, query.LabelSelectors, cancellationToken).ConfigureAwait(false));
+        return this.Ok((await repository.WatchAsync<TResource>(query.Namespace, query.LabelSelectors, cancellationToken).ConfigureAwait(false)).ToAsyncEnumerable());
     }
 
 }

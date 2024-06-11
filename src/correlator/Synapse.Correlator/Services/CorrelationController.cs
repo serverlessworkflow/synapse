@@ -1,4 +1,4 @@
-﻿// Copyright © 2024-Present Neuroglia SRL. All rights reserved.
+﻿// Copyright © 2024-Present The Synapse Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -169,7 +169,7 @@ public class CorrelationController(IServiceProvider serviceProvider, ILoggerFact
         await base.OnResourceCreatedAsync(correlation, cancellationToken).ConfigureAwait(false);
         if (!await this.TryClaimAsync(correlation, cancellationToken).ConfigureAwait(false)) return;
         var correlator = await this.CreateCorrelatorAsync(correlation,cancellationToken).ConfigureAwait(false);
-        await correlator.CorrelateAsync(cancellationToken).ConfigureAwait(false);
+        await correlator.HandleAsync(cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>

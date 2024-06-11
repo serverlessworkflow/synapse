@@ -1,4 +1,4 @@
-﻿// Copyright © 2024-Present Neuroglia SRL. All rights reserved.
+﻿// Copyright © 2024-Present The Synapse Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -17,9 +17,10 @@ namespace Synapse.Api.Http.Controllers;
 /// Represents the <see cref="NamespacedResourceController{TResource}"/> used to manage <see cref="Namespace"/>s
 /// </summary>
 /// <param name="mediator">The service used to mediate calls</param>
+/// <param name="jsonSerializer">The service used to serialize/deserialize objects to/from JSON</param>
 [Route("api/v1/namespaces")]
-public class NamespacesController(IMediator mediator)
-    : ClusterResourceController<Namespace>(mediator)
+public class NamespacesController(IMediator mediator, IJsonSerializer jsonSerializer)
+    : ClusterResourceController<Namespace>(mediator, jsonSerializer)
 {
 
 

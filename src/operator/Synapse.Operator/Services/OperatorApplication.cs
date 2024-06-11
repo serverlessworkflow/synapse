@@ -1,4 +1,4 @@
-﻿// Copyright © 2024-Present Neuroglia SRL. All rights reserved.
+﻿// Copyright © 2024-Present The Synapse Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 
 namespace Synapse.Operator.Services;
 
-internal class Application(IServiceProvider serviceProvider)
+internal class OperatorApplication(IServiceProvider serviceProvider)
     : IHostedService, IDisposable
 {
 

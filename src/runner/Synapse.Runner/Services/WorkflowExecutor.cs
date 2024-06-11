@@ -1,4 +1,4 @@
-﻿// Copyright © 2024-Present Neuroglia SRL. All rights reserved.
+﻿// Copyright © 2024-Present The Synapse Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -112,7 +112,7 @@ public class WorkflowExecutor(IServiceProvider serviceProvider, ILogger<Workflow
                     await this.StartAsync(this.CancellationTokenSource.Token).ConfigureAwait(false);
                     break;
                 case WorkflowInstanceStatusPhase.Running:
-                case WorkflowInstanceStatusPhase.Suspended:
+                case WorkflowInstanceStatusPhase.Waiting:
                     await this.ResumeAsync(this.CancellationTokenSource.Token).ConfigureAwait(false);
                     break;
                 default:

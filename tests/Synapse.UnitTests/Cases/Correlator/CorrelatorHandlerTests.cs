@@ -1,4 +1,4 @@
-﻿// Copyright © 2024-Present Neuroglia SRL. All rights reserved.
+﻿// Copyright © 2024-Present The Synapse Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -105,7 +105,7 @@ public class CorrelatorHandlerTests
         var correlator = ActivatorUtilities.CreateInstance<CorrelationHandler>(this.ServiceProvider, [correlationMonitor]);
 
         //act
-        await correlator.CorrelateAsync();
+        await correlator.HandleAsync();
         this.CloudEventBus.InputStream.OnNext(e);
         await Task.Delay(150);
 
@@ -174,7 +174,7 @@ public class CorrelatorHandlerTests
         var correlator = ActivatorUtilities.CreateInstance<CorrelationHandler>(this.ServiceProvider, [correlationMonitor]);
 
         //act
-        await correlator.CorrelateAsync();
+        await correlator.HandleAsync();
         this.CloudEventBus.InputStream.OnNext(e);
         await Task.Delay(150);
 
@@ -243,7 +243,7 @@ public class CorrelatorHandlerTests
         var correlator = ActivatorUtilities.CreateInstance<CorrelationHandler>(this.ServiceProvider, [correlationMonitor]);
 
         //act
-        await correlator.CorrelateAsync();
+        await correlator.HandleAsync();
         this.CloudEventBus.InputStream.OnNext(e);
         await Task.Delay(150);
 
@@ -308,7 +308,7 @@ public class CorrelatorHandlerTests
         var correlator = ActivatorUtilities.CreateInstance<CorrelationHandler>(this.ServiceProvider, [correlationMonitor]);
 
         //act
-        await correlator.CorrelateAsync();
+        await correlator.HandleAsync();
         this.CloudEventBus.InputStream.OnNext(e);
         await Task.Delay(150);
 
@@ -444,7 +444,7 @@ public class CorrelatorHandlerTests
         var correlator = ActivatorUtilities.CreateInstance<CorrelationHandler>(this.ServiceProvider, [correlationMonitor]);
 
         //act
-        await correlator.CorrelateAsync();
+        await correlator.HandleAsync();
         this.CloudEventBus.InputStream.OnNext(e1);
         await Task.Delay(150);
         this.CloudEventBus.InputStream.OnNext(e2);

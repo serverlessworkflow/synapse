@@ -1,4 +1,4 @@
-﻿// Copyright © 2024-Present Neuroglia SRL. All rights reserved.
+﻿// Copyright © 2024-Present The Synapse Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -11,10 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Synapse.Api.Application.Commands.Resources.Generic;
-using Synapse.Api.Application.Queries.Resources.Generic;
-using Neuroglia.Data;
-
 namespace Synapse.Api.Http;
 
 /// <summary>
@@ -22,10 +18,16 @@ namespace Synapse.Api.Http;
 /// </summary>
 /// <typeparam name="TResource">The type of <see cref="IResource"/> to manage</typeparam>
 /// <param name="mediator">The service used to mediate calls</param>
-public abstract class NamespacedResourceController<TResource>(IMediator mediator)
+/// <param name="jsonSerializer">The service used to serialize/deserialize data to/from JSON</param>
+public abstract class NamespacedResourceController<TResource>(IMediator mediator, IJsonSerializer jsonSerializer)
     : ResourceController<TResource>(mediator)
     where TResource : class, IResource, new()
 {
+
+    /// <summary>
+    /// Gets the service used to serialize/deserialize data to/from JSON
+    /// </summary>
+    protected IJsonSerializer JsonSerializer { get; } = jsonSerializer;
 
     /// <summary>
     /// Gets the resource with the specified name and namespace
@@ -107,6 +109,115 @@ public abstract class NamespacedResourceController<TResource>(IMediator mediator
     {
         if (!this.TryParseLabelSelectors(labelSelector, out var labelSelectors)) return this.InvalidLabelSelector(labelSelector!);
         return this.Process(await this.Mediator.ExecuteAsync(new ListResourcesQuery<TResource>(@namespace, labelSelectors, maxResults, continuationToken), cancellationToken).ConfigureAwait(false));
+    }
+
+    /// <summary>
+    /// Watches matching resources
+    /// </summary>
+    /// <param name="labelSelector">A comma-separated list of label selectors, if any</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>A new <see cref="IActionResult"/></returns>
+    [HttpGet("watch")]
+    [ProducesResponseType(typeof(IAsyncEnumerable<ResourceWatchEvent>), (int)HttpStatusCode.OK)]
+    [ProducesErrorResponseType(typeof(Neuroglia.ProblemDetails))]
+    public virtual async Task<IActionResult> WatchResources(string? labelSelector = null, CancellationToken cancellationToken = default)
+    {
+        if (!this.TryParseLabelSelectors(labelSelector, out var labelSelectors)) return this.InvalidLabelSelector(labelSelector!);
+        var response = await this.Mediator.ExecuteAsync(new WatchResourcesQuery<TResource>(null, labelSelectors), cancellationToken).ConfigureAwait(false);
+        this.Response.Headers.ContentType = "text/event-stream";
+        this.Response.Headers.CacheControl = "no-cache";
+        this.Response.Headers.Connection = "keep-alive";
+        await foreach (var e in response.Data!)
+        {
+            var sseMessage = $"data: {this.JsonSerializer.SerializeToText(e)}\\n\\n";
+            await this.Response.Body.WriteAsync(Encoding.UTF8.GetBytes(sseMessage), cancellationToken).ConfigureAwait(false);
+            await this.Response.Body.FlushAsync(cancellationToken).ConfigureAwait(false);
+        }
+        return this.Ok();
+    }
+
+    /// <summary>
+    /// Watches matching resources
+    /// </summary>
+    /// <param name="namespace">The namespace the resources to watch belong to</param>
+    /// <param name="labelSelector">A comma-separated list of label selectors, if any</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>A new <see cref="IActionResult"/></returns>
+    [HttpGet("{namespace}/watch")]
+    [ProducesResponseType(typeof(IAsyncEnumerable<ResourceWatchEvent>), (int)HttpStatusCode.OK)]
+    [ProducesErrorResponseType(typeof(Neuroglia.ProblemDetails))]
+    public virtual async Task<IAsyncEnumerable<IResourceWatchEvent<TResource>>> WatchResources(string @namespace, string? labelSelector = null, CancellationToken cancellationToken = default)
+    {
+        if (!this.TryParseLabelSelectors(labelSelector, out var labelSelectors)) throw new Exception($"Invalid label selector '{labelSelector}'");
+        var response = await this.Mediator.ExecuteAsync(new WatchResourcesQuery<TResource>(@namespace, labelSelectors), cancellationToken).ConfigureAwait(false);
+        return response.Data!;
+    }
+
+    /// <summary>
+    /// Watches matching resources
+    /// </summary>
+    /// <param name="namespace">The namespace the resources to watch belong to</param>
+    /// <param name="labelSelector">A comma-separated list of label selectors, if any</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>A new <see cref="IActionResult"/></returns>
+    [HttpGet("{namespace}/watch/sse")]
+    [ProducesResponseType(typeof(IAsyncEnumerable<ResourceWatchEvent>), (int)HttpStatusCode.OK)]
+    [ProducesErrorResponseType(typeof(Neuroglia.ProblemDetails))]
+    public virtual async Task<IActionResult> WatchResourcesUsingSSE(string @namespace, string? labelSelector = null, CancellationToken cancellationToken = default) 
+    {
+        if (!this.TryParseLabelSelectors(labelSelector, out var labelSelectors)) return this.InvalidLabelSelector(labelSelector!);
+        var response = await this.Mediator.ExecuteAsync(new WatchResourcesQuery<TResource>(@namespace, labelSelectors), cancellationToken).ConfigureAwait(false);
+        this.Response.Headers.ContentType = "text/event-stream";
+        this.Response.Headers.CacheControl = "no-cache";
+        this.Response.Headers.Connection = "keep-alive";
+        await foreach (var e in response.Data!)
+        {
+            var sseMessage = $"data: {this.JsonSerializer.SerializeToText(e)}\\n\\n";
+            await this.Response.Body.WriteAsync(Encoding.UTF8.GetBytes(sseMessage), cancellationToken).ConfigureAwait(false);
+            await this.Response.Body.FlushAsync(cancellationToken).ConfigureAwait(false);
+        }
+        return this.Ok();
+    }
+
+    /// <summary>
+    /// Monitors a specific resource
+    /// </summary>
+    /// <param name="namespace">The namespace the resource to monitor belongs to</param>
+    /// <param name="name">The name of the resource to monitor</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>A new <see cref="IActionResult"/></returns>
+    [HttpGet("{namespace}/{name}/monitor")]
+    [ProducesResponseType(typeof(IAsyncEnumerable<ResourceWatchEvent>), (int)HttpStatusCode.OK)]
+    [ProducesErrorResponseType(typeof(Neuroglia.ProblemDetails))]
+    public virtual async Task<IAsyncEnumerable<IResourceWatchEvent<TResource>>> MonitorResource(string name, string @namespace, CancellationToken cancellationToken = default)
+    {
+        var response = await this.Mediator.ExecuteAsync(new MonitorResourceQuery<TResource>(name, @namespace), cancellationToken).ConfigureAwait(false);
+        return response.Data!;
+    }
+
+    /// <summary>
+    /// Monitors a specific resource
+    /// </summary>
+    /// <param name="namespace">The namespace the resource to monitor belongs to</param>
+    /// <param name="name">The name of the resource to monitor</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>A new <see cref="IActionResult"/></returns>
+    [HttpGet("{namespace}/{name}/monitor/sse")]
+    [ProducesResponseType(typeof(IAsyncEnumerable<ResourceWatchEvent>), (int)HttpStatusCode.OK)]
+    [ProducesErrorResponseType(typeof(Neuroglia.ProblemDetails))]
+    public virtual async Task<IActionResult> MonitorResourceUsingSSE(string name, string @namespace, CancellationToken cancellationToken = default)
+    {
+        var response = await this.Mediator.ExecuteAsync(new MonitorResourceQuery<TResource>(name, @namespace), cancellationToken).ConfigureAwait(false);
+        this.Response.Headers.ContentType = "text/event-stream";
+        this.Response.Headers.CacheControl = "no-cache";
+        this.Response.Headers.Connection = "keep-alive";
+        await foreach(var e in response.Data!)
+        {
+            var sseMessage = $"data: {this.JsonSerializer.SerializeToText(e)}\\n\\n";
+            await this.Response.Body.WriteAsync(Encoding.UTF8.GetBytes(sseMessage), cancellationToken).ConfigureAwait(false);
+            await this.Response.Body.FlushAsync(cancellationToken).ConfigureAwait(false);
+        }
+        return this.Ok();
     }
 
     /// <summary>

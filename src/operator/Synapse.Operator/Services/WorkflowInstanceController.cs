@@ -1,4 +1,4 @@
-﻿// Copyright © 2024-Present Neuroglia SRL. All rights reserved.
+﻿// Copyright © 2024-Present The Synapse Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -11,9 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Neuroglia.Reactive;
-using System.Reactive.Linq;
-
 namespace Synapse.Operator.Services;
 
 /// <summary>
@@ -23,8 +20,8 @@ namespace Synapse.Operator.Services;
 /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
 /// <param name="controllerOptions">The service used to access the current <see cref="IOptions{TOptions}"/></param>
 /// <param name="repository">The service used to manage <see cref="IResource"/>s</param>
-/// <param name="operatorAccessor">The service used to access the current <see cref="Resources.Operator"/></param>
-public class WorkflowInstanceController(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, IOptions<ResourceControllerOptions<WorkflowInstance>> controllerOptions, IResourceRepository repository, IOperatorController operatorAccessor)
+/// <param name="operatorController">The service used to access the current <see cref="Resources.Operator"/></param>
+public class WorkflowInstanceController(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, IOptions<ResourceControllerOptions<WorkflowInstance>> controllerOptions, IResourceRepository repository, IOperatorController operatorController)
     : ResourceController<WorkflowInstance>(loggerFactory, controllerOptions, repository)
 {
 
@@ -36,17 +33,12 @@ public class WorkflowInstanceController(IServiceProvider serviceProvider, ILogge
     /// <summary>
     /// Gets the service used to monitor the current <see cref="Operator"/>
     /// </summary>
-    protected IResourceMonitor<Resources.Operator> Operator => operatorAccessor.Operator;
+    protected IResourceMonitor<Resources.Operator> Operator => operatorController.Operator;
 
     /// <summary>
-    /// Gets the service used to create and run <see cref="IWorkflowProcess"/>es
+    /// Gets a <see cref="ConcurrentDictionary{TKey, TValue}"/> that contains current <see cref="WorkflowInstanceHandler"/>es
     /// </summary>
-    protected IWorkflowRuntime Runtime => this.ServiceProvider.GetRequiredService<IWorkflowRuntime>();
-
-    /// <summary>
-    /// Gets a <see cref="ConcurrentDictionary{TKey, TValue}"/> that contains current <see cref="IWorkflowProcess"/>es
-    /// </summary>
-    protected ConcurrentDictionary<string, IWorkflowProcess> Processes { get; } = [];
+    protected ConcurrentDictionary<string, WorkflowInstanceHandler> Handlers { get; } = [];
 
     /// <inheritdoc/>
     public override async Task StartAsync(CancellationToken cancellationToken)
@@ -64,19 +56,18 @@ public class WorkflowInstanceController(IServiceProvider serviceProvider, ILogge
     }
 
     /// <summary>
-    /// Creates a new <see cref="IWorkflowProcess"/> for the specified workflow
+    /// Creates a new <see cref="WorkflowInstanceHandler"/> for the specified workflow
     /// </summary>
-    /// <param name="workflow">The definition of the workflow to create a new process for</param>
-    /// <param name="workflowInstance">The workflow instance to create a new process for</param>
+    /// <param name="workflowInstance">The workflow instance to create a new handler for</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-    /// <returns>A new <see cref="IWorkflowProcess"/></returns>
-    protected virtual async Task<IWorkflowProcess> CreateProcessAsync(Workflow workflow, WorkflowInstance workflowInstance, CancellationToken cancellationToken)
+    /// <returns>A new <see cref="WorkflowInstanceHandler"/></returns>
+    protected virtual async Task<WorkflowInstanceHandler> CreateWorkflowInstanceHandlerAsync(WorkflowInstance workflowInstance, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(workflow);
         ArgumentNullException.ThrowIfNull(workflowInstance);
-        var process = await this.Runtime.CreateProcessAsync(workflow, workflowInstance, cancellationToken).ConfigureAwait(false);
-        if (!this.Processes.TryAdd(workflowInstance.GetQualifiedName(), process)) await process.DisposeAsync().ConfigureAwait(false);
-        return process;
+        var correlationMonitor = new ResourceMonitor<WorkflowInstance>(this.Watch ?? await this.Repository.WatchAsync<WorkflowInstance>(cancellationToken: cancellationToken).ConfigureAwait(false), workflowInstance, this.Watch != null);
+        var handler = ActivatorUtilities.CreateInstance<WorkflowInstanceHandler>(this.ServiceProvider, correlationMonitor);
+        if (!this.Handlers.TryAdd(workflowInstance.GetQualifiedName(), handler)) await handler.DisposeAsync().ConfigureAwait(false);
+        return handler;
     }
 
     /// <summary>
@@ -133,12 +124,11 @@ public class WorkflowInstanceController(IServiceProvider serviceProvider, ILogge
     /// <inheritdoc/>
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
-        foreach(var process in this.Processes.Values)
+        foreach(var process in this.Handlers.Values)
         {
-            await process.StopAsync(cancellationToken).ConfigureAwait(false);
             await process.DisposeAsync().ConfigureAwait(false);
         }
-        this.Processes.Clear();
+        this.Handlers.Clear();
         await foreach(var resource in this.Repository.GetAllAsync<WorkflowInstance>(labelSelectors: [new LabelSelector(SynapseDefaults.Resources.Labels.Operator, LabelSelectionOperator.Equals, [this.Operator.Resource.GetQualifiedName()])], cancellationToken: cancellationToken))
         {
             await this.TryReleaseAsync(resource, cancellationToken).ConfigureAwait(false);
@@ -151,16 +141,15 @@ public class WorkflowInstanceController(IServiceProvider serviceProvider, ILogge
     {
         await base.OnResourceCreatedAsync(workflowInstance, cancellationToken).ConfigureAwait(false);
         if (!await this.TryClaimAsync(workflowInstance, cancellationToken).ConfigureAwait(false)) return;
-        var workflow = await this.Repository.GetAsync<Workflow>(workflowInstance.Spec.Definition.Name, workflowInstance.Spec.Definition.Namespace, cancellationToken).ConfigureAwait(false) ?? throw new NullReferenceException($"Failed to find the workflow with name '{workflowInstance.Spec.Definition.Namespace}.{workflowInstance.Spec.Definition.Name}'");
-        var process = await this.Runtime.CreateProcessAsync(workflow, workflowInstance, cancellationToken).ConfigureAwait(false);
-        await process.StartAsync(cancellationToken).ConfigureAwait(false);
+        var handler = await this.CreateWorkflowInstanceHandlerAsync(workflowInstance, cancellationToken).ConfigureAwait(false);
+        await handler.HandleAsync(cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
     protected override async Task OnResourceDeletedAsync(WorkflowInstance workflowInstance, CancellationToken cancellationToken = default)
     {
         await base.OnResourceDeletedAsync(workflowInstance, cancellationToken).ConfigureAwait(false);
-        if (this.Processes.TryRemove(workflowInstance.GetQualifiedName(), out var process)) await process.DisposeAsync().ConfigureAwait(false);
+        if (this.Handlers.TryRemove(workflowInstance.GetQualifiedName(), out var process)) await process.DisposeAsync().ConfigureAwait(false);
     }
 
     /// <summary>
@@ -180,8 +169,8 @@ public class WorkflowInstanceController(IServiceProvider serviceProvider, ILogge
     /// <inheritdoc/>
     protected override void Dispose(bool disposing)
     {
-        foreach(var handler in this.Processes.Values) handler.Dispose();
-        this.Processes.Clear();
+        foreach(var handler in this.Handlers.Values) handler.Dispose();
+        this.Handlers.Clear();
         base.Dispose(disposing);
     }
 

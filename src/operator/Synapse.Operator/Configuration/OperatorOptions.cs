@@ -1,4 +1,4 @@
-﻿// Copyright © 2024-Present Neuroglia SRL. All rights reserved.
+﻿// Copyright © 2024-Present The Synapse Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -26,8 +26,15 @@ public class OperatorOptions
     {
         Namespace = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Operator.Namespace)!;
         Name = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Operator.Name)!;
-        var uri = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Operator.Api);
-        if (!string.IsNullOrWhiteSpace(uri)) this.Runner.Api.Uri = new(uri);
+        var uri = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Operator.Runner.Api);
+        if (!string.IsNullOrWhiteSpace(uri))
+        {
+            this.Runner ??= new();
+            this.Runner.Api ??= new() 
+            { 
+                Uri = new(uri) 
+            };
+        }
     }
 
     /// <summary>

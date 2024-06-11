@@ -1,4 +1,4 @@
-﻿// Copyright © 2024-Present Neuroglia SRL. All rights reserved.
+﻿// Copyright © 2024-Present The Synapse Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -53,8 +53,8 @@ public record WorkflowInstanceStatus
     /// <summary>
     /// Gets/sets a name/context map that contains the workflow's pending correlations
     /// </summary>
-    [DataMember(Order = 6, Name = "correlations"), JsonPropertyName("correlations"), JsonPropertyOrder(6), YamlMember(Alias = "correlations", Order = 6)]
-    public virtual EquatableDictionary<string, CorrelationContext>? Correlations { get; set; }
+    [DataMember(Order = 6, Name = "correlation"), JsonPropertyName("correlation"), JsonPropertyOrder(6), YamlMember(Alias = "correlation", Order = 6)]
+    public virtual WorkflowInstanceCorrelationStatus? Correlation { get; set; }
 
     /// <summary>
     /// Gets/sets the error, if any, that has occurred during the workflow's execution

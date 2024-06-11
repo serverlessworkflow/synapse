@@ -1,4 +1,4 @@
-﻿// Copyright © 2024-Present Neuroglia SRL. All rights reserved.
+﻿// Copyright © 2024-Present The Synapse Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRep
     protected IJsonSerializer Serializer { get; } = serializer;
 
     /// <summary>
-    /// Gets the resource of the correlation to manage the scheduling of
+    /// Gets the service used to monitor the resource of the correlation to manage the scheduling of
     /// </summary>
     protected IResourceMonitor<Correlation> Correlation { get; } = correlation;
 
@@ -68,7 +68,7 @@ public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRep
     /// </summary>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>A new awaitable <see cref="Task"/></returns>
-    public virtual Task CorrelateAsync(CancellationToken cancellationToken = default)
+    public virtual Task HandleAsync(CancellationToken cancellationToken = default)
     {
         this.Subscription = this.CloudEventBus.InputStream.SubscribeAsync(async e => await this.CorrelateEventAsync(e, cancellationToken).ConfigureAwait(false));
         return Task.CompletedTask;
@@ -304,54 +304,60 @@ public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRep
         var updatedResource = this.Correlation.Resource.Clone()!;
         updatedResource.Status ??= new();
         updatedResource.Status.LastModified = DateTimeOffset.Now;
+        var completed = context.Satisfies(updatedResource.Spec.Events);
         var existingContext = updatedResource.Status.Contexts.FirstOrDefault(c => c.Id == context.Id);
         if (existingContext == null) 
         {
-            updatedResource.Status.Contexts.Add(context);
+            if (!completed) updatedResource.Status.Contexts.Add(context);
         }
         else
         {
             var index = updatedResource.Status.Contexts.IndexOf(existingContext);
             updatedResource.Status.Contexts.Remove(existingContext);
-            updatedResource.Status.Contexts.Insert(index, context);
-            if (context.Satisfies(updatedResource.Spec.Events))
+            if (!completed) updatedResource.Status.Contexts.Insert(index, context);
+        }
+        if (completed)
+        {
+            context.Status = CorrelationContextStatus.Completed;
+            if (updatedResource.Spec.Lifetime == CorrelationLifetime.Ephemeral)
             {
-                context.Status = CorrelationContextStatus.Completed;
-                if (updatedResource.Spec.Lifetime == CorrelationLifetime.Ephemeral) updatedResource.Status.Phase = CorrelationStatusPhase.Completed;
-                WorkflowInstance? workflowInstance;
-                switch (this.Correlation.Resource.Spec.Outcome.Type)
-                {
-                    case CorrelationOutcomeType.Correlate:
-                        var qualifiedName = this.Correlation.Resource.Spec.Outcome.Correlate!.Instance.Trim().Split('.', StringSplitOptions.RemoveEmptyEntries);
-                        var name = qualifiedName[0];
-                        var @namespace = qualifiedName[1];
-                        workflowInstance = await this.Resources.GetAsync<WorkflowInstance>(name, @namespace, cancellationToken).ConfigureAwait(false) ?? throw new ProblemDetailsException(ResourceProblemDetails.ResourceNotFound(new ResourceReference<WorkflowInstance>(name, @namespace)));
-                        var updatedWorkflowInstance = workflowInstance.Clone()!;
-                        updatedWorkflowInstance.Status ??= new();
-                        updatedWorkflowInstance.Status.Correlations ??= [];
-                        updatedWorkflowInstance.Status.Correlations[this.Correlation.Resource.Spec.Outcome.Correlate!.Task] = context;
-                        patch = JsonPatchUtility.CreateJsonPatchFromDiff(workflowInstance, updatedWorkflowInstance);
-                        await this.Resources.PatchStatusAsync<WorkflowInstance>(new(PatchType.JsonPatch, patch), workflowInstance.GetName(), workflowInstance.GetNamespace(), false, cancellationToken).ConfigureAwait(false);
-                        break;
-                    case CorrelationOutcomeType.Start:
-                        var input = this.Correlation.Resource.Spec.Outcome.Start!.Input == null ? [] : await this.ExpressionEvaluator.EvaluateAsync<EquatableDictionary<string, object>>(this.Correlation.Resource.Spec.Outcome.Start!.Input!, context, cancellationToken: cancellationToken).ConfigureAwait(false);
-                        workflowInstance = new()
+                updatedResource.Status.Phase = CorrelationStatusPhase.Completed;
+                this.Subscription?.Dispose();
+            }
+            WorkflowInstance? workflowInstance;
+            switch (this.Correlation.Resource.Spec.Outcome.Type)
+            {
+                case CorrelationOutcomeType.Correlate:
+                    var qualifiedName = this.Correlation.Resource.Spec.Outcome.Correlate!.Instance.Trim().Split('.', StringSplitOptions.RemoveEmptyEntries);
+                    var name = qualifiedName[0];
+                    var @namespace = qualifiedName[1];
+                    workflowInstance = await this.Resources.GetAsync<WorkflowInstance>(name, @namespace, cancellationToken).ConfigureAwait(false) ?? throw new ProblemDetailsException(ResourceProblemDetails.ResourceNotFound(new ResourceReference<WorkflowInstance>(name, @namespace)));
+                    var updatedWorkflowInstance = workflowInstance.Clone()!;
+                    updatedWorkflowInstance.Status ??= new();
+                    updatedWorkflowInstance.Status.Correlation ??= new();
+                    updatedWorkflowInstance.Status.Correlation.Contexts ??= [];
+                    updatedWorkflowInstance.Status.Correlation.Contexts[this.Correlation.Resource.Spec.Outcome.Correlate!.Task] = context;
+                    patch = JsonPatchUtility.CreateJsonPatchFromDiff(workflowInstance, updatedWorkflowInstance);
+                    await this.Resources.PatchStatusAsync<WorkflowInstance>(new(PatchType.JsonPatch, patch), workflowInstance.GetName(), workflowInstance.GetNamespace(), false, cancellationToken).ConfigureAwait(false);
+                    break;
+                case CorrelationOutcomeType.Start:
+                    var input = this.Correlation.Resource.Spec.Outcome.Start!.Input == null ? [] : await this.ExpressionEvaluator.EvaluateAsync<EquatableDictionary<string, object>>(this.Correlation.Resource.Spec.Outcome.Start!.Input!, context, cancellationToken: cancellationToken).ConfigureAwait(false);
+                    workflowInstance = new()
+                    {
+                        Metadata = new()
                         {
-                            Metadata = new()
-                            {
-                                Namespace = this.Correlation.Resource.Spec.Outcome.Start!.Workflow.Namespace,
-                                Name = $"{this.Correlation.Resource.Spec.Outcome.Start!.Workflow.Namespace}-"
-                            },
-                            Spec = new()
-                            {
-                                Definition = this.Correlation.Resource.Spec.Outcome.Start!.Workflow,
-                                Input = input
-                            }
-                        };
-                        await this.Resources.AddAsync(workflowInstance, false, cancellationToken).ConfigureAwait(false);
-                        break;
-                    default: throw new NotSupportedException($"The specified correlation outcome type is not supported '{this.Correlation.Resource.Spec.Outcome.Type}'");
-                }
+                            Namespace = this.Correlation.Resource.Spec.Outcome.Start!.Workflow.Namespace,
+                            Name = $"{this.Correlation.Resource.Spec.Outcome.Start!.Workflow.Namespace}-"
+                        },
+                        Spec = new()
+                        {
+                            Definition = this.Correlation.Resource.Spec.Outcome.Start!.Workflow,
+                            Input = input
+                        }
+                    };
+                    await this.Resources.AddAsync(workflowInstance, false, cancellationToken).ConfigureAwait(false);
+                    break;
+                default: throw new NotSupportedException($"The specified correlation outcome type is not supported '{this.Correlation.Resource.Spec.Outcome.Type}'");
             }
         }
         patch = JsonPatchUtility.CreateJsonPatchFromDiff(originalResource, updatedResource);

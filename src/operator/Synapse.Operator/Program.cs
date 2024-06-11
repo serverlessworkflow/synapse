@@ -1,4 +1,4 @@
-﻿// Copyright © 2024-Present Neuroglia SRL. All rights reserved.
+﻿// Copyright © 2024-Present The Synapse Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -25,6 +25,11 @@ var builder = Host.CreateDefaultBuilder()
     .ConfigureServices((context, services) =>
     {
         services.Configure<OperatorOptions>(context.Configuration);
+        services.AddSingleton(provider =>
+        {
+            var options = provider.GetRequiredService<IOptions<OperatorOptions>>().Value;
+            return Options.Create(options.Runner);
+        });
         services.AddLogging(builder =>
         {
             builder.AddSimpleConsole(options =>
@@ -39,7 +44,9 @@ var builder = Host.CreateDefaultBuilder()
             var configuration = new DockerClientConfiguration();
             return configuration.CreateClient();
         });
-        services.AddSingleton<IContainerPlatform, DockerContainerPlatform>();
+        services.AddSingleton<DockerContainerPlatform>();
+        services.AddSingleton<IContainerPlatform>(provider => provider.GetRequiredService<DockerContainerPlatform>());
+        services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<DockerContainerPlatform>());
         services.AddScoped<NativeRuntime>();
         services.AddScoped<ContainerRuntime>();
         services.AddScoped<IWorkflowRuntime>(provider => 
@@ -62,7 +69,7 @@ var builder = Host.CreateDefaultBuilder()
         services.AddScoped<WorkflowInstanceController>();
         services.AddScoped<IResourceController<WorkflowInstance>>(provider => provider.GetRequiredService<WorkflowInstanceController>());
 
-        services.AddHostedService<Application>();
+        services.AddHostedService<OperatorApplication>();
     });
 
 using var app = builder.Build();

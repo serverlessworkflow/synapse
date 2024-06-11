@@ -1,4 +1,4 @@
-﻿// Copyright © 2024-Present Neuroglia SRL. All rights reserved.
+﻿// Copyright © 2024-Present The Synapse Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -32,9 +32,9 @@ public static class WorkflowInstanceStatusPhase
     /// </summary>
     public const string Completed = "completed";
     /// <summary>
-    /// Indicates that the workflow's execution has been suspended
+    /// Indicates that the workflow's execution is waiting for user or event input
     /// </summary>
-    public const string Suspended = "suspended";
+    public const string Waiting = "waiting";
     /// <summary>
     /// Indicates that the workflow's execution has been cancelled
     /// </summary>

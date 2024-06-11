@@ -1,4 +1,4 @@
-﻿// Copyright © 2024-Present Neuroglia SRL. All rights reserved.
+﻿// Copyright © 2024-Present The Synapse Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -27,7 +27,11 @@ internal class MockNamespacedResourceApiClient<TResource>(IResourceRepository re
 
     public Task DeleteAsync(string name, string @namespace, CancellationToken cancellationToken = default) => resources.RemoveAsync<TResource>(name, @namespace, false, cancellationToken);
 
-    public Task<IAsyncEnumerable<TResource>> ListAsync(string @namespace, IEnumerable<LabelSelector>? labelSelectors = null, CancellationToken cancellationToken = default) => Task.FromResult(resources.GetAllAsync<TResource>(@namespace, labelSelectors, cancellationToken: cancellationToken)!);
+    public Task<IAsyncEnumerable<TResource>> ListAsync(string? @namespace, IEnumerable<LabelSelector>? labelSelectors = null, CancellationToken cancellationToken = default) => Task.FromResult(resources.GetAllAsync<TResource>(@namespace, labelSelectors, cancellationToken: cancellationToken)!);
+
+    public async Task<IAsyncEnumerable<IResourceWatchEvent<TResource>>> WatchAsync(string? @namespace = null, IEnumerable<LabelSelector>? labelSelectors = null, CancellationToken cancellationToken = default) => (await resources.WatchAsync<TResource>(@namespace, labelSelectors, cancellationToken).ConfigureAwait(false)).ToAsyncEnumerable();
+
+    public async Task<IAsyncEnumerable<IResourceWatchEvent<TResource>>> MonitorAsync(string name, string @namespace, CancellationToken cancellationToken = default) => (await resources.MonitorAsync<TResource>(name, @namespace, false, cancellationToken).ConfigureAwait(false)).ToAsyncEnumerable();
 
     public Task<TResource> GetAsync(string name, string @namespace, CancellationToken cancellationToken = default) => resources.GetAsync<TResource>(name, @namespace, cancellationToken)!;
 
@@ -40,5 +44,6 @@ internal class MockNamespacedResourceApiClient<TResource>(IResourceRepository re
     public Task<TResource> ReplaceAsync(TResource resource, CancellationToken cancellationToken = default) => resources.ReplaceAsync(resource, false, cancellationToken);
 
     public Task<TResource> ReplaceStatusAsync(TResource resource, CancellationToken cancellationToken = default) => resources.ReplaceStatusAsync(resource, false, cancellationToken);
+
 
 }

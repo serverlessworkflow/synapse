@@ -1,4 +1,4 @@
-﻿// Copyright © 2024-Present Neuroglia SRL. All rights reserved.
+﻿// Copyright © 2024-Present The Synapse Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -11,14 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Synapse.Api.Http.Controllers;
-using Synapse.Resources;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.OpenApi.Models;
 using Neuroglia;
 using Neuroglia.Security.Services;
-using Neuroglia.Serialization.Json;
+using Synapse.Api.Http.Controllers;
 using Synapse.Core.Api.Services;
+using Synapse.Resources;
+using System.Text.Json;
 
 namespace Synapse.Api.Http;
 
@@ -40,7 +40,7 @@ public static class IServiceCollectionExtensions
         services.AddControllers()
             .AddJsonOptions(options =>
             {
-                JsonSerializer.DefaultOptionsConfiguration(options.JsonSerializerOptions);
+                options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
             })
             .AddApplicationPart(typeof(WorkflowsController).Assembly);
         services.AddSignalR();

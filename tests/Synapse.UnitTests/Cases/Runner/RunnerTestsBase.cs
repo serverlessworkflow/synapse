@@ -1,4 +1,4 @@
-﻿// Copyright © 2024-Present Neuroglia SRL. All rights reserved.
+﻿// Copyright © 2024-Present The Synapse Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -12,6 +12,7 @@
 // limitations under the License.
 
 using Docker.DotNet;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Moq;
 using Neuroglia.Data.Expressions.JQ;
@@ -61,7 +62,9 @@ public abstract class RunnerTestsBase
         services.AddScoped<IResourceRepository, MockResourceRepository>();
         services.AddCloudEventBus();
         services.AddHttpClient();
-        services.AddSingleton<IContainerPlatform, DockerContainerPlatform>();
+        services.AddSingleton<DockerContainerPlatform>();
+        services.AddSingleton<IContainerPlatform>(provider => provider.GetRequiredService<DockerContainerPlatform>());
+        services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<DockerContainerPlatform>());
         services.AddSingleton<IDockerClient>(new DockerClientConfiguration().CreateClient());
         services.AddSingleton<IExternalResourceProvider, ExternalResourceProvider>();
         services.AddScoped<IResourceRepository, ResourceRepository>();

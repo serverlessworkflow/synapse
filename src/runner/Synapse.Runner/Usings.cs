@@ -1,4 +1,4 @@
-﻿// Copyright © 2024-Present Neuroglia SRL. All rights reserved.
+﻿// Copyright © 2024-Present The Synapse Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ global using Microsoft.Extensions.Hosting;
 global using Microsoft.Extensions.Logging;
 global using Neuroglia.Data.Expressions.JavaScript;
 global using Neuroglia.Data.Expressions.JQ;
+global using Neuroglia.Eventing.CloudEvents.Infrastructure.Services;
 global using Neuroglia.Scripting;
 global using Neuroglia.Scripting.Services;
 global using Neuroglia.Serialization;

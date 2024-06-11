@@ -1,4 +1,4 @@
-﻿// Copyright © 2024-Present Neuroglia SRL. All rights reserved.
+﻿// Copyright © 2024-Present The Synapse Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Synapse.Api.Application.Commands.Resources.Generic;
 using Synapse.Api.Application.Commands.WorkflowDataDocuments;
@@ -82,9 +81,15 @@ public static class IServiceCollectionExtensions
             services.Add(new ServiceDescriptor(handlerServiceType, handlerImplementationType, serviceLifetime));
 
             queryType = typeof(WatchResourcesQuery<>).MakeGenericType(queryableType);
-            resultType = typeof(IOperationResult<>).MakeGenericType(typeof(IResourceWatch<>).MakeGenericType(queryableType));
+            resultType = typeof(IOperationResult<>).MakeGenericType(typeof(IAsyncEnumerable<>).MakeGenericType(typeof(IResourceWatchEvent<>).MakeGenericType(queryableType)));
             handlerServiceType = typeof(IRequestHandler<,>).MakeGenericType(queryType, resultType);
             handlerImplementationType = typeof(WatchResourcesQueryHandler<>).MakeGenericType(queryableType);
+            services.Add(new ServiceDescriptor(handlerServiceType, handlerImplementationType, serviceLifetime));
+
+            queryType = typeof(MonitorResourceQuery<>).MakeGenericType(queryableType);
+            resultType = typeof(IOperationResult<>).MakeGenericType(typeof(IAsyncEnumerable<>).MakeGenericType(typeof(IResourceWatchEvent<>).MakeGenericType(queryableType)));
+            handlerServiceType = typeof(IRequestHandler<,>).MakeGenericType(queryType, resultType);
+            handlerImplementationType = typeof(MonitorResourceQueryHandler<>).MakeGenericType(queryableType);
             services.Add(new ServiceDescriptor(handlerServiceType, handlerImplementationType, serviceLifetime));
         }
         services.AddScoped<IRequestHandler<GetWorkflowDataDocumentQuery, IOperationResult<Document>>, GetWorkflowDataQueryHandler>();

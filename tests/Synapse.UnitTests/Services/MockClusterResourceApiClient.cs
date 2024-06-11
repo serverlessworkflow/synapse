@@ -1,4 +1,4 @@
-﻿// Copyright © 2024-Present Neuroglia SRL. All rights reserved.
+﻿// Copyright © 2024-Present The Synapse Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -26,9 +26,13 @@ internal class MockClusterResourceApiClient<TResource>(IResourceRepository resou
     public Task<TResource> CreateAsync(TResource resource, CancellationToken cancellationToken = default) => resources.AddAsync(resource, false, cancellationToken);
 
     public Task<IAsyncEnumerable<TResource>> ListAsync(IEnumerable<LabelSelector>? labelSelectors = null, CancellationToken cancellationToken = default) => Task.FromResult(resources.GetAllAsync<TResource>(null, labelSelectors, cancellationToken)!);
-
+    
+    public async Task<IAsyncEnumerable<IResourceWatchEvent<TResource>>> WatchAsync(IEnumerable<LabelSelector>? labelSelectors = null, CancellationToken cancellationToken = default) => (await resources.WatchAsync<TResource>(null!, labelSelectors, cancellationToken).ConfigureAwait(false)).ToAsyncEnumerable();
+    
+    public async Task<IAsyncEnumerable<IResourceWatchEvent<TResource>>> MonitorAsync(string name, CancellationToken cancellationToken = default) => (await resources.MonitorAsync<TResource>(name, null!, false, cancellationToken).ConfigureAwait(false)).ToAsyncEnumerable();
+    
     public Task<TResource> GetAsync(string name, CancellationToken cancellationToken = default) => resources.GetAsync<TResource>(name, null, cancellationToken)!;
-
+    
     public async Task<ResourceDefinition> GetDefinitionAsync(CancellationToken cancellationToken = default) => ((ResourceDefinition)(await resources.GetDefinitionAsync<TResource>(cancellationToken))!)!;
 
     public Task<TResource> PatchAsync(string name, Patch patch, CancellationToken cancellationToken = default) => resources.PatchAsync<TResource>(patch, name, null, false, cancellationToken);
@@ -40,6 +44,5 @@ internal class MockClusterResourceApiClient<TResource>(IResourceRepository resou
     public Task<TResource> ReplaceStatusAsync(TResource resource, CancellationToken cancellationToken = default) => resources.ReplaceStatusAsync(resource, false, cancellationToken);
 
     public Task DeleteAsync(string name, CancellationToken cancellationToken = default) => resources.RemoveAsync<TResource>(name, null, false, cancellationToken);
-
 
 }

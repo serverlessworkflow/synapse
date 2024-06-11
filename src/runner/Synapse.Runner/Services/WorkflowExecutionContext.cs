@@ -1,4 +1,4 @@
-﻿// Copyright © 2024-Present Neuroglia SRL. All rights reserved.
+﻿// Copyright © 2024-Present The Synapse Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -326,7 +326,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         using var @lock = await this.Lock.LockAsync(cancellationToken).ConfigureAwait(false);
         var originalInstance = this.Instance.Clone();
         this.Instance.Status ??= new();
-        this.Instance.Status.Phase = WorkflowInstanceStatusPhase.Suspended;
+        this.Instance.Status.Phase = WorkflowInstanceStatusPhase.Waiting;
         var run = this.Instance.Status.Runs?.LastOrDefault();
         if (run != null) run.EndedAt = DateTimeOffset.Now;
         var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
