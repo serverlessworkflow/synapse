@@ -161,15 +161,16 @@ public abstract class ClusterResourceController<TResource>(IMediator mediator, I
     /// </summary>
     /// <param name="name">The name of the resource to patch</param>
     /// <param name="patch">The patch to apply</param>
+    /// <param name="resourceVersion">The expected resource version, if any, used for optimistic concurrency</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>A new <see cref="IActionResult"/></returns>
     [HttpPatch("{namespace}/{name}")]
     [ProducesResponseType(typeof(Resource), (int)HttpStatusCode.OK)]
     [ProducesErrorResponseType(typeof(Neuroglia.ProblemDetails))]
-    public virtual async Task<IActionResult> PatchResource(string name, [FromBody] Patch patch, CancellationToken cancellationToken = default)
+    public virtual async Task<IActionResult> PatchResource(string name, [FromBody] Patch patch, string? resourceVersion = null, CancellationToken cancellationToken = default)
     {
         if (!this.ModelState.IsValid) return this.ValidationProblem(this.ModelState);
-        return this.Process(await this.Mediator.ExecuteAsync(new PatchResourceCommand<TResource>(name, null, patch), cancellationToken).ConfigureAwait(false));
+        return this.Process(await this.Mediator.ExecuteAsync(new PatchResourceCommand<TResource>(name, null, patch, resourceVersion), cancellationToken).ConfigureAwait(false));
     }
 
     /// <summary>
@@ -177,15 +178,16 @@ public abstract class ClusterResourceController<TResource>(IMediator mediator, I
     /// </summary>
     /// <param name="name">The name of the resource to patch the status of</param>
     /// <param name="patch">The patch to apply</param>
+    /// <param name="resourceVersion">The expected resource version, if any, used for optimistic concurrency</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>A new <see cref="IActionResult"/></returns>
     [HttpPatch("{namespace}/{name}/status")]
     [ProducesResponseType(typeof(Resource), (int)HttpStatusCode.OK)]
     [ProducesErrorResponseType(typeof(Neuroglia.ProblemDetails))]
-    public virtual async Task<IActionResult> PatchResourceStatus(string name,[FromBody] Patch patch, CancellationToken cancellationToken = default)
+    public virtual async Task<IActionResult> PatchResourceStatus(string name, [FromBody] Patch patch, string? resourceVersion = null, CancellationToken cancellationToken = default)
     {
         if (!this.ModelState.IsValid) return this.ValidationProblem(this.ModelState);
-        return this.Process(await this.Mediator.ExecuteAsync(new PatchResourceStatusCommand<TResource>(name, null, patch), cancellationToken).ConfigureAwait(false));
+        return this.Process(await this.Mediator.ExecuteAsync(new PatchResourceStatusCommand<TResource>(name, null, patch, resourceVersion), cancellationToken).ConfigureAwait(false));
     }
 
     /// <summary>

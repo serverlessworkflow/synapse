@@ -34,8 +34,7 @@ public class PatchResourceCommand
     /// <param name="name">The name of the <see cref="IResource"/> to patch</param>
     /// <param name="namespace">The namespace the <see cref="IResource"/> to patch belongs to</param>
     /// <param name="patch">The patch to apply</param>
-    /// <param name="dryRun">A boolean indicating whether or not to persist changes</param>
-    public PatchResourceCommand(string group, string version, string plural, string name, string? @namespace, Patch patch, bool dryRun)
+    public PatchResourceCommand(string group, string version, string plural, string name, string? @namespace, Patch patch)
     {
         if (string.IsNullOrWhiteSpace(group)) throw new ArgumentNullException(nameof(group));
         if (string.IsNullOrWhiteSpace(version)) throw new ArgumentNullException(nameof(version));
@@ -92,7 +91,7 @@ public class PatchResourceCommandHandler(IResourceRepository repository)
     /// <inheritdoc/>
     public virtual async Task<IOperationResult<IResource>> HandleAsync(PatchResourceCommand command, CancellationToken cancellationToken)
     {
-        var resource = await repository.PatchAsync(command.Patch, command.Group, command.Version, command.Plural, command.Name, command.Namespace, false, cancellationToken).ConfigureAwait(false);
+        var resource = await repository.PatchAsync(command.Patch, command.Group, command.Version, command.Plural, command.Name, command.Namespace, null, false, cancellationToken).ConfigureAwait(false);
         return this.Ok(resource);
     }
 

@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Neuroglia.Data.Infrastructure.ResourceOriented;
+
 namespace Synapse.Api.Application.Commands.Resources.Generic;
 
 /// <summary>
@@ -28,12 +30,14 @@ public class PatchResourceStatusCommand<TResource>
     /// <param name="name">The name of the <see cref="IResource"/> to patch</param>
     /// <param name="namespace">The namespace the <see cref="IResource"/> to patch belongs to</param>
     /// <param name="patch">The patch to apply</param>
-    public PatchResourceStatusCommand(string name, string? @namespace, Patch patch)
+    /// <param name="resourceVersion">The expected resource version, if any, used for optimistic concurrency</param>
+    public PatchResourceStatusCommand(string name, string? @namespace, Patch patch, string? resourceVersion)
     {
         if (string.IsNullOrWhiteSpace(name)) throw new ArgumentNullException(nameof(name));
         this.Name = name;
         this.Namespace = @namespace;
         this.Patch = patch ?? throw new ArgumentNullException(nameof(patch));
+        this.ResourceVersion = resourceVersion;
     }
 
     /// <summary>
@@ -51,6 +55,11 @@ public class PatchResourceStatusCommand<TResource>
     /// </summary>
     public Patch Patch { get; }
 
+    /// <summary>
+    /// Gets the expected resource version, if any, used for optimistic concurrency
+    /// </summary>
+    public string? ResourceVersion { get; }
+
 }
 
 /// <summary>
@@ -66,7 +75,7 @@ public class PatchResourceStatusCommandHandler<TResource>(IResourceRepository re
     /// <inheritdoc/>
     public virtual async Task<IOperationResult<TResource>> HandleAsync(PatchResourceStatusCommand<TResource> command, CancellationToken cancellationToken)
     {
-        var resource = await repository.PatchStatusAsync<TResource>(command.Patch, command.Name, command.Namespace, false, cancellationToken).ConfigureAwait(false);
+        var resource = await repository.PatchStatusAsync<TResource>(command.Patch, command.Name, command.Namespace, command.ResourceVersion, false, cancellationToken).ConfigureAwait(false);
         return this.Ok(resource);
     }
 

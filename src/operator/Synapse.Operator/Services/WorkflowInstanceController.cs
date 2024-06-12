@@ -86,7 +86,7 @@ public class WorkflowInstanceController(IServiceProvider serviceProvider, ILogge
             resource.Metadata.Labels ??= new Dictionary<string, string>();
             resource.Metadata.Labels[SynapseDefaults.Resources.Labels.Operator] = this.Operator.Resource.GetQualifiedName();
             var patch = JsonPatchUtility.CreateJsonPatchFromDiff(originalResource, resource);
-            resource = await this.Repository.PatchAsync<WorkflowInstance>(new(PatchType.JsonPatch, patch), resource.GetName(), resource.GetNamespace(), false, cancellationToken).ConfigureAwait(false);
+            resource = await this.Repository.PatchAsync<WorkflowInstance>(new(PatchType.JsonPatch, patch), resource.GetName(), resource.GetNamespace(), null, false, cancellationToken).ConfigureAwait(false);
             return true;
         }
         catch (ConcurrencyException)
@@ -112,7 +112,7 @@ public class WorkflowInstanceController(IServiceProvider serviceProvider, ILogge
             resource.Metadata.Labels.Remove(SynapseDefaults.Resources.Labels.Operator);
             if (resource.Metadata.Labels.Count < 1) resource.Metadata.Labels = null;
             var patch = JsonPatchUtility.CreateJsonPatchFromDiff(originalResource, resource);
-            resource = await this.Repository.PatchAsync<WorkflowInstance>(new(PatchType.JsonPatch, patch), resource.GetName(), resource.GetNamespace(), false, cancellationToken).ConfigureAwait(false);
+            resource = await this.Repository.PatchAsync<WorkflowInstance>(new(PatchType.JsonPatch, patch), resource.GetName(), resource.GetNamespace(), null, false, cancellationToken).ConfigureAwait(false);
             return true;
         }
         catch (ConcurrencyException)

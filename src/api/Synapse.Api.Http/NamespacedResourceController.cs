@@ -228,15 +228,16 @@ public abstract class NamespacedResourceController<TResource>(IMediator mediator
     /// <param name="name">The name of the resource to patch</param>
     /// <param name="namespace">The namespace the resource to patch belongs to</param>
     /// <param name="patch">The patch to apply</param>
+    /// <param name="resourceVersion">The expected resource version, if any, used for optimistic concurrency</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>A new <see cref="IActionResult"/></returns>
     [HttpPatch("{namespace}/{name}")]
     [ProducesResponseType(typeof(IAsyncEnumerable<Resource>), (int)HttpStatusCode.OK)]
     [ProducesErrorResponseType(typeof(Neuroglia.ProblemDetails))]
-    public virtual async Task<IActionResult> PatchResource(string name, string @namespace, [FromBody] Patch patch, CancellationToken cancellationToken = default)
+    public virtual async Task<IActionResult> PatchResource(string name, string @namespace, [FromBody] Patch patch, string? resourceVersion = null, CancellationToken cancellationToken = default)
     {
         if (!this.ModelState.IsValid) return this.ValidationProblem(this.ModelState);
-        return this.Process(await this.Mediator.ExecuteAsync(new PatchResourceCommand<TResource>(name, @namespace, patch), cancellationToken).ConfigureAwait(false));
+        return this.Process(await this.Mediator.ExecuteAsync(new PatchResourceCommand<TResource>(name, @namespace, patch, resourceVersion), cancellationToken).ConfigureAwait(false));
     }
 
     /// <summary>
@@ -245,15 +246,16 @@ public abstract class NamespacedResourceController<TResource>(IMediator mediator
     /// <param name="name">The name of the resource to patch the status of</param>
     /// <param name="namespace">The namespace the resource to patch the status of belongs to</param>
     /// <param name="patch">The patch to apply</param>
+    /// <param name="resourceVersion">The expected resource version, if any, used for optimistic concurrency</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>A new <see cref="IActionResult"/></returns>
     [HttpPatch("{namespace}/{name}/status")]
     [ProducesResponseType(typeof(IAsyncEnumerable<Resource>), (int)HttpStatusCode.OK)]
     [ProducesErrorResponseType(typeof(Neuroglia.ProblemDetails))]
-    public virtual async Task<IActionResult> PatchResourceStatus(string name, string @namespace, [FromBody] Patch patch, CancellationToken cancellationToken = default)
+    public virtual async Task<IActionResult> PatchResourceStatus(string name, string @namespace, [FromBody] Patch patch, string? resourceVersion = null, CancellationToken cancellationToken = default)
     {
         if (!this.ModelState.IsValid) return this.ValidationProblem(this.ModelState);
-        return this.Process(await this.Mediator.ExecuteAsync(new PatchResourceStatusCommand<TResource>(name, @namespace, patch), cancellationToken).ConfigureAwait(false));
+        return this.Process(await this.Mediator.ExecuteAsync(new PatchResourceStatusCommand<TResource>(name, @namespace, patch, resourceVersion), cancellationToken).ConfigureAwait(false));
     }
 
     /// <summary>

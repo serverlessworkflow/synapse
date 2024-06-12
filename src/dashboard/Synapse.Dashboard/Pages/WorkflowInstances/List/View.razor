@@ -52,8 +52,13 @@
                             }
                         </td>
                         <td class="text-end">
-                            <button class="btn btn-outline-primary btn-sm" title="Edit '@resource.Metadata.Name'" @onclick="async _ => await OnShowResourceEditorAsync(resource)" @onclick:preventDefault @onclick:stopPropagation><Icon Name="IconName.Pencil" /></button>
-                            <button class="btn btn-outline-danger btn-sm" title="Delete '@resource.Metadata.Name'" @onclick="async _ => await OnDeleteResourceAsync(resource)" @onclick:preventDefault @onclick:stopPropagation><Icon Name="IconName.Trash" /></button>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="" @onclick:stopPropagation="true"><i class="bi bi-three-dots-vertical"></i></button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#" @onclick="async _ => await OnDeleteResourceAsync(resource)" @onclick:preventDefault="true" @onclick:stopPropagation="true">View</a></li>
+                                    <li><a class="dropdown-item" href="#" @onclick="async _ => await OnDeleteResourceAsync(resource)" @onclick:preventDefault="true" @onclick:stopPropagation="true">Delete</a></li>
+                                </ul>
+                            </div>
                         </td>
                     </tr>
                 </Virtualize>

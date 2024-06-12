@@ -61,18 +61,20 @@ public interface IClusterResourceApiClient<TResource>
     /// </summary>
     /// <param name="name">The name of the resource to patch</param>
     /// <param name="patch">The patch to apply</param>
+    /// <param name="resourceVersion">The expected resource version, if any, used for optimistic concurrency</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>The patched resource</returns>
-    Task<TResource> PatchAsync(string name, Patch patch, CancellationToken cancellationToken = default);
+    Task<TResource> PatchAsync(string name, Patch patch, string? resourceVersion = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Patches the specified resource's status
     /// </summary>
     /// <param name="name">The name of the resource to patch the status of</param>
     /// <param name="patch">The patch to apply</param>
+    /// <param name="resourceVersion">The expected resource version, if any, used for optimistic concurrency</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>The patched resource</returns>
-    Task<TResource> PatchStatusAsync(string name, Patch patch, CancellationToken cancellationToken = default);
+    Task<TResource> PatchStatusAsync(string name, Patch patch, string? resourceVersion = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Deletes the specified resource

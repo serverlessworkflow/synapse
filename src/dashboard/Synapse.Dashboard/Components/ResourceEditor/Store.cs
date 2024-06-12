@@ -294,7 +294,7 @@ public class ResourceEditorStore<TResource>(ISynapseApiClient apiClient, IMonaco
             var resourcePatch = new Patch(PatchType.JsonPatch, jsonPatch);
             try
             {
-                resource = await apiClient.ManageNamespaced<TResource>().PatchAsync(resource.GetName(), resource.GetNamespace()!, resourcePatch, this.CancellationTokenSource.Token);
+                resource = await apiClient.ManageNamespaced<TResource>().PatchAsync(resource.GetName(), resource.GetNamespace()!, resourcePatch, null, this.CancellationTokenSource.Token);
                 this.SetResource(resource);
             }
             catch(ProblemDetailsException ex)

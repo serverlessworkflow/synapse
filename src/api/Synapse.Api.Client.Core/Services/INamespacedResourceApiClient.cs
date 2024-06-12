@@ -66,9 +66,10 @@ public interface INamespacedResourceApiClient<TResource>
     /// <param name="name">The name of the resource to patch</param>
     /// <param name="namespace">The namespace the resource to patch belongs to</param>
     /// <param name="patch">The patch to apply</param>
+    /// <param name="resourceVersion">The expected resource version, if any, used for optimistic concurrency</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>The patched resource</returns>
-    Task<TResource> PatchAsync(string name, string @namespace, Patch patch, CancellationToken cancellationToken = default);
+    Task<TResource> PatchAsync(string name, string @namespace, Patch patch, string? resourceVersion = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Patches the specified resource's status
@@ -76,9 +77,10 @@ public interface INamespacedResourceApiClient<TResource>
     /// <param name="name">The name of the resource to patch the status of</param>
     /// <param name="namespace">The namespace the resource to patch the status of belongs to</param>
     /// <param name="patch">The patch to apply</param>
+    /// <param name="resourceVersion">The expected resource version, if any, used for optimistic concurrency</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>The patched resource</returns>
-    Task<TResource> PatchStatusAsync(string name, string @namespace, Patch patch, CancellationToken cancellationToken = default);
+    Task<TResource> PatchStatusAsync(string name, string @namespace, Patch patch, string? resourceVersion = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Deletes the specified resource

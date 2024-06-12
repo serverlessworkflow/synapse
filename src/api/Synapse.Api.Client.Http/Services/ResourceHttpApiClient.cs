@@ -11,9 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Runtime.CompilerServices;
-using System.Text.Json;
-
 namespace Synapse.Api.Client.Services;
 
 /// <summary>
@@ -172,12 +169,13 @@ public class ResourceHttpApiClient<TResource>(ILogger<ResourceHttpApiClient<TRes
     }
 
     /// <inheritdoc/>
-    public virtual async Task<TResource> PatchAsync(string name, Patch patch, CancellationToken cancellationToken = default)
+    public virtual async Task<TResource> PatchAsync(string name, Patch patch, string? resourceVersion = null, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         ArgumentNullException.ThrowIfNull(patch);
         var resource = new TResource();
         var uri = $"/api/{resource.Definition.Version}/{resource.Definition.Plural}/{name}";
+        if (!string.IsNullOrWhiteSpace(resourceVersion)) uri += $"?resourceVersion={resourceVersion}";
         var json = this.JsonSerializer.SerializeToText(patch);
         using var content = new StringContent(json, Encoding.UTF8, MediaTypeNames.Application.Json);
         using var request = await this.ProcessRequestAsync(new HttpRequestMessage(HttpMethod.Patch, uri) { Content = content }, cancellationToken).ConfigureAwait(false);
@@ -187,13 +185,14 @@ public class ResourceHttpApiClient<TResource>(ILogger<ResourceHttpApiClient<TRes
     }
 
     /// <inheritdoc/>
-    public virtual async Task<TResource> PatchAsync(string name, string @namespace, Patch patch, CancellationToken cancellationToken = default)
+    public virtual async Task<TResource> PatchAsync(string name, string @namespace, Patch patch, string? resourceVersion = null, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         ArgumentException.ThrowIfNullOrWhiteSpace(@namespace);
         ArgumentNullException.ThrowIfNull(patch);
         var resource = new TResource();
         var uri = $"/api/{resource.Definition.Version}/{resource.Definition.Plural}/{@namespace}/{name}";
+        if (!string.IsNullOrWhiteSpace(resourceVersion)) uri += $"?resourceVersion={resourceVersion}";
         var json = this.JsonSerializer.SerializeToText(patch);
         using var content = new StringContent(json, Encoding.UTF8, MediaTypeNames.Application.Json);
         using var request = await this.ProcessRequestAsync(new HttpRequestMessage(HttpMethod.Patch, uri) { Content = content }, cancellationToken).ConfigureAwait(false);
@@ -203,12 +202,13 @@ public class ResourceHttpApiClient<TResource>(ILogger<ResourceHttpApiClient<TRes
     }
 
     /// <inheritdoc/>
-    public virtual async Task<TResource> PatchStatusAsync(string name, Patch patch, CancellationToken cancellationToken = default)
+    public virtual async Task<TResource> PatchStatusAsync(string name, Patch patch, string? resourceVersion = null, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         ArgumentNullException.ThrowIfNull(patch);
         var resource = new TResource();
         var uri = $"/api/{resource.Definition.Version}/{resource.Definition.Plural}/{name}/status";
+        if (!string.IsNullOrWhiteSpace(resourceVersion)) uri += $"?resourceVersion={resourceVersion}";
         var json = this.JsonSerializer.SerializeToText(patch);
         using var content = new StringContent(json, Encoding.UTF8, MediaTypeNames.Application.Json);
         using var request = await this.ProcessRequestAsync(new HttpRequestMessage(HttpMethod.Patch, uri) { Content = content }, cancellationToken).ConfigureAwait(false);
@@ -218,13 +218,14 @@ public class ResourceHttpApiClient<TResource>(ILogger<ResourceHttpApiClient<TRes
     }
 
     /// <inheritdoc/>
-    public virtual async Task<TResource> PatchStatusAsync(string name, string @namespace, Patch patch, CancellationToken cancellationToken = default)
+    public virtual async Task<TResource> PatchStatusAsync(string name, string @namespace, Patch patch, string? resourceVersion = null, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         ArgumentException.ThrowIfNullOrWhiteSpace(@namespace);
         ArgumentNullException.ThrowIfNull(patch);
         var resource = new TResource();
         var uri = $"/api/{resource.Definition.Version}/{resource.Definition.Plural}/{@namespace}/{name}/status";
+        if (!string.IsNullOrWhiteSpace(resourceVersion)) uri += $"?resourceVersion={resourceVersion}";
         var json = this.JsonSerializer.SerializeToText(patch);
         using var content = new StringContent(json, Encoding.UTF8, MediaTypeNames.Application.Json);
         using var request = await this.ProcessRequestAsync(new HttpRequestMessage(HttpMethod.Patch, uri) { Content = content }, cancellationToken).ConfigureAwait(false);

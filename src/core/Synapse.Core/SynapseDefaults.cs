@@ -233,7 +233,14 @@ public static class SynapseDefaults
             /// Gets the label used by Synapse operators to claim workflows or workflow instances
             /// </summary>
             public const string Operator = Prefix + "operator";
-
+            /// <summary>
+            /// Gets the label used by Synapse to indicate the qualified name of the workflow used by a workflow instance
+            /// </summary>
+            public const string Workflow = Prefix + "workflow";
+            /// <summary>
+            /// Gets the label used by Synapse to indicate the version of the workflow used by a workflow instance
+            /// </summary>
+            public const string WorkflowVersion = Prefix + "workflow/version";
         }
 
     }

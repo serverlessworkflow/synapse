@@ -338,7 +338,7 @@ public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRep
                     updatedWorkflowInstance.Status.Correlation.Contexts ??= [];
                     updatedWorkflowInstance.Status.Correlation.Contexts[this.Correlation.Resource.Spec.Outcome.Correlate!.Task] = context;
                     patch = JsonPatchUtility.CreateJsonPatchFromDiff(workflowInstance, updatedWorkflowInstance);
-                    await this.Resources.PatchStatusAsync<WorkflowInstance>(new(PatchType.JsonPatch, patch), workflowInstance.GetName(), workflowInstance.GetNamespace(), false, cancellationToken).ConfigureAwait(false);
+                    await this.Resources.PatchStatusAsync<WorkflowInstance>(new(PatchType.JsonPatch, patch), workflowInstance.GetName(), workflowInstance.GetNamespace(), null, false, cancellationToken).ConfigureAwait(false);
                     break;
                 case CorrelationOutcomeType.Start:
                     var input = this.Correlation.Resource.Spec.Outcome.Start!.Input == null ? [] : await this.ExpressionEvaluator.EvaluateAsync<EquatableDictionary<string, object>>(this.Correlation.Resource.Spec.Outcome.Start!.Input!, context, cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -361,7 +361,7 @@ public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRep
             }
         }
         patch = JsonPatchUtility.CreateJsonPatchFromDiff(originalResource, updatedResource);
-        await this.Resources.PatchStatusAsync<Correlation>(new(PatchType.JsonPatch, patch), originalResource.GetName(), originalResource.GetNamespace(), false, cancellationToken).ConfigureAwait(false);
+        await this.Resources.PatchStatusAsync<Correlation>(new(PatchType.JsonPatch, patch), originalResource.GetName(), originalResource.GetNamespace(), null, false, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>

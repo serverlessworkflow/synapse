@@ -64,7 +64,7 @@ public class TaskExecutionContext<TDefinition>(IWorkflowExecutionContext workflo
     /// <inheritdoc/>
     public virtual async Task ExecuteAsync(CancellationToken cancellationToken = default)
     {
-        this.Instance = await this.Workflow.ExecuteAsync(this.Instance, cancellationToken).ConfigureAwait(false);
+        this.Instance = await this.Workflow.StartAsync(this.Instance, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>

@@ -11,6 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Json.Patch;
+using Neuroglia.Data.Infrastructure.ResourceOriented;
+using Neuroglia.Reactive;
+using System.Threading;
+
 namespace Synapse.Operator.Services;
 
 /// <summary>
@@ -50,7 +55,12 @@ public class WorkflowController(IServiceProvider serviceProvider, ILoggerFactory
     public override async Task StartAsync(CancellationToken cancellationToken)
     {
         await base.StartAsync(cancellationToken).ConfigureAwait(false);
-        this.Operator!.Select(b => b.Resource.Spec.Selector).SubscribeAsync(this.OnResourceSelectorChangedAsync, cancellationToken: cancellationToken);
+        this.Operator!.Select(b => b.Resource.Spec.Selector).DistinctUntilChanged().SubscribeAsync(this.OnResourceSelectorChangedAsync, cancellationToken: cancellationToken);
+        this.Where(e => e.Type == ResourceWatchEventType.Updated)
+            .Select(e => new { Workflow = e.Resource, e.Resource.Spec.Versions })
+            .DistinctUntilChanged()
+            .Scan((Previous: (EquatableList<WorkflowDefinition>?)null, Current: (EquatableList<WorkflowDefinition>?)null, Workflow: (Workflow?)null), (accumulator, current) => (accumulator.Current, current.Versions, current.Workflow))
+            .SubscribeAsync(async value => await this.OnWorkflowVersionChangedAsync(value.Workflow, value.Previous, value.Current).ConfigureAwait(false), cancellationToken: cancellationToken);
         await this.OnResourceSelectorChangedAsync(this.Operator!.Resource.Spec.Selector).ConfigureAwait(false);
     }
 
@@ -64,37 +74,38 @@ public class WorkflowController(IServiceProvider serviceProvider, ILoggerFactory
     /// <summary>
     /// Creates a new <see cref="WorkflowScheduler"/> for the specified workflow
     /// </summary>
-    /// <param name="resource">The resource of the workflow to create a new scheduler for</param>
+    /// <param name="workflow">The resource of the workflow to create a new scheduler for</param>
     /// <param name="definition">The definition of the workflow to create a new scheduler for</param>
     /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken"/></param>
     /// <returns>A new <see cref="WorkflowScheduler"/></returns>
-    protected virtual async Task<WorkflowScheduler> CreateSchedulerAsync(Workflow resource, WorkflowDefinition definition, CancellationToken cancellationToken)
+    protected virtual async Task<WorkflowScheduler> CreateSchedulerAsync(Workflow workflow, WorkflowDefinition definition, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(resource);
+        ArgumentNullException.ThrowIfNull(workflow);
         ArgumentNullException.ThrowIfNull(definition);
-        var scheduler = ActivatorUtilities.CreateInstance<WorkflowScheduler>(this.ServiceProvider, resource, definition);
-        if (!this.Schedulers.TryAdd(resource.GetQualifiedName(), scheduler)) await scheduler.DisposeAsync().ConfigureAwait(false);
+        var workflowMonitor = new ResourceMonitor<Workflow>(this.Watch ?? await this.Repository.WatchAsync<Workflow>(cancellationToken: cancellationToken).ConfigureAwait(false), workflow, this.Watch != null);
+        var scheduler = ActivatorUtilities.CreateInstance<WorkflowScheduler>(this.ServiceProvider, workflowMonitor, definition);
+        if (!this.Schedulers.TryAdd(workflow.GetQualifiedName(), scheduler)) await scheduler.DisposeAsync().ConfigureAwait(false);
         return scheduler;
     }
 
     /// <summary>
     /// Attempts to claim the specified <see cref="Workflow"/>
     /// </summary>
-    /// <param name="resource">The <see cref="Workflow"/> to try to claim</param>
+    /// <param name="workflow">The <see cref="Workflow"/> to try to claim</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>A boolean indicating whether or not the instance could be claimed</returns>
-    protected virtual async Task<bool> TryClaimAsync(Workflow resource, CancellationToken cancellationToken)
+    protected virtual async Task<bool> TryClaimAsync(Workflow workflow, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(resource);
+        ArgumentNullException.ThrowIfNull(workflow);
         if (this.Operator == null) throw new Exception("The controller must be started before attempting any operation");
-        if (resource.Metadata.Labels != null && resource.Metadata.Labels.TryGetValue(SynapseDefaults.Resources.Labels.Operator, out var operatorQualifiedName) && operatorQualifiedName == this.Operator.Resource.GetQualifiedName()) return true;
+        if (workflow.Metadata.Labels != null && workflow.Metadata.Labels.TryGetValue(SynapseDefaults.Resources.Labels.Operator, out var operatorQualifiedName) && operatorQualifiedName == this.Operator.Resource.GetQualifiedName()) return true;
         try
         {
-            var originalResource = resource.Clone();
-            resource.Metadata.Labels ??= new Dictionary<string, string>();
-            resource.Metadata.Labels[SynapseDefaults.Resources.Labels.Operator] = this.Operator.Resource.GetQualifiedName();
-            var patch = JsonPatchUtility.CreateJsonPatchFromDiff(originalResource, resource);
-            resource = await this.Repository.PatchAsync<Workflow>(new(PatchType.JsonPatch, patch), resource.GetName(), resource.GetNamespace(), false, cancellationToken).ConfigureAwait(false);
+            var originalResource = workflow.Clone();
+            workflow.Metadata.Labels ??= new Dictionary<string, string>();
+            workflow.Metadata.Labels[SynapseDefaults.Resources.Labels.Operator] = this.Operator.Resource.GetQualifiedName();
+            var patch = JsonPatchUtility.CreateJsonPatchFromDiff(originalResource, workflow);
+            workflow = await this.Repository.PatchAsync<Workflow>(new(PatchType.JsonPatch, patch), workflow.GetName(), workflow.GetNamespace(), null, false, cancellationToken).ConfigureAwait(false);
             return true;
         }
         catch (ConcurrencyException)
@@ -106,21 +117,21 @@ public class WorkflowController(IServiceProvider serviceProvider, ILoggerFactory
     /// <summary>
     /// Attempts to release the specified <see cref="Workflow"/>
     /// </summary>
-    /// <param name="resource">The <see cref="Workflow"/> to try to release</param>
+    /// <param name="workflow">The <see cref="Workflow"/> to try to release</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>A boolean indicating whether or not the instance could be released</returns>
-    protected virtual async Task<bool> TryReleaseAsync(Workflow resource, CancellationToken cancellationToken)
+    protected virtual async Task<bool> TryReleaseAsync(Workflow workflow, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(resource);
-        if (resource.Metadata.Labels != null && resource.Metadata.Labels.TryGetValue(SynapseDefaults.Resources.Labels.Operator, out var operatorQualifiedName) && operatorQualifiedName == this.Operator.Resource.GetQualifiedName()) return true;
+        ArgumentNullException.ThrowIfNull(workflow);
+        if (workflow.Metadata.Labels != null && workflow.Metadata.Labels.TryGetValue(SynapseDefaults.Resources.Labels.Operator, out var operatorQualifiedName) && operatorQualifiedName == this.Operator.Resource.GetQualifiedName()) return true;
         try
         {
-            var originalResource = resource.Clone();
-            resource.Metadata.Labels ??= new Dictionary<string, string>();
-            resource.Metadata.Labels.Remove(SynapseDefaults.Resources.Labels.Operator);
-            if (resource.Metadata.Labels.Count < 1) resource.Metadata.Labels = null;
-            var patch = JsonPatchUtility.CreateJsonPatchFromDiff(originalResource, resource);
-            resource = await this.Repository.PatchAsync<Workflow>(new(PatchType.JsonPatch, patch), resource.GetName(), resource.GetNamespace(), false, cancellationToken).ConfigureAwait(false);
+            var originalResource = workflow.Clone();
+            workflow.Metadata.Labels ??= new Dictionary<string, string>();
+            workflow.Metadata.Labels.Remove(SynapseDefaults.Resources.Labels.Operator);
+            if (workflow.Metadata.Labels.Count < 1) workflow.Metadata.Labels = null;
+            var patch = JsonPatchUtility.CreateJsonPatchFromDiff(originalResource, workflow);
+            workflow = await this.Repository.PatchAsync<Workflow>(new(PatchType.JsonPatch, patch), workflow.GetName(), workflow.GetNamespace(), null, false, cancellationToken).ConfigureAwait(false);
             return true;
         }
         catch (ConcurrencyException)
@@ -140,38 +151,47 @@ public class WorkflowController(IServiceProvider serviceProvider, ILoggerFactory
     }
 
     /// <inheritdoc/>
-    protected override async Task OnResourceCreatedAsync(Workflow resource, CancellationToken cancellationToken = default)
+    protected override async Task OnResourceCreatedAsync(Workflow workflow, CancellationToken cancellationToken)
     {
-        await base.OnResourceCreatedAsync(resource, cancellationToken).ConfigureAwait(false);
-        var definition = resource.Spec.Versions.GetLatest();
+        await base.OnResourceCreatedAsync(workflow, cancellationToken).ConfigureAwait(false);
+        var definition = workflow.Spec.Versions.GetLatest();
         if (definition.Schedule == null) return;
-        if (!await this.TryClaimAsync(resource, cancellationToken).ConfigureAwait(false)) return;
-        var scheduler = await this.CreateSchedulerAsync(resource, definition, cancellationToken).ConfigureAwait(false);
+        if (!await this.TryClaimAsync(workflow, cancellationToken).ConfigureAwait(false)) return;
+        var scheduler = await this.CreateSchedulerAsync(workflow, definition, cancellationToken).ConfigureAwait(false);
         await scheduler.ScheduleAsync(cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
-    protected override async Task OnResourceUpdatedAsync(Workflow resource, CancellationToken cancellationToken = default)
+    protected override async Task OnResourceDeletedAsync(Workflow workflow, CancellationToken cancellationToken)
     {
-        await base.OnResourceUpdatedAsync(resource, cancellationToken).ConfigureAwait(false);
-        if (resource.Metadata.Labels == null || !resource.Metadata.Labels.TryGetValue(SynapseDefaults.Resources.Labels.Operator, out _)) if (!await this.TryClaimAsync(resource, cancellationToken).ConfigureAwait(false)) return;
-        if (resource.Metadata.Labels?[SynapseDefaults.Resources.Labels.Operator] != this.Operator.Resource.GetQualifiedName()) return;
-        if (this.Schedulers.TryRemove(resource.GetQualifiedName(), out var scheduler)) await scheduler.DisposeAsync().ConfigureAwait(false);
-        var definition = resource.Spec.Versions.GetLatest();
-        if (definition.Schedule == null) return;
-        scheduler = await this.CreateSchedulerAsync(resource, definition, cancellationToken).ConfigureAwait(false);
-        await scheduler.ScheduleAsync(cancellationToken).ConfigureAwait(false);
-    }
-
-    /// <inheritdoc/>
-    protected override async Task OnResourceDeletedAsync(Workflow resource, CancellationToken cancellationToken = default)
-    {
-        await base.OnResourceDeletedAsync(resource, cancellationToken).ConfigureAwait(false);
-        if (this.Schedulers.TryRemove(resource.GetQualifiedName(), out var scheduler)) await scheduler.DisposeAsync().ConfigureAwait(false);
+        await base.OnResourceDeletedAsync(workflow, cancellationToken).ConfigureAwait(false);
+        if (this.Schedulers.TryRemove(workflow.GetQualifiedName(), out var scheduler)) await scheduler.DisposeAsync().ConfigureAwait(false);
         await foreach(var instance in this.Repository.GetAllAsync<WorkflowInstance>(cancellationToken: cancellationToken))
         {
             await this.Repository.RemoveAsync<WorkflowInstance>(instance.GetName(), instance.GetNamespace(), false, cancellationToken).ConfigureAwait(false);
         }
+    }
+
+    /// <summary>
+    /// Handles changes to the specified workflow's versions
+    /// </summary>
+    /// <param name="workflow">The updated workflow</param>
+    /// <param name="previous">The previous versions</param>
+    /// <param name="current">The actual versions</param>
+    /// <returns>A new awaitable <see cref="Task"/></returns>
+    protected virtual async Task OnWorkflowVersionChangedAsync(Workflow workflow, EquatableList<WorkflowDefinition> previous, EquatableList<WorkflowDefinition> current)
+    {
+        if (previous == null) return;
+        if (workflow.Metadata.Labels == null || !workflow.Metadata.Labels.TryGetValue(SynapseDefaults.Resources.Labels.Operator, out _)) if (!await this.TryClaimAsync(workflow, this.CancellationTokenSource.Token).ConfigureAwait(false)) return;
+        if (workflow.Metadata.Labels?[SynapseDefaults.Resources.Labels.Operator] != this.Operator.Resource.GetQualifiedName()) return;
+        var diffPatch = JsonPatchUtility.CreateJsonPatchFromDiff(previous, current);
+        var operation = diffPatch.Operations.First().Op;
+        if (this.Schedulers.TryRemove(workflow.GetQualifiedName(), out var scheduler)) await scheduler.DisposeAsync().ConfigureAwait(false);
+        if (operation == OperationType.Remove) return;
+        var definition = workflow.Spec.Versions.GetLatest();
+        if (definition.Schedule == null) return;
+        scheduler = await this.CreateSchedulerAsync(workflow, definition, this.CancellationTokenSource.Token).ConfigureAwait(false);
+        await scheduler.ScheduleAsync(this.CancellationTokenSource.Token).ConfigureAwait(false);
     }
 
     /// <summary>

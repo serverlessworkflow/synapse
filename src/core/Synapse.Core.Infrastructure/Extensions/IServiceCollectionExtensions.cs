@@ -24,6 +24,7 @@ using Neuroglia.Plugins;
 using Neuroglia.Security.Services;
 using Neuroglia.Serialization;
 using ServerlessWorkflow.Sdk.IO;
+using Synapse.Core.Infrastructure.Services;
 using Synapse.Resources;
 
 namespace Synapse;
@@ -63,6 +64,7 @@ public static class IServiceCollectionExtensions
         services.AddScoped<IResourceRepository, ResourceRepository>();
         services.AddScoped<IAdmissionControl, AdmissionControl>();
         services.AddScoped<IVersionControl, VersionControl>();
+        services.AddScoped<IResourceMutator, WorkflowInstanceMutator>();
         services.AddSingleton<IPatchHandler, JsonMergePatchHandler>();
         services.AddSingleton<IPatchHandler, JsonPatchHandler>();
         services.AddSingleton<IPatchHandler, JsonStrategicMergePatchHandler>();

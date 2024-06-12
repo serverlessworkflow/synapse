@@ -19,8 +19,13 @@
                 <th class="sticky-header text-start">Name</th>
                 <th class="sticky-header text-start">Namespace</th>
                 <th class="sticky-header text-center">Created At</th>
+                <th class="sticky-header text-center">Last Started At</th>
+                <th class="sticky-header text-center">Last Ended At</th>
                 <th class="sticky-header text-center">Versions</th>
                 <th class="sticky-header text-center">Latest</th>
+                <th class="sticky-header text-center">Instances</th>
+                <th class="sticky-header text-center">Schedule</th>
+                <th class="sticky-header text-center">Operator</th>
                 <th class="sticky-header text-end"></th>
             </tr>
         </thead>
@@ -30,13 +35,41 @@
                 <Virtualize Context="resource" Items="@Resources">
                     <tr @onclick="async _ => await OnShowResourceDetailsAsync(resource)" class="cursor-pointer">
                         <td class="text-start">@resource.Metadata.Name</td>
-                        <td class="text-start">@resource.Metadata.Namespace</td>
-                        <td class="text-center">@resource.Metadata.CreationTimestamp.ToString()</td>
+                        <td class="text-start"><a href="#" @onclick:preventDefault="true" @onclick:stopPropagation="true">@resource.Metadata.Namespace</a></td>
+                        <td class="text-center">@resource.Metadata.CreationTimestamp</td>
+                        <td class="text-center">@resource.Status?.Versions.Where(v => v.Value.LastEndedAt.HasValue).Select(v => v.Value.LastEndedAt!.Value).Order().LastOrDefault()</td>
+                        <td class="text-center">@resource.Status?.Versions.Where(v => v.Value.LastEndedAt.HasValue).Select(v => v.Value.LastEndedAt!.Value).Order().LastOrDefault()</td>
                         <td class="text-center">@resource.Spec.Versions.Count</td>
-                        <td class="text-center"><span class="badge rounded-pill border border-primary text-primary">@resource.Spec.Versions.Last().Document.Version</span></td>
+                        <td class="text-center"><a href="#" @onclick:preventDefault="true" @onclick:stopPropagation="true">@resource.Spec.Versions.GetLatest().Document.Version</a></td>
+                        <td class="text-center">@resource.Status?.Versions.Values.Sum(s => s.TotalInstances)</td>
+                        <td class="text-center">
+                            @if (resource.Spec.Versions.GetLatest().Schedule == null)
+                            {
+                                <span>-</span>
+                            }
+                            else
+                            {
+                                <span class="badge rounded-pill border border-secondary text-secondary">@GetScheduleType(resource)</span>
+                            }
+                        </td>
+                        <td class="text-center">
+                            @if (resource.Metadata.Labels?.TryGetValue(SynapseDefaults.Resources.Labels.Operator, out var operatorName) == true && !string.IsNullOrWhiteSpace(operatorName))
+                            {
+                                <a href="#" @onclick:preventDefault="true" @onclick:stopPropagation="true">@operatorName</a>
+                            }
+                            else
+                            {
+                                <span>-</span>
+                            }
+                        </td>
                         <td class="text-end">
-                            <button class="btn btn-outline-primary btn-sm" title="Edit '@resource.Metadata.Name'" @onclick="async _ => await OnShowResourceEditorAsync(resource)" @onclick:preventDefault @onclick:stopPropagation><Icon Name="IconName.Pencil" /></button>
-                            <button class="btn btn-outline-danger btn-sm" title="Delete '@resource.Metadata.Name'" @onclick="async _ => await OnDeleteResourceAsync(resource)" @onclick:preventDefault @onclick:stopPropagation><Icon Name="IconName.Trash" /></button>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="" @onclick:stopPropagation="true"><i class="bi bi-three-dots-vertical"></i></button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#" @onclick="async _ => await OnDeleteResourceAsync(resource)" @onclick:preventDefault="true" @onclick:stopPropagation="true">New version</a></li>
+                                    <li><a class="dropdown-item" href="#" @onclick="async _ => await OnDeleteResourceAsync(resource)" @onclick:preventDefault="true" @onclick:stopPropagation="true">Delete</a></li>
+                                </ul>
+                            </div>
                         </td>
                     </tr>
                 </Virtualize>
@@ -52,3 +85,19 @@
 <Offcanvas @ref="EditorOffCanvas" Size="OffcanvasSize.Large" UseStaticBackdrop="false" BodyCssClass="d-flex flex-column" />
 
 <ConfirmDialog @ref="Dialog" />
+
+@code
+{
+
+    string GetScheduleType(Workflow workflow)
+    {
+        var latest = workflow.Spec.Versions.GetLatest();
+        if (latest.Schedule == null) return "-";
+        else if (latest.Schedule.After != null) return "after";
+        else if (latest.Schedule.Cron != null) return "cron";
+        else if (latest.Schedule.Every != null) return "every";
+        else if (latest.Schedule.On != null) return "on";
+        else throw new NotSupportedException("The specified schedule type is not supported");
+    }
+
+}

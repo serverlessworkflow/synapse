@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
+using Cronos;
 
 namespace Synapse.Operator.Services;
 
@@ -20,12 +20,13 @@ namespace Synapse.Operator.Services;
 /// </summary>
 /// <param name="logger">The service used to perform logging</param>
 /// <param name="resources">The service used to manage resources</param>
-/// <param name="resource">The resource of the workflow to manage the scheduling of</param>
-/// <param name="definition">The definition of the workflow to manage the scheduling of</param>
-public class WorkflowScheduler(ILogger<WorkflowScheduler> logger, IResourceRepository resources, Workflow resource, WorkflowDefinition definition)
+/// <param name="workflow">The resource of the workflow to manage the scheduling of</param>
+/// <param name="workflowDefinition">The definition of the workflow to manage the scheduling of</param>
+public class WorkflowScheduler(ILogger<WorkflowScheduler> logger, IResourceRepository resources, IResourceMonitor<Workflow> workflow, WorkflowDefinition workflowDefinition)
     : IDisposable, IAsyncDisposable
 {
 
+    static bool _missedOccurrence = true;
     bool _disposed;
 
     /// <summary>
@@ -41,22 +42,133 @@ public class WorkflowScheduler(ILogger<WorkflowScheduler> logger, IResourceRepos
     /// <summary>
     /// Gets the resource of the workflow to manage the scheduling of
     /// </summary>
-    protected Workflow Resource { get; } = resource;
+    protected IResourceMonitor<Workflow> Workflow { get; } = workflow;
 
     /// <summary>
     /// Gets the definition of the workflow to manage the scheduling of
     /// </summary>
-    protected WorkflowDefinition Definition { get; } = definition;
+    protected WorkflowDefinition WorkflowDefinition { get; } = workflowDefinition;
+
+    /// <summary>
+    /// Gets the <see cref="WorkflowScheduler"/>'s <see cref="System.Threading.CancellationTokenSource"/>
+    /// </summary>
+    protected CancellationTokenSource CancellationTokenSource { get; } = new();
+
+    /// <summary>
+    /// Gets the <see cref="System.Threading.Timer"/>, if any, used to schedule the task
+    /// </summary>
+    protected Timer? Timer { get; private set; }
 
     /// <summary>
     /// Schedules the execution of the workflow
     /// </summary>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>A new awaitable <see cref="Task"/></returns>
-    public virtual Task ScheduleAsync(CancellationToken cancellationToken = default)
+    public virtual async Task ScheduleAsync(CancellationToken cancellationToken = default)
     {
-        //todo
-        throw new NotImplementedException();
+        if (this.WorkflowDefinition.Schedule == null) return;
+        if (this.WorkflowDefinition.Schedule.On != null)
+        {
+            var correlation = await this.Resources.GetAsync<Correlation>(this.Workflow.Resource.GetName(), this.Workflow.Resource.GetNamespace(), cancellationToken).ConfigureAwait(false);
+            if (correlation != null) return;
+            correlation = new Correlation()
+            {
+                Metadata = new()
+                {
+                    Namespace = this.Workflow.Resource.GetNamespace(),
+                    Name = $"{this.Workflow.Resource.GetName()}-schedule",
+                },
+                Spec = new()
+                {
+                    Source = this.Workflow.Resource.GetReference(),
+                    Lifetime = CorrelationLifetime.Durable,
+                    Events = this.WorkflowDefinition.Schedule.On,
+                    Outcome = new()
+                    {
+                        Start = new()
+                        {
+                            Workflow = new()
+                            {
+                                Namespace = this.Workflow.Resource.GetNamespace()!,
+                                Name = this.Workflow.Resource.GetName(),
+                                Version = this.WorkflowDefinition.Document.Version
+                            }
+                        }
+                    },
+                    Expressions = this.WorkflowDefinition.Evaluate ?? new()
+                }
+            };
+            await this.Resources.AddAsync(correlation, false, cancellationToken).ConfigureAwait(false);
+            return;
+        }
+        TimeSpan delay;
+        do
+        {
+            DateTimeOffset? nextOccurrence;
+            WorkflowVersionStatus? versionStatus = null;
+            this.Workflow.Resource.Status?.Versions.TryGetValue(this.WorkflowDefinition.Document.Version, out versionStatus);
+            if (this.WorkflowDefinition.Schedule.After != null)
+            {
+                nextOccurrence = versionStatus?.LastEndedAt.HasValue == true
+                    ? versionStatus.LastEndedAt!.Value.Add(this.WorkflowDefinition.Schedule.After.ToTimeSpan())
+                    : DateTimeOffset.Now.Add(this.WorkflowDefinition.Schedule.After.ToTimeSpan());
+            }
+            else if (this.WorkflowDefinition.Schedule.Cron != null)
+            {
+                nextOccurrence = versionStatus?.LastStartedAt.HasValue == true
+                    ? versionStatus.LastStartedAt!.Value
+                    : DateTimeOffset.Now;
+                nextOccurrence = CronExpression.Parse(this.WorkflowDefinition.Schedule.Cron).GetNextOccurrence(nextOccurrence.Value);
+            }
+            else if (this.WorkflowDefinition.Schedule.Every != null)
+            {
+                nextOccurrence = this.Workflow.Resource.Status?.Versions[this.WorkflowDefinition.Document.Version].LastStartedAt.HasValue == true
+                    ? this.Workflow.Resource.Status.Versions[this.WorkflowDefinition.Document.Version].LastStartedAt!.Value.Add(this.WorkflowDefinition.Schedule.Every.ToTimeSpan())
+                    : DateTimeOffset.Now.Add(this.WorkflowDefinition.Schedule.Every.ToTimeSpan());
+            }
+            else throw new NotSupportedException("The specified workflow schedule type is not supported");
+            if (!nextOccurrence.HasValue)
+            {
+                this.Logger.LogWarning("Failed to compute the next occurrence for workflow '{workflowQualifiedName}'", this.Workflow.Resource.GetQualifiedName());
+                return;
+            }
+            delay = nextOccurrence.Value - DateTimeOffset.Now;
+            if (delay <= TimeSpan.Zero && _missedOccurrence)
+            {
+                _missedOccurrence = false;
+                delay = TimeSpan.Zero;
+                break;
+            }
+        }
+        while (delay <= TimeSpan.Zero);
+        this.Timer = new Timer(async _ => await this.OnScheduleTimerElapsedAsync().ConfigureAwait(false), null, delay, Timeout.InfiniteTimeSpan);
+    }
+
+    /// <summary>
+    /// Handles the completion of the scheduler's timer
+    /// </summary>
+    /// <returns>A new awaitable <see cref="Task"/></returns>
+    protected virtual async Task OnScheduleTimerElapsedAsync()
+    {
+        await this.Resources.AddAsync<WorkflowInstance>(new()
+        {
+            Metadata = new()
+            {
+                Namespace = this.Workflow.Resource.GetNamespace()!,
+                Name = $"{this.Workflow.Resource.GetName()}-"
+            },
+            Spec = new()
+            {
+                Definition = new()
+                {
+                    Namespace = this.Workflow.Resource.GetNamespace()!,
+                    Name = this.Workflow.Resource.GetName(),
+                    Version = this.WorkflowDefinition.Document.Version
+                }
+            }
+        }, false, this.CancellationTokenSource.Token).ConfigureAwait(false);
+        await Task.Delay(50).ConfigureAwait(false);
+        await this.ScheduleAsync(this.CancellationTokenSource.Token).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -66,7 +178,8 @@ public class WorkflowScheduler(ILogger<WorkflowScheduler> logger, IResourceRepos
     /// <returns>A new awaitable <see cref="ValueTask"/></returns>
     protected virtual async ValueTask DisposeAsync(bool disposing)
     {
-        if (!this._disposed) return;
+        if (this._disposed || !disposing) return;
+        if (this.Timer != null) await this.Timer.DisposeAsync().ConfigureAwait(false);
         this._disposed = true;
         await Task.CompletedTask.ConfigureAwait(false);
     }
@@ -84,8 +197,8 @@ public class WorkflowScheduler(ILogger<WorkflowScheduler> logger, IResourceRepos
     /// <param name="disposing">A boolean indicating whether or not the <see cref="WorkflowScheduler"/> is being disposed of</param>
     protected virtual void Dispose(bool disposing)
     {
-        if (!this._disposed) return;
-
+        if (this._disposed || !disposing) return;
+        this.Timer?.Dispose();
         this._disposed = true;
     }
 

@@ -11,10 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Neuroglia.Data.Expressions.Services;
-using Neuroglia.Eventing.CloudEvents;
-using Synapse.Api.Client.Services;
-
 namespace Synapse.Runner.Services;
 
 /// <summary>
@@ -115,19 +111,26 @@ public interface IWorkflowExecutionContext
     Task<TaskInstance> InitializeAsync(TaskInstance task, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Executes the workflow
+    /// Starts the workflow
     /// </summary>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>A new awaitable <see cref="Task"/></returns>
-    Task ExecuteAsync(CancellationToken cancellationToken = default);
+    Task StartAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Executes the specified task
+    /// Starts the specified task
     /// </summary>
-    /// <param name="task">The task to execute</param>
+    /// <param name="task">The task to start</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>The updated <see cref="TaskInstance"/></returns>
-    Task<TaskInstance> ExecuteAsync(TaskInstance task, CancellationToken cancellationToken = default);
+    Task<TaskInstance> StartAsync(TaskInstance task, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Resumes the workflow
+    /// </summary>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>A new awaitable <see cref="Task"/></returns>
+    Task ResumeAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Begins correlating the events defined by the specified task

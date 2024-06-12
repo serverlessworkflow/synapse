@@ -130,7 +130,7 @@ public class WorkflowExecutor(IServiceProvider serviceProvider, ILogger<Workflow
     /// <returns>A new awaitable <see cref="Task"/></returns>
     protected virtual async Task StartAsync(CancellationToken cancellationToken)
     {
-        await this.Workflow.ExecuteAsync(cancellationToken).ConfigureAwait(false);
+        await this.Workflow.StartAsync(cancellationToken).ConfigureAwait(false);
         var taskDefinition = this.Workflow.Definition.Do.First(); //todo: we might add much more complex rules here (event based, etc)
         var task = await this.Workflow.CreateTaskAsync(taskDefinition.Value, taskDefinition.Key, this.Workflow.Instance.Spec.Input ?? [], cancellationToken: cancellationToken).ConfigureAwait(false);
         var executor = await this.CreateTaskExecutorAsync(task, taskDefinition.Value, this.Workflow.ContextData, this.Workflow.Arguments, cancellationToken).ConfigureAwait(false);
@@ -142,10 +142,10 @@ public class WorkflowExecutor(IServiceProvider serviceProvider, ILogger<Workflow
     /// </summary>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>A new awaitable <see cref="Task"/></returns>
-    protected virtual Task ResumeAsync(CancellationToken cancellationToken)
+    protected virtual async Task ResumeAsync(CancellationToken cancellationToken)
     {
         //todo
-        throw new NotImplementedException();
+        await this.Workflow.ResumeAsync(cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
@@ -289,17 +289,13 @@ public class WorkflowExecutor(IServiceProvider serviceProvider, ILogger<Workflow
     /// <returns>A new awaitable <see cref="ValueTask"/></returns>
     protected virtual async ValueTask DisposeAsync(bool disposing)
     {
-        if (this._disposed) return;
-        foreach (var executor in this.Executors)
-        {
-            try { await executor.DisposeAsync().ConfigureAwait(false); }
-            catch { }
-        }
-        this.Subject.Dispose();
+        if (this._disposed || !disposing) return;
+        foreach (var executor in this.Executors) try { await executor.DisposeAsync().ConfigureAwait(false); } catch { }
         this.Executors.Clear();
-        this.TaskCompletionSource.SetCanceled();
+        try { this.TaskCompletionSource.SetCanceled(); } catch { }
         this.CancellationTokenSource?.Dispose();
         if (this.Timer != null) await this.Timer.DisposeAsync().ConfigureAwait(false);
+        this.Subject.Dispose();
         this._disposed = true;
     }
 
@@ -316,17 +312,13 @@ public class WorkflowExecutor(IServiceProvider serviceProvider, ILogger<Workflow
     /// <param name="disposing">A boolean indicating whether or not the <see cref="TaskExecutor{TDefinition}"/> is being disposed of</param>
     protected virtual void Dispose(bool disposing)
     {
-        if (this._disposed) return;
-        foreach (var executor in this.Executors)
-        {
-            try { executor.Dispose(); }
-            catch { }
-        }
-        this.Subject.Dispose();
+        if (this._disposed || !disposing) return;
+        foreach (var executor in this.Executors) try { executor.Dispose(); } catch { }
         this.Executors.Clear();
-        this.TaskCompletionSource.SetCanceled();
+        try { this.TaskCompletionSource.SetCanceled(); } catch { }
         this.CancellationTokenSource?.Dispose();
         this.Timer?.Dispose();
+        this.Subject.Dispose();
         this._disposed = true;
     }
 

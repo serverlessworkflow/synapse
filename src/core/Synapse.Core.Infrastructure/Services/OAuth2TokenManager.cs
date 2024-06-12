@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using ServerlessWorkflow.Sdk.Models.Authentication;
 using IdentityModel.Client;
 using Microsoft.Extensions.Logging;
 using Neuroglia.Serialization;
+using ServerlessWorkflow.Sdk.Models.Authentication;
 using System.Collections.Concurrent;
 
 namespace Synapse.Core.Infrastructure.Services;

@@ -11,27 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Neuroglia.Data.Infrastructure.ResourceOriented;
-
 namespace Synapse.Resources;
 
 /// <summary>
-/// Represents the resource used to describe and configure a workflow
+/// Represents an object used to describe the status of a workflow
 /// </summary>
 [DataContract]
-public record Workflow
-    : Resource<WorkflowSpec, WorkflowStatus>
+public record WorkflowStatus
 {
 
     /// <summary>
-    /// Gets the <see cref="Workflow"/>'s resource type
+    /// Gets/sets a key/value mapping of the status of the workflow's versions
     /// </summary>
-    public static readonly ResourceDefinitionInfo ResourceDefinition = new WorkflowResourceDefinition()!;
-
-    /// <inheritdoc/>
-    public Workflow() : base(ResourceDefinition) { this.Status = new(); }
-
-    /// <inheritdoc/>
-    public Workflow(ResourceMetadata metadata, WorkflowSpec spec) : base(ResourceDefinition, metadata, spec, new()) { }
+    [DataMember(Order = 1, Name = "versions"), JsonPropertyOrder(1), JsonPropertyName("versions"), YamlMember(Order = 1, Alias = "versions")]
+    public virtual EquatableDictionary<string, WorkflowVersionStatus> Versions { get; set; } = [];
 
 }

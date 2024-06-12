@@ -102,14 +102,14 @@ public class CorrelationController(IServiceProvider serviceProvider, ILoggerFact
             correlation.Metadata.Labels ??= new Dictionary<string, string>();
             correlation.Metadata.Labels[SynapseDefaults.Resources.Labels.Correlator] = this.Correlator.Resource.GetQualifiedName();
             var patch = JsonPatchUtility.CreateJsonPatchFromDiff(originalResource, correlation);
-            correlation = await this.Repository.PatchAsync<Correlation>(new(PatchType.JsonPatch, patch), correlation.GetName(), correlation.GetNamespace(), false, cancellationToken).ConfigureAwait(false);
+            correlation = await this.Repository.PatchAsync<Correlation>(new(PatchType.JsonPatch, patch), correlation.GetName(), correlation.GetNamespace(), null, false, cancellationToken).ConfigureAwait(false);
             if (correlation.Status?.Phase == null || correlation.Status.Phase == CorrelationStatusPhase.Pending)
             {
                 originalResource = correlation.Clone();
                 correlation.Status ??= new();
                 correlation.Status.Phase = CorrelationStatusPhase.Active;
                 correlation.Status.LastModified = DateTimeOffset.Now;
-                originalResource = await this.Repository.PatchStatusAsync<Correlation>(new(PatchType.JsonPatch, JsonPatchUtility.CreateJsonPatchFromDiff(originalResource, correlation)), correlation.GetName(), correlation.GetNamespace(), false, cancellationToken).ConfigureAwait(false);
+                originalResource = await this.Repository.PatchStatusAsync<Correlation>(new(PatchType.JsonPatch, JsonPatchUtility.CreateJsonPatchFromDiff(originalResource, correlation)), correlation.GetName(), correlation.GetNamespace(), null, false, cancellationToken).ConfigureAwait(false);
             }
             return true;
         }
@@ -137,14 +137,14 @@ public class CorrelationController(IServiceProvider serviceProvider, ILoggerFact
                 correlation.Status ??= new();
                 correlation.Status.Phase = CorrelationStatusPhase.Pending;
                 correlation.Status.LastModified = DateTimeOffset.Now;
-                originalResource = await this.Repository.PatchStatusAsync<Correlation>(new(PatchType.JsonPatch, JsonPatchUtility.CreateJsonPatchFromDiff(originalResource, correlation)), correlation.GetName(), correlation.GetNamespace(), false, cancellationToken).ConfigureAwait(false);
+                originalResource = await this.Repository.PatchStatusAsync<Correlation>(new(PatchType.JsonPatch, JsonPatchUtility.CreateJsonPatchFromDiff(originalResource, correlation)), correlation.GetName(), correlation.GetNamespace(), null, false, cancellationToken).ConfigureAwait(false);
                 correlation = originalResource.Clone()!;
             }
             correlation.Metadata.Labels ??= new Dictionary<string, string>();
             correlation.Metadata.Labels.Remove(SynapseDefaults.Resources.Labels.Correlator);
             if (correlation.Metadata.Labels.Count < 1) correlation.Metadata.Labels = null;
             var patch = JsonPatchUtility.CreateJsonPatchFromDiff(originalResource, correlation);
-            correlation = await this.Repository.PatchAsync<Correlation>(new(PatchType.JsonPatch, patch), correlation.GetName(), correlation.GetNamespace(), false, cancellationToken).ConfigureAwait(false);
+            correlation = await this.Repository.PatchAsync<Correlation>(new(PatchType.JsonPatch, patch), correlation.GetName(), correlation.GetNamespace(), null, false, cancellationToken).ConfigureAwait(false);
             return true;
         }
         catch (ConcurrencyException)

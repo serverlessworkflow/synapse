@@ -28,12 +28,14 @@ public class PatchResourceCommand<TResource>
     /// <param name="name">The name of the <see cref="IResource"/> to patch</param>
     /// <param name="namespace">The namespace the <see cref="IResource"/> to patch belongs to</param>
     /// <param name="patch">The patch to apply</param>
-    public PatchResourceCommand(string name, string? @namespace, Patch patch)
+    /// <param name="resourceVersion">The expected resource version, if any, used for optimistic concurrency</param>
+    public PatchResourceCommand(string name, string? @namespace, Patch patch, string? resourceVersion)
     {
         if (string.IsNullOrWhiteSpace(name)) throw new ArgumentNullException(nameof(name));
         this.Name = name;
         this.Namespace = @namespace;
         this.Patch = patch ?? throw new ArgumentNullException(nameof(patch));
+        this.ResourceVersion = resourceVersion;
     }
 
     /// <summary>
@@ -51,6 +53,11 @@ public class PatchResourceCommand<TResource>
     /// </summary>
     public Patch Patch { get; }
 
+    /// <summary>
+    /// Gets the expected resource version, if any, used for optimistic concurrency
+    /// </summary>
+    public string? ResourceVersion { get; }
+
 }
 
 /// <summary>
@@ -66,7 +73,7 @@ public class PatchResourceCommandHandler<TResource>(IResourceRepository reposito
     /// <inheritdoc/>
     public virtual async Task<IOperationResult<TResource>> HandleAsync(PatchResourceCommand<TResource> command, CancellationToken cancellationToken)
     {
-        var resource = await repository.PatchAsync<TResource>(command.Patch, command.Name, command.Namespace, false, cancellationToken).ConfigureAwait(false);
+        var resource = await repository.PatchAsync<TResource>(command.Patch, command.Name, command.Namespace, command.ResourceVersion, false, cancellationToken).ConfigureAwait(false);
         return this.Ok(resource);
     }
 

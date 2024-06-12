@@ -75,7 +75,7 @@ public class CorrelatorController(IResourceRepository repository, IOptionsMonito
         updatedResource.Status ??= new();
         updatedResource.Status.Phase = phase;
         var patch = JsonPatchUtility.CreateJsonPatchFromDiff(originalResource, updatedResource);
-        await this.Repository.PatchStatusAsync<Resources.Correlator>(new(PatchType.JsonPatch, patch), updatedResource.GetName(), updatedResource.GetNamespace(), false, cancellationToken).ConfigureAwait(false);
+        await this.Repository.PatchStatusAsync<Resources.Correlator>(new(PatchType.JsonPatch, patch), updatedResource.GetName(), updatedResource.GetNamespace(), null, false, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
