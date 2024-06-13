@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using moment.net;
 using Neuroglia.Data.Infrastructure.ResourceOriented;
 
 namespace Synapse.Cli.Commands.Namespaces;
@@ -59,7 +60,7 @@ internal class ListNamespacesCommand
             table.AddRow
             (
                 @namespace.GetName(),
-                @namespace.Metadata.CreationTimestamp.ToString()!
+                @namespace.Metadata.CreationTimestamp?.ToOffset(DateTimeOffset.Now.Offset).DateTime.FromNow() ?? "-"
             );
         }
         if (isEmpty)

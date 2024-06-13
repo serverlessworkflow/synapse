@@ -37,21 +37,16 @@ namespace Synapse.Dashboard.StateManagement.Configuration
     /// <summary>
     /// Represents the default implementation of the <see cref="IFluxOptionsBuilder"/> interface
     /// </summary>
-    public class FluxOptionsBuilder
-        : IFluxOptionsBuilder
+    /// <remarks>
+    /// Initializes a new <see cref="FluxOptionsBuilder"/>
+    /// </remarks>
+    /// <param name="services">The <see cref="IServiceCollection"/> to configure</param>
+    public class FluxOptionsBuilder(IServiceCollection services)
+                : IFluxOptionsBuilder
     {
 
-        /// <summary>
-        /// Initializes a new <see cref="FluxOptionsBuilder"/>
-        /// </summary>
-        /// <param name="services">The <see cref="IServiceCollection"/> to configure</param>
-        public FluxOptionsBuilder(IServiceCollection services)
-        {
-            this.Services = services;
-        }
-
         /// <inheritdoc/>
-        public IServiceCollection Services { get; }
+        public IServiceCollection Services { get; } = services;
 
         /// <summary>
         /// Gets the <see cref="FluxOptions"/> to configure
@@ -61,8 +56,7 @@ namespace Synapse.Dashboard.StateManagement.Configuration
         /// <inheritdoc/>
         public virtual IFluxOptionsBuilder ScanAssembly(Assembly assembly)
         {
-            if(assembly == null)
-                throw new ArgumentNullException(nameof(assembly));
+            ArgumentNullException.ThrowIfNull(assembly);
             this.Options.AssembliesToScan.Add(assembly);
             return this;
         }
@@ -91,10 +85,8 @@ namespace Synapse.Dashboard.StateManagement.Configuration
         /// <inheritdoc/>
         public virtual IFluxOptionsBuilder UseDispatcher(Type dispatcherType)
         {
-            if (dispatcherType == null)
-                throw new ArgumentNullException(nameof(dispatcherType));
-            if (!typeof(IDispatcher).IsAssignableFrom(dispatcherType))
-                throw new ArgumentException($"The specified type must implement the {nameof(IDispatcher)} interface", nameof(dispatcherType));
+            ArgumentNullException.ThrowIfNull(dispatcherType);
+            if (!typeof(IDispatcher).IsAssignableFrom(dispatcherType)) throw new ArgumentException($"The specified type must implement the {nameof(IDispatcher)} interface", nameof(dispatcherType));
             this.Options.DispatcherType = dispatcherType;
             return this;
         }
@@ -102,10 +94,8 @@ namespace Synapse.Dashboard.StateManagement.Configuration
         /// <inheritdoc/>
         public virtual IFluxOptionsBuilder UseStoreFactory(Type storeFactoryType)
         {
-            if (storeFactoryType == null)
-                throw new ArgumentNullException(nameof(storeFactoryType));
-            if (!typeof(IStoreFactory).IsAssignableFrom(storeFactoryType))
-                throw new ArgumentException($"The specified type must implement the {nameof(IStoreFactory)} interface", nameof(storeFactoryType));
+            ArgumentNullException.ThrowIfNull(storeFactoryType);
+            if (!typeof(IStoreFactory).IsAssignableFrom(storeFactoryType)) throw new ArgumentException($"The specified type must implement the {nameof(IStoreFactory)} interface", nameof(storeFactoryType));
             this.Options.StoreFactoryType = storeFactoryType;
             return this;
         }
@@ -113,10 +103,8 @@ namespace Synapse.Dashboard.StateManagement.Configuration
         /// <inheritdoc/>
         public virtual IFluxOptionsBuilder UseStore(Type storeType)
         {
-            if (storeType == null)
-                throw new ArgumentNullException(nameof(storeType));
-            if (!typeof(IStore).IsAssignableFrom(storeType))
-                throw new ArgumentException($"The specified type must implement the {nameof(IStore)} interface", nameof(storeType));
+            ArgumentNullException.ThrowIfNull(storeType);
+            if (!typeof(IStore).IsAssignableFrom(storeType)) throw new ArgumentException($"The specified type must implement the {nameof(IStore)} interface", nameof(storeType));
             this.Options.StoreType = storeType;
             return this;
         }
@@ -131,8 +119,7 @@ namespace Synapse.Dashboard.StateManagement.Configuration
         /// <inheritdoc/>
         public virtual IFluxOptionsBuilder AddFeature<TState>(TState state)
         {
-            if (state == null)
-                throw new ArgumentNullException(nameof(state));
+            if (state == null) throw new ArgumentNullException(nameof(state));
             this.Options.Features.Add(new Feature<TState>(state));
             return this;
         }
@@ -155,8 +142,7 @@ namespace Synapse.Dashboard.StateManagement.Configuration
         /// <inheritdoc/>
         public virtual IFluxOptionsBuilder AddEffect(IEffect effect) 
         {
-            if (effect == null)
-                throw new ArgumentNullException(nameof(effect));
+            ArgumentNullException.ThrowIfNull(effect);
             this.Options.Effects.Add(effect);
             return this;
         }

@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using moment.net;
 using Neuroglia.Data.Infrastructure.ResourceOriented;
 
 namespace Synapse.Cli.Commands.Correlators;
@@ -74,7 +75,7 @@ internal class ListCorrelatorsCommand
                 correlator.GetName(),
                 correlator.GetNamespace()!,
                 (correlator.Status?.Phase ?? CorrelatorStatusPhase.Stopped).ToUpperInvariant(),
-                correlator.Metadata.CreationTimestamp.ToString()!
+                correlator.Metadata.CreationTimestamp?.ToOffset(DateTimeOffset.Now.Offset).DateTime.FromNow() ?? "-"
             );
         }
         if(isEmpty)

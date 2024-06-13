@@ -68,7 +68,7 @@ internal class GetCorrelatorCommand
             "yaml" => this.YamlSerializer.SerializeToText(correlator),
             _ => throw new NotSupportedException($"The specified output format '{output}' is not supported"),
         };
-        AnsiConsole.MarkupLine($"[gray]{outputText.EscapeMarkup()}[/]");
+        AnsiConsole.Markup($"[gray]{outputText.EscapeMarkup()}[/]");
     }
 
     static class CommandOptions

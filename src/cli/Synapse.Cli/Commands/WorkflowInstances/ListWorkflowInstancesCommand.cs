@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using moment.net;
 using Neuroglia.Data.Infrastructure.ResourceOriented;
 
 namespace Synapse.Cli.Commands.WorkflowInstances;
@@ -56,10 +57,12 @@ internal class ListWorkflowInstancesCommand
         });
         table.AddColumn("NAMESPACE", column =>
         {
+            column.Alignment = Justify.Center;
             column.NoWrap = true;
         });
         table.AddColumn("DEFINITION", column =>
         {
+            column.Alignment = Justify.Center;
             column.NoWrap = true;
         });
         table.AddColumn("STATUS", column =>
@@ -96,9 +99,9 @@ internal class ListWorkflowInstancesCommand
                 workflow.GetNamespace()!,
                 workflow.Spec.Definition.ToString(),
                 (workflow.Status?.Phase ?? WorkflowInstanceStatusPhase.Pending).ToUpperInvariant(),
-                workflow.Metadata.CreationTimestamp.ToString()!,
-                workflow.Status?.StartedAt?.ToString() ?? "-",
-                workflow.Status?.EndedAt?.ToString() ?? "-",
+                workflow.Metadata.CreationTimestamp?.ToOffset(DateTimeOffset.Now.Offset).DateTime.FromNow() ?? "-",
+                workflow.Status?.StartedAt?.ToOffset(DateTimeOffset.Now.Offset).DateTime.FromNow() ?? "-",
+                workflow.Status?.EndedAt?.ToOffset(DateTimeOffset.Now.Offset).DateTime.FromNow() ?? "-",
                 workflow.Status?.StartedAt.HasValue == true && workflow.Status?.EndedAt.HasValue == true ? workflow.Status.EndedAt.Value.Subtract(workflow.Status.StartedAt.Value).ToString("hh\\:mm\\:ss\\.fff") : "-",
                 workflow.Metadata.Labels?.TryGetValue(SynapseDefaults.Resources.Labels.Operator, out var operatorName) == true && !string.IsNullOrWhiteSpace(operatorName) ? operatorName : "-"
             );

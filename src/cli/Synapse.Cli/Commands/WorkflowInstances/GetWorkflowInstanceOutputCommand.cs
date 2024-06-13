@@ -62,7 +62,7 @@ internal class GetWorkflowInstanceOutputCommand
     public async Task HandleAsync(string name, string @namespace, string output)
     {
         var workflowInstance = await this.Api.WorkflowInstances.GetAsync(name, @namespace);
-        if (string.IsNullOrWhiteSpace(workflowInstance.Status?.OutputReference)) throw new NullReferenceException($"The workflow instance '{name}.{@namespace}' did not completed.");
+        if (string.IsNullOrWhiteSpace(workflowInstance.Status?.OutputReference)) throw new NullReferenceException($"The workflow instance '{name}.{@namespace}' did not complete.");
         var outputDocument = await this.Api.WorkflowData.GetAsync(workflowInstance.Status.OutputReference);
         string outputText = output.ToLowerInvariant() switch
         {
@@ -70,7 +70,7 @@ internal class GetWorkflowInstanceOutputCommand
             "yaml" => this.YamlSerializer.SerializeToText(outputDocument.Content),
             _ => throw new NotSupportedException($"The specified output format '{output}' is not supported"),
         };
-        AnsiConsole.MarkupLine($"[gray]{outputText.EscapeMarkup()}[/]");
+        AnsiConsole.Markup($"[gray]{outputText.EscapeMarkup()}[/]");
     }
 
     static class CommandOptions

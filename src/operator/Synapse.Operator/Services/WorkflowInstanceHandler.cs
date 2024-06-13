@@ -79,7 +79,7 @@ public class WorkflowInstanceHandler(ILogger<WorkflowInstanceHandler> logger, IR
             || this.WorkflowInstance.Resource.Status.Phase == WorkflowInstanceStatusPhase.Pending
             || this.WorkflowInstance.Resource.Status.Phase == WorkflowInstanceStatusPhase.Running)
         {
-            var workflow = await this.Resources.GetAsync<Workflow>(this.WorkflowInstance.Resource.Spec.Definition.Name, this.WorkflowInstance.Resource.Spec.Definition.Namespace, cancellationToken).ConfigureAwait(false) ?? throw new NullReferenceException($"Failed to find the workflow with name '{this.WorkflowInstance.Resource.Spec.Definition.Namespace}.{this.WorkflowInstance.Resource.Spec.Definition.Name}'");
+            var workflow = await this.Resources.GetAsync<Workflow>(this.WorkflowInstance.Resource.Spec.Definition.Name, this.WorkflowInstance.Resource.Spec.Definition.Namespace, cancellationToken).ConfigureAwait(false) ?? throw new NullReferenceException($"Failed to find the workflow with name '{this.WorkflowInstance.Resource.Spec.Definition.Name}.{this.WorkflowInstance.Resource.Spec.Definition.Namespace}'");
             this.Process = await this.Runtime.CreateProcessAsync(workflow, this.WorkflowInstance.Resource, cancellationToken).ConfigureAwait(false);
             await this.Process.StartAsync(cancellationToken).ConfigureAwait(false);
         }

@@ -45,6 +45,83 @@ Synapse is composed of several specialized applications, allowing for atomic sca
 
 ## Getting Started
 
+### Prerequisites
+
+[Docker]() or [Kubernetes](), depending on the container platform you wish to use.
+
+### Installation
+
+The simplest way to get started is by using the provided Docker Compose setup. 
+
+1. Clone the Synapse repository:
+
+    ```bash
+    git clone https://github.com/serverlessworkflow/synapse.git
+    ```
+
+2. Navigate to the Docker Compose directory:
+
+    ```bash
+    cd synapse/deployments/docker-compose
+    ```
+
+3. Build the Docker images:
+
+    ```bash
+    docker-compose build
+    ```
+
+4. Start the services using Docker Compose:
+
+    ```bash
+    docker-compose up
+    ```
+
+This will pull the necessary Docker images and start the Synapse services as defined in the `docker-compose.yml` file. You can then access the Synapse API and dashboard as configured.
+
+### Run using `synctl` Command-line Interface
+
+First, set up the Synapse API server to use with `synctl`:
+
+```bash
+synctl config set-api default -server=http://localhost:8080
+```
+
+Then, create a new file with the definition of the workflow to create:
+
+```yaml
+# greeter.yaml
+document:
+  dsl: '1.0.0'
+  name: greeter
+  namespace: default
+  version: '0.1.0'
+do:
+  greet:
+    set:
+      greetings: '${ "Hello \(.user.firstName) \(.user.lastName)!" }'
+```
+
+Next, run the following command to create the workflow on the API:
+
+```bash
+synctl workflow create -f greeter.yaml 
+```
+
+Finally, run the following command to run the workflow with the specified JSON input:
+
+```bash
+synctl workflow run greeter --namespace default --version 0.1.0 --input '{\"user\":{\"firstName\":\"John\",\"lastName\":\"Doe\"}}'
+```
+
+The command above will provide the fully qualified name of the created workflow instance. You can utilize this name to inspect its output once the execution is finished, as demonstrated below:
+
+```bash
+synctl workflow-instance get-output greeter-uk58h3dssqp620a --namespace default --output yaml
+```
+
+For more information about `synctl`, please refer to the [documentation](#synctl).
+
 ## Community
 
 We have a growing community working together to build a community-driven and vendor-neutral

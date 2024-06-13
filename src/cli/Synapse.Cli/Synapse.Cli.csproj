@@ -13,6 +13,7 @@
   <ItemGroup>
 	<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
 	<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
+	<PackageReference Include="moment.net" Version="1.3.4" />
 	<PackageReference Include="NetEscapades.Configuration.Yaml" Version="3.1.0" />
 	<PackageReference Include="ServerlessWorkflow.Sdk.IO" Version="1.0.0-alpha1" />
 	<PackageReference Include="Spectre.Console" Version="0.49.1" />

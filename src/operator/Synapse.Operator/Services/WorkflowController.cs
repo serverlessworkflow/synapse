@@ -59,7 +59,7 @@ public class WorkflowController(IServiceProvider serviceProvider, ILoggerFactory
         this.Where(e => e.Type == ResourceWatchEventType.Updated)
             .Select(e => new { Workflow = e.Resource, e.Resource.Spec.Versions })
             .DistinctUntilChanged()
-            .Scan((Previous: (EquatableList<WorkflowDefinition>?)null, Current: (EquatableList<WorkflowDefinition>?)null, Workflow: (Workflow?)null), (accumulator, current) => (accumulator.Current, current.Versions, current.Workflow))
+            .Scan((Previous: (EquatableList<WorkflowDefinition>)null!, Current: (EquatableList<WorkflowDefinition>)null!, Workflow: (Workflow)null!), (accumulator, current) => (accumulator.Current, current.Versions, current.Workflow))
             .SubscribeAsync(async value => await this.OnWorkflowVersionChangedAsync(value.Workflow, value.Previous, value.Current).ConfigureAwait(false), cancellationToken: cancellationToken);
         await this.OnResourceSelectorChangedAsync(this.Operator!.Resource.Spec.Selector).ConfigureAwait(false);
     }
@@ -185,7 +185,7 @@ public class WorkflowController(IServiceProvider serviceProvider, ILoggerFactory
         if (workflow.Metadata.Labels == null || !workflow.Metadata.Labels.TryGetValue(SynapseDefaults.Resources.Labels.Operator, out _)) if (!await this.TryClaimAsync(workflow, this.CancellationTokenSource.Token).ConfigureAwait(false)) return;
         if (workflow.Metadata.Labels?[SynapseDefaults.Resources.Labels.Operator] != this.Operator.Resource.GetQualifiedName()) return;
         var diffPatch = JsonPatchUtility.CreateJsonPatchFromDiff(previous, current);
-        var operation = diffPatch.Operations.First().Op;
+        var operation = diffPatch.Operations[0].Op;
         if (this.Schedulers.TryRemove(workflow.GetQualifiedName(), out var scheduler)) await scheduler.DisposeAsync().ConfigureAwait(false);
         if (operation == OperationType.Remove) return;
         var definition = workflow.Spec.Versions.GetLatest();

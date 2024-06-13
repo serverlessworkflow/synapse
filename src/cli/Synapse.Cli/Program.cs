@@ -34,11 +34,11 @@ static Parser BuildCommandLineParser()
         .UseDefaults()
         .UseExceptionHandler((ex, context) =>
         {
-            AnsiConsole.MarkupLine($"[red]{ex.Message.EscapeMarkup()}[/]");
+            AnsiConsole.Markup($"[red]{ex.Message.EscapeMarkup()}[/]");
             var inner = ex.InnerException;
             while (inner != null)
             {
-                AnsiConsole.MarkupLine($"[red]{inner.Message.EscapeMarkup()}[/]");
+                AnsiConsole.Markup($"[red]{inner.Message.EscapeMarkup()}[/]");
                 inner = inner.InnerException;
             }
         })

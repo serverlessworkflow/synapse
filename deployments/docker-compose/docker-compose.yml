@@ -19,10 +19,10 @@ services:
       - garnet
 
   operator:
-    #image: ghcr.io/serverlessworkflow/synapse/operator
-    build:
-      context: ../../
-      dockerfile: ./src/operator/Synapse.Operator/Dockerfile
+    image: ghcr.io/serverlessworkflow/synapse/operator
+    # build:
+    #   context: ../../
+    #   dockerfile: ./src/operator/Synapse.Operator/Dockerfile
     environment:
       CONNECTIONSTRINGS__REDIS: ${GARNET_URI}
       SYNAPSE_OPERATOR_NAMESPACE: default

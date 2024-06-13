@@ -67,8 +67,8 @@ internal class CreateWorkflowCommand
             { 
                 Metadata = new() 
                 { 
-                    Namespace = "default", 
-                    Name = "test" 
+                    Namespace = workflowDefinition.Document.Namespace, 
+                    Name = workflowDefinition.Document.Name
                 }, 
                 Spec = new() 
                 { 

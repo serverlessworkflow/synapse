@@ -68,7 +68,7 @@ internal class GetOperatorCommand
             "yaml" => this.YamlSerializer.SerializeToText(@operator),
             _ => throw new NotSupportedException($"The specified output format '{output}' is not supported"),
         };
-        AnsiConsole.MarkupLine($"[gray]{outputText.EscapeMarkup()}[/]");
+        AnsiConsole.Markup($"[gray]{outputText.EscapeMarkup()}[/]");
     }
 
     static class CommandOptions
