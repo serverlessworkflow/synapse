@@ -30,7 +30,8 @@ public static class IServiceCollectionExtensions
         services.Configure(setup);
         services.AddHttpClient<ISynapseApiClient, SynapseHttpApiClient>((provider, http) =>
         {
-            http.BaseAddress = provider.GetRequiredService<IOptions<SynapseHttpApiClientOptions>>().Value.BaseAddress;
+            var apiClientOptions = provider.GetRequiredService<IOptions<SynapseHttpApiClientOptions>>().Value;
+            http.BaseAddress = apiClientOptions.BaseAddress;
         });
         services.TryAddSingleton(provider =>
         {

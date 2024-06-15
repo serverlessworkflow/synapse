@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Microsoft.AspNetCore.Components.Web;
-using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
@@ -30,6 +30,7 @@ builder.Services.AddScoped(provider => new HttpClient { BaseAddress = new Uri(bu
 builder.Services.AddSynapseHttpApiClient(options =>
 {
     options.BaseAddress = new(builder.HostEnvironment.BaseAddress);
+    options.TokenFactory = provider => provider.GetRequiredService<ISecurityTokenManager>().GetTokenAsync();
 });
 
 builder.Services.AddFlux(flux =>
@@ -38,7 +39,16 @@ builder.Services.AddFlux(flux =>
 });
 builder.Services.AddScoped<IApplicationLayout, ApplicationLayout>();
 builder.Services.AddSingleton<IMonacoEditorHelper, MonacoEditorHelper>();
+builder.Services.AddSingleton<ISecurityTokenManager, SecurityTokenManager>();
 builder.Services.AddSingleton<MonacoInterop>();
 builder.Services.AddBlazorBootstrap();
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddAuthorizationCore();
+builder.Services.AddScoped<ApplicationAuthenticationStateProvider>();
+builder.Services.AddScoped<AuthenticationStateProvider>(provider => provider.GetRequiredService<ApplicationAuthenticationStateProvider>());
+builder.Services.AddOidcAuthentication(options =>
+{
+    builder.Configuration.Bind("Authentication:OIDC", options.ProviderOptions);
+});
 
 await builder.Build().RunAsync();

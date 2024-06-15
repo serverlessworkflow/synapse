@@ -24,13 +24,19 @@ public class SynapseHttpApiClientOptions
     /// </summary>
     public SynapseHttpApiClientOptions()
     {
-        var uri = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Api.Uri);
-        this.BaseAddress = string.IsNullOrWhiteSpace(uri) ? null! : new(uri, UriKind.RelativeOrAbsolute);
+        var env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Api.Uri);
+        this.BaseAddress = string.IsNullOrWhiteSpace(env) ? null! : new(env, UriKind.RelativeOrAbsolute);
+        this.TokenFactory = provider => Task.FromResult(Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Api.Token));
     }
 
     /// <summary>
-    /// Gets/sets the base address of the Cloud Streams API to connect to
+    /// Gets/sets the base address of the Synapse API to connect to
     /// </summary>
     public virtual Uri BaseAddress { get; set; }
+
+    /// <summary>
+    /// Gets/sets the function used to create a new token to authenticate on the Synapse API
+    /// </summary>
+    public virtual Func<IServiceProvider, Task<string?>> TokenFactory { get; set; } 
 
 }

@@ -6,13 +6,16 @@ services:
       - garnet_data:/data
  
   api:
-    image: ghcr.io/serverlessworkflow/synapse/api
-    # build:
-    #   context: ../../
-    #   dockerfile: ./src/api/Synapse.Api.Server/Dockerfile
+    #image: ghcr.io/serverlessworkflow/synapse/api
+    build:
+      context: ../../
+      dockerfile: ./src/api/Synapse.Api.Server/Dockerfile
     environment:
       CONNECTIONSTRINGS__REDIS: ${GARNET_URI}
       SYNAPSE_DASHBOARD_SERVE: true
+      SYNAPSE_API_AUTH_TOKEN_FILE: /app/tokens.yaml
+    volumes:
+      - /config/tokens.yaml:/app/tokens.yaml
     ports:
       - 8080:8080
     depends_on:

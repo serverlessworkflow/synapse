@@ -14,23 +14,12 @@
 namespace Synapse.Api.Server.Configuration;
 
 /// <summary>
-/// Represents the options used to configure a Synapse API server
+/// Represents the <see cref="AuthenticationSchemeOptions"/> used to configure Synapse's service account based authentication
 /// </summary>
-public class SynapseApiServerOptions
+public class ServiceAccountAuthenticationOptions
+    : AuthenticationSchemeOptions
 {
 
-    /// <summary>
-    /// Initializes a new <see cref="SynapseApiServerOptions"/>
-    /// </summary>
-    public SynapseApiServerOptions()
-    {
-        var env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Dashboard.Serve);
-        if (string.IsNullOrWhiteSpace(env) && bool.TryParse(env, out var serveDashboard)) this.ServeDashboard = serveDashboard;
-    }
 
-    /// <summary>
-    /// Gets/sets a boolean indicating whether or not to serve the Synapse Dashboard
-    /// </summary>
-    public bool ServeDashboard { get; set; } = true;
 
 }

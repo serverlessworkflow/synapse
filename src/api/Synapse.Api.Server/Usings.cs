@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+global using IdentityModel;
+global using Microsoft.AspNetCore.Authentication;
 global using Microsoft.AspNetCore.Diagnostics;
 global using Microsoft.Extensions.Options;
 global using Neuroglia;
@@ -21,5 +23,9 @@ global using Synapse;
 global using Synapse.Api.Application;
 global using Synapse.Api.Http;
 global using Synapse.Api.Http.Hubs;
+global using Synapse.Api.Server;
 global using Synapse.Api.Server.Configuration;
+global using Synapse.Api.Server.Services;
 global using System.Net.Mime;
+global using System.Security.Claims;
+global using System.Text.Encodings.Web;

@@ -1,0 +1,45 @@
+﻿@page "/users/profile"
+@attribute [Authorize]
+@inject ApplicationAuthenticationStateProvider AuthenticationStateProvider
+
+<ApplicationTitle>User Profile</ApplicationTitle>
+
+<div class="container">
+    <div class="d-flex align-items-start align-middle">
+        <h3 class="mb-3 d-inline">User Profile</h3>
+        <small class="badge rounded-pill border border-primary text-primary ms-3 my-1">@user?.Identity?.AuthenticationType</small>
+    </div>
+    @if (user != null)
+    {
+        <table class="table table-striped">
+            <tbody>
+                @foreach (var claim in user.Claims)
+                {
+                    <tr>
+                        <td>@claim.Type</td>
+                        <td>@claim.Value</td>
+                    </tr>
+                }
+            </tbody>
+        </table> 
+    }
+</div>
+
+@code {
+
+    ClaimsPrincipal? user;
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+        AuthenticationStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
+        await base.OnInitializedAsync();
+    }
+
+    async void OnAuthenticationStateChanged(Task<AuthenticationState> authenticationStateTask)
+    {
+        user = (await authenticationStateTask).User;
+        this.StateHasChanged();
+    }
+
+}

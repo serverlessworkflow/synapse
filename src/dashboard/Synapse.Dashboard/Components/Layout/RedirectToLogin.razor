@@ -1,0 +1,13 @@
+﻿@inject NavigationManager Navigation
+@inject IOptions<ApplicationOptions> Options
+
+@code {
+
+    protected override void OnInitialized()
+    {
+        Navigation.NavigateTo(this.Options.Value.Authentication.Oidc == null
+            ? "authentication/bearer/login"
+            : "authentication");
+    }
+
+}

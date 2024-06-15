@@ -1,5 +1,6 @@
-﻿@namespace Synapse.Dashboard.Pages.Workflows.List
-@page "/"
+﻿@page "/"
+@attribute [Authorize]
+@namespace Synapse.Dashboard.Pages.Workflows.List
 @inherits NamespacedResourceManagementComponent<Workflow>
 
 <ApplicationTitle>Workflows</ApplicationTitle>

@@ -1,5 +1,7 @@
 ﻿@namespace Synapse.Dashboard
 @inherits LayoutComponentBase
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IOptions<ApplicationOptions> Options
 
 <div class="page h-100 d-flex flex-column">    
     <nav class="header navbar navbar-expand-lg flex-row navbar-dark bg-dark-subtle">        
@@ -10,48 +12,52 @@
             <span class="logo-typing">Synapse</span>
         </a>
         <div class="navbar-collapse">
-            <ul class="navbar-nav">
-                <div class="dropdown">
-                    <button class="btn text-muted dropdown-toggle" type="button" id="workflowDropdownButton" data-bs-toggle="dropdown" aria-expanded="false">
-                        <span class="btn-label">Workflows</span>
-                    </button>
-                    <ul class="dropdown-menu" aria-labelledby="workflowDropdownButton">
-                        <li>
-                            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                                <span class="btn-label">Definitions</span>
+            <ul class="navbar-nav">    
+                <AuthorizeView>
+                    <Authorized>
+                        <div class="dropdown">
+                            <button class="btn text-muted dropdown-toggle" type="button" id="workflowDropdownButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="btn-label">Workflows</span>
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="workflowDropdownButton">
+                                <li>
+                                    <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                                        <span class="btn-label">Definitions</span>
+                                    </NavLink>
+                                </li>
+                                <li>
+                                    <NavLink class="nav-link" href="workflow-instances" Match="NavLinkMatch.All">
+                                        <span class="btn-label">Instances</span>
+                                    </NavLink>
+                                </li>
+                            </ul>
+                        </div>
+                        <li class="nav-item">
+                            <NavLink class="nav-link" href="correlations" Match="NavLinkMatch.All">
+                                <span class="btn-label">Correlations</span>
                             </NavLink>
                         </li>
-                        <li>
-                            <NavLink class="nav-link" href="workflow-instances" Match="NavLinkMatch.All">
-                                <span class="btn-label">Instances</span>
-                            </NavLink>
+                        <li class="nav-item">
+                            <div class="dropdown">
+                                <button class="btn text-muted dropdown-toggle" type="button" id="servicesDropdownButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span class="btn-label">Services</span>
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="servicesDropdownButton">
+                                    <li>
+                                        <NavLink class="nav-link" href="correlators" Match="NavLinkMatch.All">
+                                            <span class="btn-label">Correlators</span>
+                                        </NavLink>
+                                    </li>
+                                    <li>
+                                        <NavLink class="nav-link" href="operators" Match="NavLinkMatch.All">
+                                            <span class="btn-label">Operators</span>
+                                        </NavLink>
+                                    </li>
+                                </ul>
+                            </div>
                         </li>
-                    </ul>
-                </div>
-                <li class="nav-item">
-                    <NavLink class="nav-link" href="correlations" Match="NavLinkMatch.All">
-                        <span class="btn-label">Correlations</span>
-                    </NavLink>
-                </li>
-                <li class="nav-item">
-                    <div class="dropdown">
-                        <button class="btn text-muted dropdown-toggle" type="button" id="servicesDropdownButton" data-bs-toggle="dropdown" aria-expanded="false">
-                            <span class="btn-label">Services</span>
-                        </button>
-                        <ul class="dropdown-menu" aria-labelledby="servicesDropdownButton">
-                            <li>
-                                <NavLink class="nav-link" href="correlators" Match="NavLinkMatch.All">
-                                    <span class="btn-label">Correlators</span>
-                                </NavLink>
-                            </li>
-                            <li>
-                                <NavLink class="nav-link" href="operators" Match="NavLinkMatch.All">
-                                    <span class="btn-label">Operators</span>
-                                </NavLink>
-                            </li>
-                        </ul>
-                    </div>
-                </li>
+                    </Authorized>
+                </AuthorizeView>
                 <li class="nav-item">
                     <NavLink class="nav-link" href="about" Match="NavLinkMatch.All">
                         <span class="btn-label">About</span>
@@ -59,8 +65,48 @@
                 </li>
             </ul>
         </div>
+        <AuthorizeView>
+            <Authorized>
+                <div class="dropdown text-end me-5">
+                    <button class="btn text-muted dropdown-toggle" type="button" id="servicesDropdownButton" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span class="btn-label">@user?.Identity?.Name</span>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="servicesDropdownButton">
+                        <li>
+                            <NavLink class="nav-link mx-3 my-2" href="users/profile" Match="NavLinkMatch.All">
+                                <span class="btn-label">Profile</span>
+                            </NavLink>
+                        </li>
+                        <li>
+                            <NavLink class="nav-link mx-3" href="authentication/logout" Match="NavLinkMatch.All">
+                                <span class="btn-label">Logout</span>
+                            </NavLink>
+                        </li>
+                    </ul>
+                </div>
+            </Authorized>
+        </AuthorizeView>
     </nav>
     <div class="content flex-grow d-flex flex-column p-3">
         @Body
     </div>
 </div>
+
+@code{
+
+    ClaimsPrincipal? user;
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+        AuthenticationStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
+        await base.OnInitializedAsync();
+    }
+
+    async void OnAuthenticationStateChanged(Task<AuthenticationState> authenticationStateTask)
+    {
+        user = (await authenticationStateTask).User;
+        this.StateHasChanged();
+    }
+
+}

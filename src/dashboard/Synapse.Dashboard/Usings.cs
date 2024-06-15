@@ -14,6 +14,8 @@
 global using BlazorBootstrap;
 global using BlazorMonaco.Editor;
 global using Microsoft.AspNetCore.Components;
+global using Microsoft.AspNetCore.Components.Web;
+global using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 global using Microsoft.JSInterop;
 global using Neuroglia;
 global using Neuroglia.Data.Infrastructure.ResourceOriented;
@@ -23,6 +25,5 @@ global using Synapse.Api.Client;
 global using Synapse.Dashboard;
 global using Synapse.Dashboard.Components;
 global using Synapse.Dashboard.Components.ResourceManagement;
-global using Synapse.Dashboard.Pages.Workflows.List;
 global using Synapse.Dashboard.Services;
 global using Synapse.Dashboard.StateManagement;

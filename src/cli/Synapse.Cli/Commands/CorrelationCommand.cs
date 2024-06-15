@@ -39,7 +39,7 @@ public class CorrelationCommand
         this.AddAlias("correlations");
         this.AddAlias("corel");
         this.AddCommand(ActivatorUtilities.CreateInstance<CreateCorrelationCommand>(this.ServiceProvider));
-        this.AddCommand(ActivatorUtilities.CreateInstance<ListCorrelationsCommand>(this.ServiceProvider));
+        this.AddCommand(ActivatorUtilities.CreateInstance<ListServiceAccountsCommand>(this.ServiceProvider));
         this.AddCommand(ActivatorUtilities.CreateInstance<DeleteCorrelationCommand>(this.ServiceProvider));
     }
 

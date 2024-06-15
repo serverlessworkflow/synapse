@@ -40,6 +40,16 @@ public interface ISynapseApiClient
     INamespacedResourceApiClient<Operator> Operators { get; }
 
     /// <summary>
+    /// Gets the Synapse API used to manage <see cref="ServiceAccount"/>s
+    /// </summary>
+    INamespacedResourceApiClient<ServiceAccount> ServiceAccounts { get; }
+
+    /// <summary>
+    /// Gets the Synapse API used to manage users
+    /// </summary>
+    IUserApiClient Users { get; }
+
+    /// <summary>
     /// Gets the Synapse API used to manage <see cref="Workflow"/>s
     /// </summary>
     INamespacedResourceApiClient<Workflow> Workflows { get; }

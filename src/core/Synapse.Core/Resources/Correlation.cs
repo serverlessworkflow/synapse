@@ -16,7 +16,7 @@ using Neuroglia.Data.Infrastructure.ResourceOriented;
 namespace Synapse.Resources;
 
 /// <summary>
-/// Represents the resource used to describe and configure a correlation
+/// Represents a resource used to describe and configure a correlation
 /// </summary>
 [DataContract]
 public record Correlation

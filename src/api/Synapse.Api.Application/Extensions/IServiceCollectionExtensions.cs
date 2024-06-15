@@ -12,9 +12,11 @@
 // limitations under the License.
 
 using Microsoft.Extensions.DependencyInjection;
+using Neuroglia.Security;
 using Synapse.Api.Application.Commands.Resources.Generic;
 using Synapse.Api.Application.Commands.WorkflowDataDocuments;
 using Synapse.Api.Application.Queries.Resources.Generic;
+using Synapse.Api.Application.Queries.Users;
 using Synapse.Api.Application.Queries.WorkflowDataDocuments;
 using Synapse.Resources;
 
@@ -92,6 +94,7 @@ public static class IServiceCollectionExtensions
             handlerImplementationType = typeof(MonitorResourceQueryHandler<>).MakeGenericType(queryableType);
             services.Add(new ServiceDescriptor(handlerServiceType, handlerImplementationType, serviceLifetime));
         }
+        services.AddScoped<IRequestHandler<GetUserProfileQuery, IOperationResult<UserInfo>>, GetUserProfileQueryHandler>();
         services.AddScoped<IRequestHandler<GetWorkflowDataDocumentQuery, IOperationResult<Document>>, GetWorkflowDataQueryHandler>();
         return services;
     }

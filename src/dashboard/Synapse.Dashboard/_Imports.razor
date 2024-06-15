@@ -1,14 +1,20 @@
 ﻿@using BlazorBootstrap
 @using BlazorMonaco;
 @using BlazorMonaco.Editor;
+@using IdentityModel
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.AspNetCore.Components.Web
 @using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using Microsoft.AspNetCore.Components.WebAssembly.Http
+@using Microsoft.Extensions.Options
 @using Microsoft.JSInterop
 @using Synapse.Dashboard
 @using Synapse.Dashboard.Components
+@using Synapse.Dashboard.Configuration
 @using Synapse.Dashboard.Services;
 @using Synapse.Dashboard.StateManagement;
 @using Synapse.Resources
@@ -17,3 +23,4 @@
 @using System.Net.Http.Json
 @using System.Reactive.Linq;
 @using System.Reactive.Subjects;
+@using System.Security.Claims

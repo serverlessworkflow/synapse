@@ -1,5 +1,6 @@
-﻿@namespace Synapse.Dashboard.Pages.Namespaces.List
-@page "/namespaces"
+﻿@page "/namespaces"
+@attribute [Authorize]
+@namespace Synapse.Dashboard.Pages.Namespaces.List
 @inherits ClusterResourceManagementComponent<Namespace>
 
 <ApplicationTitle>Namespaces</ApplicationTitle>

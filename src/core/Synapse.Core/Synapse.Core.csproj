@@ -17,12 +17,14 @@
     <None Remove="Resources\Correlation.yaml" />
     <None Remove="Resources\Correlator.yaml" />
     <None Remove="Resources\Operator.yaml" />
+    <None Remove="Resources\ServiceAccount.yaml" />
     <None Remove="Resources\Workflow.yaml" />
     <None Remove="Resources\WorkflowInstance.yaml" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Resources\Correlation.yaml" />
+    <EmbeddedResource Include="Resources\ServiceAccount.yaml" />
     <EmbeddedResource Include="Resources\Correlator.yaml" />
     <EmbeddedResource Include="Resources\Operator.yaml" />
     <EmbeddedResource Include="Resources\Workflow.yaml" />
@@ -30,8 +32,8 @@
   </ItemGroup>
 
   <ItemGroup>
-	<PackageReference Include="Neuroglia.Data.Infrastructure.ResourceOriented" Version="4.11.2" />
-	<PackageReference Include="Neuroglia.Eventing.CloudEvents" Version="4.11.2" />
+	<PackageReference Include="Neuroglia.Data.Infrastructure.ResourceOriented" Version="4.11.3" />
+	<PackageReference Include="Neuroglia.Eventing.CloudEvents" Version="4.11.3" />
     <PackageReference Include="Semver" Version="2.3.0" />
     <PackageReference Include="ServerlessWorkflow.Sdk" Version="1.0.0-alpha1" />
   </ItemGroup>

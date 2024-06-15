@@ -1,0 +1,26 @@
+﻿@page "/authentication/bearer/login"
+@inject ISecurityTokenManager SecurityTokenManager
+@inject NavigationManager NavigationManager
+@inject ApplicationAuthenticationStateProvider AuthenticationStateManager
+
+<ApplicationTitle>Token Authentication</ApplicationTitle>
+<div class="container flex-grow d-flex align-items-center">
+    <div class="w-100">
+        <input class="form-control mb-3 text-center" @bind="token" placeholder="Static bearer token" />
+        <button class="btn btn-primary w-100 mb-3" disabled="@string.IsNullOrWhiteSpace(token)" @onclick="OnLoginAsync">Login</button>
+    </div>
+</div>
+
+@code {
+
+    string? token;
+
+    async Task OnLoginAsync()
+    {
+        if (string.IsNullOrWhiteSpace(token)) return;
+        await SecurityTokenManager.SetTokenAsync(token);
+        AuthenticationStateManager.NotifyNotifyAuthenticationStateChanged();
+        NavigationManager.NavigateTo("/");
+    }
+
+}

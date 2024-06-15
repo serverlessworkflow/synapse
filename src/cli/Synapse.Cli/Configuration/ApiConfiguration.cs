@@ -26,4 +26,10 @@ public class ApiConfiguration
     [DataMember(Name = "server", Order = 1), JsonPropertyOrder(1), JsonPropertyName("server"), YamlMember(Alias = "server", Order = 1)]
     public required virtual Uri Server { get; set; }
 
+    /// <summary>
+    /// Gets/sets the token used to authenticate on the API server
+    /// </summary>
+    [DataMember(Name = "token", Order = 2), JsonPropertyOrder(2), JsonPropertyName("token"), YamlMember(Alias = "token", Order = 2)]
+    public required virtual string Token { get; set; }
+
 }

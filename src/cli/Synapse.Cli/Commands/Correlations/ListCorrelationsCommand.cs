@@ -19,21 +19,21 @@ namespace Synapse.Cli.Commands.Correlations;
 /// <summary>
 /// Represents the <see cref="Command"/> used to list<see cref="Correlation"/>s
 /// </summary>
-internal class ListCorrelationsCommand
+internal class ListServiceAccountsCommand
     : Command
 {
 
     /// <summary>
-    /// Gets the <see cref="ListCorrelationsCommand"/>'s name
+    /// Gets the <see cref="ListServiceAccountsCommand"/>'s name
     /// </summary>
     public const string CommandName = "list";
     /// <summary>
-    /// Gets the <see cref="ListCorrelationsCommand"/>'s description
+    /// Gets the <see cref="ListServiceAccountsCommand"/>'s description
     /// </summary>
     public const string CommandDescription = "Lists correlations";
 
     /// <inheritdoc/>
-    public ListCorrelationsCommand(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, ISynapseApiClient api)
+    public ListServiceAccountsCommand(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, ISynapseApiClient api)
         : base(serviceProvider, loggerFactory, api, CommandName, CommandDescription)
     {
         this.AddAlias("ls");
@@ -42,7 +42,7 @@ internal class ListCorrelationsCommand
     }
 
     /// <summary>
-    /// Handles the <see cref="ListCorrelationsCommand"/>
+    /// Handles the <see cref="ListServiceAccountsCommand"/>
     /// </summary>
     /// <param name="namespace">The namespace the workflow to list belong to</param>
     /// <returns>A new awaitable <see cref="Task"/></returns>

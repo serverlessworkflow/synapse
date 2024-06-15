@@ -59,8 +59,10 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
     services.AddServerlessWorkflowIO();
     services.AddSynapseHttpApiClient(http =>
     {
-        if (string.IsNullOrWhiteSpace(applicationOptions.Api.Current)) return; //todo: warn
-        http.BaseAddress = applicationOptions.Api.Configurations[applicationOptions.Api.Current].Server ?? null!; //todo: warn
+        if (string.IsNullOrWhiteSpace(applicationOptions.Api.Current)) return;
+        var apiConfiguration = applicationOptions.Api.Configurations[applicationOptions.Api.Current];
+        http.BaseAddress = apiConfiguration.Server;
+        http.Token = apiConfiguration.Token;
     });
     services.AddCliCommands();
     services.AddSingleton<IOptionsManager, OptionsManager>();

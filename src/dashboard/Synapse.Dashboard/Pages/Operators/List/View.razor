@@ -1,5 +1,6 @@
-﻿@namespace Synapse.Dashboard.Pages.Operators.List
-@page "/operators"
+﻿@page "/operators"
+@attribute [Authorize]
+@namespace Synapse.Dashboard.Pages.Operators.List
 @inherits NamespacedResourceManagementComponent<Operator>
 
 <ApplicationTitle>Operators</ApplicationTitle>
