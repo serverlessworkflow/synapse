@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+
 namespace Synapse.Dashboard.Components;
 
 /// <summary>
@@ -22,6 +23,27 @@ public abstract class NamespacedResourceManagementComponent<TResource>
     where TResource : Resource, new()
 {
 
+    /// <summary>
+    /// Gets the list of available <see cref="Namespace"/>s
+    /// </summary>
+    protected EquatableList<Namespace>? Namespaces { get; set; }
 
+    /// <inheritdoc/>
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        this.Store.Namespaces.Subscribe(OnNamespaceCollectionChanged, token: this.CancellationTokenSource.Token);
+        await this.Store.ListNamespaceAsync().ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Updates the <see cref="NamespacedResourceManagementComponent{TResource}.Namespaces"/>
+    /// </summary>
+    /// <param name="namespaces">The updated <see cref="Namespace"/>s</param>
+    protected void OnNamespaceCollectionChanged(EquatableList<Namespace>? namespaces)
+    {
+        this.Namespaces = namespaces;
+        this.StateHasChanged();
+    }
 
 }

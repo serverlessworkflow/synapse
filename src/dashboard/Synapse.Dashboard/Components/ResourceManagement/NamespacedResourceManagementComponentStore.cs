@@ -30,6 +30,16 @@ public class NamespacedResourceManagementComponentStore<TResource>(ISynapseApiCl
     where TResource : Resource, new()
 {
 
+    /// <summary>
+    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="Namespace"/>s
+    /// </summary>
+    public IObservable<EquatableList<Namespace>?> Namespaces => this.Select(s => s.Namespaces);
+
+    /// <summary>
+    /// Gets a list containing local copies of managed <see cref="Namespace"/>s
+    /// </summary>
+    protected EquatableList<Namespace>? NamespaceList { get; set; }
+
     /// <inheritdoc/>
     public override async Task GetResourceDefinitionAsync()
     {
@@ -40,17 +50,45 @@ public class NamespacedResourceManagementComponentStore<TResource>(ISynapseApiCl
         });
     }
 
+    /// <summary>
+    /// Lists all resources within the specified namespace
+    /// </summary>
+    /// <param name="namespace">The namespace, if any, to list the resources of</param>
+    /// <param name="labelSelectors">A list of the label selectors, if any, used to filter the resources to list</param>
+    /// <returns>A new awaitable <see cref="Task"/></returns>
+    public async Task ListResourcesAsync(string? @namespace, IEnumerable<LabelSelector>? labelSelectors)
+    {
+        this.Reduce(state => state with
+        {
+            Loading = true,
+        });
+        this.ResourceList = new EquatableList<TResource>(await (await this.ApiClient.ManageNamespaced<TResource>().ListAsync(@namespace, labelSelectors).ConfigureAwait(false)).ToListAsync().ConfigureAwait(false));
+        this.Reduce(s => s with
+        {
+            Resources = this.ResourceList,
+            Namespace = @namespace,
+            LabelSelectors = labelSelectors == null ? null : new(labelSelectors),
+            Loading = false
+        });
+    }
+
     /// <inheritdoc/>
-    public override async Task ListResourcesAsync()
+    public override Task ListResourcesAsync(IEnumerable<LabelSelector>? labelSelectors) => this.ListResourcesAsync(null, labelSelectors);
+
+    /// <summary>
+    /// Lists all available <see cref="Namespace"/>s
+    /// </summary>
+    /// <returns>A new awaitable <see cref="Task"/></returns>
+    public virtual async Task ListNamespaceAsync()
     {
         this.Reduce(state => state with
         {
             Loading = true
         });
-        this.ResourceList = new EquatableList<TResource>(await (await this.ApiClient.ManageNamespaced<TResource>().ListAsync(null!).ConfigureAwait(false)).ToListAsync().ConfigureAwait(false));
+        this.NamespaceList = new EquatableList<Namespace>(await (await this.ApiClient.Namespaces.ListAsync().ConfigureAwait(false)).ToListAsync().ConfigureAwait(false));
         this.Reduce(s => s with
         {
-            Resources = this.ResourceList,
+            Namespaces = this.NamespaceList,
             Loading = false
         });
     }

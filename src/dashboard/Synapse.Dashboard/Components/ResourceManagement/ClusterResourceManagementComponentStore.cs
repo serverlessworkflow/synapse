@@ -41,13 +41,13 @@ public class ClusterResourceManagementComponentStore<TResource>(ISynapseApiClien
     }
 
     /// <inheritdoc/>
-    public override async Task ListResourcesAsync()
+    public override async Task ListResourcesAsync(IEnumerable<LabelSelector>? labelSelectors)
     {
         this.Reduce(state => state with
         {
             Loading = true
         });
-        this.ResourceList = new EquatableList<TResource>(await (await this.ApiClient.ManageCluster<TResource>().ListAsync().ConfigureAwait(false)).ToListAsync().ConfigureAwait(false));
+        this.ResourceList = new EquatableList<TResource>(await (await this.ApiClient.ManageCluster<TResource>().ListAsync(labelSelectors).ConfigureAwait(false)).ToListAsync().ConfigureAwait(false));
         this.Reduce(s => s with
         {
             Resources = this.ResourceList,

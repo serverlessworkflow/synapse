@@ -91,10 +91,11 @@ public abstract class ResourceManagementComponentStoreBase<TResource>(ISynapseAp
     public abstract Task GetResourceDefinitionAsync();
 
     /// <summary>
-    /// Lists all the channels managed by Synapse
+    /// Lists all the resources managed by Synapse
     /// </summary>
+    /// <param name="labelSelectors">A list containing the label selectors, if any, used to filter the resources to list</param>
     /// <returns>A new awaitable <see cref="Task"/></returns>
-    public abstract Task ListResourcesAsync();
+    public abstract Task ListResourcesAsync(IEnumerable<LabelSelector>? labelSelectors = null);
 
     /// <summary>
     /// Deletes the specified <see cref="IResource"/>
