@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Neuroglia.Data.Infrastructure.ResourceOriented;
 using Synapse.Api.Client.Services;
 using System.Reactive.Linq;
 
@@ -29,6 +30,8 @@ public abstract class ResourceManagementComponentStoreBase<TResource>(ISynapseAp
      : ComponentStore<ResourceManagementComponentState<TResource>>(new())
     where TResource : Resource, new()
 {
+
+    EquatableList<TResource>? _unfilteredResourceList;
 
     /// <summary>
     /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="ResourceDefinition"/>s of the specified type
@@ -96,6 +99,36 @@ public abstract class ResourceManagementComponentStoreBase<TResource>(ISynapseAp
     /// <param name="labelSelectors">A list containing the label selectors, if any, used to filter the resources to list</param>
     /// <returns>A new awaitable <see cref="Task"/></returns>
     public abstract Task ListResourcesAsync(IEnumerable<LabelSelector>? labelSelectors = null);
+
+    /// <summary>
+    /// Searches resources for the specified term
+    /// </summary>
+    /// <param name="term">The term to search resources by</param>
+    /// <returns>A new awaitable <see cref="Task"/></returns>
+    public virtual Task SearchResourcesAsync(string? term)
+    {
+        this.Reduce(state => state with
+        {
+            Loading = true
+        });
+        if (string.IsNullOrWhiteSpace(term))
+        {
+            if (_unfilteredResourceList != null) ResourceList = new(_unfilteredResourceList);
+            _unfilteredResourceList = null;
+        }
+        else
+        {
+            if (_unfilteredResourceList != null) ResourceList = _unfilteredResourceList;
+            else if(ResourceList != null) _unfilteredResourceList = new(ResourceList);
+            ResourceList = ResourceList == null ? null : new(ResourceList.Where(r => r.GetName().StartsWith(term)));
+        }
+        this.Reduce(s => s with
+        {
+            Resources = this.ResourceList,
+            Loading = false
+        });
+        return Task.CompletedTask;
+    }
 
     /// <summary>
     /// Deletes the specified <see cref="IResource"/>

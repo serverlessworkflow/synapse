@@ -35,9 +35,9 @@ internal class MockClusterResourceApiClient<TResource>(IResourceRepository resou
     
     public async Task<ResourceDefinition> GetDefinitionAsync(CancellationToken cancellationToken = default) => ((ResourceDefinition)(await resources.GetDefinitionAsync<TResource>(cancellationToken))!)!;
 
-    public Task<TResource> PatchAsync(string name, Patch patch, CancellationToken cancellationToken = default) => resources.PatchAsync<TResource>(patch, name, null, false, cancellationToken);
+    public Task<TResource> PatchAsync(string name, Patch patch, string? resourceVersion = null, CancellationToken cancellationToken = default) => resources.PatchAsync<TResource>(patch, name, null, resourceVersion, false, cancellationToken);
 
-    public Task<TResource> PatchStatusAsync(string name, Patch patch, CancellationToken cancellationToken = default) => resources.PatchStatusAsync<TResource>(patch, name, null, false, cancellationToken);
+    public Task<TResource> PatchStatusAsync(string name, Patch patch, string? resourceVersion = null, CancellationToken cancellationToken = default) => resources.PatchStatusAsync<TResource>(patch, name, null, resourceVersion, false, cancellationToken);
 
     public Task<TResource> ReplaceAsync(TResource resource, CancellationToken cancellationToken = default) => resources.ReplaceAsync(resource, false, cancellationToken);
 

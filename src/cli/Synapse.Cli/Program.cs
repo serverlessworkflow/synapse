@@ -62,7 +62,7 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
         if (string.IsNullOrWhiteSpace(applicationOptions.Api.Current)) return;
         var apiConfiguration = applicationOptions.Api.Configurations[applicationOptions.Api.Current];
         http.BaseAddress = apiConfiguration.Server;
-        http.Token = apiConfiguration.Token;
+        http.TokenFactory = provider => Task.FromResult(apiConfiguration.Token)!;
     });
     services.AddCliCommands();
     services.AddSingleton<IOptionsManager, OptionsManager>();

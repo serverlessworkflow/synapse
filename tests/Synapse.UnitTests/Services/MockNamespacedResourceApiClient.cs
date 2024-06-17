@@ -37,13 +37,12 @@ internal class MockNamespacedResourceApiClient<TResource>(IResourceRepository re
 
     public async Task<ResourceDefinition> GetDefinitionAsync(CancellationToken cancellationToken = default) => ((ResourceDefinition)(await resources.GetDefinitionAsync<TResource>(cancellationToken))!)!;
 
-    public Task<TResource> PatchAsync(string name, string @namespace, Patch patch, CancellationToken cancellationToken = default) => resources.PatchAsync<TResource>(patch, name, @namespace, false, cancellationToken);
+    public Task<TResource> PatchAsync(string name, string @namespace, Patch patch, string? resourceVersion = null, CancellationToken cancellationToken = default) => resources.PatchAsync<TResource>(patch, name, @namespace, resourceVersion, false, cancellationToken);
 
-    public Task<TResource> PatchStatusAsync(string name, string @namespace, Patch patch, CancellationToken cancellationToken = default) => resources.PatchStatusAsync<TResource>(patch, name, @namespace, false, cancellationToken);
+    public Task<TResource> PatchStatusAsync(string name, string @namespace, Patch patch, string? resourceVersion = null, CancellationToken cancellationToken = default) => resources.PatchStatusAsync<TResource>(patch, name, @namespace, resourceVersion, false, cancellationToken);
 
     public Task<TResource> ReplaceAsync(TResource resource, CancellationToken cancellationToken = default) => resources.ReplaceAsync(resource, false, cancellationToken);
 
     public Task<TResource> ReplaceStatusAsync(TResource resource, CancellationToken cancellationToken = default) => resources.ReplaceStatusAsync(resource, false, cancellationToken);
-
 
 }

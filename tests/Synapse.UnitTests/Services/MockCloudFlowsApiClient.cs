@@ -34,4 +34,7 @@ internal class MockSynapseApiClient(IServiceProvider serviceProvider)
 
     public IDocumentApiClient WorkflowData { get; } = ActivatorUtilities.CreateInstance<MockDocumentApiClient>(serviceProvider);
 
+    public INamespacedResourceApiClient<ServiceAccount> ServiceAccounts => throw new NotImplementedException();
+
+    public IUserApiClient Users => throw new NotImplementedException();
 }

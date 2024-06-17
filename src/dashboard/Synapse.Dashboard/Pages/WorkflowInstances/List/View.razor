@@ -33,8 +33,7 @@
                         }
                     }
                 </select>
-                <input type="search" class="form-control rounded-end-0 my-2">
-                <button class="btn btn-sm btn-outline-secondary rounded-start-0 text-secondary my-2"><i class="bi bi-search"></i></button>
+                <input type="search" class="form-control rounded-end-0 my-2" placeholder="Search" value="@searchTerm" @oninput="OnSearchInput" />
             </div>
         </div>
     </div>
@@ -101,7 +100,9 @@
 
 <ConfirmDialog @ref="Dialog" />
 
-@{
+@code{
+
+    string? searchTerm;
 
     string GetStatusClass(WorkflowInstance instance)
     {
@@ -129,6 +130,12 @@
             { nameof(WorkflowInstanceDetails.WorkflowInstance), workflowInstance }
         };
         return this.DetailsOffCanvas.ShowAsync<WorkflowInstanceDetails>(title: workflowInstance.GetName(), parameters: parameters);
+    }
+
+    async Task OnSearchInput(ChangeEventArgs e)
+    {
+        searchTerm = e.Value?.ToString();
+        await this.Store.SearchResourcesAsync(searchTerm);
     }
 
 }
