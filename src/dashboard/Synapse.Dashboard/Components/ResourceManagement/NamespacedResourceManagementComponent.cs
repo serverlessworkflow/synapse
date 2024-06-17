@@ -11,15 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 namespace Synapse.Dashboard.Components;
 
 /// <summary>
 /// Represents the base class for all components used to manage <see cref="IResource"/>s
 /// </summary>
+/// <typeparam name="TStore">The type of the component's <see cref="Store"/></typeparam>
+/// <typeparam name="TState">The type of the component's state</typeparam>
 /// <typeparam name="TResource">The type of <see cref="IResource"/> to manage</typeparam>
-public abstract class NamespacedResourceManagementComponent<TResource>
-    : ResourceManagementComponent<NamespacedResourceManagementComponentStore<TResource>, TResource>
+public abstract class NamespacedResourceManagementComponent<TStore, TState, TResource>
+    : ResourceManagementComponent<TStore, TState, TResource>
+    where TStore : NamespacedResourceManagementComponentStore<TState, TResource>
+    where TState : NamespacedResourceManagementComponentState<TResource>, new()
     where TResource : Resource, new()
 {
 
@@ -37,7 +40,7 @@ public abstract class NamespacedResourceManagementComponent<TResource>
     }
 
     /// <summary>
-    /// Updates the <see cref="NamespacedResourceManagementComponent{TResource}.Namespaces"/>
+    /// Updates the <see cref="NamespacedResourceManagementComponent{TStore, TState, TResource}.Namespaces"/>
     /// </summary>
     /// <param name="namespaces">The updated <see cref="Namespace"/>s</param>
     protected void OnNamespaceCollectionChanged(EquatableList<Namespace>? namespaces)
@@ -45,5 +48,33 @@ public abstract class NamespacedResourceManagementComponent<TResource>
         this.Namespaces = namespaces;
         this.StateHasChanged();
     }
+
+}
+
+/// <summary>
+/// Represents the base class for all components used to manage <see cref="IResource"/>s
+/// </summary>
+/// <typeparam name="TState">The type of the component's state</typeparam>
+/// <typeparam name="TResource">The type of <see cref="IResource"/> to manage</typeparam>
+public abstract class NamespacedResourceManagementComponent<TState, TResource>
+    : NamespacedResourceManagementComponent<NamespacedResourceManagementComponentStore<TState, TResource>, TState, TResource>
+    where TState : NamespacedResourceManagementComponentState<TResource>, new()
+    where TResource : Resource, new()
+{
+
+
+
+}
+
+/// <summary>
+/// Represents the base class for all components used to manage <see cref="IResource"/>s
+/// </summary>
+/// <typeparam name="TResource">The type of <see cref="IResource"/> to manage</typeparam>
+public abstract class NamespacedResourceManagementComponent<TResource>
+    : NamespacedResourceManagementComponent<NamespacedResourceManagementComponentStore<NamespacedResourceManagementComponentState<TResource>, TResource>, NamespacedResourceManagementComponentState<TResource>, TResource>
+    where TResource : Resource, new()
+{
+
+
 
 }

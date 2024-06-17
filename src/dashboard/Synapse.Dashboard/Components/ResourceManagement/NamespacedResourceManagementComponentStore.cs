@@ -19,15 +19,14 @@ namespace Synapse.Dashboard.Components.ResourceManagement;
 /// <summary>
 /// Represents a <see cref="ComponentStore{TState}"/> used to manage Synapse <see cref="IResource"/>s of the specified type
 /// </summary>
+/// <typeparam name="TState">The type of the component's state</typeparam>
 /// <typeparam name="TResource">The type of <see cref="IResource"/>s to manage</typeparam>
-/// <remarks>
-/// Initializes a new <see cref="NamespacedResourceManagementComponentStore{TResource}"/>
-/// </remarks>
 /// <param name="apiClient">The service used to interact with the Synapse API</param>
 /// <param name="resourceEventHub">The <see cref="IResourceEventWatchHub"/> websocket service client</param>
-public class NamespacedResourceManagementComponentStore<TResource>(ISynapseApiClient apiClient, ResourceWatchEventHubClient resourceEventHub)
-    : ResourceManagementComponentStoreBase<TResource>(apiClient, resourceEventHub)
+public class NamespacedResourceManagementComponentStore<TState, TResource>(ISynapseApiClient apiClient, ResourceWatchEventHubClient resourceEventHub)
+    : ResourceManagementComponentStoreBase<TState, TResource>(apiClient, resourceEventHub)
     where TResource : Resource, new()
+    where TState : NamespacedResourceManagementComponentState<TResource>, new()
 {
 
     /// <summary>

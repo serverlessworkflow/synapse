@@ -32,19 +32,9 @@ public record ResourceManagementComponentState<TResource>
     public EquatableList<TResource>? Resources { get; set; }
 
     /// <summary>
-    /// Gets the <see cref="Neuroglia.Data.Infrastructure.ResourceOriented.Namespace"/>, if any, the (namespaced) resources to list belong to
-    /// </summary>
-    public string? Namespace { get; set; }
-
-    /// <summary>
     /// Gets a list that contains the label selectors, if any, used to filter the resources to list
     /// </summary>
     public EquatableList<LabelSelector>? LabelSelectors { get; set; }
-
-    /// <summary>
-    /// Gets a <see cref="List{T}"/> that contains all cached <see cref="Neuroglia.Data.Infrastructure.ResourceOriented.Namespace"/>s
-    /// </summary>
-    public EquatableList<Namespace>? Namespaces { get; set; }
 
     /// <summary>
     /// Gets/sets a boolean value that indicates whether data is currently being gathered

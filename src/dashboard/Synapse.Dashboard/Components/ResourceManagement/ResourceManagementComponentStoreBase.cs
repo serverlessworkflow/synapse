@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Neuroglia.Data.Infrastructure.ResourceOriented;
 using Synapse.Api.Client.Services;
 using System.Reactive.Linq;
 
@@ -20,15 +19,14 @@ namespace Synapse.Dashboard.Components.ResourceManagement;
 /// <summary>
 /// Represents a <see cref="ComponentStore{TState}"/> used to manage Synapse <see cref="IResource"/>s of the specified type
 /// </summary>
+/// <typeparam name="TState">The type of the state managed by the component store</typeparam>
 /// <typeparam name="TResource">The type of <see cref="IResource"/>s to manage</typeparam>
-/// <remarks>
-/// Initializes a new <see cref="ResourceManagementComponentStoreBase{TResource}"/>
-/// </remarks>
 /// <param name="apiClient">The service used to interact with the Synapse API</param>
 /// <param name="resourceEventHub">The <see cref="IResourceEventWatchHub"/> websocket service client</param>
-public abstract class ResourceManagementComponentStoreBase<TResource>(ISynapseApiClient apiClient, ResourceWatchEventHubClient resourceEventHub)
-     : ComponentStore<ResourceManagementComponentState<TResource>>(new())
+public abstract class ResourceManagementComponentStoreBase<TState, TResource>(ISynapseApiClient apiClient, ResourceWatchEventHubClient resourceEventHub)
+     : ComponentStore<TState>(new())
     where TResource : Resource, new()
+    where TState : ResourceManagementComponentState<TResource>, new()
 {
 
     EquatableList<TResource>? _unfilteredResourceList;
@@ -215,4 +213,23 @@ public abstract class ResourceManagementComponentStoreBase<TResource>(ISynapseAp
         this.ResourceWatchSubscription.Dispose();
         base.Dispose(disposing);
     }
+
+}
+
+/// <summary>
+/// Represents a <see cref="ComponentStore{TState}"/> used to manage Synapse <see cref="IResource"/>s of the specified type
+/// </summary>
+/// <typeparam name="TResource">The type of <see cref="IResource"/>s to manage</typeparam>
+/// <remarks>
+/// Initializes a new <see cref="ResourceManagementComponentStoreBase{TResource}"/>
+/// </remarks>
+/// <param name="apiClient">The service used to interact with the Synapse API</param>
+/// <param name="resourceEventHub">The <see cref="IResourceEventWatchHub"/> websocket service client</param>
+public abstract class ResourceManagementComponentStoreBase<TResource>(ISynapseApiClient apiClient, ResourceWatchEventHubClient resourceEventHub)
+     : ResourceManagementComponentStoreBase<ResourceManagementComponentState<TResource>, TResource>(apiClient, resourceEventHub)
+    where TResource : Resource, new()
+{
+
+
+
 }

@@ -1,7 +1,7 @@
 ﻿@page "/workflow-instances"
 @attribute [Authorize]
 @namespace Synapse.Dashboard.Pages.WorkflowInstances.List
-@inherits NamespacedResourceManagementComponent<WorkflowInstance>
+@inherits WorkflowInstanceListComponent
 
 <ApplicationTitle>Workflow Instances</ApplicationTitle>
 
@@ -23,6 +23,16 @@
         </div>
         <div class="col-4 d-flex">
             <div class="ms-auto d-flex">
+                <select class="form-select m-2" @onchange="OnWorkflowChanged">
+                    <option value="">All workflows</option>
+                    @if (Workflows != null && Workflows.Count > 0)
+                    {
+                        foreach (var workflowResource in Workflows)
+                        {
+                            <option value="@workflowResource.GetQualifiedName()">@workflowResource.GetQualifiedName()</option>
+                        }
+                    }
+                </select>
                 <select class="form-select m-2" @onchange="OnNamespaceChanged">
                     <option value="">All namespaces</option>
                     @if (Namespaces != null && Namespaces.Count > 0)
@@ -103,6 +113,8 @@
 @code{
 
     string? searchTerm;
+    List<LabelSelector>? labelSelectors = null;
+    List<string>? versions;
 
     string GetStatusClass(WorkflowInstance instance)
     {
@@ -117,19 +129,16 @@
         };
     }
 
+    async Task OnWorkflowChanged(ChangeEventArgs e)
+    {
+        var workflowQualifiedName = e.Value?.ToString();
+        labelSelectors = string.IsNullOrWhiteSpace(workflowQualifiedName)? null : [new(SynapseDefaults.Resources.Labels.Workflow, LabelSelectionOperator.Equals, workflowQualifiedName)];
+        await this.Store.ListResourcesAsync(this.Namespace, labelSelectors);
+    }
+
     async Task OnNamespaceChanged(ChangeEventArgs e)
     {
-        await this.Store.ListResourcesAsync(e.Value?.ToString(), null); //todo: add label selectors
-    }
-    
-    Task OnShowResourceDetailsAsync(WorkflowInstance workflowInstance)
-    {
-        if (this.DetailsOffCanvas == null) return Task.CompletedTask;
-        var parameters = new Dictionary<string, object>
-        {
-            { nameof(WorkflowInstanceDetails.WorkflowInstance), workflowInstance }
-        };
-        return this.DetailsOffCanvas.ShowAsync<WorkflowInstanceDetails>(title: workflowInstance.GetName(), parameters: parameters);
+        await this.Store.ListResourcesAsync(e.Value?.ToString(), labelSelectors);
     }
 
     async Task OnSearchInput(ChangeEventArgs e)
