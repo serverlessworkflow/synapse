@@ -20,28 +20,21 @@ namespace Synapse.Dashboard.StateManagement;
 /// Represents the base class for all component stores
 /// </summary>
 /// <typeparam name="TState">The type of the component store's state</typeparam>
-public abstract class ComponentStore<TState>
+/// <remarks>
+/// Initializes a new <see cref="ComponentStore{TState}"/>
+/// </remarks>
+/// <param name="state">The store's initial state</param>
+public abstract class ComponentStore<TState>(TState state)
     : IComponentStore<TState>
 {
-    private BehaviorSubject<TState> _Subject;
-    private TState _State;
-    private bool _Disposed;
-
-    /// <summary>
-    /// Initializes a new <see cref="ComponentStore{TState}"/>
-    /// </summary>
-    /// <param name="state">The store's initial state</param>
-    protected ComponentStore(TState state)
-    {
-        this.CancellationTokenSource = new CancellationTokenSource();
-        this._State = state;
-        this._Subject = new(state);
-    }
+    private readonly BehaviorSubject<TState> _subject = new(state);
+    private TState _state = state;
+    private bool _disposed;
 
     /// <summary>
     /// Gets the <see cref="ComponentStore{TState}"/>'s <see cref="System.Threading.CancellationTokenSource"/>
     /// </summary>
-    protected CancellationTokenSource CancellationTokenSource { get; }
+    protected CancellationTokenSource CancellationTokenSource { get; } = new CancellationTokenSource();
 
     /// <inheritdoc/>
     public virtual Task InitializeAsync() => Task.CompletedTask;
@@ -52,8 +45,8 @@ public abstract class ComponentStore<TState>
     /// <param name="state">The updated state to set</param>
     protected virtual void Set(TState state)
     {
-        this._State = state;
-        this._Subject.OnNext(this._State);
+        this._state = state;
+        this._subject.OnNext(this._state);
     }
 
     /// <summary>
@@ -62,7 +55,7 @@ public abstract class ComponentStore<TState>
     /// <param name="reducer">A <see cref="Func{T, TResult}"/> used to reduce the <see cref="ComponentStore{TState}"/>'s state</param>
     protected virtual void Reduce(Func<TState, TState> reducer)
     {
-        this.Set(reducer(this._State));
+        this.Set(reducer(this._state));
     }
 
     /// <summary>
@@ -71,7 +64,7 @@ public abstract class ComponentStore<TState>
     /// <returns></returns>
     protected virtual TState Get()
     {
-        return this._State;
+        return this._state;
     }
 
     /// <summary>
@@ -80,11 +73,11 @@ public abstract class ComponentStore<TState>
     /// <returns></returns>
     protected virtual T Get<T>(Func<TState, T> project)
     {
-        return project(this._State);
+        return project(this._state);
     }
 
     /// <inheritdoc/>
-    public virtual IDisposable Subscribe(IObserver<TState> observer) => this._Subject.Throttle(TimeSpan.FromMicroseconds(1)).Subscribe(observer);
+    public virtual IDisposable Subscribe(IObserver<TState> observer) => this._subject.Throttle(TimeSpan.FromMicroseconds(1)).Subscribe(observer);
 
     /// <summary>
     /// Disposes of the <see cref="ComponentStore{TState}"/>
@@ -92,14 +85,14 @@ public abstract class ComponentStore<TState>
     /// <param name="disposing">A boolean indicating whether or not the <see cref="ComponentStore{TState}"/> is being disposed of</param>
     protected virtual void Dispose(bool disposing)
     {
-        if (!this._Disposed)
+        if (!this._disposed)
         {
             if (disposing)
             {
                 this.CancellationTokenSource.Dispose();
-                this._Subject.Dispose();
+                this._subject.Dispose();
             }
-            this._Disposed = true;
+            this._disposed = true;
         }
     }
 
@@ -117,14 +110,14 @@ public abstract class ComponentStore<TState>
     /// <returns>A new awaitable <see cref="ValueTask"/></returns>
     protected virtual ValueTask DisposeAsync(bool disposing)
     {
-        if (!this._Disposed)
+        if (!this._disposed)
         {
             if (disposing)
             {
                 this.CancellationTokenSource.Dispose();
-                this._Subject.Dispose();
+                this._subject.Dispose();
             }
-            this._Disposed = true;
+            this._disposed = true;
         }
         return ValueTask.CompletedTask;
     }

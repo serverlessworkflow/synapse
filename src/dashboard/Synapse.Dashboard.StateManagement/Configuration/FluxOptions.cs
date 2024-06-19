@@ -25,7 +25,7 @@ public class FluxOptions
     /// <summary>
     /// Gets/sets a <see cref="List{T}"/> containing the assemblies to scan for Flux components
     /// </summary>
-    public virtual List<Assembly> AssembliesToScan { get; set; } = new();
+    public virtual List<Assembly> AssembliesToScan { get; set; } = [];
 
     /// <summary>
     /// Gets/sets a boolean indicating whether or not to automatically register scanned <see cref="IFeature"/>s and <see cref="IReducer"/>s
@@ -60,17 +60,17 @@ public class FluxOptions
     /// <summary>
     /// Gets/sets a <see cref="List{T}"/> containing the types of the <see cref="IFeature"/>s to use
     /// </summary>
-    public virtual List<IFeature> Features { get; set; } = new();
+    public virtual List<IFeature> Features { get; set; } = [];
 
     /// <summary>
     /// Gets/sets a <see cref="List{T}"/> containing the types of the <see cref="IMiddleware"/>s to use
     /// </summary>
-    public virtual List<Type> Middlewares { get; set; } = new();
+    public virtual List<Type> Middlewares { get; set; } = [];
 
     /// <summary>
     /// Gets/sets a <see cref="List{T}"/> containing the types of the <see cref="IEffect"/>s to use
     /// </summary>
-    public virtual List<IEffect> Effects { get; set; } = new();
+    public virtual List<IEffect> Effects { get; set; } = [];
 
     /// <summary>
     /// Gets/sets the lifetime of all Flux services

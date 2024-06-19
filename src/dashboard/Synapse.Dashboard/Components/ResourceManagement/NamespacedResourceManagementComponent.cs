@@ -16,11 +16,13 @@ namespace Synapse.Dashboard.Components;
 /// <summary>
 /// Represents the base class for all components used to manage <see cref="IResource"/>s
 /// </summary>
+/// <typeparam name="TComponent">The type of component inheriting the <see cref="NamespacedResourceManagementComponent{TComponent, TStore, TState, TResource}"/></typeparam>
 /// <typeparam name="TStore">The type of the component's <see cref="Store"/></typeparam>
 /// <typeparam name="TState">The type of the component's state</typeparam>
 /// <typeparam name="TResource">The type of <see cref="IResource"/> to manage</typeparam>
-public abstract class NamespacedResourceManagementComponent<TStore, TState, TResource>
-    : ResourceManagementComponent<TStore, TState, TResource>
+public abstract class NamespacedResourceManagementComponent<TComponent, TStore, TState, TResource>
+    : ResourceManagementComponent<TComponent, TStore, TState, TResource>
+    where TComponent : NamespacedResourceManagementComponent<TComponent, TStore, TState, TResource>
     where TStore : NamespacedResourceManagementComponentStore<TState, TResource>
     where TState : NamespacedResourceManagementComponentState<TResource>, new()
     where TResource : Resource, new()
@@ -31,23 +33,46 @@ public abstract class NamespacedResourceManagementComponent<TStore, TState, TRes
     /// </summary>
     protected EquatableList<Namespace>? Namespaces { get; set; }
 
+    /// <summary>
+    /// Gets current namespace
+    /// </summary>
+    protected string? Namespace { get; set; }
+
     /// <inheritdoc/>
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        this.Store.Namespaces.Subscribe(OnNamespaceCollectionChanged, token: this.CancellationTokenSource.Token);
+        this.Store.Namespace.Subscribe(@namespace => this.OnStateChanged(cmp => cmp.Namespace = @namespace), token: this.CancellationTokenSource.Token);
+        this.Store.Namespaces.Subscribe(namespaces => this.OnStateChanged(cmp => cmp.Namespaces = namespaces), token: this.CancellationTokenSource.Token);
         await this.Store.ListNamespaceAsync().ConfigureAwait(false);
     }
 
     /// <summary>
-    /// Updates the <see cref="NamespacedResourceManagementComponent{TStore, TState, TResource}.Namespaces"/>
+    /// Handles changes of namespace
     /// </summary>
-    /// <param name="namespaces">The updated <see cref="Namespace"/>s</param>
-    protected void OnNamespaceCollectionChanged(EquatableList<Namespace>? namespaces)
+    /// <param name="e"></param>
+    /// <returns></returns>
+    protected void OnNamespaceChanged(ChangeEventArgs e)
     {
-        this.Namespaces = namespaces;
-        this.StateHasChanged();
+        this.Store.SetNamespace(e.Value?.ToString());
     }
+
+}
+
+/// <summary>
+/// Represents the base class for all components used to manage <see cref="IResource"/>s
+/// </summary>
+/// <typeparam name="TStore">The type of the component's <see cref="Store"/></typeparam>
+/// <typeparam name="TState">The type of the component's state</typeparam>
+/// <typeparam name="TResource">The type of <see cref="IResource"/> to manage</typeparam>
+public abstract class NamespacedResourceManagementComponent<TStore, TState, TResource>
+    : NamespacedResourceManagementComponent<NamespacedResourceManagementComponent<TStore, TState, TResource>, TStore, TState, TResource>
+    where TStore : NamespacedResourceManagementComponentStore<TState, TResource>
+    where TState : NamespacedResourceManagementComponentState<TResource>, new()
+    where TResource : Resource, new()
+{
+
+
 
 }
 

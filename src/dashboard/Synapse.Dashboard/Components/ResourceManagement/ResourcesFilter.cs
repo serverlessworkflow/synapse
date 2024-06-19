@@ -11,17 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Synapse.Dashboard.Components;
+namespace Synapse.Dashboard.Components.ResourceManagement;
 
 /// <summary>
-/// Represents the base class for all components used to manage <see cref="IResource"/>s
+/// Holds filters used to request resources
 /// </summary>
-/// <typeparam name="TResource">The type of <see cref="IResource"/> to manage</typeparam>
-public abstract class ClusterResourceManagementComponent<TResource>
-    : ResourceManagementComponent<ClusterResourceManagementComponent<TResource>, ClusterResourceManagementComponentStore<TResource>, TResource>
-    where TResource : Resource, new()
+public record ResourcesFilter
 {
 
+    /// <summary>
+    /// Gets the <see cref="Neuroglia.Data.Infrastructure.ResourceOriented.Namespace"/>, if any, the (namespaced) resources to list belong to
+    /// </summary>
+    public string? Namespace { get; set; }
 
+    /// <summary>
+    /// Gets/sets a list that contains the label selectors, if any, used to filter the resources to list
+    /// </summary>
+    public EquatableList<LabelSelector>? LabelSelectors { get; set; }
 
 }

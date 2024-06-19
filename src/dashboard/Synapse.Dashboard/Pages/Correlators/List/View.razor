@@ -14,6 +14,23 @@
             </div>
         </div>
     }
+    <div class="d-flex flex-row justify-content-between align-items-center">
+        <h4>Correlators</h4>
+        <span>@(Resources?.Count ?? 0) items</span>
+        <div class="d-flex">
+            <select class="form-select m-2" @onchange="OnNamespaceChanged">
+                <option value="">All namespaces</option>
+                @if (Namespaces != null && Namespaces.Count > 0)
+                {
+                    foreach (var namespaceResource in Namespaces)
+                    {
+                        <option value="@namespaceResource.GetName()">@namespaceResource.GetName()</option>
+                    }
+                }
+            </select>
+            <input type="search" class="form-control rounded my-2 me-2" placeholder="Search" value="@SearchTerm" @oninput="OnSearchInput" />
+        </div>
+    </div>
     <table class="table table-striped table-hover">
         <thead>
             <tr>
@@ -21,7 +38,9 @@
                 <th class="sticky-header text-start">Name</th>
                 <th class="sticky-header text-center">Created At</th>
                 <th class="sticky-header text-center">Status</th>
-                <th class="sticky-header text-end"></th>
+                <th class="sticky-header text-end">
+                    <Button Outline="true" Size="Size.Small" Color="ButtonColor.Primary" @onclick="async _ => await OnShowResourceEditorAsync()"><Icon Name="IconName.Plus" /></Button>
+                </th>
             </tr>
         </thead>
         <tbody>

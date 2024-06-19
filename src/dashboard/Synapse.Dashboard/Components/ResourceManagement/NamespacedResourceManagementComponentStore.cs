@@ -32,47 +32,36 @@ public class NamespacedResourceManagementComponentStore<TState, TResource>(ISyna
     /// <summary>
     /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="Namespace"/>s
     /// </summary>
-    public IObservable<EquatableList<Namespace>?> Namespaces => this.Select(s => s.Namespaces);
+    public IObservable<EquatableList<Namespace>?> Namespaces => this.Select(s => s.Namespaces).DistinctUntilChanged();
 
     /// <summary>
-    /// Gets a list containing local copies of managed <see cref="Namespace"/>s
+    /// Gets an <see cref="IObservable{T}"/> used to observe current namespace
     /// </summary>
-    protected EquatableList<Namespace>? NamespaceList { get; set; }
+    public IObservable<string?> Namespace => this.Select(s => s.Namespace).DistinctUntilChanged();
 
     /// <inheritdoc/>
-    public override async Task GetResourceDefinitionAsync()
-    {
-        this.ResourceDefinition = await this.ApiClient.ManageNamespaced<TResource>().GetDefinitionAsync().ConfigureAwait(false);
-        this.Reduce(s => s with
-        {
-            Definition = this.ResourceDefinition
-        });
-    }
+    protected override IObservable<ResourcesFilter> Filter => Observable.CombineLatest(
+            this.Namespace,
+            this.LabelSelectors,
+            (@namespace, labelSelectors) => new ResourcesFilter()
+            {
+                Namespace = @namespace,
+                LabelSelectors = labelSelectors
+            }
+        )
+        .DistinctUntilChanged();
 
     /// <summary>
-    /// Lists all resources within the specified namespace
+    /// Sets the <see cref="NamespacedResourceManagementComponentState{TResource}.Namespace"/>
     /// </summary>
-    /// <param name="namespace">The namespace, if any, to list the resources of</param>
-    /// <param name="labelSelectors">A list of the label selectors, if any, used to filter the resources to list</param>
-    /// <returns>A new awaitable <see cref="Task"/></returns>
-    public async Task ListResourcesAsync(string? @namespace, IEnumerable<LabelSelector>? labelSelectors)
+    /// <param name="namespace">The new namespace</param>
+    public void SetNamespace(string? @namespace)
     {
         this.Reduce(state => state with
         {
-            Loading = true,
-        });
-        this.ResourceList = new EquatableList<TResource>(await (await this.ApiClient.ManageNamespaced<TResource>().ListAsync(@namespace, labelSelectors).ConfigureAwait(false)).ToListAsync().ConfigureAwait(false));
-        this.Reduce(s => s with
-        {
-            Resources = this.ResourceList,
-            Namespace = @namespace,
-            LabelSelectors = labelSelectors == null ? null : new(labelSelectors),
-            Loading = false
+            Namespace = @namespace
         });
     }
-
-    /// <inheritdoc/>
-    public override Task ListResourcesAsync(IEnumerable<LabelSelector>? labelSelectors) => this.ListResourcesAsync(null, labelSelectors);
 
     /// <summary>
     /// Lists all available <see cref="Namespace"/>s
@@ -84,10 +73,10 @@ public class NamespacedResourceManagementComponentStore<TState, TResource>(ISyna
         {
             Loading = true
         });
-        this.NamespaceList = new EquatableList<Namespace>(await (await this.ApiClient.Namespaces.ListAsync().ConfigureAwait(false)).ToListAsync().ConfigureAwait(false));
+        var namespaceList = new EquatableList<Namespace>(await (await this.ApiClient.Namespaces.ListAsync().ConfigureAwait(false)).ToListAsync().ConfigureAwait(false));
         this.Reduce(s => s with
         {
-            Namespaces = this.NamespaceList,
+            Namespaces = namespaceList,
             Loading = false
         });
     }
@@ -96,18 +85,6 @@ public class NamespacedResourceManagementComponentStore<TState, TResource>(ISyna
     public override async Task DeleteResourceAsync(TResource resource)
     {
         await this.ApiClient.ManageNamespaced<TResource>().DeleteAsync(resource.GetName(), resource.GetNamespace()!).ConfigureAwait(false);
-        var match = this.ResourceList?.ToList().FirstOrDefault(r => r.GetName() == resource.GetName() && r.GetNamespace() == resource.GetNamespace());
-        var resourceCollectionChanged = false;
-        if (match != null)
-        {
-            this.ResourceList!.Remove(match);
-            resourceCollectionChanged = true;
-        }
-        if (!resourceCollectionChanged) return;
-        this.Reduce(s => s with
-        {
-            Resources = this.ResourceList
-        });
     }
 
 }

@@ -117,7 +117,7 @@ public class Store
     {
         try
         {
-            var pipelineBuilder = (DispatchDelegate reducer) => this.Middlewares
+            DispatchDelegate pipelineBuilder(DispatchDelegate reducer) => this.Middlewares
                 .AsEnumerable()
                 .Reverse()
                 .Aggregate(reducer, (next, type) => this.InstantiateMiddleware(type, next).InvokeAsync);

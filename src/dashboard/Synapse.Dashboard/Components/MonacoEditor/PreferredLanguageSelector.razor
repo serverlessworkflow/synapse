@@ -1,11 +1,27 @@
-﻿@namespace Synapse.Dashboard.Components
+﻿﻿@*
+    Copyright © 2024-Present The Synapse Authors
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*@
+
+@namespace Synapse.Dashboard.Components
 @inject IMonacoEditorHelper MonacoEditorHelper
 @implements IDisposable
 
 <div class="width d-flex justify-content-end mb-2">
     <div class="btn-group btn-group-xsm" role="group" aria-label="Toggle editor language">
-        <Button Color="!isJsonSelected ? ButtonColor.Primary : ButtonColor.Secondary" Outline="true" Active="!isJsonSelected" @onclick="_ => ToggleLanguage()">YAML</Button>
-        <Button Color="isJsonSelected ? ButtonColor.Primary : ButtonColor.Secondary" Outline="true" Active="isJsonSelected" @onclick="_ => ToggleLanguage()">JSON</Button>
+        <Button class="@(!isJsonSelected ? "btn-outline-primary" : "btn-outline-mute")" Outline="true" Active="!isJsonSelected" @onclick="_ => ToggleLanguage()">YAML</Button>
+        <Button class="@(isJsonSelected ? "btn-outline-primary" : "btn-outline-mute")" Outline="true" Active="isJsonSelected" @onclick="_ => ToggleLanguage()">JSON</Button>
     </div>
 </div>
 
