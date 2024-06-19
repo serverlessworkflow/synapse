@@ -14,30 +14,23 @@
             </div>
         </div>
     }
-    <div class="row align-items-center">
-        <div class="col-2">
-            <h4>Correlations</h4>
-        </div>
-        <div class="col-6 text-center">
-            <span>@(Resources?.Count ?? 0) items</span>
-        </div>
-        <div class="col-4 d-flex">
-            <div class="ms-auto d-flex">
-                <select class="form-select m-2" @onchange="OnNamespaceChanged">
-                    <option value="">All namespaces</option>
-                    @if (Namespaces != null && Namespaces.Count > 0)
+    <div class="d-flex flex-row justify-content-between align-items-center">
+        <h4>Correlations</h4>
+        <span>@(Resources?.Count ?? 0) items</span>
+        <div class="d-flex">
+            <select class="form-select m-2" @onchange="OnNamespaceChanged">
+                <option value="">All namespaces</option>
+                @if (Namespaces != null && Namespaces.Count > 0)
+                {
+                    foreach (var namespaceResource in Namespaces)
                     {
-                        foreach (var namespaceResource in Namespaces)
-                        {
-                            <option value="@namespaceResource.GetName()">@namespaceResource.GetName()</option>
-                        }
+                        <option value="@namespaceResource.GetName()">@namespaceResource.GetName()</option>
                     }
-                </select>
-                <input type="search" class="form-control rounded-end-0 my-2" placeholder="Search" value="@searchTerm" @oninput="OnSearchInput" />
-            </div>
+                }
+            </select>
+            <input type="search" class="form-control rounded my-2 me-2" placeholder="Search" value="@SearchTerm" @oninput="OnSearchInput" />
         </div>
     </div>
-    <hr />
     <table class="table table-striped table-hover">
         <thead>
             <tr>
@@ -91,8 +84,6 @@
 <ConfirmDialog @ref="Dialog" />
 
 @code{
-
-    string? searchTerm;
 
     string GetStatusPhaseTitle(string? phase)
     {
@@ -176,17 +167,6 @@
     {
         if (correlation.Spec.Outcome.Start != null) return $"/workflows/{correlation.Spec.Outcome.Start.Workflow.ToString()}";
         else return $"/workflow-instances/{correlation.Spec.Outcome.Correlate!.Instance}";
-    }
-
-    async Task OnNamespaceChanged(ChangeEventArgs e)
-    {
-        await this.Store.ListResourcesAsync(e.Value?.ToString(), null); //todo: add label selectors
-    }
-
-    async Task OnSearchInput(ChangeEventArgs e)
-    {
-        searchTerm = e.Value?.ToString();
-        await this.Store.SearchResourcesAsync(searchTerm);
     }
 
 }

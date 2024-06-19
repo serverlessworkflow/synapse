@@ -1,0 +1,139 @@
+﻿﻿@*
+    Copyright © 2024-Present The Synapse Authors
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*@
+
+@namespace Synapse.Dashboard.Components
+@using Synapse.Dashboard.Components.ReferenceDetailsStateManagement
+@inherits StatefulComponent<ReferenceDetails, ReferenceDetailsStore, ReferenceDetailsState>
+
+<Accordion @ref="accordion" Flush="true" OnShowing="Store.LoadReferencedDocument">
+    <AccordionItem Title="@_label" Name="Reference">
+        <Content>
+            @if (!_loaded)
+            {
+                <Spinner Class="me-3" Color="SpinnerColor.Primary" Size="SpinnerSize.Small" />
+            }
+            else
+            {
+                <PreferredLanguageSelector PreferedLanguageChange="Store.ToggleTextBasedEditorLanguageAsync" />
+                <StandaloneCodeEditor @ref="TextBasedEditor"
+                                      ConstructionOptions="Store.StandaloneEditorConstructionOptions"
+                                      OnDidInit="Store.OnTextBasedEditorInitAsync"
+                                      CssClass="h-100-px" />
+            }
+            @if (_problemDetails != null)
+            {
+                <div class="problems">
+                    <Callout Type="CalloutType.Danger" Heading="@_problemDetails.Title">
+                        @_problemDetails.Detail
+                </Callout>
+                    @if (_problemDetails.Errors != null && _problemDetails.Errors.Any())
+                    {
+                            foreach (KeyValuePair<string, string[]> errorContainer in _problemDetails.Errors)
+                        {
+                            <Callout Type="CalloutType.Danger" Heading="@errorContainer.Key">
+                                <ul>
+                                    @foreach (string error in errorContainer.Value)
+                                    {
+                                        <li>@error</li>
+                                    }
+                                </ul>
+                            </Callout>
+                        }
+                    }
+                </div>
+            }
+        </Content>
+    </AccordionItem>
+</Accordion>
+
+@code {
+    /// <summary>
+    /// The label to display
+    /// </summary>
+    [Parameter] public string Label { get; set; } = null!;
+    /// <summary>
+    /// The reference of the document to load
+    /// </summary>
+    [Parameter] public string Reference { get; set; } = null!;
+
+    /// <summary>
+    /// The <see cref="Accordion" /> reference
+    /// </summary>
+    private Accordion accordion = default!;
+    /// <summary>
+    /// The <see cref="StandaloneCodeEditor"/> reference accessor
+    /// </summary>
+    private StandaloneCodeEditor? TextBasedEditor
+    {
+        get
+        {
+            return this._textEditor;
+        }
+        set
+        {
+            this.Store.SetTextEditor(value);
+        }
+    }
+    /// <summary>
+    /// The <see cref="StandaloneCodeEditor"/> reference
+    /// </summary>
+    private StandaloneCodeEditor? _textEditor = null;
+    /// <summary>
+    /// The internal label
+    /// </summary>
+    private string _label = "";
+    /// <summary>
+    /// The internal reference
+    /// </summary>
+    private string _reference = "";
+    /// <summary>
+    /// The internal boolean indicating if the resource already loaded
+    /// </summary>
+    private bool _loaded = false;
+    /// <summary>
+    /// The <see cref="ProblemDetails"/> that occurred when trying to save the resource, if any
+    /// </summary>
+    private ProblemDetails? _problemDetails = null;
+
+    /// <inheritdoc/>
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync().ConfigureAwait(false);
+        this.Store.Label.Subscribe(label => this.OnStateChanged(cmp => cmp._label = label), token: this.CancellationTokenSource.Token);
+        this.Store.Reference.Subscribe(reference => this.OnStateChanged(cmp => cmp._reference = reference), token: this.CancellationTokenSource.Token);
+        this.Store.Loaded.Subscribe(loading => this.OnStateChanged(cmp => cmp._loaded = loading), token: this.CancellationTokenSource.Token);
+        this.Store.ProblemDetails.Subscribe(problemDetails => this.OnStateChanged(cmp => cmp._problemDetails = problemDetails), token: this.CancellationTokenSource.Token);
+        this.Store.TextEditor.Subscribe(textEditor => this.OnStateChanged(cmp => cmp._textEditor = textEditor), token: this.CancellationTokenSource.Token);
+    }
+
+    /// <inheritdoc/>
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        if (this._label != this.Label)
+        {
+            this.Store.SetLabel(this.Label);
+        }
+        if (this._reference != this.Reference)
+        {
+            this.Store.SetReference(this.Reference);
+        }
+        if (this.accordion != null)
+        {
+            await this.accordion.HideFirstAccordionItemAsync();
+        }
+    }
+}

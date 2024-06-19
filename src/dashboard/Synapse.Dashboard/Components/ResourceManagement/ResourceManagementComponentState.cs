@@ -22,19 +22,24 @@ public record ResourceManagementComponentState<TResource>
 {
 
     /// <summary>
-    /// Gets the definition of the managed resource type
+    /// Gets/sets the definition of the managed resource type
     /// </summary>
     public ResourceDefinition? Definition { get; set; }
 
     /// <summary>
-    /// Gets a <see cref="List{T}"/> that contains all cached <see cref="IResource"/>s
+    /// Gets/sets a <see cref="List{T}"/> that contains all cached <see cref="IResource"/>s
     /// </summary>
-    public EquatableList<TResource>? Resources { get; set; }
+    public EquatableList<TResource>? Resources { get; set; } = [];
 
     /// <summary>
-    /// Gets a list that contains the label selectors, if any, used to filter the resources to list
+    /// Gets/sets a list that contains the label selectors, if any, used to filter the resources to list
     /// </summary>
-    public EquatableList<LabelSelector>? LabelSelectors { get; set; }
+    public EquatableList<LabelSelector>? LabelSelectors { get; set; } = [];
+
+    /// <summary>
+    /// Gets/sets the search term, if any, used to filter the resources to list
+    /// </summary>
+    public string? SearchTerm { get; set; }
 
     /// <summary>
     /// Gets/sets a boolean value that indicates whether data is currently being gathered

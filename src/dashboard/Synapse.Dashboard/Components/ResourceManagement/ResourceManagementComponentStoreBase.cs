@@ -11,6 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Neuroglia;
+using Neuroglia.Data.Infrastructure.ResourceOriented;
+using Neuroglia.Reactive;
 using Synapse.Api.Client.Services;
 using System.Reactive.Linq;
 
@@ -28,23 +31,58 @@ public abstract class ResourceManagementComponentStoreBase<TState, TResource>(IS
     where TResource : Resource, new()
     where TState : ResourceManagementComponentState<TResource>, new()
 {
-
-    EquatableList<TResource>? _unfilteredResourceList;
-
     /// <summary>
     /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="ResourceDefinition"/>s of the specified type
     /// </summary>
-    public IObservable<ResourceDefinition?> Definition => this.Select(s => s.Definition);
+    public IObservable<ResourceDefinition?> Definition => this.Select(s => s.Definition).DistinctUntilChanged();
 
     /// <summary>
-    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="IResource"/>s of the specified type
+    /// Gets an <see cref="IObservable{T}"/> used to observe unfiltered <see cref="IResource"/>s of the specified type
     /// </summary>
-    public IObservable<EquatableList<TResource>?> Resources => this.Select(s => s.Resources);
+    protected IObservable<EquatableList<TResource>?> InternalResources => this.Select(s => s.Resources).DistinctUntilChanged();
+
+    /// <summary>
+    /// Gets an <see cref="IObservable{T}"/> used to observe the  <see cref="ResourceManagementComponentState{TResource}.SearchTerm"/> changes
+    /// </summary>
+    public IObservable<string?> SearchTerm => this.Select(state => state.SearchTerm).DistinctUntilChanged();
+
+    /// <summary>
+    /// Gets an <see cref="IObservable{T}"/> used to observe the <see cref="ResourceManagementComponentState{TResource}.LabelSelectors"/> changes
+    /// </summary>
+    public IObservable<EquatableList<LabelSelector>?> LabelSelectors => this.Select(state => state.LabelSelectors).DistinctUntilChanged();
 
     /// <summary>
     /// Gets an <see cref="IObservable{T}"/> used to observe changes
     /// </summary>
     public IObservable<bool> Loading => this.Select(state => state.Loading).DistinctUntilChanged();
+
+    /// <summary>
+    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="IResource"/>s of the specified type
+    /// </summary>
+    public IObservable<EquatableList<TResource>?> Resources => Observable.CombineLatest(
+            this.InternalResources,
+            this.SearchTerm.Throttle(TimeSpan.FromMilliseconds(100)).StartWith(""),
+            (resources, searchTerm) =>
+            {
+                if (resources == null)
+                {
+                    return [];
+                }
+                if (string.IsNullOrWhiteSpace(searchTerm))
+                {
+                    return resources!;
+                }
+                return new EquatableList<TResource>(resources!.Where(r => r.GetName().Contains(searchTerm)));
+            }
+         )
+        .DistinctUntilChanged();
+
+    /// <summary>
+    /// Gets an <see cref="IObservable{T}"/> used to observe the <see cref="ResourcesFilter"/> 
+    /// </summary>
+    protected virtual IObservable<ResourcesFilter> Filter => this.LabelSelectors
+        .Select(labelSelectors =>  new ResourcesFilter() { LabelSelectors = labelSelectors })
+        .DistinctUntilChanged();
 
     /// <summary>
     /// Gets the service used to interact with the Synapse API
@@ -66,66 +104,84 @@ public abstract class ResourceManagementComponentStoreBase<TState, TResource>(IS
     /// </summary>
     protected IDisposable ResourceWatchSubscription { get; private set; } = null!;
 
-    /// <summary>
-    /// Gets the definition of managed <see cref="IResource"/>s
-    /// </summary>
-    protected ResourceDefinition? ResourceDefinition { get; set; }
-
-    /// <summary>
-    /// Gets a list containing local copies of managed <see cref="IResource"/>s
-    /// </summary>
-    protected EquatableList<TResource>? ResourceList { get; set; }
 
     /// <inheritdoc/>
     public override async Task InitializeAsync()
     {
+        await this.GetResourceDefinitionAsync().ConfigureAwait(false);
         await this.ResourceEventHub.StartAsync().ConfigureAwait(false);
         this.ResourceWatch = await this.ResourceEventHub.WatchAsync<TResource>().ConfigureAwait(false);
-        this.ResourceWatch.SubscribeAsync(OnResourceWatchEventAsync, onErrorAsync: ex => Task.Run(() => Console.WriteLine(ex)));
+        this.ResourceWatch.SubscribeAsync(
+            onNextAsync: this.OnResourceWatchEventAsync, 
+            onErrorAsync: ex => Task.Run(() => Console.WriteLine(ex)), 
+            onCompletedAsync: () => Task.CompletedTask, 
+            cancellationToken: this.CancellationTokenSource.Token
+            );
+        this.Filter.SubscribeAsync(this.ListResourcesAsync, onErrorAsync: ex => Task.Run(() => Console.WriteLine(ex)), onCompletedAsync: () => Task.CompletedTask, cancellationToken: this.CancellationTokenSource.Token);
         await base.InitializeAsync();
     }
 
     /// <summary>
-    /// Fetches the definition of the managed <see cref="IResource"/> type
+    /// Sets the <see cref="ResourceManagementComponentState{TResource}.SearchTerm" />
     /// </summary>
-    /// <returns>A new awaitable <see cref="Task"/></returns>
-    public abstract Task GetResourceDefinitionAsync();
-
-    /// <summary>
-    /// Lists all the resources managed by Synapse
-    /// </summary>
-    /// <param name="labelSelectors">A list containing the label selectors, if any, used to filter the resources to list</param>
-    /// <returns>A new awaitable <see cref="Task"/></returns>
-    public abstract Task ListResourcesAsync(IEnumerable<LabelSelector>? labelSelectors = null);
-
-    /// <summary>
-    /// Searches resources for the specified term
-    /// </summary>
-    /// <param name="term">The term to search resources by</param>
-    /// <returns>A new awaitable <see cref="Task"/></returns>
-    public virtual Task SearchResourcesAsync(string? term)
+    /// <param name="searchTerm">The new search term</param>
+    public void SetSearchTerm(string? searchTerm)
     {
         this.Reduce(state => state with
         {
-            Loading = true
+            SearchTerm = searchTerm
         });
-        if (string.IsNullOrWhiteSpace(term))
+    }
+
+    /// <summary>
+    /// Sets the <see cref="ResourceManagementComponentState{TResource}.LabelSelectors" />
+    /// </summary>
+    /// <param name="labelSelectors">The new label selectors</param>
+    public void SetLabelSelectors(EquatableList<LabelSelector>? labelSelectors)
+    {
+        this.Reduce(state => state with
         {
-            if (_unfilteredResourceList != null) ResourceList = new(_unfilteredResourceList);
-            _unfilteredResourceList = null;
-        }
-        else
-        {
-            if (_unfilteredResourceList != null) ResourceList = _unfilteredResourceList;
-            else if(ResourceList != null) _unfilteredResourceList = new(ResourceList);
-            ResourceList = ResourceList == null ? null : new(ResourceList.Where(r => r.GetName().StartsWith(term)));
-        }
-        this.Reduce(s => s with
-        {
-            Resources = this.ResourceList,
-            Loading = false
+            LabelSelectors = new EquatableList<LabelSelector>(labelSelectors ?? [])
         });
-        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Adds a single <see cref="LabelSelector" />
+    /// </summary>
+    /// <param name="labelSelector">The label selector to add</param>
+    public void AddLabelSelector(LabelSelector labelSelector)
+    {
+        if (labelSelector == null)
+        {
+            return;
+        }
+        var labelSelectors = new EquatableList<LabelSelector>(this.Get(state => state.LabelSelectors) ?? []);
+        var existingSelector = labelSelectors.FirstOrDefault(selector => selector.Key == labelSelector.Key);
+        if (existingSelector != null)
+        {
+            labelSelectors.Remove(existingSelector);
+        }
+        labelSelectors.Add(labelSelector);
+        this.SetLabelSelectors(labelSelectors);
+    }
+
+    /// <summary>
+    /// Removes a single <see cref="LabelSelector" /> by key
+    /// </summary>
+    /// <param name="labelSelectorKey">The label selector key to remove</param>
+    public void RemoveLabelSelector(string labelSelectorKey)
+    {
+        if (string.IsNullOrWhiteSpace(labelSelectorKey))
+        {
+            return;
+        }
+        var labelSelectors = new EquatableList<LabelSelector>(this.Get(state => state.LabelSelectors) ?? []);
+        var existingSelector = labelSelectors.FirstOrDefault(selector => selector.Key == labelSelectorKey);
+        if (existingSelector != null)
+        {
+            labelSelectors.Remove(existingSelector);
+        }
+        this.SetLabelSelectors(labelSelectors);
     }
 
     /// <summary>
@@ -134,6 +190,46 @@ public abstract class ResourceManagementComponentStoreBase<TState, TResource>(IS
     /// <param name="resource">The <see cref="IResource"/> to delete</param>
     /// <returns>A new awaitable <see cref="Task"/></returns>
     public abstract Task DeleteResourceAsync(TResource resource);
+
+    /// <summary>
+    /// Fetches the definition of the managed <see cref="IResource"/> type
+    /// </summary>
+    /// <returns>A new awaitable <see cref="Task"/></returns>
+    public virtual async Task GetResourceDefinitionAsync()
+    {
+        var resourceDefinition = await this.ApiClient.ManageNamespaced<TResource>().GetDefinitionAsync().ConfigureAwait(false);
+        this.Reduce(s => s with
+        {
+            Definition = resourceDefinition
+        });
+    }
+
+    /// <summary>
+    /// Lists all the resources managed by Synapse
+    /// </summary>
+    /// <param name="filter">The <see cref="ResourcesFilter" />, if any, to list the resources of</param>
+    /// <returns>A new awaitable <see cref="Task"/></returns>
+    public virtual async Task ListResourcesAsync(ResourcesFilter? filter = null)
+    {
+        try
+        {
+            this.Reduce(state => state with
+            {
+                Loading = true,
+            });
+            var resourceList = new EquatableList<TResource>(await (await this.ApiClient.ManageNamespaced<TResource>().ListAsync(filter?.Namespace, filter?.LabelSelectors).ConfigureAwait(false)).ToListAsync().ConfigureAwait(false));
+            this.Reduce(s => s with
+            {
+                Resources = resourceList,
+                Loading = false
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            // todo: implement proper error handling
+        }
+    }
 
     /// <summary>
     /// Handles the specified <see cref="IResourceWatchEvent"/>

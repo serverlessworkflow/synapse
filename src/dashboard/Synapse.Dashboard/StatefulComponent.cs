@@ -16,10 +16,12 @@ namespace Synapse.Dashboard;
 /// <summary>
 /// Represents the base class for all stateful <see cref="ComponentBase"/> implementations
 /// </summary>
+/// <typeparam name="TComponent">The type of component inheriting the <see cref="StatefulComponent{TComponent, TStore, TState}"/></typeparam>
 /// <typeparam name="TStore">The type of the store used to manage the component's state</typeparam>
 /// <typeparam name="TState">The type of the component's state</typeparam>
-public abstract class StatefulComponent<TStore, TState>
+public abstract class StatefulComponent<TComponent, TStore, TState>
     : ComponentBase, IDisposable
+    where TComponent: StatefulComponent<TComponent, TStore, TState>
     where TStore : ComponentStore<TState>
 {
 
@@ -30,7 +32,7 @@ public abstract class StatefulComponent<TStore, TState>
     protected IServiceProvider ServiceProvider { get; set; } = null!;
 
     /// <summary>
-    /// Gets the <see cref="StatefulComponent{TStore, TState}"/>'s <see cref="System.Threading.CancellationTokenSource"/>
+    /// Gets the <see cref="StatefulComponent{TComponent, TStore, TState}"/>'s <see cref="System.Threading.CancellationTokenSource"/>
     /// </summary>
     protected CancellationTokenSource CancellationTokenSource { get; } = new CancellationTokenSource();
 
@@ -53,6 +55,16 @@ public abstract class StatefulComponent<TStore, TState>
     {
         await base.OnInitializedAsync();
         await this.Store.InitializeAsync();
+    }
+
+    /// <summary>
+    /// Patches the component fields after a change
+    /// </summary>
+    /// <param name="patch">The patch to apply</param>
+    protected void OnStateChanged(Action<TComponent> patch)
+    {
+        patch((TComponent)this);
+        this.StateHasChanged();
     }
 
     private bool _Disposed;

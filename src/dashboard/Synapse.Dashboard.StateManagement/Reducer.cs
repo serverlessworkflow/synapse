@@ -18,23 +18,18 @@ namespace Synapse.Dashboard.StateManagement;
 /// </summary>
 /// <typeparam name="TState">The type of state to reduce</typeparam>
 /// <typeparam name="TAction">The type of flux action the reducer applies to</typeparam>
-public class Reducer<TState, TAction>
+/// <remarks>
+/// Initializes a new <see cref="Reducer{TState, TAction}"/>
+/// </remarks>
+/// <param name="reduceFunction">The function used to reduce the state</param>
+public class Reducer<TState, TAction>(Func<TState, TAction, TState> reduceFunction)
     : IReducer<TState, TAction>
 {
 
     /// <summary>
-    /// Initializes a new <see cref="Reducer{TState, TAction}"/>
-    /// </summary>
-    /// <param name="reduceFunction">The function used to reduce the state</param>
-    public Reducer(Func<TState, TAction, TState> reduceFunction)
-    {
-        this.ReduceFunction = reduceFunction;
-    }
-
-    /// <summary>
     /// Gets the function used to reduce the state
     /// </summary>
-    protected Func<TState, TAction, TState> ReduceFunction { get; }
+    protected Func<TState, TAction, TState> ReduceFunction { get; } = reduceFunction;
 
     /// <inheritdoc/>
     public TState Reduce(TState state, TAction action)

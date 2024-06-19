@@ -1,7 +1,7 @@
 ﻿@namespace Synapse.Dashboard.Components
 @using Synapse.Dashboard.Components.ResourceEditorStateManagement
 @typeparam TResource where TResource : Resource, new()
-@inherits StatefulComponent<ResourceEditorStore<TResource>, ResourceEditorState<TResource>>
+@inherits StatefulComponent<ResourceEditor<TResource>, ResourceEditorStore<TResource>, ResourceEditorState<TResource>>
 @inject IMonacoEditorHelper MonacoEditorHelper
 @inject IJSRuntime JSRuntime
 
@@ -118,16 +118,6 @@
             this.Store.SetResource(this.Resource);
         }
         return base.OnParametersSetAsync();
-    }
-
-    /// <summary>
-    /// Patches the <see cref="ResourceEditor{TResource}"/>'s fields after a <see cref="ResourceEditorStore{TResource}"/>'s change
-    /// </summary>
-    /// <param name="patch">The patch to apply</param>
-    private void OnStateChanged(Action<ResourceEditor<TResource>> patch)
-    {
-        patch(this);
-        this.StateHasChanged();
     }
 
     /// <summary>
