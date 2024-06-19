@@ -54,11 +54,10 @@ internal class DeleteNamespaceCommand
         {
             Console.Write($"Are you sure you wish to delete the namespace '{name}'? Press 'y' to confirm, or any other key to cancel: ");
             var inputKey = Console.ReadKey();
-            Console.WriteLine();
             if (inputKey.Key != ConsoleKey.Y) return;
         }
         await this.Api.Namespaces.DeleteAsync(name);
-        Console.WriteLine($"namespace/{name} deleted");
+        Console.Write($"namespace/{name} deleted");
     }
 
     static class CommandOptions

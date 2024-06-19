@@ -138,4 +138,14 @@
         else throw new NotSupportedException("The specified schedule type is not supported");
     }
 
+    new Task OnShowResourceDetailsAsync(Workflow workflow)
+    {
+        if (this.DetailsOffCanvas == null) return Task.CompletedTask;
+        var parameters = new Dictionary<string, object>
+        {
+            { nameof(WorkflowDetails.Workflow), workflow }
+        };
+        return this.DetailsOffCanvas.ShowAsync<WorkflowDetails>(title: workflow.GetName(), parameters: parameters);
+    }
+
 }

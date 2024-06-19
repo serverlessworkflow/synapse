@@ -1,0 +1,59 @@
+﻿@namespace Synapse.Dashboard
+@using ServerlessWorkflow.Sdk.Models
+@inject IWorkflowGraphBuilder WorkflowGraphBuilder
+
+@if (Graph != null)
+{
+    <DagreGraph @ref="dagre" Graph="Graph" OnMouseUp="OnMouseUp" Options="options" />
+}
+
+@code{
+
+    [Parameter] public WorkflowDefinition WorkflowDefinition { get; set; } = null!;
+
+    protected WorkflowDefinition workflowDefinition { get; set; } = null!;
+
+    [Parameter] public WorkflowDiagramOrientation Orientation { get; set; } = WorkflowDiagramOrientation.TopToBottom;
+
+    [Parameter] public EventCallback<GraphEventArgs<MouseEventArgs>> OnMouseUp { get; set; }
+
+    public IGraphViewModel? Graph { get; set; }
+    protected DagreGraph? dagre { get; set; }
+    protected IDagreGraphOptions? options { get; set; } = null;
+    protected bool isDirty = true;
+    // Maps a state name to its cluster(s) in the graph
+    protected Dictionary<string, IEnumerable<TaskNodeViewModel>>? TaskMap = null;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        if (this.WorkflowDefinition != null && this.WorkflowDefinition != this.workflowDefinition)
+        {
+            this.workflowDefinition = this.WorkflowDefinition;
+            this.options = new DagreGraphOptions()
+            {
+                Direction = this.Orientation == WorkflowDiagramOrientation.LeftToRight ? DagreGraphDirection.LeftToRight : DagreGraphDirection.TopToBottom
+            };
+            var graph = await this.WorkflowGraphBuilder.Build(this.workflowDefinition);
+            this.Graph = graph;
+            this.TaskMap = this.Graph.AllClusters.Values.OfType<TaskNodeViewModel>()
+                .GroupBy(cluster => cluster.Task.Key)
+                .ToDictionary(group => group.Key, group => group.AsEnumerable())
+                ;
+            this.isDirty = true;
+        }
+    }
+
+    protected override bool ShouldRender()
+    {
+        if (!this.isDirty) return false;
+        this.isDirty = false;
+        return true;
+    }
+
+    public virtual async Task RefreshAsync()
+    {
+        if (this.dagre != null) await this.dagre.RefreshAsync();
+    }
+
+}

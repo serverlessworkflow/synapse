@@ -1,0 +1,24 @@
+﻿@namespace Synapse.Dashboard
+@inherits NodeTemplate
+
+<g class="node @Node.CssClass" transform="translate(@((Node.X ?? 0).ToInvariantString()), @((Node.Y ?? 0).ToInvariantString()))">
+    <CascadingValue Name="Node" Value="Node">
+        <NodeShapeTemplate />
+        <NodeLabelTemplate /> 
+        <CascadingValue Name="ActiveInstances" Value="WorkflowNode.OperativeInstancesCount">
+            <CascadingValue Name="FaultedInstances" Value="WorkflowNode.FaultedInstancesCount">
+                    
+            </CascadingValue>
+        </CascadingValue>
+        @if (Graph.EnableProfiling) {
+            <circle cx="0" cy="0" r="1" fill="red" />
+        }
+    </CascadingValue>
+</g>
+
+    
+@code {
+
+    protected virtual WorkflowNodeViewModel WorkflowNode => (WorkflowNodeViewModel)this.Node;
+
+}

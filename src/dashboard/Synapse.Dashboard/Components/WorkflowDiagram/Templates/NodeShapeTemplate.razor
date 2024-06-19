@@ -1,0 +1,22 @@
+﻿@namespace Synapse.Dashboard
+
+<g class="shape">
+    @if (Node.Shape == NodeShape.Circle)
+    {
+        <Circle BBox="Node.BBox" />
+    }
+    else if (Node.Shape == NodeShape.Ellipse)
+    {
+        <Ellipse BBox="Node.BBox" />
+    }
+    else
+    {
+        <Rectangle BBox="Node.BBox" RadiusX="Node.RadiusX" RadiusY="Node.RadiusY" />
+    }
+</g>
+
+@code {
+
+    [CascadingParameter(Name = "Node")] public INodeViewModel Node { get; set; } = null!;
+
+}
