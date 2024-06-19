@@ -35,7 +35,7 @@ internal static class TaskDefinitionFactory
         },
         Output = new()
         {
-            To = ".scopeDataProperty"
+            As = ".scopeDataProperty"
         },
         Timeout = new()
         {
@@ -43,17 +43,13 @@ internal static class TaskDefinitionFactory
         }
     };
 
-    internal static CompositeTaskDefinition Composite() => new()
+    internal static DoTaskDefinition Do() => new()
     {
-        Execute = new()
-        {
-            Sequentially = 
-            [
-                new("sub-todo-1", Emit()),
-                new("sub-todo-2", Listen())
-            ]
-        }
-
+        Do =
+        [
+            new("sub-todo-1", Emit()),
+            new("sub-todo-2", Listen())
+        ]
     };
 
     internal static EmitTaskDefinition Emit() => new()
@@ -75,9 +71,22 @@ internal static class TaskDefinitionFactory
                 At = "i"
             },
             While = "fake-condition",
-            Do = Emit()
+            Do = [ new("fake-emit", Emit()) ]
         };
     }
+
+    internal static ForkTaskDefinition Fork() => new()
+    {
+        Fork = new()
+        {
+            Compete = false,
+            Branches = 
+            [
+                new("sub-todo-1", Emit()),
+                new("sub-todo-2", Listen())
+            ]
+        }
+    };
 
     internal static ListenTaskDefinition Listen() => new()
     {
@@ -174,17 +183,11 @@ internal static class TaskDefinitionFactory
     {
         return new()
         {
-            Try = new CompositeTaskDefinition()
-            {
-                Execute = new()
-                {
-                    Sequentially =
-                    [
-                        new("subtask-1", Call()),
-                        new("subtask-2", Emit())
-                    ]
-                }
-            },
+            Try =
+            [
+                new("subtask-1", Call()),
+                new("subtask-2", Emit())
+            ],
             Catch = new()
             {
                 Errors = new()
@@ -218,7 +221,10 @@ internal static class TaskDefinitionFactory
                         Duration = Duration.FromMinutes(15)
                     }
                 },
-                Do = RunWorkflow()
+                Do = 
+                [
+                    new("on-error", Call())
+                ]
             }
         };
     }

@@ -38,13 +38,13 @@
 	<PackageReference Include="Microsoft.Extensions.Configuration.KeyPerFile" Version="8.0.6" />
 	<PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
-	<PackageReference Include="Microsoft.OpenApi.Readers" Version="1.6.14" />
+	<PackageReference Include="Microsoft.OpenApi.Readers" Version="1.6.15" />
 	<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.20.1" />
-	<PackageReference Include="Neuroglia.Data.Expressions.JavaScript" Version="4.12.0" />
-	<PackageReference Include="Neuroglia.Data.Expressions.JQ" Version="4.12.0" />
-	<PackageReference Include="Neuroglia.Eventing.CloudEvents.Infrastructure" Version="4.12.0" />
-	<PackageReference Include="Neuroglia.Scripting.NodeJS" Version="4.12.0" />
-	<PackageReference Include="Neuroglia.Scripting.Python" Version="4.12.0" />
+	<PackageReference Include="Neuroglia.Data.Expressions.JavaScript" Version="4.12.1" />
+	<PackageReference Include="Neuroglia.Data.Expressions.JQ" Version="4.12.1" />
+	<PackageReference Include="Neuroglia.Eventing.CloudEvents.Infrastructure" Version="4.12.1" />
+	<PackageReference Include="Neuroglia.Scripting.NodeJS" Version="4.12.1" />
+	<PackageReference Include="Neuroglia.Scripting.Python" Version="4.12.1" />
 	<PackageReference Include="protobuf-net.Grpc.ClientFactory" Version="1.1.1" />
     <PackageReference Include="System.Reactive" Version="6.0.1" />
   </ItemGroup>

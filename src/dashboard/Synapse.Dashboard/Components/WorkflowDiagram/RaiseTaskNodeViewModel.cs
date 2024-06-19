@@ -12,6 +12,7 @@
 // limitations under the License.
 
 using Neuroglia.Blazor.Dagre;
+using ServerlessWorkflow.Sdk;
 using ServerlessWorkflow.Sdk.Models.Tasks;
 
 namespace Synapse.Dashboard.Components;
@@ -19,17 +20,10 @@ namespace Synapse.Dashboard.Components;
 /// <summary>
 /// Represents a raise task node view model
 /// </summary>
-public class RaiseTaskNodeViewModel
-    : LabeledWorkflowNodeViewModel
+/// <remarks>
+/// Initializes a new <see cref="RaiseTaskNodeViewModel"/>
+/// </remarks>
+public class RaiseTaskNodeViewModel(MapEntry<string, RaiseTaskDefinition> task)
+    : LabeledWorkflowNodeViewModel(task.Key, "raise-task-node", null, Constants.NodeHeight * 1.5, Constants.NodeHeight * 1.5)
 {
-
-    /// <summary>
-    /// Initializes a new <see cref="RaiseTaskNodeViewModel"/>
-    /// </summary>
-    public RaiseTaskNodeViewModel(KeyValuePair<string, RaiseTaskDefinition> task)
-        : base(task.Key, "raise-task-node", null, Constants.NodeHeight * 1.5, Constants.NodeHeight * 1.5)
-    {
-
-    }
-
 }

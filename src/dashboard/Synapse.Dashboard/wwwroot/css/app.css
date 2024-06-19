@@ -19332,7 +19332,7 @@ h1:focus, .h1:focus {
 }
 
 .logo-large {
-  height: 150px;
+  height: 300px;
 }
 
 .logo-typing {
@@ -19345,10 +19345,6 @@ h1:focus, .h1:focus {
       text-fill-color: transparent;
       -webkit-text-fill-color: transparent;
   */
-}
-
-.logo-typing-large {
-  font-size: 4.5rem;
 }
 
 .vh-30 {
@@ -19369,4 +19365,8 @@ h1:focus, .h1:focus {
 
 .h-100-px {
   height: 100px;
+}
+
+.end-node circle {
+  stroke-width: 3px;
 }

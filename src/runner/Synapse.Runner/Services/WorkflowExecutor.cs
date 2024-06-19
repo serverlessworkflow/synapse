@@ -272,7 +272,7 @@ public class WorkflowExecutor(IServiceProvider serviceProvider, ILogger<Workflow
         var last = executor.Task;
         this.Executors.Remove(executor);
         await executor.DisposeAsync().ConfigureAwait(false);
-        if (nextDefinition.Key == null)
+        if (nextDefinition == null)
         {
             await this.SetResultAsync(last.Output, cancellationToken).ConfigureAwait(false);
             return;

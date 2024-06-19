@@ -102,7 +102,7 @@ public abstract class ResourceManagementComponent<TStore, TState, TResource>
     }
 
     /// <summary>
-    /// Updates the <see cref="ResourceManagementComponent{TStore, TResource}.Resources"/>
+    /// Updates the <see cref="ResourceManagementComponent{TStore, TState, TResource}.Resources"/>
     /// </summary>
     /// <param name="resources"></param>
     protected void OnResourceCollectionChanged(EquatableList<TResource>? resources)

@@ -12,13 +12,11 @@
 // limitations under the License.
 
 using Neuroglia;
-using Neuroglia.Reactive;
-using System.Reactive.Linq;
 
 namespace Synapse.Runner.Services.Executors;
 
 /// <summary>
-/// Represents an <see cref="ITaskExecutor"/> implementation used to execute <see cref="CompositeTaskDefinition"/>s
+/// Represents an <see cref="ITaskExecutor"/> implementation used to execute <see cref="ForkTaskDefinition"/>s
 /// </summary>
 /// <param name="serviceProvider">The current <see cref="IServiceProvider"/></param>
 /// <param name="logger">The service used to perform logging</param>
@@ -26,21 +24,17 @@ namespace Synapse.Runner.Services.Executors;
 /// <param name="executorFactory">The service used to create <see cref="ITaskExecutor"/>s</param>
 /// <param name="context">The current <see cref="ITaskExecutionContext"/></param>
 /// <param name="serializer">The service used to serialize/deserialize objects to/from JSON</param>
-public class ConcurrentCompositeTaskExecutor(IServiceProvider serviceProvider, ILogger<ConcurrentCompositeTaskExecutor> logger, ITaskExecutionContextFactory executionContextFactory, ITaskExecutorFactory executorFactory, ITaskExecutionContext<CompositeTaskDefinition> context, IJsonSerializer serializer)
-    : TaskExecutor<CompositeTaskDefinition>(serviceProvider, logger, executionContextFactory, executorFactory, context, serializer)
+public class ForkTaskExecutor(IServiceProvider serviceProvider, ILogger<ForkTaskExecutor> logger, ITaskExecutionContextFactory executionContextFactory, ITaskExecutorFactory executorFactory, ITaskExecutionContext<ForkTaskDefinition> context, IJsonSerializer serializer)
+    : TaskExecutor<ForkTaskDefinition>(serviceProvider, logger, executionContextFactory, executorFactory, context, serializer)
 {
 
     /// <summary>
-    /// Gets a name/definition mapping of the tasks to execute
+    /// Gets the path to the specified subtask
     /// </summary>
-    protected EquatableDictionary<string, TaskDefinition> Tasks => this.Task.Definition.Execute.Concurrently ?? throw new NullReferenceException("The task must define at least two tasks to perform concurrently");
-
-    /// <summary>
-    /// Gets the path for the specified subtask
-    /// </summary>
-    /// <param name="subTaskName">The name of the subtask to get the path for</param>
-    /// <returns></returns>
-    protected virtual string GetPathFor(string subTaskName) => $"{nameof(CompositeTaskDefinition.Execute).ToCamelCase()}/{nameof(TaskExecutionStrategyDefinition.Concurrently).ToCamelCase()}/{subTaskName}";
+    /// <param name="index">The index of the subtask to get the path to</param>
+    /// <param name="name">The name of the subtask to get the path to</param>
+    /// <returns>The path to the specified subtask</returns>
+    protected virtual string GetPathFor(int index, string name) => $"{nameof(ForkTaskDefinition.Fork).ToCamelCase()}/{index}/{name}";
 
     /// <inheritdoc/>
     protected override async Task<ITaskExecutor> CreateTaskExecutorAsync(TaskInstance task, TaskDefinition definition, IDictionary<string, object> contextData, IDictionary<string, object>? arguments = null, CancellationToken cancellationToken = default)
@@ -59,9 +53,9 @@ public class ConcurrentCompositeTaskExecutor(IServiceProvider serviceProvider, I
         var tasks = this.Task.GetSubTasksAsync(cancellationToken);
         tasks = await tasks.AnyAsync(cancellationToken).ConfigureAwait(false)
             ? tasks.Where(t => t.IsOperative)
-            : this.Tasks
+            : this.Task.Definition.Fork.Branches
                 .ToAsyncEnumerable()
-                .SelectAwait(async kvp => await this.Task.Workflow.CreateTaskAsync(kvp.Value, this.GetPathFor(kvp.Key), this.Task.Input, null, this.Task, false, cancellationToken).ConfigureAwait(false));
+                .SelectAwait(async (kvp, index) => await this.Task.Workflow.CreateTaskAsync(kvp.Value, this.GetPathFor(index, kvp.Key), this.Task.Input, null, this.Task, false, cancellationToken).ConfigureAwait(false));
         await System.Threading.Tasks.Task.WhenAll(await tasks
             .SelectAwait(async task =>
             {
@@ -113,7 +107,7 @@ public class ConcurrentCompositeTaskExecutor(IServiceProvider serviceProvider, I
                 await executor.DisposeAsync().ConfigureAwait(false);
             }
         }
-        if (this.Task.Definition.Execute.Compete == true)
+        if (this.Task.Definition.Fork.Compete == true)
         {
             var output = executor.Task.Output!;
             foreach (var concurrentTaskExecutor in this.Executors)

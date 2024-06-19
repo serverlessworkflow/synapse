@@ -12,12 +12,11 @@
 // limitations under the License.
 
 using Neuroglia;
-using Neuroglia.Reactive;
 
 namespace Synapse.Runner.Services.Executors;
 
 /// <summary>
-/// Represents an <see cref="ITaskExecutor"/> implementation used to execute <see cref="CompositeTaskDefinition"/>s
+/// Represents an <see cref="ITaskExecutor"/> implementation used to execute <see cref="DoTaskDefinition"/>s
 /// </summary>
 /// <param name="serviceProvider">The current <see cref="IServiceProvider"/></param>
 /// <param name="logger">The service used to perform logging</param>
@@ -25,21 +24,21 @@ namespace Synapse.Runner.Services.Executors;
 /// <param name="executorFactory">The service used to create <see cref="ITaskExecutor"/>s</param>
 /// <param name="context">The current <see cref="ITaskExecutionContext"/></param>
 /// <param name="serializer">The service used to serialize/deserialize objects to/from JSON</param>
-public class SequentialCompositeTaskExecutor(IServiceProvider serviceProvider, ILogger<SequentialCompositeTaskExecutor> logger, ITaskExecutionContextFactory executionContextFactory, ITaskExecutorFactory executorFactory, ITaskExecutionContext<CompositeTaskDefinition> context, IJsonSerializer serializer)
-    : TaskExecutor<CompositeTaskDefinition>(serviceProvider, logger, executionContextFactory, executorFactory, context, serializer)
+public class DoTaskExecutor(IServiceProvider serviceProvider, ILogger<DoTaskExecutor> logger, ITaskExecutionContextFactory executionContextFactory, ITaskExecutorFactory executorFactory, ITaskExecutionContext<DoTaskDefinition> context, IJsonSerializer serializer)
+    : TaskExecutor<DoTaskDefinition>(serviceProvider, logger, executionContextFactory, executorFactory, context, serializer)
 {
 
     /// <summary>
     /// Gets a name/definition mapping of the tasks to execute
     /// </summary>
-    protected EquatableDictionary<string, TaskDefinition> Tasks => this.Task.Definition.Execute.Sequentially ?? throw new NullReferenceException("The task must define at least two tasks to perform sequentially");
+    protected Map<string, TaskDefinition> Tasks => this.Task.Definition.Do ?? throw new NullReferenceException("The task must define at least two tasks to perform sequentially");
 
     /// <summary>
     /// Gets the path for the specified subtask
     /// </summary>
     /// <param name="subTaskName">The name of the subtask to get the path for</param>
     /// <returns></returns>
-    protected virtual string GetPathFor(string subTaskName) => $"{nameof(CompositeTaskDefinition.Execute).ToCamelCase()}/{nameof(TaskExecutionStrategyDefinition.Sequentially).ToCamelCase()}/{subTaskName}";
+    protected virtual string GetPathFor(string subTaskName) => $"{nameof(DoTaskDefinition.Do).ToCamelCase()}/{nameof(TaskExecutionStrategyDefinition.Sequentially).ToCamelCase()}/{subTaskName}";
 
     /// <inheritdoc/>
     protected override async Task<ITaskExecutor> CreateTaskExecutorAsync(TaskInstance task, TaskDefinition definition, IDictionary<string, object> contextData, IDictionary<string, object>? arguments = null, CancellationToken cancellationToken = default)
@@ -59,9 +58,9 @@ public class SequentialCompositeTaskExecutor(IServiceProvider serviceProvider, I
         var nextDefinition = last == null
             ? this.Tasks.First()
             : last.IsOperative
-                ? this.Task.Workflow.Definition.GetComponent<KeyValuePair<string, TaskDefinition>>(last.Reference.OriginalString)
+                ? this.Task.Workflow.Definition.GetComponent<MapEntry<string, TaskDefinition>>(last.Reference.OriginalString)
                 : this.Task.Definition.GetTaskAfter(last);
-        if (nextDefinition.Key == default)
+        if (nextDefinition == null)
         {
             await this.SetResultAsync(last!.OutputReference, this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
             return;
@@ -101,7 +100,7 @@ public class SequentialCompositeTaskExecutor(IServiceProvider serviceProvider, I
         var nextDefinition = this.Task.Definition.GetTaskAfter(last);
         this.Executors.Remove(executor);
         await executor.DisposeAsync().ConfigureAwait(false);
-        if (nextDefinition.Key == null || nextDefinition.Value == null)
+        if (nextDefinition == null || nextDefinition.Value == null)
         {
             await this.SetResultAsync(output, last.Next == FlowDirective.End ? FlowDirective.End : this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
             return;

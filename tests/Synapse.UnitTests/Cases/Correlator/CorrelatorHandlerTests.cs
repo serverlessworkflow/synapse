@@ -323,18 +323,6 @@ public class CorrelatorHandlerTests
     }
 
     [Fact]
-    public async Task Correlate_Any_Event_Should_Work()
-    {
-
-    }
-
-    [Fact]
-    public async Task Correlate_Any_Event_Until_Should_Work()
-    {
-
-    }
-
-    [Fact]
     public async Task Correlate_All_Events_Should_Work()
     {
         //arrange

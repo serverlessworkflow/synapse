@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using ServerlessWorkflow.Sdk;
 using ServerlessWorkflow.Sdk.Models.Tasks;
 
 namespace Synapse.Dashboard.Components;
@@ -18,17 +19,10 @@ namespace Synapse.Dashboard.Components;
 /// <summary>
 /// Represents a listen task node view model
 /// </summary>
-public class ListenTaskNodeViewModel
-    : LabeledWorkflowNodeViewModel
+/// <remarks>
+/// Initializes a new <see cref="ListenTaskNodeViewModel"/>
+/// </remarks>
+public class ListenTaskNodeViewModel(MapEntry<string, ListenTaskDefinition> task)
+    : LabeledWorkflowNodeViewModel(task.Key, "listen-task-node", null, Neuroglia.Blazor.Dagre.Constants.NodeHeight * 1.5, Neuroglia.Blazor.Dagre.Constants.NodeHeight * 1.5)
 {
-
-    /// <summary>
-    /// Initializes a new <see cref="ListenTaskNodeViewModel"/>
-    /// </summary>
-    public ListenTaskNodeViewModel(KeyValuePair<string, ListenTaskDefinition> task)
-        : base(task.Key, "listen-task-node", null, Neuroglia.Blazor.Dagre.Constants.NodeHeight * 1.5, Neuroglia.Blazor.Dagre.Constants.NodeHeight * 1.5)
-    {
-
-    }
-
 }

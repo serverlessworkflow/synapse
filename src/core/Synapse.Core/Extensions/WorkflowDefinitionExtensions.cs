@@ -26,15 +26,32 @@ public static class WorkflowDefinitionExtensions
     /// <param name="afterTask">The name/definition mapping of the <see cref="TaskDefinition"/> to get the following <see cref="TaskDefinition"/> of</param>
     /// <param name="parentReference">A reference to the component that defines the next <see cref="TaskDefinition"/></param>
     /// <returns>A name/definition mapping of the next <see cref="TaskDefinition"/>, if any</returns>
-    public static KeyValuePair<string, TaskDefinition>? GetNextTask(this WorkflowDefinition workflow, KeyValuePair<string, TaskDefinition> afterTask, string parentReference)
+    public static MapEntry<string, TaskDefinition>? GetTaskAfter(this WorkflowDefinition workflow, MapEntry<string, TaskDefinition> afterTask, string parentReference)
     {
         ArgumentNullException.ThrowIfNull(workflow);
         ArgumentException.ThrowIfNullOrWhiteSpace(parentReference);
-        var taskMap = workflow.GetComponent<IDictionary<string, TaskDefinition>>(parentReference) ?? throw new NullReferenceException($"Failed to find the component at '{parentReference}'");
-        var taskIndex = taskMap.Keys.ToList().IndexOf(afterTask.Key);
+        var taskMap = workflow.GetComponent<Map<string, TaskDefinition>>(parentReference) ?? throw new NullReferenceException($"Failed to find the component at '{parentReference}'");
+        var taskIndex = taskMap.Select(e => e.Key).ToList().IndexOf(afterTask.Key);
         var nextIndex = taskIndex < 0 ? -1 : taskIndex + 1;
         if (nextIndex < 0 || nextIndex >= taskMap.Count) return null;
         return taskMap.ElementAt(nextIndex);
+    }
+
+    /// <summary>
+    /// Gets the index of the specified task within its defining container
+    /// </summary>
+    /// <param name="workflow">The extended <see cref="WorkflowDefinition"/></param>
+    /// <param name="taskName">The name of the task to get the index of</param>
+    /// <param name="parentReference">A reference to the parent of the task to get the index of</param>
+    /// <returns>The index of the specified task</returns>
+    public static int IndexOf(this WorkflowDefinition workflow, string taskName, string parentReference)
+    {
+        ArgumentNullException.ThrowIfNull(workflow);
+        ArgumentException.ThrowIfNullOrWhiteSpace(taskName);
+        ArgumentException.ThrowIfNullOrWhiteSpace(parentReference);
+        var taskMap = workflow.GetComponent<Map<string, TaskDefinition>>(parentReference) ?? throw new NullReferenceException($"Failed to find the component at '{parentReference}'");
+        if (taskMap.TryGetValue(taskName, out var task) && task != null) return taskMap.Select(e => e.Value).ToList().IndexOf(task);
+        else return -1;
     }
 
 }

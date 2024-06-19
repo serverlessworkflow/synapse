@@ -11,9 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using ServerlessWorkflow.Sdk;
-using Neuroglia;
-
 namespace Synapse.UnitTests.Services;
 
 internal static class WorkflowDefinitionFactory
@@ -29,22 +26,23 @@ internal static class WorkflowDefinitionFactory
                 Name = "fake",
                 Version = "1.0.0",
             },
-            Do = new EquatableDictionary<string, TaskDefinition>
-            ([
+            Do =
+            [
                 new("todo-1", TaskDefinitionFactory.Call()),
-                new("todo-2", TaskDefinitionFactory.Composite()),
+                new("todo-2", TaskDefinitionFactory.Do()),
                 new("todo-3", TaskDefinitionFactory.Emit()),
                 new("todo-4", TaskDefinitionFactory.For()),
-                new("todo-5", TaskDefinitionFactory.Listen()),
-                new("todo-6", TaskDefinitionFactory.Raise()),
-                new("todo-7", TaskDefinitionFactory.RunContainer()),
-                new("todo-8", TaskDefinitionFactory.RunScript()),
-                new("todo-9", TaskDefinitionFactory.RunShell()),
-                new("todo-10", TaskDefinitionFactory.RunWorkflow()),
-                new("todo-11", TaskDefinitionFactory.Switch()),
-                new("todo-12", TaskDefinitionFactory.Try()),
-                new("todo-13", TaskDefinitionFactory.Wait())
-            ])
+                new("todo-5", TaskDefinitionFactory.Fork()),
+                new("todo-6", TaskDefinitionFactory.Listen()),
+                new("todo-7", TaskDefinitionFactory.Raise()),
+                new("todo-8", TaskDefinitionFactory.RunContainer()),
+                new("todo-9", TaskDefinitionFactory.RunScript()),
+                new("todo-10", TaskDefinitionFactory.RunShell()),
+                new("todo-11", TaskDefinitionFactory.RunWorkflow()),
+                new("todo-12", TaskDefinitionFactory.Switch()),
+                new("todo-13", TaskDefinitionFactory.Try()),
+                new("todo-14", TaskDefinitionFactory.Wait())
+            ]
         };
     }
 

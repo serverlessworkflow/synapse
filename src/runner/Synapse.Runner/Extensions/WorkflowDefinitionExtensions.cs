@@ -25,14 +25,14 @@ public static class WorkflowDefinitionExtensions
     /// <param name="workflow">The extended <see cref="WorkflowDefinition"/></param>
     /// <param name="after">The <see cref="TaskInstance"/> to perform the next <see cref="TaskInstance"/> after</param>
     /// <returns>The next <see cref="TaskDefinition"/> to perform next, if any</returns>
-    public static KeyValuePair<string, TaskDefinition> GetTaskAfter(this WorkflowDefinition workflow, TaskInstance after)
+    public static MapEntry<string, TaskDefinition>? GetTaskAfter(this WorkflowDefinition workflow, TaskInstance after)
     {
         ArgumentNullException.ThrowIfNull(after);
         switch (after.Next)
         {
             case FlowDirective.Continue:
                 var afterTask = workflow.Do[after.Name!];
-                var afterIndex = workflow.Do.Values.ToList().IndexOf(afterTask);
+                var afterIndex = workflow.Do.Select(e => e.Value).ToList().IndexOf(afterTask);
                 return workflow.Do.Skip(afterIndex + 1).FirstOrDefault();
             case FlowDirective.End: case FlowDirective.Exit: return default;
             default: return new(after.Next!, workflow.Do[after.Next!]);
@@ -46,11 +46,11 @@ public static class WorkflowDefinitionExtensions
     /// <param name="after">The <see cref="TaskInstance"/> to perform the next <see cref="TaskInstance"/> after</param>
     /// <param name="task">The next <see cref="TaskDefinition"/> to perform next, if any</param>
     /// <returns>A boolean indicating whether or not a next <see cref="TaskInstance"/> must be executed next</returns>
-    public static bool TryGetTaskAfter(this WorkflowDefinition workflow, TaskInstance after, out KeyValuePair<string, TaskDefinition> task)
+    public static bool TryGetTaskAfter(this WorkflowDefinition workflow, TaskInstance after, out MapEntry<string, TaskDefinition> task)
     {
         ArgumentNullException.ThrowIfNull(after);
-        task = workflow.GetTaskAfter(after);
-        return task.Key == default;
+        task = workflow.GetTaskAfter(after)!;
+        return task != null;
     }
 
 }

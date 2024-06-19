@@ -266,7 +266,7 @@ public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRep
     /// <param name="keyDefinitions">A name/definition mapping of the correlation keys to extract</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>An object used to describe the result of the operation</returns>
-    protected virtual async Task<(bool Succeeded, IDictionary<string, string>? CorrelationKeys)> TryExtractCorrelationKeysAsync(CloudEvent e, IDictionary<string, CorrelationDefinition>? keyDefinitions, CancellationToken cancellationToken)
+    protected virtual async Task<(bool Succeeded, IDictionary<string, string>? CorrelationKeys)> TryExtractCorrelationKeysAsync(CloudEvent e, IDictionary<string, CorrelationKeyDefinition>? keyDefinitions, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(e);
         var correlationKeys = new Dictionary<string, string>();

@@ -30,10 +30,11 @@ public class TaskExecutorFactory
         return context.Definition switch
         {
             CallTaskDefinition => this.CreateCallTaskExecutor(serviceProvider, (ITaskExecutionContext<CallTaskDefinition>)context),
-            CompositeTaskDefinition => this.CreateCompositeTaskExecutor(serviceProvider, (ITaskExecutionContext<CompositeTaskDefinition>)context),
+            DoTaskDefinition => ActivatorUtilities.CreateInstance<DoTaskExecutor>(serviceProvider, context),
             EmitTaskDefinition => ActivatorUtilities.CreateInstance<EmitTaskExecutor>(serviceProvider, context),
             ExtensionTaskDefinition => ActivatorUtilities.CreateInstance<ExtensionTaskExecutor>(serviceProvider, context),
             ForTaskDefinition => ActivatorUtilities.CreateInstance<ForTaskExecutor>(serviceProvider, context),
+            ForkTaskDefinition => ActivatorUtilities.CreateInstance<ForkTaskExecutor>(serviceProvider, context),
             ListenTaskDefinition => ActivatorUtilities.CreateInstance<ListenTaskExecutor>(serviceProvider, context),
             RaiseTaskDefinition => ActivatorUtilities.CreateInstance<RaiseTaskExecutor>(serviceProvider, context),
             RunTaskDefinition => this.CreateRunTaskExecutor(serviceProvider, (ITaskExecutionContext<RunTaskDefinition>)context),
@@ -71,21 +72,6 @@ public class TaskExecutorFactory
             Function.OpenApi => ActivatorUtilities.CreateInstance<OpenApiCallExecutor>(serviceProvider, context),
             _ => throw new NotSupportedException($"Unknown/unsupported function '{context.Definition.Call}'")
         };
-    }
-
-    /// <summary>
-    /// Creates a new <see cref="CompositeTaskDefinition"/> executor for the specified context
-    /// </summary>
-    /// <param name="serviceProvider">The current <see cref="IServiceProvider"/></param>
-    /// <param name="context">The context for which to create a new <see cref="CallTaskDefinition"/> executor</param>
-    /// <returns>A new <see cref="ITaskExecutor"/> instance</returns>
-    protected virtual ITaskExecutor CreateCompositeTaskExecutor(IServiceProvider serviceProvider, ITaskExecutionContext<CompositeTaskDefinition> context)
-    {
-        ArgumentNullException.ThrowIfNull(serviceProvider);
-        ArgumentNullException.ThrowIfNull(context);
-        if (context.Definition.Execute.Concurrently?.Count > 1) return ActivatorUtilities.CreateInstance<ConcurrentCompositeTaskExecutor>(serviceProvider, context);
-        else if (context.Definition.Execute.Sequentially?.Count > 1) return ActivatorUtilities.CreateInstance<SequentialCompositeTaskExecutor>(serviceProvider, context);
-        else throw new ErrorRaisedException(Error.Configuration(context.Instance.Reference, "The execution strategy must be configured and define a minimum of two tasks"));
     }
 
     /// <summary>

@@ -29,14 +29,17 @@ public class ExtensionTests
         var extension = new ExtensionDefinition()
         {
             Extend = "all",
-            Before = new SetTaskDefinition()
-            {
-                Set =
-                [
-                    new(variableName, valueBefore)
-                ],
-                Then = FlowDirective.Exit
-            }
+            Before = 
+            [ 
+                new("setVariable", new SetTaskDefinition()
+                {
+                    Set =
+                    [
+                        new(variableName, valueBefore)
+                    ],
+                    Then = FlowDirective.Exit
+                })
+            ]
         };
         var taskDefinition = new SetTaskDefinition()
         {
@@ -90,14 +93,17 @@ public class ExtensionTests
         var extension = new ExtensionDefinition()
         {
             Extend = "all",
-            After = new SetTaskDefinition()
-            {
-                Set =
-                [
-                    new(variableName, valueAfter)
-                ],
-                Then = FlowDirective.Exit
-            }
+            After =
+            [
+                new("setVariable", new SetTaskDefinition()
+                {
+                    Set =
+                    [
+                        new(variableName, valueBefore)
+                    ],
+                    Then = FlowDirective.Exit
+                })
+            ]
         };
         var taskDefinition = new SetTaskDefinition()
         {

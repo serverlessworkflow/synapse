@@ -15,8 +15,6 @@ using Neuroglia.Blazor.Dagre.Models;
 using ServerlessWorkflow.Sdk;
 using ServerlessWorkflow.Sdk.Models;
 using ServerlessWorkflow.Sdk.Models.Tasks;
-using Synapse.Dashboard.StateManagement;
-using static Synapse.SynapseDefaults.Resources;
 
 namespace Synapse.Dashboard.Services;
 
@@ -31,23 +29,19 @@ public class WorkflowGraphBuilder
     /// Gets the default radius for start and end nodes
     /// </summary>
     public const int StartEndNodeRadius = 30;
-    public const double GraphBagdesRadius = 15;
-    public const double GraphStartEndNodeRadius = 30;
-    public const string SpecVersion = "0.8";
-    public const string DefinitionVersion = "1.0";
 
     /// <inheritdoc/>
     public async Task<IGraphViewModel> Build(WorkflowDefinition workflow)
     {
         ArgumentNullException.ThrowIfNull(workflow);
         var isEmpty = workflow.Do.Count < 1;
-        var graph = new GraphViewModel(/*enableProfiling: true*/);
+        var graph = new GraphViewModel(enableProfiling: true);
         //graph.RegisterBehavior(new DragAndDropNodeBehavior(graph, this.jSRuntime));
         var startNode = this.BuildStartNode(!isEmpty);
         var endNode = this.BuildEndNode();
         await graph.AddElementAsync(startNode);
         if (isEmpty) await this.BuildEdgeAsync(graph, startNode, endNode);
-        else await this.BuildTaskNodeAsync(workflow, graph, workflow.Do.First(), endNode, startNode, "/do", true); 
+        else await this.BuildTaskNodeAsync(workflow, graph, workflow.Do.First(), endNode, startNode, "/do"); 
         await graph.AddElementAsync(endNode);
         return graph;
     }
@@ -68,9 +62,8 @@ public class WorkflowGraphBuilder
     /// <param name="endNode">The end node</param>
     /// <param name="previousNode">The previous node</param>
     /// <param name="parentReference">A reference to the parent, if any, of the task to build a new <see cref="TaskNodeViewModel"/> for</param>
-    /// <param name="first">Indicates whether or not the task to create the <see cref="TaskNodeViewModel"/> for is the first task of the workflow it belongs to</param>
     /// <returns>A new <see cref="TaskNodeViewModel"/></returns>
-    protected async Task<NodeViewModel> BuildTaskNodeAsync(WorkflowDefinition workflow, GraphViewModel graph, KeyValuePair<string, TaskDefinition> task, NodeViewModel endNode, NodeViewModel previousNode, string parentReference, bool first = false)
+    protected async Task<NodeViewModel> BuildTaskNodeAsync(WorkflowDefinition workflow, GraphViewModel graph, MapEntry<string, TaskDefinition> task, NodeViewModel endNode, NodeViewModel previousNode, string parentReference)
     {
         ArgumentNullException.ThrowIfNull(workflow);
         ArgumentNullException.ThrowIfNull(graph);
@@ -82,7 +75,7 @@ public class WorkflowGraphBuilder
         var lastNode = task.Value switch
         {
             CallTaskDefinition callTask => await this.BuildCallTaskNodeAsync(workflow, graph, new(task.Key, callTask), taskNodeGroup, endNode, previousNode, parentReference),
-            CompositeTaskDefinition compositeTask => await this.BuildCompositeTaskNodeAsync(workflow, graph, new(task.Key, compositeTask), taskNodeGroup, endNode, previousNode, parentReference),
+            DoTaskDefinition compositeTask => await this.BuildDoTaskNodeAsync(workflow, graph, new(task.Key, compositeTask), taskNodeGroup, endNode, previousNode, parentReference),
             EmitTaskDefinition emitTask => await this.BuildEmitTaskNodeAsync(workflow, graph, new(task.Key, emitTask), taskNodeGroup, endNode, previousNode, parentReference),
             ExtensionTaskDefinition extensionTask => await this.BuildExtensionTaskNodeAsync(workflow, graph, new(task.Key, extensionTask), taskNodeGroup, endNode, previousNode, parentReference),
             ForTaskDefinition forTask => await this.BuildForTaskNodeAsync(workflow, graph, new(task.Key, forTask), taskNodeGroup, endNode, previousNode, parentReference),
@@ -99,15 +92,16 @@ public class WorkflowGraphBuilder
         else
         {
             var nextTaskName = string.IsNullOrWhiteSpace(task.Value.Then) || task.Value.Then == FlowDirective.Continue
-                ? workflow.GetNextTask(task, parentReference)?.Key
+                ? workflow.GetTaskAfter(task, parentReference)?.Key
                 : task.Value.Then;
-            if(string.IsNullOrWhiteSpace(nextTaskName)) await this.BuildEdgeAsync(graph, lastNode, endNode);
+            if (string.IsNullOrWhiteSpace(nextTaskName)) await this.BuildEdgeAsync(graph, lastNode, endNode);
             else
             {
-                var nextTaskReference = $"{parentReference}/{nextTaskName}";
+                var nextTaskIndex = workflow.IndexOf(nextTaskName, parentReference);
+                var nextTaskReference = $"{parentReference}/{nextTaskIndex}/{nextTaskName}";
                 var nextTask = workflow.GetComponent<TaskDefinition>(nextTaskReference) ?? throw new Exception($"Failed to find the task at '{nextTaskReference}' in workflow '{workflow.Document.Name}.{workflow.Document.Namespace}:{workflow.Document.Version}'");
                 var nextTaskNode = await this.BuildTaskNodeAsync(workflow, graph, new(nextTaskName, nextTask), endNode, lastNode, parentReference);
-                //await this.BuildEdgeAsync(graph, lastNode, nextTaskNode.Children.Values.OfType<NodeViewModel>().First()); //todo
+                await this.BuildEdgeAsync(graph, lastNode, nextTaskNode);
             }
         }
         return lastNode;
@@ -124,7 +118,7 @@ public class WorkflowGraphBuilder
     /// <param name="previousNode">The previous node</param>
     /// <param name="parentReference">The reference of the task's parent</param>
     /// <returns>A new <see cref="NodeViewModel"/></returns>
-    protected virtual async Task<NodeViewModel> BuildCallTaskNodeAsync(WorkflowDefinition workflow, GraphViewModel graph, KeyValuePair<string, CallTaskDefinition> task, TaskNodeViewModel? taskNodeGroup, NodeViewModel endNode, NodeViewModel previousNode, string parentReference)
+    protected virtual async Task<NodeViewModel> BuildCallTaskNodeAsync(WorkflowDefinition workflow, GraphViewModel graph, MapEntry<string, CallTaskDefinition> task, TaskNodeViewModel? taskNodeGroup, NodeViewModel endNode, NodeViewModel previousNode, string parentReference)
     {
         ArgumentNullException.ThrowIfNull(workflow);
         ArgumentNullException.ThrowIfNull(graph);
@@ -150,7 +144,7 @@ public class WorkflowGraphBuilder
     /// <param name="previousNode">The previous node</param>
     /// <param name="parentReference">The reference of the task's parent</param>
     /// <returns>A new <see cref="NodeViewModel"/></returns>
-    protected virtual async Task<NodeViewModel> BuildCompositeTaskNodeAsync(WorkflowDefinition workflow, GraphViewModel graph, KeyValuePair<string, CompositeTaskDefinition> task, TaskNodeViewModel? taskNodeGroup, NodeViewModel endNode, NodeViewModel previousNode, string parentReference)
+    protected virtual async Task<NodeViewModel> BuildDoTaskNodeAsync(WorkflowDefinition workflow, GraphViewModel graph, MapEntry<string, DoTaskDefinition> task, TaskNodeViewModel? taskNodeGroup, NodeViewModel endNode, NodeViewModel previousNode, string parentReference)
     {
         ArgumentNullException.ThrowIfNull(workflow);
         ArgumentNullException.ThrowIfNull(graph);
@@ -158,7 +152,7 @@ public class WorkflowGraphBuilder
         ArgumentNullException.ThrowIfNull(endNode);
         ArgumentNullException.ThrowIfNull(previousNode);
         ArgumentException.ThrowIfNullOrWhiteSpace(parentReference);
-        var lastNode = new CompositeTaskNodeViewModel(task);
+        var lastNode = new DoTaskNodeViewModel(task);
         if (taskNodeGroup == null) await graph.AddElementAsync(lastNode);
         else await taskNodeGroup.AddChildAsync(lastNode);
         await this.BuildEdgeAsync(graph, previousNode, lastNode);
@@ -176,7 +170,7 @@ public class WorkflowGraphBuilder
     /// <param name="previousNode">The previous node</param>
     /// <param name="parentReference">The reference of the task's parent</param>
     /// <returns>A new <see cref="NodeViewModel"/></returns>
-    protected virtual async Task<NodeViewModel> BuildEmitTaskNodeAsync(WorkflowDefinition workflow, GraphViewModel graph, KeyValuePair<string, EmitTaskDefinition> task, TaskNodeViewModel? taskNodeGroup, NodeViewModel endNode, NodeViewModel previousNode, string parentReference)
+    protected virtual async Task<NodeViewModel> BuildEmitTaskNodeAsync(WorkflowDefinition workflow, GraphViewModel graph, MapEntry<string, EmitTaskDefinition> task, TaskNodeViewModel? taskNodeGroup, NodeViewModel endNode, NodeViewModel previousNode, string parentReference)
     {
         ArgumentNullException.ThrowIfNull(workflow);
         ArgumentNullException.ThrowIfNull(graph);
@@ -202,7 +196,7 @@ public class WorkflowGraphBuilder
     /// <param name="previousNode">The previous node</param>
     /// <param name="parentReference">The reference of the task's parent</param>
     /// <returns>A new <see cref="NodeViewModel"/></returns>
-    protected virtual async Task<NodeViewModel> BuildExtensionTaskNodeAsync(WorkflowDefinition workflow, GraphViewModel graph, KeyValuePair<string, ExtensionTaskDefinition> task, TaskNodeViewModel? taskNodeGroup, NodeViewModel endNode, NodeViewModel previousNode, string parentReference)
+    protected virtual async Task<NodeViewModel> BuildExtensionTaskNodeAsync(WorkflowDefinition workflow, GraphViewModel graph, MapEntry<string, ExtensionTaskDefinition> task, TaskNodeViewModel? taskNodeGroup, NodeViewModel endNode, NodeViewModel previousNode, string parentReference)
     {
         ArgumentNullException.ThrowIfNull(workflow);
         ArgumentNullException.ThrowIfNull(graph);
@@ -228,7 +222,7 @@ public class WorkflowGraphBuilder
     /// <param name="previousNode">The previous node</param>
     /// <param name="parentReference">The reference of the task's parent</param>
     /// <returns>A new <see cref="NodeViewModel"/></returns>
-    protected virtual async Task<NodeViewModel> BuildForTaskNodeAsync(WorkflowDefinition workflow, GraphViewModel graph, KeyValuePair<string, ForTaskDefinition> task, TaskNodeViewModel? taskNodeGroup, NodeViewModel endNode, NodeViewModel previousNode, string parentReference)
+    protected virtual async Task<NodeViewModel> BuildForTaskNodeAsync(WorkflowDefinition workflow, GraphViewModel graph, MapEntry<string, ForTaskDefinition> task, TaskNodeViewModel? taskNodeGroup, NodeViewModel endNode, NodeViewModel previousNode, string parentReference)
     {
         ArgumentNullException.ThrowIfNull(workflow);
         ArgumentNullException.ThrowIfNull(graph);
@@ -254,7 +248,7 @@ public class WorkflowGraphBuilder
     /// <param name="previousNode">The previous node</param>
     /// <param name="parentReference">The reference of the task's parent</param>
     /// <returns>A new <see cref="NodeViewModel"/></returns>
-    protected virtual async Task<NodeViewModel> BuildListenTaskNodeAsync(WorkflowDefinition workflow, GraphViewModel graph, KeyValuePair<string, ListenTaskDefinition> task, TaskNodeViewModel? taskNodeGroup, NodeViewModel endNode, NodeViewModel previousNode, string parentReference)
+    protected virtual async Task<NodeViewModel> BuildListenTaskNodeAsync(WorkflowDefinition workflow, GraphViewModel graph, MapEntry<string, ListenTaskDefinition> task, TaskNodeViewModel? taskNodeGroup, NodeViewModel endNode, NodeViewModel previousNode, string parentReference)
     {
         ArgumentNullException.ThrowIfNull(workflow);
         ArgumentNullException.ThrowIfNull(graph);
@@ -280,7 +274,7 @@ public class WorkflowGraphBuilder
     /// <param name="previousNode">The previous node</param>
     /// <param name="parentReference">The reference of the task's parent</param>
     /// <returns>A new <see cref="NodeViewModel"/></returns>
-    protected virtual async Task<NodeViewModel> BuildRaiseTaskNodeAsync(WorkflowDefinition workflow, GraphViewModel graph, KeyValuePair<string, RaiseTaskDefinition> task, TaskNodeViewModel? taskNodeGroup, NodeViewModel endNode, NodeViewModel previousNode, string parentReference)
+    protected virtual async Task<NodeViewModel> BuildRaiseTaskNodeAsync(WorkflowDefinition workflow, GraphViewModel graph, MapEntry<string, RaiseTaskDefinition> task, TaskNodeViewModel? taskNodeGroup, NodeViewModel endNode, NodeViewModel previousNode, string parentReference)
     {
         ArgumentNullException.ThrowIfNull(workflow);
         ArgumentNullException.ThrowIfNull(graph);
@@ -306,7 +300,7 @@ public class WorkflowGraphBuilder
     /// <param name="previousNode">The previous node</param>
     /// <param name="parentReference">The reference of the task's parent</param>
     /// <returns>A new <see cref="NodeViewModel"/></returns>
-    protected virtual async Task<NodeViewModel> BuildRunTaskNodeAsync(WorkflowDefinition workflow, GraphViewModel graph, KeyValuePair<string, RunTaskDefinition> task, TaskNodeViewModel? taskNodeGroup, NodeViewModel endNode, NodeViewModel previousNode, string parentReference)
+    protected virtual async Task<NodeViewModel> BuildRunTaskNodeAsync(WorkflowDefinition workflow, GraphViewModel graph, MapEntry<string, RunTaskDefinition> task, TaskNodeViewModel? taskNodeGroup, NodeViewModel endNode, NodeViewModel previousNode, string parentReference)
     {
         ArgumentNullException.ThrowIfNull(workflow);
         ArgumentNullException.ThrowIfNull(graph);
@@ -332,7 +326,7 @@ public class WorkflowGraphBuilder
     /// <param name="previousNode">The previous node</param>
     /// <param name="parentReference">The reference of the task's parent</param>
     /// <returns>A new <see cref="NodeViewModel"/></returns>
-    protected virtual async Task<NodeViewModel> BuildSetTaskNodeAsync(WorkflowDefinition workflow, GraphViewModel graph, KeyValuePair<string, SetTaskDefinition> task, TaskNodeViewModel? taskNodeGroup, NodeViewModel endNode, NodeViewModel previousNode, string parentReference)
+    protected virtual async Task<NodeViewModel> BuildSetTaskNodeAsync(WorkflowDefinition workflow, GraphViewModel graph, MapEntry<string, SetTaskDefinition> task, TaskNodeViewModel? taskNodeGroup, NodeViewModel endNode, NodeViewModel previousNode, string parentReference)
     {
         ArgumentNullException.ThrowIfNull(workflow);
         ArgumentNullException.ThrowIfNull(graph);
@@ -358,7 +352,7 @@ public class WorkflowGraphBuilder
     /// <param name="previousNode">The previous node</param>
     /// <param name="parentReference">The reference of the task's parent</param>
     /// <returns>A new <see cref="NodeViewModel"/></returns>
-    protected virtual async Task<NodeViewModel> BuildSwitchTaskNodeAsync(WorkflowDefinition workflow, GraphViewModel graph, KeyValuePair<string, SwitchTaskDefinition> task, TaskNodeViewModel? taskNodeGroup, NodeViewModel endNode, NodeViewModel previousNode, string parentReference)
+    protected virtual async Task<NodeViewModel> BuildSwitchTaskNodeAsync(WorkflowDefinition workflow, GraphViewModel graph, MapEntry<string, SwitchTaskDefinition> task, TaskNodeViewModel? taskNodeGroup, NodeViewModel endNode, NodeViewModel previousNode, string parentReference)
     {
         ArgumentNullException.ThrowIfNull(workflow);
         ArgumentNullException.ThrowIfNull(graph);
@@ -384,7 +378,7 @@ public class WorkflowGraphBuilder
     /// <param name="previousNode">The previous node</param>
     /// <param name="parentReference">The reference of the task's parent</param>
     /// <returns>A new <see cref="NodeViewModel"/></returns>
-    protected virtual async Task<NodeViewModel> BuildTryTaskNodeAsync(WorkflowDefinition workflow, GraphViewModel graph, KeyValuePair<string, TryTaskDefinition> task, TaskNodeViewModel? taskNodeGroup, NodeViewModel endNode, NodeViewModel previousNode, string parentReference)
+    protected virtual async Task<NodeViewModel> BuildTryTaskNodeAsync(WorkflowDefinition workflow, GraphViewModel graph, MapEntry<string, TryTaskDefinition> task, TaskNodeViewModel? taskNodeGroup, NodeViewModel endNode, NodeViewModel previousNode, string parentReference)
     {
         ArgumentNullException.ThrowIfNull(workflow);
         ArgumentNullException.ThrowIfNull(graph);
@@ -410,7 +404,7 @@ public class WorkflowGraphBuilder
     /// <param name="previousNode">The previous node</param>
     /// <param name="parentReference">The reference of the task's parent</param>
     /// <returns>A new <see cref="NodeViewModel"/></returns>
-    protected virtual async Task<NodeViewModel> BuildWaitTaskNodeAsync(WorkflowDefinition workflow, GraphViewModel graph, KeyValuePair<string, WaitTaskDefinition> task, TaskNodeViewModel? taskNodeGroup, NodeViewModel endNode, NodeViewModel previousNode, string parentReference)
+    protected virtual async Task<NodeViewModel> BuildWaitTaskNodeAsync(WorkflowDefinition workflow, GraphViewModel graph, MapEntry<string, WaitTaskDefinition> task, TaskNodeViewModel? taskNodeGroup, NodeViewModel endNode, NodeViewModel previousNode, string parentReference)
     {
         ArgumentNullException.ThrowIfNull(workflow);
         ArgumentNullException.ThrowIfNull(graph);

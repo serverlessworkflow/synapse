@@ -12,6 +12,7 @@
 // limitations under the License.
 
 using Neuroglia.Blazor.Dagre;
+using ServerlessWorkflow.Sdk;
 using ServerlessWorkflow.Sdk.Models.Tasks;
 
 namespace Synapse.Dashboard.Components;
@@ -19,17 +20,10 @@ namespace Synapse.Dashboard.Components;
 /// <summary>
 /// Represents a wait task node view model
 /// </summary>
-public class WaitTaskNodeViewModel
-    : LabeledWorkflowNodeViewModel
+/// <remarks>
+/// Initializes a new <see cref="WaitTaskNodeViewModel"/>
+/// </remarks>
+public class WaitTaskNodeViewModel(MapEntry<string, WaitTaskDefinition> task)
+    : LabeledWorkflowNodeViewModel(task.Key, "wait-task-node", null, Constants.NodeHeight * 1.5, Constants.NodeHeight * 1.5)
 {
-
-    /// <summary>
-    /// Initializes a new <see cref="WaitTaskNodeViewModel"/>
-    /// </summary>
-    public WaitTaskNodeViewModel(KeyValuePair<string, WaitTaskDefinition> task)
-        : base(task.Key, "wait-task-node", null, Constants.NodeHeight * 1.5, Constants.NodeHeight * 1.5)
-    {
-
-    }
-
 }

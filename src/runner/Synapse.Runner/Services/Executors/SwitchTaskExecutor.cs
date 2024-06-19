@@ -31,7 +31,7 @@ public class SwitchTaskExecutor(IServiceProvider serviceProvider, ILogger<Switch
     /// <inheritdoc/>
     protected override async Task DoExecuteAsync(CancellationToken cancellationToken)
     {
-        var matches = new List<KeyValuePair<string, SwitchCaseDefinition>>();
+        var matches = new List<MapEntry<string, SwitchCaseDefinition>>();
         var defaultCase = this.Task.Definition.Switch.FirstOrDefault(kvp => string.IsNullOrWhiteSpace(kvp.Value.When));
         foreach (var @case in this.Task.Definition.Switch!.Where(c => !string.IsNullOrWhiteSpace(c.Value.When)))
         {
@@ -42,7 +42,7 @@ public class SwitchTaskExecutor(IServiceProvider serviceProvider, ILogger<Switch
         }
         if (matches.Count == 1) await this.SetResultAsync(this.Task.Input, matches.First().Value.Then, cancellationToken).ConfigureAwait(false);
         else if (matches.Count > 1) await this.SetErrorAsync(Error.Configuration(this.Task.Instance.Reference, $"At most one matching case is allowed, but cases {string.Join(", ", matches.Select(m => m.Key))} have been matched."), cancellationToken).ConfigureAwait(false);
-        else if (defaultCase.Key != default) await this.SetResultAsync(this.Task.Input, defaultCase.Value.Then, cancellationToken).ConfigureAwait(false);
+        else if (defaultCase != null) await this.SetResultAsync(this.Task.Input, defaultCase.Value.Then, cancellationToken).ConfigureAwait(false);
         else await this.SetResultAsync(this.Task.Input, this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
     }
 

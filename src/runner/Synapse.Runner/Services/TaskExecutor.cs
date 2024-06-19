@@ -153,7 +153,10 @@ public abstract class TaskExecutor<TDefinition>(IServiceProvider serviceProvider
         var input = this.Task.Input;
         foreach (var extension in this.Extensions.Where(ex => ex.Value.Before != null).Reverse())
         {
-            var taskDefinition = extension.Value.Before!;
+            var taskDefinition = new DoTaskDefinition()
+            {
+                Do = extension.Value.Before!
+            };
             var task = await this.Task.Workflow.CreateTaskAsync(taskDefinition, $"before/{extension.Key}", input, null, this.Task, true, cancellationToken).ConfigureAwait(false);
             var executor = await this.CreateTaskExecutorAsync(task, taskDefinition, this.Task.ContextData, this.Task.Arguments, cancellationToken).ConfigureAwait(false);
             await executor.ExecuteAsync(cancellationToken).ConfigureAwait(false);
@@ -185,7 +188,10 @@ public abstract class TaskExecutor<TDefinition>(IServiceProvider serviceProvider
         var output = this.Task.Output ?? new { };
         foreach (var extension in this.Extensions.Where(ex => ex.Value.After != null).Reverse())
         {
-            var taskDefinition = extension.Value.After!;
+            var taskDefinition = new DoTaskDefinition()
+            {
+                Do = extension.Value.After!
+            };
             var task = await this.Task.Workflow.CreateTaskAsync(taskDefinition, $"after/{extension.Key}", output, null, this.Task, true, cancellationToken).ConfigureAwait(false);
             var executor = await this.CreateTaskExecutorAsync(task, taskDefinition, this.Task.ContextData, this.Task.Arguments, cancellationToken).ConfigureAwait(false);
             await executor.ExecuteAsync(cancellationToken).ConfigureAwait(false);
@@ -257,16 +263,16 @@ public abstract class TaskExecutor<TDefinition>(IServiceProvider serviceProvider
         var output = result;
         var arguments = this.GetExpressionEvaluationArguments() ?? new Dictionary<string, object>();
         arguments["output"] = output!;//todo: replace with arguments[RuntimeExpressions.Arguments.Output] = output;
-        if (this.Task.Definition.Output?.From is string fromExpression) output = await this.Task.Workflow.Expressions.EvaluateAsync<object>(fromExpression, output ?? new(), arguments, cancellationToken).ConfigureAwait(false);
-        else if (this.Task.Definition.Output?.From != null) output = await this.Task.Workflow.Expressions.EvaluateAsync<object>(this.Task.Definition.Output.From, output ?? new(), arguments, cancellationToken).ConfigureAwait(false);
-        if (this.Task.Definition.Output?.To is string toExpression) 
+        if (this.Task.Definition.Output?.As is string fromExpression) output = await this.Task.Workflow.Expressions.EvaluateAsync<object>(fromExpression, output ?? new(), arguments, cancellationToken).ConfigureAwait(false);
+        else if (this.Task.Definition.Output?.As != null) output = await this.Task.Workflow.Expressions.EvaluateAsync<object>(this.Task.Definition.Output.As, output ?? new(), arguments, cancellationToken).ConfigureAwait(false);
+        if (this.Task.Definition.Export?.As is string toExpression) 
         {
             var context = (await this.Task.Workflow.Expressions.EvaluateAsync<IDictionary<string, object>>(toExpression, this.Task.ContextData, arguments, cancellationToken).ConfigureAwait(false))!;
             await this.Task.SetContextDataAsync(context, cancellationToken).ConfigureAwait(false);
         }
-        else if (this.Task.Definition.Output?.To != null)
+        else if (this.Task.Definition.Export?.As != null)
         {
-            var context = (await this.Task.Workflow.Expressions.EvaluateAsync<IDictionary<string, object>>(this.Task.Definition.Output.To, this.Task.ContextData, this.GetExpressionEvaluationArguments(), cancellationToken).ConfigureAwait(false))!;
+            var context = (await this.Task.Workflow.Expressions.EvaluateAsync<IDictionary<string, object>>(this.Task.Definition.Export.As, this.Task.ContextData, this.GetExpressionEvaluationArguments(), cancellationToken).ConfigureAwait(false))!;
             await this.Task.SetContextDataAsync(context, cancellationToken).ConfigureAwait(false);
         }
         await this.AfterExecuteAsync(cancellationToken).ConfigureAwait(false); //todo: act upon last directive

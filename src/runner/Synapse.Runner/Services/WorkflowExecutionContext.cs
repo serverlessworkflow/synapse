@@ -261,7 +261,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
             .Subscribe(value =>
             {
                 var patch = JsonPatchUtility.CreateJsonPatchFromDiff(value.Previous, value.Current);
-                var patchOperation = patch.Operations.FirstOrDefault(o => o.Op == OperationType.Add && o.Path.First() == task.Instance.Reference.OriginalString);
+                var patchOperation = patch.Operations.FirstOrDefault(o => o.Op == OperationType.Add && o.Path[0] == task.Instance.Reference.OriginalString);
                 if (patchOperation == null) return;
                 context = this.JsonSerializer.Deserialize<CorrelationContext>(patchOperation.Value!)!;
                 taskCompletionSource.SetResult(context);

@@ -34,13 +34,16 @@ public class ForTaskExecutorTests
                 Each = "color",
                 In = ".colors"
             },
-            Do = new SetTaskDefinition()
-            {
-                Set =
-                [
-                    new("output", "${ { colors: (.output.colors + [ $color ]), indexes: (.output.indexes + [ $index ])} }")
-                ]
-            }
+            Do = 
+            [
+                new("setOutput", new SetTaskDefinition()
+                {
+                    Set =
+                    [
+                        new("output", "${ { colors: (.output.colors + [ $color ]), indexes: (.output.indexes + [ $index ])} }")
+                    ]
+                })
+            ]
         };
         var workflowDefinition = new WorkflowDefinition()
         {
@@ -98,11 +101,11 @@ public class ForTaskExecutorTests
                 Each = "letter",
                 In = ".letters"
             },
-            Do = new CompositeTaskDefinition()
-            {
-                Execute = new()
+            Do = 
+            [
+                new("do", new DoTaskDefinition()
                 {
-                    Sequentially = 
+                    Do = 
                     [
                         new("checkWhetherBeforeOrAfterLastIndex", new SwitchTaskDefinition()
                         {
@@ -123,8 +126,8 @@ public class ForTaskExecutorTests
                             ]
                         })
                     ]
-                }
-            }
+                })
+            ]
         };
         var input = new { letters };
         var workflow = await MockWorkflowExecutionContextFactory.CreateAsync(this.ServiceProvider);
@@ -156,11 +159,11 @@ public class ForTaskExecutorTests
                 Each = "letter",
                 In = ".letters"
             },
-            Do = new CompositeTaskDefinition()
-            {
-                Execute = new()
+            Do =
+            [
+                new("do", new DoTaskDefinition()
                 {
-                    Sequentially =
+                    Do =
                     [
                         new("checkWhetherBeforeOrAfterLastIndex", new SwitchTaskDefinition()
                         {
@@ -169,7 +172,7 @@ public class ForTaskExecutorTests
                                 new("afterL", new()
                                 {
                                     When = $"$index > {lastIndex}",
-                                    Then = FlowDirective.End
+                                    Then = FlowDirective.Exit
                                 })
                             ]
                         }),
@@ -181,8 +184,8 @@ public class ForTaskExecutorTests
                             ]
                         })
                     ]
-                }
-            }
+                })
+            ]
         };
         var input = new { letters };
         var workflow = await MockWorkflowExecutionContextFactory.CreateAsync(this.ServiceProvider);

@@ -75,13 +75,17 @@ public class ForTaskExecutor(IServiceProvider serviceProvider, ILogger<ForTaskEx
             return;
         }
         var item = this.Collection.ElementAt(index);
-        if (task == null) task = await this.Task.Workflow.CreateTaskAsync(this.Task.Definition.Do, this.GetPathFor("0"), this.Task.Input, null, this.Task, false, cancellationToken).ConfigureAwait(false);
-        else if(!task.IsOperative) task = await this.Task.Workflow.CreateTaskAsync(this.Task.Definition.Do, this.GetPathFor($"{index + 1}"), this.Task.Input, null, this.Task, false, cancellationToken).ConfigureAwait(false);
+        var taskDefinition = new DoTaskDefinition()
+        {
+            Do = this.Task.Definition.Do
+        };
+        if (task == null) task = await this.Task.Workflow.CreateTaskAsync(taskDefinition, this.GetPathFor("0"), this.Task.Input, null, this.Task, false, cancellationToken).ConfigureAwait(false);
+        else if(!task.IsOperative) task = await this.Task.Workflow.CreateTaskAsync(taskDefinition, this.GetPathFor($"{index + 1}"), this.Task.Input, null, this.Task, false, cancellationToken).ConfigureAwait(false);
         var contextData = this.Task.ContextData.Clone()!;
         var arguments = this.Task.Arguments.Clone()!;
         arguments[this.Task.Definition.For.Each ?? RuntimeExpressions.Arguments.Each] = item;
         arguments[this.Task.Definition.For.At ?? RuntimeExpressions.Arguments.Index] = index;
-        var executor = await this.CreateTaskExecutorAsync(task, this.Task.Definition.Do, contextData, arguments, cancellationToken).ConfigureAwait(false);
+        var executor = await this.CreateTaskExecutorAsync(task, taskDefinition, contextData, arguments, cancellationToken).ConfigureAwait(false);
         await executor.ExecuteAsync(cancellationToken).ConfigureAwait(false);
     }
 
@@ -124,13 +128,17 @@ public class ForTaskExecutor(IServiceProvider serviceProvider, ILogger<ForTaskEx
         switch (executor.Task.Instance.Next)
         {
             case FlowDirective.Continue:
-                var next = await this.Task.Workflow.CreateTaskAsync(this.Task.Definition.Do, this.GetPathFor(index.ToString()), output, null, this.Task, false, cancellationToken).ConfigureAwait(false);
+                var taskDefinition = new DoTaskDefinition()
+                {
+                    Do = this.Task.Definition.Do
+                };
+                var next = await this.Task.Workflow.CreateTaskAsync(taskDefinition, this.GetPathFor(index.ToString()), output, null, this.Task, false, cancellationToken).ConfigureAwait(false);
                 var item = this.Collection.ElementAt(index);
                 var contextData = this.Task.ContextData.Clone()!;
                 var arguments = this.Task.Arguments.Clone()!;
                 arguments[this.Task.Definition.For.Each ?? RuntimeExpressions.Arguments.Each] = item;
                 arguments[this.Task.Definition.For.At ?? RuntimeExpressions.Arguments.Index] = index;
-                var nextExecutor = await this.CreateTaskExecutorAsync(next, this.Task.Definition.Do, contextData, arguments, cancellationToken).ConfigureAwait(false);
+                var nextExecutor = await this.CreateTaskExecutorAsync(next, taskDefinition, contextData, arguments, cancellationToken).ConfigureAwait(false);
                 await nextExecutor.ExecuteAsync(cancellationToken).ConfigureAwait(false);
                 break;
             case FlowDirective.End:

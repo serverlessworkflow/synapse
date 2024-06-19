@@ -38,8 +38,7 @@
             this.Graph = graph;
             this.TaskMap = this.Graph.AllClusters.Values.OfType<TaskNodeViewModel>()
                 .GroupBy(cluster => cluster.Task.Key)
-                .ToDictionary(group => group.Key, group => group.AsEnumerable())
-                ;
+                .ToDictionary(group => group.Key, group => group.AsEnumerable());
             this.isDirty = true;
         }
     }

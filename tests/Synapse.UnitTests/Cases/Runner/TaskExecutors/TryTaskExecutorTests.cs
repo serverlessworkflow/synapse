@@ -30,13 +30,16 @@ public class TryTaskExecutorTests
         };
         var definition = new TryTaskDefinition()
         {
-            Try = new RaiseTaskDefinition()
-            {
-                Raise = new()
+            Try =
+            [
+                new("raise", new RaiseTaskDefinition()
                 {
-                    Error = error
-                }
-            },
+                    Raise = new()
+                    {
+                        Error = error
+                    }
+                })
+            ],
             Catch = new()
             {
                 Errors = new()
@@ -74,13 +77,16 @@ public class TryTaskExecutorTests
         };
         var definition = new TryTaskDefinition()
         {
-            Try = new RaiseTaskDefinition()
-            {
-                Raise = new()
+            Try = 
+            [
+                new("raise", new RaiseTaskDefinition()
                 {
-                    Error = error
-                }
-            },
+                    Raise = new()
+                    {
+                        Error = error
+                    }
+                })
+            ],
             Catch = new()
             {
                 Errors = new()
@@ -124,13 +130,16 @@ public class TryTaskExecutorTests
         };
         var definition = new TryTaskDefinition()
         {
-            Try = new RaiseTaskDefinition()
-            {
-                Raise = new()
+            Try = 
+            [
+                new("raise", new RaiseTaskDefinition()
                 {
-                    Error = error
-                }
-            },
+                    Raise = new()
+                    {
+                        Error = error
+                    }
+                })
+            ],
             Catch = new()
             {
                 Errors = new()

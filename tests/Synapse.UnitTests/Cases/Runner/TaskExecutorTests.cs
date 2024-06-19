@@ -83,7 +83,7 @@ public class TaskExecutorTests
             },
             Output = new()
             {
-                From = "{ fonts: $input.fonts, sizes }"
+                As = "{ fonts: $input.fonts, sizes }"
             }
         };
         var workflow = await MockWorkflowExecutionContextFactory.CreateAsync(ServiceProvider);

@@ -14,7 +14,6 @@
 using Neuroglia;
 using Neuroglia.Data.Expressions;
 using Neuroglia.Data.Infrastructure.ResourceOriented;
-using Neuroglia.Reactive;
 
 namespace Synapse.Runner.Services.Executors;
 
@@ -34,8 +33,12 @@ public class TryTaskExecutor(IServiceProvider serviceProvider, ILogger<TryTaskEx
     /// <inheritdoc/>
     protected override async Task DoExecuteAsync(CancellationToken cancellationToken)
     {
-        var task = await this.Task.Workflow.CreateTaskAsync(this.Task.Definition.Try, nameof(this.Task.Definition.Try).ToCamelCase(), this.Task.Input, null, this.Task, false, cancellationToken).ConfigureAwait(false);
-        var executor = await this.CreateTaskExecutorAsync(task, this.Task.Definition.Try, this.Task.ContextData, this.Task.Arguments, cancellationToken).ConfigureAwait(false);
+        var taskDefinition = new DoTaskDefinition()
+        {
+            Do = this.Task.Definition.Try
+        };
+        var task = await this.Task.Workflow.CreateTaskAsync(taskDefinition, nameof(this.Task.Definition.Try).ToCamelCase(), this.Task.Input, null, this.Task, false, cancellationToken).ConfigureAwait(false);
+        var executor = await this.CreateTaskExecutorAsync(task, taskDefinition, this.Task.ContextData, this.Task.Arguments, cancellationToken).ConfigureAwait(false);
         executor.SubscribeAsync
         (
             _ => System.Threading.Tasks.Task.CompletedTask,
@@ -49,8 +52,12 @@ public class TryTaskExecutor(IServiceProvider serviceProvider, ILogger<TryTaskEx
     /// <inheritdoc/>
     protected override async Task DoRetryAsync(Error cause, CancellationToken cancellationToken) 
     {
-        var task = await this.Task.Workflow.CreateTaskAsync(this.Task.Definition.Try, $"retry/{this.Task.Instance.Retries?.Count - 1}", this.Task.Input, null, this.Task, false, cancellationToken).ConfigureAwait(false);
-        var executor = await this.CreateTaskExecutorAsync(task, this.Task.Definition.Try, this.Task.ContextData, this.Task.Arguments, cancellationToken).ConfigureAwait(false);
+        var taskDefinition = new DoTaskDefinition()
+        {
+            Do = this.Task.Definition.Try
+        };
+        var task = await this.Task.Workflow.CreateTaskAsync(taskDefinition, $"retry/{this.Task.Instance.Retries?.Count - 1}", this.Task.Input, null, this.Task, false, cancellationToken).ConfigureAwait(false);
+        var executor = await this.CreateTaskExecutorAsync(task, taskDefinition, this.Task.ContextData, this.Task.Arguments, cancellationToken).ConfigureAwait(false);
         executor.SubscribeAsync
         (
             _ => System.Threading.Tasks.Task.CompletedTask,
@@ -113,10 +120,14 @@ public class TryTaskExecutor(IServiceProvider serviceProvider, ILogger<TryTaskEx
         }
         if (this.Task.Definition.Catch.Do != null)
         {
-            var next = await this.Task.Workflow.CreateTaskAsync(this.Task.Definition.Catch.Do, $"{nameof(this.Task.Definition.Catch).ToCamelCase()}/{nameof(ErrorCatcherDefinition.Do).ToCamelCase()}", this.Task.Input, null, this.Task, false, cancellationToken).ConfigureAwait(false);
+            var taskDefinition = new DoTaskDefinition()
+            {
+                Do = this.Task.Definition.Catch.Do
+            };
+            var next = await this.Task.Workflow.CreateTaskAsync(taskDefinition, $"{nameof(this.Task.Definition.Catch).ToCamelCase()}/{nameof(ErrorCatcherDefinition.Do).ToCamelCase()}", this.Task.Input, null, this.Task, false, cancellationToken).ConfigureAwait(false);
             var arguments = this.Task.Arguments.Clone()!;
             arguments[this.Task.Definition.Catch.As ?? RuntimeExpressions.Arguments.Error] = error;
-            var nextExecutor = await this.CreateTaskExecutorAsync(next, this.Task.Definition.Catch.Do, this.Task.ContextData, arguments, cancellationToken).ConfigureAwait(false);
+            var nextExecutor = await this.CreateTaskExecutorAsync(next, taskDefinition, this.Task.ContextData, arguments, cancellationToken).ConfigureAwait(false);
             nextExecutor.SubscribeAsync
             (
                 _ => System.Threading.Tasks.Task.CompletedTask,
