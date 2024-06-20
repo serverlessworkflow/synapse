@@ -2,8 +2,11 @@
 @using Neuroglia.Blazor.Dagre
 @using Neuroglia.Blazor.Dagre.Models
 @using ServerlessWorkflow.Sdk.Models
+@using System.Diagnostics
 @inject IWorkflowGraphBuilder WorkflowGraphBuilder
 
+<Button Color="ButtonColor.Primary" @onclick="() => Layout()">Layout</Button>
+<Button Color="ButtonColor.Primary" @onclick="() => Draw()">Draw</Button>
 @if (Graph != null)
 {
     <DagreGraph @ref="dagre" Graph="Graph" />
@@ -23,17 +26,41 @@
 
     public IGraphViewModel? Graph { get; set; }
 
+    public void Layout()
+    {
+        Stopwatch sw = Stopwatch.StartNew();
+        this.isDirty = false;
+        this.StateHasChanged();
+        this.workflowDefinition = this.WorkflowDefinition;
+        var graph = this.WorkflowGraphBuilder.Build(this.workflowDefinition);
+        this.Graph = graph;
+        this.taskMap = this.Graph.AllClusters.Values.OfType<TaskNodeViewModel>()
+            .GroupBy(cluster => cluster.Task.Key)
+            .ToDictionary(group => group.Key, group => group.AsEnumerable());
+        sw.Stop();
+        Console.WriteLine($"Layout took {sw.ElapsedMilliseconds} ms");
+    }
+
+    public void Draw()
+    {
+        Stopwatch sw = Stopwatch.StartNew();
+        this.isDirty = true;
+        this.StateHasChanged();
+        sw.Stop();
+        Console.WriteLine($"Draw took {sw.ElapsedMilliseconds} ms");
+    }
+
     protected override async Task OnParametersSetAsync()
     {
         await base.OnParametersSetAsync();
         if (this.WorkflowDefinition != null && this.WorkflowDefinition != this.workflowDefinition)
         {
             this.workflowDefinition = this.WorkflowDefinition;
-            var graph = this.WorkflowGraphBuilder.Build(this.workflowDefinition);
-            this.Graph = graph;
-            this.taskMap = this.Graph.AllClusters.Values.OfType<TaskNodeViewModel>()
-                .GroupBy(cluster => cluster.Task.Key)
-                .ToDictionary(group => group.Key, group => group.AsEnumerable());
+            // var graph = this.WorkflowGraphBuilder.Build(this.workflowDefinition);
+            // this.Graph = graph;
+            // this.taskMap = this.Graph.AllClusters.Values.OfType<TaskNodeViewModel>()
+            //     .GroupBy(cluster => cluster.Task.Key)
+            //     .ToDictionary(group => group.Key, group => group.AsEnumerable());
             this.isDirty = true;
         }
     }

@@ -16,6 +16,7 @@ using Neuroglia.Blazor.Dagre.Services;
 using ServerlessWorkflow.Sdk;
 using ServerlessWorkflow.Sdk.Models;
 using ServerlessWorkflow.Sdk.Models.Tasks;
+using System.Diagnostics;
 
 namespace Synapse.Dashboard.Services;
 
@@ -34,6 +35,7 @@ public class WorkflowGraphBuilder
     /// <inheritdoc/>
     public IGraphViewModel Build(WorkflowDefinition workflow)
     {
+        Stopwatch sw = Stopwatch.StartNew();
         ArgumentNullException.ThrowIfNull(workflow);
         var isEmpty = workflow.Do.Count < 1;
         var graph = new GraphViewModel(new DagreGraphLayout());
@@ -42,7 +44,9 @@ public class WorkflowGraphBuilder
         graph.AddNode(startNode);
         graph.AddNode(endNode);
         if (isEmpty) graph.AddEdge(startNode, endNode);
-        else this.BuildTaskNode(workflow, graph, workflow.Do.First(), endNode, startNode, "/do"); 
+        else this.BuildTaskNode(workflow, graph, workflow.Do.First(), endNode, startNode, "/do");
+        sw.Stop();
+        Console.WriteLine($"WorkflowGraphBuilder.Build took {sw.ElapsedMilliseconds} ms");
         return graph;
     }
 
@@ -65,13 +69,20 @@ public class WorkflowGraphBuilder
     /// <returns>A new <see cref="TaskNodeViewModel"/></returns>
     protected virtual NodeViewModel BuildTaskNode(WorkflowDefinition workflow, GraphViewModel graph, MapEntry<string, TaskDefinition> task, NodeViewModel endNode, NodeViewModel previousNode, string parentReference)
     {
+        Stopwatch sw = Stopwatch.StartNew();
+        Stopwatch building = Stopwatch.StartNew();
         ArgumentNullException.ThrowIfNull(workflow);
         ArgumentNullException.ThrowIfNull(graph);
         ArgumentNullException.ThrowIfNull(task);
         ArgumentNullException.ThrowIfNull(endNode);
         ArgumentNullException.ThrowIfNull(previousNode);
         var taskNodeGroup = graph.AllClusters.Values.OfType<TaskNodeViewModel>().FirstOrDefault(cluster => cluster.Task.Key == task.Key);
-        if (taskNodeGroup != null) return taskNodeGroup;
+        if (taskNodeGroup != null)
+        {
+            sw.Stop();
+            Console.WriteLine($"WorkflowGraphBuilder.BuildTaskNode took {sw.ElapsedMilliseconds} ms");
+            return taskNodeGroup;
+        }
         var lastNode = task.Value switch
         {
             CallTaskDefinition callTask => this.BuildCallTaskNode(workflow, graph, new(task.Key, callTask), taskNodeGroup, endNode, previousNode, parentReference),
@@ -88,22 +99,38 @@ public class WorkflowGraphBuilder
             WaitTaskDefinition waitTask => this.BuildWaitTaskNode(workflow, graph, new(task.Key, waitTask), taskNodeGroup, endNode, previousNode, parentReference),
             _ => throw new NotSupportedException($"The specified task type '{task.Value.GetType()}' is not supported")
         } ?? throw new Exception($"Unable to define a last node for task '{task.Key}'");
+        building.Stop();
+        Console.WriteLine($"WorkflowGraphBuilder.BuildTaskNode took {building.ElapsedMilliseconds} ms (task: {task.Key} | parentRef: {parentReference}) --- Building node");
+        Stopwatch transition = Stopwatch.StartNew();
         if (task.Value.Then == FlowDirective.End || task.Value.Then == FlowDirective.Exit) graph.AddEdge(lastNode, endNode);
         else
         {
+            Stopwatch getTaskAfter = Stopwatch.StartNew();
             var nextTaskName = string.IsNullOrWhiteSpace(task.Value.Then) || task.Value.Then == FlowDirective.Continue
-                ? workflow.GetTaskAfter(task, parentReference)?.Key
+                ? workflow.GetTaskAfter2(task, parentReference)?.Key
                 : task.Value.Then;
+            getTaskAfter.Stop();
+            Console.WriteLine($"WorkflowGraphBuilder.BuildTaskNode took {sw.ElapsedMilliseconds} ms (task: {task.Key} | parentRef: {parentReference})--- Get Task After");
             if (string.IsNullOrWhiteSpace(nextTaskName)) graph.AddEdge(lastNode, endNode);
             else
             {
-                var nextTaskIndex = workflow.IndexOf(nextTaskName, parentReference);
+                Stopwatch indexOf = Stopwatch.StartNew();
+                var nextTaskIndex = workflow.IndexOf2(nextTaskName, parentReference);
+                indexOf.Stop();
+                Console.WriteLine($"WorkflowGraphBuilder.BuildTaskNode took {sw.ElapsedMilliseconds} ms (task: {task.Key} | parentRef: {parentReference})--- Index Of");
                 var nextTaskReference = $"{parentReference}/{nextTaskIndex}/{nextTaskName}";
-                var nextTask = workflow.GetComponent<TaskDefinition>(nextTaskReference) ?? throw new Exception($"Failed to find the task at '{nextTaskReference}' in workflow '{workflow.Document.Name}.{workflow.Document.Namespace}:{workflow.Document.Version}'");
+                Stopwatch getComponent = Stopwatch.StartNew();
+                var nextTask = workflow.GetComponent2<TaskDefinition>(nextTaskReference) ?? throw new Exception($"Failed to find the task at '{nextTaskReference}' in workflow '{workflow.Document.Name}.{workflow.Document.Namespace}:{workflow.Document.Version}'");
+                getComponent.Stop();
+                Console.WriteLine($"WorkflowGraphBuilder.BuildTaskNode took {sw.ElapsedMilliseconds} ms (task: {task.Key} | parentRef: {parentReference})--- Get Component");
                 var nextTaskNode = this.BuildTaskNode(workflow, graph, new(nextTaskName, nextTask), endNode, lastNode, parentReference);
                 try { graph.AddEdge(lastNode, nextTaskNode); } catch { } //todo: fix: should not be any duplicate
             }
         }
+        transition.Stop();
+        Console.WriteLine($"WorkflowGraphBuilder.BuildTaskNode took {sw.ElapsedMilliseconds} ms (task: {task.Key} | parentRef: {parentReference})--- Transition");
+        sw.Stop();
+        Console.WriteLine($"WorkflowGraphBuilder.BuildTaskNode took {sw.ElapsedMilliseconds} ms (task: {task.Key} | parentRef: {parentReference})");
         return lastNode;
     }
 
@@ -120,6 +147,7 @@ public class WorkflowGraphBuilder
     /// <returns>A new <see cref="NodeViewModel"/></returns>
     protected virtual NodeViewModel BuildCallTaskNode(WorkflowDefinition workflow, GraphViewModel graph, MapEntry<string, CallTaskDefinition> task, TaskNodeViewModel? taskNodeGroup, NodeViewModel endNode, NodeViewModel previousNode, string parentReference)
     {
+        Stopwatch sw = Stopwatch.StartNew();
         ArgumentNullException.ThrowIfNull(workflow);
         ArgumentNullException.ThrowIfNull(graph);
         ArgumentNullException.ThrowIfNull(task);
@@ -130,6 +158,8 @@ public class WorkflowGraphBuilder
         if (taskNodeGroup == null) graph.AddNode(lastNode);
         else taskNodeGroup.AddChild(lastNode);
         graph.AddEdge(previousNode, lastNode);
+        sw.Stop();
+        Console.WriteLine($"WorkflowGraphBuilder.BuildCallTaskNode took {sw.ElapsedMilliseconds} ms");
         return lastNode;
     }
 
@@ -146,6 +176,7 @@ public class WorkflowGraphBuilder
     /// <returns>A new <see cref="NodeViewModel"/></returns>
     protected virtual NodeViewModel BuildDoTaskNode(WorkflowDefinition workflow, GraphViewModel graph, MapEntry<string, DoTaskDefinition> task, TaskNodeViewModel? taskNodeGroup, NodeViewModel endNode, NodeViewModel previousNode, string parentReference)
     {
+        Stopwatch sw = Stopwatch.StartNew();
         ArgumentNullException.ThrowIfNull(workflow);
         ArgumentNullException.ThrowIfNull(graph);
         ArgumentNullException.ThrowIfNull(task);
@@ -156,6 +187,8 @@ public class WorkflowGraphBuilder
         if (taskNodeGroup == null) graph.AddNode(lastNode);
         else taskNodeGroup.AddChild(lastNode);
         graph.AddEdge(previousNode, lastNode);
+        sw.Stop();
+        Console.WriteLine($"WorkflowGraphBuilder.BuildDoTaskNode took {sw.ElapsedMilliseconds} ms");
         return lastNode;
     }
 
@@ -172,6 +205,7 @@ public class WorkflowGraphBuilder
     /// <returns>A new <see cref="NodeViewModel"/></returns>
     protected virtual NodeViewModel BuildEmitTaskNode(WorkflowDefinition workflow, GraphViewModel graph, MapEntry<string, EmitTaskDefinition> task, TaskNodeViewModel? taskNodeGroup, NodeViewModel endNode, NodeViewModel previousNode, string parentReference)
     {
+        Stopwatch sw = Stopwatch.StartNew();
         ArgumentNullException.ThrowIfNull(workflow);
         ArgumentNullException.ThrowIfNull(graph);
         ArgumentNullException.ThrowIfNull(task);
@@ -182,6 +216,8 @@ public class WorkflowGraphBuilder
         if (taskNodeGroup == null) graph.AddNode(lastNode);
         else taskNodeGroup.AddChild(lastNode);
         graph.AddEdge(previousNode, lastNode);
+        sw.Stop();
+        Console.WriteLine($"WorkflowGraphBuilder.BuildEmitTaskNode took {sw.ElapsedMilliseconds} ms");
         return lastNode;
     }
 
@@ -198,6 +234,7 @@ public class WorkflowGraphBuilder
     /// <returns>A new <see cref="NodeViewModel"/></returns>
     protected virtual NodeViewModel BuildExtensionTaskNode(WorkflowDefinition workflow, GraphViewModel graph, MapEntry<string, ExtensionTaskDefinition> task, TaskNodeViewModel? taskNodeGroup, NodeViewModel endNode, NodeViewModel previousNode, string parentReference)
     {
+        Stopwatch sw = Stopwatch.StartNew();
         ArgumentNullException.ThrowIfNull(workflow);
         ArgumentNullException.ThrowIfNull(graph);
         ArgumentNullException.ThrowIfNull(task);
@@ -208,6 +245,8 @@ public class WorkflowGraphBuilder
         if (taskNodeGroup == null) graph.AddNode(lastNode);
         else taskNodeGroup.AddChild(lastNode);
         graph.AddEdge(previousNode, lastNode);
+        sw.Stop();
+        Console.WriteLine($"WorkflowGraphBuilder.BuildExtensionTaskNode took {sw.ElapsedMilliseconds} ms");
         return lastNode;
     }
 
@@ -224,6 +263,7 @@ public class WorkflowGraphBuilder
     /// <returns>A new <see cref="NodeViewModel"/></returns>
     protected virtual NodeViewModel BuildForTaskNode(WorkflowDefinition workflow, GraphViewModel graph, MapEntry<string, ForTaskDefinition> task, TaskNodeViewModel? taskNodeGroup, NodeViewModel endNode, NodeViewModel previousNode, string parentReference)
     {
+        Stopwatch sw = Stopwatch.StartNew();
         ArgumentNullException.ThrowIfNull(workflow);
         ArgumentNullException.ThrowIfNull(graph);
         ArgumentNullException.ThrowIfNull(task);
@@ -234,6 +274,8 @@ public class WorkflowGraphBuilder
         if (taskNodeGroup == null) graph.AddNode(lastNode);
         else taskNodeGroup.AddChild(lastNode);
         graph.AddEdge(previousNode, lastNode);
+        sw.Stop();
+        Console.WriteLine($"WorkflowGraphBuilder.BuildForTaskNode took {sw.ElapsedMilliseconds} ms");
         return lastNode;
     }
 
@@ -250,6 +292,7 @@ public class WorkflowGraphBuilder
     /// <returns>A new <see cref="NodeViewModel"/></returns>
     protected virtual NodeViewModel BuildListenTaskNode(WorkflowDefinition workflow, GraphViewModel graph, MapEntry<string, ListenTaskDefinition> task, TaskNodeViewModel? taskNodeGroup, NodeViewModel endNode, NodeViewModel previousNode, string parentReference)
     {
+        Stopwatch sw = Stopwatch.StartNew();
         ArgumentNullException.ThrowIfNull(workflow);
         ArgumentNullException.ThrowIfNull(graph);
         ArgumentNullException.ThrowIfNull(task);
@@ -260,6 +303,8 @@ public class WorkflowGraphBuilder
         if (taskNodeGroup == null) graph.AddNode(lastNode);
         else taskNodeGroup.AddChild(lastNode);
         graph.AddEdge(previousNode, lastNode);
+        sw.Stop();
+        Console.WriteLine($"WorkflowGraphBuilder.BuildListenTaskNode took {sw.ElapsedMilliseconds} ms");
         return lastNode;
     }
 
@@ -276,6 +321,7 @@ public class WorkflowGraphBuilder
     /// <returns>A new <see cref="NodeViewModel"/></returns>
     protected virtual NodeViewModel BuildRaiseTaskNode(WorkflowDefinition workflow, GraphViewModel graph, MapEntry<string, RaiseTaskDefinition> task, TaskNodeViewModel? taskNodeGroup, NodeViewModel endNode, NodeViewModel previousNode, string parentReference)
     {
+        Stopwatch sw = Stopwatch.StartNew();
         ArgumentNullException.ThrowIfNull(workflow);
         ArgumentNullException.ThrowIfNull(graph);
         ArgumentNullException.ThrowIfNull(task);
@@ -286,6 +332,8 @@ public class WorkflowGraphBuilder
         if (taskNodeGroup == null) graph.AddNode(lastNode);
         else taskNodeGroup.AddChild(lastNode);
         graph.AddEdge(previousNode, lastNode);
+        sw.Stop();
+        Console.WriteLine($"WorkflowGraphBuilder.BuildRaiseTaskNode took {sw.ElapsedMilliseconds} ms");
         return lastNode;
     }
 
@@ -302,6 +350,7 @@ public class WorkflowGraphBuilder
     /// <returns>A new <see cref="NodeViewModel"/></returns>
     protected virtual NodeViewModel BuildRunTaskNode(WorkflowDefinition workflow, GraphViewModel graph, MapEntry<string, RunTaskDefinition> task, TaskNodeViewModel? taskNodeGroup, NodeViewModel endNode, NodeViewModel previousNode, string parentReference)
     {
+        Stopwatch sw = Stopwatch.StartNew();
         ArgumentNullException.ThrowIfNull(workflow);
         ArgumentNullException.ThrowIfNull(graph);
         ArgumentNullException.ThrowIfNull(task);
@@ -312,6 +361,8 @@ public class WorkflowGraphBuilder
         if (taskNodeGroup == null) graph.AddNode(lastNode);
         else taskNodeGroup.AddChild(lastNode);
         graph.AddEdge(previousNode, lastNode);
+        sw.Stop();
+        Console.WriteLine($"WorkflowGraphBuilder.BuildRunTaskNode took {sw.ElapsedMilliseconds} ms");
         return lastNode;
     }
 
@@ -328,6 +379,7 @@ public class WorkflowGraphBuilder
     /// <returns>A new <see cref="NodeViewModel"/></returns>
     protected virtual NodeViewModel BuildSetTaskNode(WorkflowDefinition workflow, GraphViewModel graph, MapEntry<string, SetTaskDefinition> task, TaskNodeViewModel? taskNodeGroup, NodeViewModel endNode, NodeViewModel previousNode, string parentReference)
     {
+        Stopwatch sw = Stopwatch.StartNew();
         ArgumentNullException.ThrowIfNull(workflow);
         ArgumentNullException.ThrowIfNull(graph);
         ArgumentNullException.ThrowIfNull(task);
@@ -338,6 +390,8 @@ public class WorkflowGraphBuilder
         if (taskNodeGroup == null) graph.AddNode(lastNode);
         else taskNodeGroup.AddChild(lastNode);
         graph.AddEdge(previousNode, lastNode);
+        sw.Stop();
+        Console.WriteLine($"WorkflowGraphBuilder.BuildSetTaskNode took {sw.ElapsedMilliseconds} ms");
         return lastNode;
     }
 
@@ -354,6 +408,7 @@ public class WorkflowGraphBuilder
     /// <returns>A new <see cref="NodeViewModel"/></returns>
     protected virtual NodeViewModel BuildSwitchTaskNode(WorkflowDefinition workflow, GraphViewModel graph, MapEntry<string, SwitchTaskDefinition> task, TaskNodeViewModel? taskNodeGroup, NodeViewModel endNode, NodeViewModel previousNode, string parentReference)
     {
+        Stopwatch sw = Stopwatch.StartNew();
         ArgumentNullException.ThrowIfNull(workflow);
         ArgumentNullException.ThrowIfNull(graph);
         ArgumentNullException.ThrowIfNull(task);
@@ -364,6 +419,8 @@ public class WorkflowGraphBuilder
         if (taskNodeGroup == null) graph.AddNode(lastNode);
         else taskNodeGroup.AddChild(lastNode);
         graph.AddEdge(previousNode, lastNode);
+        sw.Stop();
+        Console.WriteLine($"WorkflowGraphBuilder.BuildSwitchTaskNode took {sw.ElapsedMilliseconds} ms");
         return lastNode;
     }
 
@@ -380,6 +437,7 @@ public class WorkflowGraphBuilder
     /// <returns>A new <see cref="NodeViewModel"/></returns>
     protected virtual NodeViewModel BuildTryTaskNode(WorkflowDefinition workflow, GraphViewModel graph, MapEntry<string, TryTaskDefinition> task, TaskNodeViewModel? taskNodeGroup, NodeViewModel endNode, NodeViewModel previousNode, string parentReference)
     {
+        Stopwatch sw = Stopwatch.StartNew();
         ArgumentNullException.ThrowIfNull(workflow);
         ArgumentNullException.ThrowIfNull(graph);
         ArgumentNullException.ThrowIfNull(task);
@@ -390,6 +448,8 @@ public class WorkflowGraphBuilder
         if (taskNodeGroup == null) graph.AddNode(lastNode);
         else taskNodeGroup.AddChild(lastNode);
         graph.AddEdge(previousNode, lastNode);
+        sw.Stop();
+        Console.WriteLine($"WorkflowGraphBuilder.BuildTryTaskNode took {sw.ElapsedMilliseconds} ms");
         return lastNode;
     }
 
@@ -406,6 +466,7 @@ public class WorkflowGraphBuilder
     /// <returns>A new <see cref="NodeViewModel"/></returns>
     protected virtual NodeViewModel BuildWaitTaskNode(WorkflowDefinition workflow, GraphViewModel graph, MapEntry<string, WaitTaskDefinition> task, TaskNodeViewModel? taskNodeGroup, NodeViewModel endNode, NodeViewModel previousNode, string parentReference)
     {
+        Stopwatch sw = Stopwatch.StartNew();
         ArgumentNullException.ThrowIfNull(workflow);
         ArgumentNullException.ThrowIfNull(graph);
         ArgumentNullException.ThrowIfNull(task);
@@ -416,6 +477,8 @@ public class WorkflowGraphBuilder
         if (taskNodeGroup == null) graph.AddNode(lastNode);
         else taskNodeGroup.AddChild(lastNode);
         graph.AddEdge(previousNode, lastNode);
+        sw.Stop();
+        Console.WriteLine($"WorkflowGraphBuilder.BuildWaitTaskNode took {sw.ElapsedMilliseconds} ms");
         return lastNode;
     }
 
