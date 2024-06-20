@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Neuroglia.Blazor.Dagre;
 using ServerlessWorkflow.Sdk;
 using ServerlessWorkflow.Sdk.Models.Tasks;
 
@@ -24,6 +23,6 @@ namespace Synapse.Dashboard.Components;
 /// Initializes a new <see cref="TryTaskNodeViewModel"/>
 /// </remarks>
 public class TryTaskNodeViewModel(MapEntry<string, TryTaskDefinition> task)
-    : LabeledWorkflowNodeViewModel(task.Key, "switch-task-node", null, Constants.NodeHeight * 1.5, Constants.NodeHeight * 1.5)
+    : LabeledWorkflowNodeViewModel
 {
 }

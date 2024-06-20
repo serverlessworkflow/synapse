@@ -30,11 +30,10 @@ public class TaskNodeViewModel
     /// <param name="task">The name/definition mapping of the <see cref="TaskDefinition"/> the <see cref="TaskNodeViewModel"/> represents</param>
     /// <param name="isFirst">Indicates whether or not the task to create the <see cref="TaskNodeViewModel"/> for is the first task of the workflow it belongs to</param>
     public TaskNodeViewModel(KeyValuePair<string, TaskDefinition> task, bool isFirst = false)
-        : base(null, task.Key)
     {
         this.Task = task;
         this.IsFirst = isFirst;
-        this.ComponentType = typeof(TaskNodeTemplate);
+        this.Label = task.Key;
     }
 
     /// <summary>

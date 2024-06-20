@@ -23,6 +23,6 @@ namespace Synapse.Dashboard.Components;
 /// Initializes a new <see cref="ExtensionTaskNodeViewModel"/>
 /// </remarks>
 public class ExtensionTaskNodeViewModel(MapEntry<string, ExtensionTaskDefinition> task)
-    : LabeledWorkflowNodeViewModel(task.Key, "composite-task-node", null, Neuroglia.Blazor.Dagre.Constants.NodeHeight * 1.5, Neuroglia.Blazor.Dagre.Constants.NodeHeight * 1.5)
+    : LabeledWorkflowNodeViewModel
 {
 }

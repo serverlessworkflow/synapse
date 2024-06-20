@@ -24,6 +24,6 @@ namespace Synapse.Dashboard.Components;
 /// Initializes a new <see cref="RunTaskNodeViewModel"/>
 /// </remarks>
 public class RunTaskNodeViewModel(MapEntry<string, RunTaskDefinition> task)
-    : LabeledWorkflowNodeViewModel(task.Key, "run-task-node", null, Constants.NodeHeight * 1.5, Constants.NodeHeight * 1.5)
+    : LabeledWorkflowNodeViewModel
 {
 }

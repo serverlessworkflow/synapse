@@ -24,6 +24,6 @@ namespace Synapse.Dashboard.Components;
 /// Initializes a new <see cref="EmitTaskNodeViewModel"/>
 /// </remarks>
 public class EmitTaskNodeViewModel(MapEntry<string, EmitTaskDefinition> task)
-    : LabeledWorkflowNodeViewModel(task.Key, "emit-task-node", null, Constants.NodeHeight * 1.5, Constants.NodeHeight * 1.5)
+    : LabeledWorkflowNodeViewModel
 {
 }

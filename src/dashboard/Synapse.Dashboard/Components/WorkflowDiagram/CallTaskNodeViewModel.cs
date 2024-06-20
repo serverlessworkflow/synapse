@@ -23,6 +23,6 @@ namespace Synapse.Dashboard.Components;
 /// Initializes a new <see cref="CallTaskNodeViewModel"/>
 /// </remarks>
 public class CallTaskNodeViewModel(MapEntry<string, CallTaskDefinition> task)
-    : LabeledWorkflowNodeViewModel(task.Key, "call-task-node", null, Neuroglia.Blazor.Dagre.Constants.NodeHeight * 1.5, Neuroglia.Blazor.Dagre.Constants.NodeHeight * 1.5)
+    : LabeledWorkflowNodeViewModel
 {
 }

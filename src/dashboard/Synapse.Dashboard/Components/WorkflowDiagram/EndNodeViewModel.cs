@@ -11,15 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Neuroglia.Blazor.Dagre;
-
 namespace Synapse.Dashboard.Components;
 
 /// <summary>
 /// Represents the object that holds the data required to render the view of a workflow's end node 
 /// </summary>
 public class EndNodeViewModel()
-    : WorkflowNodeViewModel(string.Empty, "end-node", NodeShape.Circle, WorkflowGraphBuilder.StartEndNodeRadius, WorkflowGraphBuilder.StartEndNodeRadius)
+    : WorkflowNodeViewModel
 {
 
 

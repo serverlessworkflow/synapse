@@ -24,6 +24,6 @@ namespace Synapse.Dashboard.Components;
 /// Initializes a new <see cref="SwitchTaskNodeViewModel"/>
 /// </remarks>
 public class SwitchTaskNodeViewModel(MapEntry<string, SwitchTaskDefinition> task)
-    : LabeledWorkflowNodeViewModel(task.Key, "switch-task-node", null, Constants.NodeHeight * 1.5, Constants.NodeHeight * 1.5)
+    : LabeledWorkflowNodeViewModel
 {
 }

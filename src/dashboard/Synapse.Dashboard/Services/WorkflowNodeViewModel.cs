@@ -27,14 +27,6 @@ public abstract class WorkflowNodeViewModel
     int _faultedInstances = 0;
 
     /// <inheritdoc/>
-    public WorkflowNodeViewModel(string? label = "", string? cssClass = null, string? shape = null, double? width = Constants.NodeWidth * 1.5, double? height = Constants.NodeHeight * 1.5,
-        double? radiusX = Constants.NodeRadius, double? radiusY = Constants.NodeRadius, double? x = 0, double? y = 0, Type? componentType = null, Guid? parentId = null)
-        : base(label, cssClass, shape, width, height, radiusX, radiusY, x, y, componentType, parentId)
-    {
-        this.ComponentType = typeof(WorkflowNodeTemplate);
-    }
-
-    /// <inheritdoc/>
     public int OperativeInstancesCount
     {
         get => this._operativeInstances;

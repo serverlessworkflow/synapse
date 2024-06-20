@@ -24,6 +24,6 @@ namespace Synapse.Dashboard.Components;
 /// Initializes a new <see cref="WaitTaskNodeViewModel"/>
 /// </remarks>
 public class WaitTaskNodeViewModel(MapEntry<string, WaitTaskDefinition> task)
-    : LabeledWorkflowNodeViewModel(task.Key, "wait-task-node", null, Constants.NodeHeight * 1.5, Constants.NodeHeight * 1.5)
+    : LabeledWorkflowNodeViewModel
 {
 }

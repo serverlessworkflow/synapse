@@ -12,7 +12,6 @@
 // limitations under the License.
 
 using Microsoft.AspNetCore.Components.Authorization;
-using Neuroglia.Blazor.Dagre;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
@@ -41,7 +40,6 @@ builder.Services.AddScoped<IApplicationLayout, ApplicationLayout>();
 builder.Services.AddSingleton<IMonacoEditorHelper, MonacoEditorHelper>();
 builder.Services.AddSingleton<ISecurityTokenManager, SecurityTokenManager>();
 builder.Services.AddSingleton<MonacoInterop>();
-builder.Services.AddSingleton<IDagreService, DagreService>();
 builder.Services.AddSingleton<IWorkflowGraphBuilder, WorkflowGraphBuilder>();
 builder.Services.AddBlazorBootstrap();
 builder.Services.AddCascadingAuthenticationState();

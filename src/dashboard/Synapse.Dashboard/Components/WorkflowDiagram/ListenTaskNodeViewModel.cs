@@ -23,6 +23,6 @@ namespace Synapse.Dashboard.Components;
 /// Initializes a new <see cref="ListenTaskNodeViewModel"/>
 /// </remarks>
 public class ListenTaskNodeViewModel(MapEntry<string, ListenTaskDefinition> task)
-    : LabeledWorkflowNodeViewModel(task.Key, "listen-task-node", null, Neuroglia.Blazor.Dagre.Constants.NodeHeight * 1.5, Neuroglia.Blazor.Dagre.Constants.NodeHeight * 1.5)
+    : LabeledWorkflowNodeViewModel
 {
 }
