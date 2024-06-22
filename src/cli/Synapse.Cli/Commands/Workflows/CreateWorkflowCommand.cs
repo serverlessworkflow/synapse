@@ -54,6 +54,7 @@ internal class CreateWorkflowCommand
     /// <returns>A new awaitable <see cref="Task"/></returns>
     public async Task HandleAsync(string file)
     {
+        this.EnsureConfigured();
         Stream? stream;
         if (!string.IsNullOrWhiteSpace(file)) stream = File.OpenRead(file);
         else throw new InvalidOperationException("You must specify exactly one of the following options: --file");

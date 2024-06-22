@@ -14,12 +14,11 @@
 namespace Synapse.Dashboard.Components;
 
 /// <summary>
-/// Represents a run task node view model
+/// Exposes the default breadcrumbs for all pages of the application
 /// </summary>
-/// <remarks>
-/// Initializes a new <see cref="RunTaskNodeViewModel"/>
-/// </remarks>
-public class RunTaskNodeViewModel(string name)
-    : LabeledWorkflowNodeViewModel(name, "run-task-node", null, 150, 35)
+public static class Breadcrumbs
 {
+
+    public static BreadcrumbItem[] Workflows = [new("Workflows", "/workflows")];
+
 }

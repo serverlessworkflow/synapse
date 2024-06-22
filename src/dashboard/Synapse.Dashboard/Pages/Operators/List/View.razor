@@ -50,7 +50,7 @@
                     <tr @onclick="async _ => await OnShowResourceDetailsAsync(resource)" class="cursor-pointer">
                         <td class="text-start">@resource.Metadata.Namespace</td>
                         <td class="text-start">@resource.Metadata.Name</td>
-                        <td class="text-center">@resource.Metadata.CreationTimestamp.ToString()</td>
+                        <td class="text-center">@resource.Metadata.CreationTimestamp?.DateTime.FromNow()</td>
                         <td class="text-center"><span class="badge rounded-pill border border-@GetStatusClass(resource) text-@GetStatusClass(resource)">@resource.Status?.Phase</span></td>
                         <td class="text-end">
                             <button class="btn btn-outline-primary btn-sm" title="Edit '@resource.Metadata.Name'" @onclick="async _ => await OnShowResourceEditorAsync(resource)" @onclick:preventDefault @onclick:stopPropagation><Icon Name="IconName.Pencil" /></button>

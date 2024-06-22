@@ -49,6 +49,7 @@ internal class DeleteCorrelationCommand
     /// <returns>A new awaitable <see cref="Task"/></returns>
     public async Task HandleAsync(string name, string @namespace, bool y)
     {
+        this.EnsureConfigured();
         if (!y)
         {
             Console.Write($"Are you sure you wish to delete the correlation '{name}'? Press 'y' to confirm, or any other key to cancel: ");

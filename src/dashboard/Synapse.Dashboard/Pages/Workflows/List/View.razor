@@ -1,7 +1,11 @@
 ﻿@page "/"
+@page "/workflows"
 @attribute [Authorize]
 @namespace Synapse.Dashboard.Pages.Workflows.List
+@using BlazorBootstrap
 @inherits NamespacedResourceManagementComponent<Workflow>
+@inject IBreadcrumbManager BreadcrumbManager
+@inject NavigationManager NavigationManager
 
 <ApplicationTitle>Workflows</ApplicationTitle>
 
@@ -51,12 +55,12 @@
             @if (Resources != null && Resources.Count > 0)
             {
                 <Virtualize Context="resource" Items="@Resources">
-                    <tr @onclick="async _ => await OnShowResourceDetailsAsync(resource)" class="cursor-pointer">
+                    <tr @onclick="_ => OnViewWorkflow(resource)" class="cursor-pointer">
                         <td class="text-start">@resource.Metadata.Name</td>
                         <td class="text-start"><a href="#" @onclick:preventDefault="true" @onclick:stopPropagation="true">@resource.Metadata.Namespace</a></td>
-                        <td class="text-center">@resource.Metadata.CreationTimestamp</td>
-                        <td class="text-center">@resource.Status?.Versions.Where(v => v.Value.LastEndedAt.HasValue).Select(v => v.Value.LastEndedAt!.Value).Order().LastOrDefault()</td>
-                        <td class="text-center">@resource.Status?.Versions.Where(v => v.Value.LastEndedAt.HasValue).Select(v => v.Value.LastEndedAt!.Value).Order().LastOrDefault()</td>
+                        <td class="text-center">@resource.Metadata.CreationTimestamp?.DateTime.FromNow()</td>
+                        <td class="text-center">@(resource.Status?.Versions.Where(v => v.Value.LastStartedAt.HasValue).Select(v => v.Value.LastStartedAt).Order().LastOrDefault()?.DateTime.FromNow() ?? "-")</td>
+                        <td class="text-center">@(resource.Status?.Versions.Where(v => v.Value.LastEndedAt.HasValue).Select(v => v.Value.LastEndedAt).Order().LastOrDefault()?.DateTime.FromNow() ?? "-")</td>
                         <td class="text-center">@resource.Spec.Versions.Count</td>
                         <td class="text-center"><a href="#" @onclick:preventDefault="true" @onclick:stopPropagation="true">@resource.Spec.Versions.GetLatest().Document.Version</a></td>
                         <td class="text-center">@resource.Status?.Versions.Values.Sum(s => s.TotalInstances)</td>
@@ -107,6 +111,12 @@
 @code
 {
 
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        this.BreadcrumbManager.Use(Breadcrumbs.Workflows);
+    }
+
     string GetScheduleType(Workflow workflow)
     {
         var latest = workflow.Spec.Versions.GetLatest();
@@ -118,14 +128,6 @@
         else throw new NotSupportedException("The specified schedule type is not supported");
     }
 
-    new Task OnShowResourceDetailsAsync(Workflow workflow)
-    {
-        if (this.DetailsOffCanvas == null) return Task.CompletedTask;
-        var parameters = new Dictionary<string, object>
-        {
-            { nameof(WorkflowDetails.Workflow), workflow }
-        };
-        return this.DetailsOffCanvas.ShowAsync<WorkflowDetails>(title: workflow.GetName(), parameters: parameters);
-    }
+    void OnViewWorkflow(Workflow workflow) => this.NavigationManager.NavigateTo($"workflows/{workflow.GetNamespace()}/{workflow.GetName()}/{workflow.Spec.Versions.GetLatest().Document.Version}");
 
 }

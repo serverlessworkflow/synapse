@@ -50,6 +50,7 @@ internal class DeleteNamespaceCommand
     /// <returns>A new awaitable <see cref="Task"/></returns>
     public async Task HandleAsync(string name, bool y)
     {
+        this.EnsureConfigured();
         if (!y)
         {
             Console.Write($"Are you sure you wish to delete the namespace '{name}'? Press 'y' to confirm, or any other key to cancel: ");

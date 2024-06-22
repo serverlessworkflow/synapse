@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using ServerlessWorkflow.Sdk.IO;
+
 namespace Synapse.Api.Client;
 
 /// <summary>
@@ -28,6 +30,7 @@ public static class IServiceCollectionExtensions
     public static IServiceCollection AddSynapseHttpApiClient(this IServiceCollection services, Action<SynapseHttpApiClientOptions> setup)
     {
         services.Configure(setup);
+        services.AddServerlessWorkflowIO();
         services.AddHttpClient<ISynapseApiClient, SynapseHttpApiClient>((provider, http) =>
         {
             var apiClientOptions = provider.GetRequiredService<IOptions<SynapseHttpApiClientOptions>>().Value;

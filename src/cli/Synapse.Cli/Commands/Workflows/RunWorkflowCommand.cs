@@ -65,6 +65,7 @@ internal class RunWorkflowCommand
     /// <returns>A new awaitable <see cref="Task"/></returns>
     public async Task HandleAsync(string name, string @namespace, string version, string input)
     {
+        this.EnsureConfigured();
         var inputData = new EquatableDictionary<string, object> { };
         if (!string.IsNullOrWhiteSpace(input)) inputData = this.JsonSerializer.Deserialize<EquatableDictionary<string, object>>(input);
         var instance = await this.Api.WorkflowInstances.CreateAsync(new()

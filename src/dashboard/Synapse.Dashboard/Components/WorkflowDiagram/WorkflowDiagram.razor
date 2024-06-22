@@ -1,28 +1,26 @@
 ﻿@namespace Synapse.Dashboard
 @using ServerlessWorkflow.Sdk.Models
+@using System.Diagnostics
 @inject IWorkflowGraphBuilder WorkflowGraphBuilder
 
-@if (Graph != null)
+@if (graph != null)
 {
-    <DagreGraph @ref="dagre" Graph="Graph" OnMouseUp="OnMouseUp" Options="options" />
+    <DagreGraph @ref="dagre" Graph="graph" OnMouseUp="OnMouseUp" Options="options" />
 }
 
 @code{
 
-    [Parameter] public WorkflowDefinition WorkflowDefinition { get; set; } = null!;
+    WorkflowDefinition workflowDefinition = null!;
+    DagreGraph? dagre;
+    IGraphViewModel? graph;
+    IDagreGraphOptions? options = null;
+    bool isDirty = true;
 
-    protected WorkflowDefinition workflowDefinition { get; set; } = null!;
+    [Parameter] public WorkflowDefinition WorkflowDefinition { get; set; } = null!;
 
     [Parameter] public WorkflowDiagramOrientation Orientation { get; set; } = WorkflowDiagramOrientation.TopToBottom;
 
     [Parameter] public EventCallback<GraphEventArgs<MouseEventArgs>> OnMouseUp { get; set; }
-
-    public IGraphViewModel? Graph { get; set; }
-    protected DagreGraph? dagre { get; set; }
-    protected IDagreGraphOptions? options { get; set; } = null;
-    protected bool isDirty = true;
-    // Maps a state name to its cluster(s) in the graph
-    protected Dictionary<string, IEnumerable<TaskNodeViewModel>>? TaskMap = null;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -34,11 +32,7 @@
             {
                 Direction = this.Orientation == WorkflowDiagramOrientation.LeftToRight ? DagreGraphDirection.LeftToRight : DagreGraphDirection.TopToBottom
             };
-            var graph = await this.WorkflowGraphBuilder.Build(this.workflowDefinition);
-            this.Graph = graph;
-            this.TaskMap = this.Graph.AllClusters.Values.OfType<TaskNodeViewModel>()
-                .GroupBy(cluster => cluster.Task.Key)
-                .ToDictionary(group => group.Key, group => group.AsEnumerable());
+            this.graph = await this.WorkflowGraphBuilder.Build(this.workflowDefinition);
             this.isDirty = true;
         }
     }
@@ -48,11 +42,6 @@
         if (!this.isDirty) return false;
         this.isDirty = false;
         return true;
-    }
-
-    public virtual async Task RefreshAsync()
-    {
-        if (this.dagre != null) await this.dagre.RefreshAsync();
     }
 
 }

@@ -1,6 +1,7 @@
 ﻿@page "/workflow-instances"
 @attribute [Authorize]
 @namespace Synapse.Dashboard.Pages.WorkflowInstances.List
+@using BlazorBootstrap
 @inherits NamespacedResourceManagementComponent<View, WorkflowInstanceListComponentStore, WorkflowInstanceListState, WorkflowInstance>
 
 <ApplicationTitle>Workflow Instances</ApplicationTitle>
@@ -65,9 +66,9 @@
                         <td class="text-start"><a href="#" @onclick:preventDefault="true" @onclick:stopPropagation="true">@resource.Metadata.Namespace</a></td>
                         <td class="text-center"><a href="#" @onclick:preventDefault="true" @onclick:stopPropagation="true">@resource.Spec.Definition.ToString()</a></td>
                         <td class="text-center"><span class="badge rounded-pill badge rounded-pill border @GetStatusClass(resource)">@(resource.Status?.Phase ?? WorkflowInstanceStatusPhase.Pending)</span></td>
-                        <td class="text-center">@resource.Metadata.CreationTimestamp.ToString()</td>
-                        <td class="text-center">@(resource.Status?.StartedAt.ToString() ?? "-")</td>
-                        <td class="text-center">@(resource.Status?.EndedAt.ToString() ?? "-")</td>
+                        <td class="text-center">@resource.Metadata.CreationTimestamp?.DateTime.FromNow()</td>
+                        <td class="text-center">@(resource.Status?.StartedAt?.DateTime.FromNow() ?? "-")</td>
+                        <td class="text-center">@(resource.Status?.EndedAt?.DateTime.FromNow() ?? "-")</td>
                         <td class="text-center">@(resource.Status?.StartedAt.HasValue == true && resource.Status?.EndedAt.HasValue == true ? resource.Status.EndedAt.Value.Subtract(resource.Status.StartedAt.Value).ToString("hh\\:mm\\:ss\\.fff") : "-")</td>
                         <td class="text-center">
                             @if (resource.Metadata.Labels?.TryGetValue(SynapseDefaults.Resources.Labels.Operator, out var operatorName) == true && !string.IsNullOrWhiteSpace(operatorName))

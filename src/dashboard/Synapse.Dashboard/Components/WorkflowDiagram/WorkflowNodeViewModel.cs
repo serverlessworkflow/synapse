@@ -14,7 +14,7 @@
 using Neuroglia.Blazor.Dagre;
 using Neuroglia.Blazor.Dagre.Models;
 
-namespace Synapse.Dashboard.Services;
+namespace Synapse.Dashboard.Components;
 
 /// <summary>
 /// Represents the base class for all workflow-related node models
@@ -31,37 +31,37 @@ public abstract class WorkflowNodeViewModel
         double? radiusX = Constants.NodeRadius, double? radiusY = Constants.NodeRadius, double? x = 0, double? y = 0, Type? componentType = null, Guid? parentId = null)
         : base(label, cssClass, shape, width, height, radiusX, radiusY, x, y, componentType, parentId)
     {
-        this.ComponentType = typeof(WorkflowNodeTemplate);
+        ComponentType = typeof(WorkflowNodeTemplate);
     }
 
     /// <inheritdoc/>
     public int OperativeInstancesCount
     {
-        get => this._operativeInstances;
+        get => _operativeInstances;
         set
         {
-            this._operativeInstances = value;
-            this.OnChange();
+            _operativeInstances = value;
+            OnChange();
         }
     }
 
     /// <inheritdoc/>
     public int FaultedInstancesCount
     {
-        get => this._faultedInstances;
+        get => _faultedInstances;
         set
         {
-            this._faultedInstances = value;
-            this.OnChange();
+            _faultedInstances = value;
+            OnChange();
         }
     }
 
     /// <inheritdoc/>
     public void ResetInstancesCount()
     {
-        this._operativeInstances = 0;
-        this._faultedInstances = 0;
-        this.OnChange();
+        _operativeInstances = 0;
+        _faultedInstances = 0;
+        OnChange();
     }
 
 }

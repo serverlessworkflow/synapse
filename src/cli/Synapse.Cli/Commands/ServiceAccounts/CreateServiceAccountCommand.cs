@@ -63,6 +63,7 @@ internal class CreateServiceAccountCommand
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         ArgumentException.ThrowIfNullOrWhiteSpace(@namespace);
         ArgumentException.ThrowIfNullOrWhiteSpace(claims);
+        this.EnsureConfigured();
         if (string.IsNullOrWhiteSpace(key)) 
         {
             var keyBytes = new byte[64];

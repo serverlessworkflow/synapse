@@ -11,9 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using ServerlessWorkflow.Sdk;
-using ServerlessWorkflow.Sdk.Models.Tasks;
-
 namespace Synapse.Dashboard.Components;
 
 /// <summary>
@@ -22,7 +19,10 @@ namespace Synapse.Dashboard.Components;
 /// <remarks>
 /// Initializes a new <see cref="DoTaskNodeViewModel"/>
 /// </remarks>
-public class DoTaskNodeViewModel(MapEntry<string, DoTaskDefinition> task)
-    : LabeledWorkflowNodeViewModel(task.Key, "do-task-node", null, Neuroglia.Blazor.Dagre.Constants.NodeHeight * 1.5, Neuroglia.Blazor.Dagre.Constants.NodeHeight * 1.5)
+public class DoTaskNodeViewModel(string name)
+    : LabeledWorkflowNodeViewModel(name, "do-task-node", null, 150, 35)
 {
+
+
+
 }

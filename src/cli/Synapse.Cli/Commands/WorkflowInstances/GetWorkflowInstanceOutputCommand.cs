@@ -61,6 +61,7 @@ internal class GetWorkflowInstanceOutputCommand
     /// <returns>A new awaitable <see cref="Task"/></returns>
     public async Task HandleAsync(string name, string @namespace, string output)
     {
+        this.EnsureConfigured();
         var workflowInstance = await this.Api.WorkflowInstances.GetAsync(name, @namespace);
         if (string.IsNullOrWhiteSpace(workflowInstance.Status?.OutputReference)) throw new NullReferenceException($"The workflow instance '{name}.{@namespace}' did not complete.");
         var outputDocument = await this.Api.WorkflowData.GetAsync(workflowInstance.Status.OutputReference);

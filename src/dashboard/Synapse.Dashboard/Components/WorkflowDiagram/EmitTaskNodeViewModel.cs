@@ -11,10 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Neuroglia.Blazor.Dagre;
-using ServerlessWorkflow.Sdk;
-using ServerlessWorkflow.Sdk.Models.Tasks;
-
 namespace Synapse.Dashboard.Components;
 
 /// <summary>
@@ -23,7 +19,8 @@ namespace Synapse.Dashboard.Components;
 /// <remarks>
 /// Initializes a new <see cref="EmitTaskNodeViewModel"/>
 /// </remarks>
-public class EmitTaskNodeViewModel(MapEntry<string, EmitTaskDefinition> task)
-    : LabeledWorkflowNodeViewModel(task.Key, "emit-task-node", null, Constants.NodeHeight * 1.5, Constants.NodeHeight * 1.5)
+public class EmitTaskNodeViewModel(string name)
+    : LabeledWorkflowNodeViewModel(name, "emit-task-node", null, 150, 35)
 {
+
 }

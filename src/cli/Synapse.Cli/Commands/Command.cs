@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.Extensions.Options;
+
 namespace Synapse.Cli.Commands;
 
 /// <summary>
@@ -50,5 +52,26 @@ public abstract class Command
     /// Gets the service used to interact with the remote Synapse API
     /// </summary>
     protected ISynapseApiClient Api { get; }
+
+    /// <summary>
+    /// Ensures that the CLI application has been properly configured
+    /// </summary>
+    protected virtual void EnsureConfigured()
+    {
+        var applicationOptions = this.ServiceProvider.GetRequiredService<IOptions<ApplicationOptions>>().Value;
+        if (applicationOptions.Api.Configurations.Count < 1) throw new Exception(@"Error: The server is not configured. Please ensure that your server configuration is correctly set.
+
+To configure the server, follow these steps:
+
+1. Verify that your configuration file is present and correctly formatted.
+2. Set the server configuration using the appropriate command, for example:
+   synctl config set-api your-api-name --server=https://your-server-address --token=your_access_token
+
+For more information on configuring the server, visit: https://your-docs-url.com/configuration
+
+Hint: You can check your current configuration with:
+   synctl config get-apis
+");
+    }
 
 }

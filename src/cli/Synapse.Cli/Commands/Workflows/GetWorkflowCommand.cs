@@ -63,6 +63,7 @@ internal class GetWorkflowCommand
     /// <returns>A new awaitable <see cref="Task"/></returns>
     public async Task HandleAsync(string name, string @namespace, string version, string output)
     {
+        this.EnsureConfigured();
         object outputData;
         if (string.IsNullOrWhiteSpace(version))
         {

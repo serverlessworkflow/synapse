@@ -35,8 +35,6 @@ var builder = Host.CreateDefaultBuilder()
             });
         });
         services.AddSerialization();
-        services.AddJsonSerializer();
-        services.AddYamlDotNetSerializer();
         services.AddJQExpressionEvaluator();
         services.AddJavaScriptExpressionEvaluator();
         services.AddNodeJSScriptExecutor();

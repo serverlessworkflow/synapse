@@ -61,6 +61,7 @@ internal class GetCorrelatorCommand
     /// <returns>A new awaitable <see cref="Task"/></returns>
     public async Task HandleAsync(string name, string @namespace, string output)
     {
+        this.EnsureConfigured();
         var correlator = await this.Api.Correlators.GetAsync(name, @namespace);
         string outputText = output.ToLowerInvariant() switch
         {

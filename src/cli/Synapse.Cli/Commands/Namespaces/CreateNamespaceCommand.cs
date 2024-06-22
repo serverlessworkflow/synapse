@@ -46,6 +46,7 @@ internal class CreateNamespaceCommand
     /// <returns>A new awaitable <see cref="Task"/></returns>
     public async Task HandleAsync(string name)
     {
+        this.EnsureConfigured();
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         await this.Api.Namespaces.CreateAsync(new() 
         { 

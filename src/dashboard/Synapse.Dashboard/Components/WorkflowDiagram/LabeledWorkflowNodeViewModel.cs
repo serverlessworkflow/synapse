@@ -14,21 +14,14 @@
 using Neuroglia.Blazor.Dagre;
 using Neuroglia.Blazor.Dagre.Models;
 
-namespace Synapse.Dashboard.Services;
+namespace Synapse.Dashboard.Components;
 
 /// <summary>
 /// Represents a <see cref="NodeViewModel"/> containing a label
 /// </summary>
-public class LabeledWorkflowNodeViewModel
-    : WorkflowNodeViewModel
+/// <inheritdoc/>
+public class LabeledWorkflowNodeViewModel(string? label = "", string? cssClass = null, string? shape = null, double? width = Constants.NodeWidth * 2, double? height = Constants.NodeHeight, double? radiusX = Constants.NodeRadius, double? radiusY = Constants.NodeRadius, double? x = 0, double? y = 0, Type? componentType = null, Guid? parentId = null)
+    : WorkflowNodeViewModel(label, cssClass, shape, width, height, radiusX, radiusY, x, y, componentType, parentId)
 {
-
-    /// <inheritdoc/>
-    public LabeledWorkflowNodeViewModel(string? label = "", string? cssClass = null, string? shape = null, double? width = Constants.NodeWidth * 2, double? height = Constants.NodeHeight, double ? radiusX = Constants.NodeRadius, double? radiusY = Constants.NodeRadius, double? x = 0, double? y = 0, Type? componentType = null, Guid? parentId = null)
-        : base(label, cssClass, shape, width, height, radiusX, radiusY, x, y, componentType, parentId)
-    {
-
-
-    }
 
 }

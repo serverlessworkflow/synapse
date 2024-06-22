@@ -24,31 +24,41 @@ public class TaskNodeViewModel
     : ClusterViewModel, IWorkflowNodeViewModel
 {
 
+    int _operativeInstances;
+    int _faultedInstances;
+
     /// <summary>
     /// Initializes a new <see cref="TaskNodeViewModel"/>
     /// </summary>
-    /// <param name="task">The name/definition mapping of the <see cref="TaskDefinition"/> the <see cref="TaskNodeViewModel"/> represents</param>
+    /// <param name="name">The name of the <see cref="TaskDefinition"/> the <see cref="TaskNodeViewModel"/> represents</param>
+    /// <param name="definition">The <see cref="TaskDefinition"/> the <see cref="TaskNodeViewModel"/> represents</param>
     /// <param name="isFirst">Indicates whether or not the task to create the <see cref="TaskNodeViewModel"/> for is the first task of the workflow it belongs to</param>
-    public TaskNodeViewModel(KeyValuePair<string, TaskDefinition> task, bool isFirst = false)
-        : base(null, task.Key)
+    public TaskNodeViewModel(string name, TaskDefinition definition, bool isFirst = false)
+        : base(null, name)
     {
-        this.Task = task;
+        this.Name = name;
+        this.Definition = definition;
         this.IsFirst = isFirst;
         this.ComponentType = typeof(TaskNodeTemplate);
     }
 
     /// <summary>
-    /// Gets the name/definition mapping of the <see cref="TaskDefinition"/> the <see cref="TaskNodeViewModel"/> represents
+    /// Gets the name of the <see cref="TaskDefinition"/> the <see cref="TaskNodeViewModel"/> represents
     /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
-    public KeyValuePair<string, TaskDefinition> Task { get; }
+    public string Name { get; }
+
+    /// <summary>
+    /// Gets the <see cref="TaskDefinition"/> the <see cref="TaskNodeViewModel"/> represents
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
+    public TaskDefinition Definition { get; }
 
     /// <summary>
     /// Gets if the state is the first of the workflow
     /// </summary>
     public bool IsFirst { get; }
 
-    int _operativeInstances = 0;
     /// <inheritdoc/>
     public int OperativeInstancesCount
     {
@@ -60,7 +70,6 @@ public class TaskNodeViewModel
         }
     }
 
-    int _faultedInstances = 0;
     /// <inheritdoc/>
     public int FaultedInstancesCount
     {

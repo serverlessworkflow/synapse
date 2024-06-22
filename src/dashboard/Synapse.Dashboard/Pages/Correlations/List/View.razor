@@ -55,8 +55,8 @@
                     <tr @onclick="async _ => await OnShowResourceDetailsAsync(correlation)" class="cursor-pointer">
                         <td class="text-start" title="The namespace the correlation belongs to">@correlation.Metadata.Namespace</td>
                         <td class="text-start" title="The correlation's name">@correlation.Metadata.Name</td>
-                        <td class="text-center" title="The date and time at which the correlation has been created">@correlation.Metadata.CreationTimestamp.ToString()</td>
-                        <td class="text-center" title="The date and time at which the correlation was last modified">@correlation.Status?.LastModified.ToString()</td>
+                        <td class="text-center" title="The date and time at which the correlation has been created">@correlation.Metadata.CreationTimestamp?.DateTime.FromNow()</td>
+                        <td class="text-center" title="The date and time at which the correlation was last modified">@correlation.Status?.LastModified?.DateTime.FromNow()</td>
                         <td class="text-center" title="@GetStatusPhaseTitle(correlation.Status?.Phase)"><span class="badge rounded-pill border border-@GetStatusPhaseClass(correlation) text-@GetStatusPhaseClass(correlation)">@correlation.Status?.Phase</span></td>
                         <td class="text-center" title="@GetLifetimeTitle(correlation.Spec.Lifetime)"><span class="badge rounded-pill border border-secondary text-secondary">@correlation.Spec.Lifetime</span></td>
                         <td class="text-center" title="@GetEventConsumptionStrategyTitle(correlation)"><span class="badge rounded-pill border border-secondary text-secondary">@GetEventConsumptionStrategy(correlation)</span></td>

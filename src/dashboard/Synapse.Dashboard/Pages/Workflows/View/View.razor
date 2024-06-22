@@ -1,0 +1,186 @@
+﻿@page "/workflows/{namespace}/{name}/latest"
+@page "/workflows/{namespace}/{name}/{version}"
+@using ServerlessWorkflow.Sdk.Models
+@using Synapse.Api.Client.Services
+@inject ISynapseApiClient Api
+@inject IBreadcrumbManager BreadcrumbManager
+@inject IJSRuntime JSRuntime
+@inject IMonacoEditorHelper MonacoEditorHelper
+@inject IYamlSerializer YamlSerializer
+
+<ApplicationTitle>Workflow @($"{name}.{ns}:{version}")</ApplicationTitle>
+
+
+<div class="row d-flex flex-grow">
+    <div class="col-4">
+        <div class="table-container">
+            <div class="d-flex flex-row justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <Synapse.Dashboard.Components.Breadcrumb />
+                    <select class="form-select w-auto">
+                        @if (workflow != null)
+                        {
+                            foreach (var definitionVersion in workflow.Spec.Versions)
+                            {
+                                <option value="@definitionVersion.Document.Version" selected="@(definitionVersion.Document.Version == version)">@definitionVersion.Document.Version</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <span>@(workflowInstances?.Count ?? 0) items</span>
+                <div class="d-flex">
+                    <input type="search" class="form-control rounded my-2 me-2" placeholder="Search" @* value="@SearchTerm" @oninput="OnSearchInput" *@ />
+                </div>
+            </div>
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th class="sticky-header text-start">Name</th>
+                        <th class="sticky-header text-start">Namespace</th>
+                        <th class="sticky-header text-center">Status</th>
+                        <th class="sticky-header text-center">Started At</th>
+                        <th class="sticky-header text-center">Ended At</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (workflowInstances != null && workflowInstances.Count > 0)
+                    {
+                        <Virtualize Context="resource" Items="workflowInstances">
+                            <tr class="cursor-pointer">
+                                <td class="text-start">@resource.Metadata.Name</td>
+                                <td class="text-start"><a href="#" @onclick:preventDefault="true" @onclick:stopPropagation="true">@resource.Metadata.Namespace</a></td>
+                                <td class="text-center"><span class="badge rounded-pill badge rounded-pill border @GetStatusClass(resource)">@(resource.Status?.Phase ?? WorkflowInstanceStatusPhase.Pending)</span></td>
+                                <td class="text-center">@(resource.Status?.StartedAt?.DateTime.FromNow() ?? "-")</td>
+                                <td class="text-center">@(resource.Status?.EndedAt?.DateTime.FromNow() ?? "-")</td>
+                            </tr>
+                        </Virtualize>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-4 border p-3">
+        <WorkflowDiagram WorkflowDefinition="workflowDefinition" />
+    </div> 
+    <div class="col-4 border p-3">
+        <StandaloneCodeEditor @ref="textBasedEditor"
+                              CssClass="h-100"
+                              ConstructionOptions="MonacoEditorHelper.GetStandaloneEditorConstructionOptions(this.textEditorValue, false, this.MonacoEditorHelper.PreferredLanguage)"
+                              OnDidInit="OnTextBasedEditorInitAsync"
+                              OnDidChangeModelContent="OnTextBasedValueChangedAsync" />
+    </div>
+</div>
+
+@code
+{
+    StandaloneCodeEditor? textBasedEditor;
+    string textEditorValue = string.Empty;
+    string ns = null!;
+    string name = null!;
+    string version = null!;
+    Workflow workflow = null!;
+    WorkflowDefinition workflowDefinition = null!;
+    List<WorkflowInstance> workflowInstances = [];
+
+    [Parameter] public string Namespace { get; set; } = null!;
+    [Parameter] public string Name { get; set; } = null!;
+    [Parameter] public string Version { get; set; } = null!;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var updated = false;
+        if (Namespace != ns)
+        {
+            ns = Namespace;
+            updated = true;
+        }
+        if (Name != name)
+        {
+            name = Name;
+            updated = true;
+        }
+        if (Version != version)
+        {
+            version = Version;
+            updated = true;
+        }
+        if (updated)
+        {
+            workflow = await Api.Workflows.GetAsync(name, ns);
+            workflowDefinition = string.IsNullOrWhiteSpace(version)
+                ? workflow.Spec.Versions.GetLatest()
+                : workflow.Spec.Versions.Get(version) ?? throw new NullReferenceException($"Failed to find the version '{version}' of workflow '{name}.{ns}'");
+            if (string.IsNullOrWhiteSpace(version)) version = workflowDefinition.Document.Version;
+            var labelSelectors = new LabelSelector[]
+            {
+                new LabelSelector(SynapseDefaults.Resources.Labels.Workflow, LabelSelectionOperator.Equals, $"{workflowDefinition.Document.Name}.{workflowDefinition.Document.Namespace}"),
+                new LabelSelector(SynapseDefaults.Resources.Labels.WorkflowVersion, LabelSelectionOperator.Equals, workflowDefinition.Document.Version)
+            };
+            workflowInstances = await (await Api.WorkflowInstances.ListAsync(ns, labelSelectors)).ToListAsync();
+            BreadcrumbManager.Use(Breadcrumbs.Workflows);
+            BreadcrumbManager.Add(new($"{name}.{ns}", $"/workflows/{ns}/{name}/latest"));
+            await this.textBasedEditor.SetValue(YamlSerializer.SerializeToText(workflowDefinition));
+            StateHasChanged();
+        }
+    }
+
+    string GetStatusClass(WorkflowInstance instance)
+    {
+        return instance.Status?.Phase switch
+        {
+            WorkflowInstanceStatusPhase.Pending => "border-secondary text-secondary",
+            WorkflowInstanceStatusPhase.Running => "border-primary text-primary",
+            WorkflowInstanceStatusPhase.Faulted => "border-danger text-danger",
+            WorkflowInstanceStatusPhase.Cancelled => "border-warning text-warning",
+            WorkflowInstanceStatusPhase.Completed => "border-success text-success",
+            _ => "border-secondary text-secondary"
+        };
+    }
+
+    async Task OnTextBasedEditorInitAsync()
+    {
+        // var resourceUri = $"inmemory://{typeof(TResource).Name.ToLower()}";
+        // this.textEditorModel = await Global.GetModel(this.JSRuntime, resourceUri);
+        // if (this.textEditorModel == null)
+        // {
+        //     this.textEditorModel = await Global.CreateModel(this.JSRuntime, this.textEditorValue, this.MonacoEditorHelper.PreferredLanguage, resourceUri);
+        //     await this.textBasedEditor!.SetModel(this.textEditorModel);
+        // }
+        // else
+        // {
+        //     await this.SetTextEditorValueAsync();
+        //     await this.SetTextBasedEditorLanguageAsync();
+        // }
+        await this.SetTextEditorValueAsync();
+        await this.SetTextBasedEditorLanguageAsync();
+        this.StateHasChanged();
+    }
+
+    async Task OnTextBasedValueChangedAsync(ModelContentChangedEvent e)
+    {
+        // if (!this.updating && this.textBasedEditor != null && this.textEditorInput != null)
+        // {
+        //     var text = await this.textBasedEditor.GetValue();
+        //     this.textEditorInput.OnNext(text);
+        // }
+    }
+
+    async Task SetTextEditorValueAsync()
+    {
+        if (this.textBasedEditor != null)
+        {
+            var editorText = await this.textBasedEditor.GetValue();
+            if (this.textEditorValue != editorText) await this.textBasedEditor.SetValue(this.textEditorValue);
+        }
+    }
+
+    async Task SetTextBasedEditorLanguageAsync()
+    {
+        // if (this.textBasedEditor != null && this.textEditorModel != null)
+        // {
+        //     //TextModel model = await this.textBasedEditor!.GetModel();
+        //     await Global.SetModelLanguage(this.JSRuntime, this.textEditorModel, this.MonacoEditorHelper.PreferredLanguage);
+        // }
+    }
+
+}

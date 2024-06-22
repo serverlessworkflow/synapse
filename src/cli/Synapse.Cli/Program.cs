@@ -11,11 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Microsoft.Extensions.Configuration;
-using Synapse.Cli.Configuration;
-using Synapse.Cli.Services;
-using System.Text.Json;
-
 var parser = BuildCommandLineParser();
 await parser.InvokeAsync(args);
 
@@ -56,7 +51,6 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
     {
         options.WriteIndented = true;
     });
-    services.AddServerlessWorkflowIO();
     services.AddSynapseHttpApiClient(http =>
     {
         if (string.IsNullOrWhiteSpace(applicationOptions.Api.Current)) return;

@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
 global using Neuroglia.Serialization;
@@ -19,6 +20,8 @@ global using Spectre.Console;
 global using Synapse.Api.Client;
 global using Synapse.Api.Client.Services;
 global using Synapse.Cli;
+global using Synapse.Cli.Configuration;
+global using Synapse.Cli.Services;
 global using Synapse.Resources;
 global using System.CommandLine;
 global using System.CommandLine.Builder;
@@ -26,5 +29,6 @@ global using System.CommandLine.NamingConventionBinder;
 global using System.CommandLine.Parsing;
 global using System.ComponentModel.DataAnnotations;
 global using System.Runtime.Serialization;
+global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using YamlDotNet.Serialization;

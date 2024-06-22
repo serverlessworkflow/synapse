@@ -63,6 +63,7 @@ internal class MonitorWorkflowInstancesCommand
     /// <returns>A new awaitable <see cref="Task"/></returns>
     public async Task HandleAsync(string name, string @namespace, string output)
     {
+        this.EnsureConfigured();
         var enumerable = await this.Api.WorkflowInstances.MonitorAsync(name, @namespace);
         await foreach (var e in enumerable)
         {

@@ -54,6 +54,7 @@ internal class DeleteWorkflowCommand
     /// <returns>A new awaitable <see cref="Task"/></returns>
     public async Task HandleAsync(string name, string @namespace, string version, bool y)
     {
+        this.EnsureConfigured();
         if (!y)
         {
             if (string.IsNullOrWhiteSpace(version)) Console.Write($"Are you sure you wish to delete all version of the workflow '{name}.{@namespace}'? Press 'y' to confirm, or any other key to cancel: ");

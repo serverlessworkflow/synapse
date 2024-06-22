@@ -13,36 +13,29 @@
 
 using Microsoft.AspNetCore.Components.Authorization;
 using Neuroglia.Blazor.Dagre;
+using System.Text.Json;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
-
 builder.Services.AddLogging();
 builder.Services.AddSerialization();
-builder.Services.AddJsonSerializer(options =>
+builder.Services.Configure<JsonSerializerOptions>(options =>
 {
     options.WriteIndented = true;
 });
-builder.Services.AddYamlDotNetSerializer();
 builder.Services.AddScoped(provider => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 builder.Services.AddSynapseHttpApiClient(options =>
 {
     options.BaseAddress = new(builder.HostEnvironment.BaseAddress);
     options.TokenFactory = provider => provider.GetRequiredService<ISecurityTokenManager>().GetTokenAsync();
 });
-
 builder.Services.AddFlux(flux =>
 {
     flux.ScanMarkupTypeAssembly<App>();
 });
-builder.Services.AddScoped<IApplicationLayout, ApplicationLayout>();
-builder.Services.AddSingleton<IMonacoEditorHelper, MonacoEditorHelper>();
 builder.Services.AddSingleton<ISecurityTokenManager, SecurityTokenManager>();
-builder.Services.AddSingleton<MonacoInterop>();
-builder.Services.AddSingleton<IDagreService, DagreService>();
-builder.Services.AddSingleton<IWorkflowGraphBuilder, WorkflowGraphBuilder>();
 builder.Services.AddBlazorBootstrap();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthorizationCore();
@@ -52,5 +45,12 @@ builder.Services.AddOidcAuthentication(options =>
 {
     builder.Configuration.Bind("Authentication:OIDC", options.ProviderOptions);
 });
+
+builder.Services.AddSingleton<IMonacoEditorHelper, MonacoEditorHelper>();
+builder.Services.AddScoped<IApplicationLayout, ApplicationLayout>();
+builder.Services.AddSingleton<MonacoInterop>();
+builder.Services.AddSingleton<IDagreService, DagreService>();
+builder.Services.AddSingleton<IWorkflowGraphBuilder, WorkflowGraphBuilder>();
+builder.Services.AddSingleton<IBreadcrumbManager, BreadcrumbManager>();
 
 await builder.Build().RunAsync();

@@ -53,6 +53,7 @@ internal class CreateCorrelationCommand
     public async Task HandleAsync(string file)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(file);
+        this.EnsureConfigured();
         var yaml = await File.ReadAllTextAsync(file);
         var correlation = this.YamlSerializer.Deserialize<Correlation>(yaml) ?? throw new NullReferenceException("Failed to read a correlation resource from the specified file.");
         correlation = await this.Api.Correlations.CreateAsync(correlation);

@@ -47,6 +47,7 @@ internal class ListWorkflowsCommand
     /// <returns>A new awaitable <see cref="Task"/></returns>
     public async Task HandleAsync(string @namespace)
     {
+        this.EnsureConfigured();
         var table = new Table();
         var isEmpty = true;
         table.Border(TableBorder.None);
