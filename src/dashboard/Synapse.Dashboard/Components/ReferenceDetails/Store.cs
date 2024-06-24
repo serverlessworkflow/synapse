@@ -156,7 +156,7 @@ public class ReferenceDetailsStore(
     /// Loads the referenced documents
     /// </summary>
     /// <returns></returns>
-    public async Task LoadReferencedDocument()
+    public async Task LoadReferencedDocumentAsync()
     {
         var reference = this.Get(state => state.Reference);
         var loaded = this.Get(state => state.Loaded);

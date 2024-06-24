@@ -12,11 +12,7 @@
 <div class="table-container">
     @if (Loading)
     {
-        <div class="loading">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-        </div>
+        <Loader />
     }
     <div class="d-flex flex-row justify-content-between align-items-center">
         <h4>Workflows</h4>
@@ -88,7 +84,7 @@
                             <div class="dropdown">
                                 <button class="btn btn-sm btn-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="" @onclick:stopPropagation="true"><i class="bi bi-three-dots-vertical"></i></button>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#" @onclick="async _ => await OnDeleteResourceAsync(resource)" @onclick:preventDefault="true" @onclick:stopPropagation="true">New version</a></li>
+                                    <li><a class="dropdown-item" href="#" @onclick="_ => OnCreateNewWorkflowVersion(resource.GetNamespace()!, resource.GetName())" @onclick:preventDefault="true" @onclick:stopPropagation="true">New version</a></li>
                                     <li><a class="dropdown-item" href="#" @onclick="async _ => await OnDeleteResourceAsync(resource)" @onclick:preventDefault="true" @onclick:stopPropagation="true">Delete</a></li>
                                 </ul>
                             </div>
@@ -100,7 +96,7 @@
     </table>
 </div>
 
-<Button Outline="true" Color="ButtonColor.Primary" @onclick="async _ => await OnShowResourceEditorAsync()"><Icon Name="IconName.Plus" /></Button>
+<Button Outline="true" Color="ButtonColor.Primary" @onclick="_ => OnCreateNewWorkflow()"><Icon Name="IconName.Plus" /></Button>
 
 <Offcanvas @ref="DetailsOffCanvas" Size="OffcanvasSize.Large" UseStaticBackdrop="false" BodyCssClass="d-flex flex-column" />
 
@@ -129,5 +125,9 @@
     }
 
     void OnViewWorkflow(Workflow workflow) => this.NavigationManager.NavigateTo($"workflows/{workflow.GetNamespace()}/{workflow.GetName()}/{workflow.Spec.Versions.GetLatest().Document.Version}");
+
+    void OnCreateNewWorkflow() => this.NavigationManager.NavigateTo("/workflows/new");
+
+    void OnCreateNewWorkflowVersion(string ns, string name) => this.NavigationManager.NavigateTo($"/workflows/{ns}/{name}/new");
 
 }

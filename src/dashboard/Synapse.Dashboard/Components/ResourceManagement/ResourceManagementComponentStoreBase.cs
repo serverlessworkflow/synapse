@@ -11,11 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Neuroglia;
-using Neuroglia.Data.Infrastructure.ResourceOriented;
-using Neuroglia.Reactive;
 using Synapse.Api.Client.Services;
-using System.Reactive.Linq;
 
 namespace Synapse.Dashboard.Components.ResourceManagement;
 
@@ -31,6 +27,7 @@ public abstract class ResourceManagementComponentStoreBase<TState, TResource>(IS
     where TResource : Resource, new()
     where TState : ResourceManagementComponentState<TResource>, new()
 {
+
     /// <summary>
     /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="ResourceDefinition"/>s of the specified type
     /// </summary>
@@ -115,8 +112,7 @@ public abstract class ResourceManagementComponentStoreBase<TState, TResource>(IS
             onNextAsync: this.OnResourceWatchEventAsync, 
             onErrorAsync: ex => Task.Run(() => Console.WriteLine(ex)), 
             onCompletedAsync: () => Task.CompletedTask, 
-            cancellationToken: this.CancellationTokenSource.Token
-            );
+            cancellationToken: this.CancellationTokenSource.Token);
         this.Filter.SubscribeAsync(this.ListResourcesAsync, onErrorAsync: ex => Task.Run(() => Console.WriteLine(ex)), onCompletedAsync: () => Task.CompletedTask, cancellationToken: this.CancellationTokenSource.Token);
         await base.InitializeAsync();
     }

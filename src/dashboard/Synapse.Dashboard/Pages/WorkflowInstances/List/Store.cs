@@ -13,12 +13,11 @@
 
 using Synapse.Api.Client.Services;
 using Synapse.Resources;
-using System.Reactive.Linq;
 
 namespace Synapse.Dashboard.Pages.WorkflowInstances.List;
 
 /// <summary>
-/// Represents the <see cref="Synapse.Dashboard.Pages.WorkflowInstances.List.View"/>'s store
+/// Represents the <see cref="View"/>'s store
 /// </summary>
 /// <param name="apiClient">The service used to interact with the Synapse API</param>
 /// <param name="resourceEventHub">The hub used to watch resource events</param>
@@ -30,7 +29,6 @@ public class WorkflowInstanceListComponentStore(ISynapseApiClient apiClient, Res
     /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="Workflow"/>s
     /// </summary>
     public IObservable<EquatableList<Workflow>?> Workflows => this.Select(s => s.Workflows);
-
 
     /// <summary>
     /// Lists all available <see cref="Workflow"/>s

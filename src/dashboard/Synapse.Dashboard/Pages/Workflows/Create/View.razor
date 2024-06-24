@@ -1,0 +1,98 @@
+﻿﻿@*
+    Copyright © 2024-Present The Synapse Authors
+    <p>
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+    <p>
+    http://www.apache.org/licenses/LICENSE-2.0
+    <p>
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*@
+
+@page "/workflows/new"
+@page "/workflows/{namespace}/{name}/new"
+@using ServerlessWorkflow.Sdk.Models
+@using Synapse.Api.Client.Services
+@inherits StatefulComponent<View, CreateWorkflowViewStore, CreateWorkflowViewState>
+@inject IBreadcrumbManager BreadcrumbManager
+@inject NavigationManager NavigationManager
+
+<ApplicationTitle>New workflow</ApplicationTitle>
+
+<h4>New Workflow</h4>
+@if (saving)
+{
+    <div class="position-relative w-100 h-100">
+        <Loader />
+    </div>
+}
+else if (workflowDefinition != null)
+{
+    <PreferredLanguageSelector />
+    <StandaloneCodeEditor @ref="TextBasedEditor"
+                          CssClass="h-100" />
+    <Button Class="btn-outline-primary">Save</Button>
+}
+else if(!string.IsNullOrWhiteSpace(ns))
+{
+    <Loader />
+}
+
+@code {
+
+    StandaloneCodeEditor? textBasedEditor;
+    string textEditorValue = string.Empty;
+    string? ns;
+    string? name;
+    Workflow? workflow;
+    WorkflowDefinition? workflowDefinition;
+    bool initialized;
+    bool loading;
+    bool saving;
+    StandaloneCodeEditor? TextBasedEditor
+    {
+        get => this.textBasedEditor;
+        set => this.Store.SetTextEditor(value);
+    }
+
+    [Parameter] public string? Namespace { get; set; }
+    [Parameter] public string? Name { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        this.Store.Loading.Subscribe(value => this.OnStateChanged(_ => loading = value), token: this.CancellationTokenSource.Token);
+        this.Store.Saving.Subscribe(value => this.OnStateChanged(_ => saving = value), token: this.CancellationTokenSource.Token);
+        this.Store.WorkflowDefinition.Subscribe(value => this.OnStateChanged(_ => workflowDefinition = value), token: this.CancellationTokenSource.Token);
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var updated = false;
+        if (Namespace != ns)
+        {
+            ns = Namespace;
+            updated = true;
+        }
+        if (Name != name)
+        {
+            name = Name;
+            updated = true;
+        }
+        if (updated || !initialized)
+        {
+            if (string.IsNullOrWhiteSpace(ns) || string.IsNullOrWhiteSpace(name)) await this.Store.CreateWorkflowDefinitionAsync();
+            else await this.Store.CreateWorkflowDefinitionAsync(ns, name);
+            BreadcrumbManager.Use(Breadcrumbs.Workflows);
+            BreadcrumbManager.Add(new($"New", $"/workflows/new"));
+            initialized = true;
+            StateHasChanged();
+        }
+    }
+
+}

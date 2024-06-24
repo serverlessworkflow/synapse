@@ -18,7 +18,7 @@
 @using Synapse.Dashboard.Components.ReferenceDetailsStateManagement
 @inherits StatefulComponent<ReferenceDetails, ReferenceDetailsStore, ReferenceDetailsState>
 
-<Accordion @ref="accordion" Flush="true" OnShowing="Store.LoadReferencedDocument">
+<Accordion @ref="accordion" Flush="true" OnShowing="Store.LoadReferencedDocumentAsync">
     <AccordionItem Title="@_label" Name="Reference">
         <Content>
             @if (!_loaded)
