@@ -1,10 +1,7 @@
 ﻿@import url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@200..900&display=swap');
-@font-face {
-    font-family: 'Aquatico';
-    src: url('../../fonts/Aquatico-Regular.woff2') format('woff2');
-}
+@import url('https://fonts.googleapis.com/css2?family=Mitr:wght@200;300;400;500;600;700&family=Rajdhani:wght@300;400;500;600;700&display=swap');
 
-$font-family-base: 'Source Sans Pro', sans-serif;
+$font-family-base: 'Inconsolata', monospace;
 $font-size-root: 15px;
 
 @import "../../lib/bootstrap/scss/mixins/banner";

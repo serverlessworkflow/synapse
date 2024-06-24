@@ -112,8 +112,14 @@ public abstract class ResourceManagementComponentStoreBase<TState, TResource>(IS
             onNextAsync: this.OnResourceWatchEventAsync, 
             onErrorAsync: ex => Task.Run(() => Console.WriteLine(ex)), 
             onCompletedAsync: () => Task.CompletedTask, 
-            cancellationToken: this.CancellationTokenSource.Token);
-        this.Filter.SubscribeAsync(this.ListResourcesAsync, onErrorAsync: ex => Task.Run(() => Console.WriteLine(ex)), onCompletedAsync: () => Task.CompletedTask, cancellationToken: this.CancellationTokenSource.Token);
+            cancellationToken: this.CancellationTokenSource.Token
+        );
+        this.Filter.SubscribeAsync(
+            onNextAsync: this.ListResourcesAsync,
+            onErrorAsync: ex => Task.Run(() => Console.WriteLine(ex)),
+            onCompletedAsync: () => Task.CompletedTask,
+            cancellationToken: this.CancellationTokenSource.Token
+        );
         await base.InitializeAsync();
     }
 

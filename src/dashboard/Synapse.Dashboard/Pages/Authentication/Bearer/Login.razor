@@ -12,7 +12,7 @@
             <svg class="logo" viewBox="0 0 40 40">
                 <use xlink:href="#logo" />
             </svg>
-            <h1 class="logo-typing">Synapse</h1>
+            <h1 class="logo-typing">SYNAPSE</h1>
         </div>
         <input @ref="logininput" type="password" class="form-control mb-3 text-center" @onkeydown="OnEnterKeyDown" @oninput="e => token = (string?)e.Value" placeholder="Static bearer token" />
         <button class="btn btn-primary w-100 mb-3" disabled="@string.IsNullOrWhiteSpace(token)" @onclick="OnLoginAsync">Login</button>

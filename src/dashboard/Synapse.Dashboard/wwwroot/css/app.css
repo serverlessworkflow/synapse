@@ -1,5 +1,6 @@
 ﻿@charset "UTF-8";
 @import url("https://fonts.googleapis.com/css2?family=Inconsolata:wght@200..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Mitr:wght@200;300;400;500;600;700&family=Rajdhani:wght@300;400;500;600;700&display=swap");
 @font-face {
   font-display: block;
   font-family: "bootstrap-icons";
@@ -7436,10 +7437,6 @@
   content: "\f83e";
 }
 
-@font-face {
-  font-family: "Aquatico";
-  src: url("../../fonts/Aquatico-Regular.woff2") format("woff2");
-}
 /*!
  * Bootstrap  v5.3.0-alpha1 (https://getbootstrap.com/)
  * Copyright 2011-2022 The Bootstrap Authors
@@ -7518,7 +7515,7 @@
   --bs-font-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --bs-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0));
   --bs-root-font-size: 15px;
-  --bs-body-font-family: "Source Sans Pro", sans-serif;
+  --bs-body-font-family: "Inconsolata", monospace;
   --bs-body-font-size: 1rem;
   --bs-body-font-weight: 400;
   --bs-body-line-height: 1.5;
@@ -13102,7 +13099,7 @@ textarea.form-control-lg {
   display: block;
   padding: var(--bs-tooltip-arrow-height);
   margin: var(--bs-tooltip-margin);
-  font-family: "Source Sans Pro", sans-serif;
+  font-family: "Inconsolata", monospace;
   font-style: normal;
   font-weight: 400;
   line-height: 1.5;
@@ -13212,7 +13209,7 @@ textarea.form-control-lg {
   z-index: var(--bs-popover-zindex);
   display: block;
   max-width: var(--bs-popover-max-width);
-  font-family: "Source Sans Pro", sans-serif;
+  font-family: "Inconsolata", monospace;
   font-style: normal;
   font-weight: 400;
   line-height: 1.5;
@@ -19343,7 +19340,7 @@ h1:focus, .h1:focus {
 }
 
 .logo-typing {
-  font-family: Aquatico;
+  font-family: Rajdhani;
   color: #8c68cd;
   /*
       background-image: -webkit-linear-gradient(0deg, $primary-dark 0%, $primary-bg-subtle-dark 100%);

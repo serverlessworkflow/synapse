@@ -13,49 +13,10 @@
 <div class="row d-flex flex-grow">
     <div class="col-4">
         <div class="table-container">
-            <div class="d-flex flex-row justify-content-between align-items-center">
-                <div class="d-flex align-items-center">
-                    <Synapse.Dashboard.Components.Breadcrumb />
-                    <select class="form-select w-auto">
-                        @if (workflow != null)
-                        {
-                            foreach (var definitionVersion in workflow.Spec.Versions)
-                            {
-                                <option value="@definitionVersion.Document.Version" selected="@(definitionVersion.Document.Version == version)">@definitionVersion.Document.Version</option>
-                            }
-                        }
-                    </select>
-                </div>
-                <span>@(workflowInstances?.Count ?? 0) items</span>
-                <div class="d-flex">
-                    <input type="search" class="form-control rounded my-2 me-2" placeholder="Search" @* value="@SearchTerm" @oninput="OnSearchInput" *@ />
-                </div>
-            </div>
-            <table class="table table-striped table-hover">
-                <thead>
-                    <tr>
-                        <th class="sticky-header text-start">Name</th>
-                        <th class="sticky-header text-start">Namespace</th>
-                        <th class="sticky-header text-center">Status</th>
-                        <th class="sticky-header text-center">Started At</th>
-                        <th class="sticky-header text-center">Ended At</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (workflowInstances != null && workflowInstances.Count > 0)
-                    {
-                        <Virtualize Context="resource" Items="workflowInstances">
-                            <tr class="cursor-pointer">
-                                <td class="text-start">@resource.Metadata.Name</td>
-                                <td class="text-start"><a href="#" @onclick:preventDefault="true" @onclick:stopPropagation="true">@resource.Metadata.Namespace</a></td>
-                                <td class="text-center"><span class="badge rounded-pill badge rounded-pill border @GetStatusClass(resource)">@(resource.Status?.Phase ?? WorkflowInstanceStatusPhase.Pending)</span></td>
-                                <td class="text-center">@(resource.Status?.StartedAt?.DateTime.FromNow() ?? "-")</td>
-                                <td class="text-center">@(resource.Status?.EndedAt?.DateTime.FromNow() ?? "-")</td>
-                            </tr>
-                        </Virtualize>
-                    }
-                </tbody>
-            </table>
+            <WorkflowInstancesList Loading="false"
+                                   Title="Title()"
+                                   WorkflowInstances="workflowInstances"
+                                   Columns="columns"></WorkflowInstancesList>
         </div>
     </div>
     <div class="col-4 border p-3">
@@ -80,6 +41,14 @@
     Workflow workflow = null!;
     WorkflowDefinition workflowDefinition = null!;
     List<WorkflowInstance> workflowInstances = [];
+    IEnumerable<string> columns = [
+        "Name",
+        "Namespace",
+        "Status",
+        "Started At",
+        "Ended At"
+    ];
+
 
     [Parameter] public string Namespace { get; set; } = null!;
     [Parameter] public string Name { get; set; } = null!;
@@ -123,18 +92,22 @@
         }
     }
 
-    string GetStatusClass(WorkflowInstance instance)
+
+    RenderFragment Title() => __builder =>
     {
-        return instance.Status?.Phase switch
-        {
-            WorkflowInstanceStatusPhase.Pending => "border-secondary text-secondary",
-            WorkflowInstanceStatusPhase.Running => "border-primary text-primary",
-            WorkflowInstanceStatusPhase.Faulted => "border-danger text-danger",
-            WorkflowInstanceStatusPhase.Cancelled => "border-warning text-warning",
-            WorkflowInstanceStatusPhase.Completed => "border-success text-success",
-            _ => "border-secondary text-secondary"
-        };
-    }
+        <div class="d-flex align-items-center">
+            <Synapse.Dashboard.Components.Breadcrumb />
+            <select class="form-select w-auto">
+                @if (workflow != null)
+                {
+                    foreach (var definitionVersion in workflow.Spec.Versions)
+                    {
+                        <option value="@definitionVersion.Document.Version" selected="@(definitionVersion.Document.Version == version)">@definitionVersion.Document.Version</option>
+                    }
+                }
+            </select>
+        </div>
+    };
 
     async Task OnTextBasedEditorInitAsync()
     {
