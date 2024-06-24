@@ -23,7 +23,8 @@ namespace Synapse.Dashboard.Services;
 /// </summary>
 /// <param name="api">The service used to interact with the Synapse API</param>
 /// <param name="tokenManager">The service used to manage security tokens</param>
-public class ApplicationAuthenticationStateProvider(ISynapseApiClient api, ISecurityTokenManager tokenManager)
+/// <param name="navigationManager">The service used to provides an abstraction for querying and managing URI navigation.</param>
+public class ApplicationAuthenticationStateProvider(ISynapseApiClient api, ISecurityTokenManager tokenManager, NavigationManager navigationManager)
     : AuthenticationStateProvider
 {
 
@@ -42,13 +43,24 @@ public class ApplicationAuthenticationStateProvider(ISynapseApiClient api, ISecu
     /// <inheritdoc/>
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        var token = await TokenManager.GetTokenAsync();
-        if (string.IsNullOrWhiteSpace(token)) return new AuthenticationState(Anonymous);
-        var profile = await this.Api.Users.GetUserProfileAsync();
-        var claims = profile.Claims?.Select(c => new Claim(c.Key, c.Value)) ?? [];
-        var identity = new ClaimsIdentity(claims, profile.AuthenticationType, JwtClaimTypes.Name, JwtClaimTypes.Role);
-        var principal = new ClaimsPrincipal(identity);
-        return new AuthenticationState(principal);
+        try
+        {
+            var token = await TokenManager.GetTokenAsync();
+            if (string.IsNullOrWhiteSpace(token)) return new AuthenticationState(Anonymous);
+            var profile = await this.Api.Users.GetUserProfileAsync();
+            var claims = profile.Claims?.Select(c => new Claim(c.Key, c.Value)).ToList() ?? [];
+            var identity = new ClaimsIdentity(claims, profile.AuthenticationType, JwtClaimTypes.Name, JwtClaimTypes.Role);
+            var principal = new ClaimsPrincipal(identity);
+            return new AuthenticationState(principal);
+        }
+        catch (Exception ex)
+        {
+            // todo: better error handling
+            Console.WriteLine(ex);
+            await TokenManager.SetTokenAsync("");
+            navigationManager.NavigateTo("/");
+            return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+        }
     }
 
     /// <summary>

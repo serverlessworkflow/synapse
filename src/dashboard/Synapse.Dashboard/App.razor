@@ -1,38 +1,64 @@
 ﻿@using Synapse.Dashboard.Components.Layout
+@implements IDisposable
 @inject IApplicationLayout Layout
 
-<Router AppAssembly="@typeof(App).Assembly">
-    <Found Context="routeData">
-        <PageTitle>Synapse - @Layout.Title?.ChildContent</PageTitle>
-        <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
-            <NotAuthorized>
-                @if (context.User.Identity?.IsAuthenticated != true)
-                {
-                    <RedirectToLogin />
-                }
-                else
-                {
-                    <p role="alert">You are not authorized to access this resource.</p>
-                }
-            </NotAuthorized>
-        </AuthorizeRouteView>
-        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
-    </Found>
-    <NotFound>
-        <PageTitle>Not found</PageTitle>
-        <LayoutView Layout="@typeof(MainLayout)">
-            <p role="alert">Sorry, there's nothing at this address.</p>
-        </LayoutView>
-    </NotFound>
-</Router>
+<CascadingAuthenticationState>
+    <AuthorizeView>
+        <Authorized>
+            @RouterWithLayout(typeof(MainLayout))
+        </Authorized>
+        <NotAuthorized>
+            @RouterWithLayout(typeof(EmptyLayout))
+        </NotAuthorized>
+    </AuthorizeView>
+</CascadingAuthenticationState>
 
 @code
 {
+    // see https://github.com/dotnet/aspnetcore/issues/39456
+    RenderFragment RouterWithLayout(Type layoutType) => __builder =>
+    {
+        <Router AppAssembly="@typeof(Program).Assembly">
+            <Found Context="routeData">
+                <PageTitle>Synapse - @Layout.Title?.ChildContent</PageTitle>
+                    <AuthorizeRouteView RouteData="@routeData" DefaultLayout="layoutType">
+                        <NotAuthorized>
+                            @if (context.User.Identity?.IsAuthenticated != true)
+                            {
+                                <RedirectToLogin />
+                            }
+                            else
+                            {
+                                <p role="alert">You are not authorized to access this resource.</p>
+                            }
+                        </NotAuthorized>
+                    </AuthorizeRouteView>
+                <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+            </Found>
+            <NotFound>
+                <PageTitle>Not found</PageTitle>
+                <LayoutView Layout="@layoutType">
+                    <p>Sorry, there's nothing at this address.</p>
+                </LayoutView>
+            </NotFound>
+        </Router>
+    };
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        this.Layout.PropertyChanged += (_, _) => this.StateHasChanged();
+        this.Layout.PropertyChanged += this.OnLayoutPropertyChanged;
+    }
+
+    void OnLayoutPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        this.StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        this.Layout.PropertyChanged -= this.OnLayoutPropertyChanged;
+        GC.SuppressFinalize(this);
     }
 
 }

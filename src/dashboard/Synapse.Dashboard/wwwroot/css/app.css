@@ -1,5 +1,5 @@
 ﻿@charset "UTF-8";
-@import url("https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,300;0,400;0,700;1,400&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inconsolata:wght@200..900&display=swap");
 @font-face {
   font-display: block;
   font-family: "bootstrap-icons";
@@ -19230,34 +19230,6 @@ tr.row-placeholder td::after {
   animation-fill-mode: forwards;
 }
 
-.y-tick {
-  stroke: var(--bs-gray-700);
-  fill: none;
-  stroke-width: 1px;
-}
-
-.axis g.tick line {
-  stroke: var(--bs-gray-700);
-  fill: none;
-  stroke-width: 1px;
-}
-
-.line-separator,
-.x-axis {
-  stroke: var(--bs-gray-700);
-  fill: none;
-  stroke-width: 1px;
-}
-
-.drop-line:last-child .line-separator {
-  display: none;
-}
-
-text {
-  stroke: none;
-  fill: var(--bs-body-color);
-}
-
 .monaco-normal {
   height: 500px !important;
 }
@@ -19270,8 +19242,43 @@ text {
   height: 100px !important;
 }
 
+.graph-container {
+  display: flex;
+  flex-direction: column;
+}
+.graph-container .graph-controls {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+.graph-container .graph-controls .btn {
+  --bs-btn-color: #6c757d;
+  --bs-btn-border-color: #6c757d;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: #6c757d;
+  --bs-btn-hover-border-color: #6c757d;
+  --bs-btn-focus-shadow-rgb: 108, 117, 125;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: #6c757d;
+  --bs-btn-active-border-color: #6c757d;
+  --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+  --bs-btn-disabled-color: #6c757d;
+  --bs-btn-disabled-bg: transparent;
+  --bs-btn-disabled-border-color: #6c757d;
+  --bs-gradient: none;
+  color: var(--bs-btn-color);
+  fill: var(--bs-btn-color);
+  border: var(--bs-btn-border-width) solid var(--bs-btn-border-color);
+}
+.graph-container .graph-controls .btn:hover {
+  color: var(--bs-btn-hover-color);
+  fill: var(--bs-btn-hover-color);
+  background-color: var(--bs-btn-hover-bg);
+  border-color: var(--bs-btn-hover-border-color);
+}
+
 html, body {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: "Inconsolata", monospace;
   width: 100%;
   height: 100%;
 }
@@ -19347,6 +19354,11 @@ h1:focus, .h1:focus {
   */
 }
 
+.logo-typing-large {
+  font-size: 8rem;
+  margin-right: 0px;
+}
+
 .vh-30 {
   height: 30vh !important;
 }
@@ -19369,4 +19381,14 @@ h1:focus, .h1:focus {
 
 .end-node circle {
   stroke-width: 3px;
+}
+
+input[type=search]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  height: 16px;
+  width: 16px;
+  margin-left: 0.4em;
+  mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23777'><path d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'/></svg>");
+  cursor: pointer;
+  background-color: #c6b4e6;
 }

@@ -83,23 +83,21 @@
         </div>
         <AuthorizeView>
             <Authorized>
-                <div class="dropdown text-end me-3">
-                    <button class="btn text-muted dropdown-toggle" type="button" id="servicesDropdownButton" data-bs-toggle="dropdown" aria-expanded="false">
-                        <span class="btn-label">@user?.Identity?.Name</span>
-                    </button>
-                    <ul class="dropdown-menu" aria-labelledby="servicesDropdownButton">
-                        <li>
+                <Dropdown Class="me-3">
+                    <DropdownToggleButton Class="text-muted">@user?.Identity?.Name</DropdownToggleButton>
+                    <DropdownMenu Position="DropdownMenuPosition.End">
+                        <DropdownItem>
                             <NavLink class="nav-link mx-3 my-2" href="users/profile" Match="NavLinkMatch.All">
                                 <span class="btn-label">Profile</span>
                             </NavLink>
-                        </li>
-                        <li>
+                        </DropdownItem>
+                        <DropdownItem>
                             <NavLink class="nav-link mx-3" href="authentication/logout" Match="NavLinkMatch.All">
                                 <span class="btn-label">Logout</span>
                             </NavLink>
-                        </li>
-                    </ul>
-                </div>
+                        </DropdownItem>
+                    </DropdownMenu>
+                </Dropdown>
             </Authorized>
         </AuthorizeView>
     </nav>
