@@ -13,7 +13,6 @@
 
 using Neuroglia.Data.Expressions;
 using Neuroglia.Data.Infrastructure.ResourceOriented;
-using Neuroglia.Eventing.CloudEvents;
 
 namespace Synapse.Runner.Services.Executors;
 

@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Neuroglia.Data.Infrastructure.ResourceOriented;
+
 namespace Synapse.UnitTests.Cases.Runner.TaskExecutors;
 
 public class ForkTaskExecutorTests
@@ -60,7 +62,7 @@ public class ForkTaskExecutorTests
             Document = new()
             {
                 Dsl = DslVersion.V010,
-                Namespace = "default",
+                Namespace = Namespace.DefaultNamespaceName,
                 Name = "fake",
                 Version = "0.1.0"
             },

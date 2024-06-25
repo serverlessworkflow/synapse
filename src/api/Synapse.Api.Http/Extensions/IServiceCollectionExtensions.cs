@@ -11,13 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using IdentityServer4.Models;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.OpenApi.Models;
 using Neuroglia;
 using Neuroglia.Security.Services;
+using Synapse.Api.Application.Services;
 using Synapse.Api.Http.Controllers;
 using Synapse.Core.Api.Services;
-using Synapse.Resources;
 using System.Text.Json;
 
 namespace Synapse.Api.Http;
@@ -43,6 +44,13 @@ public static class IServiceCollectionExtensions
                 options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
             })
             .AddApplicationPart(typeof(WorkflowsController).Assembly);
+        services.AddIdentityServer()
+            .AddDeveloperSigningCredential()
+            .AddInMemoryApiResources(SynapseApiDefaults.OpenIDConnect.ApiResources.AsEnumerable())
+            .AddInMemoryIdentityResources(SynapseApiDefaults.OpenIDConnect.IdentityResources.AsEnumerable())
+            .AddInMemoryApiScopes(SynapseApiDefaults.OpenIDConnect.ApiScopes.AsEnumerable())
+            .AddClientStore<ServiceAccountClientStore>()
+            .AddProfileService<ServiceAccountProfileService>();
         services.AddSignalR();
         services.AddSingleton<ResourceWatchEventHubController>();
         services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<ResourceWatchEventHubController>());

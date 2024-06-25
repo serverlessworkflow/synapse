@@ -13,6 +13,8 @@
 
 using Microsoft.Extensions.Logging;
 using Neuroglia.Data.Infrastructure.ResourceOriented;
+using Synapse.Resources;
+using System.Security.Cryptography;
 
 namespace Synapse.Core.Infrastructure.Services;
 
@@ -27,10 +29,27 @@ public class DatabaseInitializer(ILoggerFactory loggerFactory, IServiceProvider 
     /// <inheritdoc/>
     protected override async Task SeedAsync(CancellationToken cancellationToken)
     {
-        foreach (var definition in SynapseDefaults.Resources.Definitions.AsEnumerable())
+        foreach (var definition in SynapseDefaults.Resources.Definitions.AsEnumerable()) await this.Database.CreateResourceAsync(definition, cancellationToken: cancellationToken).ConfigureAwait(false);
+        var keyBytes = new byte[64];
+        using var rng = RandomNumberGenerator.Create();
+        rng.GetBytes(keyBytes);
+        var key = Convert.ToBase64String(keyBytes);
+        await this.Database.CreateResourceAsync(new ServiceAccount()
         {
-            await this.Database.CreateResourceAsync(definition, cancellationToken: cancellationToken).ConfigureAwait(false);
-        }
+            Metadata = new()
+            {
+                Namespace = Namespace.DefaultNamespaceName,
+                Name = ServiceAccount.DefaultServiceAccountName
+            },
+            Spec = new()
+            {
+                Key = key,
+                Claims = new Dictionary<string, string>()
+                {
+
+                }
+            }
+        }, false, cancellationToken).ConfigureAwait(false);
     }
 
 }

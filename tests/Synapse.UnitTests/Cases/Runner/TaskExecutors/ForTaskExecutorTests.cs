@@ -13,6 +13,7 @@
 
 using Json.Pointer;
 using Neuroglia;
+using Neuroglia.Data.Infrastructure.ResourceOriented;
 using System.Text.Json;
 
 namespace Synapse.UnitTests.Cases.Runner.TaskExecutors;
@@ -50,7 +51,7 @@ public class ForTaskExecutorTests
             Document = new()
             {
                 Dsl = DslVersion.V010,
-                Namespace = "default",
+                Namespace = Namespace.DefaultNamespaceName,
                 Name = "fake",
                 Version = "0.1.0"
             },
@@ -79,14 +80,14 @@ public class ForTaskExecutorTests
         result!.AsObject()!.TryGetPropertyValue(nameof(indexes).ToCamelCase(), out var outputIndexes).Should().BeTrue();
         outputIndexes!.Deserialize<int[]>().Should().BeEquivalentTo(indexes);
 
-        var index = 0;
         JsonPointer.Parse(context.Workflow.Instance.Status!.Tasks!.First().Reference.OriginalString).TryEvaluate(workflowDefinitionNode, out var match).Should().BeTrue();
         match.Should().NotBeNull();
-        foreach (var task in context.Workflow.Instance.Status!.Tasks!.Skip(1))
-        {
-            task.Reference.OriginalString.Should().EndWith($"{index}/do");
-            index++;
-        }
+        context.Workflow.Instance.Status!.Tasks!.Skip(1).First().Reference.OriginalString.Should().EndWith("/0/do");
+        context.Workflow.Instance.Status!.Tasks!.Skip(2).First().Reference.OriginalString.Should().EndWith("/0/do/0/setOutput");
+        context.Workflow.Instance.Status!.Tasks!.Skip(3).First().Reference.OriginalString.Should().EndWith("/1/do");
+        context.Workflow.Instance.Status!.Tasks!.Skip(4).First().Reference.OriginalString.Should().EndWith("/1/do/0/setOutput");
+        context.Workflow.Instance.Status!.Tasks!.Skip(5).First().Reference.OriginalString.Should().EndWith("/2/do");
+        context.Workflow.Instance.Status!.Tasks!.Skip(6).First().Reference.OriginalString.Should().EndWith("/2/do/0/setOutput");
     }
 
     [Fact]
@@ -142,7 +143,7 @@ public class ForTaskExecutorTests
 
         //assert
         context.Instance.Status.Should().Be(TaskInstanceStatus.Completed);
-        context.Instance.Next.Should().Be(FlowDirective.Continue);
+        context.Instance.Next.Should().Be(FlowDirective.End);
         output.Count.Should().Be(1);
         output["lastIndex"].Deserialize<int>().Should().Be(lastIndex);
     }

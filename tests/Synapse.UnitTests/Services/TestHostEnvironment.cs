@@ -11,15 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Synapse.Api.Server.Configuration;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Hosting;
 
-/// <summary>
-/// Represents the <see cref="AuthenticationSchemeOptions"/> used to configure Synapse's service account based authentication
-/// </summary>
-public class ServiceAccountAuthenticationOptions
-    : AuthenticationSchemeOptions
+namespace Synapse.UnitTests.Services;
+
+public class TestHostEnvironment
+    : IHostEnvironment
 {
 
+    public string ApplicationName { get; set; } = "unit-tests";
 
+    public IFileProvider ContentRootFileProvider { get; set; } = new PhysicalFileProvider(AppContext.BaseDirectory);
+
+    public string ContentRootPath { get; set; } = AppContext.BaseDirectory;
+
+    public string EnvironmentName { get; set; } = "Debug";
 
 }

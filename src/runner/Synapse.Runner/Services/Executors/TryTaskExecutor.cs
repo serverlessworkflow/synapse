@@ -35,7 +35,11 @@ public class TryTaskExecutor(IServiceProvider serviceProvider, ILogger<TryTaskEx
     {
         var taskDefinition = new DoTaskDefinition()
         {
-            Do = this.Task.Definition.Try
+            Do = this.Task.Definition.Try,
+            Extensions =
+            [
+                new(SynapseDefaults.Tasks.ExtensionProperties.PathPrefix.Name, false)
+            ]
         };
         var task = await this.Task.Workflow.CreateTaskAsync(taskDefinition, nameof(this.Task.Definition.Try).ToCamelCase(), this.Task.Input, null, this.Task, false, cancellationToken).ConfigureAwait(false);
         var executor = await this.CreateTaskExecutorAsync(task, taskDefinition, this.Task.ContextData, this.Task.Arguments, cancellationToken).ConfigureAwait(false);
@@ -54,9 +58,13 @@ public class TryTaskExecutor(IServiceProvider serviceProvider, ILogger<TryTaskEx
     {
         var taskDefinition = new DoTaskDefinition()
         {
-            Do = this.Task.Definition.Try
+            Do = this.Task.Definition.Try,
+            Extensions =
+            [
+                new(SynapseDefaults.Tasks.ExtensionProperties.PathPrefix.Name, false)
+            ]
         };
-        var task = await this.Task.Workflow.CreateTaskAsync(taskDefinition, $"retry/{this.Task.Instance.Retries?.Count - 1}", this.Task.Input, null, this.Task, false, cancellationToken).ConfigureAwait(false);
+        var task = await this.Task.Workflow.CreateTaskAsync(taskDefinition, $"retry/{this.Task.Instance.Retries?.Count - 1}/try", this.Task.Input, null, this.Task, false, cancellationToken).ConfigureAwait(false);
         var executor = await this.CreateTaskExecutorAsync(task, taskDefinition, this.Task.ContextData, this.Task.Arguments, cancellationToken).ConfigureAwait(false);
         executor.SubscribeAsync
         (

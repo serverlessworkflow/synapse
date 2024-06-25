@@ -64,7 +64,7 @@ internal class DeleteServiceAccountCommand
     static class CommandOptions
     {
 
-        public static Option<string> Namespace => new(["-n", "--namespace"], () => "default", "The namespace the service account to delete belongs to");
+        public static Option<string> Namespace => new(["-n", "--namespace"], () => Neuroglia.Data.Infrastructure.ResourceOriented.Namespace.DefaultNamespaceName, "The namespace the service account to delete belongs to");
 
         public static Option<bool> Confirm => new(["-y", "--yes"], () => false, "Delete the service account without prompting confirmation");
 

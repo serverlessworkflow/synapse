@@ -29,9 +29,21 @@ authentication.AddScheme<StaticBearerAuthenticationOptions, StaticBearerAuthenti
 {
     foreach(var token in applicationOptions.Authentication.Tokens) options.AddToken(token.Key, new(token.Value.Select(kvp => new Claim(kvp.Key, kvp.Value)), StaticBearerDefaults.AuthenticationScheme, JwtClaimTypes.Name, JwtClaimTypes.Role));
 });
-authentication.AddScheme<ServiceAccountAuthenticationOptions, ServiceAccountAuthenticationHandler>(ServiceAccountAuthenticationDefaults.AuthenticationScheme, options =>
+authentication.AddJwtBearer(ServiceAccountAuthenticationDefaults.AuthenticationScheme, options =>
 {
-
+    options.Authority = builder.Environment.RunsInDocker() || builder.Environment.RunsInKubernetes()
+        ? "http://localhost:8080"
+        : "http://localhost:5257";
+    options.RequireHttpsMetadata = false;
+    options.TokenValidationParameters = new()
+    {
+        NameClaimType = JwtClaimTypes.Name,
+        RoleClaimType = JwtClaimTypes.Role,
+        //ValidAudience = "api", //todo
+        ValidateAudience = false, //todo
+        ValidIssuer = options.Authority,
+        ValidateIssuer = true
+    };
 });
 authentication.AddPolicyScheme(FallbackPolicySchemeDefaults.AuthenticationScheme, FallbackPolicySchemeDefaults.AuthenticationScheme, options =>
 {
@@ -56,6 +68,8 @@ if (applicationOptions.Authentication.Jwt != null)
         options.Audience = applicationOptions.Authentication.Jwt.Audience;
         options.TokenValidationParameters = new()
         {
+            NameClaimType = JwtClaimTypes.Name,
+            RoleClaimType = JwtClaimTypes.Role,
             ValidAudience = applicationOptions.Authentication.Jwt.Audience,
             ValidateAudience = !string.IsNullOrWhiteSpace(applicationOptions.Authentication.Jwt.Audience),
             ValidIssuer = applicationOptions.Authentication.Jwt.Issuer,
@@ -94,6 +108,7 @@ app.UseResponseCompression();
 if (options.ServeDashboard) app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseIdentityServer();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseExceptionHandler(handler =>

@@ -27,6 +27,11 @@ public class RunnerOptions
     public virtual SynapseHttpApiClientOptions Api { get; set; } = new();
 
     /// <summary>
+    /// Gets/sets the options used to configure the service account used by a Synapse Runner application
+    /// </summary>
+    public virtual ServiceAccountOptions ServiceAccount { get; set; } = new();
+
+    /// <summary>
     /// Gets/sets the options used to configure the workflow the Synapse Runner must run and how
     /// </summary>
     public virtual WorkflowOptions Workflow { get; set; } = new();

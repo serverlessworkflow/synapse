@@ -52,6 +52,7 @@ public abstract class RunnerTestsBase
 
     protected virtual IServiceCollection ConfigureServices(IServiceCollection services)
     {
+        services.AddSingleton<IHostEnvironment, TestHostEnvironment>();
         services.AddLogging();
         services.AddSerialization();
         services.AddJsonSerializer();

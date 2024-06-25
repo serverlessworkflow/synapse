@@ -64,7 +64,7 @@ internal class DeleteWorkflowInstanceCommand
     static class CommandOptions
     {
 
-        public static Option<string> Namespace => new([ "-n", "--namespace" ], () => "default", "The namespace the workflow instance to delete belongs to.");
+        public static Option<string> Namespace => new([ "-n", "--namespace" ], () => Neuroglia.Data.Infrastructure.ResourceOriented.Namespace.DefaultNamespaceName, "The namespace the workflow instance to delete belongs to.");
 
         public static Option<bool> Confirm => new(["-y", "--yes"], () => false, "Delete the workflow instance without prompting confirmation.");
 

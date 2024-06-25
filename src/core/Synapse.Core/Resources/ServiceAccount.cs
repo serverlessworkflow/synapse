@@ -24,6 +24,11 @@ public record ServiceAccount
 {
 
     /// <summary>
+    /// Gets the name of the default service account
+    /// </summary>
+    public const string DefaultServiceAccountName = "default";
+
+    /// <summary>
     /// Gets the <see cref="ServiceAccount"/>'s resource type
     /// </summary>
     public static readonly ResourceDefinitionInfo ResourceDefinition = new ServiceAccountResourceDefinition()!;

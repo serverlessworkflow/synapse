@@ -32,7 +32,7 @@ public class OperatorOptions
             this.Runner ??= new();
             this.Runner.Api ??= new() 
             { 
-                Uri = new(uri) 
+                Uri = new(uri)
             };
         }
     }

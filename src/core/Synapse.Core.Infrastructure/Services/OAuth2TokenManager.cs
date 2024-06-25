@@ -84,12 +84,12 @@ public class OAuth2TokenManager(ILogger<OAuth2TokenManager> logger, IJsonSeriali
             }
             else return token;
         }
-        var discoveryDocument = await this.HttpClient.GetDiscoveryDocumentAsync(configuration.Authority.ToString(), cancellationToken);
-        using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(configuration.Authority, discoveryDocument.TokenEndpoint))
+        var discoveryDocument = await this.HttpClient.GetDiscoveryDocumentAsync(configuration.Authority.OriginalString, cancellationToken).ConfigureAwait(false);
+        using var request = new HttpRequestMessage(HttpMethod.Post, discoveryDocument.TokenEndpoint)
         {
             Content = new FormUrlEncodedContent(properties)
         };
-        using var response = await this.HttpClient.SendAsync(request, cancellationToken);
+        using var response = await this.HttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
         var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
         if (!response.IsSuccessStatusCode)
         {

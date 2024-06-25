@@ -12,6 +12,7 @@
 // limitations under the License.
 
 using Json.Pointer;
+using Neuroglia.Data.Infrastructure.ResourceOriented;
 
 namespace Synapse.UnitTests.Cases.Runner.TaskExecutors;
 
@@ -54,7 +55,7 @@ public class EmitTaskExecutorTests
             Document = new()
             {
                 Dsl = DslVersion.V010,
-                Namespace = "default",
+                Namespace = Namespace.DefaultNamespaceName,
                 Name = "fake",
                 Version = "0.1.0"
             },

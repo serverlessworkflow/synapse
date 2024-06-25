@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-if (args.Length != 0 && args.Contains("--debug") && !Debugger.IsAttached) Debugger.Launch();
+//if (args.Length != 0 && args.Contains("--debug") && !Debugger.IsAttached) Debugger.Launch(); //todo: uncomment
 
 var builder = Host.CreateDefaultBuilder()
     .ConfigureAppConfiguration((context, config) =>
@@ -41,8 +41,26 @@ var builder = Host.CreateDefaultBuilder()
         services.AddPythonScriptExecutor();
         services.AddSynapseHttpApiClient(http =>
         {
+            var configuration = new ServerlessWorkflow.Sdk.Models.Authentication.OAuth2AuthenticationSchemeDefinition()
+            {
+                Authority = options.Api.BaseAddress,
+                Grant = OAuth2GrantType.ClientCredentials,
+                Client = new()
+                {
+                    Id = options.ServiceAccount.Name,
+                    Secret = options.ServiceAccount.Key
+                },
+                Scopes = ["api"]
+            };
             http.BaseAddress = options.Api.BaseAddress;
+            http.TokenFactory = async provider =>
+            {
+                var token = await provider.GetRequiredService<IOAuth2TokenManager>().GetTokenAsync(configuration);
+                if (string.IsNullOrWhiteSpace(token.AccessToken)) throw new NullReferenceException("The access token cannot be null");
+                return token.AccessToken;
+            };
         });
+        services.AddSingleton<IOAuth2TokenManager, OAuth2TokenManager>();
         services.AddSingleton<ITaskExecutionContextFactory, TaskExecutionContextFactory>();
         services.AddSingleton<ITaskExecutorFactory, TaskExecutorFactory>();
         services.AddHostedService<RunnerApplication>();

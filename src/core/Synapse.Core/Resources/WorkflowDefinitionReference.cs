@@ -42,7 +42,7 @@ public record WorkflowDefinitionReference
     public required virtual string Version { get; set; }
 
     /// <inheritdoc/>
-    public override string ToString() => $"{this.Namespace}.{this.Name}:{this.Version}";
+    public override string ToString() => $"{this.Name}.{this.Namespace}:{this.Version}";
 
     /// <summary>
     /// Parses the specified input into a new <see cref="WorkflowDefinitionReference"/>

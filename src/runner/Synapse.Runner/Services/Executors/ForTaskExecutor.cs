@@ -66,10 +66,10 @@ public class ForTaskExecutor(IServiceProvider serviceProvider, ILogger<ForTaskEx
     /// <inheritdoc/>
     protected override async Task DoExecuteAsync(CancellationToken cancellationToken)
     {
-        if(this.Collection == null) throw new InvalidOperationException("The executor must be initialized before execution");
+        if (this.Collection == null) throw new InvalidOperationException("The executor must be initialized before execution");
         var task = await this.Task.GetSubTasksAsync(cancellationToken).OrderBy(t => t.CreatedAt).LastOrDefaultAsync(cancellationToken).ConfigureAwait(false);
         var index = task == null ? 0 : int.Parse(task.Reference.OriginalString.Split('/', StringSplitOptions.RemoveEmptyEntries).Last());
-        if(index == this.Collection.Count - 1)
+        if (index == this.Collection.Count - 1)
         {
             await this.SetResultAsync(this.Task.Input, this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
             return;
@@ -77,10 +77,14 @@ public class ForTaskExecutor(IServiceProvider serviceProvider, ILogger<ForTaskEx
         var item = this.Collection.ElementAt(index);
         var taskDefinition = new DoTaskDefinition()
         {
-            Do = this.Task.Definition.Do
+            Do = this.Task.Definition.Do,
+            Extensions =
+            [
+                new(SynapseDefaults.Tasks.ExtensionProperties.PathPrefix.Name, false)
+            ]
         };
         if (task == null) task = await this.Task.Workflow.CreateTaskAsync(taskDefinition, this.GetPathFor("0"), this.Task.Input, null, this.Task, false, cancellationToken).ConfigureAwait(false);
-        else if(!task.IsOperative) task = await this.Task.Workflow.CreateTaskAsync(taskDefinition, this.GetPathFor($"{index + 1}"), this.Task.Input, null, this.Task, false, cancellationToken).ConfigureAwait(false);
+        else if (!task.IsOperative) task = await this.Task.Workflow.CreateTaskAsync(taskDefinition, this.GetPathFor($"{index + 1}"), this.Task.Input, null, this.Task, false, cancellationToken).ConfigureAwait(false);
         var contextData = this.Task.ContextData.Clone()!;
         var arguments = this.Task.Arguments.Clone()!;
         arguments[this.Task.Definition.For.Each ?? RuntimeExpressions.Arguments.Each] = item;
@@ -130,7 +134,11 @@ public class ForTaskExecutor(IServiceProvider serviceProvider, ILogger<ForTaskEx
             case FlowDirective.Continue:
                 var taskDefinition = new DoTaskDefinition()
                 {
-                    Do = this.Task.Definition.Do
+                    Do = this.Task.Definition.Do,
+                    Extensions =
+                    [
+                        new(SynapseDefaults.Tasks.ExtensionProperties.PathPrefix.Name, false)
+                    ]
                 };
                 var next = await this.Task.Workflow.CreateTaskAsync(taskDefinition, this.GetPathFor(index.ToString()), output, null, this.Task, false, cancellationToken).ConfigureAwait(false);
                 var item = this.Collection.ElementAt(index);

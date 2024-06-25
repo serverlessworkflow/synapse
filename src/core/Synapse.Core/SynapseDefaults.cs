@@ -42,19 +42,6 @@ public static class SynapseDefaults
     }
 
     /// <summary>
-    /// Exposes Synapse claims
-    /// </summary>
-    public static class Claims
-    {
-
-        /// <summary>
-        /// Gets the service account claim type
-        /// </summary>
-        public const string ServiceAccount = "service_account";
-
-    }
-
-    /// <summary>
     /// Exposes Synapse environment variables
     /// </summary>
     public static class EnvironmentVariables
@@ -247,6 +234,28 @@ public static class SynapseDefaults
         }
 
         /// <summary>
+        /// Exposes constants about service account related environment variables
+        /// </summary>
+        public static class ServiceAccount
+        {
+
+            /// <summary>
+            /// Gets the prefix for all operator related environment variables
+            /// </summary>
+            public const string Prefix = EnvironmentVariables.Prefix + "SERVICEACCOUNT_";
+
+            /// <summary>
+            /// Gets the environment variable used to configure the service account name of a Synapse Runner
+            /// </summary>
+            public const string Name = Prefix + "NAME";
+            /// <summary>
+            /// Gets the environment variable used to configure the key of a Synapse Runner's service account
+            /// </summary>
+            public const string Key = Prefix + "KEY";
+
+        }
+
+        /// <summary>
         /// Exposes constants about workflow-related environment variables
         /// </summary>
         public static class Workflow
@@ -351,6 +360,39 @@ public static class SynapseDefaults
             /// Gets the label used by Synapse to indicate the version of the workflow used by a workflow instance
             /// </summary>
             public const string WorkflowVersion = Prefix + "workflow/version";
+        }
+
+    }
+
+    /// <summary>
+    /// Exposes constants about Synapse tasks
+    /// </summary>
+    public static class Tasks
+    {
+
+        /// <summary>
+        /// Exposes Synapse task extension properties
+        /// </summary>
+        public static class ExtensionProperties
+        {
+
+            /// <summary>
+            /// Exposes constants about the extension property used to determine whether or not to prefix the path of child tasks with the task's keyword (ex: `do`)
+            /// </summary>
+            public static class PathPrefix
+            {
+
+                /// <summary>
+                /// Gets the name of the 'PathPrefix' property
+                /// </summary>
+                public const string Name = "PathPrefix";
+                /// <summary>
+                /// Gets the type of the 'PathPrefix' property
+                /// </summary>
+                public static readonly Type Type = typeof(bool);
+
+            }
+
         }
 
     }

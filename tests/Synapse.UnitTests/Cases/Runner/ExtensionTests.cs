@@ -53,7 +53,7 @@ public class ExtensionTests
             Document = new()
             {
                 Dsl = DslVersion.V010,
-                Namespace = "default",
+                Namespace = Namespace.DefaultNamespaceName,
                 Name = "test",
                 Version = "0.1.0"
             },
@@ -117,7 +117,7 @@ public class ExtensionTests
             Document = new()
             {
                 Dsl = DslVersion.V010,
-                Namespace = "default",
+                Namespace = Namespace.DefaultNamespaceName,
                 Name = "test",
                 Version = "0.1.0"
             },

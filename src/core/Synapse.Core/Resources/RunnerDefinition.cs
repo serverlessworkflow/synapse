@@ -44,7 +44,7 @@ public record RunnerDefinition
     /// Gets/sets the endpoint that references the base address and authentication policy for the Synapse API used by runners
     /// </summary>
     [Required]
-    [DataMember(Order = 3, Name = "certificate"), JsonPropertyOrder(3), JsonPropertyName("certificate"), YamlMember(Order = 3, Alias = "certificate")]
+    [DataMember(Order = 3, Name = "certificates"), JsonPropertyOrder(3), JsonPropertyName("certificates"), YamlMember(Order = 3, Alias = "certificates")]
     public virtual CertificateValidationStrategyDefinition Certificates { get; set; } = null!;
     
 }

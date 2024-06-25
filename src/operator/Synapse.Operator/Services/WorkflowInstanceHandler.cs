@@ -17,11 +17,12 @@ namespace Synapse.Operator.Services;
 /// Represents the service used to handle a specific <see cref="Resources.WorkflowInstance"/>
 /// </summary>
 /// <param name="logger">The service used to perform logging</param>
+/// <param name="options">The service used to access the current <see cref="OperatorOptions"/></param>
 /// <param name="resources">The service used to manage <see cref="IResource"/>s</param>
 /// <param name="runtime">The service used to create and run <see cref="IWorkflowProcess"/>es</param>
 /// <param name="jsonSerializer">The service used to serialize/deserialize objects to/from JSON</param>
 /// <param name="workflowInstance">The service used to monitor the resource of the workflow instance to handle</param>
-public class WorkflowInstanceHandler(ILogger<WorkflowInstanceHandler> logger, IResourceRepository resources, IWorkflowRuntime runtime, IJsonSerializer jsonSerializer, IResourceMonitor<WorkflowInstance> workflowInstance)
+public class WorkflowInstanceHandler(ILogger<WorkflowInstanceHandler> logger, IOptions<OperatorOptions> options, IResourceRepository resources, IWorkflowRuntime runtime, IJsonSerializer jsonSerializer, IResourceMonitor<WorkflowInstance> workflowInstance)
     : IDisposable, IAsyncDisposable
 {
 
@@ -31,6 +32,11 @@ public class WorkflowInstanceHandler(ILogger<WorkflowInstanceHandler> logger, IR
     /// Gets the service used to perform logging
     /// </summary>
     protected ILogger Logger { get; } = logger;
+
+    /// <summary>
+    /// Gets the options used to configure the current operator
+    /// </summary>
+    protected OperatorOptions Options { get; } = options.Value;
 
     /// <summary>
     /// Gets the service used to manage resources
@@ -79,8 +85,9 @@ public class WorkflowInstanceHandler(ILogger<WorkflowInstanceHandler> logger, IR
             || this.WorkflowInstance.Resource.Status.Phase == WorkflowInstanceStatusPhase.Pending
             || this.WorkflowInstance.Resource.Status.Phase == WorkflowInstanceStatusPhase.Running)
         {
-            var workflow = await this.Resources.GetAsync<Workflow>(this.WorkflowInstance.Resource.Spec.Definition.Name, this.WorkflowInstance.Resource.Spec.Definition.Namespace, cancellationToken).ConfigureAwait(false) ?? throw new NullReferenceException($"Failed to find the workflow with name '{this.WorkflowInstance.Resource.Spec.Definition.Name}.{this.WorkflowInstance.Resource.Spec.Definition.Namespace}'");
-            this.Process = await this.Runtime.CreateProcessAsync(workflow, this.WorkflowInstance.Resource, cancellationToken).ConfigureAwait(false);
+            var workflow = await this.GetWorkflowAsync(cancellationToken).ConfigureAwait(false);
+            var serviceAccount = await this.GetServiceAccountAsync(cancellationToken).ConfigureAwait(false);
+            this.Process = await this.Runtime.CreateProcessAsync(workflow, this.WorkflowInstance.Resource, serviceAccount, cancellationToken).ConfigureAwait(false);
             await this.Process.StartAsync(cancellationToken).ConfigureAwait(false);
         }
     }
@@ -97,10 +104,34 @@ public class WorkflowInstanceHandler(ILogger<WorkflowInstanceHandler> logger, IR
         if (patch.Operations.All(o => o.Op == Json.Patch.OperationType.Remove)) return;
         if(this.WorkflowInstance.Resource.Status?.Phase == WorkflowInstanceStatusPhase.Waiting)
         {
-            var workflow = await this.Resources.GetAsync<Workflow>(this.WorkflowInstance.Resource.Spec.Definition.Name, this.WorkflowInstance.Resource.Spec.Definition.Namespace, cancellationToken).ConfigureAwait(false) ?? throw new NullReferenceException($"Failed to find the workflow with name '{this.WorkflowInstance.Resource.Spec.Definition.Namespace}.{this.WorkflowInstance.Resource.Spec.Definition.Name}'");
-            this.Process = await this.Runtime.CreateProcessAsync(workflow, this.WorkflowInstance.Resource, cancellationToken).ConfigureAwait(false);
+            var workflow = await this.GetWorkflowAsync(cancellationToken).ConfigureAwait(false);
+            var serviceAccount = await this.GetServiceAccountAsync(cancellationToken).ConfigureAwait(false);
+            this.Process = await this.Runtime.CreateProcessAsync(workflow, this.WorkflowInstance.Resource, serviceAccount, cancellationToken).ConfigureAwait(false);
             await this.Process.StartAsync(cancellationToken).ConfigureAwait(false);
         }
+    }
+
+    /// <summary>
+    /// Gets the specified <see cref="Workflow"/>
+    /// </summary>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>The specified <see cref="Workflow"/></returns>
+    protected virtual async Task<Workflow> GetWorkflowAsync( CancellationToken cancellationToken)
+    {
+        return await this.Resources.GetAsync<Workflow>(this.WorkflowInstance.Resource.Spec.Definition.Name, this.WorkflowInstance.Resource.Spec.Definition.Namespace, cancellationToken).ConfigureAwait(false) 
+            ?? throw new NullReferenceException($"Failed to find the workflow with name '{this.WorkflowInstance.Resource.Spec.Definition.Namespace}.{this.WorkflowInstance.Resource.Spec.Definition.Name}'");
+    }
+
+    /// <summary>
+    /// Gets the current <see cref="ServiceAccount"/>
+    /// </summary>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>The current <see cref="ServiceAccount"/></returns>
+    protected virtual async Task<ServiceAccount> GetServiceAccountAsync(CancellationToken cancellationToken)
+    {
+        return await this.Resources.GetAsync<ServiceAccount>(this.Options.Name, this.Options.Namespace, cancellationToken).ConfigureAwait(false)
+            ?? await this.Resources.GetAsync<ServiceAccount>(ServiceAccount.DefaultServiceAccountName, Namespace.DefaultNamespaceName, cancellationToken).ConfigureAwait(false)
+            ?? throw new NullReferenceException($"Failed to find the default {nameof(ServiceAccount)} resource. Make sure the resource database is properly initialized.");
     }
 
     /// <summary>

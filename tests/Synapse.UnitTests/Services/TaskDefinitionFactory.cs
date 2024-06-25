@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Neuroglia.Data.Infrastructure.ResourceOriented;
+
 namespace Synapse.UnitTests.Services;
 
 internal static class TaskDefinitionFactory
@@ -172,7 +174,7 @@ internal static class TaskDefinitionFactory
                 When = "fake-condition-2",
                 Then = FlowDirective.Exit
             }),
-            new("default", new()
+            new(Namespace.DefaultNamespaceName, new()
             {
                 Then = FlowDirective.End
             }),

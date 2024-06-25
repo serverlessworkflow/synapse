@@ -90,7 +90,7 @@ public class CreateWorkflowViewStore(ISynapseApiClient api, IMonacoEditorHelper 
             Document = new()
             {
                 Dsl = "1.0.0",
-                Namespace = "default",
+                Namespace = Namespace.DefaultNamespaceName,
                 Name = "new-workflow",
                 Version = "0.1.0"
             },

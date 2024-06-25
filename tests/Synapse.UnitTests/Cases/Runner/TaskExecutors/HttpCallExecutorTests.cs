@@ -13,6 +13,7 @@
 
 using Json.Pointer;
 using Neuroglia;
+using Neuroglia.Data.Infrastructure.ResourceOriented;
 
 namespace Synapse.UnitTests.Cases.Runner.TaskExecutors;
 
@@ -43,7 +44,7 @@ public class HttpCallExecutorTests
             Document = new()
             {
                 Dsl = DslVersion.V010,
-                Namespace = "default",
+                Namespace = Namespace.DefaultNamespaceName,
                 Name = "fake",
                 Version = "0.1.0"
             },

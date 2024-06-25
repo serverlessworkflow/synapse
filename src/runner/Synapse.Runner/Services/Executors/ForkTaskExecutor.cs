@@ -34,7 +34,7 @@ public class ForkTaskExecutor(IServiceProvider serviceProvider, ILogger<ForkTask
     /// <param name="index">The index of the subtask to get the path to</param>
     /// <param name="name">The name of the subtask to get the path to</param>
     /// <returns>The path to the specified subtask</returns>
-    protected virtual string GetPathFor(int index, string name) => $"{nameof(ForkTaskDefinition.Fork).ToCamelCase()}/{index}/{name}";
+    protected virtual string GetPathFor(int index, string name) => $"{nameof(ForkTaskDefinition.Fork).ToCamelCase()}/{nameof(BranchingDefinition.Branches).ToCamelCase()}/{index}/{name}";
 
     /// <inheritdoc/>
     protected override async Task<ITaskExecutor> CreateTaskExecutorAsync(TaskInstance task, TaskDefinition definition, IDictionary<string, object> contextData, IDictionary<string, object>? arguments = null, CancellationToken cancellationToken = default)

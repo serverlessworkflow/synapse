@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Net;
 using System.Runtime.InteropServices;
 
 namespace Synapse.Runner.Services.Executors;
@@ -37,10 +36,11 @@ public class ShellProcessExecutor(IServiceProvider serviceProvider, ILogger<Shel
     /// <inheritdoc/>
     protected override async Task DoExecuteAsync(CancellationToken cancellationToken)
     {
-        var fileInfo = string.Empty;
-        var arguments = this.ProcessDefinition.Arguments ?? [];
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) arguments[0] = "-c";
-        else arguments[0] = "/c";
+        var fileInfo = RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? "/bin/bash" : "cmd.exe";
+        var arguments = new List<string> { this.ProcessDefinition.Command };
+        if (this.ProcessDefinition.Arguments != null) arguments.AddRange(arguments);
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) arguments.Insert(0, "-c");
+        else arguments.Insert(0, "/c");
         var startInfo = new ProcessStartInfo(fileInfo, arguments)
         {
             RedirectStandardOutput = true,
@@ -51,7 +51,7 @@ public class ShellProcessExecutor(IServiceProvider serviceProvider, ILogger<Shel
         await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
         var rawOutput = (await process.StandardOutput.ReadToEndAsync(cancellationToken).ConfigureAwait(false)).Trim();
         var errorMessage = (await process.StandardError.ReadToEndAsync(cancellationToken).ConfigureAwait(false)).Trim();
-        if(process.ExitCode == 0) await this.SetResultAsync(rawOutput, this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
+        if (process.ExitCode == 0) await this.SetResultAsync(rawOutput, this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
         else await this.SetErrorAsync(new()
         {
             Status = (int)HttpStatusCode.InternalServerError,

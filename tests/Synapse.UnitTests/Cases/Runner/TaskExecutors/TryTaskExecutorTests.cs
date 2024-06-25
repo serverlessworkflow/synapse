@@ -113,7 +113,7 @@ public class TryTaskExecutorTests
         context.Instance.Error.Type.OriginalString.Should().Be(error.Type);
         context.Instance.Error.Title.Should().Be(error.Title);
         context.Instance.Error.Detail?.Should().Be(context.Instance.Error.Detail);
-        context.Instance.Error.Instance?.OriginalString.Should().Be($"{context.Instance.Reference.OriginalString}/try");
+        context.Instance.Error.Instance?.OriginalString.Should().Be($"{context.Instance.Reference.OriginalString}/try/0/raise");
     }
 
     [Fact]
@@ -176,7 +176,7 @@ public class TryTaskExecutorTests
         context.Instance.Error.Type.OriginalString.Should().Be(error.Type);
         context.Instance.Error.Title.Should().Be(error.Title);
         context.Instance.Error.Detail?.Should().Be(context.Instance.Error.Detail);
-        context.Instance.Error.Instance?.OriginalString.Should().Be($"{context.Instance.Reference.OriginalString}/retry/4");
+        context.Instance.Error.Instance?.OriginalString.Should().Be($"{context.Instance.Reference.OriginalString}/retry/4/try/0/raise");
         context.Instance.Retries.Should().NotBeNull();
         context.Instance.Retries.Should().HaveCount((int)retryCount);
     }

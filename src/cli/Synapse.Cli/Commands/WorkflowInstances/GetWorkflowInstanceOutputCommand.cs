@@ -77,7 +77,7 @@ internal class GetWorkflowInstanceOutputCommand
     static class CommandOptions
     {
 
-        public static Option<string> Namespace => new(["-n", "--namespace"], () => "default", "The namespace the workflow instance to get the output of belongs to.");
+        public static Option<string> Namespace => new(["-n", "--namespace"], () => Neuroglia.Data.Infrastructure.ResourceOriented.Namespace.DefaultNamespaceName, "The namespace the workflow instance to get the output of belongs to.");
 
         public static Option<string> Output => new(["-o", "--output"], () => "yaml", "The output format.");
 

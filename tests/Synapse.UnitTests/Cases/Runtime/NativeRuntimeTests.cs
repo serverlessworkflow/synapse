@@ -52,7 +52,7 @@ public class NativeRuntimeTests
             Document = new()
             {
                 Dsl = DslVersion.V010,
-                Namespace = "default",
+                Namespace = Namespace.DefaultNamespaceName,
                 Name = "test",
                 Version = "0.1.0"
             },
@@ -80,7 +80,7 @@ public class NativeRuntimeTests
         {
             Metadata = new()
             {
-                Namespace = "default",
+                Namespace = Namespace.DefaultNamespaceName,
                 Name = "test-"
             },
             Spec = new()
@@ -94,9 +94,10 @@ public class NativeRuntimeTests
                 Input = input
             }
         });
+        var serviceAccount = (await this.Resources.GetAsync<ServiceAccount>(ServiceAccount.DefaultServiceAccountName, Namespace.DefaultNamespaceName))!;
 
         //act
-        var process = await this.Runtime.CreateProcessAsync(workflow, workflowInstance);
+        var process = await this.Runtime.CreateProcessAsync(workflow, workflowInstance, serviceAccount);
        
         //assert
         process.Should().NotBeNull();

@@ -50,14 +50,17 @@ public class ContainerRuntime(ILoggerFactory loggerFactory, IHostEnvironment env
     protected ConcurrentDictionary<string, ContainerProcess> Processes { get; } = new();
 
     /// <inheritdoc/>
-    public override async Task<IWorkflowProcess> CreateProcessAsync(Workflow workflow, WorkflowInstance workflowInstance, CancellationToken cancellationToken = default)
+    public override async Task<IWorkflowProcess> CreateProcessAsync(Workflow workflow, WorkflowInstance workflowInstance, ServiceAccount serviceAccount, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(workflow);
         ArgumentNullException.ThrowIfNull(workflowInstance);
+        ArgumentNullException.ThrowIfNull(serviceAccount);
         var containerDefinition = this.Options.Runtime.Container!.Clone()!;
         containerDefinition.Environment ??= [];
         containerDefinition.Environment[SynapseDefaults.EnvironmentVariables.Api.Uri] = this.Options.Api.Uri.OriginalString;
         containerDefinition.Environment[SynapseDefaults.EnvironmentVariables.Workflow.Instance] = workflowInstance.GetQualifiedName();
+        containerDefinition.Environment[SynapseDefaults.EnvironmentVariables.ServiceAccount.Name] = serviceAccount.GetQualifiedName();
+        containerDefinition.Environment[SynapseDefaults.EnvironmentVariables.ServiceAccount.Key] = serviceAccount.Spec.Key;
         var container = await this.ContainerPlatform.CreateAsync(containerDefinition, cancellationToken).ConfigureAwait(false);
         return this.Processes.AddOrUpdate(workflowInstance.GetQualifiedName(), new ContainerProcess(container), (key, current) => current);
     }
