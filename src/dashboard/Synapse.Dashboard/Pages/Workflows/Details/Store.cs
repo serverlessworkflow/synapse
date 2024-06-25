@@ -69,13 +69,24 @@ public class WorkflowDetailsStore(
     /// Gets an <see cref="IObservable{T}"/> exposing the <see cref="WorkflowDefinition"/>
     /// </summary>
     public IObservable<WorkflowDefinition?> WorkflowDefinition => Observable.CombineLatest(
-        this.Workflow.Where(wf => wf != null),
+        this.Workflow,
         this.WorkflowDefinitionVersion,
         (workflow, version) =>
         {
-            return string.IsNullOrWhiteSpace(version)
-                ? workflow!.Spec.Versions.GetLatest()
-                : workflow!.Spec.Versions.Get(version);
+            if (workflow == null)
+            {
+                return null;
+            }
+            if (string.IsNullOrWhiteSpace(version))
+            {
+                var latest = workflow.Spec.Versions.GetLatest()?.Document.Version;
+                if (!string.IsNullOrWhiteSpace(latest))
+                {
+                    this.SetWorkflowDefinitionVersion(latest);
+                }
+                return null;
+            }
+            return workflow.Spec.Versions.Get(version);
         }
     );
 
@@ -99,6 +110,7 @@ public class WorkflowDetailsStore(
     {
         this.Reduce(state => state with
         {
+            Workflow = null,
             WorkflowDefinitionName = workflowDefinitionName
         });
         var ns = this.Get(state => state.Namespace);

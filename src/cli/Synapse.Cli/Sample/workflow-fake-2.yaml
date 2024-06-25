@@ -1,0 +1,165 @@
+document:
+  dsl: '0.10'
+  namespace: default
+  name: fake-name
+  version: '0.2.0'
+  title: Fake Title
+  summary: Fake MD summary
+  tags:
+    fakeTagName: fakeTagValue
+use:
+  authentications:
+    fakeBasic:
+      basic:
+        username: fake-user
+        password: fake-password
+    fakeBearer:
+      bearer:
+        token: fake-token
+    fakeOAuth2:
+      oauth2:
+        authority: https://fake-authority.com/
+        grant: client_credentials
+        client:
+          id: fake-client-id
+          secret: fake-client-secret
+  extensions:
+    fakeLoggingExtension:
+      extend: all
+      when: fake-expression
+      before:
+      - fake-http-call:
+          call: http
+          with:
+            method: post
+            uri: https://fake.log.collector.com
+            body:
+              message: ${ "Executing task '\($task.reference)'..." }
+      after:
+      - fake-http-call:
+          call: http
+          with:
+            method: post
+            uri: https://fake.log.collector.com
+            body:
+              message: ${ "Executed task '\($task.reference)'..." }
+  functions:
+    fakeFunction1:
+      call: http
+      with:
+        method: post
+        uri: https://test.com
+    fakeFunction2:
+      run:
+        shell:
+          command: echo "Hello, World!"
+  secrets:
+  - fake-secret
+do:
+- todo-1:
+    call: http
+    with:
+      method: get
+      uri: https://unit-tests.serverlessworkflow.io
+- todo-2:
+    emit:
+      event:
+        with:
+          type: io.serverlessworkflow.unit-tests.fake.event.type.v1
+- todo-3:
+    for:
+      each: color
+      in: .colors
+      at: index
+    do:
+    - fake-http-call:
+        set:
+          processed: .processed + [$color]
+- todo-4:
+    listen:
+      to:
+        any:
+        - with:
+            foo: bar
+        - with:
+            foo: bar
+            bar: baz
+- todo-5:
+    raise:
+      error:
+        type: fake-error-type
+        title: fake-error-title
+        status: "400"
+- todo-6:
+    run:
+      container:
+        image: fake-image:latest
+        command: fake command --arg1 arg1
+        environment:
+          ASPNET_ENVIRONMENT: Development
+- todo-7:
+    run:
+      shell:
+        command: fake command --arg1 arg1
+        arguments:
+        - --arg2 arg2
+        environment:
+          ASPNET_ENVIRONMENT: Development
+- todo-8:
+    run:
+      script:
+        language: js
+        code: console.log("Hello, World!")
+- todo-9:
+    run:
+      workflow:
+        namespace: default
+        name: fake-workflow
+        version: '1.0.0'
+        input:
+          foo: bar
+- todo-10:
+    set:
+      foo: bar
+      bar:
+        baz: foo
+- todo-11:
+    switch:
+    - case-1:
+        when: fake-condition
+        then: continue
+    - case-2:
+        when: another-fake-condition
+        then: exit
+    - default:
+        then: end
+- todo-12:
+    try:
+    - setFoo:
+        set:
+          foo: bar
+    catch: {}
+- todo-13:
+    wait:
+      minutes: 5
+- todo-14:
+    do:
+    - todo-14-1:
+        call: http
+        with:
+          method: get
+          uri: https://unit-tests.serverlessworkflow.io
+    - todo-14-2:
+        emit:
+          event:
+            with:
+              type: io.serverlessworkflow.unit-tests.fake.event.type.v1
+    - todo-14-3:
+        for:
+          each: color
+          in: .colors
+          at: index
+        do:
+        - setProcessed:
+            set:
+              processed: .processed + [$color]

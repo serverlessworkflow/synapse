@@ -45,7 +45,9 @@
         <Content>
             @if (workflowDefinition == null)
             {
-                <Loader />
+                <div class="d-flex justify-content-center mt-5">
+                    <Loader />
+                </div>
             }
             else
             {
@@ -58,7 +60,9 @@
         <Content>
             @if (workflowDefinition == null)
             {
-                <Loader />
+                <div class="d-flex justify-content-center mt-5">
+                    <Loader />
+                </div>
             }
             else
             {
@@ -82,10 +86,10 @@
     WorkflowDefinition workflowDefinition = null!;
     readonly IEnumerable<string> columns = [
         "Name",
-    "Namespace",
-    "Status",
-    "Started At",
-    "Ended At"
+        "Namespace",
+        "Status",
+        "Started At",
+        "Ended At"
     ];
 
     [Parameter] public new string? Namespace { get; set; }
