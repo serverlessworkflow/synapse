@@ -23,10 +23,11 @@ namespace Synapse.Runner.Services.Executors;
 /// <param name="context">The current <see cref="ITaskExecutionContext"/></param>
 /// <param name="serializer">The service used to serialize/deserialize objects to/from JSON</param>
 /// <param name="externalResourceProvider">The service used to resolve external resources</param>
+/// <param name="schemaHandlerProvider">The service used to provide <see cref="ISchemaHandler"/> implementations</param>
 /// <param name="scriptExecutorProvider">The service used to provide <see cref="IScriptExecutor"/>s</param>
 public class ScriptProcessExecutor(IServiceProvider serviceProvider, ILogger<ScriptProcessExecutor> logger, ITaskExecutionContextFactory executionContextFactory, ITaskExecutorFactory executorFactory, 
-    ITaskExecutionContext<RunTaskDefinition> context, IJsonSerializer serializer, IExternalResourceProvider externalResourceProvider, IScriptExecutorProvider scriptExecutorProvider)
-    : TaskExecutor<RunTaskDefinition>(serviceProvider, logger, executionContextFactory, executorFactory, context, serializer)
+    ITaskExecutionContext<RunTaskDefinition> context, ISchemaHandlerProvider schemaHandlerProvider, IJsonSerializer serializer, IExternalResourceProvider externalResourceProvider, IScriptExecutorProvider scriptExecutorProvider)
+    : TaskExecutor<RunTaskDefinition>(serviceProvider, logger, executionContextFactory, executorFactory, context, schemaHandlerProvider, serializer)
 {
 
     /// <summary>

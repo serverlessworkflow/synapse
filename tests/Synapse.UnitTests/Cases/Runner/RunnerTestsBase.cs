@@ -64,6 +64,8 @@ public abstract class RunnerTestsBase
         services.AddCloudEventBus();
         services.AddHttpClient();
         services.AddSingleton<DockerContainerPlatform>();
+        services.AddSingleton<ISchemaHandlerProvider, SchemaHandlerProvider>();
+        services.AddSingleton<ISchemaHandler, JsonSchemaHandler>();
         services.AddSingleton<IContainerPlatform>(provider => provider.GetRequiredService<DockerContainerPlatform>());
         services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<DockerContainerPlatform>());
         services.AddSingleton<IDockerClient>(new DockerClientConfiguration().CreateClient());

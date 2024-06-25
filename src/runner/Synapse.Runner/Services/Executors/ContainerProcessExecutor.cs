@@ -22,9 +22,10 @@ namespace Synapse.Runner.Services.Executors;
 /// <param name="executorFactory">The service used to create <see cref="ITaskExecutor"/>s</param>
 /// <param name="containers">The service used to manage <see cref="IContainer"/>s</param>
 /// <param name="context">The current <see cref="ITaskExecutionContext"/></param>
+/// <param name="schemaHandlerProvider">The service used to provide <see cref="ISchemaHandler"/> implementations</param>
 /// <param name="serializer">The service used to serialize/deserialize objects to/from JSON</param>
-public class ContainerProcessExecutor(IServiceProvider serviceProvider, ILogger<ContainerProcessExecutor> logger, ITaskExecutionContextFactory executionContextFactory, ITaskExecutorFactory executorFactory, IContainerPlatform containers, ITaskExecutionContext<RunTaskDefinition> context, IJsonSerializer serializer)
-    : TaskExecutor<RunTaskDefinition>(serviceProvider, logger, executionContextFactory, executorFactory, context, serializer)
+public class ContainerProcessExecutor(IServiceProvider serviceProvider, ILogger<ContainerProcessExecutor> logger, ITaskExecutionContextFactory executionContextFactory, ITaskExecutorFactory executorFactory, IContainerPlatform containers, ITaskExecutionContext<RunTaskDefinition> context, ISchemaHandlerProvider schemaHandlerProvider, IJsonSerializer serializer)
+    : TaskExecutor<RunTaskDefinition>(serviceProvider, logger, executionContextFactory, executorFactory, context, schemaHandlerProvider, serializer)
 {
 
     /// <summary>

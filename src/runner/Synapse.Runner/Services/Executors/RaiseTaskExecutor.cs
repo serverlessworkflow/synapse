@@ -23,9 +23,10 @@ namespace Synapse.Runner.Services.Executors;
 /// <param name="executionContextFactory">The service used to create <see cref="ITaskExecutionContext"/>s</param>
 /// <param name="executorFactory">The service used to create <see cref="ITaskExecutor"/>s</param>
 /// <param name="context">The current <see cref="ITaskExecutionContext"/></param>
+/// <param name="schemaHandlerProvider">The service used to provide <see cref="ISchemaHandler"/> implementations</param>
 /// <param name="serializer">The service used to serialize/deserialize objects to/from JSON</param>
-public class RaiseTaskExecutor(IServiceProvider serviceProvider, ILogger<RaiseTaskExecutor> logger, ITaskExecutionContextFactory executionContextFactory, ITaskExecutorFactory executorFactory, ITaskExecutionContext<RaiseTaskDefinition> context, IJsonSerializer serializer)
-    : TaskExecutor<RaiseTaskDefinition>(serviceProvider, logger, executionContextFactory, executorFactory, context, serializer)
+public class RaiseTaskExecutor(IServiceProvider serviceProvider, ILogger<RaiseTaskExecutor> logger, ITaskExecutionContextFactory executionContextFactory, ITaskExecutorFactory executorFactory, ITaskExecutionContext<RaiseTaskDefinition> context, ISchemaHandlerProvider schemaHandlerProvider, IJsonSerializer serializer)
+    : TaskExecutor<RaiseTaskDefinition>(serviceProvider, logger, executionContextFactory, executorFactory, context, schemaHandlerProvider, serializer)
 {
 
     /// <inheritdoc/>

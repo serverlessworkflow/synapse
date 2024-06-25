@@ -63,6 +63,8 @@ var builder = Host.CreateDefaultBuilder()
         services.AddSingleton<IOAuth2TokenManager, OAuth2TokenManager>();
         services.AddSingleton<ITaskExecutionContextFactory, TaskExecutionContextFactory>();
         services.AddSingleton<ITaskExecutorFactory, TaskExecutorFactory>();
+        services.AddSingleton<ISchemaHandlerProvider, SchemaHandlerProvider>();
+        services.AddSingleton<ISchemaHandler, JsonSchemaHandler>();
         services.AddHostedService<RunnerApplication>();
     });
 

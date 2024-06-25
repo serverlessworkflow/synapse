@@ -25,10 +25,11 @@ namespace Synapse.Runner.Services.Executors;
 /// <param name="executorFactory">The service used to create <see cref="ITaskExecutor"/>s</param>
 /// <param name="context">The current <see cref="ITaskExecutionContext"/></param>
 /// <param name="serializer">The service used to serialize/deserialize objects to/from JSON</param>
+/// <param name="schemaHandlerProvider">The service used to provide <see cref="ISchemaHandler"/> implementations</param>
 /// <param name="cloudEventBus">The service used to stream both input and output <see cref="CloudEvent"/>s</param>
 public class EmitTaskExecutor(IServiceProvider serviceProvider, ILogger<EmitTaskExecutor> logger, ITaskExecutionContextFactory executionContextFactory, 
-    ITaskExecutorFactory executorFactory, ITaskExecutionContext<EmitTaskDefinition> context, IJsonSerializer serializer, ICloudEventBus cloudEventBus)
-    : TaskExecutor<EmitTaskDefinition>(serviceProvider, logger, executionContextFactory, executorFactory, context, serializer)
+    ITaskExecutorFactory executorFactory, ITaskExecutionContext<EmitTaskDefinition> context, ISchemaHandlerProvider schemaHandlerProvider, IJsonSerializer serializer, ICloudEventBus cloudEventBus)
+    : TaskExecutor<EmitTaskDefinition>(serviceProvider, logger, executionContextFactory, executorFactory, context, schemaHandlerProvider, serializer)
 {
 
     /// <summary>
