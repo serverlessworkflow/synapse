@@ -78,7 +78,7 @@ public interface IWorkflowExecutionContext
     /// <param name="isExtension">Indicates whether or not the task is part of an extension</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>The updated <see cref="TaskInstance"/></returns>
-    Task<TaskInstance> CreateTaskAsync(TaskDefinition definition, string path, object input, IDictionary<string, object>? context = null, ITaskExecutionContext? parent = null, bool isExtension = false, CancellationToken cancellationToken = default);
+    Task<TaskInstance> CreateTaskAsync(TaskDefinition definition, string? path, object input, IDictionary<string, object>? context = null, ITaskExecutionContext? parent = null, bool isExtension = false, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets the workflow's tasks

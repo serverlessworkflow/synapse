@@ -103,4 +103,19 @@ public record Error
         Instance = instance
     };
 
+    /// <summary>
+    /// Creates a new validation <see cref="Error"/>
+    /// </summary>
+    /// <param name="instance">The <see cref="Error"/> source</param>
+    /// <param name="detail">The <see cref="Error"/> detail, if any</param>
+    /// <returns>A new communication <see cref="Error"/></returns>
+    public static Error Validation(Uri instance, string? detail = null) => new()
+    {
+        Status = ErrorStatus.Validation,
+        Type = ErrorType.Validation,
+        Title = ErrorTitle.Validation,
+        Detail = detail,
+        Instance = instance
+    };
+
 }

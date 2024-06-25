@@ -76,11 +76,14 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
     public virtual Task ContinueWith(TaskDefinition task, CancellationToken cancellationToken = default) => Task.CompletedTask;
 
     /// <inheritdoc/>
-    public virtual async Task<TaskInstance> CreateTaskAsync(TaskDefinition definition, string path, object input, IDictionary<string, object>? context = null, ITaskExecutionContext? parent = null, bool isExtension = false, CancellationToken cancellationToken = default)
+    public virtual async Task<TaskInstance> CreateTaskAsync(TaskDefinition definition, string? path, object input, IDictionary<string, object>? context = null, ITaskExecutionContext? parent = null, bool isExtension = false, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(definition);
         using var @lock = await this.Lock.LockAsync(cancellationToken).ConfigureAwait(false);
         input ??= new();
+        var name = string.IsNullOrWhiteSpace(path)
+            ? parent?.Instance.Reference?.OriginalString.Split('/', StringSplitOptions.RemoveEmptyEntries).Last()
+            : path.Split('/', StringSplitOptions.RemoveEmptyEntries).Last();
         var reference = this.Definition.BuildReferenceTo(definition, path, parent?.Instance.Reference);
         var contextReference = string.Empty;
         if (context == null)
@@ -114,7 +117,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         var inputDocument = await this.Api.WorkflowData.CreateAsync($"{reference}/input", filteredInput, cancellationToken).ConfigureAwait(false);
         var task = new TaskInstance()
         {
-            Name = path.Split('/', StringSplitOptions.RemoveEmptyEntries).Last(),
+            Name = name,
             Reference = reference,
             IsExtension = isExtension,
             ParentId = parent?.Instance.Id,

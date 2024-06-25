@@ -83,7 +83,7 @@ internal class DeleteWorkflowCommand
     static class CommandOptions
     {
 
-        public static Option<string> Namespace => new([ "-n", "--namespace" ], () => "default", "The namespace the workflow to delete belongs to");
+        public static Option<string> Namespace => new([ "-n", "--namespace" ], () => Neuroglia.Data.Infrastructure.ResourceOriented.Namespace.DefaultNamespaceName, "The namespace the workflow to delete belongs to");
 
         public static Option<string> Version => new(["-v", "--version"], () => string.Empty, "The version of the workflow to delete. Note that failing to specify the version will delete all version of the specified workflow");
 

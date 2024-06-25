@@ -92,7 +92,7 @@ internal class RunWorkflowCommand
     static class CommandOptions
     {
 
-        public static Option<string> Namespace => new(["-n", "--namespace"], () => "default", "The namespace the workflow to run belongs to. Defaults to 'default'.");
+        public static Option<string> Namespace => new(["-n", "--namespace"], () => Neuroglia.Data.Infrastructure.ResourceOriented.Namespace.DefaultNamespaceName, "The namespace the workflow to run belongs to. Defaults to 'default'.");
 
         public static Option<string> Version => new(["-v", "--version"], "The version of the workflow to run.");
 

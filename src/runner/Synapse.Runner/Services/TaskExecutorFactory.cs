@@ -70,7 +70,7 @@ public class TaskExecutorFactory
             Function.Grpc => ActivatorUtilities.CreateInstance<GrpcCallExecutor>(serviceProvider, context),
             Function.Http => ActivatorUtilities.CreateInstance<HttpCallExecutor>(serviceProvider, context),
             Function.OpenApi => ActivatorUtilities.CreateInstance<OpenApiCallExecutor>(serviceProvider, context),
-            _ => throw new NotSupportedException($"Unknown/unsupported function '{context.Definition.Call}'")
+            _ => ActivatorUtilities.CreateInstance<FunctionCallExecutor>(serviceProvider, context)
         };
     }
 

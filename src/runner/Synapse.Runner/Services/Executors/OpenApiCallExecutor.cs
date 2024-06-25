@@ -16,7 +16,6 @@ using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi.Readers;
 using Neuroglia;
 using Neuroglia.Data.Expressions;
-using System.Net;
 using System.Net.Mime;
 using System.Text;
 
@@ -30,11 +29,13 @@ namespace Synapse.Runner.Services.Executors;
 /// <param name="executionContextFactory">The service used to create <see cref="ITaskExecutionContext"/>s</param>
 /// <param name="executorFactory">The service used to create <see cref="ITaskExecutor"/>s</param>
 /// <param name="context">The current <see cref="ITaskExecutionContext"/></param>
+/// <param name="schemaHandlerProvider">The service used to provide <see cref="ISchemaHandler"/> implementations</param>
 /// <param name="serializer">The service used to serialize/deserialize objects to/from JSON</param>
 /// <param name="serializerProvider">The service used to provide <see cref="ISerializer"/>s</param>
 /// <param name="httpClientFactory">The service used to create <see cref="HttpClient"/>s</param>
-public class OpenApiCallExecutor(IServiceProvider serviceProvider, ILogger<OpenApiCallExecutor> logger, ITaskExecutionContextFactory executionContextFactory, ITaskExecutorFactory executorFactory, ITaskExecutionContext<CallTaskDefinition> context, IJsonSerializer serializer, ISerializerProvider serializerProvider, IHttpClientFactory httpClientFactory)
-    : TaskExecutor<CallTaskDefinition>(serviceProvider, logger, executionContextFactory, executorFactory, context, serializer)
+public class OpenApiCallExecutor(IServiceProvider serviceProvider, ILogger<OpenApiCallExecutor> logger, ITaskExecutionContextFactory executionContextFactory, ITaskExecutorFactory executorFactory, 
+    ITaskExecutionContext<CallTaskDefinition> context, ISchemaHandlerProvider schemaHandlerProvider, IJsonSerializer serializer, ISerializerProvider serializerProvider, IHttpClientFactory httpClientFactory)
+    : TaskExecutor<CallTaskDefinition>(serviceProvider, logger, executionContextFactory, executorFactory, context, schemaHandlerProvider, serializer)
 {
 
     /// <summary>

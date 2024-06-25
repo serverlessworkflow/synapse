@@ -37,7 +37,7 @@ public abstract class WorkflowRuntimeBase
     protected ILogger Logger { get; }
 
     /// <inheritdoc/>
-    public abstract Task<IWorkflowProcess> CreateProcessAsync(Workflow workflow, WorkflowInstance workflowInstance, CancellationToken cancellationToken = default);
+    public abstract Task<IWorkflowProcess> CreateProcessAsync(Workflow workflow, WorkflowInstance workflowInstance, ServiceAccount serviceAccount, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Disposes of the <see cref="WorkflowProcessBase"/>

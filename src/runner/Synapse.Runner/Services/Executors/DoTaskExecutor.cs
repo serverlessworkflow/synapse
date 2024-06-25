@@ -23,9 +23,10 @@ namespace Synapse.Runner.Services.Executors;
 /// <param name="executionContextFactory">The service used to create <see cref="ITaskExecutionContext"/>s</param>
 /// <param name="executorFactory">The service used to create <see cref="ITaskExecutor"/>s</param>
 /// <param name="context">The current <see cref="ITaskExecutionContext"/></param>
+/// <param name="schemaHandlerProvider">The service used to provide <see cref="ISchemaHandler"/> implementations</param>
 /// <param name="serializer">The service used to serialize/deserialize objects to/from JSON</param>
-public class DoTaskExecutor(IServiceProvider serviceProvider, ILogger<DoTaskExecutor> logger, ITaskExecutionContextFactory executionContextFactory, ITaskExecutorFactory executorFactory, ITaskExecutionContext<DoTaskDefinition> context, IJsonSerializer serializer)
-    : TaskExecutor<DoTaskDefinition>(serviceProvider, logger, executionContextFactory, executorFactory, context, serializer)
+public class DoTaskExecutor(IServiceProvider serviceProvider, ILogger<DoTaskExecutor> logger, ITaskExecutionContextFactory executionContextFactory, ITaskExecutorFactory executorFactory, ITaskExecutionContext<DoTaskDefinition> context, ISchemaHandlerProvider schemaHandlerProvider, IJsonSerializer serializer)
+    : TaskExecutor<DoTaskDefinition>(serviceProvider, logger, executionContextFactory, executorFactory, context, schemaHandlerProvider, serializer)
 {
 
     /// <summary>
@@ -34,11 +35,14 @@ public class DoTaskExecutor(IServiceProvider serviceProvider, ILogger<DoTaskExec
     protected Map<string, TaskDefinition> Tasks => this.Task.Definition.Do ?? throw new NullReferenceException("The task must define at least two tasks to perform sequentially");
 
     /// <summary>
-    /// Gets the path for the specified subtask
+    /// Gets the path to the specified subtask
     /// </summary>
-    /// <param name="subTaskName">The name of the subtask to get the path for</param>
-    /// <returns></returns>
-    protected virtual string GetPathFor(string subTaskName) => $"{nameof(DoTaskDefinition.Do).ToCamelCase()}/{nameof(TaskExecutionStrategyDefinition.Sequentially).ToCamelCase()}/{subTaskName}";
+    /// <param name="index">The index of the subtask to get the path to</param>
+    /// <param name="name">The name of the subtask to get the path to</param>
+    /// <returns>The path to the specified subtask</returns>
+    protected virtual string GetPathFor(int index, string name) => this.Task.Definition.Extensions?.TryGetValue(SynapseDefaults.Tasks.ExtensionProperties.PathPrefix.Name, out var value) == true && value is bool prefix && prefix == false
+        ? $"{index}/{name}"
+        : $"{nameof(DoTaskDefinition.Do).ToCamelCase()}/{index}/{name}";
 
     /// <inheritdoc/>
     protected override async Task<ITaskExecutor> CreateTaskExecutorAsync(TaskInstance task, TaskDefinition definition, IDictionary<string, object> contextData, IDictionary<string, object>? arguments = null, CancellationToken cancellationToken = default)
@@ -58,15 +62,16 @@ public class DoTaskExecutor(IServiceProvider serviceProvider, ILogger<DoTaskExec
         var nextDefinition = last == null
             ? this.Tasks.First()
             : last.IsOperative
-                ? this.Task.Workflow.Definition.GetComponent<MapEntry<string, TaskDefinition>>(last.Reference.OriginalString)
-                : this.Task.Definition.GetTaskAfter(last);
+                ? this.Task.Definition.Do.FirstOrDefault(e => e.Key == last.Name) ?? throw new NullReferenceException($"Failed to find a task with the specified name '{last.Name}' at '{this.Task.Instance.Reference}'")
+                : this.Task.Definition.Do.GetTaskAfter(last);
         if (nextDefinition == null)
         {
             await this.SetResultAsync(last!.OutputReference, this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
             return;
         }
+        var nextDefinitionIndex = this.Task.Definition.Do.Keys.ToList().IndexOf(nextDefinition.Key);
         var input = last == null ? this.Task.Input : (await this.Task.Workflow.Documents.GetAsync(last.OutputReference!, cancellationToken).ConfigureAwait(false))!;
-        var next = await this.Task.Workflow.CreateTaskAsync(nextDefinition.Value, this.GetPathFor(nextDefinition.Key), input, null, this.Task, false, cancellationToken).ConfigureAwait(false);
+        var next = await this.Task.Workflow.CreateTaskAsync(nextDefinition.Value, this.GetPathFor(nextDefinitionIndex, nextDefinition.Key), input, null, this.Task, false, cancellationToken).ConfigureAwait(false);
         var executor = await this.CreateTaskExecutorAsync(next, nextDefinition.Value, this.Task.ContextData, this.Task.Arguments, cancellationToken).ConfigureAwait(false);
         await executor.ExecuteAsync(cancellationToken).ConfigureAwait(false);
     }
@@ -97,14 +102,15 @@ public class DoTaskExecutor(IServiceProvider serviceProvider, ILogger<DoTaskExec
         ArgumentNullException.ThrowIfNull(executor);
         var last = executor.Task.Instance;
         var output = executor.Task.Output!;
-        var nextDefinition = this.Task.Definition.GetTaskAfter(last);
+        var nextDefinition = this.Task.Definition.Do.GetTaskAfter(last);
         this.Executors.Remove(executor);
         await executor.DisposeAsync().ConfigureAwait(false);
         if (nextDefinition == null || nextDefinition.Value == null)
         {
-            await this.SetResultAsync(output, last.Next == FlowDirective.End ? FlowDirective.End : this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
+            await this.SetResultAsync(output, last.Next == FlowDirective.End || last.Next == FlowDirective.Exit ? FlowDirective.End : this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
             return;
         }
+        var nextDefinitionIndex = this.Task.Definition.Do.Keys.ToList().IndexOf(nextDefinition.Key);
         TaskInstance next;
         switch (executor.Task.Instance.Next)
         {
@@ -115,7 +121,7 @@ public class DoTaskExecutor(IServiceProvider serviceProvider, ILogger<DoTaskExec
                 await this.SetResultAsync(output, this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
                 break;
             default:
-                next = await this.Task.Workflow.CreateTaskAsync(nextDefinition.Value, this.GetPathFor(nextDefinition.Key), output, null, this.Task, false, cancellationToken).ConfigureAwait(false);
+                next = await this.Task.Workflow.CreateTaskAsync(nextDefinition.Value, this.GetPathFor(nextDefinitionIndex, nextDefinition.Key), output, null, this.Task, false, cancellationToken).ConfigureAwait(false);
                 var nextExecutor = await this.CreateTaskExecutorAsync(next, nextDefinition.Value, this.Task.ContextData, this.Task.Arguments, cancellationToken).ConfigureAwait(false);
                 await nextExecutor.ExecuteAsync(cancellationToken).ConfigureAwait(false);
                 break;

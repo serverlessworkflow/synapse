@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Runtime.CompilerServices;
+
 namespace Synapse;
 
 /// <summary>
@@ -23,15 +25,16 @@ public static class WorkflowDefinitionExtensions
     /// Gets the task, if any, that should be executed after the specified one
     /// </summary>
     /// <param name="workflow">The <see cref="WorkflowDefinition"/> that defines the specified <see cref="TaskDefinition"/></param>
-    /// <param name="afterTask">The name/definition mapping of the <see cref="TaskDefinition"/> to get the following <see cref="TaskDefinition"/> of</param>
+    /// <param name="task">The name/definition mapping of the <see cref="TaskDefinition"/> to get the following <see cref="TaskDefinition"/> of</param>
     /// <param name="parentReference">A reference to the component that defines the next <see cref="TaskDefinition"/></param>
     /// <returns>A name/definition mapping of the next <see cref="TaskDefinition"/>, if any</returns>
-    public static MapEntry<string, TaskDefinition>? GetTaskAfter(this WorkflowDefinition workflow, MapEntry<string, TaskDefinition> afterTask, string parentReference)
+    public static MapEntry<string, TaskDefinition>? GetTaskAfter(this WorkflowDefinition workflow, MapEntry<string, TaskDefinition> task, string parentReference)
     {
         ArgumentNullException.ThrowIfNull(workflow);
+        ArgumentNullException.ThrowIfNull(task);
         ArgumentException.ThrowIfNullOrWhiteSpace(parentReference);
         var taskMap = workflow.GetComponent<Map<string, TaskDefinition>>(parentReference) ?? throw new NullReferenceException($"Failed to find the component at '{parentReference}'");
-        var taskIndex = taskMap.Select(e => e.Key).ToList().IndexOf(afterTask.Key);
+        var taskIndex = taskMap.Select(e => e.Key).ToList().IndexOf(task.Key);
         var nextIndex = taskIndex < 0 ? -1 : taskIndex + 1;
         if (nextIndex < 0 || nextIndex >= taskMap.Count) return null;
         return taskMap.ElementAt(nextIndex);

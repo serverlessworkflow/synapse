@@ -75,7 +75,7 @@ internal class GetCorrelatorCommand
     static class CommandOptions
     {
 
-        public static Option<string> Namespace => new(["-n", "--namespace"], () => "default", "The namespace the correlator to get belongs to.");
+        public static Option<string> Namespace => new(["-n", "--namespace"], () => Neuroglia.Data.Infrastructure.ResourceOriented.Namespace.DefaultNamespaceName, "The namespace the correlator to get belongs to.");
 
         public static Option<string> Output => new(["-o", "--output"], () => "yaml", "The output format.");
 

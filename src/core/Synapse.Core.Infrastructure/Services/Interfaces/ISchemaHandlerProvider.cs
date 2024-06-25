@@ -11,15 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Synapse.Api.Server.Configuration;
+namespace Synapse.Core.Infrastructure.Services;
 
 /// <summary>
-/// Represents the <see cref="AuthenticationSchemeOptions"/> used to configure Synapse's service account based authentication
+/// Defines the fundamentals of a service used to provide <see cref="ISchemaHandler"/>s
 /// </summary>
-public class ServiceAccountAuthenticationOptions
-    : AuthenticationSchemeOptions
+public interface ISchemaHandlerProvider
 {
 
-
+    /// <summary>
+    /// Gets the first registered <see cref="ISchemaHandler"/> that supports the specified schema format
+    /// </summary>
+    /// <param name="format">The schema format to get an <see cref="ISchemaHandler"/> for</param>
+    /// <returns>The first registered <see cref="ISchemaHandler"/>, if any, that supports the specified schema format</returns>
+    ISchemaHandler? GetHandler(string format);
 
 }

@@ -25,8 +25,9 @@ public interface IWorkflowRuntime
     /// </summary>
     /// <param name="workflow">The instantiated <see cref="Workflow"/> to start a new <see cref="IWorkflowProcess"/> for</param>
     /// <param name="workflowInstance">The <see cref="WorkflowInstance"/> to create a new <see cref="IWorkflowProcess"/> for</param>
+    /// <param name="serviceAccount">The <see cref="ServiceAccount"/> used to authenticate the <see cref="IWorkflowProcess"/> to create</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>A new <see cref="IWorkflowProcess"/></returns>
-    Task<IWorkflowProcess> CreateProcessAsync(Workflow workflow, WorkflowInstance workflowInstance, CancellationToken cancellationToken = default);
+    Task<IWorkflowProcess> CreateProcessAsync(Workflow workflow, WorkflowInstance workflowInstance, ServiceAccount serviceAccount, CancellationToken cancellationToken = default);
 
 }

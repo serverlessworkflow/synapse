@@ -90,7 +90,7 @@ public class CorrelatorHandlerTests
         {
             Metadata = new()
             {
-                Namespace = "default",
+                Namespace = Namespace.DefaultNamespaceName,
                 Name = "test"
             },
             Spec = new()
@@ -159,7 +159,7 @@ public class CorrelatorHandlerTests
         {
             Metadata = new()
             {
-                Namespace = "default",
+                Namespace = Namespace.DefaultNamespaceName,
                 Name = "test"
             },
             Spec = new()
@@ -228,7 +228,7 @@ public class CorrelatorHandlerTests
         {
             Metadata = new()
             {
-                Namespace = "default",
+                Namespace = Namespace.DefaultNamespaceName,
                 Name = "test"
             },
             Spec = new()
@@ -293,7 +293,7 @@ public class CorrelatorHandlerTests
         {
             Metadata = new()
             {
-                Namespace = "default",
+                Namespace = Namespace.DefaultNamespaceName,
                 Name = "test"
             },
             Spec = new()
@@ -467,7 +467,7 @@ public class CorrelatorHandlerTests
         services.AddHostedService<ContainerBootstrapper>();
         services.Configure<CorrelatorOptions>(options =>
         {
-            options.Namespace = "default";
+            options.Namespace = Namespace.DefaultNamespaceName;
             options.Name = "test";
         });
         services.AddLogging(builder =>

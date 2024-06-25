@@ -50,10 +50,11 @@ public class NativeRuntime(ILoggerFactory loggerFactory, IHostEnvironment enviro
     protected ConcurrentDictionary<string, NativeProcess> Processes { get; } = new();
 
     /// <inheritdoc/>
-    public override Task<IWorkflowProcess> CreateProcessAsync(Workflow workflow, WorkflowInstance workflowInstance, CancellationToken cancellationToken = default)
+    public override Task<IWorkflowProcess> CreateProcessAsync(Workflow workflow, WorkflowInstance workflowInstance, ServiceAccount serviceAccount, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(workflow);
         ArgumentNullException.ThrowIfNull(workflowInstance);
+        ArgumentNullException.ThrowIfNull(serviceAccount);
         if (this.Options.Runtime.Native == null) throw new NullReferenceException("The native runtime must be configured");
         var fileName = this.Options.Runtime.Native.Executable;
         var args = string.Empty;
@@ -70,6 +71,8 @@ public class NativeRuntime(ILoggerFactory loggerFactory, IHostEnvironment enviro
         };
         startInfo.Environment.Add(SynapseDefaults.EnvironmentVariables.Api.Uri, this.Options.Api.Uri.OriginalString);
         startInfo.Environment.Add(SynapseDefaults.EnvironmentVariables.Workflow.Instance, workflowInstance.GetQualifiedName());
+        startInfo.Environment[SynapseDefaults.EnvironmentVariables.ServiceAccount.Name] = serviceAccount.GetQualifiedName();
+        startInfo.Environment[SynapseDefaults.EnvironmentVariables.ServiceAccount.Key] = serviceAccount.Spec.Key;
         if (this.Options.Certificates?.Validate == false) startInfo.Environment.Add(SynapseDefaults.EnvironmentVariables.SkipCertificateValidation, "true");
         var process = new Process()
         {

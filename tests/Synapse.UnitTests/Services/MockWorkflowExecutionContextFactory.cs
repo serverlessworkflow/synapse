@@ -14,6 +14,7 @@
 using Synapse.Runner.Services;
 using Neuroglia.Data.Infrastructure.ResourceOriented;
 using Neuroglia.Data.Infrastructure.ResourceOriented.Services;
+using Neuroglia.Data.Infrastructure.Services;
 
 namespace Synapse.UnitTests.Services;
 
@@ -25,6 +26,7 @@ internal static class MockWorkflowExecutionContextFactory
     internal static async Task<IWorkflowExecutionContext> CreateAsync(IServiceProvider services, WorkflowDefinition? workflowDefinition = null) 
     {
         var resources = services.GetRequiredService<IResourceRepository>();
+        var documents = services.GetRequiredService<IRepository<Document, string>>();
         workflowDefinition ??= WorkflowDefinitionFactory.Create();
         var workflow = await resources.AddAsync(new Workflow() 
         { 
@@ -38,6 +40,7 @@ internal static class MockWorkflowExecutionContextFactory
                 Versions = [ workflowDefinition ]
             }
         });
+        var contextDocument = await documents.AddAsync(new() { Name = "context", Content = new { } });
         var workflowInstance = await resources.AddAsync(new WorkflowInstance()
         {
             Metadata = new()
@@ -57,7 +60,7 @@ internal static class MockWorkflowExecutionContextFactory
             },
             Status = new()
             {
-
+                ContextReference = contextDocument.Id
             }
         });
         return Create(services, workflowDefinition, workflowInstance);

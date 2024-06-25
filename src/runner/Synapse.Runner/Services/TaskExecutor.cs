@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Neuroglia;
 using Neuroglia.Data.Expressions;
 using Neuroglia.Data.Infrastructure.ResourceOriented;
 
@@ -24,9 +25,10 @@ namespace Synapse.Runner.Services;
 /// <param name="executionContextFactory">The service used to create <see cref="ITaskExecutionContext"/>s</param>
 /// <param name="executorFactory">The service used to create <see cref="ITaskExecutor"/>s</param>
 /// <param name="context">The <see cref="ITaskExecutionContext"/> in which to run the <see cref="ITaskExecutor"/></param>
+/// <param name="schemaHandlerProvider">The service used to provide <see cref="ISchemaHandler"/> implementations</param>
 /// <param name="jsonSerializer">The service used to serialize/deserialize objects to/from JSON</param>
 /// <typeparam name="TDefinition">The type of <see cref="TaskInstance"/> to run</typeparam>
-public abstract class TaskExecutor<TDefinition>(IServiceProvider serviceProvider, ILogger logger, ITaskExecutionContextFactory executionContextFactory, ITaskExecutorFactory executorFactory, ITaskExecutionContext<TDefinition> context, IJsonSerializer jsonSerializer)
+public abstract class TaskExecutor<TDefinition>(IServiceProvider serviceProvider, ILogger logger, ITaskExecutionContextFactory executionContextFactory, ITaskExecutorFactory executorFactory, ITaskExecutionContext<TDefinition> context, ISchemaHandlerProvider schemaHandlerProvider, IJsonSerializer jsonSerializer)
     : ITaskExecutor<TDefinition>
     where TDefinition : TaskDefinition
 {
@@ -57,6 +59,11 @@ public abstract class TaskExecutor<TDefinition>(IServiceProvider serviceProvider
     /// Gets the <see cref="ITaskExecutionContext"/> that describes the execution of the <see cref="TaskInstance"/> to run
     /// </summary>
     public virtual ITaskExecutionContext<TDefinition> Task { get; } = context;
+
+    /// <summary>
+    /// Gets the service used to provide <see cref="ISchemaHandler"/> implementations
+    /// </summary>
+    protected ISchemaHandlerProvider SchemaHandlerProvider { get; } = schemaHandlerProvider;
 
     /// <summary>
     /// Gets the service used to serialize/deserialize objects to/from JSON
@@ -132,6 +139,23 @@ public abstract class TaskExecutor<TDefinition>(IServiceProvider serviceProvider
         }
         try
         {
+            if (this.Task.Definition.Input?.Schema != null)
+            {
+                var schemaHandler = this.SchemaHandlerProvider.GetHandler(this.Task.Definition.Input.Schema.Format) ?? throw new ArgumentNullException($"Failed to find an handler that supports the specified schema format '{this.Task.Definition.Input.Schema.Format}'");
+                var validationResult = await schemaHandler.ValidateAsync(this.Task.Input, this.Task.Definition.Input.Schema, cancellationToken).ConfigureAwait(false);
+                if (!validationResult.IsSuccess()) 
+                {
+                    await this.SetErrorAsync(new()
+                    {
+                        Type = ErrorType.Validation,
+                        Status = ErrorStatus.Validation,
+                        Title = ErrorTitle.Validation,
+                        Instance = new($"{this.Task.Instance.Reference}/input", UriKind.RelativeOrAbsolute),
+                        Detail = $"Failed to validate the task's input:\n{string.Join('\n', validationResult.Errors?.FirstOrDefault()?.Errors?.Select(e => $"- {e.Key}: {e.Value.First()}") ?? [])}"
+                    }, cancellationToken).ConfigureAwait(false);
+                    return;
+                }
+            }
             await this.Task.ExecuteAsync(this.CancellationTokenSource.Token).ConfigureAwait(false);
             this.Subject.OnNext(new TaskLifeCycleEvent(TaskLifeCycleEventType.Running));
             this.Stopwatch.Start();

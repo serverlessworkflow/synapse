@@ -86,7 +86,7 @@ internal class GetWorkflowCommand
     static class CommandOptions
     {
 
-        public static Option<string> Namespace => new(["-n", "--namespace"], () => "default", "The namespace the workflow to get belongs to.");
+        public static Option<string> Namespace => new(["-n", "--namespace"], () => Neuroglia.Data.Infrastructure.ResourceOriented.Namespace.DefaultNamespaceName, "The namespace the workflow to get belongs to.");
 
         public static Option<string> Version => new(["-v", "--version"], () => string.Empty, "The version of the workflow to get. Setting the version allows the retrieval of a specific version instead.");
 

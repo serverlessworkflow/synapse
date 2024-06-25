@@ -25,9 +25,10 @@ namespace Synapse.Runner.Services.Executors;
 /// <param name="executionContextFactory">The service used to create <see cref="ITaskExecutionContext"/>s</param>
 /// <param name="executorFactory">The service used to create <see cref="ITaskExecutor"/>s</param>
 /// <param name="context">The current <see cref="ITaskExecutionContext"/></param>
+/// <param name="schemaHandlerProvider">The service used to provide <see cref="ISchemaHandler"/> implementations</param>
 /// <param name="serializer">The service used to serialize/deserialize objects to/from JSON</param>
-public class TryTaskExecutor(IServiceProvider serviceProvider, ILogger<TryTaskExecutor> logger, ITaskExecutionContextFactory executionContextFactory, ITaskExecutorFactory executorFactory, ITaskExecutionContext<TryTaskDefinition> context, IJsonSerializer serializer)
-    : TaskExecutor<TryTaskDefinition>(serviceProvider, logger, executionContextFactory, executorFactory, context, serializer)
+public class TryTaskExecutor(IServiceProvider serviceProvider, ILogger<TryTaskExecutor> logger, ITaskExecutionContextFactory executionContextFactory, ITaskExecutorFactory executorFactory, ITaskExecutionContext<TryTaskDefinition> context, ISchemaHandlerProvider schemaHandlerProvider, IJsonSerializer serializer)
+    : TaskExecutor<TryTaskDefinition>(serviceProvider, logger, executionContextFactory, executorFactory, context, schemaHandlerProvider, serializer)
 {
 
     /// <inheritdoc/>
@@ -35,7 +36,11 @@ public class TryTaskExecutor(IServiceProvider serviceProvider, ILogger<TryTaskEx
     {
         var taskDefinition = new DoTaskDefinition()
         {
-            Do = this.Task.Definition.Try
+            Do = this.Task.Definition.Try,
+            Extensions =
+            [
+                new(SynapseDefaults.Tasks.ExtensionProperties.PathPrefix.Name, false)
+            ]
         };
         var task = await this.Task.Workflow.CreateTaskAsync(taskDefinition, nameof(this.Task.Definition.Try).ToCamelCase(), this.Task.Input, null, this.Task, false, cancellationToken).ConfigureAwait(false);
         var executor = await this.CreateTaskExecutorAsync(task, taskDefinition, this.Task.ContextData, this.Task.Arguments, cancellationToken).ConfigureAwait(false);
@@ -54,9 +59,13 @@ public class TryTaskExecutor(IServiceProvider serviceProvider, ILogger<TryTaskEx
     {
         var taskDefinition = new DoTaskDefinition()
         {
-            Do = this.Task.Definition.Try
+            Do = this.Task.Definition.Try,
+            Extensions =
+            [
+                new(SynapseDefaults.Tasks.ExtensionProperties.PathPrefix.Name, false)
+            ]
         };
-        var task = await this.Task.Workflow.CreateTaskAsync(taskDefinition, $"retry/{this.Task.Instance.Retries?.Count - 1}", this.Task.Input, null, this.Task, false, cancellationToken).ConfigureAwait(false);
+        var task = await this.Task.Workflow.CreateTaskAsync(taskDefinition, $"retry/{this.Task.Instance.Retries?.Count - 1}/try", this.Task.Input, null, this.Task, false, cancellationToken).ConfigureAwait(false);
         var executor = await this.CreateTaskExecutorAsync(task, taskDefinition, this.Task.ContextData, this.Task.Arguments, cancellationToken).ConfigureAwait(false);
         executor.SubscribeAsync
         (
