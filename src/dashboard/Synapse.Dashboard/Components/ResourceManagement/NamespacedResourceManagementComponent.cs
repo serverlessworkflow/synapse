@@ -44,7 +44,6 @@ public abstract class NamespacedResourceManagementComponent<TComponent, TStore, 
         await base.OnInitializedAsync();
         this.Store.Namespace.Subscribe(@namespace => this.OnStateChanged(cmp => cmp.Namespace = @namespace), token: this.CancellationTokenSource.Token);
         this.Store.Namespaces.Subscribe(namespaces => this.OnStateChanged(cmp => cmp.Namespaces = namespaces), token: this.CancellationTokenSource.Token);
-        await this.Store.ListNamespaceAsync().ConfigureAwait(false);
     }
 
     /// <summary>

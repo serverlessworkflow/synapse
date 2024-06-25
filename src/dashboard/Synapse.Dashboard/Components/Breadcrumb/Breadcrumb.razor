@@ -17,7 +17,7 @@
 @namespace Synapse.Dashboard.Components
 @inject IBreadcrumbManager BreadcrumbService
 @implements IDisposable
-<nav class="pb-4" aria-label="breadcrumb">
+<nav aria-label="breadcrumb">
     <ul class="breadcrumb">
         @foreach (var item in BreadcrumbService.Items)
         {

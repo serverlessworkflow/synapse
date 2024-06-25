@@ -1,0 +1,145 @@
+﻿﻿@*
+    Copyright © 2024-Present The Synapse Authors
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*@
+
+@page "/workflows/{namespace}/{name}/latest"
+@page "/workflows/{namespace}/{name}/{version}"
+@using ServerlessWorkflow.Sdk.Models
+@using Synapse.Api.Client.Services
+@inherits NamespacedResourceManagementComponent<View, WorkflowDetailsStore, WorkflowDetailsState, WorkflowInstance>
+@inject ISynapseApiClient Api
+@inject IBreadcrumbManager BreadcrumbManager
+@inject IJSRuntime JSRuntime
+@inject IMonacoEditorHelper MonacoEditorHelper
+@inject IYamlSerializer YamlSerializer
+
+<ApplicationTitle>Workflow @($"{name}.{ns}:{version}")</ApplicationTitle>
+
+<div class="d-flex w-100 h-100">
+    <HorizontalCollapsible>
+        <Label>Instances</Label>
+        <Content>
+            <div class="table-container">
+                <WorkflowInstancesList Loading="Loading"
+                                       Title="Title()"
+                                       WorkflowInstances="Resources"
+                                       OnSearchInput="OnSearchInput"
+                                       Columns="columns"></WorkflowInstancesList>
+            </div>
+        </Content>
+    </HorizontalCollapsible>
+    <HorizontalCollapsible>
+        <Label>Graph</Label>
+        <Content>
+            @if (workflowDefinition == null)
+            {
+                <Loader />
+            }
+            else
+            {
+                <WorkflowDiagram WorkflowDefinition="workflowDefinition" />
+            }
+        </Content>
+    </HorizontalCollapsible>
+    <HorizontalCollapsible>
+        <Label>Definition</Label>
+        <Content>
+            @if (workflowDefinition == null)
+            {
+                <Loader />
+            }
+            else
+            {
+                <!--<PreferredLanguageSelector PreferedLanguageChange="Store.ToggleTextBasedEditorLanguageAsync" />-->
+                <StandaloneCodeEditor @ref="Store.TextEditor"
+                                      ConstructionOptions="Store.StandaloneEditorConstructionOptions"
+                                      OnDidInit="Store.OnTextBasedEditorInitAsync"
+                                      CssClass="h-100" />
+            }
+        </Content>
+    </HorizontalCollapsible>
+</div>
+
+@code
+{
+
+    string ns = null!;
+    string name = null!;
+    string version = null!;
+    Workflow workflow = null!;
+    WorkflowDefinition workflowDefinition = null!;
+    readonly IEnumerable<string> columns = [
+        "Name",
+    "Namespace",
+    "Status",
+    "Started At",
+    "Ended At"
+    ];
+
+    [Parameter] public new string? Namespace { get; set; }
+    [Parameter] public string? Name { get; set; }
+    [Parameter] public string? Version { get; set; }
+
+    /// <inheritdoc/>
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync().ConfigureAwait(false);
+        this.Store.Namespace.Where(newNamespace => !string.IsNullOrWhiteSpace(newNamespace)).Subscribe(newNamespace => this.OnStateChanged(cmp => cmp.ns = newNamespace!), token: this.CancellationTokenSource.Token);
+        this.Store.WorkflowDefinitionName.Where(newName => !string.IsNullOrWhiteSpace(newName)).Subscribe(newName => this.OnStateChanged(cmp => cmp.name = newName!), token: this.CancellationTokenSource.Token);
+        this.Store.WorkflowDefinitionVersion.Where(newVersion => !string.IsNullOrWhiteSpace(newVersion)).Subscribe(newVersion => this.OnStateChanged(cmp => cmp.version = newVersion!), token: this.CancellationTokenSource.Token);
+        this.Store.Workflow.Where(newWorkflow => newWorkflow != null).Subscribe(newWorkflow => this.OnStateChanged(cmp => cmp.workflow = newWorkflow!), token: this.CancellationTokenSource.Token);
+        this.Store.WorkflowDefinition.Where(newWorkflowDefinition => newWorkflowDefinition != null).Subscribe(newWorkflowDefinition =>
+        {
+            this.OnStateChanged(cmp => cmp.workflowDefinition = newWorkflowDefinition!);
+            BreadcrumbManager.Use(Breadcrumbs.Workflows);
+            BreadcrumbManager.Add(new($"{newWorkflowDefinition!.Document.Name}.{newWorkflowDefinition!.Document.Namespace}", $"/workflows/{newWorkflowDefinition!.Document.Namespace}/{newWorkflowDefinition!.Document.Name}/latest"));
+
+        }, token: this.CancellationTokenSource.Token);
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (this.Namespace != this.ns)
+        {
+            this.Store.SetNamespace(this.Namespace);
+        }
+        if (this.Name != this.name)
+        {
+            this.Store.SetWorkflowDefinitionName(this.Name);
+        }
+        if (this.Version != this.version)
+        {
+            this.Store.SetWorkflowDefinitionVersion(this.Version);
+        }
+    }
+
+    RenderFragment Title() => __builder =>
+    {
+        <div class="d-flex align-items-center">
+            <Synapse.Dashboard.Components.Breadcrumb />
+            <span class="ps-2">/</span>
+            <select class="form-select w-auto border-0 text-decoration-underline text-primary" @onchange="(e) => Store.SetWorkflowDefinitionVersion(e.Value!.ToString())">
+                @if (workflow != null)
+                {
+                    foreach (var definitionVersion in workflow.Spec.Versions)
+                    {
+                        <option value="@definitionVersion.Document.Version" selected="@(definitionVersion.Document.Version == version)">@definitionVersion.Document.Version</option>
+                    }
+                }
+            </select>
+        </div>
+    };
+
+}
