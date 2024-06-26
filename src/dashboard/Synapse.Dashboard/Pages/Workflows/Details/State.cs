@@ -28,12 +28,12 @@ public record WorkflowDetailsState
     public Workflow? Workflow { get; set; }
 
     /// <summary>
-    /// The displayed <see cref="Workflow"/>'s <see cref="WorkflowDefinition"/> name
+    /// Gets/sets the displayed <see cref="Workflow"/>'s <see cref="WorkflowDefinition"/> name
     /// </summary>
     public string? WorkflowDefinitionName { get; set; }
 
     /// <summary>
-    /// The displayed <see cref="Workflow"/>'s <see cref="WorkflowDefinition"/> version
+    /// Gets/sets the displayed <see cref="Workflow"/>'s <see cref="WorkflowDefinition"/> version
     /// </summary>
     public string? WorkflowDefinitionVersion { get; set; }
 
@@ -45,6 +45,6 @@ public record WorkflowDetailsState
     /// <summary>
     /// Gets/sets the parsed <see cref="WorkflowDefinition"/>
     /// </summary>
-    public string JsonWorkflowDefinition { get; set; } = string.Empty;
+    public string WorkflowDefinitionJson { get; set; } = string.Empty;
 
 }

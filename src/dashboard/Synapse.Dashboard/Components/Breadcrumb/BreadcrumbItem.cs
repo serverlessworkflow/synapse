@@ -19,25 +19,49 @@ namespace Synapse.Dashboard.Components;
 /// <remarks>
 /// Initializes a new <see cref="BreadcrumbItem"/> with the provided data
 /// </remarks>
-/// <param name="label">The breadcrumb's label</param>
-/// <param name="link">The link associated to the breadcrumb</param>
-/// <param name="icon">The breadcrumb's icon, if any</param>
-public class BreadcrumbItem(string label, string link, string? icon = null)
+public class BreadcrumbItem
 {
 
     /// <summary>
-    /// Gets the breadcrumb's label
+    /// Initializes a new <see cref="BreadcrumbItem"/> with the provided data
     /// </summary>
-    public string Label { get; } = label;
+    /// <param name="label">The breadcrumb's label</param>
+    /// <param name="link">The link associated to the breadcrumb</param>
+    /// <param name="icon">The breadcrumb's icon, if any</param>
+    public BreadcrumbItem(string label, string link, string? icon = null)
+    {
+        Label = label;
+        Link = link;
+        Icon = icon;
+    }
 
     /// <summary>
-    /// Gets the link associated to the breadcrumb
+    /// Initializes a new <see cref="BreadcrumbItem"/> with the provided template
     /// </summary>
-    public string Link { get; } = link;
+    /// <param name="template">The breadcrumb's template</param>
+    public BreadcrumbItem(RenderFragment template)
+    {
+        Template = template;
+    }
+
+    /// <summary>
+    /// Gets the breadcrumb's label, if any
+    /// </summary>
+    public string? Label { get; }
+
+    /// <summary>
+    /// Gets the link associated to the breadcrumb, if any
+    /// </summary>
+    public string? Link { get; }
 
     /// <summary>
     /// Gets the breadcrumb's icon, if any
     /// </summary>
-    public string? Icon { get; } = icon;
+    public string? Icon { get; }
+
+    /// <summary>
+    /// Get the breadcrumb's <see cref="RenderFragment"/>, if any
+    /// </summary>
+    public RenderFragment? Template { get; }
 
 }

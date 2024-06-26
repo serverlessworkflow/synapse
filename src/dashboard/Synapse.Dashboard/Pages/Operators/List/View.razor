@@ -2,6 +2,7 @@
 @attribute [Authorize]
 @namespace Synapse.Dashboard.Pages.Operators.List
 @inherits NamespacedResourceManagementComponent<Operator>
+@inject IBreadcrumbManager BreadcrumbManager
 
 <ApplicationTitle>Operators</ApplicationTitle>
 
@@ -67,7 +68,13 @@
 
 <ConfirmDialog @ref="Dialog" />
 
-@{
+@code {
+    /// <inheritdoc/>
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        BreadcrumbManager.Use(Breadcrumbs.Operators);
+    }
 
     string GetStatusClass(Operator @operator)
     {

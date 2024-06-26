@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Microsoft.JSInterop;
+using JsonCons.Utilities;
+using Neuroglia.Data;
 using Semver;
 using ServerlessWorkflow.Sdk.Models;
 using Synapse.Api.Client.Services;
-using Synapse.Dashboard.Components.ReferenceDetailsStateManagement;
+using Synapse.Dashboard.Components.ResourceEditorStateManagement;
 using Synapse.Resources;
 
 namespace Synapse.Dashboard.Pages.Workflows.Create;
@@ -27,12 +28,21 @@ namespace Synapse.Dashboard.Pages.Workflows.Create;
 /// <param name="monacoEditorHelper">The service used to help handling Monaco editors</param>
 /// <param name="jsonSerializer">The service used to serialize/deserialize data to/from JSON</param>
 /// <param name="yamlSerializer">The service used to serialize/deserialize data to/from YAML</param>
-public class CreateWorkflowViewStore(ISynapseApiClient api, IMonacoEditorHelper monacoEditorHelper, IJsonSerializer jsonSerializer, IYamlSerializer yamlSerializer)
+/// <param name="jsRuntime">The service used for JS interop</param>
+/// <param name="navigationManager">The service used to provides an abstraction for querying and managing URI navigation</param>
+public class CreateWorkflowViewStore(
+    ISynapseApiClient api,
+    IMonacoEditorHelper monacoEditorHelper,
+    IJsonSerializer jsonSerializer,
+    IYamlSerializer yamlSerializer,
+    IJSRuntime jsRuntime,
+    NavigationManager navigationManager
+)
     : ComponentStore<CreateWorkflowViewState>(new())
 {
 
-    Workflow? _workflow;
-    WorkflowDefinition? _workflowDefinition;
+    private TextModel? _textModel = null;
+    private bool _disposed;
 
     /// <summary>
     /// Gets the service used to interact with the Synapse API
@@ -55,19 +65,40 @@ public class CreateWorkflowViewStore(ISynapseApiClient api, IMonacoEditorHelper 
     protected IYamlSerializer YamlSerializer { get; } = yamlSerializer;
 
     /// <summary>
-    /// Gets an <see cref="IObservable{T}"/> used to observe changes to the state's <see cref="CreateWorkflowViewState.Workflow"/> property
+    /// Gets the service used for JS interop
     /// </summary>
-    public IObservable<Workflow?> Workflow => this.Select(state => state.Workflow).DistinctUntilChanged();
+    protected IJSRuntime JSRuntime { get; } = jsRuntime;
+
+    /// <summary>
+    /// Gets the service used to provides an abstraction for querying and managing URI navigation
+    /// </summary>
+    protected NavigationManager NavigationManager { get; } = navigationManager;
+
+    /// <summary>
+    /// The <see cref="BlazorMonaco.Editor.StandaloneEditorConstructionOptions"/> provider function
+    /// </summary>
+    public Func<StandaloneCodeEditor, StandaloneEditorConstructionOptions> StandaloneEditorConstructionOptions = monacoEditorHelper.GetStandaloneEditorConstructionOptions(string.Empty, false, monacoEditorHelper.PreferredLanguage);
+
+    /// <summary>
+    /// The <see cref="StandaloneCodeEditor"/> reference
+    /// </summary>
+    public StandaloneCodeEditor? TextEditor { get; set; }
+
+    #region Selectors
+    /// <summary>
+    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="CreateWorkflowViewState.Namespace"/> changes
+    /// </summary>
+    public IObservable<string?> Namespace => this.Select(state => state.Namespace).DistinctUntilChanged();
+
+    /// <summary>
+    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="CreateWorkflowViewState.Name"/> changes
+    /// </summary>
+    public IObservable<string?> Name => this.Select(state => state.Name).DistinctUntilChanged();
 
     /// <summary>
     /// Gets an <see cref="IObservable{T}"/> used to observe changes to the state's <see cref="CreateWorkflowViewState.WorkflowDefinition"/> property
     /// </summary>
     public IObservable<WorkflowDefinition?> WorkflowDefinition => this.Select(state => state.WorkflowDefinition).DistinctUntilChanged();
-
-    /// <summary>
-    /// Gets an <see cref="IObservable{T}"/> used to observe changes to the state's <see cref="CreateWorkflowViewState.WorkflowDefinitionText"/> property
-    /// </summary>
-    public IObservable<string?> WorkflowDefinitionText => this.Select(state => state.WorkflowDefinitionText).DistinctUntilChanged();
 
     /// <summary>
     /// Gets an <see cref="IObservable{T}"/> used to observe changes to the state's <see cref="CreateWorkflowViewState.Loading"/> property
@@ -80,84 +111,200 @@ public class CreateWorkflowViewStore(ISynapseApiClient api, IMonacoEditorHelper 
     public IObservable<bool> Saving => this.Select(state => state.Saving).DistinctUntilChanged();
 
     /// <summary>
-    /// Creates a new <see cref="WorkflowDefinition"/> from scratch
+    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="CreateWorkflowViewState.ProblemType"/> changes
     /// </summary>
-    /// <returns>A new awaitable <see cref="Task"/></returns>
-    public Task CreateWorkflowDefinitionAsync()
-    {
-        var workflowDefinition = new WorkflowDefinition()
+    public IObservable<Uri?> ProblemType => this.Select(state => state.ProblemType).DistinctUntilChanged();
+
+    /// <summary>
+    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="CreateWorkflowViewState.ProblemTitle"/> changes
+    /// </summary>
+    public IObservable<string> ProblemTitle => this.Select(state => state.ProblemTitle).DistinctUntilChanged();
+
+    /// <summary>
+    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="CreateWorkflowViewState.ProblemDetail"/> changes
+    /// </summary>
+    public IObservable<string> ProblemDetail => this.Select(state => state.ProblemDetail).DistinctUntilChanged();
+
+    /// <summary>
+    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="CreateWorkflowViewState.ProblemStatus"/> changes
+    /// </summary>
+    public IObservable<int> ProblemStatus => this.Select(state => state.ProblemStatus).DistinctUntilChanged();
+
+    /// <summary>
+    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="CreateWorkflowViewState.ProblemErrors"/> changes
+    /// </summary>
+    public IObservable<IDictionary<string, string[]>> ProblemErrors => this.Select(state => state.ProblemErrors).DistinctUntilChanged();
+
+    /// <summary>
+    /// Gets an <see cref="IObservable{T}"/> used to observe computed <see cref="Neuroglia.ProblemDetails"/>
+    /// </summary>
+    public IObservable<ProblemDetails?> ProblemDetails => Observable.CombineLatest(
+        this.ProblemType,
+        this.ProblemTitle,
+        this.ProblemStatus,
+        this.ProblemDetail,
+        this.ProblemErrors,
+        (type, title, status, details, errors) =>
         {
-            Document = new()
+            if (string.IsNullOrWhiteSpace(title))
             {
-                Dsl = "1.0.0",
-                Namespace = Namespace.DefaultNamespaceName,
-                Name = "new-workflow",
-                Version = "0.1.0"
-            },
-            Do = []
-        };
-        return this.SetWorkflowDefinitionAsync(workflowDefinition);
+                return null;
+            }
+            return new ProblemDetails(type ?? new Uri("unknown://"), title, status, details, null, errors, null);
+        }
+    );
+    #endregion
+
+    #region Setters
+    /// <summary>
+    /// Sets the state's <see cref="CreateWorkflowViewState.Namespace"/>
+    /// </summary>
+    /// <param name="ns">The new <see cref="CreateWorkflowViewState.Namespace"/> value</param>
+    public void SetNamespace(string? ns)
+    {
+        this.Reduce(state => state with
+        {
+            Namespace = ns,
+            Loading = true
+        });
     }
 
     /// <summary>
-    /// Creates a new <see cref="ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/> from the specified one
+    /// Sets the state's <see cref="CreateWorkflowViewState.Name"/>
+    /// </summary>
+    /// <param name="name">The new <see cref="CreateWorkflowViewState.Name"/> value</param>
+    public void SetName(string? name)
+    {
+        this.Reduce(state => state with
+        {
+            Name = name,
+            Loading = true
+        });
+    }
+
+    /// <summary>
+    /// Sets the state's <see cref="ResourceEditorState{TResource}" /> <see cref="ProblemDetails"/>'s related data
+    /// </summary>
+    /// <param name="problem">The <see cref="ProblemDetails"/> to populate the data with</param>
+    public void SetProblemDetails(ProblemDetails? problem)
+    {
+        this.Reduce(state => state with
+        {
+            ProblemType = problem?.Type,
+            ProblemTitle = problem?.Title ?? string.Empty,
+            ProblemStatus = problem?.Status ?? 0,
+            ProblemDetail = problem?.Detail ?? string.Empty,
+            ProblemErrors = problem?.Errors?.ToDictionary(kvp => kvp.Key, kvp => kvp.Value) ?? []
+        });
+    }
+    #endregion
+
+    #region Actions
+    /// <summary>
+    /// Gets the <see cref="ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/> for the specified namespace and name
     /// </summary>
     /// <param name="namespace">The namespace the <see cref="ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/> to create a new version of belongs to</param>
     /// <param name="name">The name of the <see cref="ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/> to create a new version of</param>
     /// <returns>A new awaitable <see cref="Task"/></returns>
-    public async Task CreateWorkflowDefinitionAsync(string @namespace, string name)
+    public async Task GetWorkflowDefinitionAsync(string @namespace, string name)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(@namespace);
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
-        this._workflow = await this.Api.Workflows.GetAsync(name, @namespace) ?? throw new NullReferenceException($"Failed to find the specified workflow '{name}.{@namespace}'");
+        var workflow = await this.Api.Workflows.GetAsync(name, @namespace) ?? throw new NullReferenceException($"Failed to find the specified workflow '{name}.{@namespace}'");
+        var definition = workflow.Spec.Versions.GetLatest();
         this.Reduce(s => s with
         {
-            Workflow = this._workflow
-        });
-        var workflowDefinition = this._workflow.Spec.Versions.GetLatest();
-        await this.SetWorkflowDefinitionAsync(workflowDefinition);
-    }
-
-    /// <summary>
-    /// Sets the <see cref="WorkflowDefinition"/> to create
-    /// </summary>
-    /// <param name="workflowDefinition">The base <see cref="WorkflowDefinition"/></param>
-    /// <returns>A new awaitable <see cref="Task"/></returns>
-    protected Task SetWorkflowDefinitionAsync(WorkflowDefinition workflowDefinition)
-    {
-        ArgumentNullException.ThrowIfNull(workflowDefinition);
-        this.Reduce(s => s with
-        {
-            Loading = true
-        });
-        var serializer = this.MonacoEditorHelper.PreferredLanguage switch
-        {
-            PreferredLanguage.JSON => (ITextSerializer)this.JsonSerializer,
-            PreferredLanguage.YAML => this.YamlSerializer,
-            _ => throw new NotSupportedException($"The specified language '{this.MonacoEditorHelper.PreferredLanguage}' is not supported")
-        };
-        var text = serializer.SerializeToText(workflowDefinition);
-        this._workflowDefinition = workflowDefinition;
-        this.Reduce(s => s with
-        {
-            WorkflowDefinition = workflowDefinition,
-            WorkflowDefinitionText = text,
+            WorkflowDefinition = definition,
             Loading = false
         });
-        return Task.CompletedTask;
     }
 
     /// <summary>
-    /// Sets the state's <see cref="ReferenceDetailsState.TextEditor"/>
+    /// Handles changed of the text editor's language
     /// </summary>
-    /// <param name="textEditor">The new <see cref="ReferenceDetailsState.TextEditor"/> value</param>
-    public void SetTextEditor(StandaloneCodeEditor? textEditor)
+    /// <param name="_"></param>
+    /// <returns></returns>
+    public async Task ToggleTextBasedEditorLanguageAsync(string _)
     {
-        ArgumentNullException.ThrowIfNull(textEditor);
-        this.Reduce(state => state with
+        if (this.TextEditor == null)
         {
-            TextEditor = textEditor
-        });
+            return;
+        }
+        var language = this.MonacoEditorHelper.PreferredLanguage;
+        try
+        {
+            var document = await this.TextEditor.GetValue();
+            if (document == null)
+            {
+                return;
+            }
+            document = language == PreferredLanguage.YAML ?
+                this.YamlSerializer.ConvertFromJson(document) :
+                this.YamlSerializer.ConvertToJson(document);
+            this.Reduce(state => state with
+            {
+                WorkflowDefinitionText = document
+            });
+            await this.OnTextBasedEditorInitAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            await this.MonacoEditorHelper.ChangePreferredLanguageAsync(language == PreferredLanguage.YAML ? PreferredLanguage.JSON : PreferredLanguage.YAML);
+        }
+    }
+
+    /// <summary>
+    /// Handles initialization of the text editor
+    /// </summary>
+    /// <returns></returns>
+    public async Task OnTextBasedEditorInitAsync()
+    {
+        await this.SetTextBasedEditorLanguageAsync();
+        await this.SetTextEditorValueAsync();
+    }
+
+    /// <summary>
+    /// Sets the language of the text editor
+    /// </summary>
+    /// <returns></returns>
+    public async Task SetTextBasedEditorLanguageAsync()
+    {
+        try
+        {
+            var language = this.MonacoEditorHelper.PreferredLanguage;
+            if (this.TextEditor != null)
+            {
+                if (this._textModel != null)
+                {
+                    await Global.SetModelLanguage(this.JSRuntime, this._textModel, language);
+                }
+                else
+                {
+                    var resourceUri = $"inmemory://workflow-definition";
+                    this._textModel = await Global.CreateModel(this.JSRuntime, "", language, resourceUri);
+                }
+                await this.TextEditor!.SetModel(this._textModel);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            // todo: handle exception
+        }
+    }
+
+    /// <summary>
+    /// Changes the value of the text editor
+    /// </summary>
+    /// <returns></returns>
+    async Task SetTextEditorValueAsync()
+    {
+        var document = this.Get(state => state.WorkflowDefinitionText);
+        if (this.TextEditor != null && !string.IsNullOrWhiteSpace(document))
+        {
+            await this.TextEditor.SetValue(document);
+        }
     }
 
     /// <summary>
@@ -166,39 +313,156 @@ public class CreateWorkflowViewStore(ISynapseApiClient api, IMonacoEditorHelper 
     /// <returns>A new awaitable <see cref="Task"/></returns>
     public async Task SaveWorkflowDefinitionAsync()
     {
-        if (this._workflowDefinition == null) throw new NullReferenceException("The workflow definition cannot be null");
-        this.Reduce(s => s with
+        if (this.TextEditor == null)
         {
-            Saving = true
-        });
-        if(this._workflow == null)
-        {
-            this._workflow = await this.Api.Workflows.CreateAsync(new()
+            this.Reduce(state => state with
             {
-                Metadata = new()
+                ProblemTitle = "Text editor",
+                ProblemDetail = "The text editor must be initialized."
+            });
+            return;
+        }
+        var workflowDefinitionText = await this.TextEditor.GetValue();
+        if (string.IsNullOrWhiteSpace(workflowDefinitionText))
+        {
+            this.Reduce(state => state with
+            {
+                ProblemTitle = "Invalid definition",
+                ProblemDetail = "The workflow definition cannot be empty."
+            });
+            return;
+        }
+        try
+        {
+            var workflowDefinition = this.MonacoEditorHelper.PreferredLanguage == PreferredLanguage.JSON ?
+                this.JsonSerializer.Deserialize<WorkflowDefinition>(workflowDefinitionText) :
+                this.YamlSerializer.Deserialize<WorkflowDefinition>(workflowDefinitionText);
+            var @namespace = workflowDefinition!.Document.Namespace;
+            var name = workflowDefinition.Document.Name;
+            var version = workflowDefinition.Document.Version;
+            this.Reduce(s => s with
+            {
+                Saving = true
+            });
+            Workflow? workflow = null;
+            try
+            {
+                workflow = await this.Api.Workflows.GetAsync(name, @namespace);
+            }
+            catch
+            {
+                // Assume 404, might need actual handling
+            }
+            if (workflow == null)
+            {
+                workflow = await this.Api.Workflows.CreateAsync(new()
                 {
-                    Namespace = this._workflowDefinition.Document.Namespace,
-                    Name = this._workflowDefinition.Document.Name
-                },
-                Spec = new()
+                    Metadata = new()
+                    {
+                        Namespace = workflowDefinition!.Document.Namespace,
+                        Name = workflowDefinition.Document.Name
+                    },
+                    Spec = new()
+                    {
+                        Versions = [workflowDefinition]
+                    }
+                });
+            }
+            else
+            {
+                var updatedResource = workflow.Clone()!;
+                var documentVersion = SemVersion.Parse(version, SemVersionStyles.Strict)!;
+                var latestVersion = SemVersion.Parse(updatedResource.Spec.Versions.GetLatest().Document.Version, SemVersionStyles.Strict)!;
+                if (updatedResource.Spec.Versions.Any(v => SemVersion.Parse(v.Document.Version, SemVersionStyles.Strict).CompareSortOrderTo(documentVersion) >= 0))
                 {
-                    Versions = [this._workflowDefinition]
+                    this.Reduce(state => state with
+                    {
+                        ProblemTitle = "Invalid version",
+                        ProblemDetail = $"The specified version '{documentVersion}' must be strictly superior to the latest version '{latestVersion}'."
+                    });
+                    return;
                 }
+                updatedResource.Spec.Versions.Add(workflowDefinition!);
+                var jsonPatch = JsonPatch.FromDiff(this.JsonSerializer.SerializeToElement(workflow)!.Value, this.JsonSerializer.SerializeToElement(updatedResource)!.Value);
+                var patch = this.JsonSerializer.Deserialize<Json.Patch.JsonPatch>(jsonPatch.RootElement);
+                if (patch != null)
+                {
+                    var resourcePatch = new Patch(PatchType.JsonPatch, jsonPatch);
+                    await this.Api.ManageNamespaced<Workflow>().PatchAsync(name, @namespace, resourcePatch, null, this.CancellationTokenSource.Token);
+                }
+            }
+            this.NavigationManager.NavigateTo($"/workflows/details/{@namespace}/{name}/{version}");
+        }
+        catch (ProblemDetailsException ex)
+        {
+            this.SetProblemDetails(ex.Problem);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            // todo: handle exception
+        }
+        finally
+        {
+            this.Reduce(s => s with
+            {
+                Saving = false
             });
         }
-        else
+    }
+    #endregion
+
+    /// <inheritdoc/>
+    public override async Task InitializeAsync()
+    {
+        this.WorkflowDefinition.SubscribeAsync(async definition => {
+            string document = "";
+            if (definition != null)
+            {
+                document = this.MonacoEditorHelper.PreferredLanguage == PreferredLanguage.JSON ?
+                    this.JsonSerializer.SerializeToText(definition) :
+                    this.YamlSerializer.SerializeToText(definition);
+            }
+            this.Reduce(state => state with
+            {
+                WorkflowDefinitionText = document
+            });
+            await this.SetTextEditorValueAsync();
+        }, cancellationToken: this.CancellationTokenSource.Token);
+        Observable.CombineLatest(
+            this.Namespace.Where(ns => !string.IsNullOrWhiteSpace(ns)),
+            this.Name.Where(name => !string.IsNullOrWhiteSpace(name)),
+            (ns, name) => (ns!, name!)
+        ).SubscribeAsync(async ((string ns, string name) workflow) =>
         {
-            var originalResource = await this.Api.Workflows.GetAsync(this._workflowDefinition.Document.Name, this._workflowDefinition.Document.Namespace);
-            var updatedResource = originalResource.Clone()!;
-            var latestVersion = SemVersion.Parse(updatedResource.Spec.Versions.GetLatest().Document.Version, SemVersionStyles.Strict)!;
-            if (updatedResource.Spec.Versions.Any(v => SemVersion.Parse(v.Document.Version, SemVersionStyles.Strict).CompareSortOrderTo(latestVersion) >= 0)) throw new Exception($"The specified version '{this._workflowDefinition.Document.Version}' must be strictly superior to the latest version '{latestVersion}'");
-            updatedResource.Spec.Versions.Add(this._workflowDefinition);
+            await this.GetWorkflowDefinitionAsync(workflow.ns, workflow.name);
+        }, cancellationToken: this.CancellationTokenSource.Token);
+        await base.InitializeAsync();
+    }
+
+    /// <summary>
+    /// Disposes of the store
+    /// </summary>
+    /// <param name="disposing">A boolean indicating whether or not the dispose of the store</param>
+    protected override void Dispose(bool disposing)
+    {
+        if (!this._disposed)
+        {
+            if (disposing)
+            {
+                if (this._textModel != null)
+                {
+                    this._textModel.DisposeModel();
+                    this._textModel = null;
+                }
+                if (this.TextEditor != null)
+                {
+                    this.TextEditor.Dispose();
+                    this.TextEditor = null;
+                }
+            }
+            this._disposed = true;
         }
-        this.Reduce(s => s with
-        {
-            Workflow = this._workflow,
-            Saving = false
-        });
     }
 
 }

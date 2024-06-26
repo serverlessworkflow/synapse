@@ -22,7 +22,7 @@ namespace Synapse.Dashboard.Pages.Workflows.Details;
 /// </summary>
 /// <param name="apiClient">The service used to interact with the Synapse API</param>
 /// <param name="resourceEventHub">The hub used to watch resource events</param>
-/// <param name="jsRuntime">The service used from JS interop</param>
+/// <param name="jsRuntime">The service used for JS interop</param>
 /// <param name="monacoEditorHelper">The service used ease Monaco Editor interactions</param>
 /// <param name="jsonSerializer">The service used to serialize and deserialize JSON</param>
 /// <param name="yamlSerializer">The service used to serialize and deserialize YAML</param>
@@ -38,6 +38,7 @@ public class WorkflowDetailsStore(
 {
 
     private TextModel? _textModel = null;
+    private bool _disposed;
 
     /// <summary>
     /// The <see cref="BlazorMonaco.Editor.StandaloneEditorConstructionOptions"/> provider function
@@ -96,9 +97,9 @@ public class WorkflowDetailsStore(
     public IObservable<EquatableList<Workflow>?> Workflows => this.Select(state => state.Workflows).DistinctUntilChanged();
 
     /// <summary>
-    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="WorkflowDetailsState.JsonWorkflowDefinition"/> changes
+    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="WorkflowDetailsState.WorkflowDefinitionJson"/> changes
     /// </summary>
-    public IObservable<string> Document => this.Select(state => state.JsonWorkflowDefinition).DistinctUntilChanged();
+    public IObservable<string> Document => this.Select(state => state.WorkflowDefinitionJson).DistinctUntilChanged();
     #endregion
 
     #region Setters
@@ -113,8 +114,8 @@ public class WorkflowDetailsStore(
             Workflow = null,
             WorkflowDefinitionName = workflowDefinitionName
         });
-        var ns = this.Get(state => state.Namespace);
     }
+
     /// <summary>
     /// Sets the state's <see cref="WorkflowDetailsState.WorkflowDefinitionVersion"/>
     /// </summary>
@@ -210,7 +211,7 @@ public class WorkflowDetailsStore(
     /// <returns></returns>
     async Task SetTextEditorValueAsync()
     {
-        var document = this.Get(state => state.JsonWorkflowDefinition);
+        var document = this.Get(state => state.WorkflowDefinitionJson);
         var language = monacoEditorHelper.PreferredLanguage;
         if (this.TextEditor != null && !string.IsNullOrWhiteSpace(document))
         {
@@ -240,7 +241,7 @@ public class WorkflowDetailsStore(
             var document = jsonSerializer.SerializeToText(definition);
             this.Reduce(state => state with
             {
-                JsonWorkflowDefinition = document
+                WorkflowDefinitionJson = document
             });
             await this.SetTextEditorValueAsync();
             if (monacoEditorHelper.PreferredLanguage != PreferredLanguage.YAML)
@@ -266,14 +267,13 @@ public class WorkflowDetailsStore(
         await base.InitializeAsync();
     }
 
-    private bool disposed;
     /// <summary>
     /// Disposes of the store
     /// </summary>
     /// <param name="disposing">A boolean indicating whether or not the dispose of the store</param>
     protected override void Dispose(bool disposing)
     {
-        if (!this.disposed)
+        if (!this._disposed)
         {
             if (disposing)
             {
@@ -288,7 +288,7 @@ public class WorkflowDetailsStore(
                     this.TextEditor = null;
                 }
             }
-            this.disposed = true;
+            this._disposed = true;
         }
     }
 }

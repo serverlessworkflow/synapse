@@ -14,16 +14,12 @@
     limitations under the License.
 *@
 
-@page "/workflows/{namespace}/{name}/latest"
-@page "/workflows/{namespace}/{name}/{version}"
+@page "/workflows/details/{namespace}/{name}/latest"
+@page "/workflows/details/{namespace}/{name}/{version}"
 @using ServerlessWorkflow.Sdk.Models
 @using Synapse.Api.Client.Services
 @inherits NamespacedResourceManagementComponent<View, WorkflowDetailsStore, WorkflowDetailsState, WorkflowInstance>
-@inject ISynapseApiClient Api
 @inject IBreadcrumbManager BreadcrumbManager
-@inject IJSRuntime JSRuntime
-@inject IMonacoEditorHelper MonacoEditorHelper
-@inject IYamlSerializer YamlSerializer
 
 <ApplicationTitle>Workflow @($"{name}.{ns}:{version}")</ApplicationTitle>
 
@@ -33,7 +29,6 @@
         <Content>
             <div class="table-container">
                 <WorkflowInstancesList Loading="Loading"
-                                       Title="Title()"
                                        WorkflowInstances="Resources"
                                        OnSearchInput="OnSearchInput"
                                        Columns="columns"></WorkflowInstancesList>
@@ -66,11 +61,16 @@
             }
             else
             {
-                <!--<PreferredLanguageSelector PreferedLanguageChange="Store.ToggleTextBasedEditorLanguageAsync" />-->
-                <StandaloneCodeEditor @ref="Store.TextEditor"
-                                      ConstructionOptions="Store.StandaloneEditorConstructionOptions"
-                                      OnDidInit="Store.OnTextBasedEditorInitAsync"
-                                      CssClass="h-100" />
+                <div class="d-flex flex-column h-100 mh-100">
+                    <PreferredLanguageSelector PreferedLanguageChange="Store.ToggleTextBasedEditorLanguageAsync" />
+                    <div class="flex-grow">
+                        <StandaloneCodeEditor @ref="Store.TextEditor"
+                                              ConstructionOptions="Store.StandaloneEditorConstructionOptions"
+                                              OnDidInit="Store.OnTextBasedEditorInitAsync"
+                                              CssClass="h-100" />
+                    </div>
+                </div>
+                
             }
         </Content>
     </HorizontalCollapsible>
@@ -86,10 +86,10 @@
     WorkflowDefinition workflowDefinition = null!;
     readonly IEnumerable<string> columns = [
         "Name",
-        "Namespace",
-        "Status",
-        "Started At",
-        "Ended At"
+    "Namespace",
+    "Status",
+    "Started At",
+    "Ended At"
     ];
 
     [Parameter] public new string? Namespace { get; set; }
@@ -100,50 +100,63 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync().ConfigureAwait(false);
-        this.Store.Namespace.Where(newNamespace => !string.IsNullOrWhiteSpace(newNamespace)).Subscribe(newNamespace => this.OnStateChanged(cmp => cmp.ns = newNamespace!), token: this.CancellationTokenSource.Token);
-        this.Store.WorkflowDefinitionName.Where(newName => !string.IsNullOrWhiteSpace(newName)).Subscribe(newName => this.OnStateChanged(cmp => cmp.name = newName!), token: this.CancellationTokenSource.Token);
-        this.Store.WorkflowDefinitionVersion.Where(newVersion => !string.IsNullOrWhiteSpace(newVersion)).Subscribe(newVersion => this.OnStateChanged(cmp => cmp.version = newVersion!), token: this.CancellationTokenSource.Token);
-        this.Store.Workflow.Where(newWorkflow => newWorkflow != null).Subscribe(newWorkflow => this.OnStateChanged(cmp => cmp.workflow = newWorkflow!), token: this.CancellationTokenSource.Token);
-        this.Store.WorkflowDefinition.Where(newWorkflowDefinition => newWorkflowDefinition != null).Subscribe(newWorkflowDefinition =>
+        UpdateBreadcrumb();
+        Store.Namespace.Where(value => !string.IsNullOrWhiteSpace(value)).Subscribe(value => OnStateChanged(_ => ns = value!), token: CancellationTokenSource.Token);
+        Store.WorkflowDefinitionName.Where(value => !string.IsNullOrWhiteSpace(value)).Subscribe(value => OnStateChanged(_ => name = value!), token: CancellationTokenSource.Token);
+        Store.WorkflowDefinitionVersion.Where(value => !string.IsNullOrWhiteSpace(value)).Subscribe(value => OnStateChanged(_ => version = value!), token: CancellationTokenSource.Token);
+        Store.WorkflowDefinition.Where(value => value != null).Subscribe(value => OnStateChanged(_ => workflowDefinition = value!), token: CancellationTokenSource.Token);
+        Store.Workflow.Where(value => value != null).Subscribe(value =>
         {
-            this.OnStateChanged(cmp => cmp.workflowDefinition = newWorkflowDefinition!);
-            BreadcrumbManager.Use(Breadcrumbs.Workflows);
-            BreadcrumbManager.Add(new($"{newWorkflowDefinition!.Document.Name}.{newWorkflowDefinition!.Document.Namespace}", $"/workflows/{newWorkflowDefinition!.Document.Namespace}/{newWorkflowDefinition!.Document.Name}/latest"));
-
-        }, token: this.CancellationTokenSource.Token);
+            OnStateChanged(_ => workflow = value!);
+            UpdateBreadcrumb();
+        }, token: CancellationTokenSource.Token);
     }
 
+    /// <inheritdoc/>
     protected override void OnParametersSet()
     {
-        if (this.Namespace != this.ns)
+        if (Namespace != ns)
         {
-            this.Store.SetNamespace(this.Namespace);
+            Store.SetNamespace(Namespace);
         }
-        if (this.Name != this.name)
+        if (Name != name)
         {
-            this.Store.SetWorkflowDefinitionName(this.Name);
+            Store.SetWorkflowDefinitionName(Name);
         }
-        if (this.Version != this.version)
+        if (Version != version)
         {
-            this.Store.SetWorkflowDefinitionVersion(this.Version);
+            Store.SetWorkflowDefinitionVersion(Version);
         }
     }
 
-    RenderFragment Title() => __builder =>
+    /// <summary>
+    /// Updates the breadcrumb
+    /// </summary>
+    protected void UpdateBreadcrumb()
     {
-        <div class="d-flex align-items-center">
-            <Synapse.Dashboard.Components.Breadcrumb />
-            <span class="ps-2">/</span>
-            <select class="form-select w-auto border-0 text-decoration-underline text-primary" @onchange="(e) => Store.SetWorkflowDefinitionVersion(e.Value!.ToString())">
-                @if (workflow != null)
+        BreadcrumbManager.Use(Breadcrumbs.Workflows);
+        BreadcrumbManager.Add(new($"{Name}.{Namespace}", $"/workflows/{Namespace}/{Name}/latest"));
+        if (workflow != null)
+        {
+            BreadcrumbManager.Add(new(VersionSelector()));
+        }
+    }
+
+    /// <summary>
+    /// Renders the workflows instances table's title
+    /// </summary>
+    /// <returns></returns>
+    protected RenderFragment VersionSelector() => __builder =>
+    {
+        <select class="form-select w-auto border-0 py-0 ps-0 text-decoration-underline text-primary" @onchange="(e) => Store.SetWorkflowDefinitionVersion(e.Value!.ToString())">
+            @if (workflow != null)
+            {
+                foreach (var definitionVersion in workflow.Spec.Versions)
                 {
-                    foreach (var definitionVersion in workflow.Spec.Versions)
-                    {
-                        <option value="@definitionVersion.Document.Version" selected="@(definitionVersion.Document.Version == version)">@definitionVersion.Document.Version</option>
-                    }
+                    <option value="@definitionVersion.Document.Version" selected="@(definitionVersion.Document.Version == version)">@definitionVersion.Document.Version</option>
                 }
-            </select>
-        </div>
+            }
+        </select>
     };
 
 }

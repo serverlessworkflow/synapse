@@ -1,6 +1,7 @@
 ﻿@page "/users/profile"
 @attribute [Authorize]
 @inject ApplicationAuthenticationStateProvider AuthenticationStateProvider
+@inject IBreadcrumbManager BreadcrumbManager
 
 <ApplicationTitle>User Profile</ApplicationTitle>
 
@@ -31,6 +32,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        BreadcrumbManager.Use(Breadcrumbs.UserProfile);
         user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
         AuthenticationStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
         await base.OnInitializedAsync();

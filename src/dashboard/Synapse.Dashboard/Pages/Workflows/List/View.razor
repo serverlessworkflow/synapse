@@ -124,10 +124,13 @@
         else throw new NotSupportedException("The specified schedule type is not supported");
     }
 
-    void OnViewWorkflow(Workflow workflow) => this.NavigationManager.NavigateTo($"workflows/{workflow.GetNamespace()}/{workflow.GetName()}/{workflow.Spec.Versions.GetLatest().Document.Version}");
+    void OnViewWorkflow(Workflow workflow) => this.NavigationManager.NavigateTo($"workflows/details/{workflow.GetNamespace()}/{workflow.GetName()}/{workflow.Spec.Versions.GetLatest().Document.Version}");
 
     void OnCreateNewWorkflow() => this.NavigationManager.NavigateTo("/workflows/new");
 
-    void OnCreateNewWorkflowVersion(string ns, string name) => this.NavigationManager.NavigateTo($"/workflows/{ns}/{name}/new");
+    void OnCreateNewWorkflowVersion(string ns, string name) => this.NavigationManager.NavigateTo($"/workflows/new/{ns}/{name}");
+
+    //void OnNavigateToVersion(string ns, string name, string version) => NavigationManager.NavigateTo($"/workflows/details/{ns}/{name}/{version}");
+
 
 }

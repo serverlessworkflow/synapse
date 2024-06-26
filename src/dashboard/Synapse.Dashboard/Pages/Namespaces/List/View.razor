@@ -2,6 +2,7 @@
 @attribute [Authorize]
 @namespace Synapse.Dashboard.Pages.Namespaces.List
 @inherits ClusterResourceManagementComponent<Namespace>
+@inject IBreadcrumbManager BreadcrumbManager
 
 <ApplicationTitle>Namespaces</ApplicationTitle>
 
@@ -52,3 +53,12 @@
 <Offcanvas @ref="EditorOffCanvas" Size="OffcanvasSize.Large" UseStaticBackdrop="false" BodyCssClass="d-flex flex-column" />
 
 <ConfirmDialog @ref="Dialog" />
+
+@code {
+    /// <inheritdoc/>
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        BreadcrumbManager.Use(Breadcrumbs.Namespaces);
+    }
+}
