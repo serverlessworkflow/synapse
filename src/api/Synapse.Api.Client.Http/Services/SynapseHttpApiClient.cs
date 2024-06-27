@@ -33,7 +33,7 @@ public class SynapseHttpApiClient
         this.Logger = loggerFactory.CreateLogger(GetType());
         this.Serializer = serializer;
         this.HttpClient = httpClient;
-        this.WorkflowData = ActivatorUtilities.CreateInstance<DocumentHttpApiClient>(this.ServiceProvider, this.HttpClient);
+        this.Documents = ActivatorUtilities.CreateInstance<DocumentHttpApiClient>(this.ServiceProvider, this.HttpClient);
         foreach (var apiProperty in GetType().GetProperties().Where(p => p.CanRead && p.PropertyType.GetGenericType(typeof(IResourceApiClient<>)) != null))
         {
             var apiType = apiProperty.PropertyType.GetGenericType(typeof(IResourceApiClient<>))!;
@@ -83,7 +83,7 @@ public class SynapseHttpApiClient
     public IUserApiClient Users { get; }
 
     /// <inheritdoc/>
-    public IDocumentApiClient WorkflowData { get; }
+    public IDocumentApiClient Documents { get; }
 
     /// <inheritdoc/>
     public INamespacedResourceApiClient<Workflow> Workflows { get; private set; } = null!;

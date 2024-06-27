@@ -71,12 +71,6 @@ public class TaskExecutionContext<TDefinition>(IWorkflowExecutionContext workflo
     public virtual Task<CorrelationContext> CorrelateAsync(CancellationToken cancellationToken = default) => this.Workflow.CorrelateAsync(this, cancellationToken);
 
     /// <inheritdoc/>
-    public virtual async Task SkipAsync(CancellationToken cancellationToken = default)
-    {
-        this.Instance = await this.Workflow.SkipAsync(this.Instance, cancellationToken).ConfigureAwait(false);
-    }
-
-    /// <inheritdoc/>
     public virtual async Task SuspendAsync(CancellationToken cancellationToken = default)
     {
         this.Instance = await this.Workflow.SuspendAsync(this.Instance, cancellationToken).ConfigureAwait(false);
@@ -102,18 +96,24 @@ public class TaskExecutionContext<TDefinition>(IWorkflowExecutionContext workflo
     }
 
     /// <inheritdoc/>
-    public virtual async Task SetContextDataAsync(IDictionary<string, object> context, CancellationToken cancellationToken = default)
+    public virtual async Task SkipAsync(object? result, string? then = FlowDirective.Continue, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(context);
-        if (string.IsNullOrWhiteSpace(this.Instance.ContextReference)) throw new NullReferenceException($"The context reference of the task '{this.Instance.Reference}' must be set");
-        await this.Workflow.SetWorkflowDataAsync(this.Instance.ContextReference, context, cancellationToken).ConfigureAwait(false);
-        this.ContextData = context;
+        this.Instance = await this.Workflow.SkipAsync(this.Instance, result, then, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
     public virtual async Task CancelAsync(CancellationToken cancellationToken = default)
     {
         this.Instance = await this.Workflow.CancelAsync(this.Instance, cancellationToken);
+    }
+
+    /// <inheritdoc/>
+    public virtual async Task SetContextDataAsync(IDictionary<string, object> context, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        if (string.IsNullOrWhiteSpace(this.Instance.ContextReference)) throw new NullReferenceException($"The context reference of the task '{this.Instance.Reference}' must be set");
+        await this.Workflow.Documents.UpdateAsync(this.Instance.ContextReference, context, cancellationToken).ConfigureAwait(false);
+        this.ContextData = context;
     }
 
 }

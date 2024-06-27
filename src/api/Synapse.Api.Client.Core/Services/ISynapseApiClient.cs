@@ -30,6 +30,11 @@ public interface ISynapseApiClient
     INamespacedResourceApiClient<Correlator> Correlators { get; }
 
     /// <summary>
+    /// Gets the Synapse API used to manage <see cref="Document"/>s
+    /// </summary>
+    IDocumentApiClient Documents { get; }
+
+    /// <summary>
     /// Gets the Synapse API used to manage <see cref="Namespace"/>s
     /// </summary>
     IClusterResourceApiClient<Namespace> Namespaces { get; }
@@ -53,11 +58,6 @@ public interface ISynapseApiClient
     /// Gets the Synapse API used to manage <see cref="Workflow"/>s
     /// </summary>
     INamespacedResourceApiClient<Workflow> Workflows { get; }
-
-    /// <summary>
-    /// Gets the Synapse API used to manage workflow data <see cref="Document"/>s
-    /// </summary>
-    IDocumentApiClient WorkflowData { get; }
 
     /// <summary>
     /// Gets the Synapse API used to manage <see cref="WorkflowInstance"/>s

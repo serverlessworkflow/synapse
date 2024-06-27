@@ -33,7 +33,7 @@ public class JsonSchemaHandler(IJsonSerializer serializer)
     protected IJsonSerializer Serializer { get; } = serializer;
 
     /// <inheritdoc/>
-    public virtual bool Supports(string format) => format.Equals("json", StringComparison.OrdinalIgnoreCase);
+    public virtual bool Supports(string format) => format.Equals(SchemaFormat.Json, StringComparison.OrdinalIgnoreCase);
 
     /// <inheritdoc/>
     public virtual async Task<IOperationResult> ValidateAsync(object graph, SchemaDefinition schema, CancellationToken cancellationToken = default)

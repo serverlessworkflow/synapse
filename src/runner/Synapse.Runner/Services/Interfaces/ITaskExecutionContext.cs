@@ -83,13 +83,6 @@ public interface ITaskExecutionContext
     Task SuspendAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Skips the <see cref="TaskInstance"/>
-    /// </summary>
-    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-    /// <returns>A new awaitable <see cref="Task"/></returns>
-    Task SkipAsync(CancellationToken cancellationToken = default);
-
-    /// <summary>
     /// Retries the <see cref="TaskInstance"/>
     /// </summary>
     /// <param name="cause">The <see cref="Error"/> to retry the <see cref="TaskInstance"/> for</param>
@@ -121,6 +114,15 @@ public interface ITaskExecutionContext
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>A new awaitable <see cref="Task"/></returns>
     Task SetResultAsync(object? result, string? then = FlowDirective.Continue, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Skips the <see cref="TaskInstance"/>
+    /// </summary>
+    /// <param name="result">The <see cref="TaskInstance"/>'s result, if any</param>
+    /// <param name="then">The <see cref="FlowDirective"/> to perform next</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>A new awaitable <see cref="Task"/></returns>
+    Task SkipAsync(object? result, string? then = FlowDirective.Continue, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Cancels the <see cref="TaskInstance"/>

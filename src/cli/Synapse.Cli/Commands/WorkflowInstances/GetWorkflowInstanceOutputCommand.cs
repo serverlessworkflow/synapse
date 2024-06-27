@@ -64,7 +64,7 @@ internal class GetWorkflowInstanceOutputCommand
         this.EnsureConfigured();
         var workflowInstance = await this.Api.WorkflowInstances.GetAsync(name, @namespace);
         if (string.IsNullOrWhiteSpace(workflowInstance.Status?.OutputReference)) throw new NullReferenceException($"The workflow instance '{name}.{@namespace}' did not complete.");
-        var outputDocument = await this.Api.WorkflowData.GetAsync(workflowInstance.Status.OutputReference);
+        var outputDocument = await this.Api.Documents.GetAsync(workflowInstance.Status.OutputReference);
         string outputText = output.ToLowerInvariant() switch
         {
             "json" => this.JsonSerializer.SerializeToText(outputDocument.Content),

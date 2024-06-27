@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Synapse.Api.Application.Commands.WorkflowDataDocuments;
-using Synapse.Api.Application.Queries.WorkflowDataDocuments;
+using Synapse.Api.Application.Commands.Documents;
+using Synapse.Api.Application.Queries.Documents;
 
 namespace Synapse.Api.Http.Controllers;
 
@@ -20,8 +20,8 @@ namespace Synapse.Api.Http.Controllers;
 /// Represents the <see cref="NamespacedResourceController{TResource}"/> used to manage <see cref="Workflow"/>s
 /// </summary>
 /// <param name="mediator">The service used to mediate calls</param>
-[Route("api/v1/workflow-data")]
-public class WorkflowDataController(IMediator mediator)
+[Route("api/v1/documents")]
+public class DocumentsController(IMediator mediator)
     : Controller
 {
 
@@ -31,7 +31,7 @@ public class WorkflowDataController(IMediator mediator)
     protected IMediator Mediator { get; } = mediator;
 
     /// <summary>
-    /// Creates a new workflow data document
+    /// Creates a new document
     /// </summary>
     /// <param name="document">The document to create</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
@@ -39,19 +39,32 @@ public class WorkflowDataController(IMediator mediator)
     [HttpPost]
     public async Task<IActionResult> CreateDocument([FromBody]Document document, CancellationToken cancellationToken = default)
     {
-        return this.Process(await this.Mediator.ExecuteAsync(new CreateWorkflowDataDocumentCommand(document), cancellationToken), (int)HttpStatusCode.Created);
+        return this.Process(await this.Mediator.ExecuteAsync(new CreateDocumentCommand(document), cancellationToken), (int)HttpStatusCode.Created);
     }
 
     /// <summary>
-    /// Gets the workflow data document with the specified id
+    /// Gets the document with the specified id
     /// </summary>
-    /// <param name="id">The id of the workflow data document to get</param>
+    /// <param name="id">The id of the document to get</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>A new <see cref="IActionResult"/> that describes the result of the operation</returns>
     [HttpGet("{id}")]
     public async Task<IActionResult> GetDocument(string id, CancellationToken cancellationToken = default)
     {
-        return this.Process(await this.Mediator.ExecuteAsync(new GetWorkflowDataDocumentQuery(id), cancellationToken));
+        return this.Process(await this.Mediator.ExecuteAsync(new GetDocumentQuery(id), cancellationToken));
+    }
+
+    /// <summary>
+    /// Updates the contents of the document with the specified id
+    /// </summary>
+    /// <param name="id">The id of the document to update</param>
+    /// <param name="content">The document's updated content</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>A new <see cref="IActionResult"/> that describes the result of the operation</returns>
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateDocument(string id, [FromBody]object content, CancellationToken cancellationToken = default)
+    {
+        return this.Process(await this.Mediator.ExecuteAsync(new UpdateDocumentCommand(id, content), cancellationToken));
     }
 
 }

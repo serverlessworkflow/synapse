@@ -266,7 +266,7 @@ public class WorkflowExecutor(IServiceProvider serviceProvider, ILogger<Workflow
     {
         var nextDefinition = executor.Task.Instance.Next switch
         {
-            FlowDirective.End or FlowDirective.Exit => default,
+            FlowDirective.End or FlowDirective.Exit => null,
             _ => this.Workflow.Definition.GetTaskAfter(executor.Task.Instance)
         };
         var last = executor.Task;

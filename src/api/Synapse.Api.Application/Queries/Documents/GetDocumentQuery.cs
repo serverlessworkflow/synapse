@@ -14,13 +14,13 @@
 using Synapse.Resources;
 using Neuroglia.Data.Infrastructure.Services;
 
-namespace Synapse.Api.Application.Queries.WorkflowDataDocuments;
+namespace Synapse.Api.Application.Queries.Documents;
 
 /// <summary>
 /// Represent the <see cref="IQuery"/> used to get a specific workflow data document
 /// </summary>
 /// <param name="id">The id of the workflow data document to get</param>
-public class GetWorkflowDataDocumentQuery(string id)
+public class GetDocumentQuery(string id)
     : Query<Document>
 {
 
@@ -32,15 +32,15 @@ public class GetWorkflowDataDocumentQuery(string id)
 }
 
 /// <summary>
-/// Represents the service used to handle <see cref="GetWorkflowDataDocumentQuery"/> instances
+/// Represents the service used to handle <see cref="GetDocumentQuery"/> instances
 /// </summary>
 /// <param name="documents">The <see cref="IRepository"/> used to manage workflow data <see cref="Document"/>s</param>
-public class GetWorkflowDataQueryHandler(IRepository<Document> documents)
-    : IQueryHandler<GetWorkflowDataDocumentQuery, Document>
+public class GetDocumentQueryHandler(IRepository<Document> documents)
+    : IQueryHandler<GetDocumentQuery, Document>
 {
 
     /// <inheritdoc/>
-    public virtual async Task<IOperationResult<Document>> HandleAsync(GetWorkflowDataDocumentQuery query, CancellationToken cancellationToken)
+    public virtual async Task<IOperationResult<Document>> HandleAsync(GetDocumentQuery query, CancellationToken cancellationToken)
     {
         return this.Ok(await documents.GetAsync(query.Id, cancellationToken).ConfigureAwait(false));
     }

@@ -139,28 +139,35 @@ public abstract class TaskExecutor<TDefinition>(IServiceProvider serviceProvider
         }
         try
         {
-            if (this.Task.Definition.Input?.Schema != null)
+            if (!string.IsNullOrWhiteSpace(this.Task.Definition.If) && !(await this.Task.Workflow.Expressions.EvaluateConditionAsync(this.Task.Definition.If, this.Task.Input, this.Task.Arguments, cancellationToken).ConfigureAwait(false)))
             {
-                var schemaHandler = this.SchemaHandlerProvider.GetHandler(this.Task.Definition.Input.Schema.Format) ?? throw new ArgumentNullException($"Failed to find an handler that supports the specified schema format '{this.Task.Definition.Input.Schema.Format}'");
-                var validationResult = await schemaHandler.ValidateAsync(this.Task.Input, this.Task.Definition.Input.Schema, cancellationToken).ConfigureAwait(false);
-                if (!validationResult.IsSuccess()) 
-                {
-                    await this.SetErrorAsync(new()
-                    {
-                        Type = ErrorType.Validation,
-                        Status = ErrorStatus.Validation,
-                        Title = ErrorTitle.Validation,
-                        Instance = new($"{this.Task.Instance.Reference}/input", UriKind.RelativeOrAbsolute),
-                        Detail = $"Failed to validate the task's input:\n{string.Join('\n', validationResult.Errors?.FirstOrDefault()?.Errors?.Select(e => $"- {e.Key}: {e.Value.First()}") ?? [])}"
-                    }, cancellationToken).ConfigureAwait(false);
-                    return;
-                }
+                await this.SkipAsync(this.Task.Input, this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
             }
-            await this.Task.ExecuteAsync(this.CancellationTokenSource.Token).ConfigureAwait(false);
-            this.Subject.OnNext(new TaskLifeCycleEvent(TaskLifeCycleEventType.Running));
-            this.Stopwatch.Start();
-            await this.BeforeExecuteAsync(cancellationToken).ConfigureAwait(false); //todo: act upon last directive
-            await this.DoExecuteAsync(this.CancellationTokenSource.Token).ConfigureAwait(false);
+            else
+            {
+                if (this.Task.Definition.Input?.Schema != null)
+                {
+                    var schemaHandler = this.SchemaHandlerProvider.GetHandler(this.Task.Definition.Input.Schema.Format) ?? throw new ArgumentNullException($"Failed to find an handler that supports the specified schema format '{this.Task.Definition.Input.Schema.Format}'");
+                    var validationResult = await schemaHandler.ValidateAsync(this.Task.Input, this.Task.Definition.Input.Schema, cancellationToken).ConfigureAwait(false);
+                    if (!validationResult.IsSuccess())
+                    {
+                        await this.SetErrorAsync(new()
+                        {
+                            Type = ErrorType.Validation,
+                            Status = ErrorStatus.Validation,
+                            Title = ErrorTitle.Validation,
+                            Instance = new($"{this.Task.Instance.Reference}/input", UriKind.RelativeOrAbsolute),
+                            Detail = $"Failed to validate the task's input:\n{string.Join('\n', validationResult.Errors?.FirstOrDefault()?.Errors?.Select(e => $"- {e.Key}: {e.Value.First()}") ?? [])}"
+                        }, cancellationToken).ConfigureAwait(false);
+                        return;
+                    }
+                }
+                await this.Task.ExecuteAsync(this.CancellationTokenSource.Token).ConfigureAwait(false);
+                this.Subject.OnNext(new TaskLifeCycleEvent(TaskLifeCycleEventType.Running));
+                this.Stopwatch.Start();
+                await this.BeforeExecuteAsync(cancellationToken).ConfigureAwait(false); //todo: act upon last directive
+                await this.DoExecuteAsync(this.CancellationTokenSource.Token).ConfigureAwait(false);
+            }
             await this.TaskCompletionSource.Task.ConfigureAwait(false);
         }
         catch (OperationCanceledException) { }
@@ -286,7 +293,7 @@ public abstract class TaskExecutor<TDefinition>(IServiceProvider serviceProvider
         if (string.IsNullOrWhiteSpace(then)) then = FlowDirective.Continue;
         var output = result;
         var arguments = this.GetExpressionEvaluationArguments() ?? new Dictionary<string, object>();
-        arguments["output"] = output!;//todo: replace with arguments[RuntimeExpressions.Arguments.Output] = output;
+        arguments[RuntimeExpressions.Arguments.Output] = output!;
         if (this.Task.Definition.Output?.As is string fromExpression) output = await this.Task.Workflow.Expressions.EvaluateAsync<object>(fromExpression, output ?? new(), arguments, cancellationToken).ConfigureAwait(false);
         else if (this.Task.Definition.Output?.As != null) output = await this.Task.Workflow.Expressions.EvaluateAsync<object>(this.Task.Definition.Output.As, output ?? new(), arguments, cancellationToken).ConfigureAwait(false);
         if (this.Task.Definition.Export?.As is string toExpression) 
@@ -303,6 +310,33 @@ public abstract class TaskExecutor<TDefinition>(IServiceProvider serviceProvider
         await this.DoSetResultAsync(output, then, cancellationToken).ConfigureAwait(false);
         await this.Task.SetResultAsync(output, then, cancellationToken).ConfigureAwait(false);
         this.Subject.OnNext(new TaskLifeCycleEvent(TaskLifeCycleEventType.Completed));
+        this.Subject.OnCompleted();
+        if (!this.TaskCompletionSource.Task.IsCompleted) this.TaskCompletionSource.SetResult();
+    }
+
+    /// <inheritdoc/>
+    public virtual async Task SkipAsync(object? result, string? then = FlowDirective.Continue, CancellationToken cancellationToken = default)
+    {
+        if (this.Task.Instance.Status != null) return;
+        this.Stopwatch.Stop();
+        if (string.IsNullOrWhiteSpace(then)) then = FlowDirective.Continue;
+        var output = result;
+        var arguments = this.GetExpressionEvaluationArguments() ?? new Dictionary<string, object>();
+        arguments[RuntimeExpressions.Arguments.Output] = output!;
+        if (this.Task.Definition.Output?.As is string fromExpression) output = await this.Task.Workflow.Expressions.EvaluateAsync<object>(fromExpression, output ?? new(), arguments, cancellationToken).ConfigureAwait(false);
+        else if (this.Task.Definition.Output?.As != null) output = await this.Task.Workflow.Expressions.EvaluateAsync<object>(this.Task.Definition.Output.As, output ?? new(), arguments, cancellationToken).ConfigureAwait(false);
+        if (this.Task.Definition.Export?.As is string toExpression)
+        {
+            var context = (await this.Task.Workflow.Expressions.EvaluateAsync<IDictionary<string, object>>(toExpression, this.Task.ContextData, arguments, cancellationToken).ConfigureAwait(false))!;
+            await this.Task.SetContextDataAsync(context, cancellationToken).ConfigureAwait(false);
+        }
+        else if (this.Task.Definition.Export?.As != null)
+        {
+            var context = (await this.Task.Workflow.Expressions.EvaluateAsync<IDictionary<string, object>>(this.Task.Definition.Export.As, this.Task.ContextData, this.GetExpressionEvaluationArguments(), cancellationToken).ConfigureAwait(false))!;
+            await this.Task.SetContextDataAsync(context, cancellationToken).ConfigureAwait(false);
+        }
+        await this.Task.SkipAsync(output, then, cancellationToken).ConfigureAwait(false);
+        this.Subject.OnNext(new TaskLifeCycleEvent(TaskLifeCycleEventType.Skipped));
         this.Subject.OnCompleted();
         if (!this.TaskCompletionSource.Task.IsCompleted) this.TaskCompletionSource.SetResult();
     }

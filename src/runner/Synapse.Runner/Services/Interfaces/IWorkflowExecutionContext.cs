@@ -156,14 +156,6 @@ public interface IWorkflowExecutionContext
     Task<TaskInstance> SuspendAsync(TaskInstance task, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Skips the specified task
-    /// </summary>
-    /// <param name="task">The task to skip</param>
-    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-    /// <returns>The updated <see cref="TaskInstance"/></returns>
-    Task<TaskInstance> SkipAsync(TaskInstance task, CancellationToken cancellationToken = default);
-
-    /// <summary>
     /// Retries the specified task
     /// </summary>
     /// <param name="task">The task to retry</param>
@@ -208,13 +200,14 @@ public interface IWorkflowExecutionContext
     Task<TaskInstance> SetResultAsync(TaskInstance task, object? result, string? then = FlowDirective.Continue, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Sets the specified workflow data
+    /// Skips the specified task
     /// </summary>
-    /// <param name="reference">A reference to the workflow data to update</param>
-    /// <param name="data">The updated workflow data</param>
+    /// <param name="task">The task to skip</param>
+    /// <param name="result">The task's result, if any</param>
+    /// <param name="then">The <see cref="FlowDirective"/> to perform next</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-    /// <returns>A new awaitable <see cref="Task"/></returns>
-    Task SetWorkflowDataAsync(string reference, object data, CancellationToken cancellationToken = default);
+    /// <returns>The updated <see cref="TaskInstance"/></returns>
+    Task<TaskInstance> SkipAsync(TaskInstance task, object? result, string? then = FlowDirective.Continue, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Cancels the workflow's execution

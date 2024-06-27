@@ -163,7 +163,7 @@ public class ReferenceDetailsStore(
         if (loaded || string.IsNullOrWhiteSpace(reference)) return;
         try 
         { 
-            var document = await api.WorkflowData.GetAsync(reference);
+            var document = await api.Documents.GetAsync(reference);
             string documentText = jsonSerializer.SerializeToText(document.Content);
             this.Reduce(state => state with
             {

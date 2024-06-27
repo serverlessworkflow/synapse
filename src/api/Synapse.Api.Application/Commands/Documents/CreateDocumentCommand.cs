@@ -14,36 +14,37 @@
 using Synapse.Resources;
 using Neuroglia.Data.Infrastructure.Services;
 
-namespace Synapse.Api.Application.Commands.WorkflowDataDocuments;
+namespace Synapse.Api.Application.Commands.Documents;
 
 /// <summary>
-/// Represents the <see cref="ICommand"/> used to create a new workflow data <see cref="Synapse.Resources.Document"/>
+/// Represents the <see cref="ICommand"/> used to create a new <see cref="Synapse.Resources.Document"/>
 /// </summary>
-/// <param name="document">The workflow data document to create</param>
-public class CreateWorkflowDataDocumentCommand(Document document)
+/// <param name="document">The  document to create</param>
+public class CreateDocumentCommand(Document document)
     : Command<Document>
 {
 
     /// <summary>
-    /// Gets the workflow data document to create
+    /// Gets the document to create
     /// </summary>
     public Document Document { get; } = document;
 
 }
 
 /// <summary>
-/// Represents the service used to handle <see cref="CreateWorkflowDataDocumentCommand"/>s
+/// Represents the service used to handle <see cref="CreateDocumentCommand"/>s
 /// </summary>
 /// <param name="documents">The service used to manage <see cref="Document"/>s</param>
-public class CreateWorkflowDataDocumentCommandHandler(IRepository<Document> documents)
-    : ICommandHandler<CreateWorkflowDataDocumentCommand, Document>
+public class CreateDocumentCommandHandler(IRepository<Document> documents)
+    : ICommandHandler<CreateDocumentCommand, Document>
 {
 
     /// <inheritdoc/>
-    public virtual async Task<IOperationResult<Document>> HandleAsync(CreateWorkflowDataDocumentCommand command, CancellationToken cancellationToken = default)
+    public virtual async Task<IOperationResult<Document>> HandleAsync(CreateDocumentCommand command, CancellationToken cancellationToken = default)
     {
         var document = await documents.AddAsync(command.Document, cancellationToken).ConfigureAwait(false);
         await documents.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return this.Ok(document);
     }
+
 }

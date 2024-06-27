@@ -13,11 +13,11 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Neuroglia.Security;
+using Synapse.Api.Application.Commands.Documents;
 using Synapse.Api.Application.Commands.Resources.Generic;
-using Synapse.Api.Application.Commands.WorkflowDataDocuments;
+using Synapse.Api.Application.Queries.Documents;
 using Synapse.Api.Application.Queries.Resources.Generic;
 using Synapse.Api.Application.Queries.Users;
-using Synapse.Api.Application.Queries.WorkflowDataDocuments;
 using Synapse.Resources;
 
 namespace Synapse.Api.Application;
@@ -95,7 +95,7 @@ public static class IServiceCollectionExtensions
             services.Add(new ServiceDescriptor(handlerServiceType, handlerImplementationType, serviceLifetime));
         }
         services.AddScoped<IRequestHandler<GetUserProfileQuery, IOperationResult<UserInfo>>, GetUserProfileQueryHandler>();
-        services.AddScoped<IRequestHandler<GetWorkflowDataDocumentQuery, IOperationResult<Document>>, GetWorkflowDataQueryHandler>();
+        services.AddScoped<IRequestHandler<GetDocumentQuery, IOperationResult<Document>>, GetDocumentQueryHandler>();
         return services;
     }
 
@@ -147,7 +147,8 @@ public static class IServiceCollectionExtensions
             services.Add(new ServiceDescriptor(handlerServiceType, handlerImplementationType, serviceLifetime));
 
         }
-        services.AddScoped<IRequestHandler<CreateWorkflowDataDocumentCommand, IOperationResult<Document>>, CreateWorkflowDataDocumentCommandHandler>();
+        services.AddScoped<IRequestHandler<CreateDocumentCommand, IOperationResult<Document>>, CreateDocumentCommandHandler>();
+        services.AddScoped<IRequestHandler<UpdateDocumentCommand, IOperationResult<Document>>, UpdateDocumentCommandHandler>();
         return services;
     }
 

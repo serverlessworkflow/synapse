@@ -56,7 +56,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
     public WorkflowInstance Instance { get; set; } = instance;
 
     /// <inheritdoc/>
-    public IDocumentApiClient Documents => this.Api.WorkflowData;
+    public IDocumentApiClient Documents => this.Api.Documents;
 
     /// <summary>
     /// Gets the object used to asynchronously lock the <see cref="TaskExecutor{TDefinition}"/>
@@ -96,14 +96,14 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
             else if(!string.IsNullOrWhiteSpace(this.Instance.Status?.ContextReference))
             {
                 contextReference = this.Instance.Status?.ContextReference;
-                var contextDocument = await this.Api.WorkflowData.GetAsync(this.Instance.Status!.ContextReference, cancellationToken).ConfigureAwait(false);
+                var contextDocument = await this.Api.Documents.GetAsync(this.Instance.Status!.ContextReference, cancellationToken).ConfigureAwait(false);
                 context = contextDocument?.Content.ConvertTo<IDictionary<string, object>>() ?? new Dictionary<string, object>();
             }
             else throw new NullReferenceException($"Failed to find the data document with id '{this.Instance.Status!.ContextReference}'");
         }
         else
         {
-            var contextDocument = await this.Api.WorkflowData.CreateAsync($"{reference}/input", context, cancellationToken).ConfigureAwait(false);
+            var contextDocument = await this.Api.Documents.CreateAsync($"{reference}/input", context, cancellationToken).ConfigureAwait(false);
             contextReference = contextDocument.Id;
         }
         var filteredInput = input;
@@ -114,7 +114,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         };
         if (definition.Input?.From is string fromExpression) filteredInput = (await this.Expressions.EvaluateAsync<object>(fromExpression, input, evaluationArguments, cancellationToken).ConfigureAwait(false))!;
         else if (definition.Input?.From != null) filteredInput = (await this.Expressions.EvaluateAsync<object>(definition.Input.From, input, evaluationArguments, cancellationToken).ConfigureAwait(false))!;
-        var inputDocument = await this.Api.WorkflowData.CreateAsync($"{reference}/input", filteredInput, cancellationToken).ConfigureAwait(false);
+        var inputDocument = await this.Api.Documents.CreateAsync($"{reference}/input", filteredInput, cancellationToken).ConfigureAwait(false);
         var task = new TaskInstance()
         {
             Name = name,
@@ -135,7 +135,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
     /// <inheritdoc/>
     public virtual async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
-        var document = await this.Api.WorkflowData.CreateAsync(this.Instance.GetQualifiedName(), this.Instance.Spec.Input ?? [], cancellationToken).ConfigureAwait(false);
+        var document = await this.Api.Documents.CreateAsync(this.Instance.GetQualifiedName(), this.Instance.Spec.Input ?? [], cancellationToken).ConfigureAwait(false);
         var jsonPatch = new JsonPatch(PatchOperation.Add(JsonPointer.Create<WorkflowInstance>(w => w.Status!).ToCamelCase(), this.JsonSerializer.SerializeToNode(new WorkflowInstanceStatus()
         {
             ContextReference = document.Id
@@ -350,7 +350,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         this.Instance.Status ??= new();
         this.Instance.Status.Phase = WorkflowInstanceStatusPhase.Completed;
         this.Instance.Status.EndedAt = DateTimeOffset.Now;
-        var document = await this.Api.WorkflowData.CreateAsync($"{this.Instance.GetQualifiedName()}/output", result, cancellationToken).ConfigureAwait(false);
+        var document = await this.Api.Documents.CreateAsync($"{this.Instance.GetQualifiedName()}/output", result, cancellationToken).ConfigureAwait(false);
         this.Instance.Status.OutputReference = document.Id;
         this.Output = document.Content;
         var run = this.Instance.Status.Runs?.LastOrDefault();
@@ -370,7 +370,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         task = this.Instance.Status?.Tasks?.FirstOrDefault(t => t.Id == task.Id) ?? throw new NullReferenceException($"Failed to find the task instance with the specified id '{task.Id}'. Make sure the task instance resource has been created using the workflow context.");
         task.Status = TaskInstanceStatus.Completed;
         task.EndedAt = DateTimeOffset.Now;
-        var document = await this.Api.WorkflowData.CreateAsync($"{this.Instance.GetQualifiedName()}/{task.Reference}/output", result, cancellationToken).ConfigureAwait(false);
+        var document = await this.Api.Documents.CreateAsync($"{this.Instance.GetQualifiedName()}/{task.Reference}/output", result, cancellationToken).ConfigureAwait(false);
         task.OutputReference = document.Id;
         task.Next = then;
         var run = task.Runs!.Last();
@@ -382,24 +382,18 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
     }
 
     /// <inheritdoc/>
-    public virtual async Task SetWorkflowDataAsync(string reference, object data, CancellationToken cancellationToken = default)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(reference);
-        await this.Api.WorkflowData.UpdateAsync(reference, data, cancellationToken).ConfigureAwait(false);
-        if (this.Instance.Status?.ContextReference == reference) this.ContextData = data.ConvertTo<IDictionary<string, object>>()!;
-    }
-
-    /// <inheritdoc/>
-    public virtual async Task<TaskInstance> SkipAsync(TaskInstance task, CancellationToken cancellationToken = default)
+    public virtual async Task<TaskInstance> SkipAsync(TaskInstance task, object? result, string? then = FlowDirective.Continue, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(task);
         using var @lock = await this.Lock.LockAsync(cancellationToken).ConfigureAwait(false);
         var originalInstance = this.Instance.Clone();
+        var document = await this.Api.Documents.CreateAsync($"{this.Instance.GetQualifiedName()}/{task.Reference}/output", result ?? new(), cancellationToken).ConfigureAwait(false);
+        result ??= new();
         task = this.Instance.Status?.Tasks?.FirstOrDefault(t => t.Id == task.Id) ?? throw new NullReferenceException($"Failed to find the task instance with the specified id '{task.Id}'. Make sure the task instance resource has been created using the workflow context.");
         task.Status = TaskInstanceStatus.Skipped;
-        var run = task.Runs!.Last();
-        run.EndedAt = DateTimeOffset.Now;
-        run.Outcome = task.Status;
+        task.EndedAt = DateTimeOffset.Now;
+        task.OutputReference = document.Id;
+        task.Next = then;
         var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
         this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), null, cancellationToken).ConfigureAwait(false);
         return this.Instance.Status?.Tasks?.FirstOrDefault(t => t.Id == task.Id) ?? throw new NullReferenceException($"Failed to find the task instance with the specified id '{task.Id}'. Make sure the task instance resource has been created using the workflow context.");

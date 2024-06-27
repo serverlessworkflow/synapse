@@ -25,6 +25,8 @@ public class DocumentHttpApiClient(IServiceProvider serviceProvider, ILogger<Doc
     : ApiClientBase(serviceProvider, logger, jsonSerializer, options, httpClient), IDocumentApiClient
 {
 
+    const string PathPrefix = "api/v1/documents";
+
     /// <inheritdoc/>
     public virtual async Task<Document> CreateAsync(string documentName, object documentContent, CancellationToken cancellationToken = default)
     {
@@ -36,7 +38,7 @@ public class DocumentHttpApiClient(IServiceProvider serviceProvider, ILogger<Doc
         };
         var json =  this.JsonSerializer.SerializeToText(document);
         using var content = new StringContent(json, Encoding.UTF8, MediaTypeNames.Application.Json);
-        var uri = "api/v1/workflow-data";
+        var uri = PathPrefix;
         using var request = await this.ProcessRequestAsync(new HttpRequestMessage(HttpMethod.Post, uri) { Content = content }, cancellationToken).ConfigureAwait(false);
         using var response = await this.ProcessResponseAsync(await this.HttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false), cancellationToken).ConfigureAwait(false);
         json = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
@@ -47,7 +49,7 @@ public class DocumentHttpApiClient(IServiceProvider serviceProvider, ILogger<Doc
     public virtual async Task<Document> GetAsync(string id, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(id);
-        var uri = $"api/v1/workflow-data/{id}";
+        var uri = $"{PathPrefix}/{id}";
         using var request = await this.ProcessRequestAsync(new HttpRequestMessage(HttpMethod.Get, uri), cancellationToken).ConfigureAwait(false);
         using var response = await this.ProcessResponseAsync(await this.HttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false), cancellationToken).ConfigureAwait(false);
         var json = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
@@ -60,7 +62,7 @@ public class DocumentHttpApiClient(IServiceProvider serviceProvider, ILogger<Doc
         ArgumentException.ThrowIfNullOrWhiteSpace(id);
         var json = this.JsonSerializer.SerializeToText(content);
         using var requestContent = new StringContent(json, Encoding.UTF8, MediaTypeNames.Application.Json);
-        var uri = $"api/v1/workflow-data/{id}";
+        var uri = $"{PathPrefix}/{id}";
         using var request = await this.ProcessRequestAsync(new HttpRequestMessage(HttpMethod.Put, uri) { Content = requestContent }, cancellationToken).ConfigureAwait(false);
         using var response = await this.ProcessResponseAsync(await this.HttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false), cancellationToken).ConfigureAwait(false);
     }
@@ -69,7 +71,7 @@ public class DocumentHttpApiClient(IServiceProvider serviceProvider, ILogger<Doc
     public virtual async Task DeletesAsync(string id, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(id);
-        var uri = $"api/v1/workflow-data/{id}";
+        var uri = $"{PathPrefix}/{id}";
         using var request = await this.ProcessRequestAsync(new HttpRequestMessage(HttpMethod.Delete, uri), cancellationToken).ConfigureAwait(false);
         using var response = await this.ProcessResponseAsync(await this.HttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false), cancellationToken).ConfigureAwait(false);
     }

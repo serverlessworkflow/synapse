@@ -11,6 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Neuroglia;
+using Neuroglia.Data.Expressions;
+
 namespace Synapse.Runner.Services.Executors;
 
 /// <summary>
@@ -56,7 +59,8 @@ public class FunctionCallExecutor(IServiceProvider serviceProvider, ILogger<Func
     protected override async Task DoExecuteAsync(CancellationToken cancellationToken)
     {
         if (this.Function == null) throw new InvalidOperationException("The executor must be initialized before execution");
-        var task = await this.Task.Workflow.CreateTaskAsync(this.Function, null, this.Task.Input, this.Task.ContextData, this.Task, false, cancellationToken).ConfigureAwait(false);
+        var input = this.Task.Definition.With == null ? [] : await this.Task.Workflow.Expressions.EvaluateAsync<EquatableDictionary<string, object>?>(this.Task.Definition.With, this.Task.Input, this.Task.Arguments, cancellationToken).ConfigureAwait(false) ?? [];
+        var task = await this.Task.Workflow.CreateTaskAsync(this.Function, null, input, null, this.Task, false, cancellationToken).ConfigureAwait(false);
         var executor = await this.CreateTaskExecutorAsync(task, this.Function, this.Task.ContextData, this.Task.Arguments, cancellationToken).ConfigureAwait(false);
         await executor.ExecuteAsync(cancellationToken).ConfigureAwait(false);
         await this.SetResultAsync(executor.Task.Output, this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);

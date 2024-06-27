@@ -42,5 +42,9 @@ public static class TaskLifeCycleEventType
     /// Indicates that the task ran to completion
     /// </summary>
     public const string Completed = "completed";
+    /// <summary>
+    /// Indicates that the task has been skipped
+    /// </summary>
+    public const string Skipped = "skipped";
 
 }
