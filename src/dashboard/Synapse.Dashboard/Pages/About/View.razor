@@ -16,6 +16,7 @@
 
 @namespace Synapse.Dashboard.Components
 @page "/about"
+@inject IBreadcrumbManager BreadcrumbManager
 
 <PageTitle>Synapse - About</PageTitle>
 
@@ -66,3 +67,12 @@
         </div>
     </div>
 </div>
+
+@code {
+    /// <inheritdoc/>
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        BreadcrumbManager.Use(Breadcrumbs.About);
+    }
+}

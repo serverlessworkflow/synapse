@@ -87,4 +87,11 @@ public class NamespacedResourceManagementComponentStore<TState, TResource>(ISyna
         await this.ApiClient.ManageNamespaced<TResource>().DeleteAsync(resource.GetName(), resource.GetNamespace()!).ConfigureAwait(false);
     }
 
+    /// <inheritdoc/>
+    public override async Task InitializeAsync()
+    {
+        await base.InitializeAsync();
+        await this.ListNamespaceAsync().ConfigureAwait(false);
+    }
+
 }

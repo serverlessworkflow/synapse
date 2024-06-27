@@ -3,6 +3,7 @@
 @namespace Synapse.Dashboard.Pages.WorkflowInstances.List
 @using BlazorBootstrap
 @inherits NamespacedResourceManagementComponent<View, WorkflowInstanceListComponentStore, WorkflowInstanceListState, WorkflowInstance>
+@inject IBreadcrumbManager BreadcrumbManager
 
 <ApplicationTitle>Workflow Instances</ApplicationTitle>
 
@@ -27,6 +28,11 @@
 
 @code{
 
+    RenderFragment Title() => __builder =>
+    {
+        <h4>Workflow Instances</h4>
+    };
+
     /// <summary>
     /// Gets the list of available <see cref="Workflow"/>s
     /// </summary>
@@ -36,14 +42,10 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+        BreadcrumbManager.Use(Breadcrumbs.WorkflowInstances);
         this.Store.Workflows.Subscribe(workflows => this.OnStateChanged(cmp => cmp.Workflows = workflows), token: this.CancellationTokenSource.Token);
         await this.Store.ListWorkflowsAsync().ConfigureAwait(false);
     }
-
-    RenderFragment Title() => __builder =>
-    {
-        <h4>Workflow Instances</h4>
-    };
 
     /// <summary>
     /// Handles changes of the workflow selector

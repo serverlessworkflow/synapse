@@ -1,0 +1,26 @@
+﻿@import "./theme/_variables.scss";
+
+.horizontal-collapse {
+    border-right: 1px solid var(--bs-dark-bg-subtle);
+
+    &:nth-last-child(1) {
+        border: none;
+    }
+
+    .title {
+        bottom: 1px solid var(--bs-dark-bg-subtle);
+    }
+
+    &.collapsed {
+        .title {
+            width: 22px;
+            height: 100%;
+
+            .label {
+                display: block;
+                transform: rotate(90deg) translate(3px);
+                transform-origin: center;
+            }
+        }
+    }
+}

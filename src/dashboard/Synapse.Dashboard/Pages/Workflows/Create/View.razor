@@ -15,7 +15,7 @@
 *@
 
 @page "/workflows/new"
-@page "/workflows/{namespace}/{name}/new"
+@page "/workflows/new/{namespace}/{name}"
 @using ServerlessWorkflow.Sdk.Models
 @using Synapse.Api.Client.Services
 @inherits StatefulComponent<View, CreateWorkflowViewStore, CreateWorkflowViewState>
@@ -25,73 +25,87 @@
 <ApplicationTitle>New workflow</ApplicationTitle>
 
 <h4>New Workflow</h4>
-@if (saving)
+@if (loading)
 {
-    <div class="position-relative w-100 h-100">
+    <div class="d-flex justify-content-center mt-5">
         <Loader />
     </div>
 }
-else if (workflowDefinition != null)
+else
 {
-    <PreferredLanguageSelector />
-    <StandaloneCodeEditor @ref="TextBasedEditor"
+    <PreferredLanguageSelector PreferedLanguageChange="Store.ToggleTextBasedEditorLanguageAsync" />
+    <StandaloneCodeEditor @ref="Store.TextEditor"
+                          ConstructionOptions="Store.StandaloneEditorConstructionOptions"
+                          OnDidInit="Store.OnTextBasedEditorInitAsync"
                           CssClass="h-100" />
-    <Button Class="btn-outline-primary">Save</Button>
-}
-else if(!string.IsNullOrWhiteSpace(ns))
-{
-    <Loader />
+    <div class="problems">
+        @if (problemDetails != null)
+        {
+            <Callout Type="CalloutType.Danger" Heading="@problemDetails.Title">
+                @problemDetails.Detail
+            </Callout>
+            @if (problemDetails.Errors != null && problemDetails.Errors.Any())
+            {
+                foreach (KeyValuePair<string, string[]> errorContainer in problemDetails.Errors)
+                {
+                    <Callout Type="CalloutType.Danger" Heading="@errorContainer.Key">
+                        <ul>
+                            @foreach (string error in errorContainer.Value)
+                            {
+                                <li>@error</li>
+                            }
+                        </ul>
+                    </Callout>
+                }
+            }
+        }
+    </div>
+    <Button class="mt-3" Color="ButtonColor.Primary" Outline="true" Disabled="saving" @onclick="async (_) => await Store.SaveWorkflowDefinitionAsync()">
+        @if(!saving)
+        {
+            @("Save")
+        }
+        else
+        {
+            <Spinner Size="SpinnerSize.Small" Color="SpinnerColor.Primary" />
+        }
+    </Button>
 }
 
 @code {
 
-    StandaloneCodeEditor? textBasedEditor;
-    string textEditorValue = string.Empty;
     string? ns;
     string? name;
-    Workflow? workflow;
-    WorkflowDefinition? workflowDefinition;
-    bool initialized;
     bool loading;
     bool saving;
-    StandaloneCodeEditor? TextBasedEditor
-    {
-        get => this.textBasedEditor;
-        set => this.Store.SetTextEditor(value);
-    }
+    private ProblemDetails? problemDetails = null;
 
     [Parameter] public string? Namespace { get; set; }
     [Parameter] public string? Name { get; set; }
 
+    /// <inheritdoc/>
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        this.Store.Loading.Subscribe(value => this.OnStateChanged(_ => loading = value), token: this.CancellationTokenSource.Token);
-        this.Store.Saving.Subscribe(value => this.OnStateChanged(_ => saving = value), token: this.CancellationTokenSource.Token);
-        this.Store.WorkflowDefinition.Subscribe(value => this.OnStateChanged(_ => workflowDefinition = value), token: this.CancellationTokenSource.Token);
+        BreadcrumbManager.Use(Breadcrumbs.Workflows);
+        BreadcrumbManager.Add(new($"New", $"/workflows/new"));
+        Store.Namespace.Subscribe(value => OnStateChanged(_ => ns = value), token: CancellationTokenSource.Token);
+        Store.Name.Subscribe(value => OnStateChanged(_ => name = value), token: CancellationTokenSource.Token);
+        Store.Loading.Subscribe(value => OnStateChanged(_ => loading = value), token: CancellationTokenSource.Token);
+        Store.Saving.Subscribe(value => OnStateChanged(_ => saving = value), token: CancellationTokenSource.Token);
+        Store.ProblemDetails.Subscribe(problemDetails => OnStateChanged(cmp => cmp.problemDetails = problemDetails), token: CancellationTokenSource.Token);
     }
 
-    protected override async Task OnParametersSetAsync()
+    /// <inheritdoc/>
+    protected override void OnParametersSet()
     {
-        var updated = false;
         if (Namespace != ns)
         {
-            ns = Namespace;
-            updated = true;
+            Store.SetNamespace(Namespace);
         }
         if (Name != name)
         {
-            name = Name;
-            updated = true;
-        }
-        if (updated || !initialized)
-        {
-            if (string.IsNullOrWhiteSpace(ns) || string.IsNullOrWhiteSpace(name)) await this.Store.CreateWorkflowDefinitionAsync();
-            else await this.Store.CreateWorkflowDefinitionAsync(ns, name);
-            BreadcrumbManager.Use(Breadcrumbs.Workflows);
-            BreadcrumbManager.Add(new($"New", $"/workflows/new"));
-            initialized = true;
-            StateHasChanged();
+            Store.SetName(Name);
         }
     }
 

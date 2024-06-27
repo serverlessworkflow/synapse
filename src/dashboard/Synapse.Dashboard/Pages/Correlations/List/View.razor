@@ -2,6 +2,7 @@
 @attribute [Authorize]
 @namespace Synapse.Dashboard.Pages.Correlations.List
 @inherits NamespacedResourceManagementComponent<Correlation>
+@inject IBreadcrumbManager BreadcrumbManager
 
 <ApplicationTitle>Correlations</ApplicationTitle>
 
@@ -165,4 +166,10 @@
         else return $"/workflow-instances/{correlation.Spec.Outcome.Correlate!.Instance}";
     }
 
+    /// <inheritdoc/>
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        BreadcrumbManager.Use(Breadcrumbs.Correlations);
+    }
 }

@@ -40,16 +40,6 @@ public record ReferenceDetailsState
     public bool Loaded { get; set; } = false;
 
     /// <summary>
-    /// Gets/sets the <see cref="StandaloneCodeEditor"/> used to display the referenced document
-    /// </summary>
-    public StandaloneCodeEditor? TextEditor { get; set; } = null;
-
-    /// <summary>
-    /// Gets/sets the <see cref="TextModel"/> used by the <see cref="StandaloneCodeEditor"/>
-    /// </summary>
-    public TextModel? TextModel { get; set; } = null;
-
-    /// <summary>
     /// Gets/sets the <see cref="ProblemDetails"/> type that occurred when trying to save the resource, if any
     /// </summary>
     public Uri? ProblemType { get; set; } = null;
@@ -72,5 +62,5 @@ public record ReferenceDetailsState
     /// <summary>
     /// Gets/sets the list of <see cref="ProblemDetails"/> errors that occurred when trying to save the resource, if any
     /// </summary>
-    public IDictionary<string, string[]> ProblemErrors { get; set; } = new Dictionary<string, string[]>();
+    public EquatableDictionary<string, string[]> ProblemErrors { get; set; } = new EquatableDictionary<string, string[]>();
 }

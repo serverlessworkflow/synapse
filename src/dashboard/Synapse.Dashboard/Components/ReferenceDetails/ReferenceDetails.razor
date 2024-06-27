@@ -19,29 +19,29 @@
 @inherits StatefulComponent<ReferenceDetails, ReferenceDetailsStore, ReferenceDetailsState>
 
 <Accordion @ref="accordion" Flush="true" OnShowing="Store.LoadReferencedDocumentAsync">
-    <AccordionItem Title="@_label" Name="Reference">
+    <AccordionItem Title="@label" Name="Reference">
         <Content>
-            @if (!_loaded)
+            @if (!loaded)
             {
                 <Spinner Class="me-3" Color="SpinnerColor.Primary" Size="SpinnerSize.Small" />
             }
             else
             {
                 <PreferredLanguageSelector PreferedLanguageChange="Store.ToggleTextBasedEditorLanguageAsync" />
-                <StandaloneCodeEditor @ref="TextBasedEditor"
+                <StandaloneCodeEditor @ref="Store.TextEditor"
                                       ConstructionOptions="Store.StandaloneEditorConstructionOptions"
                                       OnDidInit="Store.OnTextBasedEditorInitAsync"
                                       CssClass="h-100-px" />
             }
-            @if (_problemDetails != null)
+            @if (problemDetails != null)
             {
                 <div class="problems">
-                    <Callout Type="CalloutType.Danger" Heading="@_problemDetails.Title">
-                        @_problemDetails.Detail
+                    <Callout Type="CalloutType.Danger" Heading="@problemDetails.Title">
+                        @problemDetails.Detail
                 </Callout>
-                    @if (_problemDetails.Errors != null && _problemDetails.Errors.Any())
+                    @if (problemDetails.Errors != null && problemDetails.Errors.Any())
                     {
-                            foreach (KeyValuePair<string, string[]> errorContainer in _problemDetails.Errors)
+                            foreach (KeyValuePair<string, string[]> errorContainer in problemDetails.Errors)
                         {
                             <Callout Type="CalloutType.Danger" Heading="@errorContainer.Key">
                                 <ul>
@@ -74,60 +74,41 @@
     /// </summary>
     private Accordion accordion = default!;
     /// <summary>
-    /// The <see cref="StandaloneCodeEditor"/> reference accessor
-    /// </summary>
-    private StandaloneCodeEditor? TextBasedEditor
-    {
-        get
-        {
-            return this._textEditor;
-        }
-        set
-        {
-            this.Store.SetTextEditor(value);
-        }
-    }
-    /// <summary>
-    /// The <see cref="StandaloneCodeEditor"/> reference
-    /// </summary>
-    private StandaloneCodeEditor? _textEditor = null;
-    /// <summary>
     /// The internal label
     /// </summary>
-    private string _label = "";
+    private string label = "";
     /// <summary>
     /// The internal reference
     /// </summary>
-    private string _reference = "";
+    private string reference = "";
     /// <summary>
     /// The internal boolean indicating if the resource already loaded
     /// </summary>
-    private bool _loaded = false;
+    private bool loaded = false;
     /// <summary>
     /// The <see cref="ProblemDetails"/> that occurred when trying to save the resource, if any
     /// </summary>
-    private ProblemDetails? _problemDetails = null;
+    private ProblemDetails? problemDetails = null;
 
     /// <inheritdoc/>
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync().ConfigureAwait(false);
-        this.Store.Label.Subscribe(label => this.OnStateChanged(cmp => cmp._label = label), token: this.CancellationTokenSource.Token);
-        this.Store.Reference.Subscribe(reference => this.OnStateChanged(cmp => cmp._reference = reference), token: this.CancellationTokenSource.Token);
-        this.Store.Loaded.Subscribe(loading => this.OnStateChanged(cmp => cmp._loaded = loading), token: this.CancellationTokenSource.Token);
-        this.Store.ProblemDetails.Subscribe(problemDetails => this.OnStateChanged(cmp => cmp._problemDetails = problemDetails), token: this.CancellationTokenSource.Token);
-        this.Store.TextEditor.Subscribe(textEditor => this.OnStateChanged(cmp => cmp._textEditor = textEditor), token: this.CancellationTokenSource.Token);
+        this.Store.Label.Subscribe(newLabel => this.OnStateChanged(cmp => cmp.label = newLabel), token: this.CancellationTokenSource.Token);
+        this.Store.Reference.Subscribe(newReference => this.OnStateChanged(cmp => cmp.reference = newReference), token: this.CancellationTokenSource.Token);
+        this.Store.Loaded.Subscribe(newLoading => this.OnStateChanged(cmp => cmp.loaded = newLoading), token: this.CancellationTokenSource.Token);
+        this.Store.ProblemDetails.Subscribe(newProblemDetails => this.OnStateChanged(cmp => cmp.problemDetails = newProblemDetails), token: this.CancellationTokenSource.Token);
     }
 
     /// <inheritdoc/>
     protected override async Task OnParametersSetAsync()
     {
         await base.OnParametersSetAsync();
-        if (this._label != this.Label)
+        if (this.label != this.Label)
         {
             this.Store.SetLabel(this.Label);
         }
-        if (this._reference != this.Reference)
+        if (this.reference != this.Reference)
         {
             this.Store.SetReference(this.Reference);
         }

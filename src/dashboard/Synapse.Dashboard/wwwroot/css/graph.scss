@@ -10,9 +10,10 @@
         display: flex;
         justify-content: flex-end;
         gap: $spacer;
+        padding-right: 1rem;
 
         .btn {
-            @include button-outline-variant($secondary);
+            @include button-outline-variant($mute);
             color: var(--bs-btn-color);
             fill: var(--bs-btn-color);
             border: var(--bs-btn-border-width) solid var(--bs-btn-border-color);
@@ -25,4 +26,14 @@
             }
         }
     }
+}
+
+.node rect, .node circle, .node ellipse {
+    stroke: $mute;
+    fill: $dark-bg-subtle-dark;
+    stroke-width: 1px;
+}
+
+.end-node circle {
+    stroke-width: 3px;
 }

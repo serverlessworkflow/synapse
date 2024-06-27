@@ -1,0 +1,60 @@
+﻿﻿@*
+    Copyright © 2024-Present The Synapse Authors
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*@
+@namespace Synapse.Dashboard.Components
+
+<div class="horizontal-collapse d-flex flex-column @(isCollapsed ? "flew-grow-0 collapsed": "col")">
+    <div class="title px-2">
+        <span @onclick="async (_) => await ToggleAsync()">
+            @if(isCollapsed)
+            {
+                <Icon Name="IconName.CaretRight"></Icon>
+            }
+            else
+            {
+                <Icon Name="IconName.CaretDown"></Icon>
+            }
+            </span>
+        <span class="label">@Label</span>
+    </div>
+    @if (!isCollapsed)
+    {
+        <div class="flex-grow">
+            @Content
+        </div>
+    }
+</div>
+
+@code {
+    private bool isCollapsed = false;
+
+    [Parameter] public RenderFragment Label { get; set; } = default!;
+    [Parameter] public RenderFragment Content { get; set; } = default!;
+    [Parameter] public EventCallback OnShown { get; set; }
+    [Parameter] public EventCallback OnHidden { get; set; }
+
+    async Task ToggleAsync()
+    {
+        this.isCollapsed = !this.isCollapsed;
+        if (this.isCollapsed && this.OnHidden.HasDelegate)
+        {
+            await this.OnHidden.InvokeAsync();
+        }
+        if (!this.isCollapsed && this.OnShown.HasDelegate)
+        {
+            await this.OnShown.InvokeAsync();
+        }
+    }
+ }

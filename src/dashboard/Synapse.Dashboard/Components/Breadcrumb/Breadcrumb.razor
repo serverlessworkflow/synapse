@@ -17,24 +17,35 @@
 @namespace Synapse.Dashboard.Components
 @inject IBreadcrumbManager BreadcrumbService
 @implements IDisposable
-<nav class="pb-4" aria-label="breadcrumb">
+    <nav aria-label="breadcrumb" class="@ClassNames">
     <ul class="breadcrumb">
         @foreach (var item in BreadcrumbService.Items)
         {
             <li class="breadcrumb-item">
-                <a href="" @onclick="() => BreadcrumbService.NavigateTo(item)" @onclick:preventDefault>
-                    @if (!string.IsNullOrWhiteSpace(item.Icon))
-                    {
-                        <small class="bi @item.Icon" aria-hidden="true"></small>
-                    }
-                    @item.Label
-                </a>
+                @if (item.Template != null)
+                {
+                    @item.Template
+                }
+                else
+                {
+
+                    <a href="" @onclick="() => BreadcrumbService.NavigateTo(item)" @onclick:preventDefault>
+                        @if (!string.IsNullOrWhiteSpace(item.Icon))
+                        {
+                            <small class="bi @item.Icon" aria-hidden="true"></small>
+                        }
+                        @item.Label
+                    </a>
+                }
             </li>
         }
     </ul>
 </nav>
 
 @code {
+    [Parameter] public string? Class { get; set; }
+
+    protected virtual string? ClassNames => Class;
 
     protected override void OnInitialized()
     {

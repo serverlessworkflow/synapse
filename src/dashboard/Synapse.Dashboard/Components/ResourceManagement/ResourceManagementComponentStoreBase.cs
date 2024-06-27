@@ -114,7 +114,7 @@ public abstract class ResourceManagementComponentStoreBase<TState, TResource>(IS
             onCompletedAsync: () => Task.CompletedTask, 
             cancellationToken: this.CancellationTokenSource.Token
         );
-        this.Filter.SubscribeAsync(
+        this.Filter.Throttle(TimeSpan.FromMilliseconds(100)).SubscribeAsync(
             onNextAsync: this.ListResourcesAsync,
             onErrorAsync: ex => Task.Run(() => Console.WriteLine(ex)),
             onCompletedAsync: () => Task.CompletedTask,

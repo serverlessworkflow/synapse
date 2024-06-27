@@ -2,6 +2,7 @@
 @attribute [Authorize]
 @namespace Synapse.Dashboard.Pages.Correlators.List
 @inherits NamespacedResourceManagementComponent<Correlator>
+@inject IBreadcrumbManager BreadcrumbManager
 
 <ApplicationTitle>Correlators</ApplicationTitle>
 
@@ -67,7 +68,13 @@
 
 <ConfirmDialog @ref="Dialog" />
 
-@{
+@code {
+    /// <inheritdoc/>
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        BreadcrumbManager.Use(Breadcrumbs.Correlators);
+    }
 
     string GetStatusClass(Correlator correlator)
     {

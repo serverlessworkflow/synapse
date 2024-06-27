@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Neuroglia;
 using Synapse.Dashboard.Components.ResourceEditorStateManagement;
 
 namespace Synapse.Dashboard.Components.ReferenceDetailsStateManagement;
@@ -32,11 +33,18 @@ public class ReferenceDetailsStore(
 )
     : ComponentStore<ReferenceDetailsState>(new())
 {
+    
+    private TextModel? _textModel = null;
+
     /// <summary>
     /// The <see cref="BlazorMonaco.Editor.StandaloneEditorConstructionOptions"/> provider function
     /// </summary>
     public Func<StandaloneCodeEditor, StandaloneEditorConstructionOptions> StandaloneEditorConstructionOptions = monacoEditorHelper.GetStandaloneEditorConstructionOptions(string.Empty, true, monacoEditorHelper.PreferredLanguage);
 
+    /// <summary>
+    /// The <see cref="StandaloneCodeEditor"/> reference
+    /// </summary>
+    public StandaloneCodeEditor? TextEditor { get; set; }
 
     #region Selectors
     /// <summary>
@@ -58,11 +66,6 @@ public class ReferenceDetailsStore(
     /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="ReferenceDetailsState.Loaded"/> changes
     /// </summary>
     public IObservable<bool> Loaded => this.Select(state => state.Loaded).DistinctUntilChanged();
-
-    /// <summary>
-    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="ReferenceDetailsState.TextEditor"/> changes
-    /// </summary>
-    public IObservable<StandaloneCodeEditor?> TextEditor => this.Select(state => state.TextEditor).DistinctUntilChanged();
 
     /// <summary>
     /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="ResourceEditorState{TResource}.ProblemType"/> changes
@@ -135,23 +138,9 @@ public class ReferenceDetailsStore(
             Loaded = false,
         });
     }
-
-    /// <summary>
-    /// Sets the state's <see cref="ReferenceDetailsState.TextEditor"/>
-    /// </summary>
-    /// <param name="textEditor">The new <see cref="ReferenceDetailsState.TextEditor"/> value</param>
-    public void SetTextEditor(StandaloneCodeEditor? textEditor)
-    {
-        this.Reduce(state => state with
-        {
-            TextEditor = textEditor
-        });
-    }
     #endregion
 
     #region Actions
-    
-
     /// <summary>
     /// Loads the referenced documents
     /// </summary>
@@ -182,7 +171,7 @@ public class ReferenceDetailsStore(
                     ProblemTitle = ex.Problem?.Title ?? string.Empty,
                     ProblemStatus = ex.Problem?.Status ?? 0,
                     ProblemDetail = ex.Problem?.Detail ?? string.Empty,
-                    ProblemErrors = ex.Problem?.Errors?.ToDictionary(kvp => kvp.Key, kvp => kvp.Value) ?? []
+                    ProblemErrors = new EquatableDictionary<string, string[]>(ex.Problem?.Errors ?? [])
                 });
             }
         }
@@ -221,26 +210,20 @@ public class ReferenceDetailsStore(
     {
         try
         {
-            var textEditor = this.Get(state => state.TextEditor);
-            var textModel = this.Get(state => state.TextModel);
             var language = monacoEditorHelper.PreferredLanguage;
-            if (textEditor != null)
+            if (this.TextEditor != null)
             {
-                if (textModel != null)
+                if (this._textModel != null)
                 {
-                    await Global.SetModelLanguage(jsRuntime, textModel, language);
+                    await Global.SetModelLanguage(jsRuntime, this._textModel, language);
                 }
                 else
                 {
                     var reference = this.Get(state => state.Reference);
                     var resourceUri = $"inmemory://{reference.ToLower()}";
-                    textModel = await Global.CreateModel(jsRuntime, "", language, resourceUri);
+                    this._textModel = await Global.CreateModel(jsRuntime, "", language, resourceUri);
                 }
-                await textEditor!.SetModel(textModel);
-                this.Reduce(state => state with
-                {
-                    TextModel = textModel
-                });
+                await this.TextEditor!.SetModel(this._textModel);
             }
         }
         catch (Exception ex)
@@ -256,10 +239,9 @@ public class ReferenceDetailsStore(
     /// <returns></returns>
     async Task SetTextEditorValueAsync()
     {
-        var textEditor = this.Get(state => state.TextEditor);
         var document = this.Get(state => state.Document);
         var language = monacoEditorHelper.PreferredLanguage;
-        if (textEditor != null && !string.IsNullOrWhiteSpace(document))
+        if (this.TextEditor != null && !string.IsNullOrWhiteSpace(document))
         {
             try
             {
@@ -267,7 +249,7 @@ public class ReferenceDetailsStore(
                 {
                     document = yamlSerializer.ConvertFromJson(document);
                 }
-                await textEditor.SetValue(document);
+                await this.TextEditor.SetValue(document);
             }
             catch (Exception ex)
             {
@@ -289,20 +271,15 @@ public class ReferenceDetailsStore(
         {
             if (disposing)
             {
-                var textEditor = this.Get(state => state.TextEditor);
-                var textModel = this.Get(state => state.TextModel);
-                if (textModel != null)
+                if (this._textModel != null)
                 {
-                    textModel.DisposeModel();
-                    this.Reduce(state => state with
-                    { 
-                        TextModel = null 
-                    });
+                    this._textModel.DisposeModel();
+                    this._textModel = null;
                 }
-                if (textEditor != null)
+                if (this.TextEditor != null)
                 {
-                    textEditor.Dispose();
-                    this.SetTextEditor(null);
+                    this.TextEditor.Dispose();
+                    this.TextEditor = null;
                 }
             }
             this.disposed = true;
