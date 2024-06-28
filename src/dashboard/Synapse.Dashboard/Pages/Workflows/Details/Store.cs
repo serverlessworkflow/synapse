@@ -41,6 +41,26 @@ public class WorkflowDetailsStore(
     private bool _disposed;
 
     /// <summary>
+    /// Gets the service used for JS interop
+    /// </summary>
+    protected IJSRuntime JSRuntime { get; } = jsRuntime;
+
+    /// <summary>
+    /// Gets the service used ease Monaco Editor interactions
+    /// </summary>
+    protected IMonacoEditorHelper MonacoEditorHelper { get; } = monacoEditorHelper;
+
+    /// <summary>
+    /// Gets the service used to serialize and deserialize JSON
+    /// </summary>
+    protected IJsonSerializer JsonSerializer { get; } = jsonSerializer;
+
+    /// <summary>
+    /// Gets the service used to serialize and deserialize YAML
+    /// </summary>
+    protected IYamlSerializer YamlSerializer { get; } = yamlSerializer;
+
+    /// <summary>
     /// The <see cref="BlazorMonaco.Editor.StandaloneEditorConstructionOptions"/> provider function
     /// </summary>
     public Func<StandaloneCodeEditor, StandaloneEditorConstructionOptions> StandaloneEditorConstructionOptions = monacoEditorHelper.GetStandaloneEditorConstructionOptions(string.Empty, true, monacoEditorHelper.PreferredLanguage);
@@ -67,6 +87,11 @@ public class WorkflowDetailsStore(
     public IObservable<string?> WorkflowDefinitionVersion => this.Select(state => state.WorkflowDefinitionVersion).DistinctUntilChanged();
 
     /// <summary>
+    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="WorkflowDetailsState.WorkflowInstanceName"/> changes
+    /// </summary>
+    public IObservable<string?> WorkflowInstanceName => this.Select(state => state.WorkflowInstanceName).DistinctUntilChanged();
+
+    /// <summary>
     /// Gets an <see cref="IObservable{T}"/> exposing the <see cref="WorkflowDefinition"/>
     /// </summary>
     public IObservable<WorkflowDefinition?> WorkflowDefinition => Observable.CombineLatest(
@@ -78,7 +103,7 @@ public class WorkflowDetailsStore(
             {
                 return null;
             }
-            if (string.IsNullOrWhiteSpace(version))
+            if (string.IsNullOrWhiteSpace(version) || version.Equals("latest", StringComparison.CurrentCultureIgnoreCase))
             {
                 var latest = workflow.Spec.Versions.GetLatest()?.Document.Version;
                 if (!string.IsNullOrWhiteSpace(latest))
@@ -100,6 +125,21 @@ public class WorkflowDetailsStore(
     /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="WorkflowDetailsState.WorkflowDefinitionJson"/> changes
     /// </summary>
     public IObservable<string> Document => this.Select(state => state.WorkflowDefinitionJson).DistinctUntilChanged();
+
+    /// <summary>
+    /// Gets an <see cref="IObservable{T}"/> used to observe the displayed <see cref="WorkflowInstance"/> changes
+    /// </summary>
+    public IObservable<WorkflowInstance?> WorkflowInstance => Observable.CombineLatest(
+        this.Resources,
+        this.WorkflowInstanceName,
+        (instances, name) => {
+            if (instances == null || instances.Count == 0 || name == null)
+            {
+                return null;
+            }
+            return instances.FirstOrDefault(instance => instance.Metadata.Name == name);
+        }
+    );
     #endregion
 
     #region Setters
@@ -125,6 +165,18 @@ public class WorkflowDetailsStore(
         this.Reduce(state => state with
         {
             WorkflowDefinitionVersion = workflowDefinitionVersion
+        });
+    }
+
+    /// <summary>
+    /// Sets the state's <see cref="WorkflowDetailsState.WorkflowInstanceName"/>
+    /// </summary>
+    /// <param name="instanceName">The new <see cref="WorkflowDetailsState.WorkflowInstanceName"/> value</param>
+    public void SetWorkflowInstanceName(string? instanceName)
+    {
+        this.Reduce(state => state with
+        {
+            WorkflowInstanceName = instanceName
         });
     }
     #endregion
@@ -181,19 +233,19 @@ public class WorkflowDetailsStore(
     {
         try
         {
-            var language = monacoEditorHelper.PreferredLanguage;
+            var language = this.MonacoEditorHelper.PreferredLanguage;
             if (this.TextEditor != null)
             {
                 if (this._textModel != null)
                 {
-                    await Global.SetModelLanguage(jsRuntime, this._textModel, language);
+                    await Global.SetModelLanguage(this.JSRuntime, this._textModel, language);
                 }
                 else
                 {
                     var version = this.Get(state => state.WorkflowDefinitionVersion);
                     var reference = this.Get(state => state.Namespaces) + "." + this.Get(state => state.WorkflowDefinitionName) + (!string.IsNullOrWhiteSpace(version) ? $":{version}" : "");
                     var resourceUri = $"inmemory://{reference.ToLower()}";
-                    this._textModel = await Global.CreateModel(jsRuntime, "", language, resourceUri);
+                    this._textModel = await Global.CreateModel(this.JSRuntime, "", language, resourceUri);
                 }
                 await this.TextEditor!.SetModel(this._textModel);
             }
@@ -212,21 +264,21 @@ public class WorkflowDetailsStore(
     async Task SetTextEditorValueAsync()
     {
         var document = this.Get(state => state.WorkflowDefinitionJson);
-        var language = monacoEditorHelper.PreferredLanguage;
+        var language = this.MonacoEditorHelper.PreferredLanguage;
         if (this.TextEditor != null && !string.IsNullOrWhiteSpace(document))
         {
             try
             {
                 if (language == PreferredLanguage.YAML)
                 {
-                    document = yamlSerializer.ConvertFromJson(document);
+                    document = this.YamlSerializer.ConvertFromJson(document);
                 }
                 await this.TextEditor.SetValue(document);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                await monacoEditorHelper.ChangePreferredLanguageAsync(language == PreferredLanguage.YAML ? PreferredLanguage.JSON : PreferredLanguage.YAML);
+                await this.MonacoEditorHelper.ChangePreferredLanguageAsync(language == PreferredLanguage.YAML ? PreferredLanguage.JSON : PreferredLanguage.YAML);
             }
         }
     }
@@ -238,15 +290,15 @@ public class WorkflowDetailsStore(
         this.WorkflowDefinition.Where(definition => definition != null).SubscribeAsync(async (definition) =>
         {
             await Task.Delay(1);
-            var document = jsonSerializer.SerializeToText(definition);
+            var document = this.JsonSerializer.SerializeToText(definition);
             this.Reduce(state => state with
             {
                 WorkflowDefinitionJson = document
             });
             await this.SetTextEditorValueAsync();
-            if (monacoEditorHelper.PreferredLanguage != PreferredLanguage.YAML)
+            if (this.MonacoEditorHelper.PreferredLanguage != PreferredLanguage.YAML)
             {
-                await monacoEditorHelper.ChangePreferredLanguageAsync(PreferredLanguage.YAML);
+                await this.MonacoEditorHelper.ChangePreferredLanguageAsync(PreferredLanguage.YAML);
             }
         }, cancellationToken: this.CancellationTokenSource.Token);
         Observable.CombineLatest(

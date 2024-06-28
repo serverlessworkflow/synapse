@@ -37,4 +37,14 @@
     <ProjectReference Include="..\Synapse.Dashboard.StateManagement\Synapse.Dashboard.StateManagement.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="Components\DocumentDetails\DocumentDetails.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Components\CorrelationContextDetails\" />
+  </ItemGroup>
+
 </Project>

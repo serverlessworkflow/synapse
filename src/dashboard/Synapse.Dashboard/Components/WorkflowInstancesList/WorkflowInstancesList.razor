@@ -46,7 +46,7 @@
             <input type="search" class="form-control rounded my-2 me-2" placeholder="Search" @oninput="OnSearchInputAsync" />
         </div>
     </div>
-    <table class="table table-striped table-hover">
+    <table class="table table-hover">
         <thead>
             <tr>
                 @foreach (var column in columns)
@@ -162,12 +162,12 @@
     {
         return instance.Status?.Phase switch
         {
-            WorkflowInstanceStatusPhase.Pending => "border-secondary text-secondary",
-            WorkflowInstanceStatusPhase.Running => "border-primary text-primary",
+            WorkflowInstanceStatusPhase.Running => "border-accent text-accent",
             WorkflowInstanceStatusPhase.Faulted => "border-danger text-danger",
             WorkflowInstanceStatusPhase.Cancelled => "border-warning text-warning",
             WorkflowInstanceStatusPhase.Completed => "border-success text-success",
-            _ => "border-secondary text-secondary"
+            WorkflowInstanceStatusPhase.Waiting => "border-cinereous text-cinereous",
+            _ => ""
         };
     }
 

@@ -16,10 +16,12 @@
 
 @page "/workflows/details/{namespace}/{name}/latest"
 @page "/workflows/details/{namespace}/{name}/{version}"
+@page "/workflows/details/{namespace}/{name}/{version}/{instanceName}"
 @using ServerlessWorkflow.Sdk.Models
 @using Synapse.Api.Client.Services
 @inherits NamespacedResourceManagementComponent<View, WorkflowDetailsStore, WorkflowDetailsState, WorkflowInstance>
 @inject IBreadcrumbManager BreadcrumbManager
+@inject NavigationManager NavigationManager
 
 <ApplicationTitle>Workflow @($"{name}.{ns}:{version}")</ApplicationTitle>
 
@@ -27,12 +29,12 @@
     <HorizontalCollapsible>
         <Label>Instances</Label>
         <Content>
-            <div class="table-container">
-                <WorkflowInstancesList Loading="Loading"
-                                       WorkflowInstances="Resources"
-                                       OnSearchInput="OnSearchInput"
-                                       Columns="columns"></WorkflowInstancesList>
-            </div>
+            <WorkflowInstancesList Loading="Loading"
+                                    WorkflowInstances="Resources"
+                                    OnSearchInput="OnSearchInput"
+                                    Columns="columns"
+                                    OnShowDetails="OnViewWorkflowInstance"
+            ></WorkflowInstancesList>
         </Content>
     </HorizontalCollapsible>
     <HorizontalCollapsible>
@@ -50,30 +52,43 @@
             }
         </Content>
     </HorizontalCollapsible>
-    <HorizontalCollapsible>
-        <Label>Definition</Label>
-        <Content>
-            @if (workflowDefinition == null)
-            {
-                <div class="d-flex justify-content-center mt-5">
-                    <Loader />
-                </div>
-            }
-            else
-            {
-                <div class="d-flex flex-column h-100 mh-100">
-                    <PreferredLanguageSelector PreferedLanguageChange="Store.ToggleTextBasedEditorLanguageAsync" />
-                    <div class="flex-grow">
-                        <StandaloneCodeEditor @ref="Store.TextEditor"
-                                              ConstructionOptions="Store.StandaloneEditorConstructionOptions"
-                                              OnDidInit="Store.OnTextBasedEditorInitAsync"
-                                              CssClass="h-100" />
+    @if (workflowInstance == null) {
+        <HorizontalCollapsible>
+            <Label>Definition</Label>
+            <Content>
+                @if (workflowDefinition == null)
+                {
+                    <div class="d-flex justify-content-center mt-5">
+                        <Loader />
                     </div>
-                </div>
+                }
+                else
+                {
+                    <div class="d-flex flex-column h-100 mh-100">
+                        <PreferredLanguageSelector PreferedLanguageChange="Store.ToggleTextBasedEditorLanguageAsync" />
+                        <div class="flex-grow">
+                            <StandaloneCodeEditor @ref="Store.TextEditor"
+                                                  ConstructionOptions="Store.StandaloneEditorConstructionOptions"
+                                                  OnDidInit="Store.OnTextBasedEditorInitAsync"
+                                                  CssClass="h-100" />
+                        </div>
+                    </div>
                 
-            }
-        </Content>
-    </HorizontalCollapsible>
+                }
+            </Content>
+        </HorizontalCollapsible>
+    }
+    else
+    {
+        <HorizontalCollapsible OnClose="OnCloseWorkflowInstance">
+            <Label>Instance</Label>
+            <Content>
+                <div class="d-flex flex-column h-100 mh-100">
+                    <WorkflowInstanceDetails WorkflowInstance="workflowInstance"/>
+                </div>
+            </Content>
+        </HorizontalCollapsible>
+    }
 </div>
 
 @code
@@ -82,8 +97,10 @@
     string ns = null!;
     string name = null!;
     string version = null!;
+    string? instanceName = null!;
     Workflow workflow = null!;
     WorkflowDefinition workflowDefinition = null!;
+    WorkflowInstance? workflowInstance;
     readonly IEnumerable<string> columns = [
         "Name",
     "Namespace",
@@ -95,6 +112,7 @@
     [Parameter] public new string? Namespace { get; set; }
     [Parameter] public string? Name { get; set; }
     [Parameter] public string? Version { get; set; }
+    [Parameter] public string? InstanceName { get; set; }
 
     /// <inheritdoc/>
     protected override async Task OnInitializedAsync()
@@ -104,7 +122,13 @@
         Store.Namespace.Where(value => !string.IsNullOrWhiteSpace(value)).Subscribe(value => OnStateChanged(_ => ns = value!), token: CancellationTokenSource.Token);
         Store.WorkflowDefinitionName.Where(value => !string.IsNullOrWhiteSpace(value)).Subscribe(value => OnStateChanged(_ => name = value!), token: CancellationTokenSource.Token);
         Store.WorkflowDefinitionVersion.Where(value => !string.IsNullOrWhiteSpace(value)).Subscribe(value => OnStateChanged(_ => version = value!), token: CancellationTokenSource.Token);
+        Store.WorkflowInstanceName.Subscribe(value => OnStateChanged(_ => instanceName = value), token: CancellationTokenSource.Token);
         Store.WorkflowDefinition.Where(value => value != null).Subscribe(value => OnStateChanged(_ => workflowDefinition = value!), token: CancellationTokenSource.Token);
+        Store.WorkflowInstance.Subscribe(value =>
+        {
+            OnStateChanged(_ => workflowInstance = value);
+            UpdateBreadcrumb();
+        }, token: CancellationTokenSource.Token);
         Store.Workflow.Where(value => value != null).Subscribe(value =>
         {
             OnStateChanged(_ => workflow = value!);
@@ -127,6 +151,10 @@
         {
             Store.SetWorkflowDefinitionVersion(Version);
         }
+        if (InstanceName != instanceName)
+        {
+            Store.SetWorkflowInstanceName(InstanceName);
+        }
     }
 
     /// <summary>
@@ -135,11 +163,16 @@
     protected void UpdateBreadcrumb()
     {
         BreadcrumbManager.Use(Breadcrumbs.Workflows);
-        BreadcrumbManager.Add(new($"{Name}.{Namespace}", $"/workflows/{Namespace}/{Name}/latest"));
+        BreadcrumbManager.Add(new($"{Name}.{Namespace}", $"/workflows/details/{Namespace}/{Name}/latest"));
         if (workflow != null)
         {
             BreadcrumbManager.Add(new(VersionSelector()));
         }
+        if (workflowInstance != null)
+        {
+            BreadcrumbManager.Add(new(workflowInstance.GetName(), $"/workflows/details/{Namespace}/{Name}/{Version}/{workflowInstance.GetName()}"));
+        }
+        StateHasChanged();
     }
 
     /// <summary>
@@ -148,7 +181,7 @@
     /// <returns></returns>
     protected RenderFragment VersionSelector() => __builder =>
     {
-        <select class="form-select w-auto border-0 py-0 ps-0 text-decoration-underline text-primary" @onchange="(e) => Store.SetWorkflowDefinitionVersion(e.Value!.ToString())">
+        <select class="form-select w-auto border-0 py-0 ps-0 pe-4 text-decoration-underline text-primary" style="background-position: right 0rem center;" @onchange="(e) => Store.SetWorkflowDefinitionVersion(e.Value!.ToString())">
             @if (workflow != null)
             {
                 foreach (var definitionVersion in workflow.Spec.Versions)
@@ -159,4 +192,11 @@
         </select>
     };
 
+    void OnViewWorkflowInstance(WorkflowInstance instance) => NavigationManager.NavigateTo($"/workflows/details/{Namespace}/{Name}/{version}/{instance.GetName()}");
+
+    void OnCloseWorkflowInstance()
+    {
+        NavigationManager.NavigateTo($"/workflows/details/{Namespace}/{Name}/{version}");
+        StateHasChanged();
+    }
 }

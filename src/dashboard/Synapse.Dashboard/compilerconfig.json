@@ -10,5 +10,9 @@
   {
     "outputFile": "Components/ResourceEditor/ResourceEditor.razor.css",
     "inputFile": "Components/ResourceEditor/ResourceEditor.razor.scss"
+  },
+  {
+    "outputFile": "Components/WorkflowInstanceDetails/WorkflowInstanceDetails.razor.css",
+    "inputFile": "Components/WorkflowInstanceDetails/WorkflowInstanceDetails.razor.scss"
   }
 ]

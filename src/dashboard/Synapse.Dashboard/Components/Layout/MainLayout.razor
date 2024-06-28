@@ -20,14 +20,14 @@
 @inject IOptions<ApplicationOptions> Options
 
 <div class="page h-100 d-flex flex-column">    
-    <nav class="header navbar navbar-expand-lg flex-row navbar-dark bg-dark-subtle">        
+    <header class="header navbar navbar-expand-lg flex-row navbar-dark bg-dark-subtle">        
         <a class="navbar-brand d-flex flex-row align-items-center justify-content-center" href="#">        
             <svg class="logo" viewBox="-10 -10 60 60">
                 <use xlink:href="#logo" />
             </svg>
             <span class="logo-typing">SYNAPSE</span>
         </a>
-        <div class="navbar-collapse">
+        <nav class="navbar-collapse">
             <ul class="navbar-nav">    
                 <AuthorizeView>
                     <Authorized>
@@ -80,7 +80,7 @@
                     </NavLink>
                 </li>
             </ul>
-        </div>
+        </nav>
         <AuthorizeView>
             <Authorized>
                 <Dropdown Class="me-3">
@@ -100,11 +100,11 @@
                 </Dropdown>
             </Authorized>
         </AuthorizeView>
-    </nav>
+    </header>
     <Synapse.Dashboard.Components.Breadcrumb class="d-flex align-items-center px-3 py-2" />
-    <div class="content flex-grow d-flex flex-column p-3">
+    <main class="flex-grow d-flex flex-column p-3">
         @Body
-    </div>
+    </main>
 </div>
 
 @code{

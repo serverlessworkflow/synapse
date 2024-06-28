@@ -47,4 +47,9 @@ public record WorkflowDetailsState
     /// </summary>
     public string WorkflowDefinitionJson { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Gets/sets the displayed <see cref="WorkflowInstance"/> id
+    /// </summary>
+    public string? WorkflowInstanceName { get; set; }
+
 }

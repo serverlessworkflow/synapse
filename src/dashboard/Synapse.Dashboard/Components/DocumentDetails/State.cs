@@ -11,12 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Synapse.Dashboard.Components.ReferenceDetailsStateManagement;
+namespace Synapse.Dashboard.Components.DocumentDetailsStateManagement;
 
 /// <summary>
-/// Represents the state of a <see cref="Synapse.Dashboard.Components.ReferenceDetails"/>
+/// Represents the state of a <see cref="Synapse.Dashboard.Components.DocumentDetails"/>
 /// </summary>
-public record ReferenceDetailsState
+public record DocumentDetailsState
 {
 
     /// <summary>
@@ -27,12 +27,12 @@ public record ReferenceDetailsState
     /// <summary>
     /// Gets/sets the reference to load
     /// </summary>
-    public string Reference { get; set; } = string.Empty;
+    public string? Reference { get; set; } = string.Empty;
 
     /// <summary>
-    /// Gets/sets the referenced document
+    /// Gets/sets the JSON representation of the referenced document
     /// </summary>
-    public string Document { get; set; } = string.Empty;
+    public string DocumentJson { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets/sets a boolean indicating the reference has been loaded

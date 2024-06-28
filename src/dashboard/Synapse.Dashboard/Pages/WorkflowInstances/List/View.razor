@@ -15,7 +15,7 @@
                        OnWorkflowChanged="OnWorkflowChanged"
                        OnNamespaceChanged="OnNamespaceChanged"
                        OnSearchInput="OnSearchInput"
-                       OnShowDetails="OnShowResourceDetailsAsync"
+                       OnShowDetails="OnShowInstanceDetailsAsync"
                        OnDelete="OnDeleteResourceAsync"></WorkflowInstancesList>
 
 <Button Outline="true" Color="ButtonColor.Primary" @onclick="async _ => await OnShowResourceEditorAsync()"><Icon Name="IconName.Plus" /></Button>
@@ -64,17 +64,18 @@
         }
     }
 
-    string GetStatusClass(WorkflowInstance instance)
+    /// <summary>
+    /// Opens the targeted <see cref="WorkflowInstance"/>'s details
+    /// </summary>
+    /// <param name="instance">The <see cref="WorkflowInstance"/> to show the details for</param>
+    protected Task OnShowInstanceDetailsAsync(WorkflowInstance instance)
     {
-        return instance.Status?.Phase switch
+        if (this.DetailsOffCanvas == null) return Task.CompletedTask;
+        var parameters = new Dictionary<string, object>
         {
-            WorkflowInstanceStatusPhase.Pending => "border-secondary text-secondary",
-            WorkflowInstanceStatusPhase.Running => "border-primary text-primary",
-            WorkflowInstanceStatusPhase.Faulted => "border-danger text-danger",
-            WorkflowInstanceStatusPhase.Cancelled => "border-warning text-warning",
-            WorkflowInstanceStatusPhase.Completed => "border-success text-success",
-            _ => "border-secondary text-secondary"
+            { "WorkflowInstance", instance }
         };
+        return this.DetailsOffCanvas.ShowAsync<WorkflowInstanceDetails>(title: "Instance details", parameters: parameters);
     }
 
 }

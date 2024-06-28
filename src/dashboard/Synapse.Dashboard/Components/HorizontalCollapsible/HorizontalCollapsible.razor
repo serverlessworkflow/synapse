@@ -16,8 +16,8 @@
 @namespace Synapse.Dashboard.Components
 
 <div class="horizontal-collapse d-flex flex-column @(isCollapsed ? "flew-grow-0 collapsed": "col")">
-    <div class="title px-2">
-        <span @onclick="async (_) => await ToggleAsync()">
+    <div class="title px-2 cursor-pointer" @onclick="async (_) => await OnToggleAsync()">
+        <span>
             @if(isCollapsed)
             {
                 <Icon Name="IconName.CaretRight"></Icon>
@@ -28,6 +28,10 @@
             }
             </span>
         <span class="label">@Label</span>
+        @if (OnClose.HasDelegate)
+        {
+            <i class="bi bi-x" @onclick="async (_) => await OnCloseAsync()" @onclick:preventDefault="true" @onclick:stopPropagation="true"></i>
+        }
     </div>
     @if (!isCollapsed)
     {
@@ -44,17 +48,26 @@
     [Parameter] public RenderFragment Content { get; set; } = default!;
     [Parameter] public EventCallback OnShown { get; set; }
     [Parameter] public EventCallback OnHidden { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
 
-    async Task ToggleAsync()
+    async Task OnToggleAsync()
     {
-        this.isCollapsed = !this.isCollapsed;
-        if (this.isCollapsed && this.OnHidden.HasDelegate)
+        isCollapsed = !isCollapsed;
+        if (isCollapsed && OnHidden.HasDelegate)
         {
-            await this.OnHidden.InvokeAsync();
+            await OnHidden.InvokeAsync();
         }
-        if (!this.isCollapsed && this.OnShown.HasDelegate)
+        if (!isCollapsed && OnShown.HasDelegate)
         {
-            await this.OnShown.InvokeAsync();
+            await OnShown.InvokeAsync();
+        }
+    }
+
+    async Task OnCloseAsync()
+    {
+        if (OnClose.HasDelegate)
+        {
+            await OnClose.InvokeAsync();
         }
     }
  }

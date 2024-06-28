@@ -2,9 +2,10 @@
   "version": "1.0",
   "defaultProvider": "cdnjs",
   "libraries": [
+
     {
       "provider": "jsdelivr",
-      "library": "bootstrap@5.3.0-alpha1",
+      "library": "bootstrap@5.3.3",
       "destination": "wwwroot/lib/bootstrap/",
       "files": [
         "scss/forms/_floating-labels.scss",
@@ -19,6 +20,8 @@
         "scss/helpers/_clearfix.scss",
         "scss/helpers/_color-bg.scss",
         "scss/helpers/_colored-links.scss",
+        "scss/helpers/_focus-ring.scss",
+        "scss/helpers/_icon-link.scss",
         "scss/helpers/_position.scss",
         "scss/helpers/_ratio.scss",
         "scss/helpers/_stacks.scss",
@@ -97,6 +100,9 @@
         "scss/_utilities.scss",
         "scss/_variables-dark.scss",
         "scss/_variables.scss",
+        "LICENSE",
+        "package.json",
+        "README.md",
         "dist/js/bootstrap.bundle.js",
         "dist/js/bootstrap.bundle.js.map",
         "dist/js/bootstrap.bundle.min.js",
@@ -108,10 +114,7 @@
         "dist/js/bootstrap.js",
         "dist/js/bootstrap.js.map",
         "dist/js/bootstrap.min.js",
-        "dist/js/bootstrap.min.js.map",
-        "README.md",
-        "LICENSE",
-        "package.json"
+        "dist/js/bootstrap.min.js.map"
       ]
     },
     {

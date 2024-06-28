@@ -2,6 +2,7 @@
 
 .horizontal-collapse {
     border-right: 1px solid var(--bs-dark-bg-subtle);
+    overflow: scroll;
 
     &:nth-last-child(1) {
         border: none;
@@ -9,17 +10,30 @@
 
     .title {
         bottom: 1px solid var(--bs-dark-bg-subtle);
+        display: flex;
+        gap: calc($spacer / 2);
+
+        i {
+            margin-left: auto;
+        }
     }
 
     &.collapsed {
+        overflow: hidden;
+
         .title {
             width: 22px;
             height: 100%;
+            flex-direction: column;
 
             .label {
                 display: block;
                 transform: rotate(90deg) translate(3px);
                 transform-origin: center;
+            }
+
+            i {
+                margin-top: auto;
             }
         }
     }
