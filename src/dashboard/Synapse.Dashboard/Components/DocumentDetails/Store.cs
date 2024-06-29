@@ -188,7 +188,7 @@ public class DocumentDetailsStore(
         if (loaded || string.IsNullOrWhiteSpace(reference)) return;
         try 
         { 
-            var document = await this.ApiClient.WorkflowData.GetAsync(reference);
+            var document = await this.ApiClient.Documents.GetAsync(reference);
             string documentText = this.JsonSerializer.SerializeToText(document.Content);
             this.Reduce(state => state with
             {
@@ -254,10 +254,7 @@ public class DocumentDetailsStore(
                 {
                     var resourceUri = $"inmemory://{reference.ToLower()}";
                     this._textModel = await Global.GetModel(this.JSRuntime, resourceUri);
-                    if (this._textModel == null)
-                    {
-                        this._textModel = await Global.CreateModel(this.JSRuntime, "", language, resourceUri);
-                    }
+                    this._textModel ??= await Global.CreateModel(this.JSRuntime, "", language, resourceUri);
                 }
                 if (this._textModel != null)
                 {

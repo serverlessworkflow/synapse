@@ -43,8 +43,4 @@
     </Content>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Components\CorrelationContextDetails\" />
-  </ItemGroup>
-
 </Project>

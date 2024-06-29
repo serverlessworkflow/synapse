@@ -20,7 +20,7 @@
 @if (WorkflowInstance != null)
 {
     <div class="workflow-instance-details p-3">
-        <h5 class="mt-3">Timings</h5>
+        <h6 class="mt-3">Timings</h6>
         <div class="row">
             <div class="col-sm-12 col-md-4">
                 <div class="label">Started at</div>
@@ -42,7 +42,7 @@
                 }
             </div>
         </div>
-        <h5 class="mt-3">Global Data</h5>
+        <h6 class="mt-3">Global Data</h6>
         <div class="row">
             <div class="col-sm-12 col-md-4">
                 <DocumentDetails Label='Input' Document="@WorkflowInstance.Spec?.Input" />
@@ -61,7 +61,7 @@
             }
             </div>
         </div>
-        <h5 class="mt-3">Executed Tasks</h5>
+        <h6 class="mt-3">Executed Tasks</h6>
         @if (WorkflowInstance.Status?.Tasks == null || WorkflowInstance.Status.Tasks.Count == 0)
         {
             @("-")
@@ -101,7 +101,7 @@
                 </tbody>
             </table>
         }
-        <h5 class="mt-3">Runs</h5>
+        <h6 class="mt-3">Runs</h6>
         @if (WorkflowInstance.Status?.Runs == null || WorkflowInstance.Status.Runs.Count == 0)
         {
             @("-")
@@ -128,7 +128,7 @@
                 </tbody>
             </table>
         }
-        <h5 class="mt-3">Correlation</h5>
+        <h6 class="mt-3">Correlation</h6>
         @if (WorkflowInstance.Status?.Correlation == null)
         {
             @("-")
@@ -204,6 +204,8 @@
                 </table>
             }
         }
+        <h6 class="mt-3">Logs</h6>
+        -
         <pre>
             @JsonSerializer.SerializeToText(WorkflowInstance);
         </pre>

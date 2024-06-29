@@ -7,7 +7,9 @@
 
 <div class="container-fluid d-flex flex-grow flex-column">
     <div class="row flex-grow">
-        <PreferredLanguageSelector PreferedLanguageChange="ToggleTextBasedEditorLanguageAsync" />
+        <div class="d-flex justify-content-end mb-2">
+            <PreferredLanguageSelector PreferedLanguageChange="ToggleTextBasedEditorLanguageAsync" />
+        </div>
         <StandaloneCodeEditor @ref="textBasedEditor"
             ConstructionOptions="MonacoEditorHelper.GetStandaloneEditorConstructionOptions(this.textEditorValue, false, this.MonacoEditorHelper.PreferredLanguage)"
             OnDidInit="OnTextBasedEditorInit"

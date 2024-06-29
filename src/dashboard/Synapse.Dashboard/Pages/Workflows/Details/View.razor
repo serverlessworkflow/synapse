@@ -25,7 +25,7 @@
 
 <ApplicationTitle>Workflow @($"{name}.{ns}:{version}")</ApplicationTitle>
 
-<div class="d-flex w-100 h-100">
+<div class="d-flex flex-grow">
     <HorizontalCollapsible>
         <Label>Instances</Label>
         <Content>
@@ -33,7 +33,7 @@
                                     WorkflowInstances="Resources"
                                     OnSearchInput="OnSearchInput"
                                     Columns="columns"
-                                    OnShowDetails="OnViewWorkflowInstance"
+                                    OnShowDetails="OnShowInstanceDetails"
             ></WorkflowInstancesList>
         </Content>
     </HorizontalCollapsible>
@@ -65,7 +65,9 @@
                 else
                 {
                     <div class="d-flex flex-column h-100 mh-100">
-                        <PreferredLanguageSelector PreferedLanguageChange="Store.ToggleTextBasedEditorLanguageAsync" />
+                        <div class="d-flex justify-content-end mb-2">
+                            <PreferredLanguageSelector PreferedLanguageChange="Store.ToggleTextBasedEditorLanguageAsync" />
+                        </div>
                         <div class="flex-grow">
                             <StandaloneCodeEditor @ref="Store.TextEditor"
                                                   ConstructionOptions="Store.StandaloneEditorConstructionOptions"
@@ -192,7 +194,7 @@
         </select>
     };
 
-    void OnViewWorkflowInstance(WorkflowInstance instance) => NavigationManager.NavigateTo($"/workflows/details/{Namespace}/{Name}/{version}/{instance.GetName()}");
+    void OnShowInstanceDetails(WorkflowInstance instance) => NavigationManager.NavigateTo($"/workflows/details/{Namespace}/{Name}/{version}/{instance.GetName()}");
 
     void OnCloseWorkflowInstance()
     {

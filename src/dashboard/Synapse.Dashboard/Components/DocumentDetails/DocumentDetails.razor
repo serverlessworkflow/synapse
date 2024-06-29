@@ -44,7 +44,9 @@
         }
         else
         {
-            <PreferredLanguageSelector PreferedLanguageChange="Store.ToggleTextBasedEditorLanguageAsync" />
+            <div class="d-flex justify-content-end mb-2">
+                <PreferredLanguageSelector PreferedLanguageChange="Store.ToggleTextBasedEditorLanguageAsync" />
+            </div>
             <StandaloneCodeEditor @ref="Store.TextEditor"
                                   ConstructionOptions="Store.StandaloneEditorConstructionOptions"
                                   OnDidInit="Store.OnTextBasedEditorInitAsync"

@@ -18,16 +18,17 @@
 @inject IMonacoEditorHelper MonacoEditorHelper
 @implements IDisposable
 
-<div class="width d-flex justify-content-end mb-2">
-    <div class="btn-group btn-group-xsm" role="group" aria-label="Toggle editor language">
-        <Button class="@(!isJsonSelected ? "btn-outline-primary" : "btn-outline-mute")" Outline="true" Active="!isJsonSelected" @onclick="_ => ToggleLanguage()">YAML</Button>
-        <Button class="@(isJsonSelected ? "btn-outline-primary" : "btn-outline-mute")" Outline="true" Active="isJsonSelected" @onclick="_ => ToggleLanguage()">JSON</Button>
-    </div>
+
+<div class="btn-group btn-group-xsm @ClassNames" role="group" aria-label="Toggle editor language">
+    <Button class="@(!isJsonSelected ? "btn-outline-primary" : "btn-outline-mute")" Outline="true" Active="!isJsonSelected" @onclick="_ => ToggleLanguage()">YAML</Button>
+    <Button class="@(isJsonSelected ? "btn-outline-primary" : "btn-outline-mute")" Outline="true" Active="isJsonSelected" @onclick="_ => ToggleLanguage()">JSON</Button>
 </div>
 
 
 @code {
 
+    protected string? ClassNames => Class;
+    [Parameter] public string? Class { get; set; }
     [Parameter] public EventCallback<string> PreferedLanguageChange { get; set; }
 
     protected bool isJsonSelected { get; set; }

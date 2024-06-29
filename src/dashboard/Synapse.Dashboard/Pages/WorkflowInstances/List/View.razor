@@ -4,6 +4,7 @@
 @using BlazorBootstrap
 @inherits NamespacedResourceManagementComponent<View, WorkflowInstanceListComponentStore, WorkflowInstanceListState, WorkflowInstance>
 @inject IBreadcrumbManager BreadcrumbManager
+@inject NavigationManager NavigationManager
 
 <ApplicationTitle>Workflow Instances</ApplicationTitle>
 
@@ -15,12 +16,10 @@
                        OnWorkflowChanged="OnWorkflowChanged"
                        OnNamespaceChanged="OnNamespaceChanged"
                        OnSearchInput="OnSearchInput"
-                       OnShowDetails="OnShowInstanceDetailsAsync"
+                       OnShowDetails="OnShowInstanceDetails"
                        OnDelete="OnDeleteResourceAsync"></WorkflowInstancesList>
 
 <Button Outline="true" Color="ButtonColor.Primary" @onclick="async _ => await OnShowResourceEditorAsync()"><Icon Name="IconName.Plus" /></Button>
-
-<Offcanvas @ref="DetailsOffCanvas" Size="OffcanvasSize.Large" UseStaticBackdrop="false" BodyCssClass="d-flex flex-column" />
 
 <Offcanvas @ref="EditorOffCanvas" Size="OffcanvasSize.Large" UseStaticBackdrop="false" BodyCssClass="d-flex flex-column" />
 
@@ -64,18 +63,6 @@
         }
     }
 
-    /// <summary>
-    /// Opens the targeted <see cref="WorkflowInstance"/>'s details
-    /// </summary>
-    /// <param name="instance">The <see cref="WorkflowInstance"/> to show the details for</param>
-    protected Task OnShowInstanceDetailsAsync(WorkflowInstance instance)
-    {
-        if (this.DetailsOffCanvas == null) return Task.CompletedTask;
-        var parameters = new Dictionary<string, object>
-        {
-            { "WorkflowInstance", instance }
-        };
-        return this.DetailsOffCanvas.ShowAsync<WorkflowInstanceDetails>(title: "Instance details", parameters: parameters);
-    }
+    void OnShowInstanceDetails(WorkflowInstance instance) => NavigationManager.NavigateTo($"/workflows/details/{instance.Spec.Definition.Namespace}/{instance.Spec.Definition.Name}/{instance.Spec.Definition.Version}/{instance.GetName()}");
 
 }

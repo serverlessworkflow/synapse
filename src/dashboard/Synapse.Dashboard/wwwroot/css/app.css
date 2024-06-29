@@ -20074,12 +20074,14 @@ tr.row-placeholder td::after {
   border: none;
 }
 .horizontal-collapse .title {
-  bottom: 1px solid var(--bs-dark-bg-subtle);
   display: flex;
   gap: 0.5rem;
 }
 .horizontal-collapse .title i {
   margin-left: auto;
+}
+.horizontal-collapse:nth-child(1) .title {
+  padding-left: 0 !important;
 }
 .horizontal-collapse.collapsed {
   overflow: hidden;
