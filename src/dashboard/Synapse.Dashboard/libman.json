@@ -2,7 +2,6 @@
   "version": "1.0",
   "defaultProvider": "cdnjs",
   "libraries": [
-
     {
       "provider": "jsdelivr",
       "library": "bootstrap@5.3.3",
@@ -119,7 +118,7 @@
     },
     {
       "provider": "jsdelivr",
-      "library": "bootstrap-icons@1.9.1",
+      "library": "bootstrap-icons@1.11.3",
       "destination": "wwwroot/lib/bootstrap-icons/"
     },
     {

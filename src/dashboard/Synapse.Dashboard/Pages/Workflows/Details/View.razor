@@ -35,6 +35,9 @@
                                     Columns="columns"
                                     OnShowDetails="OnShowInstanceDetails"
             ></WorkflowInstancesList>
+            <Button Outline="true" Color="ButtonColor.Primary" @onclick="_ => OnCreateInstance()" class="w-100">
+                <Icon Name="IconName.Plus"/>
+            </Button>
         </Content>
     </HorizontalCollapsible>
     <HorizontalCollapsible>
@@ -65,7 +68,10 @@
                 else
                 {
                     <div class="d-flex flex-column h-100 mh-100">
-                        <div class="d-flex justify-content-end mb-2">
+                        <div class="d-flex justify-content-between mb-2">
+                            <Button Outline="true" Color="ButtonColor.Primary" Size="Size.Small" @onclick="_ => OnCreateWorkflowVersion()">
+                                <Icon Name="IconName.Plus" /><!-- todo: IconName.Copy not working ? -->
+                            </Button>
                             <PreferredLanguageSelector PreferedLanguageChange="Store.ToggleTextBasedEditorLanguageAsync" />
                         </div>
                         <div class="flex-grow">
@@ -162,7 +168,7 @@
     /// <summary>
     /// Updates the breadcrumb
     /// </summary>
-    protected void UpdateBreadcrumb()
+    void UpdateBreadcrumb()
     {
         BreadcrumbManager.Use(Breadcrumbs.Workflows);
         BreadcrumbManager.Add(new($"{Name}.{Namespace}", $"/workflows/details/{Namespace}/{Name}/latest"));
@@ -181,7 +187,7 @@
     /// Renders the workflows instances table's title
     /// </summary>
     /// <returns></returns>
-    protected RenderFragment VersionSelector() => __builder =>
+    RenderFragment VersionSelector() => __builder =>
     {
         <select class="form-select w-auto border-0 py-0 ps-0 pe-4 text-decoration-underline text-primary" style="background-position: right 0rem center;" @onchange="(e) => Store.SetWorkflowDefinitionVersion(e.Value!.ToString())">
             @if (workflow != null)
@@ -193,6 +199,10 @@
             }
         </select>
     };
+
+    void OnCreateInstance() { }
+
+    void OnCreateWorkflowVersion() => this.NavigationManager.NavigateTo($"/workflows/new/{ns}/{name}");
 
     void OnShowInstanceDetails(WorkflowInstance instance) => NavigationManager.NavigateTo($"/workflows/details/{Namespace}/{Name}/{version}/{instance.GetName()}");
 

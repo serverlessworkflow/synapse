@@ -212,6 +212,9 @@ public class CreateWorkflowViewStore(
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         var workflow = await this.Api.Workflows.GetAsync(name, @namespace) ?? throw new NullReferenceException($"Failed to find the specified workflow '{name}.{@namespace}'");
         var definition = workflow.Spec.Versions.GetLatest();
+        var nextVersion = SemVersion.Parse(definition.Document.Version, SemVersionStyles.Strict);
+        nextVersion = nextVersion.WithPatch(nextVersion.Patch + 1);
+        definition.Document.Version = nextVersion.ToString();
         this.Reduce(s => s with
         {
             WorkflowDefinition = definition,
