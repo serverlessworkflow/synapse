@@ -81,22 +81,7 @@
                 <tbody>
                     @foreach (var task in WorkflowInstance.Status.Tasks)
                     {
-                        Collapse collapse = null!;
-                        bool isOpen = false;
-                        <tr @onclick="async _ => { await collapse.ToggleAsync(); isOpen = !isOpen; }" class="cursor-pointer">
-                            <td>@task.Name</td>
-                            <td class="text-center"><span class="badge rounded-pill badge rounded-pill border @GetTaskStatusClass(task)">@(task.Status ?? TaskInstanceStatus.Pending)</span></td>
-                            <td class="text-center">@(task.StartedAt?.DateTime.FromNow() ?? "-")</td>
-                            <td class="text-center">@(task.EndedAt?.DateTime.FromNow() ?? "-")</td>
-                            <td><Icon Name="@(isOpen ? IconName.CaretUp : IconName.CaretDown)" /></td>
-                        </tr>
-                        <tr>
-                            <td colspan="999">
-                                <Collapse @ref="collapse">
-                                    <TaskInstanceDetails TaskInstance="task" />
-                                </Collapse>
-                            </td>
-                        </tr>
+                        <TaskInstanceRow Task="@task" />
                     }
                 </tbody>
             </table>
@@ -178,27 +163,7 @@
                     <tbody>
                         @foreach (var keyValuePair in WorkflowInstance.Status.Correlation.Contexts)
                         {
-                            Collapse collapse = null!;
-                            bool isOpen = false;
-                            <tr @onclick="async _ => { await collapse.ToggleAsync(); isOpen = !isOpen; }" class="cursor-pointer">
-                                <td>@keyValuePair.Key</td>
-                                <td class="text-center"><span class="badge rounded-pill badge rounded-pill border @GetCorrelationContextStatusClass(keyValuePair.Value)">@(keyValuePair.Value?.Status ?? CorrelationContextStatus.Inactive)</span></td>
-                                <td><Icon Name="@(isOpen ? IconName.CaretUp : IconName.CaretDown)" /></td>
-                            </tr>
-                            <tr>
-                                <td colspan="999">
-                                    @if (keyValuePair.Value == null)
-                                    {
-                                        @("-")
-                                    }
-                                    else
-                                    {
-                                        <Collapse @ref="collapse">
-                                            <CorrelationContextDetails CorrelationContext="keyValuePair.Value" />
-                                        </Collapse>
-                                    }
-                                </td>
-                            </tr>
+                            <CorrelationContextRow Kvp="keyValuePair" />
                         }
                     </tbody>
                 </table>
@@ -431,24 +396,4 @@
 
 @code {
     [Parameter] public WorkflowInstance? WorkflowInstance { get; set; }
-
-    string GetTaskStatusClass(TaskInstance task) => task.Status switch
-    {
-        TaskInstanceStatus.Running => "border-accent text-accent",
-        TaskInstanceStatus.Faulted => "border-danger text-danger",
-        TaskInstanceStatus.Suspended => "border-icterine text-icterine",
-        TaskInstanceStatus.Cancelled => "border-warning text-warning",
-        TaskInstanceStatus.Completed => "border-success text-success",
-        TaskInstanceStatus.Skipped => "border-cinereous text-cinereous",
-        _ => ""
-    };
-
-    string GetCorrelationContextStatusClass(CorrelationContext? context) => context?.Status switch
-    {
-        CorrelationContextStatus.Active => "border-accent text-accent",
-        CorrelationContextStatus.Inactive => "border-secondary text-secondary",
-        CorrelationContextStatus.Completed => "border-success text-success",
-        CorrelationContextStatus.Cancelled => "border-warning text-warning",
-        _ => ""
-    };
 }

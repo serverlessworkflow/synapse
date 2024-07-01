@@ -59,9 +59,10 @@ public class NativeRuntime(ILoggerFactory loggerFactory, IHostEnvironment enviro
         var fileName = this.Options.Runtime.Native.Executable;
         var args = string.Empty;
         if (this.Environment.IsDevelopment()) args += "--debug";
+        var filePath = Path.Combine(this.Options.Runtime.Native.Directory, fileName);
         var startInfo = new ProcessStartInfo()
         {
-            FileName = fileName,
+            FileName = filePath,
             Arguments = args,
             WorkingDirectory = this.Options.Runtime.Native.Directory,
             RedirectStandardOutput = true,
