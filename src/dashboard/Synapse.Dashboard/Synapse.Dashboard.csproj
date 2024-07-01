@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="Components\CorrelationContextRow.razor" />
+    <None Include="Components\WorkflowInstanceDetails\CorrelationContextRow.razor" />
     <None Include="Components\WorkflowInstanceDetails\TaskInstanceRow.razor" />
     <None Include="wwwroot\css\horizontal-collapse.scss" />
   </ItemGroup>
