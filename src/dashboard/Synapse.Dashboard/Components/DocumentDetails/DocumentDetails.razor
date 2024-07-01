@@ -18,7 +18,7 @@
 @using Synapse.Dashboard.Components.DocumentDetailsStateManagement
 @inherits StatefulComponent<DocumentDetails, DocumentDetailsStore, DocumentDetailsState>
 
-<div class="d-flex justify-content-between">
+<div class="d-flex justify-content-between cursor-pointer @ClassNames" @onclick="async (_) => await ToggleAsync()">
     @if (LabelTemplate != null) {
         @LabelTemplate
     }
@@ -27,7 +27,7 @@
     }
     @if (collapse != null)
     {
-        <Icon Name="@(isOpen ? IconName.CaretUp : IconName.CaretDown)" @onclick="async (_) => await ToggleAsync()" />
+        <Icon Name="@(isOpen ? IconName.CaretUp : IconName.CaretDown)" />
     }
 </div>
 
@@ -50,7 +50,7 @@
             <StandaloneCodeEditor @ref="Store.TextEditor"
                                   ConstructionOptions="Store.StandaloneEditorConstructionOptions"
                                   OnDidInit="Store.OnTextBasedEditorInitAsync"
-                                  CssClass="h-100-px" />
+                                  CssClass="h-300-px" />
         }
         @if (problemDetails != null)
         {
@@ -78,6 +78,9 @@
 </Collapse>
 
 @code {
+
+    protected string? ClassNames => Class;
+    [Parameter] public string? Class { get; set; }
     /// <summary>
     /// The label to display
     /// </summary>

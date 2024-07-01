@@ -15,7 +15,7 @@
 *@
 @namespace Synapse.Dashboard.Components
 
-<div class="horizontal-collapse d-flex flex-column @(isCollapsed ? "flew-grow-0 collapsed": "col")">
+<div class="horizontal-collapse d-flex flex-column @(isCollapsed ? "flew-grow-0 collapsed": "col") @ClassNames">
     <div class="title px-2 cursor-pointer" @onclick="async (_) => await OnToggleAsync()">
         <span>
             @if(isCollapsed)
@@ -44,6 +44,8 @@
 @code {
     private bool isCollapsed = false;
 
+    protected string? ClassNames => Class;
+    [Parameter] public string? Class { get; set; }
     [Parameter] public RenderFragment Label { get; set; } = default!;
     [Parameter] public RenderFragment Content { get; set; } = default!;
     [Parameter] public EventCallback OnShown { get; set; }

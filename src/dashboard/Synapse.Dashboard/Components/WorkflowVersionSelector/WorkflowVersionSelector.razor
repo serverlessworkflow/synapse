@@ -31,10 +31,10 @@
 @code {
 
     protected string? ClassNames => Class;
+    [Parameter] public string? Class { get; set; }
     [Parameter] public Workflow? Workflow { get; set; }
     [Parameter] public string? Version { get; set; }
     [Parameter] public EventCallback<ChangeEventArgs> OnChange { get; set; }
-    [Parameter] public string? Class { get; set; }
 
     async Task OnVersionChangedAsync(ChangeEventArgs e)
     {

@@ -25,7 +25,7 @@
 
 <ApplicationTitle>Workflow @($"{name}.{ns}:{version}")</ApplicationTitle>
 
-<div class="d-flex flex-grow">
+<div class="d-flex flex-grow mh-100">
     <HorizontalCollapsible>
         <Label>Instances</Label>
         <Content>
@@ -55,38 +55,36 @@
             }
         </Content>
     </HorizontalCollapsible>
-    @if (workflowInstance == null) {
-        <HorizontalCollapsible>
-            <Label>Definition</Label>
-            <Content>
-                @if (workflowDefinition == null)
-                {
-                    <div class="d-flex justify-content-center mt-5">
-                        <Loader />
+    <HorizontalCollapsible>
+        <Label>Definition</Label>
+        <Content>
+            @if (workflowDefinition == null)
+            {
+                <div class="d-flex justify-content-center mt-5">
+                    <Loader />
+                </div>
+            }
+            else
+            {
+                <div class="d-flex flex-column h-100 mh-100">
+                    <div class="d-flex justify-content-between mb-2">
+                        <Button Outline="true" Color="ButtonColor.Primary" Size="Size.Small" @onclick="_ => OnCreateWorkflowVersion()">
+                            <Icon Name="IconName.Plus" /><!-- todo: IconName.Copy not working ? -->
+                        </Button>
+                        <PreferredLanguageSelector PreferedLanguageChange="Store.ToggleTextBasedEditorLanguageAsync" />
                     </div>
-                }
-                else
-                {
-                    <div class="d-flex flex-column h-100 mh-100">
-                        <div class="d-flex justify-content-between mb-2">
-                            <Button Outline="true" Color="ButtonColor.Primary" Size="Size.Small" @onclick="_ => OnCreateWorkflowVersion()">
-                                <Icon Name="IconName.Plus" /><!-- todo: IconName.Copy not working ? -->
-                            </Button>
-                            <PreferredLanguageSelector PreferedLanguageChange="Store.ToggleTextBasedEditorLanguageAsync" />
-                        </div>
-                        <div class="flex-grow">
-                            <StandaloneCodeEditor @ref="Store.TextEditor"
-                                                  ConstructionOptions="Store.StandaloneEditorConstructionOptions"
-                                                  OnDidInit="Store.OnTextBasedEditorInitAsync"
-                                                  CssClass="h-100" />
-                        </div>
+                    <div class="flex-grow">
+                        <StandaloneCodeEditor @ref="Store.TextEditor"
+                                                ConstructionOptions="Store.StandaloneEditorConstructionOptions"
+                                                OnDidInit="Store.OnTextBasedEditorInitAsync"
+                                                CssClass="h-100" />
                     </div>
+                </div>
                 
-                }
-            </Content>
-        </HorizontalCollapsible>
-    }
-    else
+            }
+        </Content>
+    </HorizontalCollapsible>
+    @if (workflowInstance != null)
     {
         <HorizontalCollapsible OnClose="OnCloseWorkflowInstance">
             <Label>Instance</Label>
