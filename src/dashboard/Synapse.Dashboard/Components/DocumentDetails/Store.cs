@@ -207,7 +207,7 @@ public class DocumentDetailsStore(
                     ProblemTitle = ex.Problem?.Title ?? string.Empty,
                     ProblemStatus = ex.Problem?.Status ?? 0,
                     ProblemDetail = ex.Problem?.Detail ?? string.Empty,
-                    ProblemErrors = new EquatableDictionary<string, string[]>(ex.Problem?.Errors ?? [])
+                    ProblemErrors = new EquatableDictionary<string, string[]>(ex.Problem?.Errors ?? new Dictionary<string, string[]>())
                 });
             }
         }
