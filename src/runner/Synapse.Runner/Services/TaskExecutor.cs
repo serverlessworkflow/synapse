@@ -303,7 +303,7 @@ public abstract class TaskExecutor<TDefinition>(IServiceProvider serviceProvider
         }
         else if (this.Task.Definition.Export?.As != null)
         {
-            var context = (await this.Task.Workflow.Expressions.EvaluateAsync<IDictionary<string, object>>(this.Task.Definition.Export.As, this.Task.ContextData, this.GetExpressionEvaluationArguments(), cancellationToken).ConfigureAwait(false))!;
+            var context = (await this.Task.Workflow.Expressions.EvaluateAsync<IDictionary<string, object>>(this.Task.Definition.Export.As, this.Task.ContextData, arguments, cancellationToken).ConfigureAwait(false))!;
             await this.Task.SetContextDataAsync(context, cancellationToken).ConfigureAwait(false);
         }
         await this.AfterExecuteAsync(cancellationToken).ConfigureAwait(false); //todo: act upon last directive
