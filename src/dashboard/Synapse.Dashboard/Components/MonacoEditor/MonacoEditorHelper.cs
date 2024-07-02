@@ -17,6 +17,8 @@ namespace Synapse.Dashboard.Components;
 public class MonacoEditorHelper
     : IMonacoEditorHelper
 {
+    private int _modelCount = 0;
+
     /// <inheritdoc />
     public string PreferredLanguage { get; protected set; } = "yaml";
 
@@ -66,5 +68,11 @@ public class MonacoEditorHelper
             await this.PreferredLanguageChanged.Invoke(language);
         }
         await Task.CompletedTask;
+    }
+
+    /// <inheritdoc />
+    public int GetNextModelIndex() {
+        this._modelCount++;
+        return this._modelCount;
     }
 }

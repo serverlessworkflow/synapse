@@ -16,7 +16,7 @@ using Synapse.Resources;
 namespace Synapse.Dashboard.Pages.WorkflowInstances.List;
 
 /// <summary>
-/// Represents the <see cref="WorkflowInstanceListComponent"/>'s state
+/// Represents the <see cref="View"/>'s state
 /// </summary>
 public record WorkflowInstanceListState
     : NamespacedResourceManagementComponentState<WorkflowInstance>

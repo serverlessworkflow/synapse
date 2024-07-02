@@ -58,4 +58,16 @@ public interface IMonacoEditorHelper
     /// <returns>A task representing the asynchronous operation</returns>
     Task ChangePreferredLanguageAsync(string language);
 
+    /// <summary>
+    /// Returns the number of <see cref="TextModel"/> created and increases the count
+    /// </summary>
+    /// <returns></returns>
+    int GetNextModelIndex();
+
+    /// <summary>
+    /// Generates a unique resource URI for  <see cref="TextModel"/>
+    /// </summary>
+    /// <returns></returns>
+    string GetResourceUri() { return $"inmemory://random-resource-{GetNextModelIndex()}"; }
+
 }

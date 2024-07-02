@@ -34,6 +34,7 @@ public class DocumentDetailsStore(
 {
     
     private TextModel? _textModel = null;
+    private readonly string _textModelUri = monacoEditorHelper.GetResourceUri();
 
     /// <summary>
     /// Gets the service used to interact with the Synapse API
@@ -252,9 +253,8 @@ public class DocumentDetailsStore(
 
                 if (!string.IsNullOrWhiteSpace(reference))
                 {
-                    var resourceUri = $"inmemory://{reference.ToLower()}";
-                    this._textModel = await Global.GetModel(this.JSRuntime, resourceUri);
-                    this._textModel ??= await Global.CreateModel(this.JSRuntime, "", language, resourceUri);
+                    this._textModel = await Global.GetModel(this.JSRuntime, this._textModelUri);
+                    this._textModel ??= await Global.CreateModel(this.JSRuntime, "", language, this._textModelUri);
                 }
                 if (this._textModel != null)
                 {

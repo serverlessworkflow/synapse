@@ -36,7 +36,6 @@ public class WorkflowGraphBuilder
     {
         ArgumentNullException.ThrowIfNull(workflow);
         Stopwatch sw = Stopwatch.StartNew();
-        ArgumentNullException.ThrowIfNull(workflow);
         var isEmpty = workflow.Do.Count < 1;
         var graph = new GraphViewModel();
         var startNode = this.BuildStartNode(!isEmpty);
@@ -57,6 +56,11 @@ public class WorkflowGraphBuilder
     /// <returns>A new <see cref="NodeViewModel"/></returns>
     protected virtual NodeViewModel BuildStartNode(bool hasSuccessor = false) => new StartNodeViewModel(hasSuccessor);
 
+    /// <summary>
+    /// Recursively builds task nodes and their edges
+    /// </summary>
+    /// <param name="context">The rendering context for the task nodes</param>
+    /// <returns>The last built task <see cref="NodeViewModel"/></returns>
     protected async Task<NodeViewModel> BuildTaskNodesAsync(TaskNodeRenderingContext context)
     {
         var lastNode = await this.BuildTaskNodeAsync(context);
@@ -82,45 +86,33 @@ public class WorkflowGraphBuilder
     /// <summary>
     /// Builds a new <see cref="TaskNodeViewModel"/> for the specified task
     /// </summary>
-    /// <param name="workflow">The <see cref="WorkflowDefinition"/> that defines the <see cref="TaskDefinition"/> to create a new <see cref="TaskNodeViewModel"/> for</param>
-    /// <param name="graph">The current <see cref="GraphViewModel"/></param>
-    /// <param name="task">The name/definition mapping of the <see cref=""/> to create a new <see cref="TaskNodeViewModel"/> for</param>
-    /// <param name="taskIndex">The index within its parent of the <see cref="TaskDefinition"/> to create a new <see cref="TaskNodeViewModel"/></param>
-    /// <param name="endNode">The end node</param>
-    /// <param name="previousNode">The previous node</param>
-    /// <param name="parentReference">A reference to the parent, if any, of the task to build a new <see cref="TaskNodeViewModel"/> for</param>
+    /// <param name="context">The rendering context for the task node</param>
     /// <returns>A new <see cref="TaskNodeViewModel"/></returns>
     protected async Task<NodeViewModel> BuildTaskNodeAsync(TaskNodeRenderingContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
         return context.TaskDefinition switch
         {
-            CallTaskDefinition callTask => await this.BuildCallTaskNodeAsync(context.OfType<CallTaskDefinition>()),
-            DoTaskDefinition compositeTask => await this.BuildDoTaskNodeAsync(context.OfType<DoTaskDefinition>()),
-            EmitTaskDefinition emitTask => await this.BuildEmitTaskNodeAsync(context.OfType<EmitTaskDefinition>()),
-            ExtensionTaskDefinition extensionTask => await this.BuildExtensionTaskNodeAsync(context.OfType<ExtensionTaskDefinition>()),
-            ForTaskDefinition forTask => await this.BuildForTaskNodeAsync(context.OfType<ForTaskDefinition>()),
-            ListenTaskDefinition listenTask => await this.BuildListenTaskNodeAsync(context.OfType<ListenTaskDefinition>()),
-            RaiseTaskDefinition raiseTask => await this.BuildRaiseTaskNodeAsync(context.OfType<RaiseTaskDefinition>()),
-            RunTaskDefinition runTask => await this.BuildRunTaskNodeAsync(context.OfType<RunTaskDefinition>()),
-            SetTaskDefinition setTask => await this.BuildSetTaskNodeAsync(context.OfType<SetTaskDefinition>()),
-            SwitchTaskDefinition switchTask => await this.BuildSwitchTaskNodeAsync(context.OfType<SwitchTaskDefinition>()),
-            TryTaskDefinition tryTask => await this.BuildTryTaskNodeAsync(context.OfType<TryTaskDefinition>()),
-            WaitTaskDefinition waitTask => await this.BuildWaitTaskNodeAsync(context.OfType<WaitTaskDefinition>()),
+            CallTaskDefinition => await this.BuildCallTaskNodeAsync(context.OfType<CallTaskDefinition>()),
+            DoTaskDefinition => await this.BuildDoTaskNodeAsync(context.OfType<DoTaskDefinition>()),
+            EmitTaskDefinition => await this.BuildEmitTaskNodeAsync(context.OfType<EmitTaskDefinition>()),
+            ExtensionTaskDefinition => await this.BuildExtensionTaskNodeAsync(context.OfType<ExtensionTaskDefinition>()),
+            ForTaskDefinition => await this.BuildForTaskNodeAsync(context.OfType<ForTaskDefinition>()),
+            ListenTaskDefinition => await this.BuildListenTaskNodeAsync(context.OfType<ListenTaskDefinition>()),
+            RaiseTaskDefinition => await this.BuildRaiseTaskNodeAsync(context.OfType<RaiseTaskDefinition>()),
+            RunTaskDefinition => await this.BuildRunTaskNodeAsync(context.OfType<RunTaskDefinition>()),
+            SetTaskDefinition => await this.BuildSetTaskNodeAsync(context.OfType<SetTaskDefinition>()),
+            SwitchTaskDefinition => await this.BuildSwitchTaskNodeAsync(context.OfType<SwitchTaskDefinition>()),
+            TryTaskDefinition => await this.BuildTryTaskNodeAsync(context.OfType<TryTaskDefinition>()),
+            WaitTaskDefinition => await this.BuildWaitTaskNodeAsync(context.OfType<WaitTaskDefinition>()),
             _ => throw new NotSupportedException($"The specified task type '{context.TaskDefinition.GetType()}' is not supported")
         } ?? throw new Exception($"Unable to define a last node for task '{context.TaskName}'");
     }
 
     /// <summary>
-    /// Builds a new <see cref="NodeViewModel"/> for the specified task
+    /// Builds a new <see cref="NodeViewModel"/> for the specified call task
     /// </summary>
-    /// <param name="workflow">The <see cref="WorkflowDefinition"/> that defines the <see cref="TaskDefinition"/> to create a new <see cref="NodeViewModel"/> for</param>
-    /// <param name="graph">The current <see cref="GraphViewModel"/></param>
-    /// <param name="task">The name/definition mapping of the <see cref="TaskDefinition"/> to create a new <see cref="NodeViewModel"/> for</param>
-    /// <param name="taskNodeGroup">The current task node group</param>
-    /// <param name="endNode">The end node</param>
-    /// <param name="previousNode">The previous node</param>
-    /// <param name="parentReference">The reference of the task's parent</param>
+    /// <param name="context">The rendering context for the call task node</param>
     /// <returns>A new <see cref="NodeViewModel"/></returns>
     protected virtual async Task<NodeViewModel> BuildCallTaskNodeAsync(TaskNodeRenderingContext<CallTaskDefinition> context)
     {
@@ -133,15 +125,9 @@ public class WorkflowGraphBuilder
     }
 
     /// <summary>
-    /// Builds a new <see cref="NodeViewModel"/> for the specified task
+    /// Builds a new <see cref="NodeViewModel"/> for the specified do task
     /// </summary>
-    /// <param name="workflow">The <see cref="WorkflowDefinition"/> that defines the <see cref="TaskDefinition"/> to create a new <see cref="NodeViewModel"/> for</param>
-    /// <param name="graph">The current <see cref="GraphViewModel"/></param>
-    /// <param name="task">The name/definition mapping of the <see cref="TaskDefinition"/> to create a new <see cref="NodeViewModel"/> for</param>
-    /// <param name="taskNodeGroup">The current task node group</param>
-    /// <param name="endNode">The end node</param>
-    /// <param name="previousNode">The previous node</param>
-    /// <param name="parentReference">The reference of the task's parent</param>
+    /// <param name="context">The rendering context for the do task node</param>
     /// <returns>A new <see cref="NodeViewModel"/></returns>
     protected virtual async Task<NodeViewModel> BuildDoTaskNodeAsync(TaskNodeRenderingContext<DoTaskDefinition> context)
     {
@@ -154,15 +140,9 @@ public class WorkflowGraphBuilder
     }
 
     /// <summary>
-    /// Builds a new <see cref="NodeViewModel"/> for the specified task
+    /// Builds a new <see cref="NodeViewModel"/> for the specified emit task
     /// </summary>
-    /// <param name="workflow">The <see cref="WorkflowDefinition"/> that defines the <see cref="TaskDefinition"/> to create a new <see cref="NodeViewModel"/> for</param>
-    /// <param name="graph">The current <see cref="GraphViewModel"/></param>
-    /// <param name="task">The name/definition mapping of the <see cref="TaskDefinition"/> to create a new <see cref="NodeViewModel"/> for</param>
-    /// <param name="taskNodeGroup">The current task node group</param>
-    /// <param name="endNode">The end node</param>
-    /// <param name="previousNode">The previous node</param>
-    /// <param name="parentReference">The reference of the task's parent</param>
+    /// <param name="context">The rendering context for the emit task node</param>
     /// <returns>A new <see cref="NodeViewModel"/></returns>
     protected virtual async Task<NodeViewModel> BuildEmitTaskNodeAsync(TaskNodeRenderingContext<EmitTaskDefinition> context)
     {
@@ -175,15 +155,9 @@ public class WorkflowGraphBuilder
     }
 
     /// <summary>
-    /// Builds a new <see cref="NodeViewModel"/> for the specified task
+    /// Builds a new <see cref="NodeViewModel"/> for the specified extension task
     /// </summary>
-    /// <param name="workflow">The <see cref="WorkflowDefinition"/> that defines the <see cref="TaskDefinition"/> to create a new <see cref="NodeViewModel"/> for</param>
-    /// <param name="graph">The current <see cref="GraphViewModel"/></param>
-    /// <param name="task">The name/definition mapping of the <see cref="TaskDefinition"/> to create a new <see cref="NodeViewModel"/> for</param>
-    /// <param name="taskNodeGroup">The current task node group</param>
-    /// <param name="endNode">The end node</param>
-    /// <param name="previousNode">The previous node</param>
-    /// <param name="parentReference">The reference of the task's parent</param>
+    /// <param name="context">The rendering context for the extension task node</param>
     /// <returns>A new <see cref="NodeViewModel"/></returns>
     protected virtual async Task<NodeViewModel> BuildExtensionTaskNodeAsync(TaskNodeRenderingContext<ExtensionTaskDefinition> context)
     {
@@ -196,15 +170,9 @@ public class WorkflowGraphBuilder
     }
 
     /// <summary>
-    /// Builds a new <see cref="NodeViewModel"/> for the specified task
+    /// Builds a new <see cref="NodeViewModel"/> for the specified for task
     /// </summary>
-    /// <param name="workflow">The <see cref="WorkflowDefinition"/> that defines the <see cref="TaskDefinition"/> to create a new <see cref="NodeViewModel"/> for</param>
-    /// <param name="graph">The current <see cref="GraphViewModel"/></param>
-    /// <param name="task">The name/definition mapping of the <see cref="TaskDefinition"/> to create a new <see cref="NodeViewModel"/> for</param>
-    /// <param name="taskNodeGroup">The current task node group</param>
-    /// <param name="endNode">The end node</param>
-    /// <param name="previousNode">The previous node</param>
-    /// <param name="parentReference">The reference of the task's parent</param>
+    /// <param name="context">The rendering context for the for task node</param>
     /// <returns>A new <see cref="NodeViewModel"/></returns>
     protected virtual async Task<NodeViewModel> BuildForTaskNodeAsync(TaskNodeRenderingContext<ForTaskDefinition> context)
     {
@@ -217,15 +185,9 @@ public class WorkflowGraphBuilder
     }
 
     /// <summary>
-    /// Builds a new <see cref="NodeViewModel"/> for the specified task
+    /// Builds a new <see cref="NodeViewModel"/> for the specified listen task
     /// </summary>
-    /// <param name="workflow">The <see cref="WorkflowDefinition"/> that defines the <see cref="TaskDefinition"/> to create a new <see cref="NodeViewModel"/> for</param>
-    /// <param name="graph">The current <see cref="GraphViewModel"/></param>
-    /// <param name="task">The name/definition mapping of the <see cref="TaskDefinition"/> to create a new <see cref="NodeViewModel"/> for</param>
-    /// <param name="taskNodeGroup">The current task node group</param>
-    /// <param name="endNode">The end node</param>
-    /// <param name="previousNode">The previous node</param>
-    /// <param name="parentReference">The reference of the task's parent</param>
+    /// <param name="context">The rendering context for the listen task node</param>
     /// <returns>A new <see cref="NodeViewModel"/></returns>
     protected virtual async Task<NodeViewModel> BuildListenTaskNodeAsync(TaskNodeRenderingContext<ListenTaskDefinition> context)
     {
@@ -238,15 +200,9 @@ public class WorkflowGraphBuilder
     }
 
     /// <summary>
-    /// Builds a new <see cref="NodeViewModel"/> for the specified task
+    /// Builds a new <see cref="NodeViewModel"/> for the specified raise task
     /// </summary>
-    /// <param name="workflow">The <see cref="WorkflowDefinition"/> that defines the <see cref="TaskDefinition"/> to create a new <see cref="NodeViewModel"/> for</param>
-    /// <param name="graph">The current <see cref="GraphViewModel"/></param>
-    /// <param name="task">The name/definition mapping of the <see cref="TaskDefinition"/> to create a new <see cref="NodeViewModel"/> for</param>
-    /// <param name="taskNodeGroup">The current task node group</param>
-    /// <param name="endNode">The end node</param>
-    /// <param name="previousNode">The previous node</param>
-    /// <param name="parentReference">The reference of the task's parent</param>
+    /// <param name="context">The rendering context for the raise task node</param>
     /// <returns>A new <see cref="NodeViewModel"/></returns>
     protected virtual async Task<NodeViewModel> BuildRaiseTaskNodeAsync(TaskNodeRenderingContext<RaiseTaskDefinition> context)
     {
@@ -259,15 +215,9 @@ public class WorkflowGraphBuilder
     }
 
     /// <summary>
-    /// Builds a new <see cref="NodeViewModel"/> for the specified task
+    /// Builds a new <see cref="NodeViewModel"/> for the specified run task
     /// </summary>
-    /// <param name="workflow">The <see cref="WorkflowDefinition"/> that defines the <see cref="TaskDefinition"/> to create a new <see cref="NodeViewModel"/> for</param>
-    /// <param name="graph">The current <see cref="GraphViewModel"/></param>
-    /// <param name="task">The name/definition mapping of the <see cref="TaskDefinition"/> to create a new <see cref="NodeViewModel"/> for</param>
-    /// <param name="taskNodeGroup">The current task node group</param>
-    /// <param name="endNode">The end node</param>
-    /// <param name="previousNode">The previous node</param>
-    /// <param name="parentReference">The reference of the task's parent</param>
+    /// <param name="context">The rendering context for the run task node</param>
     /// <returns>A new <see cref="NodeViewModel"/></returns>
     protected virtual async Task<NodeViewModel> BuildRunTaskNodeAsync(TaskNodeRenderingContext<RunTaskDefinition> context)
     {
@@ -280,15 +230,9 @@ public class WorkflowGraphBuilder
     }
 
     /// <summary>
-    /// Builds a new <see cref="NodeViewModel"/> for the specified task
+    /// Builds a new <see cref="NodeViewModel"/> for the specified set task
     /// </summary>
-    /// <param name="workflow">The <see cref="WorkflowDefinition"/> that defines the <see cref="TaskDefinition"/> to create a new <see cref="NodeViewModel"/> for</param>
-    /// <param name="graph">The current <see cref="GraphViewModel"/></param>
-    /// <param name="task">The name/definition mapping of the <see cref="TaskDefinition"/> to create a new <see cref="NodeViewModel"/> for</param>
-    /// <param name="taskNodeGroup">The current task node group</param>
-    /// <param name="endNode">The end node</param>
-    /// <param name="previousNode">The previous node</param>
-    /// <param name="parentReference">The reference of the task's parent</param>
+    /// <param name="context">The rendering context for the set task node</param>
     /// <returns>A new <see cref="NodeViewModel"/></returns>
     protected virtual async Task<NodeViewModel> BuildSetTaskNodeAsync(TaskNodeRenderingContext<SetTaskDefinition> context)
     {
@@ -301,15 +245,9 @@ public class WorkflowGraphBuilder
     }
 
     /// <summary>
-    /// Builds a new <see cref="NodeViewModel"/> for the specified task
+    /// Builds a new <see cref="NodeViewModel"/> for the specified switch task
     /// </summary>
-    /// <param name="workflow">The <see cref="WorkflowDefinition"/> that defines the <see cref="TaskDefinition"/> to create a new <see cref="NodeViewModel"/> for</param>
-    /// <param name="graph">The current <see cref="GraphViewModel"/></param>
-    /// <param name="task">The name/definition mapping of the <see cref="TaskDefinition"/> to create a new <see cref="NodeViewModel"/> for</param>
-    /// <param name="taskNodeGroup">The current task node group</param>
-    /// <param name="endNode">The end node</param>
-    /// <param name="previousNode">The previous node</param>
-    /// <param name="parentReference">The reference of the task's parent</param>
+    /// <param name="context">The rendering context for the switch task node</param>
     /// <returns>A new <see cref="NodeViewModel"/></returns>
     protected virtual async Task<NodeViewModel> BuildSwitchTaskNodeAsync(TaskNodeRenderingContext<SwitchTaskDefinition> context)
     {
@@ -322,15 +260,9 @@ public class WorkflowGraphBuilder
     }
 
     /// <summary>
-    /// Builds a new <see cref="NodeViewModel"/> for the specified task
+    /// Builds a new <see cref="NodeViewModel"/> for the specified try task
     /// </summary>
-    /// <param name="workflow">The <see cref="WorkflowDefinition"/> that defines the <see cref="TaskDefinition"/> to create a new <see cref="NodeViewModel"/> for</param>
-    /// <param name="graph">The current <see cref="GraphViewModel"/></param>
-    /// <param name="task">The name/definition mapping of the <see cref="TaskDefinition"/> to create a new <see cref="NodeViewModel"/> for</param>
-    /// <param name="taskNodeGroup">The current task node group</param>
-    /// <param name="endNode">The end node</param>
-    /// <param name="previousNode">The previous node</param>
-    /// <param name="parentReference">The reference of the task's parent</param>
+    /// <param name="context">The rendering context for the try task node</param>
     /// <returns>A new <see cref="NodeViewModel"/></returns>
     protected virtual async Task<NodeViewModel> BuildTryTaskNodeAsync(TaskNodeRenderingContext<TryTaskDefinition> context)
     {
@@ -343,15 +275,9 @@ public class WorkflowGraphBuilder
     }
 
     /// <summary>
-    /// Builds a new <see cref="NodeViewModel"/> for the specified task
+    /// Builds a new <see cref="NodeViewModel"/> for the specified wait task
     /// </summary>
-    /// <param name="workflow">The <see cref="WorkflowDefinition"/> that defines the <see cref="TaskDefinition"/> to create a new <see cref="NodeViewModel"/> for</param>
-    /// <param name="graph">The current <see cref="GraphViewModel"/></param>
-    /// <param name="task">The name/definition mapping of the <see cref="TaskDefinition"/> to create a new <see cref="NodeViewModel"/> for</param>
-    /// <param name="taskNodeGroup">The current task node group</param>
-    /// <param name="endNode">The end node</param>
-    /// <param name="previousNode">The previous node</param>
-    /// <param name="parentReference">The reference of the task's parent</param>
+    /// <param name="context">The rendering context for the wait task node</param>
     /// <returns>A new <see cref="NodeViewModel"/></returns>
     protected virtual async Task<NodeViewModel> BuildWaitTaskNodeAsync(TaskNodeRenderingContext<WaitTaskDefinition> context)
     {
@@ -378,37 +304,100 @@ public class WorkflowGraphBuilder
     /// <returns>A new awaitable <see cref="Task"/></returns>
     protected virtual Task BuildEdgeAsync(GraphViewModel graph, NodeViewModel source, NodeViewModel target) => graph.AddElementAsync(new EdgeViewModel(source.Id, target.Id, null));
 
+    /// <summary>
+    /// Represents the context for rendering a task node within a workflow.
+    /// </summary>
+    /// <param name="workflow">The workflow definition.</param>
+    /// <param name="graph">The graph view model.</param>
+    /// <param name="taskIndex">The index of the task.</param>
+    /// <param name="taskName">The name of the task.</param>
+    /// <param name="taskDefinition">The definition of the task.</param>
+    /// <param name="taskGroup">The optional task group.</param>
+    /// <param name="parentReference">The reference to the parent task node.</param>
+    /// <param name="endNode">The end node view model.</param>
+    /// <param name="previousNode">The previous node view model.</param>
     protected class TaskNodeRenderingContext(WorkflowDefinition workflow, GraphViewModel graph, int taskIndex, string taskName, TaskDefinition taskDefinition, TaskNodeViewModel? taskGroup, string parentReference, NodeViewModel endNode, NodeViewModel previousNode)
     {
 
+        /// <summary>
+        /// Gets the workflow definition.
+        /// </summary>
         public virtual WorkflowDefinition Workflow { get; } = workflow;
 
+        /// <summary>
+        /// Gets the graph view model.
+        /// </summary>
         public virtual GraphViewModel Graph { get; } = graph;
 
+        /// <summary>
+        /// Gets the index of the task.
+        /// </summary>
         public virtual int TaskIndex { get; } = taskIndex;
 
+        /// <summary>
+        /// Gets the name of the task.
+        /// </summary>
         public virtual string TaskName { get; } = taskName;
 
+        /// <summary>
+        /// Gets the definition of the task.
+        /// </summary>
         public virtual TaskDefinition TaskDefinition { get; } = taskDefinition;
 
-        public virtual TaskNodeViewModel TaskGroup { get; } = taskGroup;
+        /// <summary>
+        /// Gets the optional task group.
+        /// </summary>
+        public virtual TaskNodeViewModel? TaskGroup { get; } = taskGroup;
 
+        /// <summary>
+        /// Gets the reference of the task node in the context of the parent task node.
+        /// </summary>
         public virtual string TaskReference => $"{this.ParentReference}/{this.TaskIndex}/{this.TaskName}";
 
+        /// <summary>
+        /// Gets the reference to the parent task node.
+        /// </summary>
         public virtual string ParentReference { get; } = parentReference;
 
+        /// <summary>
+        /// Gets the end node view model.
+        /// </summary>
         public virtual NodeViewModel EndNode { get; } = endNode;
 
+        /// <summary>
+        /// Gets the previous node view model.
+        /// </summary>
         public virtual NodeViewModel PreviousNode { get; } = previousNode;
 
+        /// <summary>
+        /// Creates a new instance of <see cref="TaskNodeRenderingContext{TDefinition}"/> with the specified task definition type.
+        /// </summary>
+        /// <typeparam name="TDefinition">The type of the task definition.</typeparam>
+        /// <returns>A new instance of <see cref="TaskNodeRenderingContext{TDefinition}"/>.</returns>
         public virtual TaskNodeRenderingContext<TDefinition> OfType<TDefinition>() where TDefinition : TaskDefinition => new(this.Workflow, this.Graph, this.TaskIndex, this.TaskName, this.TaskDefinition, this.TaskGroup, this.ParentReference, this.EndNode, this.PreviousNode);
 
     }
 
+    /// <summary>
+    /// Represents the context for rendering a task node within a workflow, with a specific task definition type.
+    /// </summary>
+    /// <typeparam name="TDefinition">The type of the task definition.</typeparam>
+    /// <param name="workflow">The workflow definition.</param>
+    /// <param name="graph">The graph view model.</param>
+    /// <param name="taskIndex">The index of the task.</param>
+    /// <param name="taskName">The name of the task.</param>
+    /// <param name="taskDefinition">The definition of the task.</param>
+    /// <param name="taskGroup">The optional task group.</param>
+    /// <param name="parentReference">The reference to the parent task node.</param>
+    /// <param name="endNode">The end node view model.</param>
+    /// <param name="previousNode">The previous node view model.</param>
     protected class TaskNodeRenderingContext<TDefinition>(WorkflowDefinition workflow, GraphViewModel graph, int taskIndex, string taskName, TaskDefinition taskDefinition, TaskNodeViewModel? taskGroup, string parentReference, NodeViewModel endNode, NodeViewModel previousNode)
         : TaskNodeRenderingContext(workflow, graph, taskIndex, taskName, taskDefinition, taskGroup, parentReference, endNode, previousNode)
         where TDefinition : TaskDefinition
     {
+        /// <summary>
+        /// Gets the task definition of type <typeparamref name="TDefinition"/>.
+        /// </summary>
         public new virtual TDefinition TaskDefinition => (TDefinition)base.TaskDefinition;
 
     }

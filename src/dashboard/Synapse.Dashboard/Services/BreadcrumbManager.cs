@@ -66,7 +66,7 @@ public class BreadcrumbManager(NavigationManager navigationManager)
     /// <inheritdoc/>
     public virtual void Use(params Components.BreadcrumbItem[] breadcrumbs)
     {
-        this._items = breadcrumbs.ToList();
+        this._items = [.. breadcrumbs];
         this.NotifyChange();
     }
 
@@ -77,7 +77,10 @@ public class BreadcrumbManager(NavigationManager navigationManager)
         var itemIndex = this._items.IndexOf(breadcrumbItem);
         var breadcrumbItems = this._items.Take(itemIndex + 1).ToArray();
         this.Use(breadcrumbItems);
-        this.NavigationManager.NavigateTo(breadcrumbItem.Link);
+        if (breadcrumbItem.Link != null)
+        {
+            this.NavigationManager.NavigateTo(breadcrumbItem.Link);
+        }
     }
 
     /// <summary>

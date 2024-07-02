@@ -42,6 +42,7 @@ public class CreateWorkflowViewStore(
 {
 
     private TextModel? _textModel = null;
+    private readonly string _textModelUri = monacoEditorHelper.GetResourceUri();
     private bool _disposed;
 
     /// <summary>
@@ -278,15 +279,8 @@ public class CreateWorkflowViewStore(
             var language = this.MonacoEditorHelper.PreferredLanguage;
             if (this.TextEditor != null)
             {
-                if (this._textModel != null)
-                {
-                    await Global.SetModelLanguage(this.JSRuntime, this._textModel, language);
-                }
-                else
-                {
-                    var resourceUri = $"inmemory://workflow-definition";
-                    this._textModel = await Global.CreateModel(this.JSRuntime, "", language, resourceUri);
-                }
+                this._textModel = await Global.GetModel(this.JSRuntime, this._textModelUri);
+                this._textModel ??= await Global.CreateModel(this.JSRuntime, "", language, this._textModelUri);
                 await this.TextEditor!.SetModel(this._textModel);
             }
         }
