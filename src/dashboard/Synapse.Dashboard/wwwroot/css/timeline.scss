@@ -1,0 +1,27 @@
+﻿.y-tick {
+    stroke: var(--bs-gray-700);
+    fill: none;
+    stroke-width: 1px;
+}
+
+.axis g.tick line {
+    stroke: var(--bs-gray-700);
+    fill: none;
+    stroke-width: 1px;
+}
+
+.line-separator,
+.x-axis {
+    stroke: var(--bs-gray-700);
+    fill: none;
+    stroke-width: 1px;
+}
+
+.drop-line:last-child .line-separator {
+    display: none;
+}
+
+text {
+    stroke: none;
+    fill: var(--bs-body-color);
+}

@@ -1,0 +1,47 @@
+﻿@namespace Synapse.Dashboard
+@using ServerlessWorkflow.Sdk.Models
+@using System.Diagnostics
+@inject IWorkflowGraphBuilder WorkflowGraphBuilder
+
+@if (graph != null)
+{
+    <DagreGraph @ref="dagre" Graph="graph" OnMouseUp="OnMouseUp" Options="options" />
+}
+
+@code{
+
+    WorkflowDefinition workflowDefinition = null!;
+    DagreGraph? dagre;
+    IGraphViewModel? graph;
+    IDagreGraphOptions? options = null;
+    bool isDirty = true;
+
+    [Parameter] public WorkflowDefinition WorkflowDefinition { get; set; } = null!;
+
+    [Parameter] public WorkflowDiagramOrientation Orientation { get; set; } = WorkflowDiagramOrientation.TopToBottom;
+
+    [Parameter] public EventCallback<GraphEventArgs<MouseEventArgs>> OnMouseUp { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        if (this.WorkflowDefinition != null && this.WorkflowDefinition != this.workflowDefinition)
+        {
+            this.workflowDefinition = this.WorkflowDefinition;
+            this.options = new DagreGraphOptions()
+            {
+                Direction = this.Orientation == WorkflowDiagramOrientation.LeftToRight ? DagreGraphDirection.LeftToRight : DagreGraphDirection.TopToBottom
+            };
+            this.graph = await this.WorkflowGraphBuilder.Build(this.workflowDefinition);
+            this.isDirty = true;
+        }
+    }
+
+    protected override bool ShouldRender()
+    {
+        if (!this.isDirty) return false;
+        this.isDirty = false;
+        return true;
+    }
+
+}

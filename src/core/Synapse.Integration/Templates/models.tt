@@ -1,4 +1,0 @@
-﻿<#@ template debug="true" hostSpecific="true" language="c#" #>
-<#@ output extension=".tst" #>
-<#@ include file="TemplateGenerator.ttinclude" #>
-<#  GenerateTemplate("Synapse", "model", "Domain.Models.*"); #>

@@ -1,0 +1,64 @@
+﻿@page "/namespaces"
+@attribute [Authorize]
+@namespace Synapse.Dashboard.Pages.Namespaces.List
+@inherits ClusterResourceManagementComponent<Namespace>
+@inject IBreadcrumbManager BreadcrumbManager
+
+<ApplicationTitle>Namespaces</ApplicationTitle>
+
+<div class="table-container">
+    @if (Loading)
+    {
+        <Loader />
+    }
+    <div class="d-flex flex-row justify-content-between align-items-center">
+        <h4>Namespaces</h4>
+        <span>@(Resources?.Count ?? 0) items</span>
+        <div class="d-flex">
+            <input type="search" class="form-control rounded my-2 me-2" placeholder="Search" value="@SearchTerm" @oninput="OnSearchInput" />
+        </div>
+    </div>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th class="sticky-header text-start">Name</th>
+                <th class="sticky-header text-center">Created At</th>
+                <th class="sticky-header text-end">
+                    <Button Outline="true" Size="Size.Small" Color="ButtonColor.Primary" @onclick="async _ => await OnShowResourceEditorAsync()"><Icon Name="IconName.Plus" /></Button>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Resources != null && Resources.Any())
+            {
+                <Virtualize Context="resource" Items="@Resources">
+                    <tr @onclick="async _ => await OnShowResourceDetailsAsync(resource)" class="cursor-pointer">
+                        <td class="text-left">@resource.Metadata.Name</td>
+                        <td class="text-center">@resource.Metadata.CreationTimestamp.ToString()</td>
+                        <td class="text-end">
+                            <button class="btn btn-outline-primary btn-sm" title="Edit '@resource.Metadata.Name'" @onclick="async _ => await OnShowResourceEditorAsync(resource)" @onclick:preventDefault @onclick:stopPropagation><Icon Name="IconName.Pencil" /></button>
+                            <button class="btn btn-outline-danger btn-sm" title="Delete '@resource.Metadata.Name'" @onclick="async _ => await OnDeleteResourceAsync(resource)" @onclick:preventDefault @onclick:stopPropagation><Icon Name="IconName.Trash" /></button>
+                        </td>
+                    </tr>
+                </Virtualize>
+            }
+        </tbody>
+    </table>
+</div>
+
+<Button Outline="true" Color="ButtonColor.Primary" @onclick="async _ => await OnShowResourceEditorAsync()"><Icon Name="IconName.Plus" /></Button>
+
+<Offcanvas @ref="DetailsOffCanvas" Size="OffcanvasSize.Large" UseStaticBackdrop="false" BodyCssClass="d-flex flex-column" />
+
+<Offcanvas @ref="EditorOffCanvas" Size="OffcanvasSize.Large" UseStaticBackdrop="false" BodyCssClass="d-flex flex-column" />
+
+<ConfirmDialog @ref="Dialog" />
+
+@code {
+    /// <inheritdoc/>
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        BreadcrumbManager.Use(Breadcrumbs.Namespaces);
+    }
+}

@@ -1,0 +1,31 @@
+﻿﻿﻿apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: operators.synapse.io
+spec:
+  scope: Namespaced
+  group: synapse.io
+  names:
+    plural: operators
+    singular: operator
+    kind: Operator
+    shortNames:
+    - op
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              description: Configures the Synapse Operator
+              properties: {} #todo
+            status:
+              type: object
+          required:
+            - spec
+      subresources:
+        status: {}

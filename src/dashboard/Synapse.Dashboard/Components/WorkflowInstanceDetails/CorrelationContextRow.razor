@@ -1,0 +1,62 @@
+﻿﻿@*
+    Copyright © 2024-Present The Synapse Authors
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*@
+
+@namespace Synapse.Dashboard.Components
+
+<tr @onclick="async _ => await OnToggleRow()" class="cursor-pointer">
+    <td>@Kvp.Key</td>
+    <td class="text-center"><span class="badge rounded-pill badge rounded-pill border @GetCorrelationContextStatusClass(Kvp.Value)">@(Kvp.Value?.Status ?? CorrelationContextStatus.Inactive)</span></td>
+    <td><Icon Name="@(isOpen ? IconName.CaretUp : IconName.CaretDown)" /></td>
+</tr>
+<tr class="@(!isOpen ? "d-none" : "")">
+    <td colspan="999">
+        @if (Kvp.Value == null)
+        {
+            @("-")
+        }
+        else
+        {
+            <Collapse @ref="collapse">
+                <CorrelationContextDetails CorrelationContext="Kvp.Value" />
+            </Collapse>
+        }
+    </td>
+</tr>
+
+@code {
+    [Parameter] public KeyValuePair<string, CorrelationContext> Kvp { get; set; }
+    bool isOpen = false;
+    Collapse? collapse;
+
+    async Task OnToggleRow()
+    {
+        isOpen = !isOpen;
+        if (collapse != null)
+        {
+            await collapse.ToggleAsync();
+        }
+        StateHasChanged();
+    }
+
+    string GetCorrelationContextStatusClass(CorrelationContext? context) => context?.Status switch
+    {
+        CorrelationContextStatus.Active => "border-accent text-accent",
+        CorrelationContextStatus.Inactive => "border-secondary text-secondary",
+        CorrelationContextStatus.Completed => "border-success text-success",
+        CorrelationContextStatus.Cancelled => "border-warning text-warning",
+        _ => ""
+    };
+}

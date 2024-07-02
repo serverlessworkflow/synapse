@@ -1,0 +1,10 @@
+﻿@page "/authentication/oidc/{action}"
+@layout EmptyLayout
+
+<RemoteAuthenticatorView Action="@Action" />
+
+@code {
+
+    [Parameter] public string? Action { get; set; }
+
+}

@@ -1,0 +1,39 @@
+﻿@import "./theme/_variables.scss";
+@import "../lib/bootstrap/scss/mixins";
+
+
+.graph-container {
+    display: flex;
+    flex-direction: column;
+
+    .graph-controls {
+        display: flex;
+        justify-content: flex-end;
+        gap: $spacer;
+        padding-right: 1rem;
+
+        .btn {
+            @include button-outline-variant($mute);
+            color: var(--bs-btn-color);
+            fill: var(--bs-btn-color);
+            border: var(--bs-btn-border-width) solid var(--bs-btn-border-color);
+
+            &:hover {
+                color: var(--bs-btn-hover-color);
+                fill: var(--bs-btn-hover-color);
+                background-color: var(--bs-btn-hover-bg);
+                border-color: var(--bs-btn-hover-border-color);
+            }
+        }
+    }
+}
+
+.node rect, .node circle, .node ellipse {
+    stroke: $mute;
+    fill: $dark-bg-subtle-dark;
+    stroke-width: 1px;
+}
+
+.end-node circle {
+    stroke-width: 3px;
+}

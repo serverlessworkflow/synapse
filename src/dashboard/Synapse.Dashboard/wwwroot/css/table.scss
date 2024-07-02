@@ -1,0 +1,66 @@
+﻿.table-container {
+    max-height: 100%;
+    overflow-y: scroll;
+    flex-grow: 1;
+    position: relative;
+
+    .loading {
+        position: absolute;
+        z-index: 2;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background: rgba(var(--bs-gray-900-rgb), 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+.sticky-header {
+    position: sticky;
+    top: 0;
+    background-color: var(--bs-body-bg) !important;
+}
+
+tr {
+    height: 61px;
+    max-height: 61px;
+}
+
+td {
+    vertical-align: middle;
+}
+
+.contained {
+    display: -webkit-box;
+    max-height: calc(61px - 1rem);
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@-webkit-keyframes moving-gradient {
+    0% {
+        background-position: -250px 0;
+    }
+
+    100% {
+        background-position: 250px 0;
+    }
+}
+
+tr.row-placeholder td::after {
+    content: ' ';
+    display: block;
+    height: 12px;
+    background: linear-gradient(to right, rgba(var(--bs-body-color-rgb), 0.3) 20%, rgba(var(--bs-secondary-bg-rgb), 0.7) 50%, rgba(var(--bs-body-color-rgb), 0.3) 80%);
+    background-size: 500px 100px;
+    animation-name: moving-gradient;
+    animation-duration: 1s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+}

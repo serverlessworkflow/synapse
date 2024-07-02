@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Synapse.Runner": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}

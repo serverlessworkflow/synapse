@@ -1,0 +1,68 @@
+﻿@page "/workflow-instances"
+@attribute [Authorize]
+@namespace Synapse.Dashboard.Pages.WorkflowInstances.List
+@using BlazorBootstrap
+@inherits NamespacedResourceManagementComponent<View, WorkflowInstanceListComponentStore, WorkflowInstanceListState, WorkflowInstance>
+@inject IBreadcrumbManager BreadcrumbManager
+@inject NavigationManager NavigationManager
+
+<ApplicationTitle>Workflow Instances</ApplicationTitle>
+
+<WorkflowInstancesList Loading="Loading"
+                       Title="Title()"
+                       Workflows="Workflows"
+                       Namespaces="Namespaces"
+                       WorkflowInstances="Resources"
+                       OnWorkflowChanged="OnWorkflowChanged"
+                       OnNamespaceChanged="OnNamespaceChanged"
+                       OnSearchInput="OnSearchInput"
+                       OnShowDetails="OnShowInstanceDetails"
+                       OnDelete="OnDeleteResourceAsync"></WorkflowInstancesList>
+
+<Button Outline="true" Color="ButtonColor.Primary" @onclick="async _ => await OnShowResourceEditorAsync()"><Icon Name="IconName.Plus" /></Button>
+
+<Offcanvas @ref="EditorOffCanvas" Size="OffcanvasSize.Large" UseStaticBackdrop="false" BodyCssClass="d-flex flex-column" />
+
+<ConfirmDialog @ref="Dialog" />
+
+@code{
+
+    RenderFragment Title() => __builder =>
+    {
+        <h4>Workflow Instances</h4>
+    };
+
+    /// <summary>
+    /// Gets the list of available <see cref="Workflow"/>s
+    /// </summary>
+    protected EquatableList<Workflow>? Workflows { get; set; }
+
+    /// <inheritdoc/>
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        BreadcrumbManager.Use(Breadcrumbs.WorkflowInstances);
+        this.Store.Workflows.Subscribe(workflows => this.OnStateChanged(cmp => cmp.Workflows = workflows), token: this.CancellationTokenSource.Token);
+        await this.Store.ListWorkflowsAsync().ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Handles changes of the workflow selector
+    /// </summary>
+    /// <param name="e"></param>
+    protected void OnWorkflowChanged(ChangeEventArgs e)
+    {
+        var workflowQualifiedName = e.Value?.ToString();
+        if (string.IsNullOrWhiteSpace(workflowQualifiedName))
+        {
+            this.Store.RemoveLabelSelector(SynapseDefaults.Resources.Labels.Workflow);
+        }
+        else
+        {
+            this.Store.AddLabelSelector(new(SynapseDefaults.Resources.Labels.Workflow, LabelSelectionOperator.Equals, workflowQualifiedName));
+        }
+    }
+
+    void OnShowInstanceDetails(WorkflowInstance instance) => NavigationManager.NavigateTo($"/workflows/details/{instance.Spec.Definition.Namespace}/{instance.Spec.Definition.Name}/{instance.Spec.Definition.Version}/{instance.GetName()}");
+
+}

@@ -1,0 +1,89 @@
+﻿@page "/operators"
+@attribute [Authorize]
+@namespace Synapse.Dashboard.Pages.Operators.List
+@inherits NamespacedResourceManagementComponent<Operator>
+@inject IBreadcrumbManager BreadcrumbManager
+
+<ApplicationTitle>Operators</ApplicationTitle>
+
+<div class="table-container">
+    @if (Loading)
+    {
+        <Loader />
+    }
+    <div class="d-flex flex-row justify-content-between align-items-center">
+        <h4>Operators</h4>
+        <span>@(Resources?.Count ?? 0) items</span>
+        <div class="d-flex">
+            <select class="form-select m-2" @onchange="OnNamespaceChanged">
+                <option value="">All namespaces</option>
+                @if (Namespaces != null && Namespaces.Count > 0)
+                {
+                    foreach (var namespaceResource in Namespaces)
+                    {
+                        <option value="@namespaceResource.GetName()">@namespaceResource.GetName()</option>
+                    }
+                }
+            </select>
+            <input type="search" class="form-control rounded my-2 me-2" placeholder="Search" value="@SearchTerm" @oninput="OnSearchInput" />
+        </div>
+    </div>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th class="sticky-header text-start">Namespace</th>
+                <th class="sticky-header text-start">Name</th>
+                <th class="sticky-header text-center">Created At</th>
+                <th class="sticky-header text-center">Status</th>
+                <th class="sticky-header text-end">
+                    <Button Outline="true" Size="Size.Small" Color="ButtonColor.Primary" @onclick="async _ => await OnShowResourceEditorAsync()"><Icon Name="IconName.Plus" /></Button>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Resources != null && Resources.Any())
+            {
+                <Virtualize Context="resource" Items="@Resources">
+                    <tr @onclick="async _ => await OnShowResourceDetailsAsync(resource)" class="cursor-pointer">
+                        <td class="text-start">@resource.Metadata.Namespace</td>
+                        <td class="text-start">@resource.Metadata.Name</td>
+                        <td class="text-center">@resource.Metadata.CreationTimestamp?.DateTime.FromNow()</td>
+                        <td class="text-center"><span class="badge rounded-pill border border-@GetStatusClass(resource) text-@GetStatusClass(resource)">@resource.Status?.Phase</span></td>
+                        <td class="text-end">
+                            <button class="btn btn-outline-primary btn-sm" title="Edit '@resource.Metadata.Name'" @onclick="async _ => await OnShowResourceEditorAsync(resource)" @onclick:preventDefault @onclick:stopPropagation><Icon Name="IconName.Pencil" /></button>
+                            <button class="btn btn-outline-danger btn-sm" title="Delete '@resource.Metadata.Name'" @onclick="async _ => await OnDeleteResourceAsync(resource)" @onclick:preventDefault @onclick:stopPropagation><Icon Name="IconName.Trash" /></button>
+                        </td>
+                    </tr>
+                </Virtualize>
+            }
+        </tbody>
+    </table>
+</div>
+
+<Button Outline="true" Color="ButtonColor.Primary" @onclick="async _ => await OnShowResourceEditorAsync()"><Icon Name="IconName.Plus" /></Button>
+
+<Offcanvas @ref="DetailsOffCanvas" Size="OffcanvasSize.Large" UseStaticBackdrop="false" BodyCssClass="d-flex flex-column" />
+
+<Offcanvas @ref="EditorOffCanvas" Size="OffcanvasSize.Large" UseStaticBackdrop="false" BodyCssClass="d-flex flex-column" />
+
+<ConfirmDialog @ref="Dialog" />
+
+@code {
+    /// <inheritdoc/>
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        BreadcrumbManager.Use(Breadcrumbs.Operators);
+    }
+
+    string GetStatusClass(Operator @operator)
+    {
+        return @operator.Status?.Phase switch
+        {
+            OperatorStatusPhase.Running => "primary",
+            OperatorStatusPhase.Stopped => "secondary",
+            _ => "secondary"
+        };
+    }
+
+}
