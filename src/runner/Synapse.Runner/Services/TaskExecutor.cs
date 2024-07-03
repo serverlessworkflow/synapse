@@ -395,7 +395,7 @@ public abstract class TaskExecutor<TDefinition>(IServiceProvider serviceProvider
     {
         var parameters = this.Task.Arguments.Clone()!;
         parameters[RuntimeExpressions.Arguments.Context] = this.Task.ContextData;
-        parameters[RuntimeExpressions.Arguments.Workflow] = this.Task.Workflow.Instance;
+        parameters[RuntimeExpressions.Arguments.Workflow] = this.Task.Workflow.Instance.Spec;
         parameters[RuntimeExpressions.Arguments.Task] = this.Task.Instance;
         parameters[RuntimeExpressions.Arguments.Input] = this.Task.Input;
         return parameters;
