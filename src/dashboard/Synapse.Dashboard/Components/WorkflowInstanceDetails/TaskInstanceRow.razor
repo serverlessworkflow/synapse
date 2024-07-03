@@ -16,31 +16,35 @@
 
 @namespace Synapse.Dashboard.Components
 
-@if (Task != null) {
+@if (TaskInstance != null) {
     <tr @onclick="async _ => await OnToggleRow()" class="cursor-pointer">
-        <td>@Task.Name</td>
-        <td class="text-center"><span class="badge rounded-pill badge rounded-pill border @GetTaskStatusClass(Task)">@(Task.Status ?? TaskInstanceStatus.Pending)</span></td>
-        <td class="text-center">@(Task.StartedAt?.DateTime.FromNow() ?? "-")</td>
-        <td class="text-center">@(Task.EndedAt?.DateTime.FromNow() ?? "-")</td>
-        <td><Icon Name="@(isOpen ? IconName.CaretUp : IconName.CaretDown)" /></td>
+        <td>@TaskInstance.Name</td>
+        <td class="text-center"><span class="badge rounded-pill badge rounded-pill border @GetTaskStatusClass(TaskInstance)">@(TaskInstance.Status ?? TaskInstanceStatus.Pending)</span></td>
+        <td class="text-center">@(TaskInstance.StartedAt?.DateTime.FromNow() ?? "-")</td>
+        <td class="text-center">@(TaskInstance.EndedAt?.DateTime.FromNow() ?? "-")</td>
+        <td class="text-end"><Icon Name="@(isOpen ? IconName.CaretUp : IconName.CaretDown)" /></td>
     </tr>
-    <tr class="@(!isOpen ? "d-none" : "")">
-        <td colspan="999">
-            <Collapse @ref="collapse">
-                <TaskInstanceDetails TaskInstance="Task" />
-            </Collapse>
-        </td>
-    </tr>
+    @if (isOpen) {
+        <tr>
+            <td colspan="999">
+                <Collapse @ref="collapse">
+                    <TaskInstanceDetails TaskInstance="TaskInstance" />
+                </Collapse>
+            </td>
+        </tr>
+    }
 }
 
 @code {
-    [Parameter] public TaskInstance? Task { get; set; }
+    [Parameter] public TaskInstance? TaskInstance { get; set; }
     bool isOpen = false;
     Collapse? collapse;
 
     async Task OnToggleRow()
     {
         isOpen = !isOpen;
+        StateHasChanged();
+        await Task.Delay(1); // tick to render the collapse, otherwise it will be null and won't show
         if (collapse != null)
         {
             await collapse.ToggleAsync();

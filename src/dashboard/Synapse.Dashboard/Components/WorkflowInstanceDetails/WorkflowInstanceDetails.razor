@@ -15,11 +15,10 @@
 *@
 
 @namespace Synapse.Dashboard.Components
-@inject IJsonSerializer JsonSerializer
 
 @if (workflowInstance != null)
 {
-    <div class="workflow-instance-details p-3">
+    <div class="details workflow-instance-details p-3">
         <h6>Details</h6>
         <div class="row mb-3">
             <div class="col-md-12 col-lg-4">
@@ -63,7 +62,7 @@
             {
                 <DocumentDetails Label='Error' Document="@workflowInstance.Status?.Error" />
             }
-            else
+            else if (!string.IsNullOrWhiteSpace(workflowInstance.Status?.OutputReference))
             {
                 <DocumentDetails Label='Output' Reference="@workflowInstance.Status?.OutputReference" />
             }
@@ -88,7 +87,7 @@
                 <tbody>
                     @foreach (var task in workflowInstance.Status.Tasks)
                     {
-                        <TaskInstanceRow Task="@task" />
+                        <TaskInstanceRow TaskInstance="@task" />
                     }
                 </tbody>
             </table>
@@ -103,7 +102,7 @@
             <table class="table table-hover">
                 <thead>
                     <tr>
-                        <th class="text-center">Started At</th>
+                        <th>Started At</th>
                         <th class="text-center">Ended At</th>
                         <th class="text-center">Duration</th>
                     </tr>
@@ -112,7 +111,7 @@
                     @foreach (var run in workflowInstance.Status.Runs)
                     {
                         <tr>
-                            <td class="text-center">@run.StartedAt.DateTime.FromNow()</td>
+                            <td>@run.StartedAt.DateTime.FromNow()</td>
                             <td class="text-center">@(run.EndedAt?.DateTime.FromNow() ?? "-")</td>
                             <td class="text-center">@(run.EndedAt.HasValue ? run.EndedAt.Value.Subtract(run.StartedAt).ToString("hh\\:mm\\:ss\\.fff") : "-")</td>
                         </tr>
@@ -137,7 +136,7 @@
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th class="text-center">Name</th>
+                            <th>Name</th>
                             <th class="text-center">Value</th>
                         </tr>
                     </thead>
@@ -145,7 +144,7 @@
                         @foreach (var keyValuePair in workflowInstance.Status.Correlation.Keys)
                         {
                             <tr>
-                                <td class="text-center">@keyValuePair.Key</td>
+                                <td>@keyValuePair.Key</td>
                                 <td class="text-center">@keyValuePair.Value</td>
                             </tr>
                         }
@@ -162,7 +161,7 @@
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th class="text-center">Name</th>
+                            <th>Name</th>
                             <th class="text-center">Status</th>
                             <th></th>
                         </tr>

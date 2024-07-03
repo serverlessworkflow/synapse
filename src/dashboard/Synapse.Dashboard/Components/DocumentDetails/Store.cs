@@ -169,11 +169,20 @@ public class DocumentDetailsStore(
     /// <param name="document">The new <see cref="DocumentDetailsState.Reference"/> value</param>
     public void SetDocument(object? document)
     {
-        this.Reduce(state => state with
+        try
         {
-            DocumentJson = document != null ? this.JsonSerializer.SerializeToText(document) : string.Empty,
-            Loaded = true,
-        });
+            var documentJson = document != null ? this.JsonSerializer.SerializeToText(document) : string.Empty;
+            this.Reduce(state => state with
+            {
+                DocumentJson = documentJson,
+                Loaded = true,
+            });
+        }
+        catch (Exception ex)
+        {
+            // todo: handle ex
+            Console.WriteLine(ex.ToString());
+        }
     }
     #endregion
 

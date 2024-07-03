@@ -15,15 +15,137 @@
 *@
 
 @namespace Synapse.Dashboard.Components
-@inject IJsonSerializer JsonSerializer
 
 @if (TaskInstance != null)
 {
-    <pre>
-    @JsonSerializer.SerializeToText(TaskInstance);
-    </pre>
+    <div class="details task-instance-details p-3">
+        <h6>Details</h6>
+        <div class="row mb-3">
+            <div class="col-md-12 col-lg-4">
+                <div class="label">Name</div>
+                @TaskInstance.Name
+            </div>
+            <div class="col-md-12 col-lg-4">
+                <div class="label">Reference</div>
+                @TaskInstance.Reference                
+            </div>
+            <div class="col-md-12 col-lg-4">
+                <div class="label">Status</div>
+                <span class="badge rounded-pill badge rounded-pill border @GetTaskStatusClass(TaskInstance.Status ?? TaskInstanceStatus.Pending)">@(TaskInstance.Status ?? TaskInstanceStatus.Pending)</span>
+                @if (!string.IsNullOrWhiteSpace(TaskInstance.StatusReason))
+                {
+                    <div class="fst-italic">@TaskInstance.StatusReason</div>
+                }
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-12 col-lg-4">
+                <div class="label">Started at</div>
+                @(TaskInstance.StartedAt?.DateTime.FromNow() ?? "-")
+            </div>
+            <div class="col-md-12 col-lg-4">
+                <div class="label">Ended at</div>
+                @(TaskInstance.EndedAt?.DateTime.FromNow() ?? "-")
+            </div>
+            <div class="col-md-12 col-lg-4">
+                <div class="label">Duration</div>
+                @if (TaskInstance.StartedAt.HasValue == true && TaskInstance.EndedAt.HasValue == true)
+                {
+                    @TaskInstance.EndedAt.Value.Subtract(TaskInstance.StartedAt.Value).ToString("hh\\:mm\\:ss\\.fff")
+                }
+                else
+                {
+                    @("-")
+                }
+            </div>
+        </div>
+        <div class="row mb-3">
+            <DocumentDetails class="mb-3" Label='Input' Reference="@TaskInstance.InputReference" />
+            <DocumentDetails class="mb-3" Label='Context' Reference="@TaskInstance.ContextReference" />
+            @if (TaskInstance.Error != null)
+            {
+                <DocumentDetails Label='Error' Document="@TaskInstance.Error" />
+            }
+            else if (!string.IsNullOrWhiteSpace(TaskInstance.OutputReference))
+            {
+                <DocumentDetails Label='Output' Reference="@TaskInstance.OutputReference" />
+            }
+        </div>
+        <h6 class="pt-3">Runs</h6>
+        @if (TaskInstance.Runs == null || TaskInstance.Runs.Count == 0)
+        {
+            @("-")
+        }
+        else
+        {
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Started At</th>
+                        <th class="text-center">Ended At</th>
+                        <th class="text-center">Duration</th>
+                        <th class="text-center">Outcome</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var run in TaskInstance.Runs)
+                    {
+                        <tr>
+                            <td>@run.StartedAt.DateTime.FromNow()</td>
+                            <td class="text-center">@(run.EndedAt?.DateTime.FromNow() ?? "-")</td>
+                            <td class="text-center">@(run.EndedAt.HasValue ? run.EndedAt.Value.Subtract(run.StartedAt).ToString("hh\\:mm\\:ss\\.fff") : "-")</td>
+                            <td class="text-center"><span class="badge rounded-pill badge rounded-pill border @GetTaskStatusClass(run.Outcome ?? TaskInstanceStatus.Pending)">@(run.Outcome ?? TaskInstanceStatus.Pending)</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        <h6 class="pt-3">Retries</h6>
+        @if (TaskInstance.Retries == null || TaskInstance.Retries.Count == 0)
+        {
+            @("-")
+        }
+        else
+        {
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Attempted At</th>
+                        <th class="text-center">Count</th>
+                        <th class="text-center">Cause</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var retry in TaskInstance.Retries)
+                    {
+                        <tr>
+                            <td>@retry.Time.DateTime.FromNow()</td>
+                            <td class="text-center">@retry.Number</td>
+                            <td class="text-center">
+                                <DocumentDetails Label="Cause" Document="@retry.Cause" />
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+        <h6 class="pt-3">Raw</h6>
+        <DocumentDetails Label="Raw" Document="@TaskInstance" />
+    </div>
 }
 
 @code {
     [Parameter] public TaskInstance? TaskInstance { get; set; }
+
+    string GetTaskStatusClass(string status) => status switch
+    {
+        TaskInstanceStatus.Running => "border-accent text-accent",
+        TaskInstanceStatus.Faulted => "border-danger text-danger",
+        TaskInstanceStatus.Suspended => "border-icterine text-icterine",
+        TaskInstanceStatus.Cancelled => "border-warning text-warning",
+        TaskInstanceStatus.Completed => "border-success text-success",
+        TaskInstanceStatus.Skipped => "border-cinereous text-cinereous",
+        _ => ""
+    };
 }
