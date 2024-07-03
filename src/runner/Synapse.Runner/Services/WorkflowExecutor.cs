@@ -269,16 +269,16 @@ public class WorkflowExecutor(IServiceProvider serviceProvider, ILogger<Workflow
             FlowDirective.End or FlowDirective.Exit => null,
             _ => this.Workflow.Definition.GetTaskAfter(executor.Task.Instance)
         };
-        var last = executor.Task;
+        var completedTask = executor.Task;
         this.Executors.Remove(executor);
         await executor.DisposeAsync().ConfigureAwait(false);
         if (nextDefinition == null)
         {
-            await this.SetResultAsync(last.Output, cancellationToken).ConfigureAwait(false);
+            await this.SetResultAsync(completedTask.Output, cancellationToken).ConfigureAwait(false);
             return;
         }
-        var next = await this.Workflow.CreateTaskAsync(last.Definition, nextDefinition.Key, last.Output ?? new { }, cancellationToken: cancellationToken).ConfigureAwait(false);
-        var nextExecutor = await this.CreateTaskExecutorAsync(next, nextDefinition.Value, this.Workflow.ContextData, this.Workflow.Arguments, cancellationToken).ConfigureAwait(false);
+        var nextTask = await this.Workflow.CreateTaskAsync(nextDefinition.Value, nextDefinition.Key, completedTask.Output ?? new { }, cancellationToken: cancellationToken).ConfigureAwait(false);
+        var nextExecutor = await this.CreateTaskExecutorAsync(nextTask, nextDefinition.Value, this.Workflow.ContextData, this.Workflow.Arguments, cancellationToken).ConfigureAwait(false);
         await nextExecutor.ExecuteAsync(cancellationToken).ConfigureAwait(false);
     }
 
