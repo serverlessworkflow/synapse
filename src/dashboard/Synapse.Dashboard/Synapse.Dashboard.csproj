@@ -11,16 +11,19 @@
 
   <ItemGroup>
     <Content Remove="wwwroot\css\horizontal-collapse.scss" />
+    <Content Remove="wwwroot\css\workflow-instance-details.scss" />
   </ItemGroup>
 
   <ItemGroup>
     <_ContentIncludedByDefault Remove="wwwroot\css\horizontal-collapse.scss" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\workflow-instance-details.scss" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="Components\WorkflowInstanceDetails\CorrelationContextRow.razor" />
     <None Include="Components\WorkflowInstanceDetails\TaskInstanceRow.razor" />
     <None Include="wwwroot\css\horizontal-collapse.scss" />
+    <None Include="wwwroot\css\workflow-instance-details.scss" />
   </ItemGroup>
 
   <ItemGroup>

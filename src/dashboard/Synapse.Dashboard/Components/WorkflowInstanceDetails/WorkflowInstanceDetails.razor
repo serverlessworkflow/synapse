@@ -17,24 +17,38 @@
 @namespace Synapse.Dashboard.Components
 @inject IJsonSerializer JsonSerializer
 
-@if (WorkflowInstance != null)
+@if (workflowInstance != null)
 {
     <div class="workflow-instance-details p-3">
-        <h6 class="mt-3">Timings</h6>
-        <div class="row">
+        <h6>Details</h6>
+        <div class="row mb-3">
+            <div class="col-md-12 col-lg-4">
+                <div class="label">Name</div>
+                @workflowInstance.GetName()
+            </div>
+            <div class="col-md-12 col-lg-4">
+                <div class="label">Namespace</div>
+                @workflowInstance.GetNamespace()
+            </div>
+            <div class="col-md-12 col-lg-4">
+                <div class="label">Status</div>
+                <span class="badge rounded-pill badge rounded-pill border @GetStatusClass(workflowInstance)">@(workflowInstance.Status?.Phase ?? WorkflowInstanceStatusPhase.Pending)</span>
+            </div>
+        </div>
+        <div class="row mb-3">
             <div class="col-md-12 col-lg-4">
                 <div class="label">Started at</div>
-                @(WorkflowInstance.Status?.StartedAt?.DateTime.FromNow() ?? "-")
+                @(workflowInstance.Status?.StartedAt?.DateTime.FromNow() ?? "-")
             </div>
             <div class="col-md-12 col-lg-4">
                 <div class="label">Ended at</div>
-                @(WorkflowInstance.Status?.EndedAt?.DateTime.FromNow() ?? "-")
+                @(workflowInstance.Status?.EndedAt?.DateTime.FromNow() ?? "-")
             </div>
             <div class="col-md-12 col-lg-4">
                 <div class="label">Duration</div>
-                @if (WorkflowInstance.Status?.StartedAt.HasValue == true && WorkflowInstance.Status?.EndedAt.HasValue == true)
+                @if (workflowInstance.Status?.StartedAt.HasValue == true && workflowInstance.Status?.EndedAt.HasValue == true)
                 {
-                    @WorkflowInstance.Status.EndedAt.Value.Subtract(WorkflowInstance.Status.StartedAt.Value).ToString("hh\\:mm\\:ss\\.fff")
+                    @workflowInstance.Status.EndedAt.Value.Subtract(workflowInstance.Status.StartedAt.Value).ToString("hh\\:mm\\:ss\\.fff")
                 }
                 else
                 {
@@ -42,27 +56,20 @@
                 }
             </div>
         </div>
-        <h6 class="mt-3">Global Data</h6>
-        <div class="row">
-            <div class="col-md-12 col-lg-4">
-                <DocumentDetails Label='Input' Document="@WorkflowInstance.Spec?.Input" />
-            </div>
-            <div class="col-md-12 col-lg-4">
-                <DocumentDetails Label='Context' Reference="@WorkflowInstance.Status?.ContextReference" />
-            </div>
-            <div class="col-md-12 col-lg-4">
-            @if (WorkflowInstance.Status?.Error != null)
+        <div class="row mb-3">
+            <DocumentDetails class="mb-3" Label='Input' Document="@workflowInstance.Spec?.Input" />
+            <DocumentDetails class="mb-3" Label='Context' Reference="@workflowInstance.Status?.ContextReference" />
+            @if (workflowInstance.Status?.Error != null)
             {
-                <DocumentDetails Label='Error' Document="@WorkflowInstance.Status?.Error" />
+                <DocumentDetails Label='Error' Document="@workflowInstance.Status?.Error" />
             }
             else
             {
-                <DocumentDetails Label='Output' Reference="@WorkflowInstance.Status?.OutputReference" />
+                <DocumentDetails Label='Output' Reference="@workflowInstance.Status?.OutputReference" />
             }
-            </div>
         </div>
-        <h6 class="mt-3">Executed Tasks</h6>
-        @if (WorkflowInstance.Status?.Tasks == null || WorkflowInstance.Status.Tasks.Count == 0)
+        <h6 class="pt-3">Executed Tasks</h6>
+        @if (workflowInstance.Status?.Tasks == null || workflowInstance.Status.Tasks.Count == 0)
         {
             @("-")
         }
@@ -79,15 +86,15 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var task in WorkflowInstance.Status.Tasks)
+                    @foreach (var task in workflowInstance.Status.Tasks)
                     {
                         <TaskInstanceRow Task="@task" />
                     }
                 </tbody>
             </table>
         }
-        <h6 class="mt-3">Runs</h6>
-        @if (WorkflowInstance.Status?.Runs == null || WorkflowInstance.Status.Runs.Count == 0)
+        <h6 class="pt-3">Runs</h6>
+        @if (workflowInstance.Status?.Runs == null || workflowInstance.Status.Runs.Count == 0)
         {
             @("-")
         }
@@ -102,7 +109,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var run in WorkflowInstance.Status.Runs)
+                    @foreach (var run in workflowInstance.Status.Runs)
                     {
                         <tr>
                             <td class="text-center">@run.StartedAt.DateTime.FromNow()</td>
@@ -113,15 +120,15 @@
                 </tbody>
             </table>
         }
-        <h6 class="mt-3">Correlation</h6>
-        @if (WorkflowInstance.Status?.Correlation == null)
+        <h6 class="pt-3">Correlation</h6>
+        @if (workflowInstance.Status?.Correlation == null)
         {
             @("-")
         }
         else
         {
             <div class="label">Keys</div>
-            @if (WorkflowInstance.Status?.Correlation?.Keys == null || WorkflowInstance.Status.Correlation.Keys.Count == 0)
+            @if (workflowInstance.Status?.Correlation?.Keys == null || workflowInstance.Status.Correlation.Keys.Count == 0)
             {
                 @("-")
             }
@@ -135,7 +142,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var keyValuePair in WorkflowInstance.Status.Correlation.Keys)
+                        @foreach (var keyValuePair in workflowInstance.Status.Correlation.Keys)
                         {
                             <tr>
                                 <td class="text-center">@keyValuePair.Key</td>
@@ -146,7 +153,7 @@
                 </table>
             }
             <div class="label">Contexts</div>
-            @if (WorkflowInstance.Status?.Correlation?.Contexts == null || WorkflowInstance.Status.Correlation.Contexts.Count == 0)
+            @if (workflowInstance.Status?.Correlation?.Contexts == null || workflowInstance.Status.Correlation.Contexts.Count == 0)
             {
                 @("-")
             }
@@ -161,7 +168,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var keyValuePair in WorkflowInstance.Status.Correlation.Contexts)
+                        @foreach (var keyValuePair in workflowInstance.Status.Correlation.Contexts)
                         {
                             <CorrelationContextRow Kvp="keyValuePair" />
                         }
@@ -169,231 +176,41 @@
                 </table>
             }
         }
-        <h6 class="mt-3">Logs</h6>
+        <h6 class="pt-3">Logs</h6>
         -
-        
-        <h6 class="mt-3">Raw</h6>
-        <DocumentDetails Label="Raw" Document="@WorkflowInstance" />
-
-        <!-- Tabs version
-        <Tabs NavStyle="NavStyle.Underline">
-                    <Tab Title="Data" IsActive="true">
-                        <Content>
-                            <div class="row">
-                                <div class="col-md-12 col-lg-4">
-                                    <DocumentDetails Label='Input' Document="@WorkflowInstance.Spec?.Input" />
-                                </div>
-                                <div class="col-md-12 col-lg-4">
-                                    <DocumentDetails Label='Context' Reference="@WorkflowInstance.Status?.ContextReference" />
-                                </div>
-                                <div class="col-md-12 col-lg-4">
-        @if (WorkflowInstance.Status?.Error != null)
-        {
-                                        <DocumentDetails Label='Error' Document="@WorkflowInstance.Status?.Error" />
-        }
-        else
-        {
-                                        <DocumentDetails Label='Output' Reference="@WorkflowInstance.Status?.OutputReference" />
-        }
-                                </div>
-                            </div>
-                        </Content>
-                    </Tab>
-                    <Tab Title="Timings">
-                        <Content>
-                            <div class="row">
-                                <div class="col-md-12 col-lg-4">
-                                    <div class="label">Started at</div>
-        @(WorkflowInstance.Status?.StartedAt?.DateTime.FromNow() ?? "-")
-                                </div>
-                                <div class="col-md-12 col-lg-4">
-                                    <div class="label">Ended at</div>
-        @(WorkflowInstance.Status?.EndedAt?.DateTime.FromNow() ?? "-")
-                                </div>
-                                <div class="col-md-12 col-lg-4">
-                                    <div class="label">Duration</div>
-        @if (WorkflowInstance.Status?.StartedAt.HasValue == true && WorkflowInstance.Status?.EndedAt.HasValue == true)
-        {
-        @WorkflowInstance.Status.EndedAt.Value.Subtract(WorkflowInstance.Status.StartedAt.Value).ToString("hh\\:mm\\:ss\\.fff")
-        }
-        else
-        {
-        @("-")
-        }
-                                </div>
-                            </div>
-                        </Content>
-                    </Tab>
-                    <Tab Title="Executed Tasks">
-                        <Content>
-        @if (WorkflowInstance.Status?.Tasks == null || WorkflowInstance.Status.Tasks.Count == 0)
-        {
-        @("-")
-        }
-        else
-        {
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th class="text-center">Status</th>
-                                            <th class="text-center">Started At</th>
-                                            <th class="text-center">Ended At</th>
-                                            <th></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                @foreach (var task in WorkflowInstance.Status.Tasks)
-                {
-                Collapse collapse = null!;
-                bool isOpen = false;
-                                            <tr @onclick="async _ => { await collapse.ToggleAsync(); isOpen = !isOpen; }" class="cursor-pointer">
-                                                <td>@task.Name</td>
-                                                <td class="text-center"><span class="badge rounded-pill badge rounded-pill border @GetTaskStatusClass(task)">@(task.Status ?? TaskInstanceStatus.Pending)</span></td>
-                                                <td class="text-center">@(task.StartedAt?.DateTime.FromNow() ?? "-")</td>
-                                                <td class="text-center">@(task.EndedAt?.DateTime.FromNow() ?? "-")</td>
-                                                <td><Icon Name="@(isOpen ? IconName.CaretUp : IconName.CaretDown)" /></td>
-                                            </tr>
-                                            <tr>
-                                                <td colspan="999">
-                                                    <Collapse @ref="collapse">
-                                                        <TaskInstanceDetails TaskInstance="task" />
-                                                    </Collapse>
-                                                </td>
-                                            </tr>
-                }
-                                    </tbody>
-                                </table>
-        }
-                        </Content>
-                    </Tab>
-                    <Tab Title="Runs">
-                        <Content>
-        @if (WorkflowInstance.Status?.Runs == null || WorkflowInstance.Status.Runs.Count == 0)
-        {
-        @("-")
-        }
-        else
-        {
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th class="text-center">Started At</th>
-                                            <th class="text-center">Ended At</th>
-                                            <th class="text-center">Duration</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                @foreach (var run in WorkflowInstance.Status.Runs)
-                {
-                                            <tr>
-                                                <td class="text-center">@run.StartedAt.DateTime.FromNow()</td>
-                                                <td class="text-center">@(run.EndedAt?.DateTime.FromNow() ?? "-")</td>
-                                                <td class="text-center">@(run.EndedAt.HasValue ? run.EndedAt.Value.Subtract(run.StartedAt).ToString("hh\\:mm\\:ss\\.fff") : "-")</td>
-                                            </tr>
-                }
-                                    </tbody>
-                                </table>
-        }
-                        </Content>
-                    </Tab>
-                    <Tab Title="Correlation">
-                        <Content>
-        @if (WorkflowInstance.Status?.Correlation == null)
-        {
-        @("-")
-        }
-        else
-        {
-                                <div class="label">Keys</div>
-        @if (WorkflowInstance.Status?.Correlation?.Keys == null || WorkflowInstance.Status.Correlation.Keys.Count == 0)
-        {
-        @("-")
-        }
-        else
-        {
-                                    <table class="table table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th class="text-center">Name</th>
-                                                <th class="text-center">Value</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                @foreach (var keyValuePair in WorkflowInstance.Status.Correlation.Keys)
-                {
-                                                <tr>
-                                                    <td class="text-center">@keyValuePair.Key</td>
-                                                    <td class="text-center">@keyValuePair.Value</td>
-                                                </tr>
-                }
-                                        </tbody>
-                                    </table>
-        }
-                                <div class="label">Contexts</div>
-        @if (WorkflowInstance.Status?.Correlation?.Contexts == null || WorkflowInstance.Status.Correlation.Contexts.Count == 0)
-        {
-        @("-")
-        }
-        else
-        {
-                                    <table class="table table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th class="text-center">Name</th>
-                                                <th class="text-center">Status</th>
-                                                <th></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                @foreach (var keyValuePair in WorkflowInstance.Status.Correlation.Contexts)
-                {
-                Collapse collapse = null!;
-                bool isOpen = false;
-                                                <tr @onclick="async _ => { await collapse.ToggleAsync(); isOpen = !isOpen; }" class="cursor-pointer">
-                                                    <td>@keyValuePair.Key</td>
-                                                    <td class="text-center"><span class="badge rounded-pill badge rounded-pill border @GetCorrelationContextStatusClass(keyValuePair.Value)">@(keyValuePair.Value?.Status ?? CorrelationContextStatus.Inactive)</span></td>
-                                                    <td><Icon Name="@(isOpen ? IconName.CaretUp : IconName.CaretDown)" /></td>
-                                                </tr>
-                                                <tr>
-                                                    <td colspan="999">
-                        @if (keyValuePair.Value == null)
-                        {
-                        @("-")
-                        }
-                        else
-                        {
-                                                            <Collapse @ref="collapse">
-                                                                <CorrelationContextDetails CorrelationContext="keyValuePair.Value" />
-                                                            </Collapse>
-                        }
-                                                    </td>
-                                                </tr>
-                }
-                                        </tbody>
-                                    </table>
-        }
-        }
-                        </Content>
-                    </Tab>
-                    <Tab Title="Logs">
-                        <Content>
-                            -
-                        </Content>
-                    </Tab>
-                    <Tab Title="Raw">
-                        <Content>
-                            <DocumentDetails Label="Raw" Document="WorkflowInstance" />
-                        </Content>
-                    </Tab>
-                </Tabs>
-
-
-                -->
-
+        <h6 class="pt-3">Raw</h6>
+        <DocumentDetails Label="Raw" Document="@workflowInstance" />
     </div>
 }
 
 @code {
+    private WorkflowInstance? workflowInstance;
     [Parameter] public WorkflowInstance? WorkflowInstance { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        if (WorkflowInstance != workflowInstance)
+        {
+            workflowInstance = WorkflowInstance;
+        }
+    }
+
+    /// <summary>
+    /// Gets the css class for the provided <see cref="WorkflowInstance"/>'s status
+    /// </summary>
+    /// <param name="instance">The instance to get the status of</param>
+    /// <returns></returns>
+    string GetStatusClass(WorkflowInstance instance)
+    {
+        return instance.Status?.Phase switch
+        {
+            WorkflowInstanceStatusPhase.Running => "border-accent text-accent",
+            WorkflowInstanceStatusPhase.Faulted => "border-danger text-danger",
+            WorkflowInstanceStatusPhase.Cancelled => "border-warning text-warning",
+            WorkflowInstanceStatusPhase.Completed => "border-success text-success",
+            WorkflowInstanceStatusPhase.Waiting => "border-cinereous text-cinereous",
+            _ => ""
+        };
+    }
 }

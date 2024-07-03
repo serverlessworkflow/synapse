@@ -20758,11 +20758,10 @@ textarea.form-control-lg {
   background-color: var(--bs-body-bg) !important;
 }
 
-tr {
-  height: 61px;
-  max-height: 61px;
-}
-
+/*tr {
+    height: 61px;
+    max-height: 61px;
+}*/
 td {
   vertical-align: middle;
 }
@@ -20887,6 +20886,13 @@ tr.row-placeholder td::after {
 }
 .horizontal-collapse.collapsed .title i {
   margin-top: auto;
+}
+
+.workflow-instance-details h6, .workflow-instance-details .h6 {
+  font-weight: bold;
+}
+.workflow-instance-details .label {
+  font-weight: lighter;
 }
 
 html, body {

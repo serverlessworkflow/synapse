@@ -30,10 +30,11 @@
         <Label>Instances</Label>
         <Content>
             <WorkflowInstancesList Loading="Loading"
-                                    WorkflowInstances="Resources"
-                                    OnSearchInput="OnSearchInput"
-                                    Columns="columns"
-                                    OnShowDetails="OnShowInstanceDetails"
+                                   WorkflowInstances="Resources"
+                                   ActiveRow="@instanceName"
+                                   Columns="columns"
+                                   OnSearchInput="OnSearchInput"
+                                   OnShowDetails="OnShowInstanceDetails"
             ></WorkflowInstancesList>
             <Button Outline="true" Color="ButtonColor.Primary" @onclick="_ => OnCreateInstance()" class="w-100">
                 <Icon Name="IconName.Plus"/>
@@ -69,7 +70,7 @@
                 <div class="d-flex flex-column h-100 mh-100">
                     <div class="d-flex justify-content-between mb-2">
                         <Button Outline="true" Color="ButtonColor.Primary" Size="Size.Small" @onclick="_ => OnCreateWorkflowVersion()">
-                            <Icon Name="IconName.Plus" /><!-- todo: IconName.Copy not working ? -->
+                            <Icon Name="IconName.Copy" />
                         </Button>
                         <PreferredLanguageSelector PreferedLanguageChange="Store.ToggleTextBasedEditorLanguageAsync" />
                     </div>

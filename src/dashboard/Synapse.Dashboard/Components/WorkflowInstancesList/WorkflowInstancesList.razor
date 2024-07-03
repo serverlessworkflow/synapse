@@ -62,7 +62,7 @@
             @if (WorkflowInstances != null && WorkflowInstances.Any())
             {
                 <Virtualize Context="instance" Items="@WorkflowInstances.ToList()">
-                    <tr @onclick="async _ => await OnShowClickedAsync(instance)" class="cursor-pointer">
+                    <tr @onclick="async _ => await OnShowClickedAsync(instance)" class="cursor-pointer @(ActiveRow == instance.GetName() ? "table-active" : "")">
                         @foreach (var column in columns)
                         {
                             if (Columns.Count() == 0 || Columns.Contains(column))
@@ -133,6 +133,7 @@
     [Parameter] public IEnumerable<WorkflowInstance>? WorkflowInstances { get; set; }
     [Parameter] public IEnumerable<Workflow>? Workflows { get; set; }
     [Parameter] public IEnumerable<Namespace>? Namespaces { get; set; }
+    [Parameter] public string? ActiveRow { get; set; }
 
     [Parameter] public EventCallback<ChangeEventArgs> OnWorkflowChanged { get; set; }
     [Parameter] public EventCallback<ChangeEventArgs> OnNamespaceChanged { get; set; }

@@ -240,6 +240,30 @@ public abstract class ResourceManagementComponentStoreBase<TState, TResource>(IS
     /// <returns>A new awaitable <see cref="Task"/></returns>
     protected virtual Task OnResourceWatchEventAsync(IResourceWatchEvent<TResource> e)
     {
+        var labelSelectors = this.Get(state => state.LabelSelectors);
+        if (labelSelectors != null && labelSelectors.Count > 0 && !labelSelectors.All(selector => {
+            if (e.Resource?.Metadata?.Labels == null || e.Resource.Metadata.Labels.Count == 0 || !e.Resource.Metadata.Labels.ContainsKey(selector.Key))
+            {
+                return false;
+            }
+            var label = e.Resource.Metadata.Labels[selector.Key];
+            switch (selector.Operator)
+            {
+                case LabelSelectionOperator.Equals:
+                    return !string.IsNullOrWhiteSpace(selector.Value) && selector.Value.Equals(label);
+                case LabelSelectionOperator.NotEquals:
+                    return !string.IsNullOrWhiteSpace(selector.Value) && !selector.Value.Equals(label);
+                case LabelSelectionOperator.Contains:
+                    return selector.Values != null && selector.Values.Contains(label);
+                case LabelSelectionOperator.NotContains:
+                    return selector.Values != null && !selector.Values.Contains(label);
+                default:
+                    return false;
+            }
+        }))
+        {
+            return Task.CompletedTask;
+        }
         switch (e.Type)
         {
             case ResourceWatchEventType.Created:

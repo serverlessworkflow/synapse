@@ -112,9 +112,9 @@ public class WorkflowDetailsStore(
                 }
                 return null;
             }
-            return workflow.Spec.Versions.Get(version);
+            return workflow.Spec.Versions.Get(version)?.Clone();
         }
-    );
+    ).DistinctUntilChanged();
 
     /// <summary>
     /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="WorkflowDetailsState.WorkflowDefinitionVersion"/> changes
@@ -137,9 +137,9 @@ public class WorkflowDetailsStore(
             {
                 return null;
             }
-            return instances.FirstOrDefault(instance => instance.Metadata.Name == name);
+            return instances.FirstOrDefault(instance => instance.Metadata.Name == name)?.Clone();
         }
-    );
+    ).DistinctUntilChanged();
     #endregion
 
     #region Setters
@@ -290,7 +290,7 @@ public class WorkflowDetailsStore(
         this.WorkflowDefinition.Where(definition => definition != null).SubscribeAsync(async (definition) =>
         {
             await Task.Delay(1);
-            var document = this.JsonSerializer.SerializeToText(definition);
+            var document = this.JsonSerializer.SerializeToText(definition.Clone());
             this.Reduce(state => state with
             {
                 WorkflowDefinitionJson = document
