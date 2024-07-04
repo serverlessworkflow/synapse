@@ -31,7 +31,7 @@
             </div>
             <div class="col-md-12 col-lg-4">
                 <div class="label">Status</div>
-                <span class="badge rounded-pill badge rounded-pill border @GetTaskStatusClass(TaskInstance.Status ?? TaskInstanceStatus.Pending)">@(TaskInstance.Status ?? TaskInstanceStatus.Pending)</span>
+                <span class="badge rounded-pill badge rounded-pill border border-@TaskInstance.Status.GetColorClass() text-@TaskInstance.Status.GetColorClass()">@(TaskInstance.Status ?? TaskInstanceStatus.Pending)</span>
                 @if (!string.IsNullOrWhiteSpace(TaskInstance.StatusReason))
                 {
                     <div class="fst-italic">@TaskInstance.StatusReason</div>
@@ -94,7 +94,7 @@
                             <td>@run.StartedAt.DateTime.FromNow()</td>
                             <td class="text-center">@(run.EndedAt?.DateTime.FromNow() ?? "-")</td>
                             <td class="text-center">@(run.EndedAt.HasValue ? run.EndedAt.Value.Subtract(run.StartedAt).ToString("hh\\:mm\\:ss\\.fff") : "-")</td>
-                            <td class="text-center"><span class="badge rounded-pill badge rounded-pill border @GetTaskStatusClass(run.Outcome ?? TaskInstanceStatus.Pending)">@(run.Outcome ?? TaskInstanceStatus.Pending)</span></td>
+                            <td class="text-center"><span class="badge rounded-pill badge rounded-pill border border-@run.Outcome.GetColorClass() text-@run.Outcome.GetColorClass()">@(run.Outcome ?? TaskInstanceStatus.Pending)</span></td>
                         </tr>
                     }
                 </tbody>
@@ -137,15 +137,4 @@
 
 @code {
     [Parameter] public TaskInstance? TaskInstance { get; set; }
-
-    string GetTaskStatusClass(string status) => status switch
-    {
-        TaskInstanceStatus.Running => "border-accent text-accent",
-        TaskInstanceStatus.Faulted => "border-danger text-danger",
-        TaskInstanceStatus.Suspended => "border-icterine text-icterine",
-        TaskInstanceStatus.Cancelled => "border-warning text-warning",
-        TaskInstanceStatus.Completed => "border-success text-success",
-        TaskInstanceStatus.Skipped => "border-cinereous text-cinereous",
-        _ => ""
-    };
 }

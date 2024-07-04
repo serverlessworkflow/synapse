@@ -35,7 +35,7 @@
     </div>
     @if (!isCollapsed)
     {
-        <div class="flex-grow">
+        <div class="content flex-grow">
             @Content
         </div>
     }
@@ -51,6 +51,11 @@
     [Parameter] public EventCallback OnShown { get; set; }
     [Parameter] public EventCallback OnHidden { get; set; }
     [Parameter] public EventCallback OnClose { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+    }
 
     async Task OnToggleAsync()
     {

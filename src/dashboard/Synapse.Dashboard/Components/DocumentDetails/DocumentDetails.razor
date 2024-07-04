@@ -30,53 +30,48 @@
         <Icon Name="@(isOpen ? IconName.CaretUp : IconName.CaretDown)" />
     }
 </div>
-
 <Collapse @ref="collapse" OnShowing="Store.LoadReferencedDocumentAsync">
     @if (reference == null && Document == null)
     {
         <p>No document</p>
     }
+    else if (!loaded)
+    {
+        <Spinner Class="me-3" Color="SpinnerColor.Primary" Size="SpinnerSize.Small" />
+    }
     else
     {
-        @if (!loaded)
-        {
-            <Spinner Class="me-3" Color="SpinnerColor.Primary" Size="SpinnerSize.Small" />
-        }
-        else
-        {
-            <div class="d-flex justify-content-end mb-2">
-                <PreferredLanguageSelector PreferedLanguageChange="Store.ToggleTextBasedEditorLanguageAsync" />
-            </div>
-            <StandaloneCodeEditor @ref="Store.TextEditor"
-                                  ConstructionOptions="Store.StandaloneEditorConstructionOptions"
-                                  OnDidInit="Store.OnTextBasedEditorInitAsync"
-                                  CssClass="h-300-px" />
-        }
-        @if (problemDetails != null)
-        {
-            <div class="problems">
-                <Callout Type="CalloutType.Danger" Heading="@problemDetails.Title">
-                    @problemDetails.Detail
-                </Callout>
-                @if (problemDetails.Errors != null && problemDetails.Errors.Any())
+        <div class="d-flex justify-content-end mb-2">
+            <PreferredLanguageSelector PreferedLanguageChange="Store.ToggleTextBasedEditorLanguageAsync" />
+        </div>
+        <StandaloneCodeEditor @ref="Store.TextEditor"
+                                ConstructionOptions="Store.StandaloneEditorConstructionOptions"
+                                OnDidInit="Store.OnTextBasedEditorInitAsync"
+                                CssClass="h-300-px" />
+    }
+    @if (problemDetails != null)
+    {
+        <div class="problems">
+            <Callout Type="CalloutType.Danger" Heading="@problemDetails.Title">
+                @problemDetails.Detail
+            </Callout>
+            @if (problemDetails.Errors != null && problemDetails.Errors.Any())
+            {
+                foreach (KeyValuePair<string, string[]> errorContainer in problemDetails.Errors)
                 {
-                    foreach (KeyValuePair<string, string[]> errorContainer in problemDetails.Errors)
-                    {
-                        <Callout Type="CalloutType.Danger" Heading="@errorContainer.Key">
-                            <ul>
-                                @foreach (string error in errorContainer.Value)
-                                {
-                                    <li>@error</li>
-                                }
-                            </ul>
-                        </Callout>
-                    }
+                    <Callout Type="CalloutType.Danger" Heading="@errorContainer.Key">
+                        <ul>
+                            @foreach (string error in errorContainer.Value)
+                            {
+                                <li>@error</li>
+                            }
+                        </ul>
+                    </Callout>
                 }
-            </div>
-        }
+            }
+        </div>
     }
 </Collapse>
-
 @code {
 
     protected string? ClassNames => Class;
@@ -119,20 +114,26 @@
     /// </summary>
     private ProblemDetails? problemDetails = null;
 
+    private object? _documentShadow;
+
     /// <inheritdoc/>
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync().ConfigureAwait(false);
-        Store.Reference.Subscribe(newReference => OnStateChanged(cmp => cmp.reference = newReference), token: CancellationTokenSource.Token);
-        Store.Loaded.Subscribe(newLoading => OnStateChanged(cmp => cmp.loaded = newLoading), token: CancellationTokenSource.Token);
-        Store.ProblemDetails.Subscribe(newProblemDetails => OnStateChanged(cmp => cmp.problemDetails = newProblemDetails), token: CancellationTokenSource.Token);
+        Store.Reference.Subscribe(value => OnStateChanged(_ => reference = value), token: CancellationTokenSource.Token);
+        Store.Loaded.Subscribe(value => OnStateChanged(_ => loaded = value), token: CancellationTokenSource.Token);
+        Store.ProblemDetails.Subscribe(value => OnStateChanged(c_mp => problemDetails = value), token: CancellationTokenSource.Token);
     }
 
     /// <inheritdoc/>
     protected override async Task OnParametersSetAsync()
     {
         await base.OnParametersSetAsync();
-        Store.SetDocument(Document);
+        if (Document != _documentShadow)
+        {
+            Store.SetDocument(Document);
+            _documentShadow = Document;
+        }
         if (reference != Reference)
         {
             Store.SetReference(Reference);
@@ -146,7 +147,10 @@
 
     async Task ToggleAsync()
     {
-        isOpen = !isOpen;
-        await (isOpen ? collapse.ShowAsync() : collapse.HideAsync());
+        if (collapse != null)
+        {
+            isOpen = !isOpen;
+            await (isOpen ? collapse.ShowAsync() : collapse.HideAsync());
+        }
     }
 }

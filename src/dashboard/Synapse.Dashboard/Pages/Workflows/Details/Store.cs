@@ -61,14 +61,19 @@ public class WorkflowDetailsStore(
     protected IYamlSerializer YamlSerializer { get; } = yamlSerializer;
 
     /// <summary>
-    /// The <see cref="BlazorMonaco.Editor.StandaloneEditorConstructionOptions"/> provider function
+    ///  Gets/sets the <see cref="BlazorMonaco.Editor.StandaloneEditorConstructionOptions"/> provider function
     /// </summary>
     public Func<StandaloneCodeEditor, StandaloneEditorConstructionOptions> StandaloneEditorConstructionOptions = monacoEditorHelper.GetStandaloneEditorConstructionOptions(string.Empty, true, monacoEditorHelper.PreferredLanguage);
 
     /// <summary>
-    /// The <see cref="StandaloneCodeEditor"/> reference
+    /// Gets/sets the <see cref="StandaloneCodeEditor"/>'s reference used to display the workflow definition
     /// </summary>
     public StandaloneCodeEditor? TextEditor { get; set; }
+
+    /// <summary>
+    /// Gets/sets the <see cref="Modal"/>'s reference used to display the workflow instance creation form
+    /// </summary>
+    public Modal? Modal { get; set; }
 
     #region Selectors
     /// <summary>
@@ -183,6 +188,32 @@ public class WorkflowDetailsStore(
 
     #region Actions
     /// <summary>
+    /// Changes the value of the text editor
+    /// </summary>
+    /// <returns></returns>
+    async Task SetTextEditorValueAsync()
+    {
+        var document = this.Get(state => state.WorkflowDefinitionJson);
+        var language = this.MonacoEditorHelper.PreferredLanguage;
+        if (this.TextEditor != null && !string.IsNullOrWhiteSpace(document))
+        {
+            try
+            {
+                if (language == PreferredLanguage.YAML)
+                {
+                    document = this.YamlSerializer.ConvertFromJson(document);
+                }
+                await this.TextEditor.SetValue(document);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                await this.MonacoEditorHelper.ChangePreferredLanguageAsync(language == PreferredLanguage.YAML ? PreferredLanguage.JSON : PreferredLanguage.YAML);
+            }
+        }
+    }
+
+    /// <summary>
     /// Gets the workflow for the provided namespace and name
     /// </summary>
     /// <param name="ns"></param>
@@ -258,29 +289,67 @@ public class WorkflowDetailsStore(
     }
 
     /// <summary>
-    /// Changes the value of the text editor
+    /// Displays the modal used to provide the new workflow input
     /// </summary>
     /// <returns></returns>
-    async Task SetTextEditorValueAsync()
+    public async Task OnShowCreateInstanceAsync()
     {
-        var document = this.Get(state => state.WorkflowDefinitionJson);
-        var language = this.MonacoEditorHelper.PreferredLanguage;
-        if (this.TextEditor != null && !string.IsNullOrWhiteSpace(document))
+        if (this.Modal != null)
         {
-            try
+            var parameters = new Dictionary<string, object>
             {
-                if (language == PreferredLanguage.YAML)
-                {
-                    document = this.YamlSerializer.ConvertFromJson(document);
-                }
-                await this.TextEditor.SetValue(document);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await this.MonacoEditorHelper.ChangePreferredLanguageAsync(language == PreferredLanguage.YAML ? PreferredLanguage.JSON : PreferredLanguage.YAML);
-            }
+                { nameof(WorkflowInstanceCreation.OnCreate), EventCallback.Factory.Create<string>(this, CreateInstanceAsync) }
+            };
+            await this.Modal.ShowAsync<WorkflowInstanceCreation>(title: "Start a new worklfow", parameters: parameters);
         }
+    }
+
+    /// <summary>
+    /// Creates a new instance of the workflow
+    /// </summary>
+    /// <param name="input">The input data, if any</param>
+    /// <returns></returns>
+    public async Task CreateInstanceAsync(string input)
+    {
+        var workflowName = this.Get(state => state.WorkflowDefinitionName);
+        var workflowVersion = this.Get(state => state.WorkflowDefinitionVersion);
+        var ns = this.Get(state => state.Namespace);
+        if (string.IsNullOrWhiteSpace(workflowName) || string.IsNullOrWhiteSpace(workflowVersion) || string.IsNullOrWhiteSpace(ns))
+        {
+            await this.Modal!.HideAsync();
+            return;
+        }
+        var inputData = new EquatableDictionary<string, object> { };
+        if (!string.IsNullOrWhiteSpace(input)) inputData = this.MonacoEditorHelper.PreferredLanguage == PreferredLanguage.JSON ?
+                this.JsonSerializer.Deserialize<EquatableDictionary<string, object>>(input) :
+                this.YamlSerializer.Deserialize<EquatableDictionary<string, object>>(input);
+        try
+        {
+            var instance = await this.ApiClient.WorkflowInstances.CreateAsync(new()
+            {
+                Metadata = new()
+                {
+                    Namespace =ns,
+                    Name = $"{workflowName}-"
+                },
+                Spec = new()
+                {
+                    Definition = new()
+                    {
+                        Namespace = ns,
+                        Name = workflowName,
+                        Version = workflowVersion
+                    },
+                    Input = inputData
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            // todo: handle ex
+            Console.WriteLine(ex.ToString());
+        }
+        await this.Modal!.HideAsync();
     }
     #endregion
 

@@ -20989,6 +20989,12 @@ h1:focus, .h1:focus {
   border-top: var(--bs-modal-header-border-width) solid var(--bs-modal-header-border-color) !important;
 }
 
+.modal .modal-header {
+  background-color: inherit !important;
+  color: inherit !important;
+  justify-content: space-between;
+}
+
 .h-100-px {
   height: 100px;
 }
@@ -21021,4 +21027,8 @@ input[type=search]::-webkit-search-cancel-button {
 
 .breadcrumb {
   margin-bottom: 0;
+}
+
+.collapsible-instances .content {
+  max-height: calc(100% - 80px) !important;
 }

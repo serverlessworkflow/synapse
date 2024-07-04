@@ -16,7 +16,7 @@
 @namespace Synapse.Dashboard.Components
 
 
-<div class="table-container">
+<div class="table-container @ClassNames">
     @if (Loading)
     {
         <Loader />
@@ -80,7 +80,7 @@
                                             <a href="#" @onclick:preventDefault="true" @onclick:stopPropagation="true">@instance.Spec.Definition.ToString()</a>
                                             break;
                                         case "Status":
-                                            <span class="badge rounded-pill badge rounded-pill border @GetStatusClass(instance)">@(instance.Status?.Phase ?? WorkflowInstanceStatusPhase.Pending)</span>
+                                            <span class="badge rounded-pill badge rounded-pill border border-@instance.Status?.Phase.GetColorClass() text-@instance.Status?.Phase.GetColorClass()">@(instance.Status?.Phase ?? WorkflowInstanceStatusPhase.Pending)</span>
                                             break;
                                         case "Created At":
                                             @instance.Metadata.CreationTimestamp?.DateTime.FromNow()
@@ -127,6 +127,9 @@
 </div>
 
 @code {
+
+    protected string? ClassNames => Class;
+    [Parameter] public string? Class { get; set; }
     [Parameter] public RenderFragment? Title { get; set; }
     [Parameter] public bool Loading { get; set; } = true;
     [Parameter] public IEnumerable<string> Columns { get; set; } = [];
@@ -153,24 +156,6 @@
         "Operator",
         "Actions"
     ];
-
-    /// <summary>
-    /// Gets the css class for the provided <see cref="WorkflowInstance"/>'s status
-    /// </summary>
-    /// <param name="instance">The instance to get the status of</param>
-    /// <returns></returns>
-    string GetStatusClass(WorkflowInstance instance)
-    {
-        return instance.Status?.Phase switch
-        {
-            WorkflowInstanceStatusPhase.Running => "border-accent text-accent",
-            WorkflowInstanceStatusPhase.Faulted => "border-danger text-danger",
-            WorkflowInstanceStatusPhase.Cancelled => "border-warning text-warning",
-            WorkflowInstanceStatusPhase.Completed => "border-success text-success",
-            WorkflowInstanceStatusPhase.Waiting => "border-cinereous text-cinereous",
-            _ => ""
-        };
-    }
 
     /// <summary>
     /// Gets the text alignment of the provided column

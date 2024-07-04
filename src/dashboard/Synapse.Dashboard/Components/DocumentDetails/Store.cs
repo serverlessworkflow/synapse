@@ -258,18 +258,10 @@ public class DocumentDetailsStore(
             var language = this.MonacoEditorHelper.PreferredLanguage;
             if (this.TextEditor != null)
             {
-                var reference = this.Get(state => state.Reference) ?? this.Get(state => state.Label);
-
-                if (!string.IsNullOrWhiteSpace(reference))
-                {
-                    this._textModel = await Global.GetModel(this.JSRuntime, this._textModelUri);
-                    this._textModel ??= await Global.CreateModel(this.JSRuntime, "", language, this._textModelUri);
-                }
-                if (this._textModel != null)
-                {
-                    await Global.SetModelLanguage(this.JSRuntime, this._textModel, language);
-                    await this.TextEditor!.SetModel(this._textModel);
-                }
+                this._textModel = await Global.GetModel(this.JSRuntime, this._textModelUri);
+                this._textModel ??= await Global.CreateModel(this.JSRuntime, "", language, this._textModelUri);
+                await Global.SetModelLanguage(this.JSRuntime, this._textModel, language);
+                await this.TextEditor!.SetModel(this._textModel);
             }
         }
         catch (Exception ex)

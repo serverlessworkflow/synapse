@@ -19,9 +19,19 @@
 @if (TaskInstance != null) {
     <tr @onclick="async _ => await OnToggleRow()" class="cursor-pointer">
         <td>@TaskInstance.Name</td>
-        <td class="text-center"><span class="badge rounded-pill badge rounded-pill border @GetTaskStatusClass(TaskInstance)">@(TaskInstance.Status ?? TaskInstanceStatus.Pending)</span></td>
+        <td class="text-center"><span class="badge rounded-pill badge rounded-pill border border-@TaskInstance.Status.GetColorClass() text-@TaskInstance.Status.GetColorClass()">@(TaskInstance.Status ?? TaskInstanceStatus.Pending)</span></td>
         <td class="text-center">@(TaskInstance.StartedAt?.DateTime.FromNow() ?? "-")</td>
         <td class="text-center">@(TaskInstance.EndedAt?.DateTime.FromNow() ?? "-")</td>
+        <td class="text-center">
+            @if (TaskInstance.StartedAt.HasValue == true && TaskInstance.EndedAt.HasValue == true)
+            {
+                @TaskInstance.EndedAt.Value.Subtract(TaskInstance.StartedAt.Value).ToString("hh\\:mm\\:ss\\.fff")
+            }
+            else
+            {
+                @("-")
+            }
+        </td>
         <td class="text-end"><Icon Name="@(isOpen ? IconName.CaretUp : IconName.CaretDown)" /></td>
     </tr>
     @if (isOpen) {
@@ -51,15 +61,4 @@
         }
         StateHasChanged();
     }
-
-    string GetTaskStatusClass(TaskInstance task) => task.Status switch
-    {
-        TaskInstanceStatus.Running => "border-accent text-accent",
-        TaskInstanceStatus.Faulted => "border-danger text-danger",
-        TaskInstanceStatus.Suspended => "border-icterine text-icterine",
-        TaskInstanceStatus.Cancelled => "border-warning text-warning",
-        TaskInstanceStatus.Completed => "border-success text-success",
-        TaskInstanceStatus.Skipped => "border-cinereous text-cinereous",
-        _ => ""
-    };
 }

@@ -1,0 +1,79 @@
+﻿﻿@*
+    Copyright © 2024-Present The Synapse Authors
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*@
+
+@namespace Synapse.Dashboard.Components
+@using Synapse.Dashboard.Components.MonacoEditorStateManagement
+@inherits StatefulComponent<MonacoEditor, MonacoEditorStore, MonacoEditorState>
+
+<div class="d-flex justify-content-end mb-2">
+    <PreferredLanguageSelector PreferedLanguageChange="Store.ToggleTextBasedEditorLanguageAsync" />
+</div>
+<StandaloneCodeEditor @ref="Store.TextEditor"
+                      ConstructionOptions="Store.StandaloneEditorConstructionOptions"
+                      OnDidInit="Store.OnTextBasedEditorInitAsync"
+                      OnDidChangeModelContent="OnDidChangeModelContent"
+                      CssClass="h-300-px" />
+
+@code {
+    /// <summary>
+    /// A boolean indicating the editor is read-only
+    /// </summary>
+    [Parameter] public bool IsReadOnly { get; set; } = false;
+    /// <summary>
+    /// The document to display
+    /// </summary>
+    [Parameter] public object? Document { get; set; }
+    /// <summary>
+    /// The JSON representation of the document to display
+    /// </summary>
+    [Parameter] public string? DocumentJson { get; set; }
+    /// <summary>
+    /// The YAML representation of the document to display
+    /// </summary>
+    [Parameter] public string? DocumentYaml { get; set; }
+    /// <summary>
+    /// The <see cref="EventCallback"/>see called when the text changes
+    /// </summary>
+    [Parameter] public EventCallback<string> OnTextChanged { get; set; }
+
+    /// <inheritdoc/>
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        Store.SetIsReadOnly(IsReadOnly);
+        if (Document !=  null)
+        {
+            Store.SetDocument(Document);
+        }
+        if (!string.IsNullOrWhiteSpace(DocumentJson))
+        {
+            Store.SetDocumentJson(DocumentJson);
+        }
+        if (!string.IsNullOrWhiteSpace(DocumentYaml))
+        {
+            Store.SetDocumentYaml(DocumentYaml);
+        }
+    }
+
+    async Task OnDidChangeModelContent(ModelContentChangedEvent e)
+    {
+        if (OnTextChanged.HasDelegate)
+        {
+            await OnTextChanged.InvokeAsync(await Store.TextEditor!.GetValue());
+        } 
+    }
+
+}
