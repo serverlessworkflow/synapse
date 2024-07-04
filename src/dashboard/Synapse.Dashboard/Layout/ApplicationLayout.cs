@@ -11,10 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Microsoft.AspNetCore.Components;
 using System.ComponentModel;
 
-namespace Synapse.Dashboard.Components;
+namespace Synapse.Dashboard.Layout;
 
 /// <summary>
 /// Represents the default implementation of the <see cref="IApplicationLayout"/> interface

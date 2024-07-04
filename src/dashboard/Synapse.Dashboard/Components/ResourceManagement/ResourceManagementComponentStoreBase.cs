@@ -219,7 +219,7 @@ public abstract class ResourceManagementComponentStoreBase<TState, TResource>(IS
             {
                 Loading = true,
             });
-            var resourceList = new EquatableList<TResource>(await (await this.ApiClient.ManageNamespaced<TResource>().ListAsync(filter?.Namespace, filter?.LabelSelectors).ConfigureAwait(false)).ToListAsync().ConfigureAwait(false));
+            var resourceList = new EquatableList<TResource>(await (await this.ApiClient.ManageNamespaced<TResource>().ListAsync(filter?.Namespace, filter?.LabelSelectors).ConfigureAwait(false)).OrderBy(r => r.Metadata.CreationTimestamp).ToListAsync().ConfigureAwait(false));
             this.Reduce(s => s with
             {
                 Resources = resourceList,
@@ -242,24 +242,19 @@ public abstract class ResourceManagementComponentStoreBase<TState, TResource>(IS
     {
         var labelSelectors = this.Get(state => state.LabelSelectors);
         if (labelSelectors != null && labelSelectors.Count > 0 && !labelSelectors.All(selector => {
-            if (e.Resource?.Metadata?.Labels == null || e.Resource.Metadata.Labels.Count == 0 || !e.Resource.Metadata.Labels.ContainsKey(selector.Key))
+            if (e.Resource?.Metadata?.Labels == null || e.Resource.Metadata.Labels.Count == 0 || !e.Resource.Metadata.Labels.TryGetValue(selector.Key, out string? value))
             {
                 return false;
             }
-            var label = e.Resource.Metadata.Labels[selector.Key];
-            switch (selector.Operator)
+            var label = value;
+            return selector.Operator switch
             {
-                case LabelSelectionOperator.Equals:
-                    return !string.IsNullOrWhiteSpace(selector.Value) && selector.Value.Equals(label);
-                case LabelSelectionOperator.NotEquals:
-                    return !string.IsNullOrWhiteSpace(selector.Value) && !selector.Value.Equals(label);
-                case LabelSelectionOperator.Contains:
-                    return selector.Values != null && selector.Values.Contains(label);
-                case LabelSelectionOperator.NotContains:
-                    return selector.Values != null && !selector.Values.Contains(label);
-                default:
-                    return false;
-            }
+                LabelSelectionOperator.Equals => !string.IsNullOrWhiteSpace(selector.Value) && selector.Value.Equals(label),
+                LabelSelectionOperator.NotEquals => !string.IsNullOrWhiteSpace(selector.Value) && !selector.Value.Equals(label),
+                LabelSelectionOperator.Contains => selector.Values != null && selector.Values.Contains(label),
+                LabelSelectionOperator.NotContains => selector.Values != null && !selector.Values.Contains(label),
+                _ => false,
+            };
         }))
         {
             return Task.CompletedTask;

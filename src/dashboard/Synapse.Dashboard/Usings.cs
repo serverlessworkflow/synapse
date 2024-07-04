@@ -25,6 +25,7 @@ global using Synapse.Api.Client;
 global using Synapse.Dashboard;
 global using Synapse.Dashboard.Components;
 global using Synapse.Dashboard.Components.ResourceManagement;
+global using Synapse.Dashboard.Layout;
 global using Synapse.Dashboard.Services;
 global using Synapse.Dashboard.StateManagement;
 global using System.Reactive.Linq;

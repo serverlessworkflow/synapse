@@ -40,12 +40,12 @@
         </div>
         <div class="row mb-3">
             <div class="col-md-12 col-lg-4">
-                <div class="label">Started at</div>
-                @(TaskInstance.StartedAt?.DateTime.FromNow() ?? "-")
+                <div class="label">Start Time</div>
+                @(TaskInstance.StartedAt?.DateTime.RelativeFormat() ?? "-")
             </div>
             <div class="col-md-12 col-lg-4">
-                <div class="label">Ended at</div>
-                @(TaskInstance.EndedAt?.DateTime.FromNow() ?? "-")
+                <div class="label">End Time</div>
+                @(TaskInstance.EndedAt?.DateTime.RelativeFormat() ?? "-")
             </div>
             <div class="col-md-12 col-lg-4">
                 <div class="label">Duration</div>
@@ -81,8 +81,8 @@
             <table class="table table-hover">
                 <thead>
                     <tr>
-                        <th>Started At</th>
-                        <th class="text-center">Ended At</th>
+                        <th>Start Time</th>
+                        <th class="text-center">End Time</th>
                         <th class="text-center">Duration</th>
                         <th class="text-center">Outcome</th>
                     </tr>
@@ -91,8 +91,8 @@
                     @foreach (var run in TaskInstance.Runs)
                     {
                         <tr>
-                            <td>@run.StartedAt.DateTime.FromNow()</td>
-                            <td class="text-center">@(run.EndedAt?.DateTime.FromNow() ?? "-")</td>
+                            <td>@run.StartedAt.DateTime.RelativeFormat()</td>
+                            <td class="text-center">@(run.EndedAt?.DateTime.RelativeFormat() ?? "-")</td>
                             <td class="text-center">@(run.EndedAt.HasValue ? run.EndedAt.Value.Subtract(run.StartedAt).ToString("hh\\:mm\\:ss\\.fff") : "-")</td>
                             <td class="text-center"><span class="badge rounded-pill badge rounded-pill border border-@run.Outcome.GetColorClass() text-@run.Outcome.GetColorClass()">@(run.Outcome ?? TaskInstanceStatus.Pending)</span></td>
                         </tr>
@@ -119,7 +119,7 @@
                     @foreach (var retry in TaskInstance.Retries)
                     {
                         <tr>
-                            <td>@retry.Time.DateTime.FromNow()</td>
+                            <td>@retry.Time.DateTime.RelativeFormat()</td>
                             <td class="text-center">@retry.Number</td>
                             <td class="text-center">
                                 <DocumentDetails Label="Cause" Document="@retry.Cause" />

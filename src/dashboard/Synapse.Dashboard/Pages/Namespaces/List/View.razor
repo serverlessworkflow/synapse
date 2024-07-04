@@ -22,10 +22,8 @@
         <thead>
             <tr>
                 <th class="sticky-header text-start">Name</th>
-                <th class="sticky-header text-center">Created At</th>
-                <th class="sticky-header text-end">
-                    <Button Outline="true" Size="Size.Small" Color="ButtonColor.Primary" @onclick="async _ => await OnShowResourceEditorAsync()"><Icon Name="IconName.Plus" /></Button>
-                </th>
+                <th class="sticky-header text-center">Creation Time</th>
+                <th class="sticky-header text-end"></th>
             </tr>
         </thead>
         <tbody>
@@ -36,8 +34,11 @@
                         <td class="text-left">@resource.Metadata.Name</td>
                         <td class="text-center">@resource.Metadata.CreationTimestamp.ToString()</td>
                         <td class="text-end">
-                            <button class="btn btn-outline-primary btn-sm" title="Edit '@resource.Metadata.Name'" @onclick="async _ => await OnShowResourceEditorAsync(resource)" @onclick:preventDefault @onclick:stopPropagation><Icon Name="IconName.Pencil" /></button>
-                            <button class="btn btn-outline-danger btn-sm" title="Delete '@resource.Metadata.Name'" @onclick="async _ => await OnDeleteResourceAsync(resource)" @onclick:preventDefault @onclick:stopPropagation><Icon Name="IconName.Trash" /></button>
+                            <button class="btn btn-sm btn-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="" @onclick:stopPropagation="true"><i class="bi bi-three-dots-vertical"></i></button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" @onclick="async _ => await OnShowResourceEditorAsync(resource)" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Pencil" /> Edit</a></li>
+                                <li><a class="dropdown-item text-danger" href="#" @onclick="async _ => await OnDeleteResourceAsync(resource)" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Trash" /> Delete</a></li>
+                            </ul>
                         </td>
                     </tr>
                 </Virtualize>

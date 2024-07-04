@@ -14,10 +14,11 @@
     limitations under the License.
 *@
 
-@namespace Synapse.Dashboard
+@namespace Synapse.Dashboard.Layout
 @inherits LayoutComponentBase
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IOptions<ApplicationOptions> Options
+@inject NavigationManager NavigationManager
 
 <div class="page h-100 d-flex flex-column">    
     <header class="header navbar navbar-expand-lg flex-row navbar-dark bg-dark-subtle">        
@@ -32,7 +33,7 @@
                 <AuthorizeView>
                     <Authorized>
                         <div class="dropdown">
-                            <button class="btn text-muted dropdown-toggle" type="button" id="workflowDropdownButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            <button class="btn nav-link dropdown-toggle @(IsActive("", NavLinkMatch.All) || IsActive("workflows", NavLinkMatch.All) || IsActive("workflow-instances", NavLinkMatch.All) ? "active" : "")" type="button" id="workflowDropdownButton" data-bs-toggle="dropdown" aria-expanded="false">
                                 <span class="btn-label">Workflows</span>
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="workflowDropdownButton">
@@ -55,7 +56,7 @@
                         </li>
                         <li class="nav-item">
                             <div class="dropdown">
-                                <button class="btn text-muted dropdown-toggle" type="button" id="servicesDropdownButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                <button class="btn nav-link dropdown-toggle @(IsActive("correlators", NavLinkMatch.Prefix) || IsActive("operators", NavLinkMatch.Prefix)  ? "active" : "")" type="button" id="servicesDropdownButton" data-bs-toggle="dropdown" aria-expanded="false">
                                     <span class="btn-label">Services</span>
                                 </button>
                                 <ul class="dropdown-menu" aria-labelledby="servicesDropdownButton">
@@ -122,6 +123,12 @@
     {
         user = (await authenticationStateTask).User;
         this.StateHasChanged();
+    }
+
+    bool IsActive(string href, NavLinkMatch navLinkMatch = NavLinkMatch.Prefix)
+    {
+        var relativePath = NavigationManager.ToBaseRelativePath(NavigationManager.Uri).ToLower();
+        return navLinkMatch == NavLinkMatch.All ? relativePath == href.ToLower() : relativePath.StartsWith(href.ToLower());
     }
 
 }

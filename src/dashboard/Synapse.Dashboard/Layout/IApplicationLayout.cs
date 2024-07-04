@@ -13,7 +13,7 @@
 
 using System.ComponentModel;
 
-namespace Synapse.Dashboard.Components;
+namespace Synapse.Dashboard.Layout;
 
 /// <summary>
 /// Defines the fundamentals of a service used to manage the application's layout

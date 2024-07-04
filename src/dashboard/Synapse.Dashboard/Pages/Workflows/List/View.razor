@@ -36,9 +36,9 @@
             <tr>
                 <th class="sticky-header text-start">Name</th>
                 <th class="sticky-header text-start">Namespace</th>
-                <th class="sticky-header text-center">Created At</th>
-                <th class="sticky-header text-center">Last Started At</th>
-                <th class="sticky-header text-center">Last Ended At</th>
+                <th class="sticky-header text-center">Creation Time</th>
+                <th class="sticky-header text-center">Last Start Time</th>
+                <th class="sticky-header text-center">Last End Time</th>
                 <th class="sticky-header text-center">Versions</th>
                 <th class="sticky-header text-center">Latest</th>
                 <th class="sticky-header text-center">Instances</th>
@@ -54,9 +54,9 @@
                     <tr @onclick="_ => OnViewWorkflow(resource)" class="cursor-pointer">
                         <td class="text-start">@resource.Metadata.Name</td>
                         <td class="text-start"><a href="#" @onclick:preventDefault="true" @onclick:stopPropagation="true">@resource.Metadata.Namespace</a></td>
-                        <td class="text-center">@resource.Metadata.CreationTimestamp?.DateTime.FromNow()</td>
-                        <td class="text-center">@(resource.Status?.Versions.Where(v => v.Value.LastStartedAt.HasValue).Select(v => v.Value.LastStartedAt).Order().LastOrDefault()?.DateTime.FromNow() ?? "-")</td>
-                        <td class="text-center">@(resource.Status?.Versions.Where(v => v.Value.LastEndedAt.HasValue).Select(v => v.Value.LastEndedAt).Order().LastOrDefault()?.DateTime.FromNow() ?? "-")</td>
+                        <td class="text-center">@resource.Metadata.CreationTimestamp?.DateTime.RelativeFormat()</td>
+                        <td class="text-center">@(resource.Status?.Versions.Where(v => v.Value.LastStartedAt.HasValue).Select(v => v.Value.LastStartedAt).Order().LastOrDefault()?.DateTime.RelativeFormat() ?? "-")</td>
+                        <td class="text-center">@(resource.Status?.Versions.Where(v => v.Value.LastEndedAt.HasValue).Select(v => v.Value.LastEndedAt).Order().LastOrDefault()?.DateTime.RelativeFormat() ?? "-")</td>
                         <td class="text-center">@resource.Spec.Versions.Count</td>
                         <td class="text-center"><a href="#" @onclick:preventDefault="true" @onclick:stopPropagation="true">@resource.Spec.Versions.GetLatest().Document.Version</a></td>
                         <td class="text-center">@resource.Status?.Versions.Values.Sum(s => s.TotalInstances)</td>
@@ -84,8 +84,8 @@
                             <div class="dropdown">
                                 <button class="btn btn-sm btn-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="" @onclick:stopPropagation="true"><i class="bi bi-three-dots-vertical"></i></button>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#" @onclick="_ => OnCreateWorkflowVersion(resource.GetNamespace()!, resource.GetName())" @onclick:preventDefault="true" @onclick:stopPropagation="true">New version</a></li>
-                                    <li><a class="dropdown-item" href="#" @onclick="async _ => await OnDeleteResourceAsync(resource)" @onclick:preventDefault="true" @onclick:stopPropagation="true">Delete</a></li>
+                                    <li><a class="dropdown-item" href="#" @onclick="_ => OnCreateWorkflowVersion(resource.GetNamespace()!, resource.GetName())" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Copy" /> New version</a></li>
+                                    <li><a class="dropdown-item text-danger" href="#" @onclick="async _ => await OnDeleteResourceAsync(resource)" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Trash" /> Delete</a></li>
                                 </ul>
                             </div>
                         </td>

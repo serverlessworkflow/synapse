@@ -82,14 +82,14 @@
                                         case "Status":
                                             <span class="badge rounded-pill badge rounded-pill border border-@instance.Status?.Phase.GetColorClass() text-@instance.Status?.Phase.GetColorClass()">@(instance.Status?.Phase ?? WorkflowInstanceStatusPhase.Pending)</span>
                                             break;
-                                        case "Created At":
-                                            @instance.Metadata.CreationTimestamp?.DateTime.FromNow()
+                                        case "Creation Time":
+                                            @instance.Metadata.CreationTimestamp?.DateTime.RelativeFormat()
                                             break;
-                                        case "Started At":
-                                            @(instance.Status?.StartedAt?.DateTime.FromNow() ?? "-")
+                                        case "Start Time":
+                                            @(instance.Status?.StartedAt?.DateTime.RelativeFormat() ?? "-")
                                             break;
-                                        case "Ended At":
-                                            @(instance.Status?.EndedAt?.DateTime.FromNow() ?? "-")
+                                        case "End Time":
+                                            @(instance.Status?.EndedAt?.DateTime.RelativeFormat() ?? "-")
                                             break;
                                         case "Duration":
                                             @(instance.Status?.StartedAt.HasValue == true && instance.Status?.EndedAt.HasValue == true ? instance.Status.EndedAt.Value.Subtract(instance.Status.StartedAt.Value).ToString("hh\\:mm\\:ss\\.fff") : "-")
@@ -108,8 +108,8 @@
                                             <div class="dropdown">
                                                 <button class="btn btn-sm btn-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="" @onclick:stopPropagation="true"><i class="bi bi-three-dots-vertical"></i></button>
                                                 <ul class="dropdown-menu">
-                                                    <li><a class="dropdown-item" href="#" @onclick:preventDefault="true" @onclick:stopPropagation="true">View</a></li>
-                                                    <li><a class="dropdown-item" href="#" @onclick="async _ => await OnDeleteClickedAsync(instance)" @onclick:preventDefault="true" @onclick:stopPropagation="true">Delete</a></li>
+                                                    <li><a class="dropdown-item" href="#" @onclick="async _ => await OnShowClickedAsync(instance)" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Eye" /> View</a></li>
+                                                    <li><a class="dropdown-item text-danger" href="#" @onclick="async _ => await OnDeleteClickedAsync(instance)" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Trash" /> Delete</a></li>
                                                 </ul>
                                             </div>
                                             break;
@@ -149,9 +149,9 @@
         "Namespace",
         "Definition",
         "Status",
-        "Created At",
-        "Started At",
-        "Ended At",
+        "Creation Time",
+        "Start Time",
+        "End Time",
         "Duration",
         "Operator",
         "Actions"
