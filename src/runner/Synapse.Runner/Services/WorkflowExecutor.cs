@@ -278,7 +278,7 @@ public class WorkflowExecutor(IServiceProvider serviceProvider, ILogger<Workflow
             return;
         }
         var nextTask = await this.Workflow.CreateTaskAsync(nextDefinition.Value, nextDefinition.Key, completedTask.Output ?? new { }, cancellationToken: cancellationToken).ConfigureAwait(false);
-        var nextExecutor = await this.CreateTaskExecutorAsync(nextTask, nextDefinition.Value, this.Workflow.ContextData, this.Workflow.Arguments, cancellationToken).ConfigureAwait(false);
+        var nextExecutor = await this.CreateTaskExecutorAsync(nextTask, nextDefinition.Value, executor.Task.ContextData, this.Workflow.Arguments, cancellationToken).ConfigureAwait(false);
         await nextExecutor.ExecuteAsync(cancellationToken).ConfigureAwait(false);
     }
 

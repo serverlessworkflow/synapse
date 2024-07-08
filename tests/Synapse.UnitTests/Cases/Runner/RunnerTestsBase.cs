@@ -12,7 +12,6 @@
 // limitations under the License.
 
 using Docker.DotNet;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Moq;
 using Neuroglia.Data.Expressions.JQ;
@@ -22,6 +21,7 @@ using Neuroglia.Data.Infrastructure.Services;
 using Neuroglia.Data.PatchModel.Services;
 using Neuroglia.Eventing.CloudEvents.Infrastructure;
 using Neuroglia.Security.Services;
+using ServerlessWorkflow.Sdk.IO;
 using StackExchange.Redis;
 using Synapse.Api.Client.Services;
 using Synapse.Core.Infrastructure.Containers;
@@ -57,6 +57,7 @@ public abstract class RunnerTestsBase
         services.AddSerialization();
         services.AddJsonSerializer();
         services.AddJQExpressionEvaluator();
+        services.AddServerlessWorkflowIO();
         services.AddSingleton<ITaskExecutionContextFactory, TaskExecutionContextFactory>();
         services.AddSingleton<ITaskExecutorFactory, TaskExecutorFactory>();
         services.AddMemoryCacheRepository<Document, string>();
