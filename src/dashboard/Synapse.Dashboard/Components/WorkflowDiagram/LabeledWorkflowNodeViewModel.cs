@@ -20,7 +20,7 @@ namespace Synapse.Dashboard.Components;
 /// Represents a <see cref="NodeViewModel"/> containing a label
 /// </summary>
 /// <inheritdoc/>
-public class LabeledWorkflowNodeViewModel(string? label = "", string? cssClass = null, string? shape = null, double? width = Constants.NodeWidth * 2, double? height = Constants.NodeHeight, double? radiusX = Constants.NodeRadius, double? radiusY = Constants.NodeRadius, double? x = 0, double? y = 0, Type? componentType = null, Guid? parentId = null)
+public class LabeledWorkflowNodeViewModel(string? label = "", string? cssClass = null, string? shape = null, double? width = Constants.NodeWidth * 5, double? height = Constants.NodeHeight *2.5, double? radiusX = Constants.NodeRadius*2, double? radiusY = Constants.NodeRadius*2, double? x = 0, double? y = 0, Type? componentType = null, Guid? parentId = null)
     : WorkflowNodeViewModel(label, cssClass, shape, width, height, radiusX, radiusY, x, y, componentType, parentId)
 {
 

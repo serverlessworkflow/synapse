@@ -58,8 +58,14 @@ h1:focus {
     flex-grow: 1;
 }
 
-#svg-definitions {
-    display: none;
+.svg-definitions, #svg-definitions {
+    width: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    position: absolute;
+    top: -100px;
+    left: -100px;
 }
 
 .logo {

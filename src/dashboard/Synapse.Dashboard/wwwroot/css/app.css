@@ -20849,6 +20849,13 @@ tr.row-placeholder td::after {
   fill: #1a1d20;
   stroke-width: 1px;
 }
+.node .node-rectangle {
+  stroke: url(#default-node-gradient);
+  stroke-width: 3px;
+}
+.node .node-cartouche {
+  fill: url(#default-node-gradient);
+}
 
 .end-node circle {
   stroke-width: 3px;
@@ -20943,8 +20950,14 @@ h1:focus, .h1:focus {
   flex-grow: 1;
 }
 
-#svg-definitions {
-  display: none;
+.svg-definitions, #svg-definitions {
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  position: absolute;
+  top: -100px;
+  left: -100px;
 }
 
 .logo {

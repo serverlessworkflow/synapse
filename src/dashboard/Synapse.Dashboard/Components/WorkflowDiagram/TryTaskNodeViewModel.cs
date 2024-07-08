@@ -20,6 +20,6 @@ namespace Synapse.Dashboard.Components;
 /// Initializes a new <see cref="TryTaskNodeViewModel"/>
 /// </remarks>
 public class TryTaskNodeViewModel(string name)
-    : LabeledWorkflowNodeViewModel(name, "try-task-node", null, 150, 35)
+    : LabeledWorkflowNodeViewModel(name, "try-task-node")
 {
 }

@@ -20,7 +20,7 @@ namespace Synapse.Dashboard.Components;
 /// Initializes a new <see cref="EmitTaskNodeViewModel"/>
 /// </remarks>
 public class EmitTaskNodeViewModel(string name)
-    : LabeledWorkflowNodeViewModel(name, "emit-task-node", null, 150, 35)
+    : LabeledWorkflowNodeViewModel(name, "emit-task-node")
 {
 
 }
