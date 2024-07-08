@@ -33,7 +33,7 @@
                 <AuthorizeView>
                     <Authorized>
                         <div class="dropdown">
-                            <button class="btn nav-link dropdown-toggle @(IsActive("", NavLinkMatch.All) || IsActive("workflows", NavLinkMatch.All) || IsActive("workflow-instances", NavLinkMatch.All) ? "active" : "")" type="button" id="workflowDropdownButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            <button class="btn nav-link dropdown-toggle @(IsActive("", NavLinkMatch.All) || IsActive("workflows", NavLinkMatch.Prefix) || IsActive("workflow-instances", NavLinkMatch.Prefix) ? "active" : "")" type="button" id="workflowDropdownButton" data-bs-toggle="dropdown" aria-expanded="false">
                                 <span class="btn-label">Workflows</span>
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="workflowDropdownButton">
