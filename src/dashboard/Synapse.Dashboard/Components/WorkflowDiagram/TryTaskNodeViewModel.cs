@@ -14,12 +14,21 @@
 namespace Synapse.Dashboard.Components;
 
 /// <summary>
-/// Represents a try task node view model
+/// Represents a composite task node view model
 /// </summary>
-/// <remarks>
-/// Initializes a new <see cref="TryTaskNodeViewModel"/>
-/// </remarks>
-public class TryTaskNodeViewModel(string name)
-    : LabeledWorkflowNodeViewModel(name, "try-task-node")
+public class TryTaskNodeViewModel
+    : WorkflowNodeViewModel
 {
+    /// <summary>
+    /// Initializes a new <see cref="TryTaskNodeViewModel"/>
+    /// </summary>
+    /// <param name="name">The node name</param>
+    /// <param name="content">The node content</param>
+    public TryTaskNodeViewModel(string name, string content)
+        : base(new() { Label = name, CssClass = "try-task-node" })
+    {
+        Content = content;
+        Symbol = "try-symbol";
+        Type = "TRY";
+    }
 }

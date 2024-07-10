@@ -11,15 +11,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.VisualBasic;
+
 namespace Synapse.Dashboard.Components;
 
 /// <summary>
-/// Represents a run task node view model
+/// Represents a composite task node view model
 /// </summary>
-/// <remarks>
-/// Initializes a new <see cref="RunTaskNodeViewModel"/>
-/// </remarks>
-public class RunTaskNodeViewModel(string name)
-    : LabeledWorkflowNodeViewModel(name, "run-task-node")
+public class RunTaskNodeViewModel
+    : WorkflowNodeViewModel
 {
+    /// <summary>
+    /// Initializes a new <see cref="RunTaskNodeViewModel"/>
+    /// </summary>
+    /// <param name="name">The node name</param>
+    /// <param name="content">The node content</param>
+    /// <param name="runType">The type of run</param>
+    public RunTaskNodeViewModel(string name, string content, string runType = "")
+        : base(new() { Label = name, CssClass = "run-task-node" })
+    {
+        Content = content;
+        Symbol = !string.IsNullOrEmpty(runType) ? $"{runType.ToLower()}-symbol" : "run-symbol";
+        Type = "RUN" + (!string.IsNullOrEmpty(runType) ? $" - {runType.ToUpper()}" : "");
+    }
 }

@@ -1,37 +1,30 @@
 @namespace Synapse.Dashboard
 
-@if (!string.IsNullOrWhiteSpace(Node.Label))
+@if (LabelTemplate != null)
+{
+    @LabelTemplate
+}
+else if (!string.IsNullOrWhiteSpace(Node.Label) )
 {
     <g class="label">
-        <foreignObject x="@LabelX"
-                       y="@LabelY"
-                       width="@LabelWidth"
-                       height="@LabelHeight">
-            <div>@Node.Label</div>
+        <foreignObject x="@x"
+                       y="@y"
+                       width="@width"
+                       height="@height">
+            <div class="label-content">@Node.Label</div>
         </foreignObject>
     </g>
 }
 
 @code {
+
+    IBoundingBox bbox => Node.BBox!;
+    string x => bbox.X.ToInvariantString() ?? string.Empty;
+    string y => bbox.Y.ToInvariantString() ?? string.Empty;
+    string width => bbox.Width.ToInvariantString() ?? string.Empty;
+    string height => bbox.Height.ToInvariantString() ?? Neuroglia.Blazor.Dagre.Constants.LabelHeight.ToInvariantString();
+
     [CascadingParameter(Name = "Node")] public INodeViewModel Node { get; set; } = null!;
+    [CascadingParameter(Name = "LabelTemplate")] public RenderFragment? LabelTemplate { get; set; } = null!;
 
-    protected virtual string LabelX { get; set; } = "0";
-    protected virtual string LabelY { get; set; } = "0";
-    protected virtual string LabelWidth { get; set; } = "";
-    protected virtual string LabelHeight { get; set; } = Neuroglia.Blazor.Dagre.Constants.LabelHeight.ToInvariantString();
-
-    protected override void OnParametersSet()
-    {
-        base.OnParametersSet();
-        this.LabelX = (this.Node.BBox?.X ?? 0).ToInvariantString();
-        this.LabelWidth = (this.Node.BBox?.Width ?? 0).ToInvariantString();
-        if (this.Node is IClusterViewModel)
-        {
-            this.LabelY = ((this.Node.BBox?.Height ?? 0) / 2).ToInvariantString();
-        }
-        else
-        {
-            this.LabelY = (0 - Neuroglia.Blazor.Dagre.Constants.LabelHeight / 2).ToInvariantString();
-        }
-    }
 }

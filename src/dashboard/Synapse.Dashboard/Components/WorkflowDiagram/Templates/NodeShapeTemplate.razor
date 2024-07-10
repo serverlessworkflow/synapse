@@ -3,29 +3,31 @@
 <g class="shape">
     @if (Node.Shape == NodeShape.Circle)
     {
-        <Circle BBox="Node.BBox" />
+        <Circle BBox="bbox" />
     }
     else if (Node.Shape == NodeShape.Ellipse)
     {
-        <Ellipse BBox="Node.BBox" />
+        <Ellipse BBox="bbox" />
+    }
+    else if (Node.Shape == SynapseNodeShape.Cartouche)
+    {
+        <rect class="node-rectangle" x="@(bbox.X.ToInvariantString())"
+               y="@(bbox.Y.ToInvariantString())"
+               width="@(bbox.Width.ToInvariantString())"
+               height="@(bbox.Height.ToInvariantString())"
+               rx="@((Node.RadiusX ?? 0).ToInvariantString())"
+               ry="@((Node.RadiusY ?? 0).ToInvariantString())" />
+        <path class="node-cartouche" d="m @((bbox.X).ToInvariantString()) @((bbox.Y + (Node.RadiusX ?? 0)).ToInvariantString()) c 0 -@(((Node.RadiusX ?? 0) / 2).ToInvariantString()) @(((Node.RadiusX ?? 0) / 2).ToInvariantString()) -@((Node.RadiusX ?? 0).ToInvariantString()) @((Node.RadiusX ?? 0).ToInvariantString()) -@((Node.RadiusX ?? 0).ToInvariantString()) h @(((bbox.Width / 8) - 1).ToInvariantString()) v @((bbox.Height).ToInvariantString()) h -@(((bbox.Width / 8) - 1).ToInvariantString()) c -@(((Node.RadiusX ?? 0) / 2).ToInvariantString()) 0 -@((Node.RadiusX ?? 0).ToInvariantString()) -@(((Node.RadiusX ?? 0) / 2).ToInvariantString()) -@((Node.RadiusX ?? 0).ToInvariantString()) -@((Node.RadiusX ?? 0).ToInvariantString()) z" />
     }
     else
     {
-        <!--<Rectangle BBox="Node.BBox" RadiusX="Node.RadiusX" RadiusY="Node.RadiusY" />-->
-        <rect class="node-rectangle" x="@(Node.BBox.X.ToInvariantString())"
-               y="@(Node.BBox.Y.ToInvariantString())"
-               width="@(Node.BBox.Width.ToInvariantString())"
-               height="@(Node.BBox.Height.ToInvariantString())"
-               rx="@((Node.RadiusX ?? 0).ToInvariantString())"
-               ry="@((Node.RadiusY ?? 0).ToInvariantString())" />
-        <path class="node-cartouche" x="@((Node.BBox.X - (Node.BBox.Width/2) + 1).ToInvariantString())"
-              y="@((Node.BBox.Y - (Node.BBox.Height/2) + 1).ToInvariantString())"
-              d="m @((Node.BBox.X).ToInvariantString()) @((Node.BBox.Y + (Node.RadiusX ?? 0)).ToInvariantString()) c 0 -@(((Node.RadiusX ?? 0) / 2).ToInvariantString()) @(((Node.RadiusX ?? 0) / 2).ToInvariantString()) -@((Node.RadiusX ?? 0).ToInvariantString()) @((Node.RadiusX ?? 0).ToInvariantString()) -@((Node.RadiusX ?? 0).ToInvariantString()) h @(((Node.BBox.Width / 8) - 1).ToInvariantString()) v @((Node.BBox.Height).ToInvariantString()) h -@(((Node.BBox.Width / 8) - 1).ToInvariantString()) c -@(((Node.RadiusX ?? 0) / 2).ToInvariantString()) 0 -@((Node.RadiusX ?? 0).ToInvariantString()) -@(((Node.RadiusX ?? 0) / 2).ToInvariantString()) -@((Node.RadiusX ?? 0).ToInvariantString()) -@((Node.RadiusX ?? 0).ToInvariantString()) z" />
+        <Rectangle BBox="bbox" RadiusX="Node.RadiusX" RadiusY="Node.RadiusY" />
     }
 </g>
 
 @code {
 
+    IBoundingBox bbox => Node.BBox!;
     [CascadingParameter(Name = "Node")] public INodeViewModel Node { get; set; } = null!;
 
 }

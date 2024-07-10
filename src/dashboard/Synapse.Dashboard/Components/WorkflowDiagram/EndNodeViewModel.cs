@@ -19,9 +19,6 @@ namespace Synapse.Dashboard.Components;
 /// Represents the object that holds the data required to render the view of a workflow's end node 
 /// </summary>
 public class EndNodeViewModel()
-    : WorkflowNodeViewModel(string.Empty, "end-node", NodeShape.Circle, WorkflowGraphBuilder.StartEndNodeRadius, WorkflowGraphBuilder.StartEndNodeRadius)
+    : WorkflowNodeViewModel(new() { CssClass = "end-node", Shape = NodeShape.Circle, Width = WorkflowGraphBuilder.StartEndNodeRadius, Height = WorkflowGraphBuilder.StartEndNodeRadius })
 {
-
-
-
 }

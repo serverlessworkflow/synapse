@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Neuroglia.Blazor.Dagre;
 using Neuroglia.Blazor.Dagre.Models;
 
 namespace Synapse.Dashboard.Components;
@@ -19,20 +18,25 @@ namespace Synapse.Dashboard.Components;
 /// <summary>
 /// Represents the base class for all workflow-related node models
 /// </summary>
-public abstract class WorkflowNodeViewModel
-    : NodeViewModel, IWorkflowNodeViewModel
+/// <remarks>
+/// Initialiazes a new <see cref="WorkflowNodeViewModel"/>
+/// </remarks>
+/// <param name="config"></param>
+public abstract class WorkflowNodeViewModel(NodeViewModelConfig? config = null)
+        : NodeViewModel(config?.Label, config?.CssClass, config?.Shape, config?.Width, config?.Height, config?.RadiusX, config?.RadiusY, config?.X, config?.Y, config?.ComponentType, config?.ParentId), IWorkflowNodeViewModel
 {
 
     int _operativeInstances = 0;
     int _faultedInstances = 0;
 
     /// <inheritdoc/>
-    public WorkflowNodeViewModel(string? label = "", string? cssClass = null, string? shape = null, double? width = Constants.NodeWidth * 1.5, double? height = Constants.NodeHeight * 1.5,
-        double? radiusX = Constants.NodeRadius, double? radiusY = Constants.NodeRadius, double? x = 0, double? y = 0, Type? componentType = null, Guid? parentId = null)
-        : base(label, cssClass, shape, width, height, radiusX, radiusY, x, y, componentType, parentId)
-    {
-        ComponentType = typeof(WorkflowNodeTemplate);
-    }
+    public string? Symbol { get; init; }
+
+    /// <inheritdoc/>
+    public string? Type { get; init; }
+
+    /// <inheritdoc/>
+    public string? Content { get; init; }
 
     /// <inheritdoc/>
     public int OperativeInstancesCount

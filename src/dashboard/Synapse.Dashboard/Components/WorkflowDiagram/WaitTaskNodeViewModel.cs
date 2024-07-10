@@ -14,12 +14,21 @@
 namespace Synapse.Dashboard.Components;
 
 /// <summary>
-/// Represents a wait task node view model
+/// Represents a composite task node view model
 /// </summary>
-/// <remarks>
-/// Initializes a new <see cref="WaitTaskNodeViewModel"/>
-/// </remarks>
-public class WaitTaskNodeViewModel(string name)
-    : LabeledWorkflowNodeViewModel(name, "wait-task-node")
+public class WaitTaskNodeViewModel
+    : WorkflowNodeViewModel
 {
+    /// <summary>
+    /// Initializes a new <see cref="WaitTaskNodeViewModel"/>
+    /// </summary>
+    /// <param name="name">The node name</param>
+    /// <param name="content">The node content</param>
+    public WaitTaskNodeViewModel(string name, string content)
+        : base(new() { Label = name, CssClass = "wait-task-node" })
+    {
+        Content = content;
+        Symbol = "wait-symbol";
+        Type = "WAIT";
+    }
 }

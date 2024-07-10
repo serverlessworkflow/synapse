@@ -14,13 +14,21 @@
 namespace Synapse.Dashboard.Components;
 
 /// <summary>
-/// Represents an emit task node view model
+/// Represents a composite task node view model
 /// </summary>
-/// <remarks>
-/// Initializes a new <see cref="EmitTaskNodeViewModel"/>
-/// </remarks>
-public class EmitTaskNodeViewModel(string name)
-    : LabeledWorkflowNodeViewModel(name, "emit-task-node")
+public class EmitTaskNodeViewModel
+    : WorkflowNodeViewModel
 {
-
+    /// <summary>
+    /// Initializes a new <see cref="EmitTaskNodeViewModel"/>
+    /// </summary>
+    /// <param name="name">The node name</param>
+    /// <param name="content">The node content</param>
+    public EmitTaskNodeViewModel(string name, string content)
+        : base(new() { Label = name, CssClass = "emit-task-node" })
+    {
+        Content = content;
+        Symbol = "emit-symbol";
+        Type = "EMIT";
+    }
 }

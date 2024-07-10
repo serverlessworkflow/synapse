@@ -14,12 +14,21 @@
 namespace Synapse.Dashboard.Components;
 
 /// <summary>
-/// Represents a raise task node view model
+/// Represents a composite task node view model
 /// </summary>
-/// <remarks>
-/// Initializes a new <see cref="RaiseTaskNodeViewModel"/>
-/// </remarks>
-public class RaiseTaskNodeViewModel(string name)
-    : LabeledWorkflowNodeViewModel(name, "raise-task-node")
+public class RaiseTaskNodeViewModel
+    : WorkflowNodeViewModel
 {
+    /// <summary>
+    /// Initializes a new <see cref="RaiseTaskNodeViewModel"/>
+    /// </summary>
+    /// <param name="name">The node name</param>
+    /// <param name="content">The node content</param>
+    public RaiseTaskNodeViewModel(string name, string content)
+        : base(new() { Label = name, CssClass = "raise-task-node" })
+    {
+        Content = content;
+        Symbol = "raise-symbol";
+        Type = "RAISE";
+    }
 }

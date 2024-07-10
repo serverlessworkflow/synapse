@@ -14,12 +14,21 @@
 namespace Synapse.Dashboard.Components;
 
 /// <summary>
-/// Represents a listen task node view model
+/// Represents a composite task node view model
 /// </summary>
-/// <remarks>
-/// Initializes a new <see cref="ListenTaskNodeViewModel"/>
-/// </remarks>
-public class ListenTaskNodeViewModel(string name)
-    : LabeledWorkflowNodeViewModel(name, "listen-task-node")
+public class ListenTaskNodeViewModel
+    : WorkflowNodeViewModel
 {
+    /// <summary>
+    /// Initializes a new <see cref="ListenTaskNodeViewModel"/>
+    /// </summary>
+    /// <param name="name">The node name</param>
+    /// <param name="content">The node content</param>
+    public ListenTaskNodeViewModel(string name, string content)
+        : base(new() { Label = name, CssClass = "listen-task-node" })
+    {
+        Content = content;
+        Symbol = "listen-symbol";
+        Type = "LISTEN";
+    }
 }

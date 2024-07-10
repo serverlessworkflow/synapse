@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Neuroglia.Blazor.Dagre.Models;
 using Synapse.Resources;
 
 namespace Synapse.Dashboard.Components;
@@ -19,21 +20,22 @@ namespace Synapse.Dashboard.Components;
 /// Defines the fundamentals of a workflow node
 /// </summary>
 public interface IWorkflowNodeViewModel
+    : ICounterNodeViewModel
 {
 
     /// <summary>
-    /// Gets/Sets the number of active <see cref="WorkflowInstance"/>s for which the task described by the node is operative
+    /// Get/sets the id of the symbol of the node.
     /// </summary>
-    int OperativeInstancesCount { get; set; }
+    public string? Symbol { get; }
 
     /// <summary>
-    /// Gets/Sets the number of active faulted <see cref="WorkflowInstance"/>s for which the task described by the node is faulted
+    /// Gets/sets the displayed type of the node
     /// </summary>
-    int FaultedInstancesCount { get; set; }
+    public string? Type { get; }
 
     /// <summary>
-    /// Resets the operative and faulted instances counts
+    /// Gets/sets the displayed content of the node
     /// </summary>
-    void ResetInstancesCount();
+    public string? Content { get; }
 
 }

@@ -21,7 +21,7 @@ namespace Synapse.Dashboard.Components;
 /// Represents a <see cref="TaskDefinition"/> <see cref="NodeViewModel"/>
 /// </summary>
 public class TaskNodeViewModel
-    : ClusterViewModel, IWorkflowNodeViewModel
+    : ClusterViewModel, ICounterNodeViewModel
 {
 
     int _operativeInstances;

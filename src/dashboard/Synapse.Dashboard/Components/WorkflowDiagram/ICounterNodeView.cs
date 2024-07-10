@@ -11,25 +11,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Synapse.Resources;
+
 namespace Synapse.Dashboard.Components;
 
 /// <summary>
-/// Represents a call task node view model
+/// Defines the fundamentals of a graph node with activity counters
 /// </summary>
-public class CallTaskNodeViewModel
-    : WorkflowNodeViewModel
+public interface ICounterNodeViewModel
 {
+
     /// <summary>
-    /// Initializes a new <see cref="CallTaskNodeViewModel"/>
+    /// Gets/Sets the number of active <see cref="WorkflowInstance"/>s for which the task described by the node is operative
     /// </summary>
-    /// <param name="name">The node name</param>
-    /// <param name="content">The node content</param>
-    /// <param name="callType">The type of call</param>
-    public CallTaskNodeViewModel(string name, string content, string callType = "")
-        : base(new() { Label = name, CssClass = "call-task-node" })
-    {
-        Content = content;
-        Symbol = !string.IsNullOrEmpty(callType) ? $"{callType.ToLower()}-symbol" : "call-symbol";
-        Type = "CALL" + (!string.IsNullOrEmpty(callType) ? $" - {callType.ToUpper()}" : "");
-    }
+    int OperativeInstancesCount { get; set; }
+
+    /// <summary>
+    /// Gets/Sets the number of active faulted <see cref="WorkflowInstance"/>s for which the task described by the node is faulted
+    /// </summary>
+    int FaultedInstancesCount { get; set; }
+
+    /// <summary>
+    /// Resets the operative and faulted instances counts
+    /// </summary>
+    void ResetInstancesCount();
+
 }

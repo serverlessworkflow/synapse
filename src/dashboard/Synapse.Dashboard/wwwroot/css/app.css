@@ -20809,6 +20809,8 @@ tr.row-placeholder td::after {
 }
 
 .graph-container {
+  --stroke-color: #6c757d;
+  --fill-color: #1a1d20;
   display: flex;
   flex-direction: column;
 }
@@ -20844,21 +20846,195 @@ tr.row-placeholder td::after {
   border-color: var(--bs-btn-hover-border-color);
 }
 
-.node rect, .node circle, .node ellipse {
-  stroke: #6c757d;
-  fill: #1a1d20;
-  stroke-width: 1px;
+#default-node-gradient stop[offset="0"] {
+  stop-color: #6c757d;
+}
+#default-node-gradient stop[offset="1"] {
+  stop-color: #4c5258;
+}
+
+#call-node-gradient stop[offset="0"] {
+  stop-color: #6e40aa;
+}
+#call-node-gradient stop[offset="1"] {
+  stop-color: #4d2d77;
+}
+
+#do-node-gradient stop[offset="0"] {
+  stop-color: #b23cb2;
+}
+#do-node-gradient stop[offset="1"] {
+  stop-color: #7d2a7d;
+}
+
+#emit-node-gradient stop[offset="0"] {
+  stop-color: #ee4395;
+}
+#emit-node-gradient stop[offset="1"] {
+  stop-color: #a72f68;
+}
+
+#for-node-gradient stop[offset="0"] {
+  stop-color: #ff5e63;
+}
+#for-node-gradient stop[offset="1"] {
+  stop-color: #b34245;
+}
+
+#fork-node-gradient stop[offset="0"] {
+  stop-color: #ff8c38;
+}
+#fork-node-gradient stop[offset="1"] {
+  stop-color: #b36227;
+}
+
+#listen-node-gradient stop[offset="0"] {
+  stop-color: #d9c231;
+}
+#listen-node-gradient stop[offset="1"] {
+  stop-color: #988822;
+}
+
+#raise-node-gradient stop[offset="0"] {
+  stop-color: #aff05b;
+}
+#raise-node-gradient stop[offset="1"] {
+  stop-color: #7ba840;
+}
+
+#run-node-gradient stop[offset="0"] {
+  stop-color: #60f760;
+}
+#run-node-gradient stop[offset="1"] {
+  stop-color: #43ad43;
+}
+
+#switch-node-gradient stop[offset="0"] {
+  stop-color: #28ea8d;
+}
+#switch-node-gradient stop[offset="1"] {
+  stop-color: #1ca463;
+}
+
+#set-node-gradient stop[offset="0"] {
+  stop-color: #1ac7c2;
+}
+#set-node-gradient stop[offset="1"] {
+  stop-color: #128b88;
+}
+
+#try-node-gradient stop[offset="0"] {
+  stop-color: #2f96e0;
+}
+#try-node-gradient stop[offset="1"] {
+  stop-color: #21699d;
+}
+
+#wait-node-gradient stop[offset="0"] {
+  stop-color: #5465d6;
+}
+#wait-node-gradient stop[offset="1"] {
+  stop-color: #3b4796;
+}
+
+.node {
+  --gradient-url: url(#default-node-gradient);
+  /*
+  rect, circle, ellipse {
+      stroke: $mute;
+      fill: $dark-bg-subtle-dark;
+      stroke-width: 1px;
+  }*/
+}
+.node.call-task-node {
+  --gradient-url: url(#call-node-gradient);
+}
+.node.do-task-node {
+  --gradient-url: url(#do-node-gradient);
+}
+.node.emit-task-node {
+  --gradient-url: url(#emit-node-gradient);
+}
+.node.for-task-node {
+  --gradient-url: url(#for-node-gradient);
+}
+.node.fork-task-node {
+  --gradient-url: url(#fork-node-gradient);
+}
+.node.listen-task-node {
+  --gradient-url: url(#listen-node-gradient);
+}
+.node.raise-task-node {
+  --gradient-url: url(#raise-node-gradient);
+}
+.node.run-task-node {
+  --gradient-url: url(#run-node-gradient);
+}
+.node.switch-task-node {
+  --gradient-url: url(#switch-node-gradient);
+}
+.node.set-task-node {
+  --gradient-url: url(#set-node-gradient);
+}
+.node.try-task-node {
+  --gradient-url: url(#try-node-gradient);
+}
+.node.wait-task-node {
+  --gradient-url: url(#wait-node-gradient);
 }
 .node .node-rectangle {
-  stroke: url(#default-node-gradient);
+  stroke: var(--gradient-url);
   stroke-width: 3px;
 }
 .node .node-cartouche {
-  fill: url(#default-node-gradient);
+  fill: var(--gradient-url);
+}
+.node .label-content {
+  width: 100%;
+  height: 100%;
+  /*
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  */
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+.node .label-content h3, .node .label-content .h3 {
+  margin-bottom: 0.25rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+.node .label-content p {
+  margin: 0;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+.node .label-content pre {
+  margin: 0;
+  height: 35px;
+  text-overflow: ellipsis;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+.node.shape-cartouche .label-content {
+  text-align: left;
+  padding: 5px 5px 5px 65px;
+}
+
+.symbol {
+  fill: var(--bs-body-color);
+}
+
+.start-node circle {
+  stroke-width: 2px;
 }
 
 .end-node circle {
-  stroke-width: 3px;
+  stroke-width: 5px;
 }
 
 .horizontal-collapse {

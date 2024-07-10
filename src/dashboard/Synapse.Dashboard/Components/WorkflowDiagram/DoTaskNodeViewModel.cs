@@ -16,13 +16,19 @@ namespace Synapse.Dashboard.Components;
 /// <summary>
 /// Represents a composite task node view model
 /// </summary>
-/// <remarks>
-/// Initializes a new <see cref="DoTaskNodeViewModel"/>
-/// </remarks>
-public class DoTaskNodeViewModel(string name)
-    : LabeledWorkflowNodeViewModel(name, "do-task-node")
+public class DoTaskNodeViewModel
+    : WorkflowNodeViewModel
 {
-
-
-
+    /// <summary>
+    /// Initializes a new <see cref="DoTaskNodeViewModel"/>
+    /// </summary>
+    /// <param name="name">The node name</param>
+    /// <param name="content">The node content</param>
+    public DoTaskNodeViewModel(string name, string content)
+        : base(new() { Label = name, CssClass = "do-task-node" })
+    {
+        Content = content;
+        Symbol = "do-symbol";
+        Type = "DO";
+    }
 }

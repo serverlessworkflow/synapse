@@ -16,10 +16,19 @@ namespace Synapse.Dashboard.Components;
 /// <summary>
 /// Represents a set task node view model
 /// </summary>
-/// <remarks>
-/// Initializes a new <see cref="SetTaskNodeViewModel"/>
-/// </remarks>
-public class SetTaskNodeViewModel(string name)
-    : LabeledWorkflowNodeViewModel(name, "set-task-node")
+public class SetTaskNodeViewModel
+    : WorkflowNodeViewModel
 {
+    /// <summary>
+    /// Initializes a new <see cref="SetTaskNodeViewModel"/>
+    /// </summary>
+    /// <param name="name">The node name</param>
+    /// <param name="content">The node content</param>
+    public SetTaskNodeViewModel(string name, string content)
+        : base(new() { Label = name, CssClass = "set-task-node" })
+    {
+        Content = content;
+        Symbol = "set-symbol";
+        Type = "SET";
+    }
 }

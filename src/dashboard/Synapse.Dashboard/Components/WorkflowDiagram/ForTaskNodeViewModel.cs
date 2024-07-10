@@ -14,12 +14,21 @@
 namespace Synapse.Dashboard.Components;
 
 /// <summary>
-/// Represents a for task node view model
+/// Represents a composite task node view model
 /// </summary>
-/// <remarks>
-/// Initializes a new <see cref="ForTaskNodeViewModel"/>
-/// </remarks>
-public class ForTaskNodeViewModel(string name)
-    : LabeledWorkflowNodeViewModel(name, "for-task-node")
+public class ForTaskNodeViewModel
+    : WorkflowNodeViewModel
 {
+    /// <summary>
+    /// Initializes a new <see cref="ForTaskNodeViewModel"/>
+    /// </summary>
+    /// <param name="name">The node name</param>
+    /// <param name="content">The node content</param>
+    public ForTaskNodeViewModel(string name, string content)
+        : base(new() { Label = name, CssClass = "for-task-node" })
+    {
+        Content = content;
+        Symbol = "for-symbol";
+        Type = "FOR";
+    }
 }

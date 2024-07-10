@@ -14,12 +14,19 @@
 namespace Synapse.Dashboard.Components;
 
 /// <summary>
-/// Represents a extension task node view model
+/// Represents a composite task node view model
 /// </summary>
-/// <remarks>
-/// Initializes a new <see cref="ExtensionTaskNodeViewModel"/>
-/// </remarks>
-public class ExtensionTaskNodeViewModel(string name)
-    : LabeledWorkflowNodeViewModel(name, "extension-task-node")
+public class ExtensionTaskNodeViewModel
+    : WorkflowNodeViewModel
 {
+    /// <summary>
+    /// Initializes a new <see cref="ExtensionTaskNodeViewModel"/>
+    /// </summary>
+    /// <param name="name">The node name</param>
+    public ExtensionTaskNodeViewModel(string name)
+        : base(new() { Label = name, CssClass = "extension-task-node" })
+    {
+        Symbol = "extension-symbol";
+        Type = "EXTENSION";
+    }
 }

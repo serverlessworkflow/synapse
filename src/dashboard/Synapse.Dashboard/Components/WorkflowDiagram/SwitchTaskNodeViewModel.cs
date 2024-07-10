@@ -14,12 +14,21 @@
 namespace Synapse.Dashboard.Components;
 
 /// <summary>
-/// Represents a switch task node view model
+/// Represents a composite task node view model
 /// </summary>
-/// <remarks>
-/// Initializes a new <see cref="SwitchTaskNodeViewModel"/>
-/// </remarks>
-public class SwitchTaskNodeViewModel(string name)
-    : LabeledWorkflowNodeViewModel(name, "switch-task-node")
+public class SwitchTaskNodeViewModel
+    : WorkflowNodeViewModel
 {
+    /// <summary>
+    /// Initializes a new <see cref="SwitchTaskNodeViewModel"/>
+    /// </summary>
+    /// <param name="name">The node name</param>
+    /// <param name="content">The node content</param>
+    public SwitchTaskNodeViewModel(string name, string content)
+        : base(new() { Label = name, CssClass = "switch-task-node" })
+    {
+        Content = content;
+        Symbol = "switch-symbol";
+        Type = "SWITCH";
+    }
 }

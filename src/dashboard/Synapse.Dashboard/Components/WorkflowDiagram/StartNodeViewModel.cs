@@ -12,6 +12,7 @@
 // limitations under the License.
 
 using Neuroglia.Blazor.Dagre;
+using System.Xml.Linq;
 
 namespace Synapse.Dashboard.Components;
 
@@ -19,7 +20,7 @@ namespace Synapse.Dashboard.Components;
 /// Represents the object that holds the data required to render the view of a workflow's start node 
 /// </summary>
 public class StartNodeViewModel(bool hasSuccessor = false)
-    : WorkflowNodeViewModel(string.Empty, "start-node", NodeShape.Circle, WorkflowGraphBuilder.StartEndNodeRadius, WorkflowGraphBuilder.StartEndNodeRadius)
+    : WorkflowNodeViewModel(new() { CssClass = "start-node", Shape = NodeShape.Circle, Width = WorkflowGraphBuilder.StartEndNodeRadius, Height = WorkflowGraphBuilder.StartEndNodeRadius })
 {
 
     /// <summary>

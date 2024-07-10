@@ -1,0 +1,32 @@
+@namespace Synapse.Dashboard
+
+@if (!string.IsNullOrWhiteSpace(Symbol))
+{
+    <g class="symbol" transform="translate(@x, @y)">
+        <svg width="@width" height="@height">
+            <use href="#@Symbol" />
+        </svg>
+    </g>
+}
+
+@code {
+
+    Double _symbolSize = 30;
+    IBoundingBox bbox => Node.BBox!;
+    string? width => Node.Shape != SynapseNodeShape.Cartouche ?
+        (bbox.Width / 2).ToInvariantString() :
+        _symbolSize.ToInvariantString();
+    string? height => Node.Shape != SynapseNodeShape.Cartouche ?
+        (bbox.Height / 2).ToInvariantString() :
+        _symbolSize.ToInvariantString();
+    string? x => Node.Shape != SynapseNodeShape.Cartouche ?
+        (0 - bbox.Width / 4).ToInvariantString() :
+        (0 - (bbox.Width - _symbolSize) / 2).ToInvariantString();
+    string? y => Node.Shape != SynapseNodeShape.Cartouche ?
+        (0 - bbox.Height / 4).ToInvariantString() :
+        (0 - _symbolSize / 2).ToInvariantString();
+
+    [CascadingParameter(Name = "Node")] public INodeViewModel Node { get; set; } = null!;
+    [CascadingParameter(Name = "Symbol")] public string? Symbol { get; set; }
+
+}
