@@ -12,6 +12,8 @@
 // limitations under the License.
 
 using moment.net;
+using moment.net.Models;
+using System.Globalization;
 
 namespace Synapse.Dashboard.Extensions;
 
@@ -31,7 +33,17 @@ public static class DateTimeExtensions
         var delta = now.Subtract(dateTime);
         if (Math.Abs(delta.Days) >= 1)
         {
-            return now.CalendarTime(dateTime);
+            var cultureFormats = CultureInfo.GetCultureInfo("en-US").DateTimeFormat;
+            var defaults = new CalendarTimeFormats(CultureInfo.CurrentUICulture);
+            var formats = new CalendarTimeFormats(
+                defaults.SameDay,
+                defaults.NextDay,
+                defaults.NextWeek,
+                defaults.LastDay,
+                defaults.LastWeek,
+                $"{cultureFormats.ShortDatePattern} {cultureFormats.ShortTimePattern}"
+            );
+            return now.CalendarTime(dateTime, formats);
         }
         else if (delta < TimeSpan.Zero)
         {
