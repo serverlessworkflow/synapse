@@ -19,6 +19,7 @@ using ServerlessWorkflow.Sdk.Models;
 using ServerlessWorkflow.Sdk.Models.Calls;
 using ServerlessWorkflow.Sdk.Models.Tasks;
 using System.Diagnostics;
+using System.Xml.Linq;
 
 namespace Synapse.Dashboard.Services;
 
@@ -47,7 +48,7 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
     protected IJsonSerializer JsonSerializer { get; } = jsonSerializer;
 
     /// <inheritdoc/>
-    public async Task<IGraphViewModel> Build(WorkflowDefinition workflow)
+    public IGraphViewModel Build(WorkflowDefinition workflow)
     {
         ArgumentNullException.ThrowIfNull(workflow);
         Stopwatch sw = Stopwatch.StartNew();
@@ -55,10 +56,14 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
         var graph = new GraphViewModel();
         var startNode = this.BuildStartNode(!isEmpty);
         var endNode = this.BuildEndNode();
-        await graph.AddElementAsync(startNode);
-        await graph.AddElementAsync(endNode);
-        if (isEmpty) await this.BuildEdgeAsync(graph, startNode, endNode);
-        else await this.BuildTaskNodesAsync(new(workflow, graph, 0, workflow.Do.First().Key, workflow.Do.First().Value, null, "/do", endNode, startNode));
+        graph.AddNode(startNode);
+        graph.AddNode(endNode);
+        var nextNode = endNode;
+        if (!isEmpty) 
+        {
+            nextNode = this.BuildTaskNode(new(workflow, graph, 0, workflow.Do.First().Key, workflow.Do.First().Value, null, "/do", endNode, startNode));
+        }
+        this.BuildEdge(graph, startNode, nextNode);
         sw.Stop();
         Console.WriteLine($"WorkflowGraphBuilder.Build took {sw.ElapsedMilliseconds} ms");
         return graph;
@@ -72,30 +77,29 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
     protected virtual NodeViewModel BuildStartNode(bool hasSuccessor = false) => new StartNodeViewModel(hasSuccessor);
 
     /// <summary>
-    /// Recursively builds task nodes and their edges
+    /// Gets the next <see cref="NodeViewModel"/> in the graph
     /// </summary>
     /// <param name="context">The rendering context for the task nodes</param>
-    /// <returns>The last built task <see cref="NodeViewModel"/></returns>
-    protected async Task<NodeViewModel> BuildTaskNodesAsync(TaskNodeRenderingContext context)
+    /// <param name="currentNode">The current task node</param>
+    /// <param name="transition">A transition, if different from the context task definition's</param>
+    /// <returns>The next task <see cref="NodeViewModel"/></returns>
+    /// <exception cref="Exception"></exception>
+    protected NodeViewModel GetNextNode(TaskNodeRenderingContext context, NodeViewModel currentNode, string? transition = null)
     {
-        var lastNode = await this.BuildTaskNodeAsync(context);
-        if (context.TaskDefinition.Then == FlowDirective.End || context.TaskDefinition.Then == FlowDirective.Exit) await this.BuildEdgeAsync(context.Graph, lastNode, context.EndNode);
-        else
-        {
-            var nextTaskName = string.IsNullOrWhiteSpace(context.TaskDefinition.Then) || context.TaskDefinition.Then == FlowDirective.Continue
+        transition = !string.IsNullOrWhiteSpace(transition) ? transition : context.TaskDefinition.Then;
+        if (transition == FlowDirective.End || transition == FlowDirective.Exit) return context.EndNode;
+        var nextTaskName = string.IsNullOrWhiteSpace(transition) || transition == FlowDirective.Continue
                 ? context.Workflow.GetTaskAfter(new(context.TaskName, context.TaskDefinition), context.ParentReference)?.Key
-                : context.TaskDefinition.Then;
-            if (string.IsNullOrWhiteSpace(nextTaskName)) await this.BuildEdgeAsync(context.Graph, lastNode, context.EndNode);
-            else
-            {
-                var nextTaskIndex = context.Workflow.IndexOf(nextTaskName, context.ParentReference);
-                var nextTaskReference = $"{context.ParentReference}/{nextTaskIndex}/{nextTaskName}";
-                var nextTask = context.Workflow.GetComponent<TaskDefinition>(nextTaskReference) ?? throw new Exception($"Failed to find the task at '{nextTaskReference}' in workflow '{context.Workflow.Document.Name}.{context.Workflow.Document.Namespace}:{context.Workflow.Document.Version}'");
-                var nextTaskNode = await this.BuildTaskNodesAsync(new(context.Workflow, context.Graph, nextTaskIndex, nextTaskName, nextTask, context.TaskGroup, context.ParentReference, context.EndNode, lastNode));
-                await this.BuildEdgeAsync(context.Graph, lastNode, nextTaskNode);
-            }
+                : transition;
+        if (string.IsNullOrWhiteSpace(nextTaskName)) return context.EndNode;
+        var nextTaskIndex = context.Workflow.IndexOf(nextTaskName, context.ParentReference);
+        var nextTaskReference = $"{context.ParentReference}/{nextTaskIndex}/{nextTaskName}";
+        var nextTask = context.Workflow.GetComponent<TaskDefinition>(nextTaskReference) ?? throw new Exception($"Failed to find the task at '{nextTaskReference}' in workflow '{context.Workflow.Document.Name}.{context.Workflow.Document.Namespace}:{context.Workflow.Document.Version}'");
+        if (!context.Graph.AllNodes.ContainsKey(nextTaskReference))
+        {
+            this.BuildTaskNode(new(context.Workflow, context.Graph, nextTaskIndex, nextTaskName, nextTask, context.TaskGroup, context.ParentReference, context.EndNode, currentNode));
         }
-        return lastNode;
+        return (NodeViewModel)context.Graph.AllNodes[nextTaskReference];
     }
 
     /// <summary>
@@ -103,23 +107,23 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
     /// </summary>
     /// <param name="context">The rendering context for the task node</param>
     /// <returns>A new <see cref="TaskNodeViewModel"/></returns>
-    protected async Task<NodeViewModel> BuildTaskNodeAsync(TaskNodeRenderingContext context)
+    protected NodeViewModel BuildTaskNode(TaskNodeRenderingContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
         return context.TaskDefinition switch
         {
-            CallTaskDefinition => await this.BuildCallTaskNodeAsync(context.OfType<CallTaskDefinition>()),
-            DoTaskDefinition => await this.BuildDoTaskNodeAsync(context.OfType<DoTaskDefinition>()),
-            EmitTaskDefinition => await this.BuildEmitTaskNodeAsync(context.OfType<EmitTaskDefinition>()),
-            ExtensionTaskDefinition => await this.BuildExtensionTaskNodeAsync(context.OfType<ExtensionTaskDefinition>()),
-            ForTaskDefinition => await this.BuildForTaskNodeAsync(context.OfType<ForTaskDefinition>()),
-            ListenTaskDefinition => await this.BuildListenTaskNodeAsync(context.OfType<ListenTaskDefinition>()),
-            RaiseTaskDefinition => await this.BuildRaiseTaskNodeAsync(context.OfType<RaiseTaskDefinition>()),
-            RunTaskDefinition => await this.BuildRunTaskNodeAsync(context.OfType<RunTaskDefinition>()),
-            SetTaskDefinition => await this.BuildSetTaskNodeAsync(context.OfType<SetTaskDefinition>()),
-            SwitchTaskDefinition => await this.BuildSwitchTaskNodeAsync(context.OfType<SwitchTaskDefinition>()),
-            TryTaskDefinition => await this.BuildTryTaskNodeAsync(context.OfType<TryTaskDefinition>()),
-            WaitTaskDefinition => await this.BuildWaitTaskNodeAsync(context.OfType<WaitTaskDefinition>()),
+            CallTaskDefinition => this.BuildCallTaskNode(context.OfType<CallTaskDefinition>()),
+            DoTaskDefinition => this.BuildDoTaskNode(context.OfType<DoTaskDefinition>()),
+            EmitTaskDefinition => this.BuildEmitTaskNode(context.OfType<EmitTaskDefinition>()),
+            ExtensionTaskDefinition => this.BuildExtensionTaskNode(context.OfType<ExtensionTaskDefinition>()),
+            ForTaskDefinition => this.BuildForTaskNode(context.OfType<ForTaskDefinition>()),
+            ListenTaskDefinition => this.BuildListenTaskNode(context.OfType<ListenTaskDefinition>()),
+            RaiseTaskDefinition => this.BuildRaiseTaskNode(context.OfType<RaiseTaskDefinition>()),
+            RunTaskDefinition => this.BuildRunTaskNode(context.OfType<RunTaskDefinition>()),
+            SetTaskDefinition => this.BuildSetTaskNode(context.OfType<SetTaskDefinition>()),
+            SwitchTaskDefinition => this.BuildSwitchTaskNode(context.OfType<SwitchTaskDefinition>()),
+            TryTaskDefinition => this.BuildTryTaskNode(context.OfType<TryTaskDefinition>()),
+            WaitTaskDefinition => this.BuildWaitTaskNode(context.OfType<WaitTaskDefinition>()),
             _ => throw new NotSupportedException($"The specified task type '{context.TaskDefinition.GetType()}' is not supported")
         } ?? throw new Exception($"Unable to define a last node for task '{context.TaskName}'");
     }
@@ -129,7 +133,7 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
     /// </summary>
     /// <param name="context">The rendering context for the call task node</param>
     /// <returns>A new <see cref="NodeViewModel"/></returns>
-    protected virtual async Task<NodeViewModel> BuildCallTaskNodeAsync(TaskNodeRenderingContext<CallTaskDefinition> context)
+    protected virtual NodeViewModel BuildCallTaskNode(TaskNodeRenderingContext<CallTaskDefinition> context)
     {
         ArgumentNullException.ThrowIfNull(context);
         var content = string.Empty;
@@ -169,11 +173,11 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
                 callType = string.Empty; 
                 break;
         }
-        var lastNode = new CallTaskNodeViewModel(context.TaskName, content, callType);
-        if (context.TaskGroup == null) await context.Graph.AddElementAsync(lastNode);
-        else await context.TaskGroup.AddChildAsync(lastNode);
-        await this.BuildEdgeAsync(context.Graph, context.PreviousNode, lastNode);
-        return lastNode;
+        var node = new CallTaskNodeViewModel(context.TaskReference, context.TaskName, content, callType);
+        if (context.TaskGroup == null) context.Graph.AddNode(node);
+        else context.TaskGroup.AddChild(node);
+        this.BuildEdge(context.Graph, node, this.GetNextNode(context, node));
+        return node;
     }
 
     /// <summary>
@@ -181,15 +185,15 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
     /// </summary>
     /// <param name="context">The rendering context for the do task node</param>
     /// <returns>A new <see cref="NodeViewModel"/></returns>
-    protected virtual async Task<NodeViewModel> BuildDoTaskNodeAsync(TaskNodeRenderingContext<DoTaskDefinition> context)
+    protected virtual NodeViewModel BuildDoTaskNode(TaskNodeRenderingContext<DoTaskDefinition> context)
     {
         ArgumentNullException.ThrowIfNull(context);
         var taskCount = context.TaskDefinition.Do.Count;
-        var lastNode = new DoTaskNodeViewModel(context.TaskName, $"{taskCount} task{(taskCount > 1 ? "s": "")}");
-        if (context.TaskGroup == null) await context.Graph.AddElementAsync(lastNode);
-        else await context.TaskGroup.AddChildAsync(lastNode);
-        await this.BuildEdgeAsync(context.Graph, context.PreviousNode, lastNode);
-        return lastNode;
+        var node = new DoTaskNodeViewModel(context.TaskReference, context.TaskName, $"{taskCount} task{(taskCount > 1 ? "s": "")}");
+        if (context.TaskGroup == null) context.Graph.AddNode(node);
+        else context.TaskGroup.AddChild(node);
+        this.BuildEdge(context.Graph, node, this.GetNextNode(context, node));
+        return node;
     }
 
     /// <summary>
@@ -197,14 +201,14 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
     /// </summary>
     /// <param name="context">The rendering context for the emit task node</param>
     /// <returns>A new <see cref="NodeViewModel"/></returns>
-    protected virtual async Task<NodeViewModel> BuildEmitTaskNodeAsync(TaskNodeRenderingContext<EmitTaskDefinition> context)
+    protected virtual NodeViewModel BuildEmitTaskNode(TaskNodeRenderingContext<EmitTaskDefinition> context)
     {
         ArgumentNullException.ThrowIfNull(context);
-        var lastNode = new EmitTaskNodeViewModel(context.TaskName, this.YamlSerializer.SerializeToText(context.TaskDefinition.Emit.Event.With));
-        if (context.TaskGroup == null) await context.Graph.AddElementAsync(lastNode);
-        else await context.TaskGroup.AddChildAsync(lastNode);
-        await this.BuildEdgeAsync(context.Graph, context.PreviousNode, lastNode);
-        return lastNode;
+        var node = new EmitTaskNodeViewModel(context.TaskReference, context.TaskName, this.YamlSerializer.SerializeToText(context.TaskDefinition.Emit.Event.With));
+        if (context.TaskGroup == null) context.Graph.AddNode(node);
+        else context.TaskGroup.AddChild(node);
+        this.BuildEdge(context.Graph, node, this.GetNextNode(context, node));
+        return node;
     }
 
     /// <summary>
@@ -212,14 +216,14 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
     /// </summary>
     /// <param name="context">The rendering context for the extension task node</param>
     /// <returns>A new <see cref="NodeViewModel"/></returns>
-    protected virtual async Task<NodeViewModel> BuildExtensionTaskNodeAsync(TaskNodeRenderingContext<ExtensionTaskDefinition> context)
+    protected virtual NodeViewModel BuildExtensionTaskNode(TaskNodeRenderingContext<ExtensionTaskDefinition> context)
     {
         ArgumentNullException.ThrowIfNull(context);
-        var lastNode = new ExtensionTaskNodeViewModel(context.TaskName);
-        if (context.TaskGroup == null) await context.Graph.AddElementAsync(lastNode);
-        else await context.TaskGroup.AddChildAsync(lastNode);
-        await this.BuildEdgeAsync(context.Graph, context.PreviousNode, lastNode);
-        return lastNode;
+        var node = new ExtensionTaskNodeViewModel(context.TaskReference, context.TaskName);
+        if (context.TaskGroup == null) context.Graph.AddNode(node);
+        else context.TaskGroup.AddChild(node);
+        this.BuildEdge(context.Graph, node, this.GetNextNode(context, node));
+        return node;
     }
 
     /// <summary>
@@ -227,14 +231,14 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
     /// </summary>
     /// <param name="context">The rendering context for the for task node</param>
     /// <returns>A new <see cref="NodeViewModel"/></returns>
-    protected virtual async Task<NodeViewModel> BuildForTaskNodeAsync(TaskNodeRenderingContext<ForTaskDefinition> context)
+    protected virtual NodeViewModel BuildForTaskNode(TaskNodeRenderingContext<ForTaskDefinition> context)
     {
         ArgumentNullException.ThrowIfNull(context);
-        var lastNode = new ForTaskNodeViewModel(context.TaskName, this.YamlSerializer.SerializeToText(context.TaskDefinition.For));
-        if (context.TaskGroup == null) await context.Graph.AddElementAsync(lastNode);
-        else await context.TaskGroup.AddChildAsync(lastNode);
-        await this.BuildEdgeAsync(context.Graph, context.PreviousNode, lastNode);
-        return lastNode;
+        var node = new ForTaskNodeViewModel(context.TaskReference, context.TaskName, this.YamlSerializer.SerializeToText(context.TaskDefinition.For));
+        if (context.TaskGroup == null) context.Graph.AddNode(node);
+        else context.TaskGroup.AddChild(node);
+        this.BuildEdge(context.Graph, node, this.GetNextNode(context, node));
+        return node;
     }
 
     /// <summary>
@@ -242,14 +246,14 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
     /// </summary>
     /// <param name="context">The rendering context for the listen task node</param>
     /// <returns>A new <see cref="NodeViewModel"/></returns>
-    protected virtual async Task<NodeViewModel> BuildListenTaskNodeAsync(TaskNodeRenderingContext<ListenTaskDefinition> context)
+    protected virtual NodeViewModel BuildListenTaskNode(TaskNodeRenderingContext<ListenTaskDefinition> context)
     {
         ArgumentNullException.ThrowIfNull(context);
-        var lastNode = new ListenTaskNodeViewModel(context.TaskName, this.YamlSerializer.SerializeToText(context.TaskDefinition.Listen));
-        if (context.TaskGroup == null) await context.Graph.AddElementAsync(lastNode);
-        else await context.TaskGroup.AddChildAsync(lastNode);
-        await this.BuildEdgeAsync(context.Graph, context.PreviousNode, lastNode);
-        return lastNode;
+        var node = new ListenTaskNodeViewModel(context.TaskReference, context.TaskName, this.YamlSerializer.SerializeToText(context.TaskDefinition.Listen));
+        if (context.TaskGroup == null) context.Graph.AddNode(node);
+        else context.TaskGroup.AddChild(node);
+        this.BuildEdge(context.Graph, node, this.GetNextNode(context, node));
+        return node;
     }
 
     /// <summary>
@@ -257,14 +261,14 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
     /// </summary>
     /// <param name="context">The rendering context for the raise task node</param>
     /// <returns>A new <see cref="NodeViewModel"/></returns>
-    protected virtual async Task<NodeViewModel> BuildRaiseTaskNodeAsync(TaskNodeRenderingContext<RaiseTaskDefinition> context)
+    protected virtual NodeViewModel BuildRaiseTaskNode(TaskNodeRenderingContext<RaiseTaskDefinition> context)
     {
         ArgumentNullException.ThrowIfNull(context);
-        var lastNode = new RaiseTaskNodeViewModel(context.TaskName, this.YamlSerializer.SerializeToText(context.TaskDefinition.Raise.Error));
-        if (context.TaskGroup == null) await context.Graph.AddElementAsync(lastNode);
-        else await context.TaskGroup.AddChildAsync(lastNode);
-        await this.BuildEdgeAsync(context.Graph, context.PreviousNode, lastNode);
-        return lastNode;
+        var node = new RaiseTaskNodeViewModel(context.TaskReference, context.TaskName, this.YamlSerializer.SerializeToText(context.TaskDefinition.Raise.Error));
+        if (context.TaskGroup == null) context.Graph.AddNode(node);
+        else context.TaskGroup.AddChild(node);
+        this.BuildEdge(context.Graph, node, this.GetNextNode(context, node));
+        return node;
     }
 
     /// <summary>
@@ -272,7 +276,7 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
     /// </summary>
     /// <param name="context">The rendering context for the run task node</param>
     /// <returns>A new <see cref="NodeViewModel"/></returns>
-    protected virtual async Task<NodeViewModel> BuildRunTaskNodeAsync(TaskNodeRenderingContext<RunTaskDefinition> context)
+    protected virtual NodeViewModel BuildRunTaskNode(TaskNodeRenderingContext<RunTaskDefinition> context)
     {
         ArgumentNullException.ThrowIfNull(context);
         string content = string.Empty;
@@ -307,11 +311,11 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
                 runType = string.Empty;
                 break;
         }
-        var lastNode = new RunTaskNodeViewModel(context.TaskName, content, runType);
-        if (context.TaskGroup == null) await context.Graph.AddElementAsync(lastNode);
-        else await context.TaskGroup.AddChildAsync(lastNode);
-        await this.BuildEdgeAsync(context.Graph, context.PreviousNode, lastNode);
-        return lastNode;
+        var node = new RunTaskNodeViewModel(context.TaskReference, context.TaskName, content, runType);
+        if (context.TaskGroup == null) context.Graph.AddNode(node);
+        else context.TaskGroup.AddChild(node);
+        this.BuildEdge(context.Graph, node, this.GetNextNode(context, node));
+        return node;
     }
 
     /// <summary>
@@ -319,14 +323,14 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
     /// </summary>
     /// <param name="context">The rendering context for the set task node</param>
     /// <returns>A new <see cref="NodeViewModel"/></returns>
-    protected virtual async Task<NodeViewModel> BuildSetTaskNodeAsync(TaskNodeRenderingContext<SetTaskDefinition> context)
+    protected virtual NodeViewModel BuildSetTaskNode(TaskNodeRenderingContext<SetTaskDefinition> context)
     {
         ArgumentNullException.ThrowIfNull(context);
-        var lastNode = new SetTaskNodeViewModel(context.TaskName, this.YamlSerializer.SerializeToText(context.TaskDefinition.Set));
-        if (context.TaskGroup == null) await context.Graph.AddElementAsync(lastNode);
-        else await context.TaskGroup.AddChildAsync(lastNode);
-        await this.BuildEdgeAsync(context.Graph, context.PreviousNode, lastNode);
-        return lastNode;
+        var node = new SetTaskNodeViewModel(context.TaskReference, context.TaskName, this.YamlSerializer.SerializeToText(context.TaskDefinition.Set));
+        if (context.TaskGroup == null) context.Graph.AddNode(node);
+        else context.TaskGroup.AddChild(node);
+        this.BuildEdge(context.Graph, node, this.GetNextNode(context, node));
+        return node;
     }
 
     /// <summary>
@@ -334,14 +338,23 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
     /// </summary>
     /// <param name="context">The rendering context for the switch task node</param>
     /// <returns>A new <see cref="NodeViewModel"/></returns>
-    protected virtual async Task<NodeViewModel> BuildSwitchTaskNodeAsync(TaskNodeRenderingContext<SwitchTaskDefinition> context)
+    protected virtual NodeViewModel BuildSwitchTaskNode(TaskNodeRenderingContext<SwitchTaskDefinition> context)
     {
         ArgumentNullException.ThrowIfNull(context);
-        var lastNode = new SwitchTaskNodeViewModel(context.TaskName, this.YamlSerializer.SerializeToText(context.TaskDefinition.Switch));
-        if (context.TaskGroup == null) await context.Graph.AddElementAsync(lastNode);
-        else await context.TaskGroup.AddChildAsync(lastNode);
-        await this.BuildEdgeAsync(context.Graph, context.PreviousNode, lastNode);
-        return lastNode;
+        var node = new SwitchTaskNodeViewModel(context.TaskReference, context.TaskName, this.YamlSerializer.SerializeToText(context.TaskDefinition.Switch));
+        if (context.TaskGroup == null) context.Graph.AddNode(node);
+        else context.TaskGroup.AddChild(node);
+        foreach (var switchCase in context.TaskDefinition.Switch)
+        {
+            var nextTaskNode = this.GetNextNode(context, node, switchCase.Value.Then);
+            this.BuildEdge(context.Graph, node, nextTaskNode, switchCase.Key);
+            //node = nextTaskNode;
+        }
+        if (!context.TaskDefinition.Switch.Any(switchCase => string.IsNullOrEmpty(switchCase.Value.When)))
+        {
+            this.BuildEdge(context.Graph, node, this.GetNextNode(context, node));
+        }
+        return node;
     }
 
     /// <summary>
@@ -349,15 +362,15 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
     /// </summary>
     /// <param name="context">The rendering context for the try task node</param>
     /// <returns>A new <see cref="NodeViewModel"/></returns>
-    protected virtual async Task<NodeViewModel> BuildTryTaskNodeAsync(TaskNodeRenderingContext<TryTaskDefinition> context)
+    protected virtual NodeViewModel BuildTryTaskNode(TaskNodeRenderingContext<TryTaskDefinition> context)
     {
         ArgumentNullException.ThrowIfNull(context);
         var taskCount = context.TaskDefinition.Try.Count;
-        var lastNode = new TryTaskNodeViewModel(context.TaskName, $"{taskCount} task{(taskCount > 1 ? "s" : "")}");
-        if (context.TaskGroup == null) await context.Graph.AddElementAsync(lastNode);
-        else await context.TaskGroup.AddChildAsync(lastNode);
-        await this.BuildEdgeAsync(context.Graph, context.PreviousNode, lastNode);
-        return lastNode;
+        var node = new TryTaskNodeViewModel(context.TaskReference, context.TaskName, $"{taskCount} task{(taskCount > 1 ? "s" : "")}");
+        if (context.TaskGroup == null) context.Graph.AddNode(node);
+        else context.TaskGroup.AddChild(node);
+        this.BuildEdge(context.Graph, node, this.GetNextNode(context, node));
+        return node;
     }
 
     /// <summary>
@@ -365,14 +378,14 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
     /// </summary>
     /// <param name="context">The rendering context for the wait task node</param>
     /// <returns>A new <see cref="NodeViewModel"/></returns>
-    protected virtual async Task<NodeViewModel> BuildWaitTaskNodeAsync(TaskNodeRenderingContext<WaitTaskDefinition> context)
+    protected virtual NodeViewModel BuildWaitTaskNode(TaskNodeRenderingContext<WaitTaskDefinition> context)
     {
         ArgumentNullException.ThrowIfNull(context);
-        var lastNode = new WaitTaskNodeViewModel(context.TaskName, context.TaskDefinition.Wait.ToTimeSpan().ToString("hh\\:mm\\:ss\\.fff"));
-        if (context.TaskGroup == null) await context.Graph.AddElementAsync(lastNode);
-        else await context.TaskGroup.AddChildAsync(lastNode);
-        await this.BuildEdgeAsync(context.Graph, context.PreviousNode, lastNode);
-        return lastNode;
+        var node = new WaitTaskNodeViewModel(context.TaskReference, context.TaskName, context.TaskDefinition.Wait.ToTimeSpan().ToString("hh\\:mm\\:ss\\.fff"));
+        if (context.TaskGroup == null) context.Graph.AddNode(node);
+        else context.TaskGroup.AddChild(node);
+        this.BuildEdge(context.Graph, node, this.GetNextNode(context, node));
+        return node;
     }
 
     /// <summary>
@@ -387,8 +400,21 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
     /// <param name="graph">The current <see cref="GraphViewModel"/></param>
     /// <param name="source">The node to draw the edge from</param>
     /// <param name="target">The node to draw the edge to</param>
+    /// <param name="label">The edge label, if any</param>
     /// <returns>A new awaitable <see cref="Task"/></returns>
-    protected virtual Task BuildEdgeAsync(GraphViewModel graph, NodeViewModel source, NodeViewModel target) => graph.AddElementAsync(new EdgeViewModel(source.Id, target.Id, null));
+    protected virtual void BuildEdge(GraphViewModel graph, NodeViewModel source, NodeViewModel target, string? label = null)
+    {
+        var existingEdge = graph.Edges.Select(keyValuePair => keyValuePair.Value).FirstOrDefault(edge => edge.SourceId == source.Id && edge.TargetId == target.Id);
+        if (existingEdge != null)
+        {
+            if (!string.IsNullOrEmpty(label)) { 
+                existingEdge.Label = existingEdge.Label + " / " + label;
+            }
+            return;
+        }
+        if (graph.Edges.Select(keyValuePair => keyValuePair.Value).Any(edge => edge.SourceId == source.Id && edge.TargetId == target.Id && edge.Label == label)) return;
+        graph.AddEdge(new EdgeViewModel(source.Id, target.Id, label));
+    }
 
     /// <summary>
     /// Represents the context for rendering a task node within a workflow.

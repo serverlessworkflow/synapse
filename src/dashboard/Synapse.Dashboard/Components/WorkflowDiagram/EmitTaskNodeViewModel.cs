@@ -22,10 +22,11 @@ public class EmitTaskNodeViewModel
     /// <summary>
     /// Initializes a new <see cref="EmitTaskNodeViewModel"/>
     /// </summary>
+    /// <param name="taskReference">The node task reference</param>
     /// <param name="name">The node name</param>
     /// <param name="content">The node content</param>
-    public EmitTaskNodeViewModel(string name, string content)
-        : base(new() { Label = name, CssClass = "emit-task-node" })
+    public EmitTaskNodeViewModel(string taskReference, string name, string content)
+        : base(taskReference, new() { Label = name, CssClass = "emit-task-node" })
     {
         Content = content;
         Symbol = "emit-symbol";

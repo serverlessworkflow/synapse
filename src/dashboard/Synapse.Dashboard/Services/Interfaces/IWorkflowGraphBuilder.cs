@@ -27,6 +27,6 @@ public interface IWorkflowGraphBuilder
     /// </summary>
     /// <param name="workflow">The <see cref="WorkflowDefinition"/> to build a new <see cref="IGraphViewModel"/> for</param>
     /// <returns>A new <see cref="IGraphViewModel"/></returns>
-    Task<IGraphViewModel> Build(WorkflowDefinition workflow);
+    IGraphViewModel Build(WorkflowDefinition workflow);
 
 }

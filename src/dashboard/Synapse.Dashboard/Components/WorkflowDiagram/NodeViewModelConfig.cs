@@ -73,7 +73,7 @@ public class NodeViewModelConfig
     /// <summary>
     /// Gets/sets parent node id
     /// </summary>
-    public Guid? ParentId { get; set; }
+    public string? ParentId { get; set; }
 
     /// <summary>
     /// Gets/sets the shape the node

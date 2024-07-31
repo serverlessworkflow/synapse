@@ -18,11 +18,11 @@ else if (!string.IsNullOrWhiteSpace(Node.Label) )
 
 @code {
 
-    IBoundingBox bbox => Node.BBox!;
-    string x => bbox.X.ToInvariantString() ?? string.Empty;
-    string y => bbox.Y.ToInvariantString() ?? string.Empty;
-    string width => bbox.Width.ToInvariantString() ?? string.Empty;
-    string height => bbox.Height.ToInvariantString() ?? Neuroglia.Blazor.Dagre.Constants.LabelHeight.ToInvariantString();
+    BoundingBox bounds => Node.Bounds!;
+    string x => bounds.X.ToInvariantString() ?? string.Empty;
+    string y => bounds.Y.ToInvariantString() ?? string.Empty;
+    string width => bounds.Width.ToInvariantString() ?? string.Empty;
+    string height => bounds.Height.ToInvariantString() ?? Neuroglia.Blazor.Dagre.Constants.LabelHeight.ToInvariantString();
 
     [CascadingParameter(Name = "Node")] public INodeViewModel Node { get; set; } = null!;
     [CascadingParameter(Name = "LabelTemplate")] public RenderFragment? LabelTemplate { get; set; } = null!;

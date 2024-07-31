@@ -22,10 +22,11 @@ public class TryTaskNodeViewModel
     /// <summary>
     /// Initializes a new <see cref="TryTaskNodeViewModel"/>
     /// </summary>
+    /// <param name="taskReference">The node task reference</param>
     /// <param name="name">The node name</param>
     /// <param name="content">The node content</param>
-    public TryTaskNodeViewModel(string name, string content)
-        : base(new() { Label = name, CssClass = "try-task-node" })
+    public TryTaskNodeViewModel(string taskReference, string name, string content)
+        : base(taskReference, new() { Label = name, CssClass = "try-task-node" })
     {
         Content = content;
         Symbol = "try-symbol";

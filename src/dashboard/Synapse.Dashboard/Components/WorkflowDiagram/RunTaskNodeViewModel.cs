@@ -24,11 +24,12 @@ public class RunTaskNodeViewModel
     /// <summary>
     /// Initializes a new <see cref="RunTaskNodeViewModel"/>
     /// </summary>
+    /// <param name="taskReference">The node task reference</param>
     /// <param name="name">The node name</param>
     /// <param name="content">The node content</param>
     /// <param name="runType">The type of run</param>
-    public RunTaskNodeViewModel(string name, string content, string runType = "")
-        : base(new() { Label = name, CssClass = "run-task-node" })
+    public RunTaskNodeViewModel(string taskReference, string name, string content, string runType = "")
+        : base(taskReference, new() { Label = name, CssClass = "run-task-node" })
     {
         Content = content;
         Symbol = !string.IsNullOrEmpty(runType) ? $"{runType.ToLower()}-symbol" : "run-symbol";

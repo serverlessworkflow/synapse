@@ -22,10 +22,11 @@ public class WaitTaskNodeViewModel
     /// <summary>
     /// Initializes a new <see cref="WaitTaskNodeViewModel"/>
     /// </summary>
+    /// <param name="taskReference">The node task reference</param>
     /// <param name="name">The node name</param>
     /// <param name="content">The node content</param>
-    public WaitTaskNodeViewModel(string name, string content)
-        : base(new() { Label = name, CssClass = "wait-task-node" })
+    public WaitTaskNodeViewModel(string taskReference, string name, string content)
+        : base(taskReference, new() { Label = name, CssClass = "wait-task-node" })
     {
         Content = content;
         Symbol = "wait-symbol";

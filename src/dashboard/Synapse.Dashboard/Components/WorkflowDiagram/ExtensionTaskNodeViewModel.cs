@@ -22,9 +22,10 @@ public class ExtensionTaskNodeViewModel
     /// <summary>
     /// Initializes a new <see cref="ExtensionTaskNodeViewModel"/>
     /// </summary>
+    /// <param name="taskReference">The node task reference</param>
     /// <param name="name">The node name</param>
-    public ExtensionTaskNodeViewModel(string name)
-        : base(new() { Label = name, CssClass = "extension-task-node" })
+    public ExtensionTaskNodeViewModel(string taskReference, string name)
+        : base(taskReference, new() { Label = name, CssClass = "extension-task-node" })
     {
         Symbol = "extension-symbol";
         Type = "EXTENSION";

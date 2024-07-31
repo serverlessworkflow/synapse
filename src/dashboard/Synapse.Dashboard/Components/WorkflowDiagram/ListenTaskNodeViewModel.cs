@@ -22,10 +22,11 @@ public class ListenTaskNodeViewModel
     /// <summary>
     /// Initializes a new <see cref="ListenTaskNodeViewModel"/>
     /// </summary>
+    /// <param name="taskReference">The node task reference</param>
     /// <param name="name">The node name</param>
     /// <param name="content">The node content</param>
-    public ListenTaskNodeViewModel(string name, string content)
-        : base(new() { Label = name, CssClass = "listen-task-node" })
+    public ListenTaskNodeViewModel(string taskReference, string name, string content)
+        : base(taskReference, new() { Label = name, CssClass = "listen-task-node" })
     {
         Content = content;
         Symbol = "listen-symbol";

@@ -30,12 +30,14 @@ public class TaskNodeViewModel
     /// <summary>
     /// Initializes a new <see cref="TaskNodeViewModel"/>
     /// </summary>
+    /// <param name="taskReference">The node task reference</param>
     /// <param name="name">The name of the <see cref="TaskDefinition"/> the <see cref="TaskNodeViewModel"/> represents</param>
     /// <param name="definition">The <see cref="TaskDefinition"/> the <see cref="TaskNodeViewModel"/> represents</param>
     /// <param name="isFirst">Indicates whether or not the task to create the <see cref="TaskNodeViewModel"/> for is the first task of the workflow it belongs to</param>
-    public TaskNodeViewModel(string name, TaskDefinition definition, bool isFirst = false)
+    public TaskNodeViewModel(string taskReference, string name, TaskDefinition definition, bool isFirst = false)
         : base(null, name)
     {
+        this.Id = taskReference;
         this.Name = name;
         this.Definition = definition;
         this.IsFirst = isFirst;

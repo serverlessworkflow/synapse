@@ -1,7 +1,7 @@
 @namespace Synapse.Dashboard
 @inherits NodeTemplate
 
-<g class="node @(!string.IsNullOrWhiteSpace(Node.Shape) ? "shape-" + Node.Shape : "shape-rectangle") @Node.CssClass" transform="translate(@((Node.X ?? 0).ToInvariantString()), @((Node.Y ?? 0).ToInvariantString()))">
+<g class="node @(!string.IsNullOrWhiteSpace(Node.Shape) ? "shape-" + Node.Shape : "shape-rectangle") @Node.CssClass" transform="translate(@((Node.X).ToInvariantString()), @((Node.Y).ToInvariantString()))">
     <CascadingValue Name="Node" Value="Node">
         <NodeShapeTemplate />
         <CascadingValue Name="LabelTemplate" Value="LabelTemplate">
@@ -24,15 +24,15 @@
     
 @code {
     protected virtual IWorkflowNodeViewModel WorkflowNode => (IWorkflowNodeViewModel)this.Node;
-    IBoundingBox bbox => Node.BBox!;
+    BoundingBox bounds => Node.Bounds!;
 
     RenderFragment? LabelTemplate => !string.IsNullOrWhiteSpace(WorkflowNode.Type) || !string.IsNullOrWhiteSpace(WorkflowNode.Content) ? (__builder) =>
     {
         <g class="label">
-            <foreignObject x="@(bbox.X.ToInvariantString())"
-                           y="@(bbox.Y.ToInvariantString())"
-                           width="@(bbox.Width.ToInvariantString())"
-                           height="@(bbox.Height.ToInvariantString())">
+            <foreignObject x="@(bounds.X.ToInvariantString())"
+                           y="@(bounds.Y.ToInvariantString())"
+                           width="@(bounds.Width.ToInvariantString())"
+                           height="@(bounds.Height.ToInvariantString())">
                 <div class="label-content">
                     <h3>
                         @if (!string.IsNullOrWhiteSpace(Node.Label))

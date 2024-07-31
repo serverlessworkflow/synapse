@@ -22,10 +22,11 @@ public class ForTaskNodeViewModel
     /// <summary>
     /// Initializes a new <see cref="ForTaskNodeViewModel"/>
     /// </summary>
+    /// <param name="taskReference">The node task reference</param>
     /// <param name="name">The node name</param>
     /// <param name="content">The node content</param>
-    public ForTaskNodeViewModel(string name, string content)
-        : base(new() { Label = name, CssClass = "for-task-node" })
+    public ForTaskNodeViewModel(string taskReference, string name, string content)
+        : base(taskReference, new() { Label = name, CssClass = "for-task-node" })
     {
         Content = content;
         Symbol = "for-symbol";

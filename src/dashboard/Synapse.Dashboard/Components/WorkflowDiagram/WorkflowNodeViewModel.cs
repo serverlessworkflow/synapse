@@ -18,12 +18,8 @@ namespace Synapse.Dashboard.Components;
 /// <summary>
 /// Represents the base class for all workflow-related node models
 /// </summary>
-/// <remarks>
-/// Initialiazes a new <see cref="WorkflowNodeViewModel"/>
-/// </remarks>
-/// <param name="config"></param>
-public abstract class WorkflowNodeViewModel(NodeViewModelConfig? config = null)
-        : NodeViewModel(config?.Label, config?.CssClass, config?.Shape, config?.Width, config?.Height, config?.RadiusX, config?.RadiusY, config?.X, config?.Y, config?.ComponentType, config?.ParentId), IWorkflowNodeViewModel
+public abstract class WorkflowNodeViewModel
+        : NodeViewModel, IWorkflowNodeViewModel
 {
 
     int _operativeInstances = 0;
@@ -58,6 +54,17 @@ public abstract class WorkflowNodeViewModel(NodeViewModelConfig? config = null)
             _faultedInstances = value;
             OnChange();
         }
+    }
+
+    /// <summary>
+    /// Initialiazes a new <see cref="WorkflowNodeViewModel"/>
+    /// </summary>
+    /// <param name="taskReference">The node task reference</param>
+    /// <param name="config">The <see cref="NodeViewModelConfig"/> for the node</param>
+    public WorkflowNodeViewModel(string taskReference, NodeViewModelConfig? config = null)
+        : base(config?.Label, config?.CssClass, config?.Shape, config?.Width ?? 0, config?.Height ?? 0, config?.RadiusX ?? 0, config?.RadiusY ?? 0, config?.X ?? 0, config?.Y ?? 0, config?.ComponentType, config?.ParentId)
+    {
+        this.Id = taskReference;
     }
 
     /// <inheritdoc/>

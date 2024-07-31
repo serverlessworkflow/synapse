@@ -22,11 +22,12 @@ public class CallTaskNodeViewModel
     /// <summary>
     /// Initializes a new <see cref="CallTaskNodeViewModel"/>
     /// </summary>
+    /// <param name="taskReference">The node task reference</param>
     /// <param name="name">The node name</param>
     /// <param name="content">The node content</param>
     /// <param name="callType">The type of call</param>
-    public CallTaskNodeViewModel(string name, string content, string callType = "")
-        : base(new() { Label = name, CssClass = "call-task-node" })
+    public CallTaskNodeViewModel(string taskReference, string name, string content, string callType = "")
+        : base(taskReference, new() { Label = name, CssClass = "call-task-node" })
     {
         Content = content;
         Symbol = !string.IsNullOrEmpty(callType) ? $"{callType.ToLower()}-symbol" : "call-symbol";

@@ -22,9 +22,9 @@
 
     [Parameter] public EventCallback<GraphEventArgs<MouseEventArgs>> OnMouseUp { get; set; }
 
-    protected override async Task OnParametersSetAsync()
+    protected override void OnParametersSet()
     {
-        await base.OnParametersSetAsync();
+        base.OnParametersSet();
         if (this.WorkflowDefinition != null && this.WorkflowDefinition != this.workflowDefinition)
         {
             this.workflowDefinition = this.WorkflowDefinition;
@@ -32,7 +32,7 @@
             {
                 Direction = this.Orientation == WorkflowDiagramOrientation.LeftToRight ? DagreGraphDirection.LeftToRight : DagreGraphDirection.TopToBottom
             };
-            this.graph = await this.WorkflowGraphBuilder.Build(this.workflowDefinition);
+            this.graph = this.WorkflowGraphBuilder.Build(this.workflowDefinition);
             this.isDirty = true;
         }
     }

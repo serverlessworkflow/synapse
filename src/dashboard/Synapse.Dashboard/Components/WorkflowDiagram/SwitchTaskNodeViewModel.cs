@@ -22,10 +22,11 @@ public class SwitchTaskNodeViewModel
     /// <summary>
     /// Initializes a new <see cref="SwitchTaskNodeViewModel"/>
     /// </summary>
+    /// <param name="taskReference">The node task reference</param>
     /// <param name="name">The node name</param>
     /// <param name="content">The node content</param>
-    public SwitchTaskNodeViewModel(string name, string content)
-        : base(new() { Label = name, CssClass = "switch-task-node" })
+    public SwitchTaskNodeViewModel(string taskReference, string name, string content)
+        : base(taskReference, new() { Label = name, CssClass = "switch-task-node" })
     {
         Content = content;
         Symbol = "switch-symbol";

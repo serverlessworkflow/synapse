@@ -22,10 +22,11 @@ public class DoTaskNodeViewModel
     /// <summary>
     /// Initializes a new <see cref="DoTaskNodeViewModel"/>
     /// </summary>
+    /// <param name="taskReference">The node task reference</param>
     /// <param name="name">The node name</param>
     /// <param name="content">The node content</param>
-    public DoTaskNodeViewModel(string name, string content)
-        : base(new() { Label = name, CssClass = "do-task-node" })
+    public DoTaskNodeViewModel(string taskReference, string name, string content)
+        : base(taskReference, new() { Label = name, CssClass = "do-task-node" })
     {
         Content = content;
         Symbol = "do-symbol";
