@@ -308,3 +308,12 @@ $wait-color: #5465d6;
 .end-node circle {
     stroke-width: 5px;
 }
+
+.edge-label {
+    transform: translateY(30px);
+
+    .label-content {
+        text-align: center;
+        background-color: #{$dark-bg-subtle-dark};
+    }
+}

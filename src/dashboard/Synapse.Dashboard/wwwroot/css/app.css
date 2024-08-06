@@ -21037,6 +21037,14 @@ tr.row-placeholder td::after {
   stroke-width: 5px;
 }
 
+.edge-label {
+  transform: translateY(30px);
+}
+.edge-label .label-content {
+  text-align: center;
+  background-color: #1a1d20;
+}
+
 .horizontal-collapse {
   border-right: 1px solid var(--bs-dark-bg-subtle);
   overflow: scroll;

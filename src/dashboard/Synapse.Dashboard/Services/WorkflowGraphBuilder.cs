@@ -11,15 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Microsoft.VisualBasic;
 using Neuroglia.Blazor.Dagre.Models;
-using Neuroglia.Eventing.CloudEvents;
 using ServerlessWorkflow.Sdk;
 using ServerlessWorkflow.Sdk.Models;
 using ServerlessWorkflow.Sdk.Models.Calls;
 using ServerlessWorkflow.Sdk.Models.Tasks;
 using System.Diagnostics;
-using System.Xml.Linq;
 
 namespace Synapse.Dashboard.Services;
 
@@ -99,7 +96,11 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
         {
             this.BuildTaskNode(new(context.Workflow, context.Graph, nextTaskIndex, nextTaskName, nextTask, context.TaskGroup, context.ParentReference, context.EndNode, currentNode));
         }
-        return (NodeViewModel)context.Graph.AllNodes[nextTaskReference];
+        if (context.Graph.AllClusters.ContainsKey(nextTaskReference))
+        {
+            return (NodeViewModel)context.Graph.AllClusters[nextTaskReference].AllNodes.First().Value;
+        }
+        return (NodeViewModel)context.Graph.AllNodes[nextTaskReference]; //((IReadOnlyDictionary<string, IGraphElement>)context.Graph.AllNodes).Concat((IReadOnlyDictionary<string, IGraphElement>)context.Graph.AllClusters).ToDictionary()[nextTaskReference];
     }
 
     /// <summary>
@@ -117,6 +118,7 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
             EmitTaskDefinition => this.BuildEmitTaskNode(context.OfType<EmitTaskDefinition>()),
             ExtensionTaskDefinition => this.BuildExtensionTaskNode(context.OfType<ExtensionTaskDefinition>()),
             ForTaskDefinition => this.BuildForTaskNode(context.OfType<ForTaskDefinition>()),
+            ForkTaskDefinition => this.BuildForkTaskNode(context.OfType<ForkTaskDefinition>()),
             ListenTaskDefinition => this.BuildListenTaskNode(context.OfType<ListenTaskDefinition>()),
             RaiseTaskDefinition => this.BuildRaiseTaskNode(context.OfType<RaiseTaskDefinition>()),
             RunTaskDefinition => this.BuildRunTaskNode(context.OfType<RunTaskDefinition>()),
@@ -188,12 +190,11 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
     protected virtual NodeViewModel BuildDoTaskNode(TaskNodeRenderingContext<DoTaskDefinition> context)
     {
         ArgumentNullException.ThrowIfNull(context);
-        var taskCount = context.TaskDefinition.Do.Count;
-        var node = new DoTaskNodeViewModel(context.TaskReference, context.TaskName, $"{taskCount} task{(taskCount > 1 ? "s": "")}");
-        if (context.TaskGroup == null) context.Graph.AddNode(node);
-        else context.TaskGroup.AddChild(node);
-        this.BuildEdge(context.Graph, node, this.GetNextNode(context, node));
-        return node;
+        var cluster = new TaskNodeViewModel(context.TaskReference, context.TaskName, false);
+        if (context.TaskGroup == null) context.Graph.AddCluster(cluster);
+        else context.TaskGroup.AddChild(cluster);
+        this.BuildTaskNode(new(context.Workflow, context.Graph, 0, context.TaskDefinition.Do.First().Key, context.TaskDefinition.Do.First().Value, cluster, context.TaskReference + "/do", context.EndNode, context.PreviousNode));
+        return cluster;
     }
 
     /// <summary>
@@ -235,6 +236,21 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
     {
         ArgumentNullException.ThrowIfNull(context);
         var node = new ForTaskNodeViewModel(context.TaskReference, context.TaskName, this.YamlSerializer.SerializeToText(context.TaskDefinition.For));
+        if (context.TaskGroup == null) context.Graph.AddNode(node);
+        else context.TaskGroup.AddChild(node);
+        this.BuildEdge(context.Graph, node, this.GetNextNode(context, node));
+        return node;
+    }
+
+    /// <summary>
+    /// Builds a new <see cref="NodeViewModel"/> for the specified fork task
+    /// </summary>
+    /// <param name="context">The rendering context for the fork task node</param>
+    /// <returns>A new <see cref="NodeViewModel"/></returns>
+    protected virtual NodeViewModel BuildForkTaskNode(TaskNodeRenderingContext<ForkTaskDefinition> context)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        var node = new ForkTaskNodeViewModel(context.TaskReference, context.TaskName, this.YamlSerializer.SerializeToText(context.TaskDefinition.Fork));
         if (context.TaskGroup == null) context.Graph.AddNode(node);
         else context.TaskGroup.AddChild(node);
         this.BuildEdge(context.Graph, node, this.GetNextNode(context, node));

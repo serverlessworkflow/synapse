@@ -34,12 +34,11 @@ public class TaskNodeViewModel
     /// <param name="name">The name of the <see cref="TaskDefinition"/> the <see cref="TaskNodeViewModel"/> represents</param>
     /// <param name="definition">The <see cref="TaskDefinition"/> the <see cref="TaskNodeViewModel"/> represents</param>
     /// <param name="isFirst">Indicates whether or not the task to create the <see cref="TaskNodeViewModel"/> for is the first task of the workflow it belongs to</param>
-    public TaskNodeViewModel(string taskReference, string name, TaskDefinition definition, bool isFirst = false)
+    public TaskNodeViewModel(string taskReference, string name, bool isFirst = false)
         : base(null, name)
     {
         this.Id = taskReference;
         this.Name = name;
-        this.Definition = definition;
         this.IsFirst = isFirst;
         this.ComponentType = typeof(TaskNodeTemplate);
     }
@@ -49,12 +48,6 @@ public class TaskNodeViewModel
     /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
     public string Name { get; }
-
-    /// <summary>
-    /// Gets the <see cref="TaskDefinition"/> the <see cref="TaskNodeViewModel"/> represents
-    /// </summary>
-    [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
-    public TaskDefinition Definition { get; }
 
     /// <summary>
     /// Gets if the state is the first of the workflow
