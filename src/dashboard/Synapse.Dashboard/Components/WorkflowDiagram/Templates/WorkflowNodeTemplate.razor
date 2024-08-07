@@ -33,7 +33,7 @@
                            y="@(bounds.Y.ToInvariantString())"
                            width="@(bounds.Width.ToInvariantString())"
                            height="@(bounds.Height.ToInvariantString())">
-                <div class="label-content">
+                <div title="@Node.Label" class="label-content">
                     <h3>
                         @if (!string.IsNullOrWhiteSpace(Node.Label))
                         {

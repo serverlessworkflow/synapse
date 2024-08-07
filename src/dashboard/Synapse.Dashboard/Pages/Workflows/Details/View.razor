@@ -14,9 +14,8 @@
     limitations under the License.
 *@
 
-@page "/workflows/details/{namespace}/{name}/latest"
-@page "/workflows/details/{namespace}/{name}/{version}"
-@page "/workflows/details/{namespace}/{name}/{version}/{instanceName}"
+
+@page "/workflows/details/{namespace}/{name}/{version?}/{instanceName?}"
 @using ServerlessWorkflow.Sdk.Models
 @using Synapse.Api.Client.Services
 @inherits NamespacedResourceManagementComponent<View, WorkflowDetailsStore, WorkflowDetailsState, WorkflowInstance>
@@ -130,9 +129,13 @@
         UpdateBreadcrumb();
         Store.Namespace.Where(value => !string.IsNullOrWhiteSpace(value)).Subscribe(value => OnStateChanged(_ => ns = value!), token: CancellationTokenSource.Token);
         Store.WorkflowDefinitionName.Where(value => !string.IsNullOrWhiteSpace(value)).Subscribe(value => OnStateChanged(_ => name = value!), token: CancellationTokenSource.Token);
-        Store.WorkflowDefinitionVersion.Where(value => !string.IsNullOrWhiteSpace(value)).Subscribe(value => OnStateChanged(_ => version = value!), token: CancellationTokenSource.Token);
         Store.WorkflowInstanceName.Subscribe(value => OnStateChanged(_ => instanceName = value), token: CancellationTokenSource.Token);
         Store.WorkflowDefinition.Where(value => value != null).Subscribe(value => OnStateChanged(_ => workflowDefinition = value!), token: CancellationTokenSource.Token);
+        Store.WorkflowDefinitionVersion.Where(value => !string.IsNullOrWhiteSpace(value)).Subscribe(value =>
+        {
+            OnStateChanged(_ => version = value!);
+            UpdateBreadcrumb();
+        }, token: CancellationTokenSource.Token);
         Store.WorkflowInstance.Subscribe(value =>
         {
             OnStateChanged(_ => workflowInstance = value);

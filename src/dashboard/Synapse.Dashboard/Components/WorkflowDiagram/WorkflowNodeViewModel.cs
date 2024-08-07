@@ -18,7 +18,7 @@ namespace Synapse.Dashboard.Components;
 /// <summary>
 /// Represents the base class for all workflow-related node models
 /// </summary>
-public abstract class WorkflowNodeViewModel
+public class WorkflowNodeViewModel
         : NodeViewModel, IWorkflowNodeViewModel
 {
 

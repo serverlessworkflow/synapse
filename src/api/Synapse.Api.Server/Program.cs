@@ -12,6 +12,7 @@
 // limitations under the License.
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
 
 var builder = WebApplication.CreateBuilder(args);
 var applicationOptions = new ApiServerOptions();
@@ -141,6 +142,7 @@ app.UseSwaggerUI(builder =>
 app.MapControllers().RequireAuthorization();
 app.MapHub<ResourceEventWatchHub>("api/ws/resources/watch");
 app.MapFallbackToFile("index.html");
+app.MapFallbackToFile("/workflows/details/{namespace}/{name}/{version?}/{instanceName?}", "index.html");
 
 await app.RunAsync();
 

@@ -195,7 +195,15 @@ public class DocumentDetailsStore(
     {
         var reference = this.Get(state => state.Reference);
         var loaded = this.Get(state => state.Loaded);
-        if (loaded || string.IsNullOrWhiteSpace(reference)) return;
+        if (loaded) return;
+        if (string.IsNullOrWhiteSpace(reference))
+        {
+            this.Reduce(state => state with
+            {
+                Loaded = true
+            });
+            return;
+        }
         try 
         { 
             var document = await this.ApiClient.Documents.GetAsync(reference);
