@@ -188,7 +188,7 @@ $wait-color: #5465d6;
     }
 }
 
-.node {
+.node, .cluster {
     --gradient-url: url(#default-node-gradient);
 
     &.call-task-node {

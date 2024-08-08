@@ -11,25 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Neuroglia.Blazor.Dagre;
+
 namespace Synapse.Dashboard.Components;
 
 /// <summary>
-/// Represents a composite task node view model
+/// Represents the object that holds the data required to render the view of a workflow's end node 
 /// </summary>
-public class DoTaskNodeViewModel
-    : WorkflowClusterViewModel
+public class PortNodeViewModel(string id)
+    : WorkflowNodeViewModel(id, new() { CssClass = "port-node", Shape = NodeShape.Rectangle, Width = 1, Height = 1 })
 {
-    /// <summary>
-    /// Initializes a new <see cref="DoTaskNodeViewModel"/>
-    /// </summary>
-    /// <param name="taskReference">The node task reference</param>
-    /// <param name="name">The node name</param>
-    /// <param name="content">The node content</param>
-    public DoTaskNodeViewModel(string taskReference, string name, string content)
-        : base(taskReference, new() { Label = name, CssClass = "do-task-node" })
-    {
-        Content = content;
-        Symbol = "do-symbol";
-        Type = "DO";
-    }
 }

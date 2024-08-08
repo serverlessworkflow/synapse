@@ -1,7 +1,7 @@
 @namespace Synapse.Dashboard
-@inherits NodeTemplate
+@inherits Neuroglia.Blazor.Dagre.Templates.NodeTemplate
 
-<g class="node @(!string.IsNullOrWhiteSpace(Node.Shape) ? "shape-" + Node.Shape : "shape-rectangle") @Node.CssClass" transform="translate(@((Node.X).ToInvariantString()), @((Node.Y).ToInvariantString()))">
+<g class="@(WorkflowNode.IsCluster ? "cluster" : "node") @(!string.IsNullOrWhiteSpace(Node.Shape) ? "shape-" + Node.Shape : "shape-rectangle") @Node.CssClass" transform="translate(@((Node.X).ToInvariantString()), @((Node.Y).ToInvariantString()))">
     <CascadingValue Name="Node" Value="Node">
         <NodeShapeTemplate />
         <CascadingValue Name="LabelTemplate" Value="LabelTemplate">

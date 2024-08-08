@@ -11,18 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Neuroglia.Blazor.Dagre;
 using Neuroglia.Blazor.Dagre.Models;
+using ServerlessWorkflow.Sdk.Models;
 using System.Text.Json.Serialization;
 
 namespace Synapse.Dashboard.Components;
 
 /// <summary>
-/// Represents the base class for all workflow-related node models
+/// Represents a <see cref="TaskDefinition"/> <see cref="NodeViewModel"/>
 /// </summary>
-public abstract class WorkflowNodeViewModel
-        : NodeViewModel, IWorkflowNodeViewModel
+public abstract class WorkflowClusterViewModel
+    : ClusterViewModel, IWorkflowNodeViewModel
 {
-
     int _operativeInstances = 0;
     int _faultedInstances = 0;
 
@@ -42,11 +43,11 @@ public abstract class WorkflowNodeViewModel
     [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
     public int OperativeInstancesCount
     {
-        get => _operativeInstances;
+        get => this._operativeInstances;
         set
         {
-            _operativeInstances = value;
-            OnChange();
+            this._operativeInstances = value;
+            this.OnChange();
         }
     }
 
@@ -54,25 +55,26 @@ public abstract class WorkflowNodeViewModel
     [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
     public int FaultedInstancesCount
     {
-        get => _faultedInstances;
+        get => this._faultedInstances;
         set
         {
-            _faultedInstances = value;
-            OnChange();
+            this._faultedInstances = value;
+            this.OnChange();
         }
     }
 
     /// <inheritdoc/>
     [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
-    public bool IsCluster => false;
+    public bool IsCluster => true;
 
     /// <summary>
-    /// Initialiazes a new <see cref="WorkflowNodeViewModel"/>
+    /// Initializes a new <see cref="WorkflowClusterViewModel"/>
     /// </summary>
     /// <param name="taskReference">The node task reference</param>
     /// <param name="config">The <see cref="NodeViewModelConfig"/> for the node</param>
-    public WorkflowNodeViewModel(string taskReference, NodeViewModelConfig? config = null)
-        : base(config?.Label, config?.CssClass, config?.Shape, config?.Width ?? 0, config?.Height ?? 0, config?.RadiusX ?? 0, config?.RadiusY ?? 0, config?.X ?? 0, config?.Y ?? 0, config?.ComponentType, config?.ParentId)
+    public WorkflowClusterViewModel(string taskReference, NodeViewModelConfig? config = null)
+        : base(null, config?.Label, config?.CssClass, config?.Shape, config?.Width ?? 0, config?.Height ?? 0, config?.RadiusX ?? 0, config?.RadiusY ?? 0, config?.X ?? 0, config?.Y ?? 0, config?.ComponentType, config?.ParentId)
+    //: base(null, config?.Label, config?.CssClass, (config?.Shape == null || config?.Shape == SynapseNodeShape.Cartouche) ? NodeShape.Rectangle : config!.Shape, config?.Width ?? 0, config?.Height ?? 0, config?.RadiusX ?? 0, config?.RadiusY ?? 0, config?.X ?? 0, config?.Y ?? 0, config?.ComponentType, config?.ParentId)
     {
         this.Id = taskReference;
     }
@@ -80,9 +82,8 @@ public abstract class WorkflowNodeViewModel
     /// <inheritdoc/>
     public void ResetInstancesCount()
     {
-        _operativeInstances = 0;
-        _faultedInstances = 0;
-        OnChange();
+        this._operativeInstances = 0;
+        this._faultedInstances = 0;
+        this.OnChange();
     }
-
 }

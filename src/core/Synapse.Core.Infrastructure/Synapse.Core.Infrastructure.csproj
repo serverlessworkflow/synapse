@@ -10,11 +10,11 @@
 
   <ItemGroup>
 	<PackageReference Include="IdentityModel" Version="7.0.0" />
-	<PackageReference Include="Neuroglia.Data.Expressions.Abstractions" Version="4.12.6" />
-	<PackageReference Include="Neuroglia.Data.Infrastructure.Redis" Version="4.12.6" />
-	<PackageReference Include="Neuroglia.Data.Infrastructure.ResourceOriented.Redis" Version="4.12.6" />
-	<PackageReference Include="Neuroglia.Mediation" Version="4.12.6" />
-	<PackageReference Include="Neuroglia.Plugins" Version="4.12.6" />
+	<PackageReference Include="Neuroglia.Data.Expressions.Abstractions" Version="4.12.7" />
+	<PackageReference Include="Neuroglia.Data.Infrastructure.Redis" Version="4.12.7" />
+	<PackageReference Include="Neuroglia.Data.Infrastructure.ResourceOriented.Redis" Version="4.12.7" />
+	<PackageReference Include="Neuroglia.Mediation" Version="4.12.7" />
+	<PackageReference Include="Neuroglia.Plugins" Version="4.12.7" />
 	<PackageReference Include="ServerlessWorkflow.Sdk.IO" Version="1.0.0-alpha2.5" />
   </ItemGroup>
 	

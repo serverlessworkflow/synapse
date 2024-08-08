@@ -12,6 +12,7 @@
 // limitations under the License.
 
 using Neuroglia.Blazor.Dagre;
+using Neuroglia.Blazor.Dagre.Templates;
 
 namespace Synapse.Dashboard.Components;
 
@@ -83,5 +84,5 @@ public class NodeViewModelConfig
     /// <summary>
     /// Gets/sets the type the component used to render the node
     /// </summary>
-    public Type ComponentType { get; set; } = typeof(WorkflowNodeTemplate);
+    public Type? ComponentType { get; set; } = typeof(NodeTemplate);
 }
