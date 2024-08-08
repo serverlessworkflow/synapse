@@ -20937,7 +20937,7 @@ tr.row-placeholder td::after {
   stop-color: #3b4796;
 }
 
-.node {
+.node, .cluster {
   --gradient-url: url(#default-node-gradient);
   /*
   rect, circle, ellipse {
@@ -20946,50 +20946,50 @@ tr.row-placeholder td::after {
       stroke-width: 1px;
   }*/
 }
-.node.call-task-node {
+.node.call-task-node, .cluster.call-task-node {
   --gradient-url: url(#call-node-gradient);
 }
-.node.do-task-node {
+.node.do-task-node, .cluster.do-task-node {
   --gradient-url: url(#do-node-gradient);
 }
-.node.emit-task-node {
+.node.emit-task-node, .cluster.emit-task-node {
   --gradient-url: url(#emit-node-gradient);
 }
-.node.for-task-node {
+.node.for-task-node, .cluster.for-task-node {
   --gradient-url: url(#for-node-gradient);
 }
-.node.fork-task-node {
+.node.fork-task-node, .cluster.fork-task-node {
   --gradient-url: url(#fork-node-gradient);
 }
-.node.listen-task-node {
+.node.listen-task-node, .cluster.listen-task-node {
   --gradient-url: url(#listen-node-gradient);
 }
-.node.raise-task-node {
+.node.raise-task-node, .cluster.raise-task-node {
   --gradient-url: url(#raise-node-gradient);
 }
-.node.run-task-node {
+.node.run-task-node, .cluster.run-task-node {
   --gradient-url: url(#run-node-gradient);
 }
-.node.switch-task-node {
+.node.switch-task-node, .cluster.switch-task-node {
   --gradient-url: url(#switch-node-gradient);
 }
-.node.set-task-node {
+.node.set-task-node, .cluster.set-task-node {
   --gradient-url: url(#set-node-gradient);
 }
-.node.try-task-node {
+.node.try-task-node, .cluster.try-task-node {
   --gradient-url: url(#try-node-gradient);
 }
-.node.wait-task-node {
+.node.wait-task-node, .cluster.wait-task-node {
   --gradient-url: url(#wait-node-gradient);
 }
-.node .node-rectangle {
+.node .node-rectangle, .cluster .node-rectangle {
   stroke: var(--gradient-url);
   stroke-width: 3px;
 }
-.node .node-cartouche {
+.node .node-cartouche, .cluster .node-cartouche {
   fill: var(--gradient-url);
 }
-.node .label-content {
+.node .label-content, .cluster .label-content {
   width: 100%;
   height: 100%;
   /*
@@ -21001,26 +21001,26 @@ tr.row-placeholder td::after {
   text-overflow: ellipsis;
   overflow: hidden;
 }
-.node .label-content h3, .node .label-content .h3 {
+.node .label-content h3, .node .label-content .h3, .cluster .label-content h3, .cluster .label-content .h3 {
   margin-bottom: 0.25rem;
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
 }
-.node .label-content p {
+.node .label-content p, .cluster .label-content p {
   margin: 0;
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
 }
-.node .label-content pre {
+.node .label-content pre, .cluster .label-content pre {
   margin: 0;
   height: 35px;
   text-overflow: ellipsis;
   overflow-x: hidden;
   overflow-y: auto;
 }
-.node.shape-cartouche .label-content {
+.node.shape-cartouche .label-content, .cluster.shape-cartouche .label-content {
   text-align: left;
   padding: 5px 5px 5px 65px;
 }

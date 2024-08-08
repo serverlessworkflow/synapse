@@ -17,6 +17,7 @@ using ServerlessWorkflow.Sdk.Models;
 using ServerlessWorkflow.Sdk.Models.Calls;
 using ServerlessWorkflow.Sdk.Models.Tasks;
 using System.Diagnostics;
+using System.Xml.Linq;
 
 namespace Synapse.Dashboard.Services;
 
@@ -104,10 +105,10 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
     }
 
     /// <summary>
-    /// Builds a new <see cref="TaskNodeViewModel"/> for the specified task
+    /// Builds a new <see cref="WorkflowClusterViewModel"/> for the specified task
     /// </summary>
     /// <param name="context">The rendering context for the task node</param>
-    /// <returns>A new <see cref="TaskNodeViewModel"/></returns>
+    /// <returns>A new <see cref="WorkflowClusterViewModel"/></returns>
     protected NodeViewModel BuildTaskNode(TaskNodeRenderingContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
@@ -190,10 +191,22 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
     protected virtual NodeViewModel BuildDoTaskNode(TaskNodeRenderingContext<DoTaskDefinition> context)
     {
         ArgumentNullException.ThrowIfNull(context);
-        var cluster = new TaskNodeViewModel(context.TaskReference, context.TaskName, false);
+        var taskCount = context.TaskDefinition.Do.Count;
+        var cluster = new DoTaskNodeViewModel(context.TaskReference, context.TaskName, $"{taskCount} task{(taskCount > 1 ? "s" : "")}");
+        var port = new PortNodeViewModel(context.TaskReference + "-port");
+        cluster.AddChild(port);
         if (context.TaskGroup == null) context.Graph.AddCluster(cluster);
         else context.TaskGroup.AddChild(cluster);
         this.BuildTaskNode(new(context.Workflow, context.Graph, 0, context.TaskDefinition.Do.First().Key, context.TaskDefinition.Do.First().Value, cluster, context.TaskReference + "/do", context.EndNode, context.PreviousNode));
+        // needed with port
+        if (taskCount > 0)
+        {
+            this.BuildEdge(context.Graph, port, (NodeViewModel)cluster.AllNodes.Skip(1).First().Value);
+        }
+        else
+        {
+            this.BuildEdge(context.Graph, port, this.GetNextNode(context, cluster));
+        }
         return cluster;
     }
 
@@ -444,7 +457,7 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
     /// <param name="parentReference">The reference to the parent task node.</param>
     /// <param name="endNode">The end node view model.</param>
     /// <param name="previousNode">The previous node view model.</param>
-    protected class TaskNodeRenderingContext(WorkflowDefinition workflow, GraphViewModel graph, int taskIndex, string taskName, TaskDefinition taskDefinition, TaskNodeViewModel? taskGroup, string parentReference, NodeViewModel endNode, NodeViewModel previousNode)
+    protected class TaskNodeRenderingContext(WorkflowDefinition workflow, GraphViewModel graph, int taskIndex, string taskName, TaskDefinition taskDefinition, WorkflowClusterViewModel? taskGroup, string parentReference, NodeViewModel endNode, NodeViewModel previousNode)
     {
 
         /// <summary>
@@ -475,7 +488,7 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
         /// <summary>
         /// Gets the optional task group.
         /// </summary>
-        public virtual TaskNodeViewModel? TaskGroup { get; } = taskGroup;
+        public virtual WorkflowClusterViewModel? TaskGroup { get; } = taskGroup;
 
         /// <summary>
         /// Gets the reference of the task node in the context of the parent task node.
@@ -519,7 +532,7 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
     /// <param name="parentReference">The reference to the parent task node.</param>
     /// <param name="endNode">The end node view model.</param>
     /// <param name="previousNode">The previous node view model.</param>
-    protected class TaskNodeRenderingContext<TDefinition>(WorkflowDefinition workflow, GraphViewModel graph, int taskIndex, string taskName, TaskDefinition taskDefinition, TaskNodeViewModel? taskGroup, string parentReference, NodeViewModel endNode, NodeViewModel previousNode)
+    protected class TaskNodeRenderingContext<TDefinition>(WorkflowDefinition workflow, GraphViewModel graph, int taskIndex, string taskName, TaskDefinition taskDefinition, WorkflowClusterViewModel? taskGroup, string parentReference, NodeViewModel endNode, NodeViewModel previousNode)
         : TaskNodeRenderingContext(workflow, graph, taskIndex, taskName, taskDefinition, taskGroup, parentReference, endNode, previousNode)
         where TDefinition : TaskDefinition
     {
