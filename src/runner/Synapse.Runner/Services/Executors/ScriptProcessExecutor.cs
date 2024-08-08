@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Neuroglia.Data.Expressions;
+
 namespace Synapse.Runner.Services.Executors;
 
 /// <summary>
@@ -57,14 +59,45 @@ public class ScriptProcessExecutor(IServiceProvider serviceProvider, ILogger<Scr
             using var streamReader = new StreamReader(stream);
             script = await streamReader.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
         }
-        using var process = await executor.ExecuteAsync(script, null, this.ProcessDefinition.Environment, cancellationToken).ConfigureAwait(false);
+        var arguments = this.ProcessDefinition.Arguments == null
+            ? null
+            : (await this.ProcessDefinition.Arguments.ToAsyncEnumerable().ToDictionaryAwaitAsync(kvp => ValueTask.FromResult(kvp.Key), async kvp => await this.EvaluateAndSerializeAsync(kvp.Value, cancellationToken).ConfigureAwait(false), cancellationToken).ConfigureAwait(false))
+                .Where(arg => !string.IsNullOrWhiteSpace(arg.Value))
+                .SelectMany(arg => new string[] { $"--{arg.Key}", arg.Value! })
+                .Where(arg => arg != "True" && arg != "False");
+        var environment = this.ProcessDefinition.Environment == null 
+            ? null 
+            : await this.ProcessDefinition.Environment.ToAsyncEnumerable().ToDictionaryAwaitAsync(kvp => ValueTask.FromResult(kvp.Key), async kvp => (await this.EvaluateAndSerializeAsync(kvp.Value, cancellationToken).ConfigureAwait(false))!, cancellationToken).ConfigureAwait(false);
+        using var process = await executor.ExecuteAsync(script, arguments, environment, cancellationToken).ConfigureAwait(false);
         await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
-        var stdOut = await process.StandardOutput.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
-        var stdErr = await process.StandardError.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
-        //todo: urgent: fix the script process so that we provide:
-        //1. (evaluated) arguments
-        //2. (evaluated) environment variables
-        //3. a way to decide, like for shell, where to read the output from: stdOut, file? or (exit) code
+        var rawOutput = (await process.StandardOutput.ReadToEndAsync(cancellationToken).ConfigureAwait(false)).Trim();
+        var errorMessage = (await process.StandardError.ReadToEndAsync(cancellationToken).ConfigureAwait(false)).Trim();
+        if (process.ExitCode == 0) await this.SetResultAsync(rawOutput, this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
+        else await this.SetErrorAsync(new()
+        {
+            Status = (int)HttpStatusCode.InternalServerError,
+            Type = ErrorType.Runtime,
+            Title = ErrorTitle.Runtime,
+            Detail = errorMessage,
+            Instance = this.Task.Instance.Reference
+        }, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Evaluates and serializes the specified value
+    /// </summary>
+    /// <param name="value">The value to serialize and evaluate</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>The evaluated and serialized value</returns>
+    protected virtual async Task<string?> EvaluateAndSerializeAsync(object? value, CancellationToken cancellationToken = default)
+    {
+        if (value == null) return null;
+        var evaluated = value is string str && str.IsRuntimeExpression()
+            ? await this.Task.Workflow.Expressions.EvaluateAsync(str, this.Task.Input, this.GetExpressionEvaluationArguments(), null, cancellationToken).ConfigureAwait(false)
+            : value.GetType().IsValueType ? value : await this.Task.Workflow.Expressions.EvaluateAsync(value, this.Task.Input, this.GetExpressionEvaluationArguments(), null, cancellationToken).ConfigureAwait(false);
+        if (evaluated == null) return null;
+        else if (evaluated.GetType().IsValueType) return evaluated.ToString();
+        else return this.JsonSerializer.SerializeToText(evaluated);
     }
 
 }

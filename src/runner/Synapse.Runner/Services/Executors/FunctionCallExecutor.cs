@@ -25,11 +25,25 @@ namespace Synapse.Runner.Services.Executors;
 /// <param name="executorFactory">The service used to create <see cref="ITaskExecutor"/>s</param>
 /// <param name="context">The current <see cref="ITaskExecutionContext"/></param>
 /// <param name="schemaHandlerProvider">The service used to provide <see cref="ISchemaHandler"/> implementations</param>
-/// <param name="serializer">The service used to serialize/deserialize objects to/from JSON</param>
+/// <param name="jsonSerializer">The service used to serialize/deserialize objects to/from JSON</param>
+/// <param name="yamlSerializer">The service used to serialize/deserialize objects to/from YAML</param>
+/// <param name="httpClientFactory">The service used to create <see cref="HttpClient"/>s</param>
 public class FunctionCallExecutor(IServiceProvider serviceProvider, ILogger<FunctionCallExecutor> logger, ITaskExecutionContextFactory executionContextFactory,
-    ITaskExecutorFactory executorFactory, ITaskExecutionContext<CallTaskDefinition> context, ISchemaHandlerProvider schemaHandlerProvider, IJsonSerializer serializer)
-    : TaskExecutor<CallTaskDefinition>(serviceProvider, logger, executionContextFactory, executorFactory, context, schemaHandlerProvider, serializer)
+    ITaskExecutorFactory executorFactory, ITaskExecutionContext<CallTaskDefinition> context, ISchemaHandlerProvider schemaHandlerProvider, IJsonSerializer jsonSerializer, IYamlSerializer yamlSerializer, IHttpClientFactory httpClientFactory)
+    : TaskExecutor<CallTaskDefinition>(serviceProvider, logger, executionContextFactory, executorFactory, context, schemaHandlerProvider, jsonSerializer)
 {
+
+    const string CustomFunctionDefinitionFile = "function.yaml";
+
+    /// <summary>
+    /// Gets the service used to serialize/deserialize objects to/from YAML
+    /// </summary>
+    protected IYamlSerializer YamlSerializer { get; } = yamlSerializer;
+
+    /// <summary>
+    /// Gets the <see cref="System.Net.Http.HttpClient"/> used to perform HTTP requests
+    /// </summary>
+    protected HttpClient HttpClient { get; } = httpClientFactory.CreateClient();
 
     /// <summary>
     /// Gets the definition of the function to execute
@@ -41,8 +55,32 @@ public class FunctionCallExecutor(IServiceProvider serviceProvider, ILogger<Func
     {
         await base.InitializeAsync(cancellationToken).ConfigureAwait(false);
         if (this.Task.Workflow.Definition.Use?.Functions?.TryGetValue(this.Task.Definition.Call, out var function) == true && function != null) this.Function = function;
+        else if (Uri.TryCreate(this.Task.Definition.Call, UriKind.Absolute, out var uri)) this.Function = await this.GetCustomFunctionAsync(uri, cancellationToken).ConfigureAwait(false);
         else throw new NotSupportedException($"Unknown/unsupported function '{this.Task.Definition.Call}'");
-        //todo: fetch from SW official collection
+    }
+
+    /// <summary>
+    /// Gets the custom function at the specified uri
+    /// </summary>
+    /// <param name="uri">The uri of that references the custom function to get</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>The <see cref="TaskDefinition"/> of the custom function defined at the specified uri</returns>
+    protected virtual async Task<TaskDefinition> GetCustomFunctionAsync(Uri uri, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(uri);
+        if (!uri.OriginalString.EndsWith(CustomFunctionDefinitionFile)) uri = new Uri(uri, CustomFunctionDefinitionFile);
+        try
+        {
+            using var response = await this.HttpClient.GetAsync(uri, cancellationToken).ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
+            var yaml = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+            var function = this.YamlSerializer.Deserialize<TaskDefinition>(yaml)!;
+            return function;
+        }
+        catch(Exception ex)
+        {
+            throw new ProblemDetailsException(new(ErrorType.Communication, ErrorTitle.Communication, ErrorStatus.Communication, $"Failed to load the custom function defined at '{uri}': {ex.Message}"));
+        }
     }
 
     /// <inheritdoc/>
@@ -79,6 +117,20 @@ public class FunctionCallExecutor(IServiceProvider serviceProvider, ILogger<Func
         this.Executors.Remove(executor);
         await executor.DisposeAsync().ConfigureAwait(false);
         await this.SetErrorAsync(error, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    protected override ValueTask DisposeAsync(bool disposing)
+    {
+        this.HttpClient.Dispose();
+        return base.DisposeAsync(disposing);
+    }
+
+    /// <inheritdoc/>
+    protected override void Dispose(bool disposing)
+    {
+        this.HttpClient.Dispose();
+        base.Dispose(disposing);
     }
 
 }

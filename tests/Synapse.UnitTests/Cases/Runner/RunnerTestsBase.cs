@@ -20,6 +20,7 @@ using Neuroglia.Data.Infrastructure.ResourceOriented.Services;
 using Neuroglia.Data.Infrastructure.Services;
 using Neuroglia.Data.PatchModel.Services;
 using Neuroglia.Eventing.CloudEvents.Infrastructure;
+using Neuroglia.Scripting;
 using Neuroglia.Security.Services;
 using ServerlessWorkflow.Sdk.IO;
 using StackExchange.Redis;
@@ -60,6 +61,8 @@ public abstract class RunnerTestsBase
         services.AddServerlessWorkflowIO();
         services.AddSingleton<ITaskExecutionContextFactory, TaskExecutionContextFactory>();
         services.AddSingleton<ITaskExecutorFactory, TaskExecutorFactory>();
+        services.AddNodeJSScriptExecutor();
+        services.AddPythonScriptExecutor();
         services.AddMemoryCacheRepository<Document, string>();
         services.AddScoped<IResourceRepository, MockResourceRepository>();
         services.AddCloudEventBus();

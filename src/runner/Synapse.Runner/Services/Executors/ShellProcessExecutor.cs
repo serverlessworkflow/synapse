@@ -37,6 +37,7 @@ public class ShellProcessExecutor(IServiceProvider serviceProvider, ILogger<Shel
     /// <inheritdoc/>
     protected override async Task DoExecuteAsync(CancellationToken cancellationToken)
     {
+        //todo: add and evaluate environment
         var fileInfo = RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? "/bin/bash" : "cmd.exe";
         var arguments = new List<string> { this.ProcessDefinition.Command };
         if (this.ProcessDefinition.Arguments != null) arguments.AddRange(arguments);
