@@ -124,26 +124,19 @@ For more information about `synctl`, please refer to the [documentation](#synctl
 
 ## Community
 
-We have a growing community working together to build a community-driven and vendor-neutral
-workflow ecosystem. Community contributions are welcome and much needed to foster project growth.
+The Synapse project has a vibrant and growing community dedicated to building a community-driven and vendor-neutral workflow runtime ecosystem. Contributions from the community are encouraged and essential to the continued growth and success of the project.
 
-See [here](community/contributors.md) for the list of community members that have contributed to the specification.
+A list of community members who have contributed to Synapse can be found [here](./community/README.md).
 
-To learn how to contribute to the specification reference the ['how to contribute'](contributing.md) doc.
+To learn how to contribute to Synapse, please refer to the [contribution guidelines](CONTRIBUTING.md).
 
-If you have any copyright questions when contributing to a CNCF project like this one,
-reference the [Ownership of Copyrights in CNCF Project Contributions](https://github.com/cncf/foundation/blob/master/copyright-notices.md) doc.
+For any copyright-related questions when contributing to a CNCF project like Synapse, please refer to the [Ownership of Copyrights in CNCF Project Contributions](https://github.com/cncf/foundation/blob/master/copyright-notices.md) document.
 
 ### Code of Conduct
 
-As contributors and maintainers of this project, and in the interest of fostering
-an open and welcoming community, we pledge to respect all people who contribute
-through reporting issues, posting feature requests, updating documentation,
-submitting pull requests or patches, and other activities.
+As contributors and maintainers of Synapse, and in the interest of fostering an open and welcoming community, we commit to respecting all individuals who contribute through activities such as reporting issues, posting feature requests, updating documentation, submitting pull requests or patches, and other forms of participation.
 
-We are committed to making participation in this project a harassment-free experience for
-everyone, regardless of level of experience, gender, gender identity and expression,
-sexual orientation, disability, personal appearance, body size, race, ethnicity, age,
-religion, or nationality.
+The project is committed to making participation in Synapse a harassment-free experience for everyone, regardless of experience level, gender identity and expression, sexual orientation, disability, personal appearance, body size, race, ethnicity, age, religion, or nationality.
 
-See our full project Code of Conduct information [here](code-of-conduct.md).
+For more detailed information, please see the full project Code of Conduct [here](code-of-conduct.md).
+
