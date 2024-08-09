@@ -45,7 +45,6 @@ public class AuthenticationPolicyOptions
             this.Jwt ??= new();
             this.Jwt.Audience = env;
         }
-
         env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Api.Authentication.Oidc.Authority);
         if (!string.IsNullOrWhiteSpace(env))
         {
