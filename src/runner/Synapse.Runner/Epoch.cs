@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 using YamlDotNet.Serialization;
@@ -19,24 +18,16 @@ using YamlDotNet.Serialization;
 namespace Synapse.Runner;
 
 /// <summary>
-/// Represents an object used to describe a datetime
+/// Represents an epoch, which is the duration elapsed between a datetime and midnight of 1970-01-01 UTC
 /// </summary>
 [DataContract]
-public record DateTimeDescriptor
+public record Epoch
 {
 
     /// <summary>
-    /// Gets/sets the ISO 8601 representation of the described datetime
+    /// Gets/sets the epoch's total milliseconds
     /// </summary>
-    [Required, MinLength(1)]
-    [DataMember(Name = "iso8601", Order = 1), JsonPropertyName("iso8601"), JsonPropertyOrder(1), YamlMember(Alias = "iso8601", Order = 1)]
-    public virtual string Iso8601 { get; set; } = null!;
-
-    /// <summary>
-    /// Gets/sets the duration elapsed between the described datetime and midnight of 1970-01-01 UTC
-    /// </summary>
-    [Required]
-    [DataMember(Name = "epoch", Order = 2), JsonPropertyName("epoch"), JsonPropertyOrder(2), YamlMember(Alias = "epoch", Order = 2)]
-    public virtual Epoch Epoch { get; set; } = null!;
+    [DataMember(Name = "ms", Order = 1), JsonPropertyName("ms"), JsonPropertyOrder(1), YamlMember(Alias = "ms", Order = 1)]
+    public virtual int Milliseconds { get; set; }
 
 }

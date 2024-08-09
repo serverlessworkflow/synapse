@@ -96,7 +96,7 @@ public class ScriptProcessExecutor(IServiceProvider serviceProvider, ILogger<Scr
             ? await this.Task.Workflow.Expressions.EvaluateAsync(str, this.Task.Input, this.GetExpressionEvaluationArguments(), null, cancellationToken).ConfigureAwait(false)
             : value.GetType().IsValueType ? value : await this.Task.Workflow.Expressions.EvaluateAsync(value, this.Task.Input, this.GetExpressionEvaluationArguments(), null, cancellationToken).ConfigureAwait(false);
         if (evaluated == null) return null;
-        else if (evaluated.GetType().IsValueType) return evaluated.ToString();
+        else if (evaluated.GetType().IsValueType || evaluated is string) return evaluated.ToString();
         else return this.JsonSerializer.SerializeToText(evaluated);
     }
 

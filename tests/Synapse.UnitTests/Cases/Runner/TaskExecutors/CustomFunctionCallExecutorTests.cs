@@ -27,7 +27,9 @@ public class CustomFunctionCallExecutorTests
         var parameters = new Neuroglia.EquatableDictionary<string, object>()
         {
             new("message", "Hello, {user}!"),
-            new("arguments", new { user = username })
+            new("arguments", new { user = username }),
+            new("context", "${ $task.reference }"),
+            new("timestamp", true),
         };
         var functionName = "https://raw.githubusercontent.com/serverlessworkflow/catalog/main/functions/log/1.0.0/function.yaml";
         var taskDefinition = new CallTaskDefinition()

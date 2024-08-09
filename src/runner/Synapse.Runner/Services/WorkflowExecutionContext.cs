@@ -109,7 +109,8 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         var filteredInput = input;
         var evaluationArguments = new Dictionary<string, object>()
         {
-            { RuntimeExpressions.Arguments.Workflow, Instance.Spec },
+            { RuntimeExpressions.Arguments.Runtime, RuntimeDescriptor.Current },
+            { RuntimeExpressions.Arguments.Workflow, this.GetDescriptor() },
             { RuntimeExpressions.Arguments.Context, context }
         };
         if (definition.Input?.From is string fromExpression) filteredInput = (await this.Expressions.EvaluateAsync<object>(fromExpression, input, evaluationArguments, cancellationToken).ConfigureAwait(false))!;

@@ -27,6 +27,15 @@ public record RuntimeDescriptor
 {
 
     /// <summary>
+    /// Gets the object used to describe the current runtime
+    /// </summary>
+    public static readonly RuntimeDescriptor Current = new()
+    {
+        Name = "Synapse",
+        Version = typeof(RuntimeDescriptor).Assembly.GetName().Version!.ToString(3)
+    };
+
+    /// <summary>
     /// Gets/sets the runtime's name
     /// </summary>
     [Required, MinLength(1)]

@@ -97,7 +97,7 @@ public class FunctionCallExecutor(IServiceProvider serviceProvider, ILogger<Func
     protected override async Task DoExecuteAsync(CancellationToken cancellationToken)
     {
         if (this.Function == null) throw new InvalidOperationException("The executor must be initialized before execution");
-        var input = this.Task.Definition.With == null ? [] : await this.Task.Workflow.Expressions.EvaluateAsync<EquatableDictionary<string, object>?>(this.Task.Definition.With, this.Task.Input, this.Task.Arguments, cancellationToken).ConfigureAwait(false) ?? [];
+        var input = this.Task.Definition.With == null ? [] : await this.Task.Workflow.Expressions.EvaluateAsync<EquatableDictionary<string, object>?>(this.Task.Definition.With, this.Task.Input, this.GetExpressionEvaluationArguments(), cancellationToken).ConfigureAwait(false) ?? [];
         var task = await this.Task.Workflow.CreateTaskAsync(this.Function, null, input, null, this.Task, false, cancellationToken).ConfigureAwait(false);
         var executor = await this.CreateTaskExecutorAsync(task, this.Function, this.Task.ContextData, this.Task.Arguments, cancellationToken).ConfigureAwait(false);
         await executor.ExecuteAsync(cancellationToken).ConfigureAwait(false);

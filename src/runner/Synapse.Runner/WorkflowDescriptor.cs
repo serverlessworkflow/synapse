@@ -50,6 +50,6 @@ public record WorkflowDescriptor
     /// </summary>
     [Required]
     [DataMember(Name = "startedAt", Order = 4), JsonPropertyName("startedAt"), JsonPropertyOrder(4), YamlMember(Alias = "startedAt", Order = 4)]
-    public virtual DateTimeDescriptor StartedAt { get; set; } = null!;
+    public virtual DateTimeDescriptor? StartedAt { get; set; } = null!;
 
 }

@@ -139,7 +139,7 @@ public abstract class TaskExecutor<TDefinition>(IServiceProvider serviceProvider
         }
         try
         {
-            if (!string.IsNullOrWhiteSpace(this.Task.Definition.If) && !(await this.Task.Workflow.Expressions.EvaluateConditionAsync(this.Task.Definition.If, this.Task.Input, this.Task.Arguments, cancellationToken).ConfigureAwait(false)))
+            if (!string.IsNullOrWhiteSpace(this.Task.Definition.If) && !(await this.Task.Workflow.Expressions.EvaluateConditionAsync(this.Task.Definition.If, this.Task.Input, this.GetExpressionEvaluationArguments(), cancellationToken).ConfigureAwait(false)))
             {
                 await this.SkipAsync(this.Task.Input, this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
             }
@@ -394,9 +394,10 @@ public abstract class TaskExecutor<TDefinition>(IServiceProvider serviceProvider
     protected virtual IDictionary<string, object>? GetExpressionEvaluationArguments()
     {
         var parameters = this.Task.Arguments.Clone()!;
+        parameters[RuntimeExpressions.Arguments.Runtime] = RuntimeDescriptor.Current;
         parameters[RuntimeExpressions.Arguments.Context] = this.Task.ContextData;
-        parameters[RuntimeExpressions.Arguments.Workflow] = this.Task.Workflow.Instance.Spec;
-        parameters[RuntimeExpressions.Arguments.Task] = this.Task.Instance;
+        parameters[RuntimeExpressions.Arguments.Workflow] = this.Task.Workflow.GetDescriptor();
+        parameters[RuntimeExpressions.Arguments.Task] = this.Task.GetDescriptor();
         parameters[RuntimeExpressions.Arguments.Input] = this.Task.Input;
         return parameters;
     }

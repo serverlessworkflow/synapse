@@ -28,9 +28,8 @@ public record TaskDescriptor
     /// <summary>
     /// Gets/sets the task's name
     /// </summary>
-    [Required, MinLength(1)]
     [DataMember(Name = "name", Order = 1), JsonPropertyName("name"), JsonPropertyOrder(1), YamlMember(Alias = "name", Order = 1)]
-    public virtual string Name { get; set; } = null!;
+    public virtual string? Name { get; set; } = null!;
 
     /// <summary>
     /// Gets/sets the task's reference
@@ -44,7 +43,7 @@ public record TaskDescriptor
     /// </summary>
     [Required]
     [DataMember(Name = "definition", Order = 3), JsonPropertyName("definition"), JsonPropertyOrder(3), YamlMember(Alias = "definition", Order = 3)]
-    public virtual WorkflowDefinition Definition { get; set; } = null!;
+    public virtual TaskDefinition Definition { get; set; } = null!;
 
     /// <summary>
     /// Gets/sets the task's raw, untransformed input
@@ -61,8 +60,7 @@ public record TaskDescriptor
     /// <summary>
     /// Gets/sets the date and time at which the task has started
     /// </summary>
-    [Required]
     [DataMember(Name = "startedAt", Order = 6), JsonPropertyName("startedAt"), JsonPropertyOrder(6), YamlMember(Alias = "startedAt", Order = 6)]
-    public virtual DateTimeDescriptor StartedAt { get; set; } = null!;
+    public virtual DateTimeDescriptor? StartedAt { get; set; } = null!;
 
 }
