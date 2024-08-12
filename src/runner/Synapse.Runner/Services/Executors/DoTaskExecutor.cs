@@ -87,7 +87,6 @@ public class DoTaskExecutor(IServiceProvider serviceProvider, ILogger<DoTaskExec
         ArgumentNullException.ThrowIfNull(executor);
         var error = executor.Task.Instance.Error ?? throw new NullReferenceException();
         this.Executors.Remove(executor);
-        await executor.DisposeAsync().ConfigureAwait(false);
         await this.SetErrorAsync(error, cancellationToken).ConfigureAwait(false);
     }
 
@@ -104,7 +103,6 @@ public class DoTaskExecutor(IServiceProvider serviceProvider, ILogger<DoTaskExec
         var output = executor.Task.Output!;
         var nextDefinition = this.Task.Definition.Do.GetTaskAfter(last);
         this.Executors.Remove(executor);
-        await executor.DisposeAsync().ConfigureAwait(false);
         if (nextDefinition == null || nextDefinition.Value == null)
         {
             await this.SetResultAsync(output, last.Next == FlowDirective.End || last.Next == FlowDirective.Exit ? FlowDirective.End : this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);

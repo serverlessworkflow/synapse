@@ -134,7 +134,6 @@ public abstract class TaskExecutor<TDefinition>(IServiceProvider serviceProvider
         if (this.Task.Definition.Timeout?.After != null)
         {
             var duration = this.Task.Definition.Timeout.After.ToTimeSpan();
-            this.CancellationTokenSource.CancelAfter(duration);
             this.Timer = new(this.OnTimeoutAsync, null, duration, Timeout.InfiniteTimeSpan);
         }
         try
@@ -275,6 +274,7 @@ public abstract class TaskExecutor<TDefinition>(IServiceProvider serviceProvider
         this.Subject.OnNext(new TaskLifeCycleEvent(TaskLifeCycleEventType.Faulted));
         this.Subject.OnError(new ErrorRaisedException(error));
         if (!this.TaskCompletionSource.Task.IsCompleted) this.TaskCompletionSource.SetResult();
+        if (this.CancellationTokenSource != null) await this.CancellationTokenSource.CancelAsync().ConfigureAwait(false);
     }
 
     /// <summary>
@@ -416,7 +416,7 @@ public abstract class TaskExecutor<TDefinition>(IServiceProvider serviceProvider
             Status = (int)HttpStatusCode.RequestTimeout,
             Type = ErrorType.Timeout,
             Title = ErrorTitle.Timeout,
-            Detail = $"The task with name '{this.Task.Instance.Name}' at '{this.Task.Instance.Reference}' has timed out after {this.Task.Definition.Timeout!.After.Milliseconds} milliseconds"
+            Detail = $"The task with name '{this.Task.Instance.Name}' at '{this.Task.Instance.Reference}' has timed out after {this.Task.Definition.Timeout!.After.TotalMilliseconds} milliseconds"
         }, this.CancellationTokenSource?.Token ?? default).ConfigureAwait(false);
     }
 

@@ -117,7 +117,7 @@ public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRep
                     if (contextCorrelationResult == default)
                     {
                         this.Logger.LogInformation("Failed to find a matching correlation context");
-                        if (this.Correlation.Resource.Status.Contexts.Count != 0) throw new Exception("Failed to correlate event"); //should not happen
+                        if (this.Correlation.Resource.Status.Contexts.Count != 0) throw new Exception("Failed to correlate event: a context with unmatched keys has already been associated with the ephemeral correlation");
                         this.Logger.LogInformation("Creating a new correlation context...");
                         context = new CorrelationContext()
                         {
@@ -202,9 +202,28 @@ public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRep
             foreach(var attribute in filter.With)
             {
                 if (!e.TryGetAttribute(attribute.Key, out var value) || value == null) return false;
-                var valueStr = attribute.Value.ToString();
-                if (valueStr?.IsRuntimeExpression() == true && !await this.ExpressionEvaluator.EvaluateConditionAsync(valueStr, e, cancellationToken: cancellationToken)) return false;
-                else if (!string.IsNullOrWhiteSpace(valueStr) && !Regex.IsMatch(value.ToString() ?? string.Empty, valueStr, RegexOptions.IgnoreCase)) return false;
+                if (attribute.Key == CloudEventAttributes.Data && value != null && value is not string)
+                {
+                    var valueDictionary = attribute.Value.ConvertTo<IDictionary<string, object>>()!;
+                    foreach(var property in valueDictionary)
+                    {
+                        var valueStr = property.Value.ToString();
+                        if (valueStr?.IsRuntimeExpression() == true) 
+                        {
+                            if (!await this.ExpressionEvaluator.EvaluateConditionAsync(valueStr, e, cancellationToken: cancellationToken)) return false;
+                        }
+                        else if (!string.IsNullOrWhiteSpace(valueStr) && !Regex.IsMatch(value.ToString() ?? string.Empty, valueStr, RegexOptions.IgnoreCase)) return false;
+                    }
+                }
+                else
+                {
+                    var valueStr = attribute.Value.ToString();
+                    if (valueStr?.IsRuntimeExpression() == true)
+                    {
+                        if (!await this.ExpressionEvaluator.EvaluateConditionAsync(valueStr, e, cancellationToken: cancellationToken)) return false;
+                    }
+                    else if (!string.IsNullOrWhiteSpace(valueStr) && !Regex.IsMatch(value.ToString() ?? string.Empty, valueStr, RegexOptions.IgnoreCase)) return false;
+                } 
             }
         }
         if (filter.Correlate?.Count > 0)
@@ -255,6 +274,7 @@ public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRep
                 }
                 break;
             }
+            else return (context, true, correlationKeys, filter.Key);
         }
         return (context, false, null, null);
     }

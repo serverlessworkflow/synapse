@@ -111,7 +111,6 @@ public class TryTaskExecutor(IServiceProvider serviceProvider, ILogger<TryTaskEx
             return;
         }
         this.Executors.Remove(executor);
-        await executor.DisposeAsync().ConfigureAwait(false);
         if (this.Task.Definition.Catch.Retry != null)
         {
             var limit = this.Task.Definition.Catch.Retry.Limit;
@@ -162,7 +161,6 @@ public class TryTaskExecutor(IServiceProvider serviceProvider, ILogger<TryTaskEx
         var last = executor.Task.Instance;
         var output = executor.Task.Output!;
         this.Executors.Remove(executor);
-        await executor.DisposeAsync().ConfigureAwait(false);
         await this.SetResultAsync(output, last.Next == FlowDirective.End ? FlowDirective.End : this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
     }
 
@@ -178,7 +176,6 @@ public class TryTaskExecutor(IServiceProvider serviceProvider, ILogger<TryTaskEx
         ArgumentNullException.ThrowIfNull(executor);
         var error = executor.Task.Instance.Error ?? throw new NullReferenceException();
         this.Executors.Remove(executor);
-        await executor.DisposeAsync().ConfigureAwait(false);
         await this.SetErrorAsync(error, cancellationToken).ConfigureAwait(false);
     }
 
@@ -194,7 +191,6 @@ public class TryTaskExecutor(IServiceProvider serviceProvider, ILogger<TryTaskEx
         var last = executor.Task.Instance;
         var output = executor.Task.Output!;
         this.Executors.Remove(executor);
-        await executor.DisposeAsync().ConfigureAwait(false);
         await this.SetResultAsync(output, last.Next == FlowDirective.End ? FlowDirective.End : this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
     }
 

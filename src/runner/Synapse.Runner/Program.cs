@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//if (args.Length != 0 && args.Contains("--debug") && !Debugger.IsAttached) Debugger.Launch(); //todo: uncomment
+if (args.Length != 0 && args.Contains("--debug") && !Debugger.IsAttached) Debugger.Launch(); //todo: uncomment
 
 var builder = Host.CreateDefaultBuilder()
     .ConfigureAppConfiguration((context, config) =>
@@ -65,6 +65,7 @@ var builder = Host.CreateDefaultBuilder()
         services.AddSingleton<ITaskExecutorFactory, TaskExecutorFactory>();
         services.AddSingleton<ISchemaHandlerProvider, SchemaHandlerProvider>();
         services.AddSingleton<ISchemaHandler, JsonSchemaHandler>();
+        services.AddSingleton<IExternalResourceProvider, ExternalResourceProvider>();
         services.AddHostedService<RunnerApplication>();
     });
 

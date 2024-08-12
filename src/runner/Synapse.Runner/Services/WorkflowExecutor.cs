@@ -253,7 +253,6 @@ public class WorkflowExecutor(IServiceProvider serviceProvider, ILogger<Workflow
     {
         await this.SetErrorAsync(executor.Task.Instance.Error ?? throw new Exception("Faulted tasks must document an error"), cancellationToken).ConfigureAwait(false);
         this.Executors.Remove(executor);
-        await executor.DisposeAsync().ConfigureAwait(false);
     }
 
     /// <summary>

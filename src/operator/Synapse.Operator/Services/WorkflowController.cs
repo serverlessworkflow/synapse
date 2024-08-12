@@ -12,9 +12,6 @@
 // limitations under the License.
 
 using Json.Patch;
-using Neuroglia.Data.Infrastructure.ResourceOriented;
-using Neuroglia.Reactive;
-using System.Threading;
 
 namespace Synapse.Operator.Services;
 
