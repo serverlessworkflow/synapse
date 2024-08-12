@@ -49,7 +49,7 @@ builder.Services.AddOidcAuthentication(options =>
 builder.Services.AddSingleton<IMonacoEditorHelper, MonacoEditorHelper>();
 builder.Services.AddScoped<IApplicationLayout, ApplicationLayout>();
 builder.Services.AddSingleton<MonacoInterop>();
-builder.Services.AddSingleton<IDagreService, DagreService>();
+builder.Services.AddSingleton<IGraphLayoutService, GraphLayoutService>();
 builder.Services.AddSingleton<IWorkflowGraphBuilder, WorkflowGraphBuilder>();
 builder.Services.AddSingleton<IBreadcrumbManager, BreadcrumbManager>();
 

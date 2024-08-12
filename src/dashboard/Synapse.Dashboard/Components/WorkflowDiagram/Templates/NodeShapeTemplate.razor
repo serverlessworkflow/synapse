@@ -19,7 +19,15 @@
                    height="@(bounds.Height.ToInvariantString())"
                    rx="@((Node.RadiusX).ToInvariantString())"
                    ry="@((Node.RadiusY).ToInvariantString())" />
-            <path class="node-cartouche" d="m @((bounds.X).ToInvariantString()) @((bounds.Y + (Node.RadiusX)).ToInvariantString()) c 0 -@(((Node.RadiusX) / 2).ToInvariantString()) @(((Node.RadiusX) / 2).ToInvariantString()) -@((Node.RadiusX).ToInvariantString()) @((Node.RadiusX).ToInvariantString()) -@((Node.RadiusX).ToInvariantString()) h @(((bounds.Width / 8) - 1).ToInvariantString()) v @((bounds.Height).ToInvariantString()) h -@(((bounds.Width / 8) - 1).ToInvariantString()) c -@(((Node.RadiusX) / 2).ToInvariantString()) 0 -@((Node.RadiusX).ToInvariantString()) -@(((Node.RadiusX) / 2).ToInvariantString()) -@((Node.RadiusX).ToInvariantString()) -@((Node.RadiusX).ToInvariantString()) z" />
+            <path class="node-cartouche" d="
+                m @(bounds.X.ToInvariantString()) @((bounds.Y + Node.RadiusX).ToInvariantString()) 
+                c 0 -@((Node.RadiusX / 2).ToInvariantString()) @((Node.RadiusX / 2).ToInvariantString()) -@(Node.RadiusX.ToInvariantString()) @(Node.RadiusX.ToInvariantString()) -@(Node.RadiusX.ToInvariantString()) 
+                h @(((bounds.Width / 8) - 1).ToInvariantString()) 
+                v @(bounds.Height.ToInvariantString()) 
+                h -@(((bounds.Width / 8) - 1).ToInvariantString()) 
+                c -@((Node.RadiusX / 2).ToInvariantString()) 0 -@(Node.RadiusX.ToInvariantString()) -@((Node.RadiusX / 2).ToInvariantString()) -@(Node.RadiusX.ToInvariantString()) -@(Node.RadiusX.ToInvariantString()) 
+                z"
+            />
         }
         else
         {
@@ -29,7 +37,15 @@
                   height="@(bounds.Height.ToInvariantString())"
                   rx="@((Node.RadiusX).ToInvariantString())"
                   ry="@((Node.RadiusY).ToInvariantString())" />
-            <path class="node-cartouche" d="m @((bounds.X).ToInvariantString()) @((bounds.Y + (Node.RadiusX)).ToInvariantString()) c 0 -@(((Node.RadiusX) / 2).ToInvariantString()) @(((Node.RadiusX) / 2).ToInvariantString()) -@((Node.RadiusX).ToInvariantString()) @((Node.RadiusX).ToInvariantString()) -@((Node.RadiusX).ToInvariantString()) h @(((bounds.Width / 8) - 1).ToInvariantString()) v @((bounds.Height).ToInvariantString()) h -@(((bounds.Width / 8) - 1).ToInvariantString()) c -@(((Node.RadiusX) / 2).ToInvariantString()) 0 -@((Node.RadiusX).ToInvariantString()) -@(((Node.RadiusX) / 2).ToInvariantString()) -@((Node.RadiusX).ToInvariantString()) -@((Node.RadiusX).ToInvariantString()) z" />
+            <path class="node-cartouche" d="
+                m @(bounds.X.ToInvariantString()) @((bounds.Y + Node.RadiusX).ToInvariantString()) 
+                c 0 -@((Node.RadiusX / 2).ToInvariantString()) @((Node.RadiusX / 2).ToInvariantString()) -@(Node.RadiusX.ToInvariantString()) @(Node.RadiusX.ToInvariantString()) -@(Node.RadiusX.ToInvariantString()) 
+                h @((bounds.Width - (Node.RadiusX * 2)).ToInvariantString()) 
+                c @((Node.RadiusX / 2).ToInvariantString()) 0 @(Node.RadiusX.ToInvariantString()) @((Node.RadiusY / 2).ToInvariantString()) @(Node.RadiusX.ToInvariantString()) @(Node.RadiusY.ToInvariantString())
+                v @Constants.ClusterHeight
+                h -@(bounds.Width.ToInvariantString()) 
+                z"
+            />
         }
     }
     else
