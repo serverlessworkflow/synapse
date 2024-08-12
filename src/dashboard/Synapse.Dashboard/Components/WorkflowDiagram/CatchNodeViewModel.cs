@@ -14,9 +14,9 @@
 namespace Synapse.Dashboard.Components;
 
 /// <summary>
-/// Represents a try task node view model
+/// Represents a catch node view model
 /// </summary>
-public class TryTaskNodeViewModel
+public class CatchNodeViewModel
     : WorkflowClusterViewModel
 {
     /// <summary>
@@ -24,12 +24,10 @@ public class TryTaskNodeViewModel
     /// </summary>
     /// <param name="taskReference">The node task reference</param>
     /// <param name="name">The node name</param>
-    /// <param name="content">The node content</param>
-    public TryTaskNodeViewModel(string taskReference, string name, string content)
-        : base(taskReference, new() { Label = name, CssClass = "try-task-node" })
+    public CatchNodeViewModel(string taskReference, string name)
+        : base(taskReference, new() { Label = name, CssClass = "catch-node" })
     {
-        Content = content;
-        Symbol = "try-symbol";
-        Type = "TRY";
+        Symbol = "catch-symbol";
+        Type = "CATCH";
     }
 }
