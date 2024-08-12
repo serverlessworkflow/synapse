@@ -11,13 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Neuroglia.Blazor.Dagre;
 using Neuroglia.Blazor.Dagre.Models;
 using ServerlessWorkflow.Sdk;
 using ServerlessWorkflow.Sdk.Models;
 using ServerlessWorkflow.Sdk.Models.Calls;
 using ServerlessWorkflow.Sdk.Models.Tasks;
 using System.Diagnostics;
-using System.Xml.Linq;
 
 namespace Synapse.Dashboard.Services;
 
@@ -29,6 +29,9 @@ namespace Synapse.Dashboard.Services;
 public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerializer jsonSerializer)
     : IWorkflowGraphBuilder
 {
+
+    const string _portSuffix = "_port";
+    const double characterSize = 8d;
 
     /// <summary>
     /// Gets the default radius for start and end nodes
@@ -193,7 +196,7 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
         ArgumentNullException.ThrowIfNull(context);
         var taskCount = context.TaskDefinition.Do.Count;
         var cluster = new DoTaskNodeViewModel(context.TaskReference, context.TaskName, $"{taskCount} task{(taskCount > 1 ? "s" : "")}");
-        var port = new PortNodeViewModel(context.TaskReference + "-port");
+        var port = new PortNodeViewModel(context.TaskReference + _portSuffix);
         cluster.AddChild(port);
         if (context.TaskGroup == null) context.Graph.AddCluster(cluster);
         else context.TaskGroup.AddChild(cluster);
@@ -431,18 +434,28 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
     /// <param name="target">The node to draw the edge to</param>
     /// <param name="label">The edge label, if any</param>
     /// <returns>A new awaitable <see cref="Task"/></returns>
-    protected virtual void BuildEdge(GraphViewModel graph, NodeViewModel source, NodeViewModel target, string? label = null)
+    protected virtual IEdgeViewModel BuildEdge(GraphViewModel graph, NodeViewModel source, NodeViewModel target, string? label = null)
     {
-        var existingEdge = graph.Edges.Select(keyValuePair => keyValuePair.Value).FirstOrDefault(edge => edge.SourceId == source.Id && edge.TargetId == target.Id);
-        if (existingEdge != null)
+        var edge = graph.Edges.Select(keyValuePair => keyValuePair.Value).FirstOrDefault(edge => edge.SourceId == source.Id && edge.TargetId == target.Id);
+        if (edge != null)
         {
             if (!string.IsNullOrEmpty(label)) { 
-                existingEdge.Label = existingEdge.Label + " / " + label;
+                edge.Label = edge.Label + " / " + label;
+                edge.Width = edge.Label.Length * characterSize;
             }
-            return;
+            return edge;
         }
-        if (graph.Edges.Select(keyValuePair => keyValuePair.Value).Any(edge => edge.SourceId == source.Id && edge.TargetId == target.Id && edge.Label == label)) return;
-        graph.AddEdge(new EdgeViewModel(source.Id, target.Id, label));
+        edge = new EdgeViewModel(source.Id, target.Id, label);
+        if (!string.IsNullOrEmpty(edge.Label))
+        {
+            edge.LabelPosition = EdgeLabelPosition.Center;
+            edge.Width = edge.Label.Length * characterSize;
+        }
+        if (target.Id.EndsWith(_portSuffix))
+        {
+            edge.EndMarkerId = null;
+        }
+        return graph.AddEdge(edge);
     }
 
     /// <summary>

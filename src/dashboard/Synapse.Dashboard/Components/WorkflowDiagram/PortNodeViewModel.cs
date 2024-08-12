@@ -16,7 +16,7 @@ using Neuroglia.Blazor.Dagre;
 namespace Synapse.Dashboard.Components;
 
 /// <summary>
-/// Represents the object that holds the data required to render the view of a workflow's end node 
+/// Used as a ghost node to create a top padding in clusters
 /// </summary>
 public class PortNodeViewModel(string id)
     : WorkflowNodeViewModel(id, new() { CssClass = "port-node", Shape = NodeShape.Rectangle, Width = 1, Height = 1 })
