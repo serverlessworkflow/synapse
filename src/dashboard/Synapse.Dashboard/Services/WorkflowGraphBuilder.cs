@@ -18,7 +18,6 @@ using ServerlessWorkflow.Sdk.Models;
 using ServerlessWorkflow.Sdk.Models.Calls;
 using ServerlessWorkflow.Sdk.Models.Tasks;
 using System.Diagnostics;
-using System.Diagnostics.Metrics;
 
 namespace Synapse.Dashboard.Services;
 
@@ -64,7 +63,7 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
         var nextNode = endNode;
         if (!isEmpty) 
         {
-            nextNode = this.BuildTaskNode(new(workflow, graph, 0, workflow.Do.First().Key, workflow.Do.First().Value, null, "/do", endNode, startNode));
+            nextNode = this.BuildTaskNode(new(workflow, graph, 0, workflow.Do.First().Key, workflow.Do.First().Value, null, "/do", null, endNode, startNode));
         }
         this.BuildEdge(graph, startNode, nextNode);
         sw.Stop();
@@ -80,6 +79,33 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
     protected virtual NodeViewModel BuildStartNode(bool hasSuccessor = false) => new StartNodeViewModel(hasSuccessor);
 
     /// <summary>
+    /// Returns the name, index and reference of the next node
+    /// </summary>
+    /// <param name="context">The rendering context for the task nodes</param>
+    /// <param name="currentNode">The current task node</param>
+    /// <param name="transition">A transition, if different from the context task definition's</param>
+    /// <returns>The next task <see cref="TaskIdentity"/></returns>
+    protected TaskIdentity? GetNextTaskIdentity(TaskNodeRenderingContext context, NodeViewModel currentNode, string? transition = null)
+    {
+        transition = !string.IsNullOrWhiteSpace(transition) ? transition : context.TaskDefinition.Then;
+        if (transition == FlowDirective.End || transition == FlowDirective.Exit) return null;
+        var nextTaskName = string.IsNullOrWhiteSpace(transition) || transition == FlowDirective.Continue
+                ? context.Workflow.GetTaskAfter(new(context.TaskName, context.TaskDefinition), context.ParentReference)?.Key
+                : transition;
+        if (string.IsNullOrWhiteSpace(nextTaskName))
+        {
+            if (context.ParentContext == null)
+            {
+                return null;
+            }
+            return this.GetNextTaskIdentity(context.ParentContext, currentNode, nextTaskName);
+        }
+        var nextTaskIndex = context.Workflow.IndexOf(nextTaskName, context.ParentReference);
+        var nextTaskReference = $"{context.ParentReference}/{nextTaskIndex}/{nextTaskName}";
+        return new(nextTaskName, nextTaskIndex, nextTaskReference, context);
+    }
+
+    /// <summary>
     /// Gets the next <see cref="NodeViewModel"/> in the graph
     /// </summary>
     /// <param name="context">The rendering context for the task nodes</param>
@@ -89,24 +115,21 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
     /// <exception cref="Exception"></exception>
     protected NodeViewModel GetNextNode(TaskNodeRenderingContext context, NodeViewModel currentNode, string? transition = null)
     {
-        transition = !string.IsNullOrWhiteSpace(transition) ? transition : context.TaskDefinition.Then;
-        if (transition == FlowDirective.End || transition == FlowDirective.Exit) return context.EndNode;
-        var nextTaskName = string.IsNullOrWhiteSpace(transition) || transition == FlowDirective.Continue
-                ? context.Workflow.GetTaskAfter(new(context.TaskName, context.TaskDefinition), context.ParentReference)?.Key
-                : transition;
-        if (string.IsNullOrWhiteSpace(nextTaskName)) return context.EndNode;
-        var nextTaskIndex = context.Workflow.IndexOf(nextTaskName, context.ParentReference);
-        var nextTaskReference = $"{context.ParentReference}/{nextTaskIndex}/{nextTaskName}";
-        var nextTask = context.Workflow.GetComponent<TaskDefinition>(nextTaskReference) ?? throw new Exception($"Failed to find the task at '{nextTaskReference}' in workflow '{context.Workflow.Document.Name}.{context.Workflow.Document.Namespace}:{context.Workflow.Document.Version}'");
-        if (!context.Graph.AllNodes.ContainsKey(nextTaskReference))
+        var nextTaskIdentity = this.GetNextTaskIdentity(context, currentNode, transition);
+        if (nextTaskIdentity == null)
         {
-            this.BuildTaskNode(new(context.Workflow, context.Graph, nextTaskIndex, nextTaskName, nextTask, context.TaskGroup, context.ParentReference, context.EndNode, currentNode));
+            return context.EndNode;
         }
-        if (context.Graph.AllClusters.ContainsKey(nextTaskReference))
+        var nextTask = context.Workflow.GetComponent<TaskDefinition>(nextTaskIdentity.Reference) ?? throw new Exception($"Failed to find the task at '{nextTaskIdentity.Reference}' in workflow '{context.Workflow.Document.Name}.{context.Workflow.Document.Namespace}:{context.Workflow.Document.Version}'");
+        if (!context.Graph.AllNodes.ContainsKey(nextTaskIdentity.Reference) && !context.Graph.AllClusters.ContainsKey(nextTaskIdentity.Reference))
         {
-            return (NodeViewModel)context.Graph.AllClusters[nextTaskReference].AllNodes.First().Value;
+            this.BuildTaskNode(new(nextTaskIdentity.Context.Workflow, nextTaskIdentity.Context.Graph, nextTaskIdentity.Index, nextTaskIdentity.Name, nextTask, nextTaskIdentity.Context.TaskGroup, nextTaskIdentity.Context.ParentReference, nextTaskIdentity.Context.ParentContext, nextTaskIdentity.Context.EndNode, currentNode));
         }
-        return (NodeViewModel)context.Graph.AllNodes[nextTaskReference]; //((IReadOnlyDictionary<string, IGraphElement>)context.Graph.AllNodes).Concat((IReadOnlyDictionary<string, IGraphElement>)context.Graph.AllClusters).ToDictionary()[nextTaskReference];
+        if (context.Graph.AllClusters.ContainsKey(nextTaskIdentity.Reference))
+        {
+            return (NodeViewModel)context.Graph.AllClusters[nextTaskIdentity.Reference].AllNodes.First().Value;
+        }
+        return (NodeViewModel)context.Graph.AllNodes[nextTaskIdentity.Reference]; //((IReadOnlyDictionary<string, IGraphElement>)context.Graph.AllNodes).Concat((IReadOnlyDictionary<string, IGraphElement>)context.Graph.AllClusters).ToDictionary()[nextTaskReference];
     }
 
     /// <summary>
@@ -202,7 +225,7 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
         cluster.AddChild(port);
         if (context.TaskGroup == null) context.Graph.AddCluster(cluster);
         else context.TaskGroup.AddChild(cluster);
-        this.BuildTaskNode(new(context.Workflow, context.Graph, 0, context.TaskDefinition.Do.First().Key, context.TaskDefinition.Do.First().Value, cluster, context.TaskReference + "/do", context.EndNode, context.PreviousNode));
+        this.BuildTaskNode(new(context.Workflow, context.Graph, 0, context.TaskDefinition.Do.First().Key, context.TaskDefinition.Do.First().Value, cluster, context.TaskReference + "/do", context, context.EndNode, context.PreviousNode));
         if (taskCount > 0)
         {
             this.BuildEdge(context.Graph, port, (NodeViewModel)cluster.AllNodes.Skip(1).First().Value);
@@ -257,7 +280,7 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
         cluster.AddChild(port);
         if (context.TaskGroup == null) context.Graph.AddCluster(cluster);
         else context.TaskGroup.AddChild(cluster);
-        this.BuildTaskNode(new(context.Workflow, context.Graph, 0, context.TaskDefinition.Do.First().Key, context.TaskDefinition.Do.First().Value, cluster, context.TaskReference + "/do", context.EndNode, context.PreviousNode));
+        this.BuildTaskNode(new(context.Workflow, context.Graph, 0, context.TaskDefinition.Do.First().Key, context.TaskDefinition.Do.First().Value, cluster, context.TaskReference + "/do", context, context.EndNode, context.PreviousNode));
         if (context.TaskDefinition.Do.Count > 0)
         {
             this.BuildEdge(context.Graph, port, (NodeViewModel)cluster.AllNodes.Skip(1).First().Value);
@@ -414,7 +437,7 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
         cluster.AddChild(port);
         if (context.TaskGroup == null) context.Graph.AddCluster(cluster);
         else context.TaskGroup.AddChild(cluster);
-        this.BuildTaskNode(new(context.Workflow, context.Graph, 0, context.TaskDefinition.Try.First().Key, context.TaskDefinition.Try.First().Value, cluster, context.TaskReference + "/try", context.EndNode, context.PreviousNode));
+        this.BuildTaskNode(new(context.Workflow, context.Graph, 0, context.TaskDefinition.Try.First().Key, context.TaskDefinition.Try.First().Value, cluster, context.TaskReference + "/try", context, context.EndNode, context.PreviousNode));
         if (taskCount > 0)
         {
             this.BuildEdge(context.Graph, port, (NodeViewModel)cluster.AllNodes.Skip(1).First().Value);
@@ -423,11 +446,11 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
         {
             this.BuildEdge(context.Graph, port, this.GetNextNode(context, cluster));
         }
-        if (context.TaskDefinition.Catch.Do != null && context.TaskDefinition.Catch.Do.Any())
+        if (context.TaskDefinition.Catch.Do != null && context.TaskDefinition.Catch.Do.Count != 0)
         {
             var catchCluster = new CatchNodeViewModel(context.TaskReference + _catchSuffix, context.TaskName + " - Catch");
             cluster.AddChild(catchCluster);
-            this.BuildTaskNode(new(context.Workflow, context.Graph, 0, context.TaskDefinition.Try.First().Key, context.TaskDefinition.Try.First().Value, catchCluster, context.TaskReference + "/try", context.EndNode, context.PreviousNode));
+            this.BuildTaskNode(new(context.Workflow, context.Graph, 0, context.TaskDefinition.Try.First().Key, context.TaskDefinition.Try.First().Value, catchCluster, context.TaskReference + "/catch", context, context.EndNode, context.PreviousNode));
             this.BuildEdge(context.Graph, port, (NodeViewModel)catchCluster.AllNodes.Skip(1).First().Value, "catch");
         }
         return cluster;
@@ -496,9 +519,10 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
     /// <param name="taskDefinition">The definition of the task.</param>
     /// <param name="taskGroup">The optional task group.</param>
     /// <param name="parentReference">The reference to the parent task node.</param>
+    /// <param name="parentContext">The parent rendering context of the task node.</param>
     /// <param name="endNode">The end node view model.</param>
     /// <param name="previousNode">The previous node view model.</param>
-    protected class TaskNodeRenderingContext(WorkflowDefinition workflow, GraphViewModel graph, int taskIndex, string taskName, TaskDefinition taskDefinition, WorkflowClusterViewModel? taskGroup, string parentReference, NodeViewModel endNode, NodeViewModel previousNode)
+    protected class TaskNodeRenderingContext(WorkflowDefinition workflow, GraphViewModel graph, int taskIndex, string taskName, TaskDefinition taskDefinition, WorkflowClusterViewModel? taskGroup, string parentReference, TaskNodeRenderingContext? parentContext, NodeViewModel endNode, NodeViewModel previousNode)
     {
 
         /// <summary>
@@ -542,6 +566,11 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
         public virtual string ParentReference { get; } = parentReference;
 
         /// <summary>
+        /// Gets the rendering context of the parent task node.
+        /// </summary>
+        public virtual TaskNodeRenderingContext? ParentContext { get; } = parentContext;
+
+        /// <summary>
         /// Gets the end node view model.
         /// </summary>
         public virtual NodeViewModel EndNode { get; } = endNode;
@@ -556,7 +585,7 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
         /// </summary>
         /// <typeparam name="TDefinition">The type of the task definition.</typeparam>
         /// <returns>A new instance of <see cref="TaskNodeRenderingContext{TDefinition}"/>.</returns>
-        public virtual TaskNodeRenderingContext<TDefinition> OfType<TDefinition>() where TDefinition : TaskDefinition => new(this.Workflow, this.Graph, this.TaskIndex, this.TaskName, this.TaskDefinition, this.TaskGroup, this.ParentReference, this.EndNode, this.PreviousNode);
+        public virtual TaskNodeRenderingContext<TDefinition> OfType<TDefinition>() where TDefinition : TaskDefinition => new(this.Workflow, this.Graph, this.TaskIndex, this.TaskName, this.TaskDefinition, this.TaskGroup, this.ParentReference, this.ParentContext, this.EndNode, this.PreviousNode);
 
     }
 
@@ -571,10 +600,11 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
     /// <param name="taskDefinition">The definition of the task.</param>
     /// <param name="taskGroup">The optional task group.</param>
     /// <param name="parentReference">The reference to the parent task node.</param>
+    /// <param name="parentContext">The parent rendering context of the task node.</param>
     /// <param name="endNode">The end node view model.</param>
     /// <param name="previousNode">The previous node view model.</param>
-    protected class TaskNodeRenderingContext<TDefinition>(WorkflowDefinition workflow, GraphViewModel graph, int taskIndex, string taskName, TaskDefinition taskDefinition, WorkflowClusterViewModel? taskGroup, string parentReference, NodeViewModel endNode, NodeViewModel previousNode)
-        : TaskNodeRenderingContext(workflow, graph, taskIndex, taskName, taskDefinition, taskGroup, parentReference, endNode, previousNode)
+    protected class TaskNodeRenderingContext<TDefinition>(WorkflowDefinition workflow, GraphViewModel graph, int taskIndex, string taskName, TaskDefinition taskDefinition, WorkflowClusterViewModel? taskGroup, string parentReference, TaskNodeRenderingContext? parentContext, NodeViewModel endNode, NodeViewModel previousNode)
+        : TaskNodeRenderingContext(workflow, graph, taskIndex, taskName, taskDefinition, taskGroup, parentReference, parentContext, endNode, previousNode)
         where TDefinition : TaskDefinition
     {
         /// <summary>
@@ -584,4 +614,33 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
 
     }
 
+    /// <summary>
+    /// Represents the identity of a task
+    /// </summary>
+    /// <param name="name">The task name</param>
+    /// <param name="index">The task index</param>
+    /// <param name="reference">The task reference</param>
+    /// <param name="context">The task rendering context</param>
+    protected class TaskIdentity(string name, int index, string reference, TaskNodeRenderingContext context)
+    {
+        /// <summary>
+        /// Gets the task name
+        /// </summary>
+        public string Name { get; } = name;
+
+        /// <summary>
+        /// Gets the task index
+        /// </summary>
+        public int Index { get; } = index;
+
+        /// <summary>
+        /// Gets the task reference
+        /// </summary>
+        public string Reference { get; } = reference;
+
+        /// <summary>
+        /// Get the task rendering context
+        /// </summary>
+        public TaskNodeRenderingContext Context { get; } = context;
+    }
 }
