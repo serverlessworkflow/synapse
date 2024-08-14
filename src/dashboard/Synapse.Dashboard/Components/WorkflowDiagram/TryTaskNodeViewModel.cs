@@ -26,10 +26,10 @@ public class TryTaskNodeViewModel
     /// <param name="name">The node name</param>
     /// <param name="content">The node content</param>
     public TryTaskNodeViewModel(string taskReference, string name, string content)
-        : base(taskReference, new() { Label = name, CssClass = "try-task-node" })
+        : base(taskReference, new() { Label = name, CssClass = "try-catch-task-node" })
     {
         Content = content;
         Symbol = "try-symbol";
-        Type = "TRY";
+        Type = "TRY..CATCH";
     }
 }

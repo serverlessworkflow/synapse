@@ -34,7 +34,7 @@
                                    Columns="columns"
                                    OnSearchInput="OnSearchInput"
                                    OnShowDetails="OnShowInstanceDetails"
-                                   />
+                                   OnDelete="OnDeleteWorkflowInstanceAsync" />
             <Button Outline="true" Color="ButtonColor.Primary" @onclick="async _ => await Store.OnShowCreateInstanceAsync()" class="w-100 mt-3">
                 <Icon Name="IconName.Plus"/>
             </Button>
@@ -99,6 +99,8 @@
 
 <Modal @ref="Store.Modal" IsVerticallyCentered="true" />
 
+<ConfirmDialog @ref="Dialog" />
+
 @code
 {
 
@@ -114,7 +116,8 @@
     "Namespace",
     "Status",
     "Start Time",
-    "End Time"
+    "End Time",
+    "Delete"
     ];
 
     [Parameter] public new string? Namespace { get; set; }
@@ -203,6 +206,28 @@
             }
         </select>
     };
+
+    /// <summary>
+    /// Handles the deletion of the targeted <see cref="WorkflowInstance"/>
+    /// </summary>
+    /// <param name="instance">The <see cref="WorkflowInstance"/> to delete</param>
+    protected async Task OnDeleteWorkflowInstanceAsync(WorkflowInstance instance)
+    {
+        if (this.Dialog == null) return;
+        var confirmation = await this.Dialog.ShowAsync(
+            title: $"Are you sure you want to delete '{instance.Metadata.Name}'?",
+            message1: $"The workflow instance will be permanently deleted. Are you sure you want to proceed ?",
+            confirmDialogOptions: new ConfirmDialogOptions()
+                {
+                    YesButtonColor = ButtonColor.Danger,
+                    YesButtonText = "Delete",
+                    NoButtonText = "Abort",
+                    IsVerticallyCentered = true
+                }
+        );
+        if (!confirmation) return;
+        await this.Store.DeleteWorkflowInstanceAsync(instance);
+    }
 
     void OnCreateWorkflowVersion() => this.NavigationManager.NavigateTo($"/workflows/new/{ns}/{name}");
 

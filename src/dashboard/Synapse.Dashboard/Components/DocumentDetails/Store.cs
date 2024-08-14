@@ -155,10 +155,11 @@ public class DocumentDetailsStore(
     /// <param name="reference">The new <see cref="DocumentDetailsState.Reference"/> value</param>
     public void SetReference(string? reference)
     {
+        var documentJson = this.Get(state => state.DocumentJson);
         this.Reduce(state => state with
         {
             Reference = reference,
-            DocumentJson = string.Empty,
+            DocumentJson = reference != null ? string.Empty : documentJson,
             Loaded = false,
         });
     }

@@ -20861,80 +20861,94 @@ tr.row-placeholder td::after {
 }
 
 #do-node-gradient stop[offset="0"] {
-  stop-color: #b23cb2;
+  stop-color: #a83cb3;
 }
 #do-node-gradient stop[offset="1"] {
-  stop-color: #7d2a7d;
+  stop-color: #762a7d;
 }
 
 #emit-node-gradient stop[offset="0"] {
-  stop-color: #ee4395;
+  stop-color: #df40a1;
 }
 #emit-node-gradient stop[offset="1"] {
-  stop-color: #a72f68;
+  stop-color: #9c2d71;
 }
 
 #for-node-gradient stop[offset="0"] {
-  stop-color: #ff5e63;
+  stop-color: #ff507a;
 }
 #for-node-gradient stop[offset="1"] {
-  stop-color: #b34245;
+  stop-color: #b33855;
 }
 
 #fork-node-gradient stop[offset="0"] {
-  stop-color: #ff8c38;
+  stop-color: #ff704e;
 }
 #fork-node-gradient stop[offset="1"] {
-  stop-color: #b36227;
+  stop-color: #b34e37;
 }
 
 #listen-node-gradient stop[offset="0"] {
-  stop-color: #d9c231;
+  stop-color: #f89b31;
 }
 #listen-node-gradient stop[offset="1"] {
-  stop-color: #988822;
+  stop-color: #ae6d22;
 }
 
 #raise-node-gradient stop[offset="0"] {
-  stop-color: #aff05b;
+  stop-color: #d2c934;
 }
 #raise-node-gradient stop[offset="1"] {
-  stop-color: #7ba840;
+  stop-color: #938d24;
 }
 
 #run-node-gradient stop[offset="0"] {
-  stop-color: #60f760;
+  stop-color: #aff05b;
 }
 #run-node-gradient stop[offset="1"] {
-  stop-color: #43ad43;
+  stop-color: #7ba840;
 }
 
 #switch-node-gradient stop[offset="0"] {
-  stop-color: #28ea8d;
+  stop-color: #6bf75c;
 }
 #switch-node-gradient stop[offset="1"] {
-  stop-color: #1ca463;
+  stop-color: #4bad40;
 }
 
 #set-node-gradient stop[offset="0"] {
-  stop-color: #1ac7c2;
+  stop-color: #34f07e;
 }
 #set-node-gradient stop[offset="1"] {
-  stop-color: #128b88;
+  stop-color: #24a858;
+}
+
+#try-catch-node-gradient stop[offset="0"] {
+  stop-color: #1bd9ac;
+}
+#try-catch-node-gradient stop[offset="1"] {
+  stop-color: #139878;
 }
 
 #try-node-gradient stop[offset="0"] {
-  stop-color: #2f96e0;
+  stop-color: #1fb3d3;
 }
 #try-node-gradient stop[offset="1"] {
-  stop-color: #21699d;
+  stop-color: #167d94;
+}
+
+#catch-node-gradient stop[offset="0"] {
+  stop-color: #3988e1;
+}
+#catch-node-gradient stop[offset="1"] {
+  stop-color: #285f9e;
 }
 
 #wait-node-gradient stop[offset="0"] {
-  stop-color: #5465d6;
+  stop-color: #585fd2;
 }
 #wait-node-gradient stop[offset="1"] {
-  stop-color: #3b4796;
+  stop-color: #3e4393;
 }
 
 .node, .cluster {
@@ -20976,8 +20990,14 @@ tr.row-placeholder td::after {
 .node.set-task-node, .cluster.set-task-node {
   --gradient-url: url(#set-node-gradient);
 }
-.node.try-task-node, .cluster.try-task-node {
+.node.try-catch-task-node, .cluster.try-catch-task-node {
+  --gradient-url: url(#try-catch-node-gradient);
+}
+.node.try-node, .cluster.try-node {
   --gradient-url: url(#try-node-gradient);
+}
+.node.catch-node, .cluster.catch-node {
+  --gradient-url: url(#catch-node-gradient);
 }
 .node.wait-task-node, .cluster.wait-task-node {
   --gradient-url: url(#wait-node-gradient);

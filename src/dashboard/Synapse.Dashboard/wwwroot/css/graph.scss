@@ -1,34 +1,25 @@
 ﻿@import "./theme/_variables.scss";
 @import "../lib/bootstrap/scss/mixins";
 
+//https://observablehq.com/@d3/color-schemes
 //* Rainbow *
+
+//* !!! DON'T FORGET TO ADJUST INDEX.HTML <linearGradient>s WHEN ADDING/REMOVING GRADIENTS !!!
+
 $call-color: #6e40aa;
-$do-color: #b23cb2;
-$emit-color: #ee4395;
-$for-color: #ff5e63;
-$fork-color: #ff8c38;
-$listen-color: #d9c231;
-$raise-color: #aff05b;
-$run-color: #60f760;
-$switch-color: #28ea8d;
-$set-color: #1ac7c2;
-$try-color: #2f96e0;
-$wait-color: #5465d6;
-
-//* Viridis *
-//$call-color: #440154;
-//$do-color: #482173;
-//$emit-color: #433e85;
-//$for-color: #38588c;
-//$fork-color: #2d708e;
-//$listen-color: #25858e;
-//$raise-color: #1e9b8a;
-//$run-color: #2ab07f;
-//$switch-color: #52c569;
-//$set-color: #86d549;
-//$try-color: #c2df23;
-//$wait-color: #fde725;
-
+$do-color: #a83cb3;
+$emit-color: #df40a1;
+$for-color: #ff507a;
+$fork-color: #ff704e;
+$listen-color: #f89b31;
+$raise-color: #d2c934;
+$run-color: #aff05b;
+$switch-color: #6bf75c;
+$set-color: #34f07e;
+$try-catch-color: #1bd9ac;
+$try-color: #1fb3d3;
+$catch-color: #3988e1;
+$wait-color: #585fd2;
 
 .graph-container {
     --stroke-color: #{$mute};
@@ -168,6 +159,16 @@ $wait-color: #5465d6;
     }
 }
 
+#try-catch-node-gradient {
+    stop[offset="0"] {
+        stop-color: $try-catch-color;
+    }
+
+    stop[offset="1"] {
+        stop-color: shade-color($try-catch-color, 30%);
+    }
+}
+
 #try-node-gradient {
     stop[offset="0"] {
         stop-color: $try-color;
@@ -175,6 +176,16 @@ $wait-color: #5465d6;
 
     stop[offset="1"] {
         stop-color: shade-color($try-color, 30%);
+    }
+}
+
+#catch-node-gradient {
+    stop[offset="0"] {
+        stop-color: $catch-color;
+    }
+
+    stop[offset="1"] {
+        stop-color: shade-color($catch-color, 30%);
     }
 }
 
@@ -231,8 +242,16 @@ $wait-color: #5465d6;
         --gradient-url: url(#set-node-gradient);
     }
 
-    &.try-task-node {
+    &.try-catch-task-node {
+        --gradient-url: url(#try-catch-node-gradient);
+    }
+
+    &.try-node {
         --gradient-url: url(#try-node-gradient);
+    }
+
+    &.catch-node {
+        --gradient-url: url(#catch-node-gradient);
     }
 
     &.wait-task-node {

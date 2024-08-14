@@ -16,20 +16,20 @@ namespace Synapse.Dashboard.Components;
 /// <summary>
 /// Represents a catch node view model
 /// </summary>
-public class CatchNodeViewModel
-    : WorkflowNodeViewModel
+public class TryNodeViewModel
+    : WorkflowClusterViewModel
 {
     /// <summary>
-    /// Initializes a new <see cref="CatchNodeViewModel"/>
+    /// Initializes a new <see cref="TryNodeViewModel"/>
     /// </summary>
     /// <param name="taskReference">The node task reference</param>
     /// <param name="name">The node name</param>
     /// <param name="content">The node content</param>
-    public CatchNodeViewModel(string taskReference, string name, string content)
-        : base(taskReference, new() { Label = name + " - Catch", CssClass = "catch-node" })
+    public TryNodeViewModel(string taskReference, string name, string content)
+        : base(taskReference, new() { Label = name + " - Try", CssClass = "try-node" })
     {
         Content = content;
-        Symbol = "catch-symbol";
-        Type = "CATCH";
+        Symbol = "try-symbol";
+        Type = "TRY";
     }
 }

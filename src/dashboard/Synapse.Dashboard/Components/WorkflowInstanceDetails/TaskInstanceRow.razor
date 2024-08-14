@@ -18,7 +18,7 @@
 
 @if (TaskInstance != null) {
     <tr @onclick="async _ => await OnToggleRow()" class="cursor-pointer">
-        <td>@TaskInstance.Name</td>
+        <td>@TaskInstance.Reference</td>
         <td class="text-center"><span class="badge rounded-pill badge rounded-pill border border-@TaskInstance.Status.GetColorClass() text-@TaskInstance.Status.GetColorClass()">@(TaskInstance.Status ?? TaskInstanceStatus.Pending)</span></td>
         <td class="text-center">@(TaskInstance.StartedAt?.DateTime.RelativeFormat() ?? "-")</td>
         <td class="text-center">@(TaskInstance.EndedAt?.DateTime.RelativeFormat() ?? "-")</td>

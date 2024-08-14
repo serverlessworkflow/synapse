@@ -18,6 +18,7 @@ using ServerlessWorkflow.Sdk.Models;
 using ServerlessWorkflow.Sdk.Models.Calls;
 using ServerlessWorkflow.Sdk.Models.Tasks;
 using System.Diagnostics;
+using System.Xml.Linq;
 
 namespace Synapse.Dashboard.Services;
 
@@ -30,8 +31,9 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
     : IWorkflowGraphBuilder
 {
 
-    const string _portSuffix = "_port";
-    const string _catchSuffix = "_port";
+    const string _portSuffix = "-port";
+    const string _trySuffix = "-try";
+    const string _catchSuffix = "-catch";
     const double characterSize = 8d;
 
     /// <summary>
@@ -61,9 +63,13 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
         graph.AddNode(startNode);
         graph.AddNode(endNode);
         var nextNode = endNode;
-        if (!isEmpty) 
+        if (!isEmpty)
         {
             nextNode = this.BuildTaskNode(new(workflow, graph, 0, workflow.Do.First().Key, workflow.Do.First().Value, null, "/do", null, endNode, startNode));
+            if (nextNode is ClusterViewModel clusterViewModel)
+            {
+                nextNode = (NodeViewModel)clusterViewModel.AllNodes.Values.First();
+            }
         }
         this.BuildEdge(graph, startNode, nextNode);
         sw.Stop();
@@ -98,7 +104,7 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
             {
                 return null;
             }
-            return this.GetNextTaskIdentity(context.ParentContext, currentNode, nextTaskName);
+            return this.GetNextTaskIdentity(context.ParentContext, currentNode, transition);
         }
         var nextTaskIndex = context.Workflow.IndexOf(nextTaskName, context.ParentReference);
         var nextTaskReference = $"{context.ParentReference}/{nextTaskIndex}/{nextTaskName}";
@@ -432,28 +438,42 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
     {
         ArgumentNullException.ThrowIfNull(context);
         var taskCount = context.TaskDefinition.Try.Count;
-        var cluster = new TryTaskNodeViewModel(context.TaskReference, context.TaskName, $"{taskCount} task{(taskCount > 1 ? "s" : "")}");
-        var port = new PortNodeViewModel(context.TaskReference + _portSuffix);
-        cluster.AddChild(port);
-        if (context.TaskGroup == null) context.Graph.AddCluster(cluster);
-        else context.TaskGroup.AddChild(cluster);
-        this.BuildTaskNode(new(context.Workflow, context.Graph, 0, context.TaskDefinition.Try.First().Key, context.TaskDefinition.Try.First().Value, cluster, context.TaskReference + "/try", context, context.EndNode, context.PreviousNode));
+        var containerCluster = new TryTaskNodeViewModel(context.TaskReference, context.TaskName, $"{taskCount} task{(taskCount > 1 ? "s" : "")}");
+        var containerPort = new PortNodeViewModel(context.TaskReference + _portSuffix);
+        containerCluster.AddChild(containerPort);
+        if (context.TaskGroup == null) context.Graph.AddCluster(containerCluster);
+        else context.TaskGroup.AddChild(containerCluster);
+
+        var tryCluster = new TryNodeViewModel(context.TaskReference + _trySuffix, context.TaskName, string.Empty);
+        var tryPort = new PortNodeViewModel(context.TaskReference + _trySuffix + _portSuffix);
+        tryCluster.AddChild(tryPort);
+        containerCluster.AddChild(tryCluster);
+        this.BuildEdge(context.Graph, containerPort, tryPort);
+        this.BuildTaskNode(new(context.Workflow, context.Graph, 0, context.TaskDefinition.Try.First().Key, context.TaskDefinition.Try.First().Value, tryCluster, context.TaskReference + "/try", context, context.EndNode, context.PreviousNode));
         if (taskCount > 0)
         {
-            this.BuildEdge(context.Graph, port, (NodeViewModel)cluster.AllNodes.Skip(1).First().Value);
+            this.BuildEdge(context.Graph, tryPort, tryCluster.AllNodes.Values.Skip(1).First());
+        }
+        var catchContent = this.YamlSerializer.SerializeToText(context.TaskDefinition.Catch);
+        if (context.TaskDefinition.Catch.Do == null || context.TaskDefinition.Catch.Do.Count == 0)
+        {
+            var catchNode = new CatchNodeViewModel(context.TaskReference + _catchSuffix, context.TaskName, catchContent);
+            containerCluster.AddChild(catchNode);
+            this.BuildEdge(context.Graph, tryCluster.AllNodes.Values.Last(), catchNode);
+            this.BuildEdge(context.Graph, catchNode, this.GetNextNode(context, containerCluster));
         }
         else
         {
-            this.BuildEdge(context.Graph, port, this.GetNextNode(context, cluster));
+            var catchCluster = new CatchDoNodeViewModel(context.TaskReference + _catchSuffix, context.TaskName, catchContent);
+            var catchPort = new PortNodeViewModel(context.TaskReference + _catchSuffix + _portSuffix);
+            catchCluster.AddChild(catchPort);
+            containerCluster.AddChild(catchCluster);
+            this.BuildEdge(context.Graph, tryCluster.AllNodes.Values.Last(), catchPort);
+            this.BuildTaskNode(new(context.Workflow, context.Graph, 0, context.TaskDefinition.Catch.Do.First().Key, context.TaskDefinition.Catch.Do.First().Value, catchCluster, context.TaskReference + "/catch/do", context, context.EndNode, context.PreviousNode));
+            this.BuildEdge(context.Graph, catchPort, catchCluster.AllNodes.Values.Skip(1).First());
+            this.BuildEdge(context.Graph, catchCluster.AllNodes.Values.Last(), this.GetNextNode(context, containerCluster));
         }
-        if (context.TaskDefinition.Catch.Do != null && context.TaskDefinition.Catch.Do.Count != 0)
-        {
-            var catchCluster = new CatchNodeViewModel(context.TaskReference + _catchSuffix, context.TaskName + " - Catch");
-            cluster.AddChild(catchCluster);
-            this.BuildTaskNode(new(context.Workflow, context.Graph, 0, context.TaskDefinition.Try.First().Key, context.TaskDefinition.Try.First().Value, catchCluster, context.TaskReference + "/catch", context, context.EndNode, context.PreviousNode));
-            this.BuildEdge(context.Graph, port, (NodeViewModel)catchCluster.AllNodes.Skip(1).First().Value, "catch");
-        }
-        return cluster;
+        return containerCluster;
     }
 
     /// <summary>
@@ -485,7 +505,7 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
     /// <param name="target">The node to draw the edge to</param>
     /// <param name="label">The edge label, if any</param>
     /// <returns>A new awaitable <see cref="Task"/></returns>
-    protected virtual IEdgeViewModel BuildEdge(GraphViewModel graph, NodeViewModel source, NodeViewModel target, string? label = null)
+    protected virtual IEdgeViewModel BuildEdge(IGraphViewModel graph, INodeViewModel source, INodeViewModel target, string? label = null)
     {
         var edge = graph.Edges.Select(keyValuePair => keyValuePair.Value).FirstOrDefault(edge => edge.SourceId == source.Id && edge.TargetId == target.Id);
         if (edge != null)

@@ -51,7 +51,7 @@
             <tr>
                 @foreach (var column in columns)
                 {
-                    if(Columns.Count() == 0 || Columns.Contains(column))
+                    if ((Columns.Count() == 0 && column != "Delete") || Columns.Contains(column))
                     {
                         <th class="sticky-header text-@GetColumnAlignment(column)">@(column != "Action" ? column : "")</th>
                     }
@@ -65,7 +65,7 @@
                     <tr @onclick="async _ => await OnShowClickedAsync(instance)" class="cursor-pointer @(ActiveRow == instance.GetName() ? "table-active" : "")">
                         @foreach (var column in columns)
                         {
-                            if (Columns.Count() == 0 || Columns.Contains(column))
+                            if ((Columns.Count() == 0 && column != "Delete") || Columns.Contains(column))
                             {
                                 <td class="text-@GetColumnAlignment(column)">
                                     @switch(column)
@@ -113,6 +113,9 @@
                                                 </ul>
                                             </div>
                                             break;
+                                        case "Delete":
+                                            <a class="dropdown-item text-danger" href="#" @onclick="async _ => await OnDeleteClickedAsync(instance)" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Trash" /></a>
+                                            break;
                                         default:
                                             break;
                                     }
@@ -154,7 +157,8 @@
         "End Time",
         "Duration",
         "Operator",
-        "Actions"
+        "Actions",
+        "Delete"
     ];
 
     /// <summary>

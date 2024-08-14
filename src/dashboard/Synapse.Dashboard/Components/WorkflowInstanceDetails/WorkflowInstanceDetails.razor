@@ -21,11 +21,11 @@
     <div class="details workflow-instance-details p-3">
         <h6>Details</h6>
         <div class="row mb-3">
-            <div class="col-md-12 col-lg-4">
+            <div class="col-md-12 col-lg-4 text-truncate" title="@workflowInstance.GetName()">
                 <div class="label">Name</div>
                 @workflowInstance.GetName()
             </div>
-            <div class="col-md-12 col-lg-4">
+            <div class="col-md-12 col-lg-4 text-truncate" title="@workflowInstance.GetNamespace()">
                 <div class="label">Namespace</div>
                 @workflowInstance.GetNamespace()
             </div>

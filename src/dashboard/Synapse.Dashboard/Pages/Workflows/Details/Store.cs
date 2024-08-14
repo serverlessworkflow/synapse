@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Neuroglia.Data.Infrastructure.ResourceOriented;
 using ServerlessWorkflow.Sdk.Models;
 using Synapse.Api.Client.Services;
 using Synapse.Resources;
@@ -350,6 +351,16 @@ public class WorkflowDetailsStore(
             Console.WriteLine(ex.ToString());
         }
         await this.Modal!.HideAsync();
+    }
+
+    /// <summary>
+    /// Delete the provided <see cref="WorkflowInstance"/>
+    /// </summary>
+    /// <param name="workflowInstance">The workflow instance to delete</param>
+    /// <returns></returns>
+    public async Task DeleteWorkflowInstanceAsync(WorkflowInstance workflowInstance)
+    {
+        await this.ApiClient.ManageNamespaced<WorkflowInstance>().DeleteAsync(workflowInstance.GetName(), workflowInstance.GetNamespace()!).ConfigureAwait(false);
     }
     #endregion
 
