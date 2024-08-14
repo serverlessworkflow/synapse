@@ -31,14 +31,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Api.Application", "
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{C31B1410-C7AF-4D11-8DA5-6877756A9907}"
 	ProjectSection(SolutionItems) = preProject
-		code-of-conduct.md = code-of-conduct.md
-		contributing.md = contributing.md
-		governance.md = governance.md
+		CODE_OF_CONDUCT.md = CODE_OF_CONDUCT.md
+		CONTRIBUTING.md = CONTRIBUTING.md
+		GOVERNANCE.md = GOVERNANCE.md
 		LICENSE = LICENSE
-		maintainer-guidelines.md = maintainer-guidelines.md
-		maintainers.md = maintainers.md
-		owners.md = owners.md
+		MAINTAINERS.md = MAINTAINERS.md
 		README.md = README.md
+		SECURITY.md = SECURITY.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{F041A1CB-45FA-4432-BAD2-DE2EE174C6FC}"
@@ -85,8 +84,39 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "assets", "assets", "{750922F9-5C47-42FE-945F-576818E6DEC9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "images", "images", "{81124062-334B-4AE3-A538-92B044207A94}"
+	ProjectSection(SolutionItems) = preProject
+		assets\images\logo.eps = assets\images\logo.eps
+		assets\images\logo.svg = assets\images\logo.svg
+		assets\images\logomark.eps = assets\images\logomark.eps
+		assets\images\logomark.svg = assets\images\logomark.svg
+		assets\images\logomark_background.eps = assets\images\logomark_background.eps
+		assets\images\logomark_background.svg = assets\images\logomark_background.svg
+		assets\images\logomark_black.eps = assets\images\logomark_black.eps
+		assets\images\logomark_black.svg = assets\images\logomark_black.svg
+		assets\images\logomark_white.eps = assets\images\logomark_white.eps
+		assets\images\logomark_white.svg = assets\images\logomark_white.svg
+		assets\images\logo_background.eps = assets\images\logo_background.eps
+		assets\images\logo_background.svg = assets\images\logo_background.svg
+		assets\images\logo_black.eps = assets\images\logo_black.eps
+		assets\images\logo_black.svg = assets\images\logo_black.svg
+		assets\images\logo_white.eps = assets\images\logo_white.eps
+		assets\images\logo_white.svg = assets\images\logo_white.svg
+		assets\images\transparent_logo.png = assets\images\transparent_logo.png
+		assets\images\transparent_logomark.ico = assets\images\transparent_logomark.ico
+		assets\images\transparent_logomark.png = assets\images\transparent_logomark.png
+		assets\images\transparent_logomark_black.png = assets\images\transparent_logomark_black.png
+		assets\images\transparent_logomark_white.png = assets\images\transparent_logomark_white.png
+		assets\images\transparent_logo_black.png = assets\images\transparent_logo_black.png
+		assets\images\transparent_logo_white.png = assets\images\transparent_logo_white.png
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "fonts", "fonts", "{2A6EE5DF-BD7E-4CC6-BB9B-7BE5FC128302}"
+	ProjectSection(SolutionItems) = preProject
+		assets\fonts\Aquatico-Regular.otf = assets\fonts\Aquatico-Regular.otf
+		assets\fonts\Aquatico-Regular.ttf = assets\fonts\Aquatico-Regular.ttf
+		assets\fonts\Aquatico-Regular.woff = assets\fonts\Aquatico-Regular.woff
+		assets\fonts\Aquatico-Regular.woff2 = assets\fonts\Aquatico-Regular.woff2
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "helm", "helm", "{B6A96DC3-E57A-4022-9279-1DB57744C893}"
 	ProjectSection(SolutionItems) = preProject
