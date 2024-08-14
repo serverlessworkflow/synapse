@@ -11,6 +11,7 @@
   <ItemGroup>
     <None Include=".env" />
     <None Include="config\tokens.yaml" />
+    <None Include="docker-compose.build.yml" />
     <None Include="docker-compose.yml" />
   </ItemGroup>
 </Project>

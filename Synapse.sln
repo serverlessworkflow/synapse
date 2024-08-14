@@ -75,17 +75,32 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Correlator", "src\c
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "deployments", "deployments", "{562C91A3-6E91-4489-9D9D-064E7436D900}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker-compose", "docker-compose", "{8DC6DDDC-0676-4FCB-9F82-570B84D1A5C2}"
-EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "deployments\docker-compose\docker-compose.dcproj", "{A2D3AFB0-C7E0-4778-9D0A-DFCE0E24AF17}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "community", "community", "{EFD78767-3171-46D2-880C-4E8F3C97529A}"
+	ProjectSection(SolutionItems) = preProject
+		community\README.md = community\README.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "assets", "assets", "{750922F9-5C47-42FE-945F-576818E6DEC9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "images", "images", "{81124062-334B-4AE3-A538-92B044207A94}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "fonts", "fonts", "{2A6EE5DF-BD7E-4CC6-BB9B-7BE5FC128302}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "helm", "helm", "{B6A96DC3-E57A-4022-9279-1DB57744C893}"
+	ProjectSection(SolutionItems) = preProject
+		deployments\helm\Chart.yaml = deployments\helm\Chart.yaml
+		deployments\helm\values.yaml = deployments\helm\values.yaml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "templates", "templates", "{3F5CCCE8-46F8-4873-8EF9-38E14EAE7E01}"
+	ProjectSection(SolutionItems) = preProject
+		deployments\helm\templates\configmap.yaml = deployments\helm\templates\configmap.yaml
+		deployments\helm\templates\deployment.yaml = deployments\helm\templates\deployment.yaml
+		deployments\helm\templates\ingress.yaml = deployments\helm\templates\ingress.yaml
+		deployments\helm\templates\services.yaml = deployments\helm\templates\services.yaml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -205,10 +220,11 @@ Global
 		{C86F6C8B-5946-433D-9E09-2C0269CE6372} = {D3B3B95D-B598-4B13-B754-4A7E530405A6}
 		{F6CA60F0-3A4A-4B27-9805-6FA96F64D94D} = {4B9AF05C-9D6D-48C0-994D-D4A5C28FA24D}
 		{1EA900CD-6CDE-4358-8412-060BF2AC3B21} = {F6CA60F0-3A4A-4B27-9805-6FA96F64D94D}
-		{8DC6DDDC-0676-4FCB-9F82-570B84D1A5C2} = {562C91A3-6E91-4489-9D9D-064E7436D900}
-		{A2D3AFB0-C7E0-4778-9D0A-DFCE0E24AF17} = {8DC6DDDC-0676-4FCB-9F82-570B84D1A5C2}
+		{A2D3AFB0-C7E0-4778-9D0A-DFCE0E24AF17} = {562C91A3-6E91-4489-9D9D-064E7436D900}
 		{81124062-334B-4AE3-A538-92B044207A94} = {750922F9-5C47-42FE-945F-576818E6DEC9}
 		{2A6EE5DF-BD7E-4CC6-BB9B-7BE5FC128302} = {750922F9-5C47-42FE-945F-576818E6DEC9}
+		{B6A96DC3-E57A-4022-9279-1DB57744C893} = {562C91A3-6E91-4489-9D9D-064E7436D900}
+		{3F5CCCE8-46F8-4873-8EF9-38E14EAE7E01} = {B6A96DC3-E57A-4022-9279-1DB57744C893}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2A6C03D6-355A-4B39-9F2B-D0FDE429C0E2}
