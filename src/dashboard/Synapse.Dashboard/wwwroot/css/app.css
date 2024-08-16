@@ -20853,112 +20853,115 @@ tr.row-placeholder td::after {
   stop-color: #4c5258;
 }
 
-#call-node-gradient stop[offset="0"] {
-  stop-color: #6e40aa;
+#catch-node-gradient stop[offset="0"] {
+  stop-color: #ff821d;
 }
-#call-node-gradient stop[offset="1"] {
-  stop-color: #4d2d77;
-}
-
-#do-node-gradient stop[offset="0"] {
-  stop-color: #a83cb3;
-}
-#do-node-gradient stop[offset="1"] {
-  stop-color: #762a7d;
-}
-
-#emit-node-gradient stop[offset="0"] {
-  stop-color: #df40a1;
-}
-#emit-node-gradient stop[offset="1"] {
-  stop-color: #9c2d71;
-}
-
-#for-node-gradient stop[offset="0"] {
-  stop-color: #ff507a;
-}
-#for-node-gradient stop[offset="1"] {
-  stop-color: #b33855;
-}
-
-#fork-node-gradient stop[offset="0"] {
-  stop-color: #ff704e;
-}
-#fork-node-gradient stop[offset="1"] {
-  stop-color: #b34e37;
-}
-
-#listen-node-gradient stop[offset="0"] {
-  stop-color: #f89b31;
-}
-#listen-node-gradient stop[offset="1"] {
-  stop-color: #ae6d22;
+#catch-node-gradient stop[offset="1"] {
+  stop-color: #b35b14;
 }
 
 #raise-node-gradient stop[offset="0"] {
-  stop-color: #d2c934;
+  stop-color: #dc3545;
 }
 #raise-node-gradient stop[offset="1"] {
-  stop-color: #938d24;
+  stop-color: #9a2530;
+}
+
+#call-node-gradient stop[offset="0"] {
+  stop-color: #440154;
+}
+#call-node-gradient stop[offset="1"] {
+  stop-color: #30013b;
+}
+
+#do-node-gradient stop[offset="0"] {
+  stop-color: #481f70;
+}
+#do-node-gradient stop[offset="1"] {
+  stop-color: #32164e;
+}
+
+#fork-node-gradient stop[offset="0"] {
+  stop-color: #443983;
+}
+#fork-node-gradient stop[offset="1"] {
+  stop-color: #30285c;
+}
+
+#for-node-gradient stop[offset="0"] {
+  stop-color: #3b528b;
+}
+#for-node-gradient stop[offset="1"] {
+  stop-color: #293961;
+}
+
+#listen-node-gradient stop[offset="0"] {
+  stop-color: #31688e;
+}
+#listen-node-gradient stop[offset="1"] {
+  stop-color: #224963;
 }
 
 #run-node-gradient stop[offset="0"] {
-  stop-color: #aff05b;
+  stop-color: #287c8e;
 }
 #run-node-gradient stop[offset="1"] {
-  stop-color: #7ba840;
+  stop-color: #1c5763;
 }
 
 #switch-node-gradient stop[offset="0"] {
-  stop-color: #6bf75c;
+  stop-color: #21918c;
 }
 #switch-node-gradient stop[offset="1"] {
-  stop-color: #4bad40;
+  stop-color: #176662;
 }
 
 #set-node-gradient stop[offset="0"] {
-  stop-color: #34f07e;
+  stop-color: #20a486;
 }
 #set-node-gradient stop[offset="1"] {
-  stop-color: #24a858;
+  stop-color: #16735e;
 }
 
 #try-catch-node-gradient stop[offset="0"] {
-  stop-color: #1bd9ac;
+  stop-color: #35b779;
 }
 #try-catch-node-gradient stop[offset="1"] {
-  stop-color: #139878;
+  stop-color: #258055;
 }
 
 #try-node-gradient stop[offset="0"] {
-  stop-color: #1fb3d3;
+  stop-color: #5ec962;
 }
 #try-node-gradient stop[offset="1"] {
-  stop-color: #167d94;
+  stop-color: #428d45;
 }
 
-#catch-node-gradient stop[offset="0"] {
-  stop-color: #3988e1;
+#emit-node-gradient stop[offset="0"] {
+  stop-color: #90d743;
 }
-#catch-node-gradient stop[offset="1"] {
-  stop-color: #285f9e;
+#emit-node-gradient stop[offset="1"] {
+  stop-color: #65972f;
 }
 
 #wait-node-gradient stop[offset="0"] {
-  stop-color: #585fd2;
+  stop-color: #c8e020;
 }
 #wait-node-gradient stop[offset="1"] {
-  stop-color: #3e4393;
+  stop-color: #8c9d16;
 }
 
 .node, .cluster {
   --gradient-url: url(#default-node-gradient);
-  /*
-  rect, circle, ellipse {
-      stroke: $mute;
-      fill: $dark-bg-subtle-dark;
-      stroke-width: 1px;
-  }*/
+}
+.node.default-task-node, .cluster.default-task-node {
+  --gradient-url: url(#default-node-gradient);
+}
+.node.catch-task-node, .cluster.catch-task-node {
+  --gradient-url: url(#catch-node-gradient);
+}
+.node.raise-task-node, .cluster.raise-task-node {
+  --gradient-url: url(#raise-node-gradient);
 }
 .node.call-task-node, .cluster.call-task-node {
   --gradient-url: url(#call-node-gradient);
@@ -20966,20 +20969,14 @@ tr.row-placeholder td::after {
 .node.do-task-node, .cluster.do-task-node {
   --gradient-url: url(#do-node-gradient);
 }
-.node.emit-task-node, .cluster.emit-task-node {
-  --gradient-url: url(#emit-node-gradient);
+.node.fork-task-node, .cluster.fork-task-node {
+  --gradient-url: url(#fork-node-gradient);
 }
 .node.for-task-node, .cluster.for-task-node {
   --gradient-url: url(#for-node-gradient);
 }
-.node.fork-task-node, .cluster.fork-task-node {
-  --gradient-url: url(#fork-node-gradient);
-}
 .node.listen-task-node, .cluster.listen-task-node {
   --gradient-url: url(#listen-node-gradient);
-}
-.node.raise-task-node, .cluster.raise-task-node {
-  --gradient-url: url(#raise-node-gradient);
 }
 .node.run-task-node, .cluster.run-task-node {
   --gradient-url: url(#run-node-gradient);
@@ -20993,11 +20990,11 @@ tr.row-placeholder td::after {
 .node.try-catch-task-node, .cluster.try-catch-task-node {
   --gradient-url: url(#try-catch-node-gradient);
 }
-.node.try-node, .cluster.try-node {
+.node.try-task-node, .cluster.try-task-node {
   --gradient-url: url(#try-node-gradient);
 }
-.node.catch-node, .cluster.catch-node {
-  --gradient-url: url(#catch-node-gradient);
+.node.emit-task-node, .cluster.emit-task-node {
+  --gradient-url: url(#emit-node-gradient);
 }
 .node.wait-task-node, .cluster.wait-task-node {
   --gradient-url: url(#wait-node-gradient);
@@ -21012,11 +21009,6 @@ tr.row-placeholder td::after {
 .node .label-content, .cluster .label-content {
   width: 100%;
   height: 100%;
-  /*
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  */
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;

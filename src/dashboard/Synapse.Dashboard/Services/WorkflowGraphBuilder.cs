@@ -289,7 +289,7 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
     protected virtual NodeViewModel BuildForTaskNode(TaskNodeRenderingContext<ForTaskDefinition> context)
     {
         ArgumentNullException.ThrowIfNull(context);
-        var cluster = new ForTaskNodeViewModel(context.TaskReference, context.TaskName, string.Empty);
+        var cluster = new ForTaskNodeViewModel(context.TaskReference, context.TaskName, this.YamlSerializer.SerializeToText(context.TaskDefinition.For));
         var port = new PortNodeViewModel(context.TaskReference + _portSuffix);
         cluster.AddChild(port);
         if (context.TaskGroup == null) context.Graph.AddCluster(cluster);

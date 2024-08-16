@@ -26,7 +26,7 @@ public class CatchDoNodeViewModel
     /// <param name="name">The node name</param>
     /// <param name="content">The node content</param>
     public CatchDoNodeViewModel(string taskReference, string name, string content)
-        : base(taskReference, new() { Label = name + " - Catch", CssClass = "catch-node" })
+        : base(taskReference, new() { Label = name + " - Catch", CssClass = "catch-task-node" })
     {
         Content = content;
         Symbol = "catch-symbol";

@@ -2,24 +2,46 @@
 @import "../lib/bootstrap/scss/mixins";
 
 //https://observablehq.com/@d3/color-schemes
-//* Rainbow *
-
 //* !!! DON'T FORGET TO ADJUST INDEX.HTML <linearGradient>s WHEN ADDING/REMOVING GRADIENTS !!!
+$nodeColors: (
+    "default": $mute,
+    "catch": #ff821d, // keep catch orange
+    "raise": $danger // keep raise red
+);
 
-$call-color: #6e40aa;
-$do-color: #a83cb3;
-$emit-color: #df40a1;
-$for-color: #ff507a;
-$fork-color: #ff704e;
-$listen-color: #f89b31;
-$raise-color: #d2c934;
-$run-color: #aff05b;
-$switch-color: #6bf75c;
-$set-color: #34f07e;
-$try-catch-color: #1bd9ac;
-$try-color: #1fb3d3;
-$catch-color: #3988e1;
-$wait-color: #585fd2;
+$nodeTypes:
+    "call",
+    "do",
+    "fork",
+    "for",
+    "listen",
+    "run",
+    "switch",
+    "set",
+    "try-catch",
+    "try",
+    "emit",
+    "wait";
+
+$viridisScale: // generated with 13 steps, using 12 to exclude the last yellow
+  #440154,
+  #481f70,
+  #443983,
+  #3b528b,
+  #31688e,
+  #287c8e,
+  #21918c,
+  #20a486,
+  #35b779,
+  #5ec962,
+  #90d743,
+  #c8e020;
+
+@for $index from 1 through length($nodeTypes) {
+    $name: nth($nodeTypes, $index);
+    $color: nth($viridisScale, $index);
+    $nodeColors: map-merge($nodeColors, ($name: $color));
+}
 
 .graph-container {
     --stroke-color: #{$mute};
@@ -49,220 +71,27 @@ $wait-color: #585fd2;
     }
 }
 
-#default-node-gradient {
-    stop[offset="0"] {
-        stop-color: $mute;
-    }
+@each $name, $color in $nodeColors {
+    ##{$name}-node-gradient {
 
-    stop[offset="1"] {
-        stop-color: shade-color($mute, 30%);
-    }
-}
+        stop[offset="0"] {
+            stop-color: $color;
+        }
 
-#call-node-gradient {
-    stop[offset="0"] {
-        stop-color: $call-color;
-    }
-
-    stop[offset="1"] {
-        stop-color: shade-color($call-color, 30%);
-    }
-}
-
-#do-node-gradient {
-    stop[offset="0"] {
-        stop-color: $do-color;
-    }
-
-    stop[offset="1"] {
-        stop-color: shade-color($do-color, 30%);
-    }
-}
-
-#emit-node-gradient {
-    stop[offset="0"] {
-        stop-color: $emit-color;
-    }
-
-    stop[offset="1"] {
-        stop-color: shade-color($emit-color, 30%);
-    }
-}
-
-#for-node-gradient {
-    stop[offset="0"] {
-        stop-color: $for-color;
-    }
-
-    stop[offset="1"] {
-        stop-color: shade-color($for-color, 30%);
-    }
-}
-
-#fork-node-gradient {
-    stop[offset="0"] {
-        stop-color: $fork-color;
-    }
-
-    stop[offset="1"] {
-        stop-color: shade-color($fork-color, 30%);
-    }
-}
-
-#listen-node-gradient {
-    stop[offset="0"] {
-        stop-color: $listen-color;
-    }
-
-    stop[offset="1"] {
-        stop-color: shade-color($listen-color, 30%);
-    }
-}
-
-#raise-node-gradient {
-    stop[offset="0"] {
-        stop-color: $raise-color;
-    }
-
-    stop[offset="1"] {
-        stop-color: shade-color($raise-color, 30%);
-    }
-}
-
-#run-node-gradient {
-    stop[offset="0"] {
-        stop-color: $run-color;
-    }
-
-    stop[offset="1"] {
-        stop-color: shade-color($run-color, 30%);
-    }
-}
-
-#switch-node-gradient {
-    stop[offset="0"] {
-        stop-color: $switch-color;
-    }
-
-    stop[offset="1"] {
-        stop-color: shade-color($switch-color, 30%);
-    }
-}
-
-#set-node-gradient {
-    stop[offset="0"] {
-        stop-color: $set-color;
-    }
-
-    stop[offset="1"] {
-        stop-color: shade-color($set-color, 30%);
-    }
-}
-
-#try-catch-node-gradient {
-    stop[offset="0"] {
-        stop-color: $try-catch-color;
-    }
-
-    stop[offset="1"] {
-        stop-color: shade-color($try-catch-color, 30%);
-    }
-}
-
-#try-node-gradient {
-    stop[offset="0"] {
-        stop-color: $try-color;
-    }
-
-    stop[offset="1"] {
-        stop-color: shade-color($try-color, 30%);
-    }
-}
-
-#catch-node-gradient {
-    stop[offset="0"] {
-        stop-color: $catch-color;
-    }
-
-    stop[offset="1"] {
-        stop-color: shade-color($catch-color, 30%);
-    }
-}
-
-#wait-node-gradient {
-    stop[offset="0"] {
-        stop-color: $wait-color;
-    }
-
-    stop[offset="1"] {
-        stop-color: shade-color($wait-color, 30%);
+        stop[offset="1"] {
+            stop-color: shade-color($color, 30%);
+        }
     }
 }
 
 .node, .cluster {
     --gradient-url: url(#default-node-gradient);
 
-    &.call-task-node {
-        --gradient-url: url(#call-node-gradient);
+    @each $name, $color in $nodeColors {
+        &.#{$name}-task-node {
+            --gradient-url: url(##{$name}-node-gradient);
+        }
     }
-
-    &.do-task-node {
-        --gradient-url: url(#do-node-gradient);
-    }
-
-    &.emit-task-node {
-        --gradient-url: url(#emit-node-gradient);
-    }
-
-    &.for-task-node {
-        --gradient-url: url(#for-node-gradient);
-    }
-
-    &.fork-task-node {
-        --gradient-url: url(#fork-node-gradient);
-    }
-
-    &.listen-task-node {
-        --gradient-url: url(#listen-node-gradient);
-    }
-
-    &.raise-task-node {
-        --gradient-url: url(#raise-node-gradient);
-    }
-
-    &.run-task-node {
-        --gradient-url: url(#run-node-gradient);
-    }
-
-    &.switch-task-node {
-        --gradient-url: url(#switch-node-gradient);
-    }
-
-    &.set-task-node {
-        --gradient-url: url(#set-node-gradient);
-    }
-
-    &.try-catch-task-node {
-        --gradient-url: url(#try-catch-node-gradient);
-    }
-
-    &.try-node {
-        --gradient-url: url(#try-node-gradient);
-    }
-
-    &.catch-node {
-        --gradient-url: url(#catch-node-gradient);
-    }
-
-    &.wait-task-node {
-        --gradient-url: url(#wait-node-gradient);
-    }
-    /*
-    rect, circle, ellipse {
-        stroke: $mute;
-        fill: $dark-bg-subtle-dark;
-        stroke-width: 1px;
-    }*/
 
     .node-rectangle {
         stroke: var(--gradient-url);
@@ -276,11 +105,6 @@ $wait-color: #585fd2;
     .label-content {
         width: 100%;
         height: 100%;
-        /*
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        */
         white-space: nowrap;
         text-overflow: ellipsis;
         overflow: hidden;

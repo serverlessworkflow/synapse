@@ -26,7 +26,7 @@ public class TryNodeViewModel
     /// <param name="name">The node name</param>
     /// <param name="content">The node content</param>
     public TryNodeViewModel(string taskReference, string name, string content)
-        : base(taskReference, new() { Label = name + " - Try", CssClass = "try-node" })
+        : base(taskReference, new() { Label = name + " - Try", CssClass = "try-task-node" })
     {
         Content = content;
         Symbol = "try-symbol";
