@@ -94,7 +94,15 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
     protected TaskIdentity? GetNextTaskIdentity(TaskNodeRenderingContext context, NodeViewModel currentNode, string? transition = null)
     {
         transition = !string.IsNullOrWhiteSpace(transition) ? transition : context.TaskDefinition.Then;
-        if (transition == FlowDirective.End || transition == FlowDirective.Exit) return null;
+        if (transition == FlowDirective.End) return null;
+        if (transition == FlowDirective.Exit)
+        {
+            if (context.ParentContext == null)
+            {
+                return null;
+            }
+            return this.GetNextTaskIdentity(context.ParentContext, currentNode);
+        }
         var nextTaskName = string.IsNullOrWhiteSpace(transition) || transition == FlowDirective.Continue
                 ? context.Workflow.GetTaskAfter(new(context.TaskName, context.TaskDefinition), context.ParentReference)?.Key
                 : transition;
@@ -104,7 +112,7 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
             {
                 return null;
             }
-            return this.GetNextTaskIdentity(context.ParentContext, currentNode, transition);
+            return this.GetNextTaskIdentity(context.ParentContext, currentNode);
         }
         var nextTaskIndex = context.Workflow.IndexOf(nextTaskName, context.ParentReference);
         var nextTaskReference = $"{context.ParentReference}/{nextTaskIndex}/{nextTaskName}";
@@ -135,7 +143,7 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
         {
             return (NodeViewModel)context.Graph.AllClusters[nextTaskIdentity.Reference].AllNodes.First().Value;
         }
-        return (NodeViewModel)context.Graph.AllNodes[nextTaskIdentity.Reference]; //((IReadOnlyDictionary<string, IGraphElement>)context.Graph.AllNodes).Concat((IReadOnlyDictionary<string, IGraphElement>)context.Graph.AllClusters).ToDictionary()[nextTaskReference];
+        return (NodeViewModel)context.Graph.AllNodes[nextTaskIdentity.Reference];
     }
 
     /// <summary>
