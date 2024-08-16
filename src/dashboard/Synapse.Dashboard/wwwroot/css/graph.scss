@@ -16,8 +16,8 @@ $nodeTypes:
     "for",
     "listen",
     "run",
-    "switch",
     "set",
+    "switch",
     "try-catch",
     "try",
     "emit",
@@ -136,6 +136,20 @@ $viridisScale: // generated with 13 steps, using 12 to exclude the last yellow
         .label-content {
             text-align: left;
             padding: 5px 5px 5px 65px;
+        }
+    }
+
+    &.legend {
+        .node-rectangle {
+            fill: var(--gradient-url);
+        }
+        div {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
         }
     }
 }

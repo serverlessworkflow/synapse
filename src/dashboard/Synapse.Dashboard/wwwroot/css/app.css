@@ -20909,17 +20909,17 @@ tr.row-placeholder td::after {
   stop-color: #1c5763;
 }
 
-#switch-node-gradient stop[offset="0"] {
+#set-node-gradient stop[offset="0"] {
   stop-color: #21918c;
 }
-#switch-node-gradient stop[offset="1"] {
+#set-node-gradient stop[offset="1"] {
   stop-color: #176662;
 }
 
-#set-node-gradient stop[offset="0"] {
+#switch-node-gradient stop[offset="0"] {
   stop-color: #20a486;
 }
-#set-node-gradient stop[offset="1"] {
+#switch-node-gradient stop[offset="1"] {
   stop-color: #16735e;
 }
 
@@ -20981,11 +20981,11 @@ tr.row-placeholder td::after {
 .node.run-task-node, .cluster.run-task-node {
   --gradient-url: url(#run-node-gradient);
 }
-.node.switch-task-node, .cluster.switch-task-node {
-  --gradient-url: url(#switch-node-gradient);
-}
 .node.set-task-node, .cluster.set-task-node {
   --gradient-url: url(#set-node-gradient);
+}
+.node.switch-task-node, .cluster.switch-task-node {
+  --gradient-url: url(#switch-node-gradient);
 }
 .node.try-catch-task-node, .cluster.try-catch-task-node {
   --gradient-url: url(#try-catch-node-gradient);
@@ -21035,6 +21035,17 @@ tr.row-placeholder td::after {
 .node.shape-cartouche .label-content, .cluster.shape-cartouche .label-content {
   text-align: left;
   padding: 5px 5px 5px 65px;
+}
+.node.legend .node-rectangle, .cluster.legend .node-rectangle {
+  fill: var(--gradient-url);
+}
+.node.legend div, .cluster.legend div {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
 }
 
 .symbol {

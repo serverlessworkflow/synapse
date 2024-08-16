@@ -5,8 +5,31 @@
 
 @if (graph != null)
 {
-    <DagreGraph @ref="dagre" Graph="graph" OnMouseUp="OnMouseUp" Options="options" />
+    <svg class="svg-definitions"
+         version="1.2"
+         baseProfile="tiny"
+         xmlns="http://www.w3.org/2000/svg"
+         xmlns:xlink="http://www.w3.org/1999/xlink">
+        <defs>
+            <svg id="legend" viewBox="0 0 18 18">
+                <!-- from https://www.svgrepo.com/svg/451049/legend -->
+                <path fill-rule="evenodd" d="m2.4 8.1q-0.2-0.1-0.5-0.3-0.2-0.2-0.3-0.5-0.1-0.3-0.1-0.5c0-0.7 0.4-1.2 0.9-1.4 0.6-0.3 1.2-0.1 1.7 0.3 0.4 0.4 0.5 1.1 0.3 1.6-0.2 0.6-0.8 1-1.4 1q-0.3-0.1-0.6-0.2zm0.3-2q-0.1 0-0.2 0.1-0.1 0.1-0.2 0.3 0 0.1 0 0.3c0 0.3 0.1 0.5 0.4 0.6 0.3 0.2 0.6 0.1 0.8-0.1 0.2-0.2 0.3-0.6 0.2-0.8-0.1-0.3-0.4-0.5-0.7-0.5q-0.1 0-0.3 0.1zm13.8-3.8v0.7h-9.8v-0.7zm0 4.5v0.7h-9.7v-0.7zm0 4.5v0.7h-9.8v-0.7zm0 4.5v0.7h-9.7v-0.7zm-13.5-1.4l1.5 2.9h-3zm0.2 2l-0.2-0.5-0.3 0.5zm1.2-15.7v3h-3v-3zm-0.8 0.7h-1.5v1.5h1.5zm0.8 8.3v3h-3v-3zm-0.8 0.7h-1.5v1.5h1.5z" />
+                <path fill="none" fill-rule="evenodd" d="m18 0v18h-18v-18z" />
+            </svg>
+        </defs>
+    </svg>
+    <DagreGraph @ref="dagre" Graph="graph" OnMouseUp="OnMouseUp" Options="options">
+        <ExtraControls>
+            <button class="btn" type="button" title="legend" @onclick="ShowLegendAsync">
+                <svg>
+                    <use href="#legend" />
+                </svg>
+            </button>
+        </ExtraControls>
+    </DagreGraph>
 }
+
+<Modal @ref="modal" />
 
 @code{
 
@@ -15,6 +38,7 @@
     IGraphViewModel? graph;
     IDagreGraphOptions? options = null;
     bool isDirty = true;
+    private Modal modal = default!;
 
     [Parameter] public WorkflowDefinition WorkflowDefinition { get; set; } = null!;
 
@@ -42,6 +66,11 @@
         if (!this.isDirty) return false;
         this.isDirty = false;
         return true;
+    }
+
+    private async Task ShowLegendAsync()
+    {
+        await modal.ShowAsync<WorkflowDiagramLegend>(title: "Legend");
     }
 
 }

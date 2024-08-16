@@ -74,7 +74,6 @@ public abstract class WorkflowClusterViewModel
     /// <param name="config">The <see cref="NodeViewModelConfig"/> for the node</param>
     public WorkflowClusterViewModel(string taskReference, NodeViewModelConfig? config = null)
         : base(null, config?.Label, config?.CssClass, config?.Shape, config?.Width ?? 0, config?.Height ?? 0, config?.RadiusX ?? 0, config?.RadiusY ?? 0, config?.X ?? 0, config?.Y ?? 0, config?.ComponentType, config?.ParentId)
-    //: base(null, config?.Label, config?.CssClass, (config?.Shape == null || config?.Shape == SynapseNodeShape.Cartouche) ? NodeShape.Rectangle : config!.Shape, config?.Width ?? 0, config?.Height ?? 0, config?.RadiusX ?? 0, config?.RadiusY ?? 0, config?.X ?? 0, config?.Y ?? 0, config?.ComponentType, config?.ParentId)
     {
         this.Id = taskReference;
     }
