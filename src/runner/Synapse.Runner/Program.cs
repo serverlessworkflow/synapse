@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-if (args.Length != 0 && args.Contains("--debug") && !Debugger.IsAttached) Debugger.Launch(); //todo: uncomment
+if (args.Length != 0 && args.Contains("--debug") && !Debugger.IsAttached) Debugger.Launch();
 
 var builder = Host.CreateDefaultBuilder()
     .ConfigureAppConfiguration((context, config) =>

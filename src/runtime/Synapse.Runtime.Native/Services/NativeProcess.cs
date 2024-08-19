@@ -55,8 +55,8 @@ public class NativeProcess
     public override Task StartAsync(CancellationToken cancellationToken = default)
     {
         this.Process.Start();
-        //this.Process.BeginOutputReadLine(); //todo: check why that was there and why it now throws
-        //this.Process.BeginErrorReadLine();
+        this.Process.BeginOutputReadLine();
+        this.Process.BeginErrorReadLine();
         return Task.CompletedTask;
     }
 

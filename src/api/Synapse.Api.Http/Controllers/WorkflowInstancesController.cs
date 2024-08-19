@@ -11,6 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Neuroglia.Data.Infrastructure;
+using Synapse.Api.Application.Queries.WorkflowInstances;
+
 namespace Synapse.Api.Http.Controllers;
 
 /// <summary>
@@ -23,6 +26,36 @@ public class WorkflowInstancesController(IMediator mediator, IJsonSerializer jso
     : NamespacedResourceController<WorkflowInstance>(mediator, jsonSerializer)
 {
 
+    /// <summary>
+    /// Gets the logs produced by workflow instance with the the specified name and namespace
+    /// </summary>
+    /// <param name="name">The name of the workflow instance to read the logs of</param>
+    /// <param name="namespace">The namespace the workflow instance to read the logs of belongs to</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>A new <see cref="IActionResult"/></returns>
+    [HttpGet("{namespace}/{name}/logs")]
+    [ProducesResponseType(typeof(Resource), (int)HttpStatusCode.Created)]
+    [ProducesErrorResponseType(typeof(Neuroglia.ProblemDetails))]
+    public async Task<IActionResult> GetResourceLogs(string name, string @namespace, CancellationToken cancellationToken = default)
+    {
+        if (!this.ModelState.IsValid) return this.ValidationProblem(this.ModelState);
+        return this.Process(await this.Mediator.ExecuteAsync(new ReadWorkflowInstanceLogsQuery(name, @namespace), cancellationToken).ConfigureAwait(false));
+    }
 
+    /// <summary>
+    /// Watches the logs of a specific workflow instance
+    /// </summary>
+    /// <param name="namespace">The namespace the workflow instance to watch the logs of belongs to</param>
+    /// <param name="name">The name of the workflow instance to watch the logs of</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>A new <see cref="IActionResult"/></returns>
+    [HttpGet("{namespace}/{name}/logs/watch")]
+    [ProducesResponseType(typeof(IAsyncEnumerable<ResourceWatchEvent>), (int)HttpStatusCode.OK)]
+    [ProducesErrorResponseType(typeof(Neuroglia.ProblemDetails))]
+    public virtual async Task<IAsyncEnumerable<ITextDocumentWatchEvent>> WatchResourceLogs(string name, string @namespace, CancellationToken cancellationToken = default)
+    {
+        var response = await this.Mediator.ExecuteAsync(new WatchWorkflowInstanceLogsQuery(name, @namespace), cancellationToken).ConfigureAwait(false);
+        return response.Data!;
+    }
 
 }

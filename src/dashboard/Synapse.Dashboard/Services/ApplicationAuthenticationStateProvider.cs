@@ -45,7 +45,7 @@ public class ApplicationAuthenticationStateProvider(ISynapseApiClient api, ISecu
     {
         try
         {
-            var token = await TokenManager.GetTokenAsync();
+            var token = await this.TokenManager.GetTokenAsync();
             if (string.IsNullOrWhiteSpace(token)) return new AuthenticationState(Anonymous);
             var profile = await this.Api.Users.GetUserProfileAsync();
             var claims = profile.Claims?.Select(c => new Claim(c.Key, c.Value)).ToList() ?? [];
@@ -57,7 +57,7 @@ public class ApplicationAuthenticationStateProvider(ISynapseApiClient api, ISecu
         {
             // todo: better error handling
             Console.WriteLine(ex);
-            await TokenManager.SetTokenAsync("");
+            await this.TokenManager.SetTokenAsync("");
             navigationManager.NavigateTo("/");
             return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
         }

@@ -60,6 +60,8 @@ public static class IServiceCollectionExtensions
 
         services.AddPlugin(typeof(IRepository<Document>), provider => provider.GetRequiredService<RedisRepository<Document, string>>(), serviceLifetime: ServiceLifetime.Scoped);
         services.AddRedisRepository<Document, string>(lifetime: ServiceLifetime.Scoped);
+        services.AddSingleton<ITextDocumentRepository<string>, RedisTextDocumentRepository<string>>();
+        services.AddSingleton<ITextDocumentRepository>(provider => provider.GetRequiredService<ITextDocumentRepository<string>>());
 
         services.AddScoped<IResourceRepository, ResourceRepository>();
         services.AddScoped<IAdmissionControl, AdmissionControl>();

@@ -11,6 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Neuroglia.Data.Infrastructure.Services;
+using Neuroglia.Mediation;
+using System.Text;
+
 namespace Synapse.Operator.Services;
 
 /// <summary>
@@ -19,13 +23,15 @@ namespace Synapse.Operator.Services;
 /// <param name="logger">The service used to perform logging</param>
 /// <param name="options">The service used to access the current <see cref="OperatorOptions"/></param>
 /// <param name="resources">The service used to manage <see cref="IResource"/>s</param>
+/// <param name="logs">The service used the manage the logs produced by Synapse runners</param>
 /// <param name="runtime">The service used to create and run <see cref="IWorkflowProcess"/>es</param>
 /// <param name="jsonSerializer">The service used to serialize/deserialize objects to/from JSON</param>
 /// <param name="workflowInstance">The service used to monitor the resource of the workflow instance to handle</param>
-public class WorkflowInstanceHandler(ILogger<WorkflowInstanceHandler> logger, IOptions<OperatorOptions> options, IResourceRepository resources, IWorkflowRuntime runtime, IJsonSerializer jsonSerializer, IResourceMonitor<WorkflowInstance> workflowInstance)
+public class WorkflowInstanceHandler(ILogger<WorkflowInstanceHandler> logger, IOptions<OperatorOptions> options, IResourceRepository resources, ITextDocumentRepository logs, IWorkflowRuntime runtime, IJsonSerializer jsonSerializer, IResourceMonitor<WorkflowInstance> workflowInstance)
     : IDisposable, IAsyncDisposable
 {
 
+    bool _persistingLogs;
     bool _disposed;
 
     /// <summary>
@@ -44,6 +50,11 @@ public class WorkflowInstanceHandler(ILogger<WorkflowInstanceHandler> logger, IO
     protected IResourceRepository Resources { get; } = resources;
 
     /// <summary>
+    /// Gets the service used the manage the logs produced by Synapse runners
+    /// </summary>
+    protected ITextDocumentRepository Logs { get; } = logs;
+
+    /// <summary>
     /// Gets the service used to create and run <see cref="IWorkflowProcess"/>es
     /// </summary>
     protected IWorkflowRuntime Runtime { get; } = runtime;
@@ -59,14 +70,34 @@ public class WorkflowInstanceHandler(ILogger<WorkflowInstanceHandler> logger, IO
     protected IResourceMonitor<WorkflowInstance> WorkflowInstance { get; } = workflowInstance;
 
     /// <summary>
-    /// Gets the handler's subscription
+    /// Gets the handler's subscription to the handled <see cref="Resources.WorkflowInstance"/>
     /// </summary>
-    protected IDisposable? Subscription { get; set; }
+    protected IDisposable? WorkflowInstanceSubscription { get; set; }
+
+    /// <summary>
+    /// Gets the <see cref="IDisposable"/> that represents the subscription to the logs produced by the  <see cref="WorkflowInstanceHandler"/>'s <see cref="IWorkflowProcess"/> 
+    /// </summary>
+    protected IDisposable? LogSubscription { get; set; }
 
     /// <summary>
     /// Gets the handled workflow instance's process, if any
     /// </summary>
     protected IWorkflowProcess? Process { get; set; }
+
+    /// <summary>
+    /// Gets the <see cref="Timer"/> used to periodically persist batches of logs
+    /// </summary>
+    protected Timer? LogBatchTimer { get; set; }
+
+    /// <summary>
+    /// Gets a <see cref="ConcurrentQueue{T}"/> used to enqueue logs before persisting them in batches
+    /// </summary>
+    protected ConcurrentQueue<string> LogBatchQueue = new();
+
+    /// <summary>
+    /// Gets the <see cref="WorkflowInstanceHandler"/>'s <see cref="System.Threading.CancellationTokenSource"/>
+    /// </summary>
+    protected CancellationTokenSource CancellationTokenSource { get; } = new();
 
     /// <summary>
     /// Handles the <see cref="Resources.WorkflowInstance"/>
@@ -75,7 +106,7 @@ public class WorkflowInstanceHandler(ILogger<WorkflowInstanceHandler> logger, IO
     /// <returns>A new awaitable <see cref="Task"/></returns>
     public virtual async Task HandleAsync(CancellationToken cancellationToken = default)
     {
-        this.Subscription = this.WorkflowInstance
+        this.WorkflowInstanceSubscription = this.WorkflowInstance
             .Where(e => e.Type == ResourceWatchEventType.Updated)
             .Select(e => e.Resource.Status?.Correlation?.Contexts)
             .Scan((Previous: (EquatableDictionary<string, CorrelationContext>?)null, Current: (EquatableDictionary<string, CorrelationContext>?)null), (accumulator, current) => (accumulator.Current ?? [], current))
@@ -84,31 +115,23 @@ public class WorkflowInstanceHandler(ILogger<WorkflowInstanceHandler> logger, IO
         if (string.IsNullOrWhiteSpace(this.WorkflowInstance.Resource.Status?.Phase)
             || this.WorkflowInstance.Resource.Status.Phase == WorkflowInstanceStatusPhase.Pending
             || this.WorkflowInstance.Resource.Status.Phase == WorkflowInstanceStatusPhase.Running)
-        {
-            var workflow = await this.GetWorkflowAsync(cancellationToken).ConfigureAwait(false);
-            var serviceAccount = await this.GetServiceAccountAsync(cancellationToken).ConfigureAwait(false);
-            this.Process = await this.Runtime.CreateProcessAsync(workflow, this.WorkflowInstance.Resource, serviceAccount, cancellationToken).ConfigureAwait(false);
-            await this.Process.StartAsync(cancellationToken).ConfigureAwait(false);
-        }
+            await this.StartProcessAsync(cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
-    /// Handles changes to the the handled workflow instance's correlation contexts
+    /// Creates and starts a new <see cref="IWorkflowProcess"/>
     /// </summary>
-    /// <param name="value">The context composite value, which contains the previous and the current state</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>A new awaitable <see cref="Task"/></returns>
-    protected virtual async Task OnCorrelationContextsChangedAsync((EquatableDictionary<string, CorrelationContext>? Previous, EquatableDictionary<string, CorrelationContext>? Current) value, CancellationToken cancellationToken)
+    protected virtual async Task StartProcessAsync(CancellationToken cancellationToken)
     {
-        var patch = JsonPatchUtility.CreateJsonPatchFromDiff(value.Previous, value.Current);
-        if (patch.Operations.All(o => o.Op == Json.Patch.OperationType.Remove)) return;
-        if(this.WorkflowInstance.Resource.Status?.Phase == WorkflowInstanceStatusPhase.Waiting)
-        {
-            var workflow = await this.GetWorkflowAsync(cancellationToken).ConfigureAwait(false);
-            var serviceAccount = await this.GetServiceAccountAsync(cancellationToken).ConfigureAwait(false);
-            this.Process = await this.Runtime.CreateProcessAsync(workflow, this.WorkflowInstance.Resource, serviceAccount, cancellationToken).ConfigureAwait(false);
-            await this.Process.StartAsync(cancellationToken).ConfigureAwait(false);
-        }
+        this.LogSubscription?.Dispose();
+        var workflow = await this.GetWorkflowAsync(cancellationToken).ConfigureAwait(false);
+        var serviceAccount = await this.GetServiceAccountAsync(cancellationToken).ConfigureAwait(false);
+        this.Process = await this.Runtime.CreateProcessAsync(workflow, this.WorkflowInstance.Resource, serviceAccount, cancellationToken).ConfigureAwait(false);
+        await this.Process.StartAsync(cancellationToken).ConfigureAwait(false);
+        this.LogSubscription = this.Process.StandardOutput?.Subscribe(this.LogBatchQueue.Enqueue);
+        this.LogBatchTimer ??= new(async _ => await this.OnPersistLogBatchAsync(), null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
     }
 
     /// <summary>
@@ -116,7 +139,7 @@ public class WorkflowInstanceHandler(ILogger<WorkflowInstanceHandler> logger, IO
     /// </summary>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>The specified <see cref="Workflow"/></returns>
-    protected virtual async Task<Workflow> GetWorkflowAsync( CancellationToken cancellationToken)
+    protected virtual async Task<Workflow> GetWorkflowAsync(CancellationToken cancellationToken)
     {
         return await this.Resources.GetAsync<Workflow>(this.WorkflowInstance.Resource.Spec.Definition.Name, this.WorkflowInstance.Resource.Spec.Definition.Namespace, cancellationToken).ConfigureAwait(false) 
             ?? throw new NullReferenceException($"Failed to find the workflow with name '{this.WorkflowInstance.Resource.Spec.Definition.Namespace}.{this.WorkflowInstance.Resource.Spec.Definition.Name}'");
@@ -135,6 +158,34 @@ public class WorkflowInstanceHandler(ILogger<WorkflowInstanceHandler> logger, IO
     }
 
     /// <summary>
+    /// Handles changes to the the handled workflow instance's correlation contexts
+    /// </summary>
+    /// <param name="value">The context composite value, which contains the previous and the current state</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>A new awaitable <see cref="Task"/></returns>
+    protected virtual async Task OnCorrelationContextsChangedAsync((EquatableDictionary<string, CorrelationContext>? Previous, EquatableDictionary<string, CorrelationContext>? Current) value, CancellationToken cancellationToken)
+    {
+        var patch = JsonPatchUtility.CreateJsonPatchFromDiff(value.Previous, value.Current);
+        if (patch.Operations.All(o => o.Op == Json.Patch.OperationType.Remove)) return;
+        if (this.WorkflowInstance.Resource.Status?.Phase == WorkflowInstanceStatusPhase.Waiting) await this.StartProcessAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Persists log batches
+    /// </summary>
+    /// <returns>A new awaitable <see cref="Task"/></returns>
+    protected virtual async Task OnPersistLogBatchAsync()
+    {
+        if (this._persistingLogs || this.LogBatchQueue.Count < 1) return;
+        this._persistingLogs = true;
+        var stringBuilder = new StringBuilder();
+        while (this.LogBatchQueue.TryDequeue(out var log)) stringBuilder.AppendLine(log);
+        var logs = stringBuilder.ToString();
+        await this.Logs.AppendAsync($"{this.WorkflowInstance.Resource.GetName()}.{this.WorkflowInstance.Resource.GetNamespace()}", logs, this.CancellationTokenSource.Token).ConfigureAwait(false);
+        this._persistingLogs = false;
+    }
+
+    /// <summary>
     /// Disposes of the <see cref="WorkflowInstanceHandler"/>
     /// </summary>
     /// <param name="disposing">A boolean indicating whether or not the <see cref="WorkflowInstanceHandler"/> is being disposed of</param>
@@ -143,8 +194,11 @@ public class WorkflowInstanceHandler(ILogger<WorkflowInstanceHandler> logger, IO
     {
         if (!disposing || this._disposed) return;
         await this.WorkflowInstance.DisposeAsync().ConfigureAwait(false);
-        this.Subscription?.Dispose();
+        this.WorkflowInstanceSubscription?.Dispose();
+        this.LogSubscription?.Dispose();
         if (this.Process != null) await this.Process.DisposeAsync().ConfigureAwait(false);
+        if (this.LogBatchTimer != null) await this.LogBatchTimer.DisposeAsync().ConfigureAwait(false);
+        this.CancellationTokenSource.Dispose();
         this._disposed = true;
         await Task.CompletedTask.ConfigureAwait(false);
     }
@@ -164,8 +218,11 @@ public class WorkflowInstanceHandler(ILogger<WorkflowInstanceHandler> logger, IO
     {
         if (!disposing || this._disposed) return;
         this.WorkflowInstance.Dispose();
-        this.Subscription?.Dispose();
+        this.WorkflowInstanceSubscription?.Dispose();
+        this.LogSubscription?.Dispose();
         this.Process?.Dispose();
+        this.LogBatchTimer?.Dispose();
+        this.CancellationTokenSource.Dispose();
         this._disposed = true;
     }
 

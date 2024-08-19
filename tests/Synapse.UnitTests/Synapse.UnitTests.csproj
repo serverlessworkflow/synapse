@@ -19,9 +19,9 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
     <PackageReference Include="Moq" Version="4.20.70" />
-    <PackageReference Include="Neuroglia.Data.Expressions.JQ" Version="4.12.10" />
-    <PackageReference Include="Neuroglia.Data.Infrastructure.Memory" Version="4.12.10" />
-    <PackageReference Include="Neuroglia.Data.Infrastructure.ResourceOriented.Redis" Version="4.12.10" />
+    <PackageReference Include="Neuroglia.Data.Expressions.JQ" Version="4.14.0" />
+    <PackageReference Include="Neuroglia.Data.Infrastructure.Memory" Version="4.14.0" />
+    <PackageReference Include="Neuroglia.Data.Infrastructure.ResourceOriented.Redis" Version="4.14.0" />
     <PackageReference Include="ServerlessWorkflow.Sdk.Builders" Version="1.0.0-alpha2.8" />
 	<PackageReference Include="ServerlessWorkflow.Sdk.IO" Version="1.0.0-alpha2.8" />
 	<PackageReference Include="Testcontainers" Version="3.9.0" />

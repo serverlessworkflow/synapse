@@ -35,16 +35,16 @@
 	<PackageReference Include="DynamicGrpc" Version="1.4.0" />
 	<PackageReference Include="Google.Protobuf" Version="3.27.3" />
 	<PackageReference Include="Grpc.Core" Version="2.46.6" />
-	<PackageReference Include="Microsoft.Extensions.Configuration.KeyPerFile" Version="8.0.7" />
+	<PackageReference Include="Microsoft.Extensions.Configuration.KeyPerFile" Version="8.0.8" />
 	<PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
 	<PackageReference Include="Microsoft.OpenApi.Readers" Version="1.6.17" />
 	<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
-	<PackageReference Include="Neuroglia.Data.Expressions.JavaScript" Version="4.12.10" />
-	<PackageReference Include="Neuroglia.Data.Expressions.JQ" Version="4.12.10" />
-	<PackageReference Include="Neuroglia.Eventing.CloudEvents.Infrastructure" Version="4.12.10" />
-	<PackageReference Include="Neuroglia.Scripting.NodeJS" Version="4.12.10" />
-	<PackageReference Include="Neuroglia.Scripting.Python" Version="4.12.10" />
+	<PackageReference Include="Neuroglia.Data.Expressions.JavaScript" Version="4.14.0" />
+	<PackageReference Include="Neuroglia.Data.Expressions.JQ" Version="4.14.0" />
+	<PackageReference Include="Neuroglia.Eventing.CloudEvents.Infrastructure" Version="4.14.0" />
+	<PackageReference Include="Neuroglia.Scripting.NodeJS" Version="4.14.0" />
+	<PackageReference Include="Neuroglia.Scripting.Python" Version="4.14.0" />
 	<PackageReference Include="protobuf-net.Grpc.ClientFactory" Version="1.1.1" />
     <PackageReference Include="System.Reactive" Version="6.0.1" />
   </ItemGroup>

@@ -56,14 +56,28 @@ internal class RunnerApplication(IServiceProvider serviceProvider, IHostApplicat
     protected IWorkflowExecutor? Executor { get; private set; }
 
     /// <inheritdoc/>
-    public virtual async Task StartAsync(CancellationToken cancellationToken)
+    public virtual Task StartAsync(CancellationToken cancellationToken)
+    {
+        this.ApplicationLifetime.ApplicationStarted.Register(() =>
+        {
+            Task.Run(() => this.RunAsync(cancellationToken), cancellationToken);
+        });
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Runs the applications
+    /// </summary>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>A new awaitable <see cref="Task"/></returns>
+    protected virtual async Task RunAsync(CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(this.Options.Workflow?.Instance)) throw new NullReferenceException("The workflow instance to run must be configured, which can be done using the application's appsettings.json file, using command line arguments or using environment variables");
         var instance = await this.ApiClient.WorkflowInstances.GetAsync(this.Options.Workflow.GetInstanceName(), this.Options.Workflow.GetInstanceNamespace(), cancellationToken).ConfigureAwait(false) ?? throw new NullReferenceException($"Failed to find the specified workflow instance '{this.Options.Workflow.Instance}'");
         var resource = await this.ApiClient.Workflows.GetAsync(instance.Spec.Definition.Name, instance.Spec.Definition.Namespace, cancellationToken).ConfigureAwait(false) ?? throw new NullReferenceException($"Failed to find the specified workflow '{instance.Spec.Definition.Namespace}.{instance.Spec.Definition.Name}'");
         var definition = resource.Spec.Versions.FirstOrDefault(v => v.Document.Version == instance.Spec.Definition.Version) ?? throw new NullReferenceException($"Failed to find the specified version '{instance.Spec.Definition.Version}' of the workflow '{instance.Spec.Definition.Namespace}.{instance.Spec.Definition.Name}'");
         var expressionLanguage = definition.Evaluate?.Language ?? RuntimeExpressions.Languages.JQ;
-        var expressionEvaluator = this.ServiceProvider.GetRequiredService<IExpressionEvaluatorProvider>().GetEvaluator(expressionLanguage) 
+        var expressionEvaluator = this.ServiceProvider.GetRequiredService<IExpressionEvaluatorProvider>().GetEvaluator(expressionLanguage)
             ?? throw new NullReferenceException($"Failed to find an expression evaluator for the language '{expressionLanguage}' defined by workflow '{instance.Spec.Definition.Namespace}.{instance.Spec.Definition.Name}:{instance.Spec.Definition.Version}'");
         var context = ActivatorUtilities.CreateInstance<WorkflowExecutionContext>(this.ServiceProvider, expressionEvaluator, definition, instance);
         this.Executor = ActivatorUtilities.CreateInstance<WorkflowExecutor>(this.ServiceProvider, context);
