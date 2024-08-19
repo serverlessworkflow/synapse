@@ -88,12 +88,12 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         var contextReference = string.Empty;
         if (context == null)
         {
-            if(parent?.ContextData != null)
+            if (parent?.ContextData != null)
             {
                 contextReference = parent.Instance.ContextReference;
                 context = parent.ContextData;
             }
-            else if(!string.IsNullOrWhiteSpace(this.Instance.Status?.ContextReference))
+            else if (!string.IsNullOrWhiteSpace(this.Instance.Status?.ContextReference))
             {
                 contextReference = this.Instance.Status?.ContextReference;
                 var contextDocument = await this.Api.Documents.GetAsync(this.Instance.Status!.ContextReference, cancellationToken).ConfigureAwait(false);

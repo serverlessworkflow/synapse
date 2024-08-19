@@ -50,6 +50,8 @@ public abstract class WorkflowRuntimeTestsBase
                 services.AddSingleton<ITaskExecutorFactory, TaskExecutorFactory>();
                 services.AddMemoryCacheRepository<Document, string>();
                 services.AddScoped<IResourceRepository, MockResourceRepository>();
+                services.AddScoped<ITextDocumentRepository<string>, MockTextDocumentRepository<string>>();
+                services.AddScoped<ITextDocumentRepository>(provider => provider.GetRequiredService<ITextDocumentRepository<string>>());
                 services.AddCloudEventBus();
                 services.AddHttpClient();
                 services.AddSingleton<DockerContainerPlatform>();

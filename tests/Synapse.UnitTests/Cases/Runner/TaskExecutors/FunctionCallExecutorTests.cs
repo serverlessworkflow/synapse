@@ -35,15 +35,6 @@ public class FunctionCallExecutorTests
                     Name = "${ .username }"
                 })
             ],
-        };
-        var parameters = new Neuroglia.EquatableDictionary<string, object>()
-        {
-            new("username", "${ .user.username }")
-        };
-        var taskDefinition = new CallTaskDefinition()
-        {
-            Call = functionName,
-            With = parameters,
             Input = new()
             {
                 Schema = new()
@@ -57,6 +48,15 @@ public class FunctionCallExecutorTests
                         .Build()
                 }
             }
+        };
+        var parameters = new Neuroglia.EquatableDictionary<string, object>()
+        {
+            new("username", "${ .user.username }")
+        };
+        var taskDefinition = new CallTaskDefinition()
+        {
+            Call = functionName,
+            With = parameters
         };
         var workflowDefinition = new WorkflowDefinitionBuilder()
             .WithNamespace("default")

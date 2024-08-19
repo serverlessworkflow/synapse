@@ -65,6 +65,8 @@ public abstract class RunnerTestsBase
         services.AddPythonScriptExecutor();
         services.AddMemoryCacheRepository<Document, string>();
         services.AddScoped<IResourceRepository, MockResourceRepository>();
+        services.AddScoped<ITextDocumentRepository<string>, MockTextDocumentRepository<string>>();
+        services.AddScoped<ITextDocumentRepository>(provider => provider.GetRequiredService<ITextDocumentRepository<string>>());
         services.AddCloudEventBus();
         services.AddHttpClient();
         services.AddSingleton<DockerContainerPlatform>();

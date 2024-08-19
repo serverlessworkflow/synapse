@@ -62,6 +62,6 @@ public interface ISynapseApiClient
     /// <summary>
     /// Gets the Synapse API used to manage <see cref="WorkflowInstance"/>s
     /// </summary>
-    INamespacedResourceApiClient<WorkflowInstance> WorkflowInstances { get; }
+    IWorkflowInstanceApiClient WorkflowInstances { get; }
 
 }

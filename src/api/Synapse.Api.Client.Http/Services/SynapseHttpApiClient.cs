@@ -34,13 +34,14 @@ public class SynapseHttpApiClient
         this.Serializer = serializer;
         this.HttpClient = httpClient;
         this.Documents = ActivatorUtilities.CreateInstance<DocumentHttpApiClient>(this.ServiceProvider, this.HttpClient);
-        foreach (var apiProperty in GetType().GetProperties().Where(p => p.CanRead && p.PropertyType.GetGenericType(typeof(IResourceApiClient<>)) != null))
+        foreach (var apiProperty in GetType().GetProperties().Where(p => p.CanRead && p.PropertyType.GetGenericType(typeof(IResourceApiClient<>)) != null && p.Name != nameof(WorkflowInstances)))
         {
             var apiType = apiProperty.PropertyType.GetGenericType(typeof(IResourceApiClient<>))!;
             var resourceType = apiType.GetGenericArguments()[0];
             var api = ActivatorUtilities.CreateInstance(this.ServiceProvider, typeof(ResourceHttpApiClient<>).MakeGenericType(resourceType), this.HttpClient);
             apiProperty.SetValue(this, api);
         }
+        this.WorkflowInstances = ActivatorUtilities.CreateInstance<WorkflowInstanceHttpApiClient>(this.ServiceProvider, this.HttpClient);
         this.Users = ActivatorUtilities.CreateInstance<UserHttpApiClient>(this.ServiceProvider, this.HttpClient);
     }
 
@@ -89,6 +90,6 @@ public class SynapseHttpApiClient
     public INamespacedResourceApiClient<Workflow> Workflows { get; private set; } = null!;
 
     /// <inheritdoc/>
-    public INamespacedResourceApiClient<WorkflowInstance> WorkflowInstances { get; private set; } = null!;
+    public IWorkflowInstanceApiClient WorkflowInstances { get; private set; } = null!;
 
 }

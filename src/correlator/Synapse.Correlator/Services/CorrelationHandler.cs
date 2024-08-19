@@ -222,7 +222,7 @@ public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRep
                     {
                         if (!await this.ExpressionEvaluator.EvaluateConditionAsync(valueStr, e, cancellationToken: cancellationToken)) return false;
                     }
-                    else if (!string.IsNullOrWhiteSpace(valueStr) && !Regex.IsMatch(value.ToString() ?? string.Empty, valueStr, RegexOptions.IgnoreCase)) return false;
+                    else if (!string.IsNullOrWhiteSpace(valueStr) && !Regex.IsMatch(value?.ToString() ?? string.Empty, valueStr, RegexOptions.IgnoreCase)) return false;
                 } 
             }
         }
