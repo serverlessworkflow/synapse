@@ -177,7 +177,7 @@
             }
         }
         <h6 class="pt-3">Logs</h6>
-        -
+        <WorkflowInstanceLogs Name="@workflowInstance.GetName()" Namespace="@workflowInstance.GetNamespace()" />
         <h6 class="pt-3">Raw</h6>
         <DocumentDetails Label="Raw" Document="@workflowInstance" />
     </div>
@@ -190,9 +190,10 @@
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
-        if (WorkflowInstance?.GetName() != workflowInstance?.GetName())
-        {
-            workflowInstance = WorkflowInstance;
-        }
+        // if (WorkflowInstance?.GetName() != workflowInstance?.GetName())
+        // {
+        //     workflowInstance = WorkflowInstance;
+        // }
+        workflowInstance = WorkflowInstance;
     }
 }

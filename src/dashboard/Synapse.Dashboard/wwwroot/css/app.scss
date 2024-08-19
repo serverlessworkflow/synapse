@@ -159,3 +159,14 @@ input[type="search"]::-webkit-search-cancel-button {
         max-height: calc(100% - 80px) !important;
     }
 }
+
+.bb-offcanvas-lg {
+    --bs-offcanvas-width: 80vw;
+}
+
+.monaco-editor.logs-container {
+    height: 300px;
+    overflow: scroll;
+    background-color: var(--vscode-editor-background);
+    color: var(--vscode-editor-foreground);
+}
