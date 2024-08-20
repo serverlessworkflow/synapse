@@ -21036,6 +21036,30 @@ tr.row-placeholder td::after {
   text-align: left;
   padding: 5px 5px 5px 65px;
 }
+.node.active rect, .cluster.active rect {
+  fill: rgba(var(--bs-info-rgb), 0.2);
+}
+.node .badge circle, .cluster .badge circle {
+  stroke-width: 0;
+  fill: var(--bs-primary);
+}
+.node .badge foreignObject, .cluster .badge foreignObject {
+  text-align: center;
+  font-size: 8px;
+  color: white;
+}
+.node .badge foreignObject div, .cluster .badge foreignObject div {
+  display: flex;
+  align-content: center;
+  align-items: center;
+  justify-content: center;
+}
+.node .activity-badge.activity-badge--active circle, .cluster .activity-badge.activity-badge--active circle {
+  fill: var(--bs-success);
+}
+.node .activity-badge.activity-badge--faulted circle, .cluster .activity-badge.activity-badge--faulted circle {
+  fill: var(--bs-danger);
+}
 .node.legend .node-rectangle, .cluster.legend .node-rectangle {
   fill: var(--gradient-url);
 }

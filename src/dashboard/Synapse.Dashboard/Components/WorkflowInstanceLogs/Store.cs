@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using BlazorBootstrap;
 using Neuroglia.Data.Infrastructure;
 using Synapse.Api.Client.Services;
 using System.Text.RegularExpressions;
@@ -34,6 +35,11 @@ public class WorkflowInstanceLogsStore(
     /// </summary>
     protected ISynapseApiClient ApiClient { get; } = apiClient;
 
+    /// <summary>
+    /// Gets/sets the logs <see cref="Collapse"/> panel
+    /// </summary>
+    public Collapse? Collapse { get; set; }
+
     #region Selectors
     /// <summary>
     /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="WorkflowInstanceLogsState.Name"/> changes
@@ -50,23 +56,20 @@ public class WorkflowInstanceLogsStore(
         .DistinctUntilChanged();
 
     /// <summary>
-    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="WorkflowInstanceLogsState.Loaded"/> changes
+    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="WorkflowInstanceLogsState.IsLoading"/> changes
     /// </summary>
-    public IObservable<bool> Loaded => this.Select(state => state.Loaded).DistinctUntilChanged();
+    public IObservable<bool> IsLoading => this.Select(state => state.IsLoading).DistinctUntilChanged();
+
+    /// <summary>
+    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="WorkflowInstanceLogsState.IsExpanded"/> changes
+    /// </summary>
+    public IObservable<bool> IsExpanded => this.Select(state => state.IsExpanded).DistinctUntilChanged();
 
     /// <summary>
     /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="WorkflowInstanceLogsState.Logs"/> changes
     /// </summary>
     public IObservable<IEnumerable<string>> Logs => this.Select(state => state.Logs).DistinctUntilChanged();
 
-    /// <summary>
-    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="WorkflowInstanceLogsState.Name"/> and <see cref="WorkflowInstanceLogsState.Namespace"/> combined changes
-    /// </summary>
-    public IObservable<(string, string)> FullName => Observable.CombineLatest(
-        this.Name,
-        this.Namespace,
-        (name, @namespace) => (name, @namespace)
-    ).DistinctUntilChanged();
     #endregion
 
     #region Setters
@@ -96,13 +99,44 @@ public class WorkflowInstanceLogsStore(
 
     #region Actions
     /// <summary>
+    /// Toggles the <see cref="Collapse"/> panel
+    /// </summary>
+    public async Task ToggleAsync()
+    {
+        if (this.Collapse != null)
+        {
+            var isExpanded = !this.Get(state => state.IsExpanded);
+            await (isExpanded ? this.Collapse.ShowAsync() : this.Collapse.HideAsync());
+            this.Reduce(state => state with
+            {
+                IsExpanded = isExpanded
+            });
+        }
+    }
+
+    /// <summary>
+    /// Toggles the <see cref="Collapse"/> panel
+    /// </summary>
+    public async Task HideAsync()
+    {
+        if (this.Collapse != null)
+        {
+            await this.Collapse.HideAsync();
+            this.Reduce(state => state with
+            {
+                IsExpanded = false
+            });
+        }
+    }
+
+    /// <summary>
     /// Reads and watches the logs
     /// </summary>
     public async Task LoadLogsAsync()
     {
         this.Reduce(state => state with
         {
-            Loaded = false
+            IsLoading = true
         });
         await this.ReadLogsAsync();
         await this.WatchLogsAsync(); //fire and forget, otherwise the subscription is blocked
@@ -119,7 +153,7 @@ public class WorkflowInstanceLogsStore(
         this.Reduce(state => state with
         {
             Logs = this.SplitLogs(logs),
-            Loaded = true
+            IsLoading = false
         });
     }
 

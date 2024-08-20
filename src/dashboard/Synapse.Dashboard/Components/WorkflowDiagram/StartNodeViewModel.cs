@@ -12,7 +12,6 @@
 // limitations under the License.
 
 using Neuroglia.Blazor.Dagre;
-using System.Xml.Linq;
 
 namespace Synapse.Dashboard.Components;
 

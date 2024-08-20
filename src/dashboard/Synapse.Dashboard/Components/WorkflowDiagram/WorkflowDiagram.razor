@@ -1,7 +1,23 @@
-﻿@namespace Synapse.Dashboard
+﻿﻿@*
+    Copyright © 2024-Present The Synapse Authors
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*@
+
 @using ServerlessWorkflow.Sdk.Models
-@using System.Diagnostics
-@inject IWorkflowGraphBuilder WorkflowGraphBuilder
+@using Synapse.Dashboard.Components.WorkflowDiagramStateManagement
+@namespace Synapse.Dashboard
+@inherits StatefulComponent<WorkflowDiagram,WorkflowDiagramStore, WorkflowDiagramState>
 
 @if (graph != null)
 {
@@ -18,9 +34,9 @@
             </svg>
         </defs>
     </svg>
-    <DagreGraph @ref="dagre" Graph="graph" OnMouseUp="OnMouseUp" Options="options">
+    <DagreGraph @ref="Store.DagreGraph" OnMouseUp="OnMouseUp" Options="options" Graph="graph">
         <ExtraControls>
-            <button class="btn" type="button" title="legend" @onclick="ShowLegendAsync">
+            <button class="btn" type="button" title="legend" @onclick="async (_) => await Store.ShowLegendAsync()">
                 <svg>
                     <use href="#legend" />
                 </svg>
@@ -29,35 +45,56 @@
     </DagreGraph>
 }
 
-<Modal @ref="modal" />
+<Modal @ref="Store.LegendModal" />
 
-@code{
+@code {
+    [Parameter] public EventCallback<GraphEventArgs<MouseEventArgs>> OnMouseUp { get; set; }
+    WorkflowDefinition? workflowDefinition = null;
+    [Parameter] public WorkflowDefinition WorkflowDefinition { get; set; } = null!;
+    WorkflowDiagramOrientation orientation = default!;
+    [Parameter] public WorkflowDiagramOrientation Orientation { get; set; } = WorkflowDiagramOrientation.TopToBottom;
+    EquatableList<WorkflowInstance> workflowInstances = [];
+    [Parameter] public EquatableList<WorkflowInstance> WorkflowInstances { get; set; } = [];
 
-    WorkflowDefinition workflowDefinition = null!;
-    DagreGraph? dagre;
     IGraphViewModel? graph;
     IDagreGraphOptions? options = null;
-    bool isDirty = true;
-    private Modal modal = default!;
+    bool isDirty = true; // moving isDirty to the State/Store seems to have unwanted behavior, the `ShouldRender` method doesn't seem to behave properly.
 
-    [Parameter] public WorkflowDefinition WorkflowDefinition { get; set; } = null!;
-
-    [Parameter] public WorkflowDiagramOrientation Orientation { get; set; } = WorkflowDiagramOrientation.TopToBottom;
-
-    [Parameter] public EventCallback<GraphEventArgs<MouseEventArgs>> OnMouseUp { get; set; }
+    /// <inheritdoc/>
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync().ConfigureAwait(false);
+        Store.WorkflowDefinition.Subscribe(value => OnStateChanged(_ => workflowDefinition = value), token: CancellationTokenSource.Token);
+        Store.WorkflowInstances.Subscribe(value => OnStateChanged(_ => workflowInstances = value), token: CancellationTokenSource.Token);
+        Store.Orientation.Subscribe(value => OnStateChanged(_ => orientation = value), token: CancellationTokenSource.Token);
+        Store.Graph.SubscribeAsync(async value =>
+        {
+            this.isDirty = true;
+            OnStateChanged(_ => graph = value);
+            if (this.Store.DagreGraph != null) await this.Store.DagreGraph.RefreshAsync();
+        }, cancellationToken: CancellationTokenSource.Token);
+        Store.Options.SubscribeAsync(async value =>
+        {
+            this.isDirty = true;
+            OnStateChanged(_ => options = value);
+            if (this.Store.DagreGraph != null) await this.Store.DagreGraph.RefreshAsync();
+        }, cancellationToken: CancellationTokenSource.Token);
+    }
 
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
+        if (this.Orientation != this.orientation)
+        {
+            this.Store.SetOrientation(this.Orientation);
+        }
         if (this.WorkflowDefinition != null && this.WorkflowDefinition != this.workflowDefinition)
         {
-            this.workflowDefinition = this.WorkflowDefinition;
-            this.options = new DagreGraphOptions()
-            {
-                Direction = this.Orientation == WorkflowDiagramOrientation.LeftToRight ? DagreGraphDirection.LeftToRight : DagreGraphDirection.TopToBottom
-            };
-            this.graph = this.WorkflowGraphBuilder.Build(this.workflowDefinition);
-            this.isDirty = true;
+            this.Store.SetWorkflowDefinition(this.WorkflowDefinition);
+        }
+        if (this.WorkflowInstances != this.workflowInstances)
+        {
+            this.Store.SetWorkflowInstances(this.WorkflowInstances);
         }
     }
 
@@ -66,11 +103,6 @@
         if (!this.isDirty) return false;
         this.isDirty = false;
         return true;
-    }
-
-    private async Task ShowLegendAsync()
-    {
-        await modal.ShowAsync<WorkflowDiagramLegend>(title: "Legend");
     }
 
 }

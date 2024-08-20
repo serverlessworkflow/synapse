@@ -31,9 +31,14 @@ public record WorkflowInstanceLogsState
     public string Namespace { get; set; } = string.Empty;
 
     /// <summary>
-    /// Gets/sets a boolean indicating if the logs have been loaded
+    /// Gets/sets a boolean indicating if the logs are being loaded
     /// </summary>
-    public bool Loaded { get; set; } = false;
+    public bool IsLoading { get; set; } = false;
+
+    /// <summary>
+    /// Gets/sets a boolean indicating if the logs panel is expanded
+    /// </summary>
+    public bool IsExpanded { get; set; } = false;
 
     /// <summary>
     /// Gets/sets the <see cref="WorkflowInstance"/>'s logs

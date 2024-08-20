@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Neuroglia.Blazor.Dagre;
 using Neuroglia.Blazor.Dagre.Models;
 using ServerlessWorkflow.Sdk.Models;
 using System.Text.Json.Serialization;

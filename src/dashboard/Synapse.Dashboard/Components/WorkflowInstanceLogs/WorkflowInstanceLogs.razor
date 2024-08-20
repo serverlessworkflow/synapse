@@ -19,12 +19,12 @@
 @namespace Synapse.Dashboard.Components
 @inherits StatefulComponent<WorkflowInstanceLogs, WorkflowInstanceLogsStore, WorkflowInstanceLogsState>
 
-<div class="d-flex justify-content-between cursor-pointer" @onclick="async (_) => await ToggleAsync()">
+<div class="d-flex justify-content-between cursor-pointer" @onclick="async (_) => await Store.ToggleAsync()">
     Logs
-    <Icon Name="@(isOpen ? IconName.CaretUp : IconName.CaretDown)" />
+    <Icon Name="@(isExpanded ? IconName.CaretUp : IconName.CaretDown)" />
 </div>
-<Collapse @ref="collapse" OnShowing="Store.LoadLogsAsync">
-    @if (!loaded)
+<Collapse @ref="Store.Collapse" OnShowing="Store.LoadLogsAsync">
+    @if (isLoading)
     {
         <Spinner Class="me-3" Color="SpinnerColor.Primary" Size="SpinnerSize.Small" />
     }
@@ -43,10 +43,11 @@
                     string level = match.Groups[2].Value;
                     string color = level.ToLower() switch
                     {
+                        "fail" => "text-danger",
                         "critical" => "text-danger",
                         "error" => "text-danger",
                         "warning" => "text-warning",
-                        "info" => "text-info",
+                        "info" => "text-primary",
                         "debug" => "text-cinereous",
                         "trace" => "text-mute",
                         _ => ""
@@ -59,21 +60,21 @@
 </Collapse>
 
 @code {
-    private Collapse collapse = default!;
-    private bool isOpen = false;
-    string timestampLevelPattern = @"\[(\d{2}:\d{2}:\d{2})\] (\w+):";
-    private bool loaded = false;
-    private IEnumerable<string> logs = [];
     private string name = string.Empty;
     [Parameter] public string Name { get; set; } = string.Empty;
     private string @namespace = string.Empty;
     [Parameter] public string Namespace { get; set; } = string.Empty;
+    bool isLoading = false;
+    bool isExpanded = false;
+    IEnumerable<string> logs = [];
+    string timestampLevelPattern = @"\[(\d{2}:\d{2}:\d{2})\] (\w+):";
 
     /// <inheritdoc/>
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync().ConfigureAwait(false);
-        Store.Loaded.Subscribe(value => OnStateChanged(_ => loaded = value), token: CancellationTokenSource.Token);
+        Store.IsLoading.Subscribe(value => OnStateChanged(_ => isLoading = value), token: CancellationTokenSource.Token);
+        Store.IsExpanded.Subscribe(value => OnStateChanged(_ => isExpanded = value), token: CancellationTokenSource.Token);
         Store.Name.Subscribe(value => OnStateChanged(_ => name = value), token: CancellationTokenSource.Token);
         Store.Namespace.Subscribe(value => OnStateChanged(_ => @namespace = value), token: CancellationTokenSource.Token);
         Store.Logs.Subscribe(value => OnStateChanged(_ => logs = value), token: CancellationTokenSource.Token);
@@ -83,6 +84,7 @@
     protected override async Task OnParametersSetAsync()
     {
         await base.OnParametersSetAsync();
+        await this.Store.HideAsync();
         if (Name != name)
         {
             Store.SetName(Name);
@@ -90,20 +92,6 @@
         if (Namespace != @namespace)
         {
             Store.SetNamespace(Namespace);
-        }
-        if (collapse != null)
-        {
-            isOpen = false;
-            await collapse.HideAsync();
-        }
-    }
-
-    async Task ToggleAsync()
-    {
-        if (collapse != null)
-        {
-            isOpen = !isOpen;
-            await (isOpen ? collapse.ShowAsync() : collapse.HideAsync());
         }
     }
 }

@@ -28,10 +28,10 @@
     <HorizontalCollapsible class="collapsible-instances">
         <Label>Instances</Label>
         <Content>
-            <WorkflowInstancesList Loading="Loading"
-                                   WorkflowInstances="Resources"
+            <WorkflowInstancesList Loading="@Loading"
+                                   WorkflowInstances="@Resources"
                                    ActiveRow="@instanceName"
-                                   Columns="columns"
+                                   Columns="@columns"
                                    OnSearchInput="OnSearchInput"
                                    OnShowDetails="OnShowInstanceDetails"
                                    OnDelete="OnDeleteWorkflowInstanceAsync" />
@@ -51,7 +51,7 @@
             }
             else
             {
-                <WorkflowDiagram WorkflowDefinition="workflowDefinition" />
+                <WorkflowDiagram WorkflowDefinition="@workflowDefinition" WorkflowInstances="@(workflowInstance != null ? [workflowInstance] : (Resources ?? []))" />
             }
         </Content>
     </HorizontalCollapsible>
