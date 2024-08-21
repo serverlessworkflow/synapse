@@ -15,22 +15,24 @@ Feature: Try Task
       namespace: default
       name: try-catch-404
     do:
-      tryGetPet:
-        try:
-          call: http
-          with:
-            method: get
-            endpoint:
-              uri: https://petstore.swagger.io/v2/pet/getPetByName/{petName}
-        catch:
-          errors:
-            with:
-              type: https://serverlessworkflow.io/dsl/errors/types/communication
-              status: 404
-          as: err
-          do:
-            set:
-              error: ${ $err }
+      - tryGetPet:
+          try:
+            - getPet:
+                call: http
+                with:
+                  method: get
+                  endpoint:
+                    uri: https://petstore.swagger.io/v2/pet/getPetByName/{petName}
+          catch:
+            errors:
+              with:
+                type: https://serverlessworkflow.io/dsl/errors/types/communication
+                status: 404
+            as: err
+            do:
+              - setError:
+                  set:
+                    error: ${ $err }
     """
     And given the workflow input is:
     """yaml
@@ -41,7 +43,7 @@ Feature: Try Task
     And the workflow output should have properties 'error', 'error.type', 'error.status', 'error.title'
     And the workflow output should have a 'error.instance' property with value:
     """yaml
-    /do/tryGetPet/try
+    /do/0/tryGetPet/try/0/getPet
     """
 
   # Tests that try tasks fault when an uncaught error is raised
@@ -56,22 +58,24 @@ Feature: Try Task
       namespace: default
       name: try-catch-503
     do:
-      tryGetPet:
-        try:
-          call: http
-          with:
-            method: get
-            endpoint:
-              uri: https://petstore.swagger.io/v2/pet/getPetByName/{petName}
-        catch:
-          errors:
-            with:
-              type: https://serverlessworkflow.io/dsl/errors/types/communication
-              status: 503
-          as: err
-          do:
-            set:
-              error: ${ $err }
+      - tryGetPet:
+          try:
+            - getPet:
+                call: http
+                with:
+                  method: get
+                  endpoint:
+                    uri: https://petstore.swagger.io/v2/pet/getPetByName/{petName}
+          catch:
+            errors:
+              with:
+                type: https://serverlessworkflow.io/dsl/errors/types/communication
+                status: 503
+            as: err
+            do:
+              - setError:
+                  set:
+                    error: ${ $err }
     """
     And given the workflow input is:
     """yaml

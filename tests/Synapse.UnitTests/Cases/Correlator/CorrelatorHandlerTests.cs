@@ -98,6 +98,13 @@ public class CorrelatorHandlerTests
                 Events = new()
                 {
                     One = eventFilter
+                },
+                Outcome = new()
+                {
+                    Start = new()
+                    {
+                        Workflow = "default.fake-workflow:1.0.0"
+                    }
                 }
             }
         });
@@ -112,11 +119,8 @@ public class CorrelatorHandlerTests
         //assert
         var corel = (await this.Resources.GetAsync<Correlation>(correlation.GetName(), correlation.GetNamespace()))!;
         corel.Status.Should().NotBeNull();
-        corel.Status!.Contexts.Should().HaveCount(1);
-        var context = corel.Status.Contexts.First();
-        context.Keys.Should().ContainKey(correlationKeyName);
-        context.Keys[correlationKeyName].Should().Be(correlationId);
-        context.Events.Should().ContainSingle();
+        corel.Status!.Phase.Should().Be(CorrelationStatusPhase.Completed);
+        corel.Status!.Contexts.Should().HaveCount(0);
     }
 
     [Fact]
@@ -167,6 +171,13 @@ public class CorrelatorHandlerTests
                 Events = new()
                 {
                     One = eventFilter
+                },
+                Outcome = new()
+                {
+                    Start = new()
+                    {
+                        Workflow = "default.fake-workflow:1.0.0"
+                    }
                 }
             }
         });
@@ -181,11 +192,8 @@ public class CorrelatorHandlerTests
         //assert
         var corel = (await this.Resources.GetAsync<Correlation>(correlation.GetName(), correlation.GetNamespace()))!;
         corel.Status.Should().NotBeNull();
-        corel.Status!.Contexts.Should().HaveCount(1);
-        var context = corel.Status.Contexts.First();
-        context.Keys.Should().ContainKey(correlationKeyName);
-        context.Keys[correlationKeyName].Should().Be(correlationId);
-        context.Events.Should().ContainSingle();
+        corel.Status!.Phase.Should().Be(CorrelationStatusPhase.Completed);
+        corel.Status!.Contexts.Should().HaveCount(0);
     }
 
     [Fact]
@@ -301,6 +309,13 @@ public class CorrelatorHandlerTests
                 Events = new()
                 {
                     One = eventFilter
+                },
+                Outcome = new() 
+                { 
+                    Start = new()
+                    {
+                        Workflow = "default.fake-workflow:1.0.0"
+                    }
                 }
             }
         });
@@ -315,11 +330,8 @@ public class CorrelatorHandlerTests
         //assert
         var corel = (await this.Resources.GetAsync<Correlation>(correlation.GetName(), correlation.GetNamespace()))!;
         corel.Status.Should().NotBeNull();
-        corel.Status!.Contexts.Should().HaveCount(1);
-        var context = corel.Status.Contexts.First();
-        context.Keys.Should().ContainKey(correlationKeyName);
-        context.Keys[correlationKeyName].Should().Be(correlationId);
-        context.Events.Should().ContainSingle();
+        corel.Status!.Phase.Should().Be(CorrelationStatusPhase.Completed);
+        corel.Status!.Contexts.Should().HaveCount(0);
     }
 
     [Fact]
@@ -425,10 +437,18 @@ public class CorrelatorHandlerTests
                 Events = new()
                 {
                     All = [eventFilter1, eventFilter2, eventFilter3]
+                },
+                Outcome = new()
+                {
+                    Start = new()
+                    {
+                        Workflow = "default.fake-workflow:1.0.0"
+                    }
                 }
             }
         });
-        await using var correlationMonitor = await this.Resources.MonitorAsync<Correlation>(correlation.GetName(), correlation.GetNamespace(), true);
+        await Task.Delay(250);
+        var correlationMonitor = await this.Resources.MonitorAsync<Correlation>(correlation.GetName(), correlation.GetNamespace(), true);
         var correlator = ActivatorUtilities.CreateInstance<CorrelationHandler>(this.ServiceProvider, [correlationMonitor]);
 
         //act
@@ -443,11 +463,8 @@ public class CorrelatorHandlerTests
         //assert
         var corel = (await this.Resources.GetAsync<Correlation>(correlation.GetName(), correlation.GetNamespace()))!;
         corel.Status.Should().NotBeNull();
-        corel.Status!.Contexts.Should().HaveCount(1);
-        var context = corel.Status.Contexts.First();
-        context.Keys.Should().ContainKey(correlationKeyName);
-        context.Keys[correlationKeyName].Should().Be(correlationId);
-        context.Events.Count.Should().Be(3);
+        corel.Status!.Phase.Should().Be(CorrelationStatusPhase.Completed);
+        corel.Status!.Contexts.Should().HaveCount(0);
     }
 
     public async Task InitializeAsync()
@@ -483,7 +500,7 @@ public class CorrelatorHandlerTests
         services.AddKeyedSingleton("redis", RedisContainerBuilder.Build());
         services.AddSingleton(provider => provider.GetRequiredKeyedService<DotNet.Testcontainers.Containers.IContainer>("redis"));
         services.AddSingleton<IConnectionMultiplexer>(provider => ConnectionMultiplexer.Connect($"localhost:{provider.GetRequiredKeyedService<DotNet.Testcontainers.Containers.IContainer>("redis").GetMappedPublicPort(RedisContainerBuilder.PublicPort)}"));
-        services.AddScoped<Neuroglia.Data.Infrastructure.ResourceOriented.Services.IDatabase, RedisDatabase>();
+        services.AddSingleton<Neuroglia.Data.Infrastructure.ResourceOriented.Services.IDatabase, RedisDatabase>();
         services.AddHostedService<Core.Infrastructure.Services.DatabaseInitializer>();
         services.AddScoped<IResourceRepository, ResourceRepository>();
         services.AddRedisRepository<Document, string>(lifetime: ServiceLifetime.Scoped);

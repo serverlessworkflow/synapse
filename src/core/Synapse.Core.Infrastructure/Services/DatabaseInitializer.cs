@@ -50,6 +50,7 @@ public class DatabaseInitializer(ILoggerFactory loggerFactory, IServiceProvider 
                 }
             }
         }, false, cancellationToken).ConfigureAwait(false);
+        await this.Database.InitializeAsync(cancellationToken);
     }
 
 }

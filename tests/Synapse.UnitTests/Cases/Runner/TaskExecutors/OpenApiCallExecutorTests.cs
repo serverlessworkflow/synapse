@@ -28,7 +28,7 @@ public class OpenApiCallExecutorTests
         var status = "available";
         var parameters = (EquatableDictionary<string, object>)JsonSerializer.Default.Convert(new OpenApiCallDefinition()
         {
-            Document = new() { Uri = new("https://petstore.swagger.io/v2/swagger.json") },
+            Document = new ExternalResourceDefinition() { EndpointUri = new("https://petstore.swagger.io/v2/swagger.json") },
             OperationId = "findPetsByStatus",
             Parameters =
             [

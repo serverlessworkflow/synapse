@@ -31,7 +31,7 @@ internal static class TaskDefinitionFactory
             Schema = new()
             {
                 Format = SchemaFormat.Json,
-                Resource = new() { Uri = new("https://unit.tests.com") }
+                Resource = new ExternalResourceDefinition() { EndpointUri = new("https://unit.tests.com") }
             },
             From = ". + { myProperty: $SCOPE.myProperty }}"
         },

@@ -3,7 +3,7 @@ Feature: Set Task
   I want to ensure that set tasks can be executed within the workflow
   So that my implementation conforms to the expected behavior
 
-  # Tests emit tasks
+  # Tests set tasks
   Scenario: Set Task
     Given a workflow with definition:
     """yaml
@@ -12,11 +12,11 @@ Feature: Set Task
       namespace: default
       name: set
     do:
-      initialize:
-        set:
-          shape: circle
-          size: ${ .configuration.size }
-          fill: ${ .configuration.fill }
+      - setShape:
+          set:
+            shape: circle
+            size: ${ .configuration.size }
+            fill: ${ .configuration.fill }
     """
     And given the workflow input is:
     """yaml

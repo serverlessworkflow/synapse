@@ -71,7 +71,7 @@ public class DoTaskExecutor(IServiceProvider serviceProvider, ILogger<DoTaskExec
         }
         var nextDefinitionIndex = this.Task.Definition.Do.Keys.ToList().IndexOf(nextDefinition.Key);
         var input = last == null ? this.Task.Input : (await this.Task.Workflow.Documents.GetAsync(last.OutputReference!, cancellationToken).ConfigureAwait(false))!;
-        var next = await this.Task.Workflow.CreateTaskAsync(nextDefinition.Value, this.GetPathFor(nextDefinitionIndex, nextDefinition.Key), input, null, this.Task, false, cancellationToken).ConfigureAwait(false);
+        var next = await this.Task.Workflow.CreateTaskAsync(nextDefinition.Value, this.GetPathFor(nextDefinitionIndex, nextDefinition.Key), input, null, this.Task, this.Task.Instance.IsExtension, cancellationToken).ConfigureAwait(false);
         var executor = await this.CreateTaskExecutorAsync(next, nextDefinition.Value, this.Task.ContextData, this.Task.Arguments, cancellationToken).ConfigureAwait(false);
         await executor.ExecuteAsync(cancellationToken).ConfigureAwait(false);
     }
@@ -105,7 +105,7 @@ public class DoTaskExecutor(IServiceProvider serviceProvider, ILogger<DoTaskExec
         this.Executors.Remove(executor);
         if (nextDefinition == null || nextDefinition.Value == null)
         {
-            await this.SetResultAsync(output, last.Next == FlowDirective.End || last.Next == FlowDirective.Exit ? FlowDirective.End : this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
+            await this.SetResultAsync(output, last.Next == FlowDirective.End ? FlowDirective.End : this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
             return;
         }
         var nextDefinitionIndex = this.Task.Definition.Do.Keys.ToList().IndexOf(nextDefinition.Key);

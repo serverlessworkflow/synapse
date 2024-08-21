@@ -28,9 +28,9 @@ public class GrpcCallExecutorTests
         var name = "John Doe";
         var parameters = (EquatableDictionary<string, object>)JsonSerializer.Default.Convert(new GrpcCallDefinition()
         {
-            Proto = new()
+            Proto = new ExternalResourceDefinition()
             {
-                Uri = new("file:///C:/Users/User/source/repos/GrpcTests/ConsoleApp1/greet.proto")
+                EndpointUri = new("file:///C:/Users/User/source/repos/GrpcTests/ConsoleApp1/greet.proto")
             },
             Service = new()
             {

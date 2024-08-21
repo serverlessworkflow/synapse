@@ -143,7 +143,7 @@ public class ForTaskExecutorTests
 
         //assert
         context.Instance.Status.Should().Be(TaskInstanceStatus.Completed);
-        context.Instance.Next.Should().Be(FlowDirective.End);
+        context.Instance.Next.Should().Be(FlowDirective.Continue);
         output.Count.Should().Be(1);
         output["lastIndex"].Deserialize<int>().Should().Be(lastIndex);
     }
@@ -173,7 +173,7 @@ public class ForTaskExecutorTests
                                 new("afterL", new()
                                 {
                                     When = $"$index > {lastIndex}",
-                                    Then = FlowDirective.Exit
+                                    Then = FlowDirective.End
                                 })
                             ]
                         }),

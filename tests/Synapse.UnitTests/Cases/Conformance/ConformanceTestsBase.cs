@@ -14,7 +14,6 @@
 using Docker.DotNet;
 using Gherkin.Ast;
 using Json.Pointer;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Moq;
 using Neuroglia;
@@ -42,9 +41,16 @@ public abstract class ConformanceTestsBase
     : Xunit.Gherkin.Quick.Feature, IAsyncLifetime
 {
 
-    public ConformanceTestsBase() => Services = ConfigureServices(new ServiceCollection()).BuildServiceProvider();
+    public ConformanceTestsBase()
+    {
+        var hostBuilder = new HostApplicationBuilder();
+        ConfigureServices(hostBuilder.Services);
+        this.Host = hostBuilder.Build();
+    }
 
-    protected ServiceProvider Services { get; }
+    protected IHost Host { get; }
+
+    protected IServiceProvider Services => this.Host.Services;
 
     protected IResourceRepository Resources => Services.GetRequiredService<IResourceRepository>();
 
@@ -64,14 +70,15 @@ public abstract class ConformanceTestsBase
 
     protected IWorkflowExecutionContext ExecutionContext { get; set; } = null!;
 
-    public async Task InitializeAsync()
+    public Task InitializeAsync() => this.Host.StartAsync();
+
+    public async Task DisposeAsync()
     {
-        foreach (var service in Services.GetServices<IHostedService>()) await service.StartAsync(default);
+        await this.Host.StopAsync();
+        this.Host.Dispose();
     }
 
-    public async Task DisposeAsync() => await Services.DisposeAsync();
-
-    protected virtual IServiceCollection ConfigureServices(IServiceCollection services)
+    protected virtual void ConfigureServices(IServiceCollection services)
     {
         services.AddLogging();
         services.AddSerialization();
@@ -90,6 +97,8 @@ public abstract class ConformanceTestsBase
         services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<DockerContainerPlatform>());
         services.AddSingleton<IDockerClient>(new DockerClientConfiguration().CreateClient());
         services.AddSingleton<IExternalResourceProvider, ExternalResourceProvider>();
+        services.AddSingleton<ISchemaHandlerProvider, SchemaHandlerProvider>();
+        services.AddSingleton<ISchemaHandler, JsonSchemaHandler>();
         services.AddScoped<IResourceRepository, ResourceRepository>();
         services.AddScoped<IAdmissionControl, AdmissionControl>();
         services.AddScoped<IVersionControl, VersionControl>();
@@ -107,7 +116,7 @@ public abstract class ConformanceTestsBase
         services.AddSingleton<ISynapseApiClient, MockSynapseApiClient>();
         services.AddSingleton(new Mock<IUserInfoProvider>().Object);
         services.AddServerlessWorkflowIO();
-        return services;
+
     }
 
     [Given(@"a workflow with definition:")]

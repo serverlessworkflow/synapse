@@ -28,7 +28,7 @@ public class HttpCallExecutorTests
         var parameters = (EquatableDictionary<string, object>)JsonSerializer.Default.Convert(new HttpCallDefinition()
         {
             Method = "post",
-            Endpoint = new() { Uri = new("https://petstore.swagger.io/v2/pet") },
+            Endpoint = new EndpointDefinition() { Uri = new("https://petstore.swagger.io/v2/pet") },
             Body = new
             {
                 name = "fake-name"
@@ -78,7 +78,7 @@ public class HttpCallExecutorTests
         var parameters = (EquatableDictionary<string, object>)JsonSerializer.Default.Convert(new HttpCallDefinition()
         {
             Method = "get",
-            Endpoint = new()
+            Endpoint = new EndpointDefinition()
             {
                 Uri = new($"https://httpbin.org/basic-auth/{username}/{password}"),
                 Authentication = new()

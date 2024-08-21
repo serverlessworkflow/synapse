@@ -37,11 +37,11 @@ public class ExternalResourceProvider(IServiceProvider serviceProvider, IHttpCli
     {
         ArgumentNullException.ThrowIfNull(workflow);
         ArgumentNullException.ThrowIfNull(resource);
-        return resource.Uri.Scheme switch
+        return resource.EndpointUri.Scheme switch
         {
-            "file" => new FileStream(resource.Uri.LocalPath, FileMode.Open),
+            "file" => new FileStream(resource.EndpointUri.LocalPath, FileMode.Open),
             "http" or "https" => await this.ReadOverHttpAsync(workflow, resource, cancellationToken).ConfigureAwait(false),
-            _ => throw new NotSupportedException($"Cannot retrieve resource at uri '{resource.Uri}': the scheme '{resource.Uri.Scheme}' is not supported")
+            _ => throw new NotSupportedException($"Cannot retrieve resource at uri '{resource.EndpointUri}': the scheme '{resource.EndpointUri.Scheme}' is not supported")
         };
     }
 
@@ -55,8 +55,8 @@ public class ExternalResourceProvider(IServiceProvider serviceProvider, IHttpCli
     protected virtual async Task<Stream> ReadOverHttpAsync(WorkflowDefinition workflow, ExternalResourceDefinition resource, CancellationToken cancellationToken = default)
     {
         using var httpClient = this.HttpClientFactory.CreateClient();
-        await httpClient.ConfigureAuthenticationAsync(resource.Authentication, this.ServiceProvider, cancellationToken).ConfigureAwait(false);
-        return await httpClient.GetStreamAsync(resource.Uri, cancellationToken).ConfigureAwait(false);
+        await httpClient.ConfigureAuthenticationAsync(resource.Endpoint.Authentication, this.ServiceProvider, cancellationToken).ConfigureAwait(false);
+        return await httpClient.GetStreamAsync(resource.EndpointUri, cancellationToken).ConfigureAwait(false);
     }
 
 }

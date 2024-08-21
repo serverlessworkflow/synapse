@@ -130,14 +130,14 @@ public class HttpCallExecutor(IServiceProvider serviceProvider, ILogger<HttpCall
                 }
             }
         }
-        var uri = StringFormatter.NamedFormat(this.Http.Endpoint.Uri.OriginalString, this.Task.Input.ToDictionary());
+        var uri = StringFormatter.NamedFormat(this.Http.EndpointUri.OriginalString, this.Task.Input.ToDictionary());
         if (uri.IsRuntimeExpression()) uri = await this.Task.Workflow.Expressions.EvaluateAsync<string>(uri, this.Task.Input, this.Task.Arguments, cancellationToken).ConfigureAwait(false);
         using var request = new HttpRequestMessage(new HttpMethod(this.Http.Method), uri) { Content = requestContent };
         using var response = await this.HttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode) //todo: could be configurable on HTTP call?
         {
             var detail = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-            this.Logger.LogError("Failed to request '{method} {uri}'. The remote server responded with a non-success status code '{statusCode}'.", this.Http.Method, this.Http.Endpoint.Uri, response.StatusCode);
+            this.Logger.LogError("Failed to request '{method} {uri}'. The remote server responded with a non-success status code '{statusCode}'.", this.Http.Method, uri, response.StatusCode);
             this.Logger.LogDebug("Response content:\r\n{responseContent}", detail ?? "None");
             await this.SetErrorAsync(Error.Communication(this.Task.Instance.Reference, (ushort)response.StatusCode, detail), cancellationToken).ConfigureAwait(false);
             return;

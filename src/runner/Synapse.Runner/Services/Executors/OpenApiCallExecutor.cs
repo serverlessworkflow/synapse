@@ -16,6 +16,7 @@ using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi.Readers;
 using Neuroglia;
 using Neuroglia.Data.Expressions;
+using Neuroglia.Data.Infrastructure.ResourceOriented;
 using System.Net.Mime;
 using System.Text;
 
@@ -108,13 +109,13 @@ public class OpenApiCallExecutor(IServiceProvider serviceProvider, ILogger<OpenA
     {
         this.OpenApi = (OpenApiCallDefinition)this.JsonSerializer.Convert(this.Task.Definition.With, typeof(OpenApiCallDefinition))!;
         using var httpClient = this.HttpClientFactory.CreateClient();
-        await httpClient.ConfigureAuthenticationAsync(this.OpenApi.Document.Authentication, this.ServiceProvider, cancellationToken).ConfigureAwait(false);
-        using var request = new HttpRequestMessage(HttpMethod.Get, this.OpenApi.Document.Uri);
+        await httpClient.ConfigureAuthenticationAsync(this.OpenApi.Document.Endpoint.Authentication, this.ServiceProvider, cancellationToken).ConfigureAwait(false);
+        using var request = new HttpRequestMessage(HttpMethod.Get, this.OpenApi.Document.EndpointUri);
         using var response = await httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode)
         {
             var responseContent = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-            this.Logger.LogInformation("Failed to retrieve the OpenAPI document at location '{uri}'. The remote server responded with a non-success status code '{statusCode}'.", this.OpenApi.Document.Uri, response.StatusCode);
+            this.Logger.LogInformation("Failed to retrieve the OpenAPI document at location '{uri}'. The remote server responded with a non-success status code '{statusCode}'.", this.OpenApi.Document.EndpointUri, response.StatusCode);
             this.Logger.LogDebug("Response content:\r\n{responseContent}", responseContent ?? "None");
             response.EnsureSuccessStatusCode();
         }
@@ -123,11 +124,11 @@ public class OpenApiCallExecutor(IServiceProvider serviceProvider, ILogger<OpenA
         var operation = this.Document.Paths
             .SelectMany(p => p.Value.Operations)
             .FirstOrDefault(o => o.Value.OperationId == this.OpenApi.OperationId);
-        if (operation.Value == null) throw new NullReferenceException($"Failed to find an operation with id '{this.OpenApi.OperationId}' in OpenAPI document at '{this.OpenApi.Document.Uri}'");
+        if (operation.Value == null) throw new NullReferenceException($"Failed to find an operation with id '{this.OpenApi.OperationId}' in OpenAPI document at '{this.OpenApi.Document.EndpointUri}'");
         this.HttpMethod = operation.Key.ToHttpMethod();
         this.Operation = operation.Value;
         this.Servers = this.Document.Servers.Select(s => s.Url).ToList();
-        if (this.Servers.Count == 0) this.Servers.Add(this.OpenApi.Document.Uri.ToString().Replace(this.OpenApi.Document.Uri.PathAndQuery, string.Empty));
+        if (this.Servers.Count == 0) this.Servers.Add(this.OpenApi.Document.EndpointUri.OriginalString.Replace(this.OpenApi.Document.EndpointUri.PathAndQuery, string.Empty));
         var path = this.Document.Paths.Single(p => p.Value.Operations.Any(o => o.Value.OperationId == operation.Value.OperationId));
         this.Path = path.Key;
         await this.BuildParametersAsync(cancellationToken).ConfigureAwait(false);
