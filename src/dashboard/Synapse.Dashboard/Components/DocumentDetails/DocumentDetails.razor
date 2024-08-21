@@ -18,58 +18,65 @@
 @using Synapse.Dashboard.Components.DocumentDetailsStateManagement
 @inherits StatefulComponent<DocumentDetails, DocumentDetailsStore, DocumentDetailsState>
 
-<div class="d-flex justify-content-between cursor-pointer @ClassNames" @onclick="async (_) => await ToggleAsync()">
+<div class="d-flex justify-content-between cursor-pointer @ClassNames" @onclick="async (_) => await Store.ToggleAsync()">
     @if (LabelTemplate != null) {
         @LabelTemplate
     }
     else {
         <span class="label">@Label</span>
     }
-    @if (collapse != null)
+    @if (Store.Collapse != null)
     {
-        <Icon Name="@(isOpen ? IconName.CaretUp : IconName.CaretDown)" />
+        <Icon Name="@(isExpanded ? IconName.CaretUp : IconName.CaretDown)" />
     }
 </div>
-<Collapse @ref="collapse" OnShowing="Store.LoadReferencedDocumentAsync">
-    @if (reference == null && Document == null)
-    {
-        <p>No document</p>
-    }
-    else if (!loaded)
-    {
-        <Spinner Class="me-3" Color="SpinnerColor.Primary" Size="SpinnerSize.Small" />
-    }
-    else
-    {
-        <div class="d-flex justify-content-end mb-2">
-            <PreferredLanguageSelector PreferedLanguageChange="Store.ToggleTextBasedEditorLanguageAsync" />
-        </div>
-        <StandaloneCodeEditor @ref="Store.TextEditor"
-                                ConstructionOptions="Store.StandaloneEditorConstructionOptions"
-                                OnDidInit="Store.OnTextBasedEditorInitAsync"
-                                CssClass="h-300-px" />
-    }
-    @if (problemDetails != null)
-    {
-        <div class="problems">
-            <Callout Type="CalloutType.Danger" Heading="@problemDetails.Title">
-                @problemDetails.Detail
-            </Callout>
-            @if (problemDetails.Errors != null && problemDetails.Errors.Any())
-            {
-                foreach (KeyValuePair<string, string[]> errorContainer in problemDetails.Errors)
+<Collapse @ref="Store.Collapse" OnShowing="Store.LoadReferencedDocumentAsync">
+    @if (isExpanded)  // prevents early rendering when collapsed
+    { 
+        @if (reference == null && Document == null)
+        {
+            <p>No document</p>
+        }
+        else if (!loaded)
+        {
+            <Spinner Class="me-3" Color="SpinnerColor.Primary" Size="SpinnerSize.Small" />
+        }
+        else
+        {
+            <div class="d-flex justify-content-end mb-2">
+                <PreferredLanguageSelector PreferedLanguageChange="Store.ToggleTextBasedEditorLanguageAsync" />
+            </div>
+            <StandaloneCodeEditor @ref="Store.TextEditor"
+                                    ConstructionOptions="Store.StandaloneEditorConstructionOptions"
+                                    OnDidInit="Store.OnTextBasedEditorInitAsync"
+                                    CssClass="h-300-px" />
+        }
+        @if (problemDetails != null)
+        {
+            <div class="problems">
+                <Callout Type="CalloutType.Danger" Heading="@problemDetails.Title">
+                    @problemDetails.Detail
+                </Callout>
+                @if (problemDetails.Errors != null && problemDetails.Errors.Any())
                 {
-                    <Callout Type="CalloutType.Danger" Heading="@errorContainer.Key">
-                        <ul>
-                            @foreach (string error in errorContainer.Value)
-                            {
-                                <li>@error</li>
-                            }
-                        </ul>
-                    </Callout>
+                    foreach (KeyValuePair<string, string[]> errorContainer in problemDetails.Errors)
+                    {
+                        <Callout Type="CalloutType.Danger" Heading="@errorContainer.Key">
+                            <ul>
+                                @foreach (string error in errorContainer.Value)
+                                {
+                                    <li>@error</li>
+                                }
+                            </ul>
+                        </Callout>
+                    }
                 }
-            }
-        </div>
+            </div>
+        }
+    }
+    else // mocks some content to enable opening animation
+    {
+        <div class="h-300-px"></div>
     }
 </Collapse>
 @code {
@@ -94,27 +101,23 @@
     [Parameter] public object? Document { get; set; }
 
     /// <summary>
-    /// The <see cref="Collapse" /> reference
-    /// </summary>
-    private Collapse collapse = default!;
-    /// <summary>
     /// The state of the <see cref="Collapse" />
     /// </summary>
-    private bool isOpen = false;
+    bool isExpanded = false;
     /// <summary>
     /// The internal reference
     /// </summary>
-    private string? reference;
+    string? reference;
     /// <summary>
     /// The internal boolean indicating if the resource already loaded
     /// </summary>
-    private bool loaded = false;
+    bool loaded = false;
     /// <summary>
     /// The <see cref="ProblemDetails"/> that occurred when trying to save the resource, if any
     /// </summary>
-    private ProblemDetails? problemDetails = null;
+    ProblemDetails? problemDetails = null;
 
-    private object? _documentShadow;
+    object? __documentShadow;
 
     /// <inheritdoc/>
     protected override async Task OnInitializedAsync()
@@ -122,6 +125,7 @@
         await base.OnInitializedAsync().ConfigureAwait(false);
         Store.Reference.Subscribe(value => OnStateChanged(_ => reference = value), token: CancellationTokenSource.Token);
         Store.Loaded.Subscribe(value => OnStateChanged(_ => loaded = value), token: CancellationTokenSource.Token);
+        Store.IsExpanded.Subscribe(value => OnStateChanged(_ => isExpanded = value), token: CancellationTokenSource.Token);
         Store.ProblemDetails.Subscribe(value => OnStateChanged(c_mp => problemDetails = value), token: CancellationTokenSource.Token);
     }
 
@@ -129,28 +133,15 @@
     protected override async Task OnParametersSetAsync()
     {
         await base.OnParametersSetAsync();
-        if (Document != _documentShadow)
+        await this.Store.HideAsync();
+        if (Document != __documentShadow)
         {
             Store.SetDocument(Document);
-            _documentShadow = Document;
+            __documentShadow = Document;
         }
         if (reference != Reference)
         {
             Store.SetReference(Reference);
-        }
-        if (collapse != null)
-        {
-            isOpen = false;
-            await collapse.HideAsync();
-        }
-    }
-
-    async Task ToggleAsync()
-    {
-        if (collapse != null)
-        {
-            isOpen = !isOpen;
-            await (isOpen ? collapse.ShowAsync() : collapse.HideAsync());
         }
     }
 }

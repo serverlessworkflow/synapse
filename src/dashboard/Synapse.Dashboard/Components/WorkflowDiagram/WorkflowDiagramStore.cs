@@ -91,50 +91,28 @@ public class WorkflowDiagramStore(
         (graph, instances) =>
         {
             var tasks = instances.SelectMany(instance => instance.Status?.Tasks ?? []);
-            //var allNodes =  ((IReadOnlyDictionary<string, IWorkflowNodeViewModel>)graph.AllNodes).Concat((IReadOnlyDictionary<string, IWorkflowNodeViewModel>)graph.AllClusters);
-            foreach (var kvp in graph.AllNodes)
+            var allNodes =  graph.AllNodes.Values.Concat(graph.AllClusters.Values);
+            foreach (var node in allNodes)
             {
                 int activeCount, faultedCount;
-                if (kvp.Key == "start-node")
+                if (node.Id == "start-node")
                 {
                     activeCount = instances.Count(instance => instance.Status == null || instance.Status?.Phase == WorkflowInstanceStatusPhase.Pending || instance.Status?.Phase == WorkflowInstanceStatusPhase.Waiting);
                     faultedCount = instances.Count(instance => (instance.Status?.Tasks == null || instance.Status.Tasks.Count == 0) && (instance.Status?.Phase == WorkflowInstanceStatusPhase.Cancelled || instance.Status?.Phase == WorkflowInstanceStatusPhase.Faulted));
                 }
-                else if (kvp.Key == "end-node")
+                else if (node.Id == "end-node")
                 {
                     activeCount = instances.Count(instance => instance.Status?.Phase == WorkflowInstanceStatusPhase.Completed);
                     faultedCount = instances.Count(instance => instance.Status?.Tasks?.Count > 0 && (instance.Status?.Phase == WorkflowInstanceStatusPhase.Cancelled || instance.Status?.Phase == WorkflowInstanceStatusPhase.Faulted));
                 }
                 else
                 {
-                    var nodeTasks = tasks.Where(task => Regex.Replace(task.Reference.ToString(), @"/for/\d*", "") == kvp.Key);
+                    var nodeTasks = tasks.Where(task => Regex.Replace(task.Reference.ToString(), @"/for/\d*", "") == node.Id);
                     activeCount = nodeTasks.Count(task => task.Status == TaskInstanceStatus.Running);
                     faultedCount = nodeTasks.Count(task => task.Status == TaskInstanceStatus.Faulted || task.Status == TaskInstanceStatus.Cancelled);
                 }
-                ((IWorkflowNodeViewModel)kvp.Value).OperativeInstancesCount = activeCount;
-                ((IWorkflowNodeViewModel)kvp.Value).FaultedInstancesCount = faultedCount;
-            }
-            foreach (var kvp in graph.AllClusters)
-            {
-                int activeCount, faultedCount;
-                if (kvp.Key == "start-node")
-                {
-                    activeCount = instances.Count(instance => instance.Status?.Phase == WorkflowInstanceStatusPhase.Pending || instance.Status?.Phase == WorkflowInstanceStatusPhase.Waiting);
-                    faultedCount = instances.Count(instance => (instance.Status?.Tasks == null || instance.Status.Tasks.Count == 0) && (instance.Status?.Phase == WorkflowInstanceStatusPhase.Cancelled || instance.Status?.Phase == WorkflowInstanceStatusPhase.Faulted));
-                }
-                else if (kvp.Key == "end-node")
-                {
-                    activeCount = instances.Count(instance => instance.Status?.Phase == WorkflowInstanceStatusPhase.Completed);
-                    faultedCount = instances.Count(instance => instance.Status?.Tasks?.Count > 0 && (instance.Status?.Phase == WorkflowInstanceStatusPhase.Cancelled || instance.Status?.Phase == WorkflowInstanceStatusPhase.Faulted));
-                }
-                else
-                {
-                    var nodeTasks = tasks.Where(task => Regex.Replace(task.Reference.ToString(), @"/for/\d*", "") == kvp.Key);
-                    activeCount = nodeTasks.Count(task => task.Status == TaskInstanceStatus.Running);
-                    faultedCount = nodeTasks.Count(task => task.Status == TaskInstanceStatus.Faulted || task.Status == TaskInstanceStatus.Cancelled);
-                }
-                ((IWorkflowNodeViewModel)kvp.Value).OperativeInstancesCount = activeCount;
-                ((IWorkflowNodeViewModel)kvp.Value).FaultedInstancesCount = faultedCount;
+                ((IWorkflowNodeViewModel)node).OperativeInstancesCount = activeCount;
+                ((IWorkflowNodeViewModel)node).FaultedInstancesCount = faultedCount;
             }
             return graph;
         });

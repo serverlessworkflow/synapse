@@ -40,6 +40,11 @@ public record DocumentDetailsState
     public bool Loaded { get; set; } = false;
 
     /// <summary>
+    /// Gets/sets a boolean indicating if the logs panel is expanded
+    /// </summary>
+    public bool IsExpanded { get; set; } = false;
+
+    /// <summary>
     /// Gets/sets the <see cref="ProblemDetails"/> type that occurred when trying to save the resource, if any
     /// </summary>
     public Uri? ProblemType { get; set; } = null;

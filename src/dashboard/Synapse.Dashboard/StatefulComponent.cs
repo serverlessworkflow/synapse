@@ -64,7 +64,17 @@ public abstract class StatefulComponent<TComponent, TStore, TState>
     protected void OnStateChanged(Action<TComponent> patch)
     {
         patch((TComponent)this);
+        this.shouldRender = true;
         this.StateHasChanged();
+    }
+
+    bool shouldRender = true;
+    /// <inheritdoc/>
+    protected override bool ShouldRender()
+    {
+        if (!this.shouldRender) return false;
+        this.shouldRender = false;
+        return true;
     }
 
     private bool _Disposed;

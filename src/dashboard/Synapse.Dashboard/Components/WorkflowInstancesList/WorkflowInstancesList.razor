@@ -49,11 +49,11 @@
     <table class="table table-hover">
         <thead>
             <tr>
-                @foreach (var column in columns)
+                @foreach (var column in knownColumns)
                 {
                     if ((Columns.Count() == 0 && column != "Delete") || Columns.Contains(column))
                     {
-                        <th class="sticky-header text-@GetColumnAlignment(column)">@(column != "Action" ? column : "")</th>
+                        <th class="sticky-header text-@GetColumnAlignment(column)">@(column != "Action" && column != "Delete" ? column : "")</th>
                     }
                 }
             </tr>
@@ -63,7 +63,7 @@
             {
                 <Virtualize Context="instance" Items="@WorkflowInstances.ToList()">
                     <tr @onclick="async _ => await OnShowClickedAsync(instance)" class="cursor-pointer @(ActiveRow == instance.GetName() ? "table-active" : "")">
-                        @foreach (var column in columns)
+                        @foreach (var column in knownColumns)
                         {
                             if ((Columns.Count() == 0 && column != "Delete") || Columns.Contains(column))
                             {
@@ -131,14 +131,23 @@
 
 @code {
 
-    protected string? ClassNames => Class;
+    protected string? ClassNames => cssClass;
+
+    string? cssClass;
     [Parameter] public string? Class { get; set; }
+    RenderFragment? title;
     [Parameter] public RenderFragment? Title { get; set; }
+    bool loading = true;
     [Parameter] public bool Loading { get; set; } = true;
+    IEnumerable<string> columns = [];
     [Parameter] public IEnumerable<string> Columns { get; set; } = [];
+    IEnumerable<WorkflowInstance>? workflowInstances;
     [Parameter] public IEnumerable<WorkflowInstance>? WorkflowInstances { get; set; }
+    IEnumerable<Workflow>? workflows { get; set; }
     [Parameter] public IEnumerable<Workflow>? Workflows { get; set; }
+    IEnumerable<Namespace>? namespaces { get; set; }
     [Parameter] public IEnumerable<Namespace>? Namespaces { get; set; }
+    string? activeRow { get; set; }
     [Parameter] public string? ActiveRow { get; set; }
 
     [Parameter] public EventCallback<ChangeEventArgs> OnWorkflowChanged { get; set; }
@@ -147,19 +156,73 @@
     [Parameter] public EventCallback<WorkflowInstance> OnShowDetails { get; set; }
     [Parameter] public EventCallback<WorkflowInstance> OnDelete { get; set; }
 
-    IEnumerable<string> columns = [
+    IEnumerable<string> knownColumns = [
         "Name",
-        "Namespace",
-        "Definition",
-        "Status",
-        "Creation Time",
-        "Start Time",
-        "End Time",
-        "Duration",
-        "Operator",
-        "Actions",
-        "Delete"
+    "Namespace",
+    "Definition",
+    "Status",
+    "Creation Time",
+    "Start Time",
+    "End Time",
+    "Duration",
+    "Operator",
+    "Actions",
+    "Delete"
     ];
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        if (cssClass != Class)
+        {
+            cssClass = Class;
+            shouldRender = true;
+        }
+        if (title != Title)
+        {
+            title = Title;
+            shouldRender = true;
+        }
+        if (loading != Loading)
+        {
+            loading = Loading;
+            shouldRender = true;
+        }
+        if (columns != Columns)
+        {
+            columns = Columns;
+            shouldRender = true;
+        }
+        if (workflowInstances != WorkflowInstances)
+        {
+            workflowInstances = WorkflowInstances;
+            shouldRender = true;
+        }
+        if (workflows != Workflows)
+        {
+            workflows = Workflows;
+            shouldRender = true;
+        }
+        if (namespaces != Namespaces)
+        {
+            namespaces = Namespaces;
+            shouldRender = true;
+        }
+        if (activeRow != ActiveRow)
+        {
+            activeRow = ActiveRow;
+            await Task.Delay(1);
+            shouldRender = true;
+        }
+    }
+
+    bool shouldRender = true;
+    protected override bool ShouldRender()
+    {
+        if (!shouldRender) return false;
+        shouldRender = false;
+        return true;
+    }
 
     /// <summary>
     /// Gets the text alignment of the provided column

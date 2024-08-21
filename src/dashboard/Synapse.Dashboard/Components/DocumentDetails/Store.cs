@@ -12,6 +12,7 @@
 // limitations under the License.
 
 using Synapse.Api.Client.Services;
+using Synapse.Dashboard.Components.WorkflowInstanceLogsStateManagement;
 
 namespace Synapse.Dashboard.Components.DocumentDetailsStateManagement;
 
@@ -70,6 +71,11 @@ public class DocumentDetailsStore(
     /// </summary>
     public StandaloneCodeEditor? TextEditor { get; set; }
 
+    /// <summary>
+    /// Gets/sets the logs <see cref="Collapse"/> panel
+    /// </summary>
+    public Collapse? Collapse { get; set; }
+
     #region Selectors
     /// <summary>
     /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="DocumentDetailsState.Label"/> changes
@@ -90,6 +96,11 @@ public class DocumentDetailsStore(
     /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="DocumentDetailsState.Loaded"/> changes
     /// </summary>
     public IObservable<bool> Loaded => this.Select(state => state.Loaded).DistinctUntilChanged();
+
+    /// <summary>
+    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="WorkflowInstanceLogsState.IsExpanded"/> changes
+    /// </summary>
+    public IObservable<bool> IsExpanded => this.Select(state => state.IsExpanded).DistinctUntilChanged();
 
     /// <summary>
     /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="DocumentDetailsState.ProblemType"/> changes
@@ -188,6 +199,37 @@ public class DocumentDetailsStore(
     #endregion
 
     #region Actions
+    /// <summary>
+    /// Toggles the <see cref="Collapse"/> panel
+    /// </summary>
+    public async Task ToggleAsync()
+    {
+        if (this.Collapse != null)
+        {
+            var isExpanded = !this.Get(state => state.IsExpanded);
+            await (isExpanded ? this.Collapse.ShowAsync() : this.Collapse.HideAsync());
+            this.Reduce(state => state with
+            {
+                IsExpanded = isExpanded
+            });
+        }
+    }
+
+    /// <summary>
+    /// Toggles the <see cref="Collapse"/> panel
+    /// </summary>
+    public async Task HideAsync()
+    {
+        if (this.Collapse != null)
+        {
+            await this.Collapse.HideAsync();
+            this.Reduce(state => state with
+            {
+                IsExpanded = false
+            });
+        }
+    }
+
     /// <summary>
     /// Loads the referenced documents
     /// </summary>

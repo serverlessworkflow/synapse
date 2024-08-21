@@ -96,7 +96,7 @@
     protected override void OnParametersSet()
     {
         double divider = this.Node.Shape == NodeShape.Circle || this.Node.Shape == NodeShape.Ellipse ? 1 : 2;
-        double offset = radius * 4;
+        double offset = radius * 2;
         double activeOffset = 0;
         double compensatedOffset = 0;
         double faultedOffset = 0;

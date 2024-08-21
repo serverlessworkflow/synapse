@@ -86,9 +86,9 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var task in workflowInstance.Status.Tasks)
+                    @foreach (var task in workflowInstance.Status.Tasks.Where(task => string.IsNullOrWhiteSpace(task.ParentId)) )
                     {
-                        <TaskInstanceRow TaskInstance="@task" />
+                        <TaskInstanceRow TaskInstance="@task" Tasks="@workflowInstance.Status.Tasks" />
                     }
                 </tbody>
             </table>
@@ -190,10 +190,18 @@
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
-        // if (WorkflowInstance?.GetName() != workflowInstance?.GetName())
-        // {
-        //     workflowInstance = WorkflowInstance;
-        // }
-        workflowInstance = WorkflowInstance;
+        if (workflowInstance != WorkflowInstance)
+        {
+            workflowInstance = WorkflowInstance;
+            shouldRender = true;
+        }
+    }
+
+    bool shouldRender = true;
+    protected override bool ShouldRender()
+    {
+        if (!shouldRender) return false;
+        shouldRender = false;
+        return true;
     }
 }

@@ -38,7 +38,7 @@
         <tr>
             <td colspan="999">
                 <Collapse @ref="collapse">
-                    <TaskInstanceDetails TaskInstance="TaskInstance" />
+                    <TaskInstanceDetails TaskInstance="@TaskInstance" Tasks="@Tasks" />
                 </Collapse>
             </td>
         </tr>
@@ -47,6 +47,7 @@
 
 @code {
     [Parameter] public TaskInstance? TaskInstance { get; set; }
+    [Parameter] public IEnumerable<TaskInstance>? Tasks { get; set; }
     bool isOpen = false;
     Collapse? collapse;
 
