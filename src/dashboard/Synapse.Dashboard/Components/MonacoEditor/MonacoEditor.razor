@@ -48,12 +48,20 @@
     /// The <see cref="EventCallback"/>see called when the text changes
     /// </summary>
     [Parameter] public EventCallback<string> OnTextChanged { get; set; }
+    /// <summary>
+    /// The document's model name, if any
+    /// </summary>
+    [Parameter] public string ModelName { get; set; } = string.Empty;
 
     /// <inheritdoc/>
     protected override async Task OnParametersSetAsync()
     {
         await base.OnParametersSetAsync();
         Store.SetIsReadOnly(IsReadOnly);
+        if (!string.IsNullOrWhiteSpace(ModelName))
+        {
+            Store.SetTexModelName(ModelName);
+        }
         if (Document !=  null)
         {
             Store.SetDocument(Document);

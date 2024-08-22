@@ -1,4 +1,4 @@
-﻿@page "/operators"
+﻿@page "/operators/{namespace?}/{name?}"
 @attribute [Authorize]
 @namespace Synapse.Dashboard.Pages.Operators.List
 @inherits NamespacedResourceManagementComponent<Operator>
@@ -21,7 +21,7 @@
                 {
                     foreach (var namespaceResource in Namespaces)
                     {
-                        <option value="@namespaceResource.GetName()">@namespaceResource.GetName()</option>
+                        <option value="@namespaceResource.GetName()" selected="@(@namespaceResource.GetName() == Namespace)">@namespaceResource.GetName()</option>
                     }
                 }
             </select>
@@ -71,7 +71,7 @@
 
 @code {
     /// <inheritdoc/>
-    protected override void OnInitialized()
+    protected override void OnInitialized() 
     {
         base.OnInitialized();
         BreadcrumbManager.Use(Breadcrumbs.Operators);

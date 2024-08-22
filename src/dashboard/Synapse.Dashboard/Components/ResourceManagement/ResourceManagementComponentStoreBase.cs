@@ -82,6 +82,21 @@ public abstract class ResourceManagementComponentStoreBase<TState, TResource>(IS
         .DistinctUntilChanged();
 
     /// <summary>
+    /// Gets an <see cref="IObservable{T}"/> used to observe the <see cref="ResourceManagementComponentState{TResource}.ActiveResourceName"/> changes
+    /// </summary>
+    public virtual IObservable<string> ActiveResourceName => this.Select(state => state.ActiveResourceName).DistinctUntilChanged();
+
+    /// <summary>
+    /// Gets an <see cref="IObservable{T}"/> used to observe the active resource changes
+    /// </summary>
+    public virtual IObservable<TResource?> ActiveResource => Observable.CombineLatest(
+        this.Resources.Where(resources => resources != null),
+        this.ActiveResourceName.Where(name => !string.IsNullOrWhiteSpace(name)),
+        (resources, name) => resources!.FirstOrDefault(r => r.GetName() == name)
+    )
+        .DistinctUntilChanged();
+
+    /// <summary>
     /// Gets the service used to interact with the Synapse API
     /// </summary>
     protected ISynapseApiClient ApiClient { get; } = apiClient;
@@ -127,7 +142,7 @@ public abstract class ResourceManagementComponentStoreBase<TState, TResource>(IS
     /// Sets the <see cref="ResourceManagementComponentState{TResource}.SearchTerm" />
     /// </summary>
     /// <param name="searchTerm">The new search term</param>
-    public void SetSearchTerm(string? searchTerm)
+    public virtual void SetSearchTerm(string? searchTerm)
     {
         this.Reduce(state => state with
         {
@@ -136,10 +151,22 @@ public abstract class ResourceManagementComponentStoreBase<TState, TResource>(IS
     }
 
     /// <summary>
+    /// Sets the <see cref="ResourceManagementComponentState{TResource}.ActiveResourceName" />
+    /// </summary>
+    /// <param name="activeResourceName">The new value</param>
+    public virtual void SetActiveResourceName(string activeResourceName)
+    {
+        this.Reduce(state => state with
+        {
+            ActiveResourceName = activeResourceName ?? string.Empty
+        });
+    }
+
+    /// <summary>
     /// Sets the <see cref="ResourceManagementComponentState{TResource}.LabelSelectors" />
     /// </summary>
     /// <param name="labelSelectors">The new label selectors</param>
-    public void SetLabelSelectors(EquatableList<LabelSelector>? labelSelectors)
+    public virtual void SetLabelSelectors(EquatableList<LabelSelector>? labelSelectors)
     {
         this.Reduce(state => state with
         {
@@ -151,7 +178,7 @@ public abstract class ResourceManagementComponentStoreBase<TState, TResource>(IS
     /// Adds a single <see cref="LabelSelector" />
     /// </summary>
     /// <param name="labelSelector">The label selector to add</param>
-    public void AddLabelSelector(LabelSelector labelSelector)
+    public virtual void AddLabelSelector(LabelSelector labelSelector)
     {
         if (labelSelector == null)
         {

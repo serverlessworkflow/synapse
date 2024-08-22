@@ -34,7 +34,7 @@ public class MonacoEditorStore(
 {
     
     private TextModel? _textModel = null;
-    private readonly string _textModelUri = monacoEditorHelper.GetResourceUri();
+    private string _textModelUri = monacoEditorHelper.GetResourceUri();
 
     /// <summary>
     /// Gets the service used to interact with the Synapse API
@@ -169,6 +169,22 @@ public class MonacoEditorStore(
         {
             DocumentText = documentText
         });
+    }
+    /// <summary>
+    /// Sets the state's <see cref="MonacoEditorState.ModelName"/>
+    /// </summary>
+    /// <param name="modelName">The new value</param>
+    public void SetTexModelName(string modelName)
+    {
+        var current = this.Get(state => state.ModelName);
+        if (current != modelName)
+        {
+            this.Reduce(state => state with
+            {
+                ModelName = modelName
+            });
+            this._textModelUri = !string.IsNullOrEmpty(modelName) ? monacoEditorHelper.GetResourceUri(modelName) : monacoEditorHelper.GetResourceUri();
+        }
     }
     #endregion
 

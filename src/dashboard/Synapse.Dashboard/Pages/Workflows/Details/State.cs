@@ -28,11 +28,6 @@ public record WorkflowDetailsState
     public Workflow? Workflow { get; set; }
 
     /// <summary>
-    /// Gets/sets the displayed <see cref="Workflow"/>'s <see cref="WorkflowDefinition"/> name
-    /// </summary>
-    public string? WorkflowDefinitionName { get; set; }
-
-    /// <summary>
     /// Gets/sets the displayed <see cref="Workflow"/>'s <see cref="WorkflowDefinition"/> version
     /// </summary>
     public string? WorkflowDefinitionVersion { get; set; }

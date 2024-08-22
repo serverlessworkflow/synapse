@@ -18,7 +18,6 @@ using ServerlessWorkflow.Sdk.Models;
 using ServerlessWorkflow.Sdk.Models.Calls;
 using ServerlessWorkflow.Sdk.Models.Tasks;
 using System.Diagnostics;
-using System.Xml.Linq;
 
 namespace Synapse.Dashboard.Services;
 

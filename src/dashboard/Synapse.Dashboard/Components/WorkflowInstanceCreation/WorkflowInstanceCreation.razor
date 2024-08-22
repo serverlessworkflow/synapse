@@ -15,8 +15,11 @@
 *@
 
 @namespace Synapse.Dashboard.Components
+@using ServerlessWorkflow.Sdk.Models
+@inject MonacoInterop MonacoInterop
+@inject IJsonSerializer Serializer
 
-<MonacoEditor OnTextChanged="OnTextChanged" />
+<MonacoEditor OnTextChanged="OnTextChanged" ModelName="@modelName" />
 <div class="text-center">
     <Button Outline="true" Color="ButtonColor.Primary" class="m-auto mt-3" @onclick="async (_) => await OnStart()">
         <Icon Name="IconName.Play" />
@@ -25,21 +28,34 @@
 </div>
 
 @code {
-    private string _input = string.Empty;
+    string payload = string.Empty;
+    string modelName = string.Empty;
 
+    [Parameter] public WorkflowDefinition? WorkflowDefinition { get; set; }
     [Parameter] public EventCallback<string> OnCreate { get; set; }
 
     void OnTextChanged(string value)
     {
-        _input = value;
+        payload = value;
     }
 
     async Task OnStart()
     {
         if (OnCreate.HasDelegate)
         {
-            await OnCreate.InvokeAsync(_input);
+            await OnCreate.InvokeAsync(payload);
         }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        if (this.WorkflowDefinition?.Input?.Schema?.Document != null)
+        {
+            modelName = this.WorkflowDefinition.Document.Name + "-" + this.WorkflowDefinition.Document.Version;
+            await this.MonacoInterop.AddValidationSchemaAsync(this.Serializer.SerializeToText(this.WorkflowDefinition.Input.Schema.Document), $"https://synapse.io/schemas/{modelName}.json", $"{modelName}*").ConfigureAwait(false);
+    }
+        
     }
 
 }

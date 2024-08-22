@@ -22,7 +22,7 @@
 @inject IBreadcrumbManager BreadcrumbManager
 @inject NavigationManager NavigationManager
 
-<ApplicationTitle>Workflow @($"{name}.{ns}:{version}")</ApplicationTitle>
+<ApplicationTitle>Workflow @($"{Name}.{Namespace}:{version}")</ApplicationTitle>
 
 <div class="d-flex flex-grow mh-100">
     <HorizontalCollapsible class="collapsible-instances">
@@ -35,7 +35,7 @@
                                    OnSearchInput="OnSearchInput"
                                    OnShowDetails="OnShowInstanceDetails"
                                    OnDelete="OnDeleteWorkflowInstanceAsync" />
-            <Button Outline="true" Color="ButtonColor.Primary" @onclick="async _ => await Store.OnShowCreateInstanceAsync()" class="w-100 mt-3">
+            <Button Outline="true" Color="ButtonColor.Primary" @onclick="async _ => await Store.OnShowCreateInstanceAsync(workflowDefinition)" class="w-100 mt-3">
                 <Icon Name="IconName.Plus"/>
             </Button>
         </Content>
@@ -103,9 +103,6 @@
 
 @code
 {
-
-    string ns = null!;
-    string name = null!;
     string version = null!;
     string? instanceName = null!;
     Workflow workflow = null!;
@@ -120,8 +117,6 @@
     "Delete"
     ];
 
-    [Parameter] public new string? Namespace { get; set; }
-    [Parameter] public string? Name { get; set; }
     [Parameter] public string? Version { get; set; }
     [Parameter] public string? InstanceName { get; set; }
 
@@ -130,8 +125,6 @@
     {
         await base.OnInitializedAsync().ConfigureAwait(false);
         UpdateBreadcrumb();
-        Store.Namespace.Where(value => !string.IsNullOrWhiteSpace(value)).Subscribe(value => OnStateChanged(_ => ns = value!), token: CancellationTokenSource.Token);
-        Store.WorkflowDefinitionName.Where(value => !string.IsNullOrWhiteSpace(value)).Subscribe(value => OnStateChanged(_ => name = value!), token: CancellationTokenSource.Token);
         Store.WorkflowInstanceName.Subscribe(value => OnStateChanged(_ => instanceName = value), token: CancellationTokenSource.Token);
         Store.WorkflowDefinition.Where(value => value != null).Subscribe(value => OnStateChanged(_ => workflowDefinition = value!), token: CancellationTokenSource.Token);
         Store.WorkflowDefinitionVersion.Where(value => !string.IsNullOrWhiteSpace(value)).Subscribe(value =>
@@ -154,14 +147,6 @@
     /// <inheritdoc/>
     protected override void OnParametersSet()
     {
-        if (Namespace != ns)
-        {
-            Store.SetNamespace(Namespace);
-        }
-        if (Name != name)
-        {
-            Store.SetWorkflowDefinitionName(Name);
-        }
         if (Version != version)
         {
             Store.SetWorkflowDefinitionVersion(Version);
@@ -229,7 +214,7 @@
         await this.Store.DeleteWorkflowInstanceAsync(instance);
     }
 
-    void OnCreateWorkflowVersion() => this.NavigationManager.NavigateTo($"/workflows/new/{ns}/{name}");
+    void OnCreateWorkflowVersion() => this.NavigationManager.NavigateTo($"/workflows/new/{Namespace}/{Name}");
 
     void OnShowInstanceDetails(WorkflowInstance instance) => NavigationManager.NavigateTo($"/workflows/details/{Namespace}/{Name}/{version}/{instance.GetName()}");
 

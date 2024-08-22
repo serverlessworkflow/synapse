@@ -27,4 +27,9 @@ public record MonacoEditorState
     /// Gets/sets a boolean indicating the editor is read-only
     /// </summary>
     public bool IsReadOnly { get; set; } = false;
+
+    /// <summary>
+    /// Gets/sets the document's model name, if any
+    /// </summary>
+    public string ModelName { get; set; } = string.Empty;
 }

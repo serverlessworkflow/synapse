@@ -46,4 +46,9 @@ public record ResourceManagementComponentState<TResource>
     /// </summary>
     public bool Loading { get; set; } = false;
 
+    /// <summary>
+    /// Gets/sets the name of the selected resource
+    /// </summary>
+    public string ActiveResourceName { get; set; } = string.Empty;
+
 }

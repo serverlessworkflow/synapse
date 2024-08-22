@@ -29,21 +29,39 @@ public abstract class NamespacedResourceManagementComponent<TComponent, TStore, 
 {
 
     /// <summary>
-    /// Gets the list of available <see cref="Namespace"/>s
+    /// Gets the list of available <see cref="@namespace"/>s
     /// </summary>
     protected EquatableList<Namespace>? Namespaces { get; set; }
 
     /// <summary>
-    /// Gets current namespace
+    /// Gets/sets current namespace
     /// </summary>
-    protected string? Namespace { get; set; }
+    public string? @namespace;
+    /// <summary>
+    /// Gets/sets current namespace
+    /// </summary>
+    [Parameter] public string? Namespace { get; set; }
 
     /// <inheritdoc/>
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        this.Store.Namespace.Subscribe(@namespace => this.OnStateChanged(cmp => cmp.Namespace = @namespace), token: this.CancellationTokenSource.Token);
-        this.Store.Namespaces.Subscribe(namespaces => this.OnStateChanged(cmp => cmp.Namespaces = namespaces), token: this.CancellationTokenSource.Token);
+        this.Store.Namespace.Subscribe(value => this.OnStateChanged(_ =>
+        {
+            this.@namespace = value;
+            if (Namespace != value) this.Namespace = value;
+        }), token: this.CancellationTokenSource.Token);
+        this.Store.Namespaces.Subscribe(value => this.OnStateChanged(_ => Namespaces = value), token: this.CancellationTokenSource.Token);
+    }
+
+    /// <inheritdoc/>
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Namespace != @namespace)
+        {
+            Store.SetNamespace(Namespace);
+        }
+        await base.OnParametersSetAsync();
     }
 
     /// <summary>

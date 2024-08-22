@@ -68,6 +68,6 @@ public interface IMonacoEditorHelper
     /// Generates a unique resource URI for  <see cref="TextModel"/>
     /// </summary>
     /// <returns></returns>
-    string GetResourceUri() { return $"inmemory://random-resource-{GetNextModelIndex()}"; }
+    string GetResourceUri(string resourceType = "unknown") { return $"inmemory://{resourceType}-{GetNextModelIndex()}"; }
 
 }

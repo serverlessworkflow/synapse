@@ -21,7 +21,7 @@
                 {
                     foreach (var namespaceResource in Namespaces)
                     {
-                        <option value="@namespaceResource.GetName()">@namespaceResource.GetName()</option>
+                        <option value="@namespaceResource.GetName()" selected="@(@namespaceResource.GetName() == @namespace)">@namespaceResource.GetName()</option>
                     }
                 }
             </select>

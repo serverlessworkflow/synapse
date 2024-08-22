@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Neuroglia.Collections;
 using Neuroglia.Data.Infrastructure.ResourceOriented;
 using ServerlessWorkflow.Sdk.Models;
 using Synapse.Api.Client.Services;
@@ -83,11 +84,6 @@ public class WorkflowDetailsStore(
     public IObservable<Workflow?> Workflow => this.Select(state => state.Workflow).DistinctUntilChanged();
 
     /// <summary>
-    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="WorkflowDetailsState.WorkflowDefinitionName"/> changes
-    /// </summary>
-    public IObservable<string?> WorkflowDefinitionName => this.Select(state => state.WorkflowDefinitionName).DistinctUntilChanged();
-
-    /// <summary>
     /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="WorkflowDetailsState.WorkflowDefinitionVersion"/> changes
     /// </summary>
     public IObservable<string?> WorkflowDefinitionVersion => this.Select(state => state.WorkflowDefinitionVersion).DistinctUntilChanged();
@@ -149,16 +145,14 @@ public class WorkflowDetailsStore(
     #endregion
 
     #region Setters
-    /// <summary>
-    /// Sets the state's <see cref="WorkflowDetailsState.WorkflowDefinitionName"/>
-    /// </summary>
-    /// <param name="workflowDefinitionName">The new <see cref="WorkflowDetailsState.WorkflowDefinitionName"/> value</param>
-    public void SetWorkflowDefinitionName(string? workflowDefinitionName)
+    /// <inheritdoc/>
+    public override void SetActiveResourceName(string activeResourceName)
     {
+        //base.SetActiveResourceName(activeResourceName);
         this.Reduce(state => state with
         {
-            Workflow = null,
-            WorkflowDefinitionName = workflowDefinitionName
+            ActiveResourceName = activeResourceName,
+            Workflow = null
         });
     }
 
@@ -253,6 +247,7 @@ public class WorkflowDetailsStore(
     /// <returns></returns>
     public async Task OnTextBasedEditorInitAsync()
     {
+        await Task.Delay(1);
         await this.SetTextBasedEditorLanguageAsync();
         await this.SetTextEditorValueAsync();
     }
@@ -275,7 +270,7 @@ public class WorkflowDetailsStore(
                 else
                 {
                     var version = this.Get(state => state.WorkflowDefinitionVersion);
-                    var reference = this.Get(state => state.Namespaces) + "." + this.Get(state => state.WorkflowDefinitionName) + (!string.IsNullOrWhiteSpace(version) ? $":{version}" : "");
+                    var reference = this.Get(state => state.Namespaces) + "." + this.Get(state => state.ActiveResourceName) + (!string.IsNullOrWhiteSpace(version) ? $":{version}" : "");
                     var resourceUri = $"inmemory://{reference.ToLower()}";
                     this._textModel = await Global.CreateModel(this.JSRuntime, "", language, resourceUri);
                 }
@@ -293,12 +288,13 @@ public class WorkflowDetailsStore(
     /// Displays the modal used to provide the new workflow input
     /// </summary>
     /// <returns></returns>
-    public async Task OnShowCreateInstanceAsync()
+    public async Task OnShowCreateInstanceAsync(WorkflowDefinition workflowDefinition)
     {
         if (this.Modal != null)
         {
             var parameters = new Dictionary<string, object>
             {
+                { nameof(WorkflowInstanceCreation.WorkflowDefinition), workflowDefinition },
                 { nameof(WorkflowInstanceCreation.OnCreate), EventCallback.Factory.Create<string>(this, CreateInstanceAsync) }
             };
             await this.Modal.ShowAsync<WorkflowInstanceCreation>(title: "Start a new worklfow", parameters: parameters);
@@ -312,7 +308,7 @@ public class WorkflowDetailsStore(
     /// <returns></returns>
     public async Task CreateInstanceAsync(string input)
     {
-        var workflowName = this.Get(state => state.WorkflowDefinitionName);
+        var workflowName = this.Get(state => state.ActiveResourceName);
         var workflowVersion = this.Get(state => state.WorkflowDefinitionVersion);
         var ns = this.Get(state => state.Namespace);
         if (string.IsNullOrWhiteSpace(workflowName) || string.IsNullOrWhiteSpace(workflowVersion) || string.IsNullOrWhiteSpace(ns))
@@ -383,7 +379,7 @@ public class WorkflowDetailsStore(
         }, cancellationToken: this.CancellationTokenSource.Token);
         Observable.CombineLatest(
             this.Namespace.Where(ns => !string.IsNullOrWhiteSpace(ns)),
-            this.WorkflowDefinitionName.Where(name => !string.IsNullOrWhiteSpace(name)),
+            this.ActiveResourceName.Where(name => !string.IsNullOrWhiteSpace(name)),
             (ns, name) => (ns!, name!)
         ).SubscribeAsync(async ((string ns, string name) workflow) =>
         {

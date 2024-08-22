@@ -77,13 +77,20 @@ public abstract class ResourceManagementComponent<TComponent, TStore, TState, TR
     /// </summary>
     protected bool Loading { get; set; } = false;
 
+    string activeResourcesName = null!;
+    /// <summary>
+    /// Gets/sets the name of the active resource
+    /// </summary>
+    [Parameter] public string? Name { get; set; }
+
     /// <inheritdoc/>
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync().ConfigureAwait(false);
-        this.Store.Resources.Subscribe(resources => this.OnStateChanged(cmp => cmp.Resources = resources), token: this.CancellationTokenSource.Token);
-        this.Store.SearchTerm.Subscribe(searchTerm => this.OnStateChanged(cmp => cmp.SearchTerm = searchTerm), token: this.CancellationTokenSource.Token);
-        this.Store.Loading.Subscribe(loading => this.OnStateChanged(cmp => cmp.Loading = loading), token: this.CancellationTokenSource.Token);
+        this.Store.Resources.Subscribe(value => this.OnStateChanged(_ => this.Resources = value), token: this.CancellationTokenSource.Token);
+        this.Store.ActiveResourceName.Subscribe(value => this.OnStateChanged(_ => this.activeResourcesName = value), token: this.CancellationTokenSource.Token);
+        this.Store.SearchTerm.Subscribe(value => this.OnStateChanged(_ => this.SearchTerm = value), token: this.CancellationTokenSource.Token);
+        this.Store.Loading.Subscribe(value => this.OnStateChanged(_ => this.Loading = value), token: this.CancellationTokenSource.Token);
         this.Store.Definition.SubscribeAsync(async definition =>
         {
             if (this.Definition != definition)
@@ -91,10 +98,28 @@ public abstract class ResourceManagementComponent<TComponent, TStore, TState, TR
                 this.Definition = definition;
                 if (this.Definition != null && this.MonacoInterop != null)
                 {
-                    await this.MonacoInterop.AddValidationSchemaAsync(this.Serializer.SerializeToText(this.Definition.Spec.Versions.First().Schema.OpenAPIV3Schema ?? new JsonSchemaBuilder().Build()), $"https://synapse.io/schemas/{typeof(TResource).Name.ToLower()}.json", $"{typeof(TResource).Name.ToLower()}").ConfigureAwait(false);
+                    await this.MonacoInterop.AddValidationSchemaAsync(this.Serializer.SerializeToText(this.Definition.Spec.Versions.First().Schema.OpenAPIV3Schema ?? new JsonSchemaBuilder().Build()), $"https://synapse.io/schemas/{typeof(TResource).Name.ToLower()}.json", $"{typeof(TResource).Name.ToLower()}*").ConfigureAwait(false);
                 }
             }
         }, cancellationToken: this.CancellationTokenSource.Token);
+        this.Store.ActiveResource.SubscribeAsync(async resource =>
+        {
+            if (resource != null)
+            {
+                await this.OnShowResourceDetailsAsync(resource);
+            }
+        }, cancellationToken: CancellationTokenSource.Token);
+    }
+
+
+    /// <inheritdoc/>
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!string.IsNullOrEmpty(Name) && Name != activeResourcesName)
+        {
+            Store.SetActiveResourceName(Name);
+        }
+        await base.OnParametersSetAsync();
     }
 
     /// <summary>

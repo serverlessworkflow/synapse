@@ -42,7 +42,7 @@ public class CreateWorkflowViewStore(
 {
 
     private TextModel? _textModel = null;
-    private readonly string _textModelUri = monacoEditorHelper.GetResourceUri();
+    private readonly string _textModelUri = monacoEditorHelper.GetResourceUri(typeof(WorkflowDefinition).Name.ToLower());
     private bool _disposed;
 
     /// <summary>
