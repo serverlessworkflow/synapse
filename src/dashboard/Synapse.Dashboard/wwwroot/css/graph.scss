@@ -43,7 +43,7 @@ $viridisScale: // generated with 13 steps, using 12 to exclude the last yellow
     $nodeColors: map-merge($nodeColors, ($name: $color));
 }
 
-.graph-container {
+.graph-container, .graph-canvas {
     --stroke-color: #{$mute};
     --fill-color: #{$dark-bg-subtle-dark};
     display: flex;
