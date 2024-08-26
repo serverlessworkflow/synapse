@@ -16,124 +16,40 @@
 
 @namespace Synapse.Dashboard
 
-<div class="d-flex align-items-center justify-content-center">
-    <svg style="height: @(height * 14)">
-        <g class="node call-task-node legend" transform="translate(0, @(height * 0))">
-            <rect class="node-rectangle" x="0" y="0" width="@width" height="@height"></rect>
-            <foreignObject x="0" y="0" width="@width" height="50">
-                <div>
-                    CALL
-                </div>
-            </foreignObject>
-        </g>
-        <g class="node do-task-node legend" transform="translate(0, @(height * 1))">
-            <rect class="node-rectangle" x="0" y="0" width="@width" height="@height"></rect>
-            <foreignObject x="0" y="0" width="@width" height="50">
-                <div>
-                    DO
-                </div>
-            </foreignObject>
-        </g>
-        <g class="node fork-task-node legend" transform="translate(0, @(height * 2))">
-            <rect class="node-rectangle" x="0" y="0" width="@width" height="@height"></rect>
-            <foreignObject x="0" y="0" width="@width" height="50">
-                <div>
-                    FORK
-                </div>
-            </foreignObject>
-        </g>
-        <g class="node for-task-node legend" transform="translate(0, @(height * 3))">
-            <rect class="node-rectangle" x="0" y="0" width="@width" height="@height"></rect>
-            <foreignObject x="0" y="0" width="@width" height="50">
-                <div>
-                    FOR
-                </div>
-            </foreignObject>
-        </g>
-        <g class="node listen-task-node legend" transform="translate(0, @(height * 4))">
-            <rect class="node-rectangle" x="0" y="0" width="@width" height="@height"></rect>
-            <foreignObject x="0" y="0" width="@width" height="50">
-                <div>
-                    LISTEN
-                </div>
-            </foreignObject>
-        </g>
-        <g class="node run-task-node legend" transform="translate(0, @(height * 5))">
-            <rect class="node-rectangle" x="0" y="0" width="@width" height="@height"></rect>
-            <foreignObject x="0" y="0" width="@width" height="50">
-                <div>
-                    RUN
-                </div>
-            </foreignObject>
-        </g>
-        <g class="node set-task-node legend" transform="translate(0, @(height * 6))">
-            <rect class="node-rectangle" x="0" y="0" width="@width" height="@height"></rect>
-            <foreignObject x="0" y="0" width="@width" height="50">
-                <div>
-                    SET
-                </div>
-            </foreignObject>
-        </g>
-        <g class="node switch-task-node legend" transform="translate(0, @(height * 7))">
-            <rect class="node-rectangle" x="0" y="0" width="@width" height="@height"></rect>
-            <foreignObject x="0" y="0" width="@width" height="50">
-                <div>
-                    SWITCH
-                </div>
-            </foreignObject>
-        </g>
-        <g class="node try-catch-task-node legend" transform="translate(0, @(height * 8))">
-            <rect class="node-rectangle" x="0" y="0" width="@width" height="@height"></rect>
-            <foreignObject x="0" y="0" width="@width" height="50">
-                <div>
-                    TRY..CATCH
-                </div>
-            </foreignObject>
-        </g>
-        <g class="node try-task-node legend" transform="translate(0, @(height * 9))">
-            <rect class="node-rectangle" x="0" y="0" width="@width" height="@height"></rect>
-            <foreignObject x="0" y="0" width="@width" height="50">
-                <div>
-                    TRY
-                </div>
-            </foreignObject>
-        </g>
-        <g class="node emit-task-node legend" transform="translate(0, @(height * 10))">
-            <rect class="node-rectangle" x="0" y="0" width="@width" height="@height"></rect>
-            <foreignObject x="0" y="0" width="@width" height="50">
-                <div>
-                    EMIT
-                </div>
-            </foreignObject>
-        </g>
-        <g class="node wait-task-node legend" transform="translate(0, @(height * 11))">
-            <rect class="node-rectangle" x="0" y="0" width="@width" height="@height"></rect>
-            <foreignObject x="0" y="0" width="@width" height="50">
-                <div>
-                    WAIT
-                </div>
-            </foreignObject>
-        </g>
-        <g class="node catch-task-node legend" transform="translate(0, @(height * 12))">
-            <rect class="node-rectangle" x="0" y="0" width="@width" height="@height"></rect>
-            <foreignObject x="0" y="0" width="@width" height="50">
-                <div>
-                    CATCH
-                </div>
-            </foreignObject>
-        </g>
-        <g class="node raise-task-node legend" transform="translate(0, @(height * 13))">
-            <rect class="node-rectangle" x="0" y="0" width="@width" height="@height"></rect>
-            <foreignObject x="0" y="0" width="@width" height="50">
-                <div>
-                    RAISE
-                </div>
-            </foreignObject>
-        </g>
+<div class="d-flex align-items-center justify-content-center position-absolute" style="bottom: @(height)px; left: @(height)px;">
+    <svg style="height: @(height * nodeTypes.Count())px">
+        @for(int i = 0, c = nodeTypes.Count(); i<c; i++)
+        {
+            var nodeType = nodeTypes.ElementAt(i);
+            <g class="node @(nodeType)-task-node legend" transform="translate(0, @(height * i))">
+                <rect class="node-rectangle" x="0" y="0" width="@width" height="@height"></rect>
+                <foreignObject x="0" y="0" width="@width" height="@height">
+                    <div>
+                        @nodeType.ToUpper().Replace("-", "..")
+                    </div>
+                </foreignObject>
+            </g>
+        }
     </svg>
 </div>
 
 @code {
-    int width = 300;
-    int height = 50;
+    int width = 100;
+    int height = 25;
+    IEnumerable<string> nodeTypes = [
+    "call",
+    "do",
+    "fork",
+    "for",
+    "listen",
+    "run",
+    "set",
+    "switch",
+    "try-catch",
+    "try",
+    "emit",
+    "wait",
+    "catch",
+    "raise"
+    ];
 }

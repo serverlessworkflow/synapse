@@ -245,7 +245,6 @@ public class WorkflowDetailsStore(
     /// <returns></returns>
     public async Task OnTextBasedEditorInitAsync()
     {
-        await Task.Delay(1);
         await this.SetTextBasedEditorLanguageAsync();
         await this.SetTextEditorValueAsync();
     }
@@ -361,20 +360,6 @@ public class WorkflowDetailsStore(
     /// <inheritdoc/>
     public override async Task InitializeAsync()
     {
-        this.WorkflowDefinition.Where(definition => definition != null).SubscribeAsync(async (definition) =>
-        {
-            await Task.Delay(1);
-            var document = this.JsonSerializer.SerializeToText(definition.Clone());
-            this.Reduce(state => state with
-            {
-                WorkflowDefinitionJson = document
-            });
-            await this.SetTextEditorValueAsync();
-            if (this.MonacoEditorHelper.PreferredLanguage != PreferredLanguage.YAML)
-            {
-                await this.MonacoEditorHelper.ChangePreferredLanguageAsync(PreferredLanguage.YAML);
-            }
-        }, cancellationToken: this.CancellationTokenSource.Token);
         Observable.CombineLatest(
             this.Namespace.Where(ns => !string.IsNullOrWhiteSpace(ns)),
             this.ActiveResourceName.Where(name => !string.IsNullOrWhiteSpace(name)),
@@ -390,6 +375,20 @@ public class WorkflowDetailsStore(
             this.RemoveLabelSelector(SynapseDefaults.Resources.Labels.WorkflowVersion);
             this.AddLabelSelector(new(SynapseDefaults.Resources.Labels.WorkflowVersion, LabelSelectionOperator.Equals, version!));
         });
+        this.WorkflowDefinition.Where(definition => definition != null).SubscribeAsync(async (definition) =>
+        {
+            await Task.Delay(1);
+            var document = this.JsonSerializer.SerializeToText(definition.Clone());
+            this.Reduce(state => state with
+            {
+                WorkflowDefinitionJson = document
+            });
+            await this.SetTextEditorValueAsync();
+            if (this.MonacoEditorHelper.PreferredLanguage != PreferredLanguage.YAML)
+            {
+                await this.MonacoEditorHelper.ChangePreferredLanguageAsync(PreferredLanguage.YAML);
+            }
+        }, cancellationToken: this.CancellationTokenSource.Token);
         await base.InitializeAsync();
     }
 

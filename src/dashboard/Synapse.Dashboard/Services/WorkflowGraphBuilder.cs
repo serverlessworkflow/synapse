@@ -57,6 +57,7 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
         Stopwatch sw = Stopwatch.StartNew();
         var isEmpty = workflow.Do.Count < 1;
         var graph = new GraphViewModel();
+        //graph.EnableProfiling = true;
         var startNode = this.BuildStartNode(!isEmpty);
         var endNode = this.BuildEndNode();
         graph.AddNode(startNode);

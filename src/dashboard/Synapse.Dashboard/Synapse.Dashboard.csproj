@@ -38,6 +38,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\framework\src\Neuroglia.Blazor.Dagre\Neuroglia.Blazor.Dagre.csproj" />
     <ProjectReference Include="..\..\api\Synapse.Api.Client.Http\Synapse.Api.Client.Http.csproj" />
     <ProjectReference Include="..\Synapse.Dashboard.StateManagement\Synapse.Dashboard.StateManagement.csproj" />
   </ItemGroup>
