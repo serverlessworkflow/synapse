@@ -16,7 +16,6 @@ using Neuroglia.Blazor.Dagre.Models;
 using ServerlessWorkflow.Sdk.Models;
 using Synapse.Resources;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Synapse.Dashboard.Components.WorkflowDiagramStateManagement;
 

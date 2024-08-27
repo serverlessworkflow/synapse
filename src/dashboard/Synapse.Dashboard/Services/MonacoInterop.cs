@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Data;
 using System.Runtime.CompilerServices;
 
 namespace Synapse.Dashboard.Services;
@@ -29,7 +30,7 @@ public class MonacoInterop(IJSRuntime jsRuntime)
     /// <summary>
     /// A reference to the js interop module
     /// </summary>
-    readonly Lazy<Task<IJSObjectReference>> moduleTask = new(() => jsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/monaco-editor-interop-extension.js").AsTask());
+    readonly Lazy<Task<IJSObjectReference>> moduleTask = new(() => jsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/monaco-editor-interop-extension.js?v=2").AsTask());
 
     /// <summary>
     /// Adds the provided schema to monaco editor's diagnostics options
@@ -42,6 +43,19 @@ public class MonacoInterop(IJSRuntime jsRuntime)
     {
         var module = await moduleTask.Value;
         await module.InvokeVoidAsync("addValidationSchema", schema, schemaUri, schemaType);
+    }
+
+    /// <summary>
+    /// Finds the range in a JSON/YAML text corresponding to a provided JSON Pointer
+    /// </summary>
+    /// <param name="source">The source JSON/YAML text</param>
+    /// <param name="jsonPointer">The JSON pointer to find the range for</param>
+    /// <param name="language">The language of the source, JSON or YAML</param>
+    /// <returns>The corresponding <see cref="BlazorMonaco.Range"/></returns>
+    public async ValueTask<BlazorMonaco.Range> GetJsonPointerRange(string source, string jsonPointer, string language)
+    {
+        var module = await moduleTask.Value;
+        return  await module.InvokeAsync<BlazorMonaco.Range>("getJsonPointerRange", source, jsonPointer, language);
     }
 
     /// <inheritdoc />

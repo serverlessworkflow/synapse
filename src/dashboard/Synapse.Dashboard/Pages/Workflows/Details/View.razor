@@ -51,7 +51,11 @@
             }
             else
             {
-                <WorkflowDiagram WorkflowDefinition="@workflowDefinition" WorkflowInstances="@(workflowInstance != null ? [workflowInstance] : (Resources ?? []))" />
+                <WorkflowDiagram 
+                    WorkflowDefinition="@workflowDefinition" 
+                    WorkflowInstances="@(workflowInstance != null ? [workflowInstance] : (Resources ?? []))"
+                    OnMouseUp="async (e) => await Store.SelectNodeInEditor(e)"
+                />
             }
         </Content>
     </HorizontalCollapsible>
