@@ -314,11 +314,30 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
     protected virtual NodeViewModel BuildForkTaskNode(TaskNodeRenderingContext<ForkTaskDefinition> context)
     {
         ArgumentNullException.ThrowIfNull(context);
-        var node = new ForkTaskNodeViewModel(context.TaskReference, context.TaskName, this.YamlSerializer.SerializeToText(context.TaskDefinition.Fork));
-        if (context.TaskGroup == null) context.Graph.AddNode(node);
-        else context.TaskGroup.AddChild(node);
-        this.BuildEdge(context.Graph, node, this.GetNextNode(context, node));
-        return node;
+        var cluster = new ForkTaskNodeViewModel(context.TaskReference, context.TaskName, this.YamlSerializer.SerializeToText(context.TaskDefinition.Fork));
+        var entryPort = new PortNodeViewModel(context.TaskReference + _portSuffix);
+        var exitPort = new PortNodeViewModel(context.TaskReference + "-exit" + _portSuffix);
+        cluster.AddChild(entryPort);
+        if (context.TaskGroup == null) context.Graph.AddCluster(cluster);
+        else context.TaskGroup.AddChild(cluster);
+        for (int i = 0, c = context.TaskDefinition.Fork.Branches.Count; i<c; i++)
+        {
+            var branch = context.TaskDefinition.Fork.Branches.ElementAt(i);
+            var branchNode = this.BuildTaskNode(new(context.Workflow, context.Graph, i, branch.Key, branch.Value, cluster, context.TaskReference + "/fork/branches", context, context.EndNode, context.PreviousNode));
+            if (branchNode is WorkflowClusterViewModel branchCluster)
+            {
+                this.BuildEdge(context.Graph, entryPort, branchCluster.AllNodes.Values.First());
+                this.BuildEdge(context.Graph, branchCluster.AllNodes.Values.Last(), exitPort);
+            }
+            else
+            {
+                this.BuildEdge(context.Graph, entryPort, branchNode);
+                this.BuildEdge(context.Graph, branchNode, exitPort);
+            }
+        }
+        cluster.AddChild(exitPort);
+        this.BuildEdge(context.Graph, exitPort, this.GetNextNode(context, cluster));
+        return cluster;
     }
 
     /// <summary>
@@ -426,9 +445,8 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
         else context.TaskGroup.AddChild(node);
         foreach (var switchCase in context.TaskDefinition.Switch)
         {
-            var nextTaskNode = this.GetNextNode(context, node, switchCase.Value.Then);
-            this.BuildEdge(context.Graph, node, nextTaskNode, switchCase.Key);
-            //node = nextTaskNode;
+            var switchCaseNode = this.GetNextNode(context, node, switchCase.Value.Then);
+            this.BuildEdge(context.Graph, node, switchCaseNode, switchCase.Key);
         }
         if (!context.TaskDefinition.Switch.Any(switchCase => string.IsNullOrEmpty(switchCase.Value.When)))
         {
