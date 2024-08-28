@@ -163,9 +163,17 @@ public class WorkflowController(IServiceProvider serviceProvider, ILoggerFactory
     {
         await base.OnResourceDeletedAsync(workflow, cancellationToken).ConfigureAwait(false);
         if (this.Schedulers.TryRemove(workflow.GetQualifiedName(), out var scheduler)) await scheduler.DisposeAsync().ConfigureAwait(false);
-        await foreach(var instance in this.Repository.GetAllAsync<WorkflowInstance>(cancellationToken: cancellationToken))
+        var selectors = new LabelSelector[]
+        {
+            new(SynapseDefaults.Resources.Labels.Workflow, LabelSelectionOperator.Equals, workflow.GetQualifiedName())
+        };
+        await foreach(var instance in this.Repository.GetAllAsync<WorkflowInstance>(null, selectors, cancellationToken: cancellationToken))
         {
             await this.Repository.RemoveAsync<WorkflowInstance>(instance.GetName(), instance.GetNamespace(), false, cancellationToken).ConfigureAwait(false);
+        }
+        await foreach (var correlation in this.Repository.GetAllAsync<Correlation>(null, selectors, cancellationToken: cancellationToken))
+        {
+            await this.Repository.RemoveAsync<Correlation>(correlation.GetName(), correlation.GetNamespace(), false, cancellationToken).ConfigureAwait(false);
         }
     }
 

@@ -235,7 +235,11 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
                 Metadata = new()
                 {
                     Namespace = @namespace,
-                    Name = name
+                    Name = name,
+                    Labels = new Dictionary<string, string>()
+                    {
+                        { SynapseDefaults.Resources.Labels.WorkflowInstance, this.Instance.GetQualifiedName() }
+                    }
                 },
                 Spec = new()
                 {

@@ -360,6 +360,11 @@ public static class SynapseDefaults
             /// Gets the label used by Synapse to indicate the version of the workflow used by a workflow instance
             /// </summary>
             public const string WorkflowVersion = Prefix + "workflow/version";
+            /// <summary>
+            /// Gets the label used by Synapse to indicate the qualified name of the workflow instance that owns a concept, such as a correlation
+            /// </summary>
+            public const string WorkflowInstance = Prefix + "workflow-instance";
+
         }
 
     }

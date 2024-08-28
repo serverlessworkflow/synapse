@@ -150,6 +150,14 @@ public class WorkflowInstanceController(IServiceProvider serviceProvider, ILogge
     {
         await base.OnResourceDeletedAsync(workflowInstance, cancellationToken).ConfigureAwait(false);
         if (this.Handlers.TryRemove(workflowInstance.GetQualifiedName(), out var process)) await process.DisposeAsync().ConfigureAwait(false);
+        var selectors = new LabelSelector[]
+        {
+            new(SynapseDefaults.Resources.Labels.WorkflowInstance, LabelSelectionOperator.Equals, workflowInstance.GetQualifiedName())
+        };
+        await foreach (var correlation in this.Repository.GetAllAsync<Correlation>(null, selectors, cancellationToken: cancellationToken))
+        {
+            await this.Repository.RemoveAsync<Correlation>(correlation.GetName(), correlation.GetNamespace(), false, cancellationToken).ConfigureAwait(false);
+        }
     }
 
     /// <summary>

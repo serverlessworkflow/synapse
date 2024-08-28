@@ -78,6 +78,10 @@ public class WorkflowScheduler(ILogger<WorkflowScheduler> logger, IResourceRepos
                 {
                     Namespace = this.Workflow.Resource.GetNamespace(),
                     Name = correlationName,
+                    Labels = new Dictionary<string, string>()
+                    {
+                        { SynapseDefaults.Resources.Labels.Workflow, this.Workflow.Resource.GetQualifiedName() }
+                    }
                 },
                 Spec = new()
                 {
