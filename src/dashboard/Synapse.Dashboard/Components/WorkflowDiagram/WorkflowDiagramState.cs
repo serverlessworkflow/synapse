@@ -35,4 +35,9 @@ public record WorkflowDiagramState
     /// Gets/sets the <see cref="WorkflowInstance"/>s to get the activity counts from
     /// </summary>
     public EquatableList<WorkflowInstance> WorkflowInstances { get; set; } = [];
+
+    /// <summary>
+    /// Gets/sets a boolean indicating if the legend is visible
+    /// </summary>
+    public bool IsLegendVisible { get; set; } = false;
 }

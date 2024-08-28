@@ -16,7 +16,6 @@ using Neuroglia.Blazor.Dagre.Models;
 using ServerlessWorkflow.Sdk.Models;
 using Synapse.Resources;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Synapse.Dashboard.Components.WorkflowDiagramStateManagement;
 
@@ -60,6 +59,11 @@ public class WorkflowDiagramStore(
     /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="WorkflowDiagramState.WorkflowInstances"/> changes
     /// </summary>
     public IObservable<EquatableList<WorkflowInstance>> WorkflowInstances => this.Select(state => state.WorkflowInstances).DistinctUntilChanged();
+
+    /// <summary>
+    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="WorkflowDiagramState.IsLegendVisible"/> changes
+    /// </summary>
+    public IObservable<bool> IsLegendVisible => this.Select(state => state.IsLegendVisible).DistinctUntilChanged();
 
     /// <summary>
     /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="DagreGraphOptions"/> changes
@@ -115,7 +119,8 @@ public class WorkflowDiagramStore(
                 ((IWorkflowNodeViewModel)node).FaultedInstancesCount = faultedCount;
             }
             return graph;
-        });
+        })
+        .DistinctUntilChanged();
     #endregion
 
     #region Setters
@@ -158,15 +163,15 @@ public class WorkflowDiagramStore(
 
     #region Actions
     /// <summary>
-    /// Shows the legend modal
+    /// Toggles the legend visibily
     /// </summary>
-    /// <returns></returns>
-    public async Task ShowLegendAsync()
+    public void ToggleLegendAsync()
     {
-        if (this.LegendModal != null)
+        var isLegendVisible = this.Get(state => state.IsLegendVisible);
+        this.Reduce(state => state with
         {
-            await this.LegendModal.ShowAsync<WorkflowDiagramLegend>(title: "Legend");
-        }
+            IsLegendVisible = !isLegendVisible
+        });
     }
     #endregion
 }

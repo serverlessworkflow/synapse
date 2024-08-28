@@ -20808,19 +20808,19 @@ tr.row-placeholder td::after {
   height: 100px !important;
 }
 
-.graph-container {
+.graph-container, .graph-canvas {
   --stroke-color: #6c757d;
   --fill-color: #1a1d20;
   display: flex;
   flex-direction: column;
 }
-.graph-container .graph-controls {
+.graph-container .graph-controls, .graph-canvas .graph-controls {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
   padding-right: 1rem;
 }
-.graph-container .graph-controls .btn {
+.graph-container .graph-controls .btn, .graph-canvas .graph-controls .btn {
   --bs-btn-color: #6c757d;
   --bs-btn-border-color: #6c757d;
   --bs-btn-hover-color: #fff;
@@ -20839,7 +20839,7 @@ tr.row-placeholder td::after {
   fill: var(--bs-btn-color);
   border: var(--bs-btn-border-width) solid var(--bs-btn-border-color);
 }
-.graph-container .graph-controls .btn:hover {
+.graph-container .graph-controls .btn:hover, .graph-canvas .graph-controls .btn:hover {
   color: var(--bs-btn-hover-color);
   fill: var(--bs-btn-hover-color);
   background-color: var(--bs-btn-hover-bg);

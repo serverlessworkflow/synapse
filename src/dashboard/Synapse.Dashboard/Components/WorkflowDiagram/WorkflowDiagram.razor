@@ -36,16 +36,19 @@
     </svg>
     <DagreGraph @ref="Store.DagreGraph" OnMouseUp="OnMouseUp" Options="options" Graph="graph">
         <ExtraControls>
-            <button class="btn" type="button" title="legend" @onclick="async (_) => await Store.ShowLegendAsync()">
+            <button class="btn" type="button" title="legend" @onclick="Store.ToggleLegendAsync">
                 <svg>
                     <use href="#legend" />
                 </svg>
             </button>
         </ExtraControls>
     </DagreGraph>
-}
 
-<Modal @ref="Store.LegendModal" />
+    @if (isLegendVisible)
+    {
+        <WorkflowDiagramLegend />
+    }
+}
 
 @code {
     [Parameter] public EventCallback<GraphEventArgs<MouseEventArgs>> OnMouseUp { get; set; }
@@ -58,6 +61,7 @@
 
     IGraphViewModel? graph;
     IDagreGraphOptions? options = null;
+    bool isLegendVisible = false;
     bool isDirty = true; // moving isDirty to the State/Store seems to have unwanted behavior, the `ShouldRender` method doesn't seem to behave properly.
 
     /// <inheritdoc/>
@@ -67,18 +71,25 @@
         Store.WorkflowDefinition.Subscribe(value => OnStateChanged(_ => workflowDefinition = value), token: CancellationTokenSource.Token);
         Store.WorkflowInstances.Subscribe(value => OnStateChanged(_ => workflowInstances = value), token: CancellationTokenSource.Token);
         Store.Orientation.Subscribe(value => OnStateChanged(_ => orientation = value), token: CancellationTokenSource.Token);
-        Store.Graph.SubscribeAsync(async value =>
+        Store.IsLegendVisible.Subscribe(value => OnStateChanged(_ =>
         {
-            this.isDirty = true;
-            OnStateChanged(_ => graph = value);
-            if (this.Store.DagreGraph != null) await this.Store.DagreGraph.RefreshAsync();
-        }, cancellationToken: CancellationTokenSource.Token);
-        Store.Options.SubscribeAsync(async value =>
+            isLegendVisible = value;
+            isDirty = true;
+        }), token: CancellationTokenSource.Token);
+        Observable.CombineLatest(
+            Store.Graph.Where(g => g != null),
+            Store.Options.Where(o => o != null),
+            (graph, options) => (graph, options)
+        ).Subscribe((values) =>
         {
-            this.isDirty = true;
-            OnStateChanged(_ => options = value);
-            if (this.Store.DagreGraph != null) await this.Store.DagreGraph.RefreshAsync();
-        }, cancellationToken: CancellationTokenSource.Token);
+            var (newGraph, newOptions) = values;
+            OnStateChanged(_ =>
+            {
+                graph = newGraph;
+                options = newOptions;
+                isDirty = true;
+            });
+        }, token: CancellationTokenSource.Token);
     }
 
     protected override void OnParametersSet()

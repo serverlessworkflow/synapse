@@ -11,8 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Neuroglia.Collections;
-using Neuroglia.Data.Infrastructure.ResourceOriented;
+using Neuroglia.Blazor.Dagre.Models;
 using ServerlessWorkflow.Sdk.Models;
 using Synapse.Api.Client.Services;
 using Synapse.Resources;
@@ -28,13 +27,15 @@ namespace Synapse.Dashboard.Pages.Workflows.Details;
 /// <param name="monacoEditorHelper">The service used ease Monaco Editor interactions</param>
 /// <param name="jsonSerializer">The service used to serialize and deserialize JSON</param>
 /// <param name="yamlSerializer">The service used to serialize and deserialize YAML</param>
+/// <param name="monacoInterop">The service used to build a bridge with the monaco interop extension</param>
 public class WorkflowDetailsStore(
     ISynapseApiClient apiClient,
     ResourceWatchEventHubClient resourceEventHub,
     IJSRuntime jsRuntime,
     IMonacoEditorHelper monacoEditorHelper,
     IJsonSerializer jsonSerializer,
-    IYamlSerializer yamlSerializer
+    IYamlSerializer yamlSerializer,
+    MonacoInterop monacoInterop
 )
     : NamespacedResourceManagementComponentStore<WorkflowDetailsState, WorkflowInstance>(apiClient, resourceEventHub)
 {
@@ -61,6 +62,11 @@ public class WorkflowDetailsStore(
     /// Gets the service used to serialize and deserialize YAML
     /// </summary>
     protected IYamlSerializer YamlSerializer { get; } = yamlSerializer;
+
+    /// <summary>
+    /// Gets the service used to build a bridge with the monaco interop extension
+    /// </summary>
+    protected MonacoInterop MonacoInterop { get; } = monacoInterop;
 
     /// <summary>
     ///  Gets/sets the <see cref="BlazorMonaco.Editor.StandaloneEditorConstructionOptions"/> provider function
@@ -247,7 +253,6 @@ public class WorkflowDetailsStore(
     /// <returns></returns>
     public async Task OnTextBasedEditorInitAsync()
     {
-        await Task.Delay(1);
         await this.SetTextBasedEditorLanguageAsync();
         await this.SetTextEditorValueAsync();
     }
@@ -358,25 +363,27 @@ public class WorkflowDetailsStore(
     {
         await this.ApiClient.ManageNamespaced<WorkflowInstance>().DeleteAsync(workflowInstance.GetName(), workflowInstance.GetNamespace()!).ConfigureAwait(false);
     }
+
+    /// <summary>
+    /// Selects the target node in the code editor
+    /// </summary>
+    /// <param name="e">The source of the event</param>
+    public async Task SelectNodeInEditor(GraphEventArgs<MouseEventArgs> e)
+    {
+        if (e.GraphElement == null) return;
+        if (this.TextEditor == null) return;
+        var source = await this.TextEditor.GetValue();
+        var pointer = e.GraphElement.Id;
+        var language = this.MonacoEditorHelper.PreferredLanguage;
+        var range = await this.MonacoInterop.GetJsonPointerRange(source, pointer, language);
+        await this.TextEditor.SetSelection(range, string.Empty);
+        await this.TextEditor.RevealRangeInCenter(range);
+    }
     #endregion
 
     /// <inheritdoc/>
     public override async Task InitializeAsync()
     {
-        this.WorkflowDefinition.Where(definition => definition != null).SubscribeAsync(async (definition) =>
-        {
-            await Task.Delay(1);
-            var document = this.JsonSerializer.SerializeToText(definition.Clone());
-            this.Reduce(state => state with
-            {
-                WorkflowDefinitionJson = document
-            });
-            await this.SetTextEditorValueAsync();
-            if (this.MonacoEditorHelper.PreferredLanguage != PreferredLanguage.YAML)
-            {
-                await this.MonacoEditorHelper.ChangePreferredLanguageAsync(PreferredLanguage.YAML);
-            }
-        }, cancellationToken: this.CancellationTokenSource.Token);
         Observable.CombineLatest(
             this.Namespace.Where(ns => !string.IsNullOrWhiteSpace(ns)),
             this.ActiveResourceName.Where(name => !string.IsNullOrWhiteSpace(name)),
@@ -392,6 +399,20 @@ public class WorkflowDetailsStore(
             this.RemoveLabelSelector(SynapseDefaults.Resources.Labels.WorkflowVersion);
             this.AddLabelSelector(new(SynapseDefaults.Resources.Labels.WorkflowVersion, LabelSelectionOperator.Equals, version!));
         });
+        this.WorkflowDefinition.Where(definition => definition != null).SubscribeAsync(async (definition) =>
+        {
+            await Task.Delay(1);
+            var document = this.JsonSerializer.SerializeToText(definition.Clone());
+            this.Reduce(state => state with
+            {
+                WorkflowDefinitionJson = document
+            });
+            await this.SetTextEditorValueAsync();
+            if (this.MonacoEditorHelper.PreferredLanguage != PreferredLanguage.YAML)
+            {
+                await this.MonacoEditorHelper.ChangePreferredLanguageAsync(PreferredLanguage.YAML);
+            }
+        }, cancellationToken: this.CancellationTokenSource.Token);
         await base.InitializeAsync();
     }
 
