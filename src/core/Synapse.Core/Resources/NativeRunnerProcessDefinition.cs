@@ -24,7 +24,7 @@ public record NativeRunnerProcessDefinition
     /// Gets/sets the path to the file to execute to run a workflow instance
     /// </summary>
     [DataMember(Order = 1, Name = "executable"), JsonPropertyOrder(1), JsonPropertyName("executable"), YamlMember(Order = 1, Alias = "executable")]
-    public virtual string Executable { get; set; } = Path.Combine(AppContext.BaseDirectory, "bin", "runner", "Synapse.Runner");
+    public virtual string Executable { get; set; } = "Synapse.Runner";
 
     /// <summary>
     /// Gets/sets the working directory
