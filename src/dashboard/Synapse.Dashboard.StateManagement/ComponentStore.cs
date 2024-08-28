@@ -89,6 +89,7 @@ public abstract class ComponentStore<TState>(TState state)
         {
             if (disposing)
             {
+                this.CancellationTokenSource.Cancel();
                 this.CancellationTokenSource.Dispose();
                 this._subject.Dispose();
             }
@@ -114,6 +115,7 @@ public abstract class ComponentStore<TState>(TState state)
         {
             if (disposing)
             {
+                this.CancellationTokenSource.Cancel();
                 this.CancellationTokenSource.Dispose();
                 this._subject.Dispose();
             }
