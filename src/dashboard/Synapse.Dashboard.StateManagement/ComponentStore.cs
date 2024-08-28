@@ -12,7 +12,6 @@
 // limitations under the License.
 
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
 
 namespace Synapse.Dashboard.StateManagement;
 
@@ -27,9 +26,10 @@ namespace Synapse.Dashboard.StateManagement;
 public abstract class ComponentStore<TState>(TState state)
     : IComponentStore<TState>
 {
-    private readonly BehaviorSubject<TState> _subject = new(state);
-    private TState _state = state;
-    private bool _disposed;
+
+    readonly BehaviorSubject<TState> _subject = new(state);
+    TState _state = state;
+    bool _disposed;
 
     /// <summary>
     /// Gets the <see cref="ComponentStore{TState}"/>'s <see cref="System.Threading.CancellationTokenSource"/>

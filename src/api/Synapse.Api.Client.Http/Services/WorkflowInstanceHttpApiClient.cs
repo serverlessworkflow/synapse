@@ -43,7 +43,7 @@ public class WorkflowInstanceHttpApiClient(IServiceProvider serviceProvider, ILo
         var resource = new WorkflowInstance();
         var uri = $"/api/{resource.Definition.Version}/{resource.Definition.Plural}/{@namespace}/{name}/logs/watch";
         using var request = await this.ProcessRequestAsync(new HttpRequestMessage(HttpMethod.Get, uri), cancellationToken).ConfigureAwait(false);
-        var response = await this.ProcessResponseAsync(await this.HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false), cancellationToken).ConfigureAwait(false);
+        var response = await this.HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
         var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
         return this.JsonSerializer.DeserializeAsyncEnumerable<TextDocumentWatchEvent>(responseStream, cancellationToken)!;
     }

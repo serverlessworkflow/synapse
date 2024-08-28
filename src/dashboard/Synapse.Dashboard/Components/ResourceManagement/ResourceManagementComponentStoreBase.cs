@@ -116,7 +116,6 @@ public abstract class ResourceManagementComponentStoreBase<TState, TResource>(IS
     /// </summary>
     protected IDisposable ResourceWatchSubscription { get; private set; } = null!;
 
-
     /// <inheritdoc/>
     public override async Task InitializeAsync()
     {
@@ -302,10 +301,7 @@ public abstract class ResourceManagementComponentStoreBase<TState, TResource>(IS
             case ResourceWatchEventType.Updated:
                 this.Reduce(state =>
                 {
-                    if (state.Resources == null)
-                    {
-                        return state;
-                    }
+                    if (state.Resources == null) return state;
                     var resources = new EquatableList<TResource>(state.Resources);
                     var resource = resources.FirstOrDefault(r => r.GetQualifiedName() == e.Resource.GetQualifiedName());
                     if (resource == null) return state;
