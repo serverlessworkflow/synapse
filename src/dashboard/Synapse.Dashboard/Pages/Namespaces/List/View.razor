@@ -1,4 +1,4 @@
-﻿@page "/namespaces"
+﻿@page "/namespaces/{name?}"
 @attribute [Authorize]
 @namespace Synapse.Dashboard.Pages.Namespaces.List
 @inherits ClusterResourceManagementComponent<Namespace>
@@ -17,7 +17,7 @@
         <div class="d-flex">
             <input type="search" class="form-control rounded my-2 me-2" placeholder="Search" value="@SearchTerm" @oninput="OnSearchInput" />
         </div>
-        <div class="dropdown">
+        <div class="dropdown d-flex align-content-center">
             <button class="btn btn-sm btn-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="" @onclick:stopPropagation="true"><i class="bi bi-three-dots-vertical"></i></button>
             <ul class="dropdown-menu">
                 <li><a class="dropdown-item @(SelectedResourceNames.Count == 0 ? "text-mute" : "text-danger")" href="#" @onclick="async _ => await (SelectedResourceNames.Count == 0 ?  Task.CompletedTask : OnDeleteSelectedResourcesAsync())" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Trash" /> Delete selected</a></li>
@@ -73,5 +73,21 @@
     {
         base.OnInitialized();
         BreadcrumbManager.Use(Breadcrumbs.Namespaces);
+    }
+
+    /// <summary>
+    /// Opens the targeted <see cref="Resource"/>'s edition
+    /// </summary>
+    /// <param name="resource">The <see cref="Resource"/> to edit</param>
+    protected override Task OnShowResourceEditorAsync(Namespace? resource = null)
+    {
+        if (this.EditorOffCanvas == null) return Task.CompletedTask;
+        var parameters = new Dictionary<string, object>
+        {
+            { nameof(ResourceEditor<Namespace>.Resource), resource! },
+            { nameof(ResourceEditor<Namespace>.IsCluster), true }
+        };
+        string actionType = resource == null ? "creation" : "edition";
+        return this.EditorOffCanvas.ShowAsync<ResourceEditor<Namespace>>(title: typeof(Namespace).Name + " " + actionType, parameters: parameters);
     }
 }

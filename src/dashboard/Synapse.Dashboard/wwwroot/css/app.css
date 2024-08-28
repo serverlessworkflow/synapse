@@ -20756,6 +20756,7 @@ textarea.form-control-lg {
   position: sticky;
   top: 0;
   background-color: var(--bs-body-bg) !important;
+  z-index: 1;
 }
 
 /*tr {

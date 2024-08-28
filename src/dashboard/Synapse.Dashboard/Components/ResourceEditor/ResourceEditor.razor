@@ -36,7 +36,7 @@
                 }
             }
         </div>
-        <Button Color="ButtonColor.Primary" Outline="true" Disabled="updating || saving" Loading="saving" @onclick="async _ => await Store.SubmitResourceAsync()">
+        <Button Color="ButtonColor.Primary" Outline="true" Disabled="isUpdating || isSaving" Loading="isSaving" @onclick="async _ => await Store.SubmitResourceAsync()">
             @if (resource?.Metadata?.Generation == null || resource?.Metadata?.Generation == 0)
             {
                 <span>Create</span>
@@ -56,6 +56,12 @@
     /// Gets/sets the resource to display details about
     /// </summary>
     [Parameter] public TResource? Resource { get; set; }
+
+    bool isCluster = false;
+    /// <summary>
+    /// Gets/sets a boolean indicating the resource is a cluster
+    /// </summary>
+    [Parameter] public bool IsCluster { get; set; } = false;
 
     /// <summary>
     /// The reference of the <see cref="StandaloneCodeEditor" />
@@ -80,12 +86,12 @@
     /// <summary>
     /// A boolean indicating if the text editor is being updated
     /// </summary>
-    private bool updating = false;
+    private bool isUpdating = false;
 
     /// <summary>
     /// A boolean indicating if the resource is being saved
     /// </summary>
-    private bool saving = false;
+    private bool isSaving = false;
 
     /// <summary>
     /// The <see cref="ProblemDetails"/> that occurred when trying to save the resource, if any
@@ -97,8 +103,8 @@
     {
         await base.OnInitializedAsync().ConfigureAwait(false);
         this.Store.Resource.Subscribe(resource => this.OnStateChanged(cmp => cmp.resource = resource), token: this.CancellationTokenSource.Token);
-        this.Store.Updating.Subscribe(updating => this.OnStateChanged(cmp => cmp.updating = updating), token: this.CancellationTokenSource.Token);
-        this.Store.Saving.Subscribe(OnSavingChanged, token: this.CancellationTokenSource.Token);
+        this.Store.IsUpdating.Subscribe(updating => this.OnStateChanged(cmp => cmp.isUpdating = updating), token: this.CancellationTokenSource.Token);
+        this.Store.IsSaving.Subscribe(OnSavingChanged, token: this.CancellationTokenSource.Token);
         this.Store.ProblemDetails.Subscribe(problemDetails => this.OnStateChanged(cmp => cmp.problemDetails = problemDetails), token: this.CancellationTokenSource.Token);
         this.textEditorInput
             .Throttle(TimeSpan.FromMilliseconds(300))
@@ -119,6 +125,11 @@
             this.resource = this.Resource; // should happen in this.Store.Resource.Subscribe but prevents possible race when multiple params are set
             this.Store.SetResource(this.Resource);
         }
+        if (this.isCluster != this.IsCluster)
+        {
+            this.isCluster = this.IsCluster;
+            this.Store.SetIsCluster(this.IsCluster);
+        }
         return base.OnParametersSetAsync();
     }
 
@@ -128,7 +139,7 @@
     /// <param name="saving">Whenever the resource is in a saving state</param>
     private void OnSavingChanged(bool saving)
     {
-        this.saving = saving;
+        this.isSaving = saving;
         if (this.textBasedEditor != null) this.textBasedEditor.UpdateOptions(new EditorUpdateOptions() { ReadOnly = saving });
         this.StateHasChanged();
     }
@@ -161,7 +172,7 @@
     /// <returns>A <see cref="Task"/></returns>
     private async Task OnTextBasedValueChanged(ModelContentChangedEvent e)
     {
-        if (!this.updating && this.textBasedEditor != null && this.textEditorInput != null)
+        if (!this.isUpdating && this.textBasedEditor != null && this.textEditorInput != null)
         {
             var text = await this.textBasedEditor.GetValue();
             this.textEditorInput.OnNext(text);

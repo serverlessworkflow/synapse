@@ -36,4 +36,38 @@ public class ClusterResourceManagementComponentStore<TResource>(ISynapseApiClien
         await this.ApiClient.ManageCluster<TResource>().DeleteAsync(resource.GetName()).ConfigureAwait(false);
     }
 
+    /// <inheritdoc/>
+    public override async Task GetResourceDefinitionAsync()
+    {
+        var resourceDefinition = await this.ApiClient.ManageCluster<TResource>().GetDefinitionAsync().ConfigureAwait(false);
+        this.Reduce(s => s with
+        {
+            Definition = resourceDefinition
+        });
+    }
+
+    /// <inheritdoc/>
+    public override async Task ListResourcesAsync(ResourcesFilter? filter = null)
+    {
+        try
+        {
+            this.Reduce(state => state with
+            {
+                Loading = true,
+            });
+            var resourceList = new EquatableList<TResource>(await (await this.ApiClient.ManageCluster<TResource>().ListAsync(filter?.LabelSelectors).ConfigureAwait(false)).OrderBy(r => r.Metadata.CreationTimestamp).ToListAsync().ConfigureAwait(false));
+            this.Reduce(s => s with
+            {
+                Resources = resourceList,
+                Loading = false
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            // todo: implement proper error handling
+        }
+    }
+
+
 }

@@ -13,35 +13,14 @@
 
 using Synapse.Resources;
 
-namespace Synapse.Dashboard.Pages.WorkflowInstances.List;
+namespace Synapse.Dashboard.Pages.Workflows.List;
 
 /// <summary>
 /// Represents the <see cref="View"/>'s state
 /// </summary>
-public record WorkflowInstanceListState
-    : NamespacedResourceManagementComponentState<WorkflowInstance>
+public record WorkflowListState
+    : NamespacedResourceManagementComponentState<Workflow>
 {
-
-    /// <summary>
-    /// Gets/sets a <see cref="List{T}"/> that contains all cached <see cref="Workflow"/>s
-    /// </summary>
-    public EquatableList<Workflow>? Workflows { get; set; }
-
-    /// <summary>
-    /// Gets/sets the <see cref="Resources.Workflow"/>, if any, to filter by the instances to list 
-    /// </summary>
-    public Workflow? Workflow { get; set; }
-
-    /// <summary>
-    /// Gets/sets the versions of the selected <see cref="Resources.Workflow"/>, if any
-    /// </summary>
-    public EquatableList<string>? Versions { get; set; }
-
-    /// <summary>
-    /// Gets/sets the version of the <see cref="Resources.Workflow"/> to filter by the instances to list
-    /// </summary>
-    public string? Version { get; set; }
-
     /// <summary>
     /// Gets a <see cref="EquatableList{T}"/> that contains all <see cref="Operator"/>s
     /// </summary>
@@ -51,5 +30,4 @@ public record WorkflowInstanceListState
     /// Gets/sets the active operator filter
     /// </summary>
     public string? Operator { get; set; } = null;
-
 }

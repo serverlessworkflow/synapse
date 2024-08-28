@@ -23,12 +23,12 @@ public record NamespacedResourceManagementComponentState<TResource>
 {
 
     /// <summary>
-    /// Gets a <see cref="List{T}"/> that contains all cached <see cref="Neuroglia.Data.Infrastructure.ResourceOriented.Namespace"/>s
+    /// Gets a <see cref="EquatableList{T}"/> that contains all <see cref="Neuroglia.Data.Infrastructure.ResourceOriented.Namespace"/>s
     /// </summary>
     public EquatableList<Namespace>? Namespaces { get; set; }
 
     /// <summary>
-    /// Gets the <see cref="Neuroglia.Data.Infrastructure.ResourceOriented.Namespace"/>, if any, the (namespaced) resources to list belong to
+    /// Gets the <see cref="Neuroglia.Data.Infrastructure.ResourceOriented.Namespace"/> the (namespaced) resources to list belong to, if any
     /// </summary>
     public string? Namespace { get; set; }
 

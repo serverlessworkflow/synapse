@@ -36,14 +36,19 @@ public record ResourceEditorState<TResource>
     public string TextEditorValue { get; set; } = string.Empty;
 
     /// <summary>
+    /// Gets/sets a boolean indicating if the resource is a cluster
+    /// </summary>
+    public bool IsCluster { get; set; } = false;
+
+    /// <summary>
     /// Gets/sets a boolean indicating if the text editor is being updated
     /// </summary>
-    public bool Updating { get; set; } = false;
+    public bool IsUpdating { get; set; } = false;
 
     /// <summary>
     /// Gets/sets a boolean indicating if the resource is being saved
     /// </summary>
-    public bool Saving { get; set; } = false;
+    public bool IsSaving { get; set; } = false;
 
     /// <summary>
     /// Gets/sets the <see cref="ProblemDetails"/> type that occurred when trying to save the resource, if any

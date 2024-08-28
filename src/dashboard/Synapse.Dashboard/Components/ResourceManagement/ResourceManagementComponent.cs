@@ -227,7 +227,7 @@ public abstract class ResourceManagementComponent<TComponent, TStore, TState, TR
         if (this.DetailsOffCanvas == null) return Task.CompletedTask;
         var parameters = new Dictionary<string, object>
         {
-            { "Resource", resource }
+            { nameof(ResourceEditor<TResource>.Resource), resource }
         };
         return this.DetailsOffCanvas.ShowAsync<ResourceDetails<TResource>>(title: typeof(TResource).Name + " details", parameters: parameters);
     }
@@ -236,12 +236,12 @@ public abstract class ResourceManagementComponent<TComponent, TStore, TState, TR
     /// Opens the targeted <see cref="Resource"/>'s edition
     /// </summary>
     /// <param name="resource">The <see cref="Resource"/> to edit</param>
-    protected Task OnShowResourceEditorAsync(TResource? resource = null)
+    protected virtual Task OnShowResourceEditorAsync(TResource? resource = null)
     {
         if (this.EditorOffCanvas == null) return Task.CompletedTask;
         var parameters = new Dictionary<string, object>
         {
-            { "Resource", resource! }
+            { nameof(ResourceEditor<TResource>.Resource), resource! }
         };
         string actionType = resource == null ? "creation" : "edition";
         return this.EditorOffCanvas.ShowAsync<ResourceEditor<TResource>>(title: typeof(TResource).Name + " " + actionType, parameters: parameters);

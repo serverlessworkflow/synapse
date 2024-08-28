@@ -15,7 +15,6 @@ using JsonCons.Utilities;
 using Neuroglia.Data;
 using Neuroglia.Serialization.Yaml;
 using Synapse.Api.Client.Services;
-using System.Reactive.Linq;
 
 namespace Synapse.Dashboard.Components.ResourceEditorStateManagement;
 
@@ -50,14 +49,19 @@ public class ResourceEditorStore<TResource>(ISynapseApiClient apiClient, IMonaco
     public IObservable<string> TextEditorValue => this.Select(state => state.TextEditorValue).DistinctUntilChanged();
 
     /// <summary>
-    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="ResourceEditorState{TResource}.Updating"/> changes
+    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="ResourceEditorState{TResource}.IsCluster"/> changes
     /// </summary>
-    public IObservable<bool> Updating => this.Select(state => state.Updating).DistinctUntilChanged();
+    public IObservable<bool> IsCluster => this.Select(state => state.IsCluster).DistinctUntilChanged();
 
     /// <summary>
-    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="ResourceEditorState{TResource}.Saving"/> changes
+    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="ResourceEditorState{TResource}.IsUpdating"/> changes
     /// </summary>
-    public IObservable<bool> Saving => this.Select(state => state.Saving).DistinctUntilChanged();
+    public IObservable<bool> IsUpdating => this.Select(state => state.IsUpdating).DistinctUntilChanged();
+
+    /// <summary>
+    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="ResourceEditorState{TResource}.IsSaving"/> changes
+    /// </summary>
+    public IObservable<bool> IsSaving => this.Select(state => state.IsSaving).DistinctUntilChanged();
 
     /// <summary>
     /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="ResourceEditorState{TResource}.ProblemType"/> changes
@@ -166,26 +170,38 @@ public class ResourceEditorStore<TResource>(ISynapseApiClient apiClient, IMonaco
     }
 
     /// <summary>
-    /// Sets the state's <see cref="ResourceEditorState{TResource}.Updating"/>
+    /// Sets the state's <see cref="ResourceEditorState{TResource}.IsUpdating"/>
     /// </summary>
-    /// <param name="updating">The new <see cref="ResourceEditorState{TResource}.Updating"/> value</param>
-    public void SetUpdating(bool updating)
+    /// <param name="isUpdating">The new <see cref="ResourceEditorState{TResource}.IsUpdating"/> value</param>
+    public void SetUpdating(bool isUpdating)
     {
         this.Reduce(state => state with
         {
-            Updating = updating
+            IsUpdating = isUpdating
         });
     }
 
     /// <summary>
-    /// Sets the state's <see cref="ResourceEditorState{TResource}.Saving"/>
+    /// Sets the state's <see cref="ResourceEditorState{TResource}.IsCluster"/>
     /// </summary>
-    /// <param name="saving">The new <see cref="ResourceEditorState{TResource}.Saving"/> value</param>
-    public void SetSaving(bool saving)
+    /// <param name="isCluster">The new <see cref="ResourceEditorState{TResource}.IsCluster"/> value</param>
+    public void SetIsCluster(bool isCluster)
     {
         this.Reduce(state => state with
         {
-            Saving = saving
+            IsCluster = isCluster
+        });
+    }
+
+    /// <summary>
+    /// Sets the state's <see cref="ResourceEditorState{TResource}.IsSaving"/>
+    /// </summary>
+    /// <param name="isSaving">The new <see cref="ResourceEditorState{TResource}.IsSaving"/> value</param>
+    public void SetSaving(bool isSaving)
+    {
+        this.Reduce(state => state with
+        {
+            IsSaving = isSaving
         });
     }
 
@@ -258,7 +274,11 @@ public class ResourceEditorStore<TResource>(ISynapseApiClient apiClient, IMonaco
         try
         {
             resource = jsonSerializer.Deserialize<TResource>(textEditorValue);
-            resource = await apiClient.ManageNamespaced<TResource>().CreateAsync(resource!, this.CancellationTokenSource.Token);
+            var isCluster = this.Get(state => state.IsCluster);
+            resource = await (!isCluster ? 
+                 apiClient.ManageNamespaced<TResource>().CreateAsync(resource!, this.CancellationTokenSource.Token) :
+                 apiClient.ManageCluster<TResource>().CreateAsync(resource!, this.CancellationTokenSource.Token)
+            );
             this.SetResource(resource);
         }
         catch (ProblemDetailsException ex)
@@ -294,7 +314,11 @@ public class ResourceEditorStore<TResource>(ISynapseApiClient apiClient, IMonaco
             var resourcePatch = new Patch(PatchType.JsonPatch, jsonPatch);
             try
             {
-                resource = await apiClient.ManageNamespaced<TResource>().PatchAsync(resource.GetName(), resource.GetNamespace()!, resourcePatch, null, this.CancellationTokenSource.Token);
+                var isCluster = this.Get(state => state.IsCluster);
+                resource = await (!isCluster ? 
+                     apiClient.ManageNamespaced<TResource>().PatchAsync(resource.GetName(), resource.GetNamespace()!, resourcePatch, null, this.CancellationTokenSource.Token) :
+                     apiClient.ManageCluster<TResource>().PatchAsync(resource.GetName(), resourcePatch, null, this.CancellationTokenSource.Token)
+                );
                 this.SetResource(resource);
             }
             catch(ProblemDetailsException ex)

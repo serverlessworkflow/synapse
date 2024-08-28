@@ -3,7 +3,7 @@
 @attribute [Authorize]
 @namespace Synapse.Dashboard.Pages.Workflows.List
 @using BlazorBootstrap
-@inherits NamespacedResourceManagementComponent<Workflow>
+@inherits NamespacedResourceManagementComponent<View, WorkflowListComponentStore, WorkflowListState, Workflow>
 @inject IBreadcrumbManager BreadcrumbManager
 @inject NavigationManager NavigationManager
 
@@ -28,8 +28,19 @@
                     }
                 }
             </select>
+            <select class="form-select m-2" @onchange="(e) => Store.SetOperator(e.Value?.ToString())">
+                <option value="">All operators</option>
+                @if (Operators != null && Operators.Count > 0)
+                {
+                    foreach (var operatorResource in Operators)
+                    {
+                        var operatorName = operatorResource.GetName() + "." + operatorResource.GetNamespace();
+                        <option value="@operatorName" selected="@(@operatorName == Operator)">@operatorName</option>
+                    }
+                }
+            </select>
             <input type="search" class="form-control rounded my-2 me-2" placeholder="Search" value="@SearchTerm" @oninput="OnSearchInput" />
-            <div class="dropdown">
+            <div class="dropdown d-flex align-content-center">
                 <button class="btn btn-sm btn-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="" @onclick:stopPropagation="true"><i class="bi bi-three-dots-vertical"></i></button>
                 <ul class="dropdown-menu">
                     <li><a class="dropdown-item @(SelectedResourceNames.Count == 0 ? "text-mute" : "text-danger")" href="#" @onclick="async _ => await (SelectedResourceNames.Count == 0 ?  Task.CompletedTask : OnDeleteSelectedResourcesAsync())" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Trash" /> Delete selected</a></li>
@@ -62,12 +73,15 @@
                 <Virtualize Context="resource" Items="@Resources">
                     <tr @onclick="_ => OnViewWorkflow(resource)" class="cursor-pointer">
                         <td class="text-start">@resource.Metadata.Name</td>
-                        <td class="text-start"><a href="#" @onclick="_ => Store.SetNamespace(resource.Metadata.Namespace)" @onclick:preventDefault="true" @onclick:stopPropagation="true">@resource.Metadata.Namespace</a></td>
+                        <td class="text-start">
+                            <a href="#" @onclick="_ => Store.SetNamespace(resource.Metadata.Namespace)" @onclick:preventDefault="true" @onclick:stopPropagation="true">@resource.Metadata.Namespace</a>
+                            <a href="/namespaces/@resource.Metadata.Namespace" @onclick:stopPropagation="true"><Icon Name="IconName.BoxArrowUpRight" Class="small" /></a>
+                        </td>
                         <td class="text-center">@resource.Metadata.CreationTimestamp?.DateTime.RelativeFormat()</td>
                         <td class="text-center">@(resource.Status?.Versions.Where(v => v.Value.LastStartedAt.HasValue).Select(v => v.Value.LastStartedAt).Order().LastOrDefault()?.DateTime.RelativeFormat() ?? "-")</td>
                         <td class="text-center">@(resource.Status?.Versions.Where(v => v.Value.LastEndedAt.HasValue).Select(v => v.Value.LastEndedAt).Order().LastOrDefault()?.DateTime.RelativeFormat() ?? "-")</td>
                         <td class="text-center">@resource.Spec.Versions.Count</td>
-                        <td class="text-center"><a href="#" @onclick:preventDefault="true" @onclick:stopPropagation="true">@resource.Spec.Versions.GetLatest().Document.Version</a></td>
+                        <td class="text-center">@resource.Spec.Versions.GetLatest().Document.Version</td>
                         <td class="text-center">@resource.Status?.Versions.Values.Sum(s => s.TotalInstances)</td>
                         <td class="text-center">
                             @if (resource.Spec.Versions.GetLatest().Schedule == null)
@@ -82,10 +96,11 @@
                         <td class="text-center">
                             @if (resource.Metadata.Labels?.TryGetValue(SynapseDefaults.Resources.Labels.Operator, out var operatorName) == true && !string.IsNullOrWhiteSpace(operatorName))
                             {
-                                var parts = operatorName.Split(".");
-                                var ns = parts.Last();
-                                var name = parts.Take(parts.Count() - 1).Join('.');
-                                <a href="/operators/@ns/@name" @onclick:stopPropagation="true">@operatorName</a>
+                                var segments = operatorName.Split(".");
+                                var ns = segments.Last();
+                                var name = segments.Take(segments.Count() - 1).Join('.');
+                                <a href="#" @onclick="_ => Store.SetOperator(operatorName)" @onclick:preventDefault="true" @onclick:stopPropagation="true">@operatorName</a>
+                                <a href="/operators/@ns/@name" @onclick:stopPropagation="true"><Icon Name="IconName.BoxArrowUpRight" Class="small" /></a>
                             }
                             else
                             {
@@ -122,10 +137,23 @@
 @code
 {
 
+    /// <summary>
+    /// Gets the list of available <see cref="Synapse.Resources.Operator"/>s
+    /// </summary>
+    protected EquatableList<Operator>? Operators { get; set; }
+
+    /// <summary>
+    /// Gets selected <see cref="Synapse.Resources.Operator"/>
+    /// </summary>
+    protected string? Operator { get; set; }
+
+    /// <inheritdoc/>
     protected override void OnInitialized()
     {
         base.OnInitialized();
         this.BreadcrumbManager.Use(Breadcrumbs.Workflows);
+        this.Store.Operators.Subscribe(value => this.OnStateChanged(_ => Operators = value), token: this.CancellationTokenSource.Token);
+        this.Store.Operator.Subscribe(value => this.OnStateChanged(_ => Operator = value), token: this.CancellationTokenSource.Token);
     }
 
     string GetScheduleType(Workflow workflow)
@@ -144,8 +172,5 @@
     void OnCreateWorkflow() => this.NavigationManager.NavigateTo("/workflows/new");
 
     void OnCreateWorkflowVersion(string ns, string name) => this.NavigationManager.NavigateTo($"/workflows/new/{ns}/{name}");
-
-    //void OnNavigateToVersion(string ns, string name, string version) => NavigationManager.NavigateTo($"/workflows/details/{ns}/{name}/{version}");
-
 
 }

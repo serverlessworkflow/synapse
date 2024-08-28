@@ -12,11 +12,15 @@
                        Title="Title()"
                        Workflows="@Workflows"
                        Namespaces="@Namespaces"
+                       Namespace="@(@namespace)"
+                       Operators="@Operators"
+                       OperatorName="@Operator"
                        WorkflowInstances="@Resources"
                        SelectedInstanceNames="@SelectedResourceNames"
                        OnWorkflowChanged="OnWorkflowChanged"
-                       OnNamespaceChanged="OnNamespaceChanged"
-                       OnSearchInput="OnSearchInput"
+                       OnNamespaceChanged="Store.SetNamespace"
+                       OnOperatorChanged="Store.SetOperator"
+                       OnSearchInput="Store.SetSearchTerm"
                        OnShowDetails="OnShowInstanceDetails"
                        OnDelete="OnDeleteResourceAsync"
                        OnToggleSelected="Store.ToggleResourceSelection"
@@ -36,6 +40,16 @@
     };
 
     /// <summary>
+    /// Gets the list of available <see cref="Synapse.Resources.Operator"/>s
+    /// </summary>
+    protected EquatableList<Operator>? Operators { get; set; }
+
+    /// <summary>
+    /// Gets selected <see cref="Synapse.Resources.Operator"/>
+    /// </summary>
+    protected string? Operator { get; set; }
+
+    /// <summary>
     /// Gets the list of available <see cref="Workflow"/>s
     /// </summary>
     protected EquatableList<Workflow>? Workflows { get; set; }
@@ -45,17 +59,17 @@
     {
         await base.OnInitializedAsync();
         BreadcrumbManager.Use(Breadcrumbs.WorkflowInstances);
-        this.Store.Workflows.Subscribe(workflows => this.OnStateChanged(cmp => cmp.Workflows = workflows), token: this.CancellationTokenSource.Token);
-        await this.Store.ListWorkflowsAsync().ConfigureAwait(false);
+        this.Store.Workflows.Subscribe(value => this.OnStateChanged(_ => Workflows = value), token: this.CancellationTokenSource.Token);
+        this.Store.Operators.Subscribe(value => this.OnStateChanged(_ => Operators = value), token: this.CancellationTokenSource.Token);
+        this.Store.Operator.Subscribe(value => this.OnStateChanged(_ => Operator = value), token: this.CancellationTokenSource.Token);
     }
 
     /// <summary>
     /// Handles changes of the workflow selector
     /// </summary>
-    /// <param name="e"></param>
-    protected void OnWorkflowChanged(ChangeEventArgs e)
+    /// <param name="workflowQualifiedName">The name of the workflow</param>
+    protected void OnWorkflowChanged(string? workflowQualifiedName)
     {
-        var workflowQualifiedName = e.Value?.ToString();
         if (string.IsNullOrWhiteSpace(workflowQualifiedName))
         {
             this.Store.RemoveLabelSelector(SynapseDefaults.Resources.Labels.Workflow);

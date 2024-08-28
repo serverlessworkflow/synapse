@@ -12,24 +12,18 @@
 // limitations under the License.
 
 using Synapse.Api.Client.Services;
-using Synapse.Dashboard.Pages.Workflows.List;
 using Synapse.Resources;
 
-namespace Synapse.Dashboard.Pages.WorkflowInstances.List;
+namespace Synapse.Dashboard.Pages.Workflows.List;
 
 /// <summary>
 /// Represents the <see cref="View"/>'s store
 /// </summary>
 /// <param name="apiClient">The service used to interact with the Synapse API</param>
 /// <param name="resourceEventHub">The hub used to watch resource events</param>
-public class WorkflowInstanceListComponentStore(ISynapseApiClient apiClient, ResourceWatchEventHubClient resourceEventHub)
-    : NamespacedResourceManagementComponentStore<WorkflowInstanceListState, WorkflowInstance>(apiClient, resourceEventHub)
+public class WorkflowListComponentStore(ISynapseApiClient apiClient, ResourceWatchEventHubClient resourceEventHub)
+    : NamespacedResourceManagementComponentStore<WorkflowListState, Workflow>(apiClient, resourceEventHub)
 {
-
-    /// <summary>
-    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="Workflow"/>s
-    /// </summary>
-    public IObservable<EquatableList<Workflow>?> Workflows => this.Select(s => s.Workflows);
 
     /// <summary>
     /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="WorkflowListState.Operators"/> changes
@@ -40,24 +34,6 @@ public class WorkflowInstanceListComponentStore(ISynapseApiClient apiClient, Res
     /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="WorkflowListState.Operator"/> changes
     /// </summary>
     public IObservable<string?> Operator => this.Select(s => s.Operator).DistinctUntilChanged();
-
-    /// <summary>
-    /// Lists all available <see cref="Workflow"/>s
-    /// </summary>
-    /// <returns>A new awaitable <see cref="Task"/></returns>
-    public virtual async Task ListWorkflowsAsync()
-    {
-        this.Reduce(state => state with
-        {
-            Loading = true
-        });
-        var workflowList = new EquatableList<Workflow>(await (await this.ApiClient.Workflows.ListAsync(null!).ConfigureAwait(false)).ToListAsync().ConfigureAwait(false));
-        this.Reduce(s => s with
-        {
-            Workflows = workflowList,
-            Loading = false
-        });
-    }
 
     /// <summary>
     /// Lists all available <see cref="Operator"/>s
@@ -89,13 +65,10 @@ public class WorkflowInstanceListComponentStore(ISynapseApiClient apiClient, Res
         });
     }
 
-
-
     /// <inheritdoc/>
     public override async Task InitializeAsync()
     {
-        await base.InitializeAsync(); 
-        await this.ListWorkflowsAsync().ConfigureAwait(false);
+        await base.InitializeAsync();
         await this.ListOperatorsAsync().ConfigureAwait(false);
         this.Operator.Subscribe(operatorName => {
             if (string.IsNullOrWhiteSpace(operatorName))
