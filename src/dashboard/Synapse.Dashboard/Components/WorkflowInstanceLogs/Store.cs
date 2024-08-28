@@ -22,8 +22,10 @@ namespace Synapse.Dashboard.Components.WorkflowInstanceLogsStateManagement;
 /// Represents the <see cref="ComponentStore{TState}" /> of a <see cref="WorkflowInstanceLogs"/> component
 /// </summary>
 /// <param name="apiClient">The service used interact with Synapse API</param>
+/// <param name="jsInterop">The service used to build a bridge with JS</param>
 public class WorkflowInstanceLogsStore(
-    ISynapseApiClient apiClient
+    ISynapseApiClient apiClient,
+    JSInterop jsInterop
 )
     : ComponentStore<WorkflowInstanceLogsState>(new())
 {
@@ -36,9 +38,19 @@ public class WorkflowInstanceLogsStore(
     protected ISynapseApiClient ApiClient { get; } = apiClient;
 
     /// <summary>
+    /// Gets the service used to build a bridge with JS
+    /// </summary>
+    protected JSInterop JSInterop { get; } = jsInterop;
+
+    /// <summary>
     /// Gets/sets the logs <see cref="Collapse"/> panel
     /// </summary>
     public Collapse? Collapse { get; set; }
+
+    /// <summary>
+    /// The <see cref="ElementReference"/> containing the logs
+    /// </summary>
+    public ElementReference? LogsContainer { get; set; } = null;
 
     #region Selectors
     /// <summary>
@@ -101,6 +113,7 @@ public class WorkflowInstanceLogsStore(
     /// <summary>
     /// Toggles the <see cref="Collapse"/> panel
     /// </summary>
+    /// <returns>An awaitable task</returns>
     public async Task ToggleAsync()
     {
         if (this.Collapse != null)
@@ -117,6 +130,7 @@ public class WorkflowInstanceLogsStore(
     /// <summary>
     /// Toggles the <see cref="Collapse"/> panel
     /// </summary>
+    /// <returns>An awaitable task</returns>
     public async Task HideAsync()
     {
         if (this.Collapse != null)
@@ -132,6 +146,7 @@ public class WorkflowInstanceLogsStore(
     /// <summary>
     /// Reads and watches the logs
     /// </summary>
+    /// <returns>An awaitable task</returns>
     public async Task LoadLogsAsync()
     {
         this.Reduce(state => state with
@@ -143,8 +158,18 @@ public class WorkflowInstanceLogsStore(
     }
 
     /// <summary>
+    /// Scrolls down the logs
+    /// </summary>
+    /// <returns>An awaitable task</returns>
+    public async Task ScrollDown()
+    {
+        if (this.LogsContainer.HasValue) await this.JSInterop.ScrollDownAsync(this.LogsContainer.Value);
+    }
+
+    /// <summary>
     /// Reads the logs form the API
     /// </summary>
+    /// <returns>An awaitable task</returns>
     protected async Task ReadLogsAsync()
     {
         var name = this.Get(state => state.Name);
@@ -160,6 +185,7 @@ public class WorkflowInstanceLogsStore(
     /// <summary>
     /// Watches the logs
     /// </summary>
+    /// <returns>An awaitable task</returns>
     protected async Task WatchLogsAsync()
     {
         this._watchCancellationTokenSource.Cancel();
@@ -169,7 +195,6 @@ public class WorkflowInstanceLogsStore(
         var @namespace = this.Get(state => state.Namespace);
         await foreach (ITextDocumentWatchEvent evt in await this.ApiClient.WorkflowInstances.WatchLogsAsync(name, @namespace, this._watchCancellationTokenSource.Token).ConfigureAwait(false))
         {
-            Console.WriteLine(evt?.Content);
             if (evt != null && !string.IsNullOrEmpty(evt.Content))
             {
                 if (evt.Type == TextDocumentWatchEventType.Appended) 

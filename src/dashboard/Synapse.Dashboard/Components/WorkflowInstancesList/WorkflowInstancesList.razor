@@ -14,7 +14,7 @@
     limitations under the License.
 *@
 @namespace Synapse.Dashboard.Components
-
+@inject JSInterop jsInterop
 
 <div class="table-container @ClassNames">
     @if (Loading)
@@ -44,6 +44,12 @@
                 </select>
             }
             <input type="search" class="form-control rounded my-2 me-2" placeholder="Search" @oninput="OnSearchInputAsync" />
+            <div class="dropdown">
+                <button class="btn btn-sm btn-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="" @onclick:stopPropagation="true"><i class="bi bi-three-dots-vertical"></i></button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item @(selectedInstanceNames.Count() == 0 ? "text-mute" : "text-danger")" href="#" @onclick="OnDeleteSelected" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Trash" /> Delete selected</a></li>
+                </ul>
+            </div>
         </div>
     </div>
     <table class="table table-hover">
@@ -56,6 +62,9 @@
                         <th class="sticky-header text-@GetColumnAlignment(column)">@(column != "Action" && column != "Delete" ? column : "")</th>
                     }
                 }
+                <th class="sticky-header text-center align-middle">
+                    <input @ref="checkboxAll" type="checkbox" @onclick="async (_) => await OnToggleSelected.InvokeAsync(null)" @onclick:preventDefault="true" @onclick:stopPropagation="true" />
+                </th>
             </tr>
         </thead>
         <tbody>
@@ -122,6 +131,9 @@
                                 </td>
                             }
                         }
+                        <td class="text-center align-middle">
+                            <input type="checkbox" checked="@selectedInstanceNames.Contains(instance.GetName())" @onclick="async (_) => await OnToggleSelected.InvokeAsync(instance.GetName())" @onclick:preventDefault="true" @onclick:stopPropagation="true" />
+                        </td>
                     </tr>
                 </Virtualize>
             }
@@ -143,6 +155,8 @@
     [Parameter] public IEnumerable<string> Columns { get; set; } = [];
     IEnumerable<WorkflowInstance>? workflowInstances;
     [Parameter] public IEnumerable<WorkflowInstance>? WorkflowInstances { get; set; }
+    IEnumerable<string> selectedInstanceNames = [];
+    [Parameter] public IEnumerable<string> SelectedInstanceNames { get; set; } = [];
     IEnumerable<Workflow>? workflows { get; set; }
     [Parameter] public IEnumerable<Workflow>? Workflows { get; set; }
     IEnumerable<Namespace>? namespaces { get; set; }
@@ -154,7 +168,9 @@
     [Parameter] public EventCallback<ChangeEventArgs> OnNamespaceChanged { get; set; }
     [Parameter] public EventCallback<ChangeEventArgs> OnSearchInput { get; set; }
     [Parameter] public EventCallback<WorkflowInstance> OnShowDetails { get; set; }
+    [Parameter] public EventCallback<string?> OnToggleSelected { get; set; }
     [Parameter] public EventCallback<WorkflowInstance> OnDelete { get; set; }
+    [Parameter] public EventCallback OnDeleteSelected { get; set; }
 
     IEnumerable<string> knownColumns = [
         "Name",
@@ -170,6 +186,11 @@
     "Delete"
     ];
 
+    ElementReference checkboxAll = default!;
+
+    bool shouldRender = true;
+
+    /// <inheritdoc />
     protected override async Task OnParametersSetAsync()
     {
         await base.OnParametersSetAsync();
@@ -208,6 +229,24 @@
             namespaces = Namespaces;
             shouldRender = true;
         }
+        if (selectedInstanceNames != SelectedInstanceNames)
+        {
+            selectedInstanceNames = SelectedInstanceNames;
+
+            if (selectedInstanceNames.Count() == 0)
+            {
+                await this.jsInterop.SetCheckboxStateAsync(checkboxAll, Dashboard.CheckboxState.Unchecked);
+            }
+            else if (selectedInstanceNames.Count() == (workflowInstances?.Count() ?? 0))
+            {
+                await this.jsInterop.SetCheckboxStateAsync(checkboxAll, Dashboard.CheckboxState.Checked);
+            }
+            else
+            {
+                await this.jsInterop.SetCheckboxStateAsync(checkboxAll, Dashboard.CheckboxState.Indeterminate);
+            }
+            shouldRender = true;
+        }
         if (activeRow != ActiveRow)
         {
             activeRow = ActiveRow;
@@ -216,7 +255,7 @@
         }
     }
 
-    bool shouldRender = true;
+    /// <inheritdoc />
     protected override bool ShouldRender()
     {
         if (!shouldRender) return false;

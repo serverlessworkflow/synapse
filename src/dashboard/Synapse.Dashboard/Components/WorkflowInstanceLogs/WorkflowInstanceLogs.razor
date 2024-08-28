@@ -29,7 +29,7 @@
         <Spinner Class="me-3" Color="SpinnerColor.Primary" Size="SpinnerSize.Small" />
     }
     else {
-        <pre class="monaco-editor logs-container p-2">
+        <pre @ref="Store.LogsContainer" class="monaco-editor logs-container p-2">
             @foreach(string line in logs)
             {
                 var match = Regex.Match(line, timestampLevelPattern);
@@ -93,5 +93,11 @@
         {
             Store.SetNamespace(Namespace);
         }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        await Store.ScrollDown();
     }
 }

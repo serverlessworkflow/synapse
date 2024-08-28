@@ -27,9 +27,14 @@ public record ResourceManagementComponentState<TResource>
     public ResourceDefinition? Definition { get; set; }
 
     /// <summary>
-    /// Gets/sets a <see cref="List{T}"/> that contains all cached <see cref="IResource"/>s
+    /// Gets/sets a <see cref="List{T}"/> that contains all <see cref="IResource"/>s
     /// </summary>
     public EquatableList<TResource>? Resources { get; set; } = [];
+
+    /// <summary>
+    /// Gets/sets a <see cref="List{T}"/> that contains all selected <see cref="IResource"/>s
+    /// </summary>
+    public EquatableList<string> SelectedResourceNames { get; set; } = [];
 
     /// <summary>
     /// Gets/sets a list that contains the label selectors, if any, used to filter the resources to list
@@ -44,7 +49,7 @@ public record ResourceManagementComponentState<TResource>
     /// <summary>
     /// Gets/sets a boolean value that indicates whether data is currently being gathered
     /// </summary>
-    public bool Loading { get; set; } = false;
+    public bool Loading { get; set; } = true;
 
     /// <summary>
     /// Gets/sets the name of the selected resource

@@ -375,7 +375,7 @@ public class WorkflowDetailsStore(
         var source = await this.TextEditor.GetValue();
         var pointer = e.GraphElement.Id;
         var language = this.MonacoEditorHelper.PreferredLanguage;
-        var range = await this.MonacoInterop.GetJsonPointerRange(source, pointer, language);
+        var range = await this.MonacoInterop.GetJsonPointerRangeAsync(source, pointer, language);
         await this.TextEditor.SetSelection(range, string.Empty);
         await this.TextEditor.RevealRangeInCenter(range);
     }

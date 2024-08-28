@@ -39,6 +39,11 @@ public abstract class ResourceManagementComponentStoreBase<TState, TResource>(IS
     protected IObservable<EquatableList<TResource>?> InternalResources => this.Select(s => s.Resources).DistinctUntilChanged();
 
     /// <summary>
+    /// Gets an <see cref="IObservable{T}"/> used to observe the <see cref="ResourceManagementComponentState{TResource}.SelectedResourceNames"/> changes
+    /// </summary>
+    public IObservable<EquatableList<string>> SelectedResourceNames => this.Select(s => s.SelectedResourceNames).DistinctUntilChanged();
+
+    /// <summary>
     /// Gets an <see cref="IObservable{T}"/> used to observe the  <see cref="ResourceManagementComponentState{TResource}.SearchTerm"/> changes
     /// </summary>
     public IObservable<string?> SearchTerm => this.Select(state => state.SearchTerm).DistinctUntilChanged();
@@ -213,11 +218,65 @@ public abstract class ResourceManagementComponentStoreBase<TState, TResource>(IS
     }
 
     /// <summary>
+    /// Toggles the resources selection
+    /// </summary>
+    /// <param name="name">The name of the resource to select, or all if none is provided</param>
+    public virtual void ToggleResourceSelection(string? name = null)
+    {
+        this.Reduce(state =>
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                if (state.SelectedResourceNames.Any())
+                {
+                    return state with
+                    {
+                        SelectedResourceNames = []
+                    };
+                }
+                return state with
+                {
+                    SelectedResourceNames = [.. state.Resources?.Select(resource => resource.GetName()) ?? []]
+                };
+            }
+            if (state.SelectedResourceNames.Contains(name))
+            {
+                return state with
+                {
+                    SelectedResourceNames = [.. state.SelectedResourceNames.Where(n => n != name)]
+                };
+            }
+            return state with
+            {
+                SelectedResourceNames = [.. state.SelectedResourceNames, name]
+            };
+        });
+    }
+
+    /// <summary>
     /// Deletes the specified <see cref="IResource"/>
     /// </summary>
     /// <param name="resource">The <see cref="IResource"/> to delete</param>
     /// <returns>A new awaitable <see cref="Task"/></returns>
     public abstract Task DeleteResourceAsync(TResource resource);
+
+    /// <summary>
+    /// Deletes the selected <see cref="IResource"/>s
+    /// </summary>
+    /// <returns>A new awaitable <see cref="Task"/></returns>
+    public async Task DeleteSelectedResourcesAsync()
+    {
+        var selectedResourcesNames = this.Get(state => state.SelectedResourceNames);
+        var resources = (this.Get(state => state.Resources) ?? []).Where(resource => selectedResourcesNames.Contains(resource.GetName()));
+        foreach(var resource in resources)
+        {
+            await this.DeleteResourceAsync(resource);
+        }
+        this.Reduce(state => state with
+        {
+            SelectedResourceNames = []
+        });
+    }
 
     /// <summary>
     /// Fetches the definition of the managed <see cref="IResource"/> type

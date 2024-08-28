@@ -45,6 +45,12 @@ export function addValidationSchema(schema, schemaUri, schemaType) {
     }
 }
 
+/**
+ * Finds the range in a JSON text corresponding to a provided JSON Pointer
+ * @param {string} source The source JSON text
+ * @param {string} jsonPointer The JSON pointer to find the range for
+ * @returns {Monaco.Range} The corresponding range
+ */
 function getJsonPointeRangeForJson(source, jsonPointer) {
     const { pointers } = parse(source);
     const node = pointers[jsonPointer];
@@ -58,6 +64,13 @@ function getJsonPointeRangeForJson(source, jsonPointer) {
         endColumn: node.valueEnd.column + 1
     };
 }
+
+/**
+ * Finds the range in a YAML text corresponding to a provided JSON Pointer
+ * @param {string} source The source YAML text
+ * @param {string} jsonPointer The JSON pointer to find the range for
+ * @returns {Monaco.Range} The corresponding range
+ */
 function getJsonPointeRangeForYaml(source, jsonPointer) {
     const lineCounter = new LineCounter(source);
     const document = parseDocument(source, { keepSourceTokens: true, lineCounter });

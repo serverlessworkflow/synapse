@@ -28,13 +28,16 @@
     <HorizontalCollapsible class="collapsible-instances">
         <Label>Instances</Label>
         <Content>
-            <WorkflowInstancesList Loading="@Loading"
+            <WorkflowInstancesList class="h-100" 
+                                   Loading="@Loading"
                                    WorkflowInstances="@Resources"
+                                   SelectedInstanceNames="@SelectedResourceNames"
                                    ActiveRow="@instanceName"
                                    Columns="@columns"
                                    OnSearchInput="OnSearchInput"
                                    OnShowDetails="OnShowInstanceDetails"
-                                   OnDelete="OnDeleteWorkflowInstanceAsync" />
+                                   OnToggleSelected="Store.ToggleResourceSelection"
+                                   OnDeleteSelected="OnDeleteSelectedResourcesAsync" />
             <Button Outline="true" Color="ButtonColor.Primary" @onclick="async _ => await Store.OnShowCreateInstanceAsync(workflowDefinition)" class="w-100 mt-3">
                 <Icon Name="IconName.Plus"/>
             </Button>

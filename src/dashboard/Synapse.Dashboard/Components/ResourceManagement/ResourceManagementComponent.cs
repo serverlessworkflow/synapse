@@ -37,45 +37,61 @@ public abstract class ResourceManagementComponent<TComponent, TStore, TState, TR
     protected MonacoInterop? MonacoInterop { get; set; }
 
     /// <summary>
+    /// Gets/sets the service used for JS interop
+    /// </summary>
+    [Inject]
+    protected JSInterop jsInterop { get; set; } = default!;
+
+    /// <summary>
     /// Gets the service used to serialize/deserialize objects to/from JSON
     /// </summary>
     [Inject]
     protected IJsonSerializer Serializer { get; set; } = null!;
 
     /// <summary>
-    /// The list of displayed <see cref="Resource"/>s
+    /// Gets/sets the list of displayed <see cref="Resource"/>s
     /// </summary>
     protected EquatableList<TResource>? Resources { get; set; }
 
     /// <summary>
-    /// The <see cref="Offcanvas"/> used to show the <see cref="Resource"/>'s details
+    /// Gets/sets the list of selected <see cref="Resource"/>s
+    /// </summary>
+    protected EquatableList<string> SelectedResourceNames { get; set; } = [];
+
+    /// <summary>
+    /// Gets/sets the <see cref="Offcanvas"/> used to show the <see cref="Resource"/>'s details
     /// </summary>
     protected Offcanvas? DetailsOffCanvas { get; set; }
 
     /// <summary>
-    /// The <see cref="Offcanvas"/> used to edit the <see cref="Resource"/>
+    /// Gets/sets the <see cref="Offcanvas"/> used to edit the <see cref="Resource"/>
     /// </summary>
     protected Offcanvas? EditorOffCanvas { get; set; }
 
     /// <summary>
-    /// The <see cref="ConfirmDialog"/> used to confirm the <see cref="Resource"/>'s deletion
+    /// Gets/sets the <see cref="ConfirmDialog"/> used to confirm the <see cref="Resource"/>'s deletion
     /// </summary>
     protected ConfirmDialog? Dialog { get; set; }
 
     /// <summary>
-    /// The <see cref="Resource"/>'s <see cref="ResourceDefinition"/>
+    /// Gets/sets the <see cref="Resource"/>'s <see cref="ResourceDefinition"/>
     /// </summary>
     protected ResourceDefinition? Definition { get; set; }
 
     /// <summary>
-    /// The search term to filter the resources with
+    /// Gets/sets the search term to filter the resources with
     /// </summary>
     protected string? SearchTerm { get; set; }
 
     /// <summary>
-    /// A boolean value that indicates whether data is currently being gathered
+    /// Gets/sets a boolean value that indicates whether data is currently being gathered
     /// </summary>
     protected bool Loading { get; set; } = false;
+
+    /// <summary>
+    /// Gets/sets the checkbox used to (un)select all resources
+    /// </summary>
+    protected ElementReference? CheckboxAll { get; set; } = null;
 
     string activeResourcesName = null!;
     /// <summary>
@@ -87,7 +103,34 @@ public abstract class ResourceManagementComponent<TComponent, TStore, TState, TR
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync().ConfigureAwait(false);
-        this.Store.Resources.Subscribe(value => this.OnStateChanged(_ => this.Resources = value), token: this.CancellationTokenSource.Token);
+        Observable.CombineLatest(
+            this.Store.Resources,
+            this.Store.SelectedResourceNames,
+            (resources, selectedResourceNames) => (resources, selectedResourceNames)
+        ).SubscribeAsync(async (values) => {
+            var (resources, selectedResourceNames) = values;
+            this.OnStateChanged(_ =>
+            {
+                this.Resources = resources;
+                this.SelectedResourceNames = selectedResourceNames;
+            });
+            if (this.CheckboxAll.HasValue)
+            {
+
+                if (selectedResourceNames.Count == 0)
+                {
+                    await this.jsInterop.SetCheckboxStateAsync(this.CheckboxAll.Value, CheckboxState.Unchecked);
+                }
+                else if (selectedResourceNames.Count == (resources?.Count ?? 0))
+                {
+                    await this.jsInterop.SetCheckboxStateAsync(this.CheckboxAll.Value, CheckboxState.Checked);
+                }
+                else
+                {
+                    await this.jsInterop.SetCheckboxStateAsync(this.CheckboxAll.Value, CheckboxState.Indeterminate);
+                }
+            }
+        }, cancellationToken: this.CancellationTokenSource.Token);
         this.Store.ActiveResourceName.Subscribe(value => this.OnStateChanged(_ => this.activeResourcesName = value), token: this.CancellationTokenSource.Token);
         this.Store.SearchTerm.Subscribe(value => this.OnStateChanged(_ => this.SearchTerm = value), token: this.CancellationTokenSource.Token);
         this.Store.Loading.Subscribe(value => this.OnStateChanged(_ => this.Loading = value), token: this.CancellationTokenSource.Token);
@@ -151,6 +194,28 @@ public abstract class ResourceManagementComponent<TComponent, TStore, TState, TR
         );
         if (!confirmation) return;
         await this.Store.DeleteResourceAsync(resource);
+    }
+
+    /// <summary>
+    /// Handles the deletion of the selected <see cref="Resource"/>s
+    /// </summary>
+    protected async Task OnDeleteSelectedResourcesAsync()
+    {
+        if (this.Dialog == null) return;
+        if (this.SelectedResourceNames.Count == 0) return;
+        var confirmation = await this.Dialog.ShowAsync(
+            title: $"Are you sure you want to delete {SelectedResourceNames.Count} resource{(SelectedResourceNames.Count > 1 ? "s" : "")}?",
+            message1: $"The resource{(SelectedResourceNames.Count > 1 ? "s" : "")} will be permanently deleted. Are you sure you want to proceed ?",
+            confirmDialogOptions: new ConfirmDialogOptions()
+            {
+                YesButtonColor = ButtonColor.Danger,
+                YesButtonText = "Delete",
+                NoButtonText = "Abort",
+                IsVerticallyCentered = true
+            }
+        );
+        if (!confirmation) return;
+        await this.Store.DeleteSelectedResourcesAsync();
     }
 
     /// <summary>

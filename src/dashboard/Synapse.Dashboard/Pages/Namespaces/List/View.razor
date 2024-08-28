@@ -17,6 +17,12 @@
         <div class="d-flex">
             <input type="search" class="form-control rounded my-2 me-2" placeholder="Search" value="@SearchTerm" @oninput="OnSearchInput" />
         </div>
+        <div class="dropdown">
+            <button class="btn btn-sm btn-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="" @onclick:stopPropagation="true"><i class="bi bi-three-dots-vertical"></i></button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item @(SelectedResourceNames.Count == 0 ? "text-mute" : "text-danger")" href="#" @onclick="async _ => await (SelectedResourceNames.Count == 0 ?  Task.CompletedTask : OnDeleteSelectedResourcesAsync())" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Trash" /> Delete selected</a></li>
+            </ul>
+        </div>
     </div>
     <table class="table table-hover">
         <thead>
@@ -24,6 +30,9 @@
                 <th class="sticky-header text-start">Name</th>
                 <th class="sticky-header text-center">Creation Time</th>
                 <th class="sticky-header text-end"></th>
+                <th class="sticky-header text-center align-middle">
+                    <input @ref="CheckboxAll" type="checkbox" @onclick="(_) => Store.ToggleResourceSelection()" @onclick:preventDefault="true" @onclick:stopPropagation="true" />
+                </th>
             </tr>
         </thead>
         <tbody>
@@ -39,6 +48,9 @@
                                 <li><a class="dropdown-item" href="#" @onclick="async _ => await OnShowResourceEditorAsync(resource)" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Pencil" /> Edit</a></li>
                                 <li><a class="dropdown-item text-danger" href="#" @onclick="async _ => await OnDeleteResourceAsync(resource)" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Trash" /> Delete</a></li>
                             </ul>
+                        </td>
+                        <td class="text-center align-middle">
+                            <input type="checkbox" checked="@SelectedResourceNames.Contains(resource.GetName())" @onclick="(_) => Store.ToggleResourceSelection(resource.GetName())" @onclick:preventDefault="true" @onclick:stopPropagation="true" />
                         </td>
                     </tr>
                 </Virtualize>

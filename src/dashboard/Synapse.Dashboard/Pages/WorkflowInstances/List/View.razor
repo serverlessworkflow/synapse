@@ -8,16 +8,19 @@
 
 <ApplicationTitle>Workflow Instances</ApplicationTitle>
 
-<WorkflowInstancesList Loading="Loading"
+<WorkflowInstancesList Loading="@Loading"
                        Title="Title()"
-                       Workflows="Workflows"
-                       Namespaces="Namespaces"
-                       WorkflowInstances="Resources"
+                       Workflows="@Workflows"
+                       Namespaces="@Namespaces"
+                       WorkflowInstances="@Resources"
+                       SelectedInstanceNames="@SelectedResourceNames"
                        OnWorkflowChanged="OnWorkflowChanged"
                        OnNamespaceChanged="OnNamespaceChanged"
                        OnSearchInput="OnSearchInput"
                        OnShowDetails="OnShowInstanceDetails"
-                       OnDelete="OnDeleteResourceAsync"></WorkflowInstancesList>
+                       OnDelete="OnDeleteResourceAsync"
+                       OnToggleSelected="Store.ToggleResourceSelection"
+                       OnDeleteSelected="OnDeleteSelectedResourcesAsync" />
 
 <Button Outline="true" Color="ButtonColor.Primary" @onclick="async _ => await OnShowResourceEditorAsync()"><Icon Name="IconName.Plus" /></Button>
 

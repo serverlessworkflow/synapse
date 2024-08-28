@@ -11,48 +11,48 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Synapse.Dashboard.StateManagement;
+
 namespace Synapse.Dashboard.Services;
 
 /// <summary>
-/// The service used to build a bridge with the monaco interop extension
+/// The service used to build a bridge with JS interop
 /// </summary>
 /// <remarks>
 /// Constructs a new <see cref="MonacoInterop"/>
 /// </remarks>
 /// <param name="jsRuntime">The service used to interop with JS</param>
-public class MonacoInterop(IJSRuntime jsRuntime)
+public class JSInterop(IJSRuntime jsRuntime)
     : IAsyncDisposable
 {
 
     /// <summary>
     /// A reference to the js interop module
     /// </summary>
-    readonly Lazy<Task<IJSObjectReference>> moduleTask = new(() => jsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/monaco-editor-interop-extension.js?v=2").AsTask());
+    readonly Lazy<Task<IJSObjectReference>> moduleTask = new(() => jsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/js-interop.js").AsTask());
 
     /// <summary>
-    /// Adds the provided schema to monaco editor's diagnostics options
+    /// Sets a checkbox tri-state
     /// </summary>
-    /// <param name="schema">The JSON Schema used for validation</param>
-    /// <param name="schemaUri">The schema identifier URI</param>
-    /// <param name="schemaType">The schema type, used to match the "file"/model URI</param>
+    /// <param name="checkbox">The <see cref="ElementReference"/> of the checkbox</param>
+    /// <param name="state">The <see cref="CheckboxState"/> to set</param>
     /// <returns>A <see cref="ValueTask"/></returns>
-    public async ValueTask AddValidationSchemaAsync(string schema, string schemaUri, string schemaType)
+    public async ValueTask SetCheckboxStateAsync(ElementReference checkbox, CheckboxState state)
     {
         var module = await moduleTask.Value;
-        await module.InvokeVoidAsync("addValidationSchema", schema, schemaUri, schemaType);
+        await module.InvokeVoidAsync("setCheckboxState", checkbox, state);
     }
 
     /// <summary>
-    /// Finds the range in a JSON/YAML text corresponding to a provided JSON Pointer
+    /// Scrolls down the provided element
     /// </summary>
-    /// <param name="source">The source JSON/YAML text</param>
-    /// <param name="jsonPointer">The JSON pointer to find the range for</param>
-    /// <param name="language">The language of the source, JSON or YAML</param>
-    /// <returns>The corresponding <see cref="BlazorMonaco.Range"/></returns>
-    public async ValueTask<BlazorMonaco.Range> GetJsonPointerRangeAsync(string source, string jsonPointer, string language)
+    /// <param name="element">The <see cref="ElementReference"/> to scorll</param>
+    /// <param name="height">The height to scroll to, down to the end if not provided</param>
+    /// <returns></returns>
+    public async ValueTask ScrollDownAsync(ElementReference element, int? height = null)
     {
         var module = await moduleTask.Value;
-        return  await module.InvokeAsync<BlazorMonaco.Range>("getJsonPointerRange", source, jsonPointer, language);
+        await module.InvokeVoidAsync("scrollDown", element, height);
     }
 
     /// <inheritdoc />
