@@ -20809,6 +20809,13 @@ tr.row-placeholder td::after {
   height: 100px !important;
 }
 
+.graph-canvas {
+  cursor: grab;
+}
+.graph-canvas.grabbing {
+  cursor: grabbing;
+}
+
 .graph-container, .graph-canvas {
   --stroke-color: #6c757d;
   --fill-color: #1a1d20;
@@ -20953,6 +20960,7 @@ tr.row-placeholder td::after {
 }
 
 .node, .cluster {
+  cursor: pointer;
   --gradient-url: url(#default-node-gradient);
 }
 .node.default-task-node, .cluster.default-task-node {

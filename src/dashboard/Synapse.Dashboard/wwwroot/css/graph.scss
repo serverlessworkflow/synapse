@@ -43,6 +43,13 @@ $viridisScale: // generated with 13 steps, using 12 to exclude the last yellow
     $nodeColors: map-merge($nodeColors, ($name: $color));
 }
 
+.graph-canvas {
+    cursor: grab;
+    &.grabbing {
+        cursor: grabbing;
+    }
+}
+
 .graph-container, .graph-canvas {
     --stroke-color: #{$mute};
     --fill-color: #{$dark-bg-subtle-dark};
@@ -85,6 +92,7 @@ $viridisScale: // generated with 13 steps, using 12 to exclude the last yellow
 }
 
 .node, .cluster {
+    cursor: pointer;
     --gradient-url: url(#default-node-gradient);
 
     @each $name, $color in $nodeColors {

@@ -34,7 +34,7 @@
             </svg>
         </defs>
     </svg>
-    <DagreGraph @ref="Store.DagreGraph" OnMouseUp="OnMouseUp" Options="options" Graph="graph">
+    <DagreGraph @ref="Store.DagreGraph" OnMouseDown="HandleOnMouseDown" OnMouseUp="HandleOnMouseUp" Options="options" Graph="graph">
         <ExtraControls>
             <button class="btn" type="button" title="legend" @onclick="Store.ToggleLegendAsync">
                 <svg>
@@ -114,6 +114,28 @@
         if (!this.isDirty) return false;
         this.isDirty = false;
         return true;
+    }
+
+    protected void HandleOnMouseDown(GraphEventArgs<MouseEventArgs> e)
+    {
+        if (e.GraphElement == null && graph != null)
+        {
+            graph.CssClass = "grabbing";
+            isDirty = true;
+        }
+    }
+
+    protected async Task HandleOnMouseUp(GraphEventArgs<MouseEventArgs> e)
+    {
+        if (e.GraphElement == null && graph != null)
+        {
+            graph.CssClass = "";
+            isDirty = true;
+        }
+        if (OnMouseUp.HasDelegate)
+        {
+            await OnMouseUp.InvokeAsync(e);
+        }
     }
 
 }
