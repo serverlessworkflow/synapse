@@ -5,6 +5,7 @@
  * @returns
  */
 export function setCheckboxState(checkboxEl, state) {
+    if (!checkboxEl) return;
     switch (state) {
         case 1:
             checkboxEl.checked = true;
@@ -27,8 +28,6 @@ export function setCheckboxState(checkboxEl, state) {
  * @param {int} height The height to scroll, or the total scroll if not provided
  */
 export function scrollDown(el, height) {
-    if (!el) {
-        return;
-    }
+    if (!el) return;
     el.scrollTop = height || el.scrollHeight;
 }

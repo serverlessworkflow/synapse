@@ -25,7 +25,7 @@
         @Title
         <span>@(WorkflowInstances?.Count() ?? 0) items</span>
         <div class="d-flex">
-            @if (Workflows != null && Workflows.Count() > 1) {
+            @if (Workflows != null && Workflows.Count() > 0) {
                 <select class="form-select m-2" @onchange="OnSelectWorkflowChangedAsync">
                     <option value="">All workflows</option>
                     @foreach (var workflowResource in Workflows)
@@ -150,7 +150,7 @@
                                             </div>
                                             break;
                                         case "Delete":
-                                            <a class="dropdown-item text-danger" href="#" @onclick="async _ => await OnDeleteClickedAsync(instance)" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Trash" /></a>
+                                            <a class="dropdown-item text-danger" href="#" @onclick="async _ => await OnDeleteClickedAsync(instance)" @onclick:stopPropagation="true"><Icon Name="IconName.Trash" /></a>
                                             break;
                                         default:
                                             break;

@@ -1,4 +1,20 @@
-﻿@page "/workflow-instances"
+﻿﻿@*
+    Copyright © 2024-Present The Synapse Authors
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*@
+
+@page "/workflow-instances/{instanceName?}"
 @attribute [Authorize]
 @namespace Synapse.Dashboard.Pages.WorkflowInstances.List
 @using BlazorBootstrap
@@ -32,7 +48,8 @@
 
 <ConfirmDialog @ref="Dialog" />
 
-@code{
+@code {
+    [Parameter] public string? InstanceName { get; set; }
 
     RenderFragment Title() => __builder =>
     {
@@ -59,9 +76,18 @@
     {
         await base.OnInitializedAsync();
         BreadcrumbManager.Use(Breadcrumbs.WorkflowInstances);
-        this.Store.Workflows.Subscribe(value => this.OnStateChanged(_ => Workflows = value), token: this.CancellationTokenSource.Token);
-        this.Store.Operators.Subscribe(value => this.OnStateChanged(_ => Operators = value), token: this.CancellationTokenSource.Token);
-        this.Store.Operator.Subscribe(value => this.OnStateChanged(_ => Operator = value), token: this.CancellationTokenSource.Token);
+        this.Store.Workflows.Subscribe(value => OnStateChanged(_ => Workflows = value), token: CancellationTokenSource.Token);
+        this.Store.Operators.Subscribe(value => OnStateChanged(_ => Operators = value), token: CancellationTokenSource.Token);
+        this.Store.Operator.Subscribe(value => OnStateChanged(_ => Operator = value), token: CancellationTokenSource.Token);
+        this.Store.Resources.Subscribe(value =>
+        {
+            if (!string.IsNullOrWhiteSpace(InstanceName) && value != null && value.Count > 0)
+            {
+                var instance = value.FirstOrDefault(r => r.GetQualifiedName() == InstanceName);
+                if (instance != null) OnShowInstanceDetails(instance);
+            }
+        
+        }, token: CancellationTokenSource.Token);
     }
 
     /// <summary>

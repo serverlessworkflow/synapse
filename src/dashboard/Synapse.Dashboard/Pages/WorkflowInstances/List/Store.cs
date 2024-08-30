@@ -47,15 +47,10 @@ public class WorkflowInstanceListComponentStore(ISynapseApiClient apiClient, Res
     /// <returns>A new awaitable <see cref="Task"/></returns>
     public virtual async Task ListWorkflowsAsync()
     {
-        this.Reduce(state => state with
-        {
-            Loading = true
-        });
-        var workflowList = new EquatableList<Workflow>(await (await this.ApiClient.Workflows.ListAsync(null!).ConfigureAwait(false)).ToListAsync().ConfigureAwait(false));
+        var workflowList = new EquatableList<Workflow>(await (await this.ApiClient.Workflows.ListAsync(null!).ConfigureAwait(false)).OrderBy(ns => ns.GetQualifiedName()).ToListAsync().ConfigureAwait(false));
         this.Reduce(s => s with
         {
-            Workflows = workflowList,
-            Loading = false
+            Workflows = workflowList
         });
     }
 
@@ -65,15 +60,10 @@ public class WorkflowInstanceListComponentStore(ISynapseApiClient apiClient, Res
     /// <returns>A new awaitable <see cref="Task"/></returns>
     public async Task ListOperatorsAsync()
     {
-        this.Reduce(state => state with
-        {
-            Loading = true
-        });
-        var operatorList = new EquatableList<Operator>(await (await this.ApiClient.Operators.ListAsync().ConfigureAwait(false)).ToListAsync().ConfigureAwait(false));
+        var operatorList = new EquatableList<Operator>(await (await this.ApiClient.Operators.ListAsync().ConfigureAwait(false)).OrderBy(ns => ns.GetQualifiedName()).ToListAsync().ConfigureAwait(false));
         this.Reduce(s => s with
         {
-            Operators = operatorList,
-            Loading = false
+            Operators = operatorList
         });
     }
 
@@ -89,12 +79,10 @@ public class WorkflowInstanceListComponentStore(ISynapseApiClient apiClient, Res
         });
     }
 
-
-
     /// <inheritdoc/>
     public override async Task InitializeAsync()
     {
-        await base.InitializeAsync(); 
+        await base.InitializeAsync();
         await this.ListWorkflowsAsync().ConfigureAwait(false);
         await this.ListOperatorsAsync().ConfigureAwait(false);
         this.Operator.Subscribe(operatorName => {

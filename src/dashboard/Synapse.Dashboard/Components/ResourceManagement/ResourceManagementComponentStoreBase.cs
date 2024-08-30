@@ -133,7 +133,7 @@ public abstract class ResourceManagementComponentStoreBase<TState, TResource>(IS
             onCompletedAsync: () => Task.CompletedTask, 
             cancellationToken: this.CancellationTokenSource.Token
         );
-        this.Filter.Throttle(TimeSpan.FromMilliseconds(100)).SubscribeAsync(
+        this.Filter.Throttle(TimeSpan.FromMilliseconds(10)).SubscribeAsync(
             onNextAsync: this.ListResourcesAsync,
             onErrorAsync: ex => Task.Run(() => Console.WriteLine(ex)),
             onCompletedAsync: () => Task.CompletedTask,

@@ -41,15 +41,10 @@ public class WorkflowListComponentStore(ISynapseApiClient apiClient, ResourceWat
     /// <returns>A new awaitable <see cref="Task"/></returns>
     public async Task ListOperatorsAsync()
     {
-        this.Reduce(state => state with
-        {
-            Loading = true
-        });
-        var operatorList = new EquatableList<Operator>(await (await this.ApiClient.Operators.ListAsync().ConfigureAwait(false)).ToListAsync().ConfigureAwait(false));
+        var operatorList = new EquatableList<Operator>(await (await this.ApiClient.Operators.ListAsync().ConfigureAwait(false)).OrderBy(ns => ns.GetQualifiedName()).ToListAsync().ConfigureAwait(false));
         this.Reduce(s => s with
         {
-            Operators = operatorList,
-            Loading = false
+            Operators = operatorList
         });
     }
 

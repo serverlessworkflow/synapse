@@ -68,7 +68,7 @@
                         <td class="text-center" title="@GetEventConsumptionStrategyTitle(correlation)"><span class="badge rounded-pill border border-secondary text-secondary">@GetEventConsumptionStrategy(correlation)</span></td>
                         <td class="text-center" title="The number of event filters defined by the correlation">@GetFilterCount(correlation)</td>
                         <td class="text-center" title="@GetOutcomeTypeTitle(correlation)"><span class="badge rounded-pill border border-secondary text-secondary">@GetOutcomeType(correlation)</span></td>
-                        <td class="text-center" title="@GetOutcomeTargetTitle(correlation)"><a @onclick:preventDefault="true" @onclick:stopPropagation="true" href="@GetOutcomeTargetRef(correlation)">@GetOutcomeTarget(correlation)</a></td>
+                        <td class="text-center" title="@GetOutcomeTargetTitle(correlation)"><a @onclick:stopPropagation="true" href="@GetOutcomeTargetRef(correlation)">@GetOutcomeTarget(correlation)</a></td>
                         <td class="text-center" title="The amount of active correlation contexts">@correlation.Status?.Contexts.Count</td>
                         <td class="text-end">
                             <button class="btn btn-sm btn-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="" @onclick:stopPropagation="true"><i class="bi bi-three-dots-vertical"></i></button>
@@ -177,7 +177,16 @@
 
     string GetOutcomeTargetRef(Correlation correlation)
     {
-        if (correlation.Spec.Outcome.Start != null) return $"/workflows/{correlation.Spec.Outcome.Start.Workflow.ToString()}";
+        if (correlation.Spec.Outcome.Start != null)
+        {
+            var definitionSegments = correlation.Spec.Outcome.Start.Workflow.ToString().Split(':');
+            var version = definitionSegments.Last();
+            var nameNs = definitionSegments.First();
+            var segments = nameNs.Split('.');
+            var ns = segments.Last();
+            var name = segments.Take(segments.Count() - 1).Join('.');
+            return $"/workflows/details/{ns}/{name}/{version}";
+        }
         else return $"/workflow-instances/{correlation.Spec.Outcome.Correlate!.Instance}";
     }
 

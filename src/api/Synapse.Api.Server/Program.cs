@@ -144,6 +144,7 @@ if (options.ServeDashboard)
 {
     app.MapFallbackToFile("index.html");
     app.MapFallbackToFile("/workflows/details/{namespace}/{name}/{version?}/{instanceName?}", "index.html");
+    app.MapFallbackToFile("/workflow-intances/{instanceName?}", "index.html");
 }
     
 await app.RunAsync();
