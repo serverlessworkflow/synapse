@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Json.Schema;
 using JsonCons.Utilities;
 using Neuroglia.Data;
 using Semver;
@@ -30,19 +31,23 @@ namespace Synapse.Dashboard.Pages.Workflows.Create;
 /// <param name="yamlSerializer">The service used to serialize/deserialize data to/from YAML</param>
 /// <param name="jsRuntime">The service used for JS interop</param>
 /// <param name="navigationManager">The service used to provides an abstraction for querying and managing URI navigation</param>
+/// <param name="specificationSchemaManager">The service used to download the specification schemas</param>
+/// <param name="monacoInterop">The service to build a bridge with the monaco interop extension</param>
 public class CreateWorkflowViewStore(
     ISynapseApiClient api,
     IMonacoEditorHelper monacoEditorHelper,
     IJsonSerializer jsonSerializer,
     IYamlSerializer yamlSerializer,
     IJSRuntime jsRuntime,
-    NavigationManager navigationManager
+    NavigationManager navigationManager,
+    SpecificationSchemaManager specificationSchemaManager,
+    MonacoInterop monacoInterop
 )
     : ComponentStore<CreateWorkflowViewState>(new())
 {
 
     private TextModel? _textModel = null;
-    private readonly string _textModelUri = monacoEditorHelper.GetResourceUri(typeof(WorkflowDefinition).Name.ToLower());
+    private string _textModelUri = string.Empty;
     private bool _disposed;
 
     /// <summary>
@@ -74,6 +79,16 @@ public class CreateWorkflowViewStore(
     /// Gets the service used to provides an abstraction for querying and managing URI navigation
     /// </summary>
     protected NavigationManager NavigationManager { get; } = navigationManager;
+
+    /// <summary>
+    /// Gets the service used to download the specification schemas
+    /// </summary>
+    protected SpecificationSchemaManager SpecificationSchemaManager { get; } = specificationSchemaManager;
+
+    /// <summary>
+    /// Gets the service to build a bridge with the monaco interop extension
+    /// </summary>
+    protected MonacoInterop MonacoInterop { get; } = monacoInterop;
 
     /// <summary>
     /// The <see cref="BlazorMonaco.Editor.StandaloneEditorConstructionOptions"/> provider function
@@ -281,6 +296,7 @@ public class CreateWorkflowViewStore(
             {
                 this._textModel = await Global.GetModel(this.JSRuntime, this._textModelUri);
                 this._textModel ??= await Global.CreateModel(this.JSRuntime, "", language, this._textModelUri);
+                await Global.SetModelLanguage(this.JSRuntime, this._textModel, language);
                 await this.TextEditor!.SetModel(this._textModel);
             }
         }
@@ -301,6 +317,16 @@ public class CreateWorkflowViewStore(
         if (this.TextEditor != null && !string.IsNullOrWhiteSpace(document))
         {
             await this.TextEditor.SetValue(document);
+            try
+            {
+                //await this.TextEditor.Trigger("", "editor.action.triggerSuggest");
+                await this.TextEditor.Trigger("", "editor.action.formatDocument");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                // todo: handle exception
+            }
         }
     }
 
@@ -416,6 +442,10 @@ public class CreateWorkflowViewStore(
             string document = "";
             if (definition != null)
             {
+                if (definition.Document?.Dsl != null)
+                {
+                    await this.SetValidationSchema($"v{definition.Document.Dsl}");
+                }
                 document = this.MonacoEditorHelper.PreferredLanguage == PreferredLanguage.JSON ?
                     this.JsonSerializer.SerializeToText(definition) :
                     this.YamlSerializer.SerializeToText(definition);
@@ -424,7 +454,7 @@ public class CreateWorkflowViewStore(
             {
                 WorkflowDefinitionText = document
             });
-            await this.SetTextEditorValueAsync();
+            await this.OnTextBasedEditorInitAsync();
         }, cancellationToken: this.CancellationTokenSource.Token);
         Observable.CombineLatest(
             this.Namespace.Where(ns => !string.IsNullOrWhiteSpace(ns)),
@@ -435,6 +465,20 @@ public class CreateWorkflowViewStore(
             await this.GetWorkflowDefinitionAsync(workflow.ns, workflow.name);
         }, cancellationToken: this.CancellationTokenSource.Token);
         await base.InitializeAsync();
+    }
+
+    /// <summary>
+    /// Adds validation for the specification of the specified version
+    /// </summary>
+    /// <param name="version">The version of the spec to add the validation for</param>
+    /// <returns>An awaitable task</returns>
+    protected async Task SetValidationSchema(string? version = null)
+    {
+        version = version ?? await this.SpecificationSchemaManager.GetLatestVersion();
+        var schema = await this.SpecificationSchemaManager.GetSchema(version);
+        var type = $"create_{typeof(WorkflowDefinition).Name.ToLower()}_{version}";
+        await this.MonacoInterop.AddValidationSchemaAsync(schema, $"https://synapse.io/schemas/{type}.json", $"{type}*").ConfigureAwait(false);
+        this._textModelUri = this.MonacoEditorHelper.GetResourceUri(type);
     }
 
     /// <summary>

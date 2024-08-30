@@ -35,7 +35,12 @@ public class MonacoEditorHelper
             Language = language,
             ReadOnly = readOnly,
             Value = value,
-            TabSize = 2
+            TabSize = 2,
+            QuickSuggestions = new QuickSuggestionsOptions
+            {
+                Other = "true",
+                Strings = "true"
+            }
         };
     }
 

@@ -36,6 +36,7 @@
                                    Columns="@columns"
                                    OnSearchInput="Store.SetSearchTerm"
                                    OnShowDetails="OnShowInstanceDetails"
+                                   OnDelete="OnDeleteWorkflowInstanceAsync"
                                    OnToggleSelected="Store.ToggleResourceSelection"
                                    OnDeleteSelected="OnDeleteSelectedResourcesAsync" />
             <Button Outline="true" Color="ButtonColor.Primary" @onclick="async _ => await Store.OnShowCreateInstanceAsync(workflowDefinition)" class="w-100 mt-3">
@@ -75,9 +76,14 @@
             {
                 <div class="d-flex flex-column h-100 mh-100">
                     <div class="d-flex justify-content-between mb-2">
-                        <Button Outline="true" Color="ButtonColor.Primary" Size="ButtonSize.Small" @onclick="_ => OnCreateWorkflowVersion()">
-                            <Icon Name="IconName.Copy" />
-                        </Button>
+                        <div>
+                            <Button Outline="true" Color="ButtonColor.Primary" Size="ButtonSize.Small" class="ms-2" @onclick="_ => OnCreateWorkflowVersion()">
+                                <Icon Name="IconName.FileEarmarkPlus" />
+                            </Button>
+                            <Button Outline="true" Color="ButtonColor.Primary" Size="ButtonSize.Small" class="ms-2" @onclick="_ => Store.OnCopyToClipboard()">
+                                <Icon Name="IconName.Clipboard" />
+                            </Button>
+                        </div>
                         <PreferredLanguageSelector PreferedLanguageChange="Store.ToggleTextBasedEditorLanguageAsync" />
                     </div>
                     <div class="flex-grow">

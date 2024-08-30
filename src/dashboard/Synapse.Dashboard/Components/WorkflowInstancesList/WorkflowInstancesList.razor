@@ -150,7 +150,7 @@
                                             </div>
                                             break;
                                         case "Delete":
-                                            <a class="dropdown-item text-danger" href="#" @onclick="async _ => await OnDeleteClickedAsync(instance)" @onclick:stopPropagation="true"><Icon Name="IconName.Trash" /></a>
+                                            <button class="btn btn-sm text-danger" @onclick="async _ => await OnDeleteClickedAsync(instance)" @onclick:stopPropagation="true"><Icon Name="IconName.Trash" /></button>
                                             break;
                                         default:
                                             break;

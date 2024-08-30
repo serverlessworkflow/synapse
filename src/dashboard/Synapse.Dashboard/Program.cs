@@ -48,6 +48,7 @@ builder.Services.AddOidcAuthentication(options =>
 
 builder.Services.AddSingleton<IMonacoEditorHelper, MonacoEditorHelper>();
 builder.Services.AddScoped<IApplicationLayout, ApplicationLayout>();
+builder.Services.AddScoped<SpecificationSchemaManager>();
 builder.Services.AddSingleton<JSInterop>();
 builder.Services.AddSingleton<MonacoInterop>();
 builder.Services.AddSingleton<IGraphLayoutService, GraphLayoutService>();

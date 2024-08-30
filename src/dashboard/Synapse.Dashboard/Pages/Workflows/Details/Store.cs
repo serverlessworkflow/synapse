@@ -28,6 +28,7 @@ namespace Synapse.Dashboard.Pages.Workflows.Details;
 /// <param name="jsonSerializer">The service used to serialize and deserialize JSON</param>
 /// <param name="yamlSerializer">The service used to serialize and deserialize YAML</param>
 /// <param name="monacoInterop">The service used to build a bridge with the monaco interop extension</param>
+/// <param name="toastService">The service used display toast messages</param>
 public class WorkflowDetailsStore(
     ISynapseApiClient apiClient,
     ResourceWatchEventHubClient resourceEventHub,
@@ -35,7 +36,8 @@ public class WorkflowDetailsStore(
     IMonacoEditorHelper monacoEditorHelper,
     IJsonSerializer jsonSerializer,
     IYamlSerializer yamlSerializer,
-    MonacoInterop monacoInterop
+    MonacoInterop monacoInterop,
+    ToastService toastService
 )
     : NamespacedResourceManagementComponentStore<WorkflowDetailsState, WorkflowInstance>(apiClient, resourceEventHub)
 {
@@ -67,6 +69,11 @@ public class WorkflowDetailsStore(
     /// Gets the service used to build a bridge with the monaco interop extension
     /// </summary>
     protected MonacoInterop MonacoInterop { get; } = monacoInterop;
+
+    /// <summary>
+    /// Gets the service used display toast messages
+    /// </summary>
+    protected ToastService ToastService { get; } = toastService;
 
     /// <summary>
     ///  Gets/sets the <see cref="BlazorMonaco.Editor.StandaloneEditorConstructionOptions"/> provider function
@@ -191,7 +198,7 @@ public class WorkflowDetailsStore(
     /// <summary>
     /// Changes the value of the text editor
     /// </summary>
-    /// <returns></returns>
+    /// <returns>A awaitable task</returns>
     async Task SetTextEditorValueAsync()
     {
         var document = this.Get(state => state.WorkflowDefinitionJson);
@@ -219,7 +226,7 @@ public class WorkflowDetailsStore(
     /// </summary>
     /// <param name="ns"></param>
     /// <param name="name"></param>
-    /// <returns></returns>
+    /// <returns>A awaitable task</returns>
     public async Task GetWorkflowAsync(string ns, string name)
     {
         try
@@ -241,7 +248,7 @@ public class WorkflowDetailsStore(
     /// Handles changed of the text editor's language
     /// </summary>
     /// <param name="_"></param>
-    /// <returns></returns>
+    /// <returns>A awaitable task</returns>
     public async Task ToggleTextBasedEditorLanguageAsync(string _)
     {
         await this.OnTextBasedEditorInitAsync();
@@ -250,7 +257,7 @@ public class WorkflowDetailsStore(
     /// <summary>
     /// Handles initialization of the text editor
     /// </summary>
-    /// <returns></returns>
+    /// <returns>A awaitable task</returns>
     public async Task OnTextBasedEditorInitAsync()
     {
         await this.SetTextBasedEditorLanguageAsync();
@@ -260,7 +267,7 @@ public class WorkflowDetailsStore(
     /// <summary>
     /// Sets the language of the text editor
     /// </summary>
-    /// <returns></returns>
+    /// <returns>A awaitable task</returns>
     public async Task SetTextBasedEditorLanguageAsync()
     {
         try
@@ -290,9 +297,31 @@ public class WorkflowDetailsStore(
     }
 
     /// <summary>
+    /// Copies to content of the Monaco editor to the clipboard
+    /// </summary>
+    /// <returns>A awaitable task</returns>
+    public async Task OnCopyToClipboard()
+    {
+        if (this.TextEditor == null) return;
+        var text = await this.TextEditor.GetValue();
+        if (string.IsNullOrWhiteSpace(text)) return;
+        try
+        {
+            await this.JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", text);
+            this.ToastService.Notify(new(ToastType.Success, "Definition copied to the clipboard!"));
+        }
+        catch (Exception ex)
+        {
+            this.ToastService.Notify(new(ToastType.Danger, "Failed to copy the definition to the clipboard."));
+            Console.WriteLine(ex.ToString());
+            // todo: handle exception
+        }
+    }
+
+    /// <summary>
     /// Displays the modal used to provide the new workflow input
     /// </summary>
-    /// <returns></returns>
+    /// <returns>A awaitable task</returns>
     public async Task OnShowCreateInstanceAsync(WorkflowDefinition workflowDefinition)
     {
         if (this.Modal != null)
@@ -310,7 +339,7 @@ public class WorkflowDetailsStore(
     /// Creates a new instance of the workflow
     /// </summary>
     /// <param name="input">The input data, if any</param>
-    /// <returns></returns>
+    /// <returns>A awaitable task</returns>
     public async Task CreateInstanceAsync(string input)
     {
         var workflowName = this.Get(state => state.ActiveResourceName);
@@ -358,7 +387,7 @@ public class WorkflowDetailsStore(
     /// Delete the provided <see cref="WorkflowInstance"/>
     /// </summary>
     /// <param name="workflowInstance">The workflow instance to delete</param>
-    /// <returns></returns>
+    /// <returns>A awaitable task</returns>
     public async Task DeleteWorkflowInstanceAsync(WorkflowInstance workflowInstance)
     {
         await this.ApiClient.ManageNamespaced<WorkflowInstance>().DeleteAsync(workflowInstance.GetName(), workflowInstance.GetNamespace()!).ConfigureAwait(false);
@@ -368,6 +397,7 @@ public class WorkflowDetailsStore(
     /// Selects the target node in the code editor
     /// </summary>
     /// <param name="e">The source of the event</param>
+    /// <returns>A awaitable task</returns>
     public async Task SelectNodeInEditor(GraphEventArgs<MouseEventArgs> e)
     {
         if (e.GraphElement == null) return;
