@@ -39,6 +39,7 @@ else
     <StandaloneCodeEditor @ref="Store.TextEditor"
                           ConstructionOptions="Store.StandaloneEditorConstructionOptions"
                           OnDidInit="Store.OnTextBasedEditorInitAsync"
+                          OnDidChangeModelContent="Store.OnDidChangeModelContent"
                           CssClass="h-100" />
     <div class="problems">
         @if (problemDetails != null)

@@ -23,14 +23,19 @@ namespace Synapse.Dashboard.Pages.Workflows.Create;
 public record CreateWorkflowViewState
 {
     /// <summary>
-    /// Gets/sets the <see cref="WorkflowDefinition"/>'s <see cref="Namespace"/>
+    /// Gets/sets the <see cref="ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/>'s <see cref="Namespace"/>
     /// </summary>
     public string? Namespace { get; set; }
 
     /// <summary>
-    /// Gets/sets the <see cref="WorkflowDefinition"/>'s name
+    /// Gets/sets the <see cref="ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/>'s name
     /// </summary>
     public string? Name { get; set; }
+
+    /// <summary>
+    /// Gets/sets the <see cref="ServerlessWorkflow.Sdk.Models.WorkflowDefinition"/>'s  DSL version
+    /// </summary>
+    public string? DslVersion { get; set; }
 
     /// <summary>
     /// Gets/sets the definition of the workflow to create
