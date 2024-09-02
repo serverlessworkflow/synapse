@@ -42,7 +42,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
         with:
-          images: ${{ env.REGISTRY }}/${{ github.repository }}
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/api
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
@@ -50,12 +50,12 @@ jobs:
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
           context: .
-          file: './src/apps/Synapse.Server/Dockerfile'
+          file: './src/api/Synapse.Api.Server/Dockerfile'
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          
-  publish-worker-image:
+
+  publish-operator-image:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -70,7 +70,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
         with:
-          images: ${{ env.REGISTRY }}/${{ github.repository }}-worker
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/operator
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
@@ -78,13 +78,41 @@ jobs:
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
           context: .
-          file: './src/apps/Synapse.Worker/Dockerfile'
+          file: './src/operator/Synapse.Operator/Dockerfile'
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  publish-correlator-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Log in to the Container registry
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/correlator
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+      - name: Build and push Docker image
+        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        with:
+          context: .
+          file: './src/correlator/Synapse.Correlator/Dockerfile'
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
   publish-server-bin:
-    name: Release Server Binaries
+    name: Release API Binaries
     strategy:
       matrix:
         kind: ['linux', 'windows', 'macOS']
@@ -105,16 +133,16 @@ jobs:
       - name: Setup
         uses: actions/setup-dotnet@v2
         with:
-          dotnet-version: 8.0.0x
+          dotnet-version: 6.0.x
       - name: Restore
         run: dotnet restore
       - name: Build
         shell: bash
         run: |
           tag=$(git describe --tags --abbrev=0)
-          release_name="synapse-${{ matrix.target }}"
+          release_name="api-${{ matrix.target }}"
           # Publish
-          dotnet publish src/apps/Synapse.Server/Synapse.Server.csproj --runtime "${{ matrix.target }}" -c Release -o "$release_name"
+          dotnet publish src/api/Synapse.Api.Server/Synapse.Api.Server.csproj --runtime "${{ matrix.target }}" -c Release -o "$release_name"
           # Pack
           if [ "${{ matrix.target }}" == "win-x64" ]; then
             # Pack for Windows
@@ -128,12 +156,12 @@ jobs:
       - name: Publish
         uses: softprops/action-gh-release@v1
         with:
-          files: "synapse*"
+          files: "api*"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  publish-worker-bin:
-    name: Release Worker Binaries
+  publish-operator-bin:
+    name: Release Operator Binaries
     strategy:
       matrix:
         kind: ['linux', 'windows', 'macOS']
@@ -154,16 +182,16 @@ jobs:
       - name: Setup
         uses: actions/setup-dotnet@v2
         with:
-          dotnet-version: 8.0.0x
+          dotnet-version: 6.0.x
       - name: Restore
         run: dotnet restore
       - name: Build
         shell: bash
         run: |
           tag=$(git describe --tags --abbrev=0)
-          release_name="synapse-worker-${{ matrix.target }}"
+          release_name="operator-${{ matrix.target }}"
           # Publish
-          dotnet publish src/apps/Synapse.Worker/Synapse.Worker.csproj --runtime "${{ matrix.target }}" -c Release -o "$release_name" -p:PublishSingleFile=true
+          dotnet publish src/operator/Synapse.Operator/Synapse.Operator.csproj --runtime "${{ matrix.target }}" -c Release -o "$release_name"
           # Pack
           if [ "${{ matrix.target }}" == "win-x64" ]; then
             # Pack for Windows
@@ -177,7 +205,105 @@ jobs:
       - name: Publish
         uses: softprops/action-gh-release@v1
         with:
-          files: "synapse-worker*"
+          files: "operator*"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish-correlator-bin:
+    name: Release Correlator Binaries
+    strategy:
+      matrix:
+        kind: ['linux', 'windows', 'macOS']
+        include:
+          - kind: linux
+            os: ubuntu-latest
+            target: linux-x64
+          - kind: windows
+            os: windows-latest
+            target: win-x64
+          - kind: macOS
+            os: macos-latest
+            target: osx-x64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Setup
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: 6.0.x
+      - name: Restore
+        run: dotnet restore
+      - name: Build
+        shell: bash
+        run: |
+          tag=$(git describe --tags --abbrev=0)
+          release_name="correlator-${{ matrix.target }}"
+          # Publish
+          dotnet publish src/correlator/Synapse.Correlator/Synapse.Correlator.csproj --runtime "${{ matrix.target }}" -c Release -o "$release_name"
+          # Pack
+          if [ "${{ matrix.target }}" == "win-x64" ]; then
+            # Pack for Windows
+            7z a -tzip "${release_name}.zip" "./${release_name}/*"
+          else
+            # Pack for other OS
+            tar czvf "${release_name}.tar.gz" "$release_name"
+          fi
+          # Delete output directory
+          rm -r "$release_name"
+      - name: Publish
+        uses: softprops/action-gh-release@v1
+        with:
+          files: "correlator*"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish-runner-bin:
+    name: Release Runner Binaries
+    strategy:
+      matrix:
+        kind: ['linux', 'windows', 'macOS']
+        include:
+          - kind: linux
+            os: ubuntu-latest
+            target: linux-x64
+          - kind: windows
+            os: windows-latest
+            target: win-x64
+          - kind: macOS
+            os: macos-latest
+            target: osx-x64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Setup
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: 6.0.x
+      - name: Restore
+        run: dotnet restore
+      - name: Build
+        shell: bash
+        run: |
+          tag=$(git describe --tags --abbrev=0)
+          release_name="synapse-runner-${{ matrix.target }}"
+          # Publish
+          dotnet publish src/runner/Synapse.Runner/Synapse.Runner.csproj --runtime "${{ matrix.target }}" -c Release -o "$release_name" -p:PublishSingleFile=true
+          # Pack
+          if [ "${{ matrix.target }}" == "win-x64" ]; then
+            # Pack for Windows
+            7z a -tzip "${release_name}.zip" "./${release_name}/*"
+          else
+            # Pack for other OS
+            tar czvf "${release_name}.tar.gz" "$release_name"
+          fi
+          # Delete output directory
+          rm -r "$release_name"
+      - name: Publish
+        uses: softprops/action-gh-release@v1
+        with:
+          files: "synapse-runner*"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
@@ -203,7 +329,7 @@ jobs:
       - name: Setup
         uses: actions/setup-dotnet@v2
         with:
-          dotnet-version: 8.0.0x
+          dotnet-version: 6.0.x
       - name: Restore
         run: dotnet restore
       - name: Build
@@ -212,7 +338,7 @@ jobs:
           tag=$(git describe --tags --abbrev=0)
           release_name="synctl-${{ matrix.target }}"
           # Publish
-          dotnet publish src/apps/Synapse.Cli/Synapse.Cli.csproj --runtime "${{ matrix.target }}" -c Release -o "$release_name" -p:PublishSingleFile=true -p:GenerateDocumentationFile=false
+          dotnet publish src/cli/Synapse.Cli/Synapse.Cli.csproj --runtime "${{ matrix.target }}" -c Release -o "$release_name" -p:PublishSingleFile=true -p:GenerateDocumentationFile=false
           # Pack
           if [ "${{ matrix.target }}" == "win-x64" ]; then
             # Pack for Windows
@@ -227,63 +353,5 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: "synctl*"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
-  publish-eventstore-plugin:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v1
-      - name: Setup
-        uses: actions/setup-dotnet@v2
-        with:
-          dotnet-version: 8.0.0x
-      - name: Restore
-        run: dotnet restore
-      - name: Build
-        shell: bash
-        run: |
-          tag=$(git describe --tags --abbrev=0)
-          release_name="EventStoreRepositoryPlugin"
-          # Publish
-          dotnet publish src/plugins/persistence/Synapse.Plugins.Persistence.EventStore/Synapse.Plugins.Persistence.EventStore.csproj -c Release -o "${release_name}"
-          # Pack
-          tar czvf "${release_name}.tar.gz" "${release_name}"
-          # Delete output directory
-          rm -r "${release_name}"
-      - name: Publish
-        uses: softprops/action-gh-release@v1
-        with:
-          files: "EventStoreRepositoryPlugin*"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
-  publish-mongodb-plugin:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v1
-      - name: Setup
-        uses: actions/setup-dotnet@v2
-        with:
-          dotnet-version: 8.0.0x
-      - name: Restore
-        run: dotnet restore
-      - name: Build
-        shell: bash
-        run: |
-          tag=$(git describe --tags --abbrev=0)
-          release_name="MongoDBRepositoryPlugin"
-          # Publish
-          dotnet publish src/plugins/persistence/Synapse.Plugins.Persistence.MongoDB/Synapse.Plugins.Persistence.MongoDB.csproj -c Release -o "${release_name}"
-          # Pack
-          tar czvf "${release_name}.tar.gz" "${release_name}"
-          # Delete output directory
-          rm -r "${release_name}"
-      - name: Publish
-        uses: softprops/action-gh-release@v1
-        with:
-          files: "MongoDBRepositoryPlugin*"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
