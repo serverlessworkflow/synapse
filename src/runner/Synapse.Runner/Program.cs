@@ -41,7 +41,7 @@ var builder = Host.CreateDefaultBuilder()
         services.AddPythonScriptExecutor();
         services.AddSynapseHttpApiClient(http =>
         {
-            var configuration = new ServerlessWorkflow.Sdk.Models.Authentication.OAuth2AuthenticationSchemeDefinition()
+            var configuration = new ServerlessWorkflow.Sdk.Models.Authentication.OpenIDConnectSchemeDefinition()
             {
                 Authority = options.Api.BaseAddress,
                 Grant = OAuth2GrantType.ClientCredentials,

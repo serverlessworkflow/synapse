@@ -22,7 +22,7 @@ internal static class WorkflowDefinitionFactory
         {
             Document = new()
             {
-                Dsl = DslVersion.V010,
+                Dsl = DslVersion.V1Alpha2,
                 Name = "fake",
                 Version = "1.0.0",
             },

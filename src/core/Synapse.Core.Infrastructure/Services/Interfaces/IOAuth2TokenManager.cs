@@ -27,6 +27,6 @@ public interface IOAuth2TokenManager
     /// <param name="configuration">The configuration that defines how to generate the <see cref="OAuth2Token"/> to get</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>An <see cref="OAuth2Token"/></returns>
-    Task<OAuth2Token> GetTokenAsync(OAuth2AuthenticationSchemeDefinition configuration, CancellationToken cancellationToken = default);
+    Task<OAuth2Token> GetTokenAsync(OAuth2AuthenticationSchemeDefinitionBase configuration, CancellationToken cancellationToken = default);
 
 }

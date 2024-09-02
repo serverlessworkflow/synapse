@@ -13,9 +13,16 @@
 
 using IdentityModel.Client;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Neuroglia.Serialization;
+using ServerlessWorkflow.Sdk;
 using ServerlessWorkflow.Sdk.Models.Authentication;
 using System.Collections.Concurrent;
+using System.IdentityModel.Tokens.Jwt;
+using System.Net.Mime;
+using System.Security.Claims;
+using System.Text;
+using YamlDotNet.Core.Tokens;
 
 namespace Synapse.Core.Infrastructure.Services;
 
@@ -50,16 +57,49 @@ public class OAuth2TokenManager(ILogger<OAuth2TokenManager> logger, IJsonSeriali
     protected ConcurrentDictionary<string, OAuth2Token> Tokens { get; } = [];
 
     /// <inheritdoc/>
-    public virtual async Task<OAuth2Token> GetTokenAsync(OAuth2AuthenticationSchemeDefinition configuration, CancellationToken cancellationToken = default)
+    public virtual async Task<OAuth2Token> GetTokenAsync(OAuth2AuthenticationSchemeDefinitionBase configuration, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(configuration);
-        var tokenKey = $"{configuration.Client.Id}@{configuration.Authority}";
+        Uri tokenEndpoint;
+        if (configuration is OpenIDConnectSchemeDefinition)
+        {
+            var discoveryDocument = await this.HttpClient.GetDiscoveryDocumentAsync(configuration.Authority.OriginalString, cancellationToken).ConfigureAwait(false);
+            if (string.IsNullOrWhiteSpace(discoveryDocument.TokenEndpoint)) throw new NullReferenceException("The token endpoint is not documented by the OIDC discovery document");
+            tokenEndpoint = new(discoveryDocument.TokenEndpoint!);
+        }
+        else if (configuration is OAuth2AuthenticationSchemeDefinition oauth2) tokenEndpoint = oauth2.Endpoints.Token;
+        else throw new NotSupportedException($"The specified scheme type '{configuration.GetType().FullName}' is not supported in this context");
+        var tokenKey = $"{configuration.Client?.Id}@{configuration.Authority}";
         var properties = new Dictionary<string, string>()
         {
-            { "grant_type", configuration.Grant },
-            { "client_id", configuration.Client.Id }
+            { "grant_type", configuration.Grant }
         };
-        if (!string.IsNullOrWhiteSpace(configuration.Client.Secret)) properties["client_secret"] = configuration.Client.Secret;
+        switch (configuration.Client?.Authentication)
+        {
+            case null:
+                if(!string.IsNullOrWhiteSpace(configuration.Client?.Id) && !string.IsNullOrWhiteSpace(configuration.Client?.Secret))
+                {
+                    properties["client_id"] = configuration.Client.Id!;
+                    properties["client_secret"] = configuration.Client.Secret!;
+                }
+                break;
+            case OAuth2ClientAuthenticationMethod.Post:
+                this.ThrowIfInvalidClientCredentials(configuration.Client);
+                properties["client_id"] = configuration.Client.Id!;
+                properties["client_secret"] = configuration.Client.Secret!;
+                break;
+            case OAuth2ClientAuthenticationMethod.JwT:
+                this.ThrowIfInvalidClientCredentials(configuration.Client);
+                properties["client_assertion_type"] = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
+                properties["client_assertion"] = this.CreateClientAssertionJwt(configuration.Client.Id!, tokenEndpoint.OriginalString, new(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.Client.Secret!)), SecurityAlgorithms.HmacSha256));
+                break;
+            case OAuth2ClientAuthenticationMethod.PrivateKey:
+                this.ThrowIfInvalidClientCredentials(configuration.Client);
+                throw new NotImplementedException(); //todo
+            case OAuth2ClientAuthenticationMethod.Basic: 
+                break;
+            default: throw new NotSupportedException($"The specified OAUTH2 client authentication method '{configuration.Client?.Authentication}' is not supported");
+        }
         if (configuration.Scopes?.Count > 0) properties["scope"] = string.Join(" ", configuration.Scopes);
         if (configuration.Audiences?.Count > 0) properties["audience"] = string.Join(" ", configuration.Audiences);
         if (!string.IsNullOrWhiteSpace(configuration.Username)) properties["username"] = configuration.Username;
@@ -84,11 +124,18 @@ public class OAuth2TokenManager(ILogger<OAuth2TokenManager> logger, IJsonSeriali
             }
             else return token;
         }
-        var discoveryDocument = await this.HttpClient.GetDiscoveryDocumentAsync(configuration.Authority.OriginalString, cancellationToken).ConfigureAwait(false);
-        using var request = new HttpRequestMessage(HttpMethod.Post, discoveryDocument.TokenEndpoint)
+        using var content = configuration.Request.Encoding switch
         {
-            Content = new FormUrlEncodedContent(properties)
+            OAuth2RequestEncoding.FormUrl => (HttpContent)new FormUrlEncodedContent(properties),
+            OAuth2RequestEncoding.Json => new StringContent(this.JsonSerializer.SerializeToText(properties), Encoding.UTF8, MediaTypeNames.Application.Json),
+            _ => throw new NotSupportedException($"The specified OAUTH2 request encoding '{configuration.Request.Encoding}' is not supported")
         };
+        using var request = new HttpRequestMessage(HttpMethod.Post, tokenEndpoint) { Content = content };
+        if (configuration.Client?.Authentication == OAuth2ClientAuthenticationMethod.Basic)
+        {
+            this.ThrowIfInvalidClientCredentials(configuration.Client);
+            request.Headers.Authorization = new("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{configuration.Client.Id}:{configuration.Client.Secret}")));
+        }
         using var response = await this.HttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
         var json = await response.Content?.ReadAsStringAsync(cancellationToken)!;
         if (!response.IsSuccessStatusCode)
@@ -99,6 +146,38 @@ public class OAuth2TokenManager(ILogger<OAuth2TokenManager> logger, IJsonSeriali
         token = this.JsonSerializer.Deserialize<OAuth2Token>(json)!;
         this.Tokens[tokenKey] = token;
         return token;
+    }
+
+    /// <summary>
+    /// Throws a new <see cref="Exception"/> if the specified client credentials have not been properly configured, as required by the configured authentication method
+    /// </summary>
+    /// <param name="client">The client credentials to validate</param>
+    protected virtual void ThrowIfInvalidClientCredentials(OAuth2AuthenticationClientDefinition? client)
+    {
+        if(string.IsNullOrWhiteSpace(client?.Id) || string.IsNullOrWhiteSpace(client?.Secret)) throw new NullReferenceException($"The client id and client secret must be configured when using the '{client?.Authentication}' OAUTH2 authentication method");
+    }
+
+    /// <summary>
+    /// Creates a JSON Web Token (JWT) for client authentication using the provided client ID, audience and signing credentials.
+    /// </summary>
+    /// <param name="clientId">The client ID used as the subject and issuer of the JWT</param>
+    /// <param name="audience">The audience for which the JWT is intended, typically the token endpoint URL</param>
+    /// <param name="signingCredentials">The credentials used to signed the JWT</param>
+    /// <returns>A signed JWT in string format, to be used as a client assertion in OAuth 2.0 requests</returns>
+    protected virtual string CreateClientAssertionJwt(string clientId, string audience, SigningCredentials signingCredentials)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(clientId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(audience);
+        ArgumentNullException.ThrowIfNull(signingCredentials);
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var claims = new List<Claim>
+        {
+            new(JwtRegisteredClaimNames.Sub, clientId),
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
+        };
+        var token = new JwtSecurityToken(clientId, audience, claims, DateTime.UtcNow, DateTime.UtcNow.AddMinutes(5), signingCredentials);
+        return tokenHandler.WriteToken(token);
     }
 
 }

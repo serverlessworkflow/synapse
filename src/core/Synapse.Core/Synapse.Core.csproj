@@ -32,10 +32,10 @@
   </ItemGroup>
 
   <ItemGroup>
-	<PackageReference Include="Neuroglia.Data.Infrastructure.ResourceOriented" Version="4.15.0" />
-	<PackageReference Include="Neuroglia.Eventing.CloudEvents" Version="4.15.0" />
+	<PackageReference Include="Neuroglia.Data.Infrastructure.ResourceOriented" Version="4.15.2" />
+	<PackageReference Include="Neuroglia.Eventing.CloudEvents" Version="4.15.2" />
     <PackageReference Include="Semver" Version="2.3.0" />
-    <PackageReference Include="ServerlessWorkflow.Sdk" Version="1.0.0-alpha2.11" />
+    <PackageReference Include="ServerlessWorkflow.Sdk" Version="1.0.0-alpha2.12" />
   </ItemGroup>
 
 </Project>

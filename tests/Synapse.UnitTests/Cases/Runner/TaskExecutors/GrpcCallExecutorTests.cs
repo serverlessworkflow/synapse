@@ -53,7 +53,7 @@ public class GrpcCallExecutorTests
         {
             Document = new()
             {
-                Dsl = DslVersion.V010,
+                Dsl = DslVersion.V1Alpha2,
                 Namespace = Namespace.DefaultNamespaceName,
                 Name = "fake",
                 Version = "0.1.0"

@@ -18,8 +18,9 @@ namespace Synapse.Runner.Services;
 /// </summary>
 /// <param name="serviceProvider">The current <see cref="IServiceProvider"/></param>
 /// <param name="applicationLifetime">The current <see cref="IHostApplicationLifetime"/></param>
+/// <param name="logger">The service used to perform logging</param>
 /// <param name="options">The service used to access the current <see cref="RunnerOptions"/></param>
-internal class RunnerApplication(IServiceProvider serviceProvider, IHostApplicationLifetime applicationLifetime, IOptions<RunnerOptions> options)
+internal class RunnerApplication(IServiceProvider serviceProvider, IHostApplicationLifetime applicationLifetime, ILogger<RunnerApplication> logger, IOptions<RunnerOptions> options)
     : IHostedService, IDisposable
 {
 
@@ -41,6 +42,11 @@ internal class RunnerApplication(IServiceProvider serviceProvider, IHostApplicat
     protected IHostApplicationLifetime ApplicationLifetime { get; } = applicationLifetime;
 
     /// <summary>
+    /// Gets the service used to perform logging
+    /// </summary>
+    protected ILogger Logger { get; } = logger;
+
+    /// <summary>
     /// Gets the service used to interact with the Synapse API
     /// </summary>
     protected ISynapseApiClient ApiClient => this.ServiceProvider.GetRequiredService<ISynapseApiClient>();
@@ -60,7 +66,7 @@ internal class RunnerApplication(IServiceProvider serviceProvider, IHostApplicat
     {
         this.ApplicationLifetime.ApplicationStarted.Register(() =>
         {
-            Task.Run(() => this.RunAsync(cancellationToken), cancellationToken);
+            _ = Task.Run(async () => await this.RunAsync(cancellationToken), cancellationToken);
         });
         return Task.CompletedTask;
     }
@@ -72,17 +78,24 @@ internal class RunnerApplication(IServiceProvider serviceProvider, IHostApplicat
     /// <returns>A new awaitable <see cref="Task"/></returns>
     protected virtual async Task RunAsync(CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(this.Options.Workflow?.Instance)) throw new NullReferenceException("The workflow instance to run must be configured, which can be done using the application's appsettings.json file, using command line arguments or using environment variables");
-        var instance = await this.ApiClient.WorkflowInstances.GetAsync(this.Options.Workflow.GetInstanceName(), this.Options.Workflow.GetInstanceNamespace(), cancellationToken).ConfigureAwait(false) ?? throw new NullReferenceException($"Failed to find the specified workflow instance '{this.Options.Workflow.Instance}'");
-        var resource = await this.ApiClient.Workflows.GetAsync(instance.Spec.Definition.Name, instance.Spec.Definition.Namespace, cancellationToken).ConfigureAwait(false) ?? throw new NullReferenceException($"Failed to find the specified workflow '{instance.Spec.Definition.Namespace}.{instance.Spec.Definition.Name}'");
-        var definition = resource.Spec.Versions.FirstOrDefault(v => v.Document.Version == instance.Spec.Definition.Version) ?? throw new NullReferenceException($"Failed to find the specified version '{instance.Spec.Definition.Version}' of the workflow '{instance.Spec.Definition.Namespace}.{instance.Spec.Definition.Name}'");
-        var expressionLanguage = definition.Evaluate?.Language ?? RuntimeExpressions.Languages.JQ;
-        var expressionEvaluator = this.ServiceProvider.GetRequiredService<IExpressionEvaluatorProvider>().GetEvaluator(expressionLanguage)
-            ?? throw new NullReferenceException($"Failed to find an expression evaluator for the language '{expressionLanguage}' defined by workflow '{instance.Spec.Definition.Namespace}.{instance.Spec.Definition.Name}:{instance.Spec.Definition.Version}'");
-        var context = ActivatorUtilities.CreateInstance<WorkflowExecutionContext>(this.ServiceProvider, expressionEvaluator, definition, instance);
-        this.Executor = ActivatorUtilities.CreateInstance<WorkflowExecutor>(this.ServiceProvider, context);
-        await this.Executor.ExecuteAsync(cancellationToken).ConfigureAwait(false);
-        this.ApplicationLifetime.StopApplication();
+        try
+        {
+            if (string.IsNullOrWhiteSpace(this.Options.Workflow?.Instance)) throw new NullReferenceException("The workflow instance to run must be configured, which can be done using the application's appsettings.json file, using command line arguments or using environment variables");
+            var instance = await this.ApiClient.WorkflowInstances.GetAsync(this.Options.Workflow.GetInstanceName(), this.Options.Workflow.GetInstanceNamespace(), cancellationToken).ConfigureAwait(false) ?? throw new NullReferenceException($"Failed to find the specified workflow instance '{this.Options.Workflow.Instance}'");
+            var resource = await this.ApiClient.Workflows.GetAsync(instance.Spec.Definition.Name, instance.Spec.Definition.Namespace, cancellationToken).ConfigureAwait(false) ?? throw new NullReferenceException($"Failed to find the specified workflow '{instance.Spec.Definition.Namespace}.{instance.Spec.Definition.Name}'");
+            var definition = resource.Spec.Versions.FirstOrDefault(v => v.Document.Version == instance.Spec.Definition.Version) ?? throw new NullReferenceException($"Failed to find the specified version '{instance.Spec.Definition.Version}' of the workflow '{instance.Spec.Definition.Namespace}.{instance.Spec.Definition.Name}'");
+            var expressionLanguage = definition.Evaluate?.Language ?? RuntimeExpressions.Languages.JQ;
+            var expressionEvaluator = this.ServiceProvider.GetRequiredService<IExpressionEvaluatorProvider>().GetEvaluator(expressionLanguage)
+                ?? throw new NullReferenceException($"Failed to find an expression evaluator for the language '{expressionLanguage}' defined by workflow '{instance.Spec.Definition.Namespace}.{instance.Spec.Definition.Name}:{instance.Spec.Definition.Version}'");
+            var context = ActivatorUtilities.CreateInstance<WorkflowExecutionContext>(this.ServiceProvider, expressionEvaluator, definition, instance);
+            this.Executor = ActivatorUtilities.CreateInstance<WorkflowExecutor>(this.ServiceProvider, context);
+            await this.Executor.ExecuteAsync(cancellationToken).ConfigureAwait(false);
+            this.ApplicationLifetime.StopApplication();
+        }
+        catch(Exception ex)
+        {
+            this.Logger.LogError("An error occurred while running the specified workflow instance: {ex}", ex);
+        }
     }
 
     /// <inheritdoc/>
