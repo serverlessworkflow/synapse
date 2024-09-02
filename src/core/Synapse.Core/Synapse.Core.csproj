@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
 	<TargetFramework>net8.0</TargetFramework>
@@ -6,7 +6,7 @@
 	<ImplicitUsings>enable</ImplicitUsings>
 	<NeutralLanguage>en</NeutralLanguage>
 	<GenerateDocumentationFile>True</GenerateDocumentationFile>
-	<VersionPrefix>1.0.0</VersionPrefix>
+	<VersionPrefix>1.1.0</VersionPrefix>
 	<VersionSuffix>alpha1</VersionSuffix>
 	<AssemblyVersion>$(VersionPrefix)</AssemblyVersion>
 	<FileVersion>$(VersionPrefix)</FileVersion>
