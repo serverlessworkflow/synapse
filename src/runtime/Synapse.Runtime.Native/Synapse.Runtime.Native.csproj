@@ -5,6 +5,7 @@
 	<Nullable>enable</Nullable>
 	<ImplicitUsings>enable</ImplicitUsings>
 	<NeutralLanguage>en</NeutralLanguage>
+	<OutputType>Library</OutputType>
 	<GenerateDocumentationFile>True</GenerateDocumentationFile>
 	<VersionPrefix>1.1.0</VersionPrefix>
 	<VersionSuffix>alpha1</VersionSuffix>
