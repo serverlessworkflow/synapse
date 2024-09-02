@@ -224,7 +224,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         if (task.Definition is not ListenTaskDefinition listenTask) throw new ArgumentException("The specified task's definition must be a 'listen' task", nameof(task));
         if (this.Instance.Status?.Correlation?.Contexts?.TryGetValue(task.Instance.Reference.OriginalString, out var context) == true && context != null) return context;
         var @namespace = task.Workflow.Instance.GetNamespace()!;
-        var name = $"{@namespace}.{task.Workflow.Instance.GetName()}.{task.Instance.Id}";
+        var name = $"{task.Workflow.Instance.GetName()}.{task.Instance.Id}";
         Correlation? correlation = null;
         try { correlation = await this.Api.Correlations.GetAsync(name, @namespace, cancellationToken).ConfigureAwait(false); }
         catch { }

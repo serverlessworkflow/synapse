@@ -69,15 +69,14 @@ public class WorkflowScheduler(ILogger<WorkflowScheduler> logger, IResourceRepos
         if (this.WorkflowDefinition.Schedule == null) return;
         if (this.WorkflowDefinition.Schedule.On != null)
         {
-            var correlationName = $"{this.Workflow.Resource.GetName()}-schedule";
-            var correlation = await this.Resources.GetAsync<Correlation>(correlationName, this.Workflow.Resource.GetNamespace(), cancellationToken).ConfigureAwait(false);
+            var correlation = await this.Resources.GetAsync<Correlation>(this.Workflow.Resource.GetName(), this.Workflow.Resource.GetNamespace(), cancellationToken).ConfigureAwait(false);
             if (correlation != null) return;
             correlation = new Correlation()
             {
                 Metadata = new()
                 {
                     Namespace = this.Workflow.Resource.GetNamespace(),
-                    Name = correlationName,
+                    Name = this.Workflow.Resource.GetName(),
                     Labels = new Dictionary<string, string>()
                     {
                         { SynapseDefaults.Resources.Labels.Workflow, this.Workflow.Resource.GetQualifiedName() }
