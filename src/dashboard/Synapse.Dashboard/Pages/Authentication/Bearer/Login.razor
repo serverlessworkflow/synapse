@@ -1,0 +1,57 @@
+﻿@*
+    Copyright © 2024-Present The Synapse Authors
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*@
+
+@page "/authentication/bearer/login"
+@layout EmptyLayout
+@inject ISecurityTokenManager SecurityTokenManager
+@inject IJSRuntime JsRuntime
+@inject NavigationManager NavigationManager
+@inject ApplicationAuthenticationStateProvider AuthenticationStateManager
+
+<ApplicationTitle>Token Authentication</ApplicationTitle>
+<main class="d-flex flex-column align-items-center text-center">
+    <div class="col-sm-8 col-md-6 col-xl-3 m-auto">
+        <div class="mb-5">
+            <svg class="logo" viewBox="0 0 40 40">
+                <use href="#logo" />
+            </svg>
+            <h1 class="logo-typing">SYNAPSE</h1>
+        </div>
+        <input @ref="logininput" type="password" class="form-control mb-3 text-center" @onkeydown="OnEnterKeyDown" @oninput="e => token = (string?)e.Value" placeholder="Static bearer token" />
+        <button class="btn btn-primary w-100 mb-3" disabled="@string.IsNullOrWhiteSpace(token)" @onclick="OnLoginAsync">Login</button>
+    </div>
+</main>
+
+@code {
+
+    ElementReference logininput;
+    string? token;
+
+    async Task OnLoginAsync()
+    {
+        if (string.IsNullOrWhiteSpace(token)) return;
+        await SecurityTokenManager.SetTokenAsync(token);
+        AuthenticationStateManager.NotifyNotifyAuthenticationStateChanged();
+        NavigationManager.NavigateTo("/");
+    }
+
+    async Task OnEnterKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key != "Enter") return; 
+        await this.OnLoginAsync();
+    }
+
+}

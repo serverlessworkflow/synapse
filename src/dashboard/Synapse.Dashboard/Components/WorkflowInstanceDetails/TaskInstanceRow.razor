@@ -1,0 +1,65 @@
+﻿﻿@*
+    Copyright © 2024-Present The Synapse Authors
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*@
+
+@namespace Synapse.Dashboard.Components
+
+@if (TaskInstance != null) {
+    <tr @onclick="async _ => await OnToggleRow()" class="cursor-pointer">
+        <td>@TaskInstance.Reference</td>
+        <td class="text-center"><span class="badge rounded-pill badge rounded-pill border border-@TaskInstance.Status.GetColorClass() text-@TaskInstance.Status.GetColorClass()">@(TaskInstance.Status ?? TaskInstanceStatus.Pending)</span></td>
+        <td class="text-center">@(TaskInstance.StartedAt?.DateTime.RelativeFormat() ?? "-")</td>
+        <td class="text-center">@(TaskInstance.EndedAt?.DateTime.RelativeFormat() ?? "-")</td>
+        <td class="text-center">
+            @if (TaskInstance.StartedAt.HasValue == true && TaskInstance.EndedAt.HasValue == true)
+            {
+                @TaskInstance.EndedAt.Value.Subtract(TaskInstance.StartedAt.Value).ToString("hh\\:mm\\:ss\\.fff")
+            }
+            else
+            {
+                @("-")
+            }
+        </td>
+        <td class="text-end"><Icon Name="@(isOpen ? IconName.CaretUp : IconName.CaretDown)" /></td>
+    </tr>
+    @if (isOpen) {
+        <tr>
+            <td colspan="999">
+                <Collapse @ref="collapse">
+                    <TaskInstanceDetails TaskInstance="@TaskInstance" Tasks="@Tasks" />
+                </Collapse>
+            </td>
+        </tr>
+    }
+}
+
+@code {
+    [Parameter] public TaskInstance? TaskInstance { get; set; }
+    [Parameter] public IEnumerable<TaskInstance>? Tasks { get; set; }
+    bool isOpen = false;
+    Collapse? collapse;
+
+    async Task OnToggleRow()
+    {
+        isOpen = !isOpen;
+        StateHasChanged();
+        await Task.Delay(1); // tick to render the collapse, otherwise it will be null and won't show
+        if (collapse != null)
+        {
+            await collapse.ToggleAsync();
+        }
+        StateHasChanged();
+    }
+}

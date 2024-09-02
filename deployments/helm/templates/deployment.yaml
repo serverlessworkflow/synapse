@@ -1,0 +1,144 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-garnet
+  labels:
+    app: {{ .Release.Name }}-garnet
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-garnet
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-garnet
+    spec:
+      containers:
+      - name: garnet
+        image: "{{ .Values.garnet.image.repository }}:{{ .Values.garnet.image.tag }}"
+        imagePullPolicy: {{ .Values.garnet.image.pullPolicy }}
+        ports:
+        - containerPort: 6379
+        volumeMounts:
+        - name: garnet-data
+          mountPath: /data
+      volumes:
+      - name: garnet-data
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-garnet-data
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-api
+  labels:
+    app: {{ .Release.Name }}-api
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-api
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-api
+    spec:
+      containers:
+      - name: api
+        image: "{{ .Values.api.image.repository }}:{{ .Values.api.image.tag }}"
+        ports:
+        - containerPort: {{ .Values.api.service.port }}
+        env:
+        - name: CONNECTIONSTRINGS__REDIS
+          value: {{ .Values.global.redisConnectionString }}
+        - name: SYNAPSE_DASHBOARD_SERVE
+          value: "{{ .Values.api.env.SYNAPSE_DASHBOARD_SERVE }}"
+        - name: SYNAPSE_API_AUTH_TOKEN_FILE
+          value: {{ .Values.api.env.SYNAPSE_API_AUTH_TOKEN_FILE }}
+        volumeMounts:
+        - name: tokens
+          mountPath: /app/tokens.yaml
+          subPath: tokens.yaml
+      volumes:
+      - name: tokens
+        configMap:
+          name: {{ .Release.Name }}-tokens
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-operator
+  labels:
+    app: {{ .Release.Name }}-operator
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-operator
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-operator
+    spec:
+      containers:
+      - name: operator
+        image: "{{ .Values.operator.image.repository }}:{{ .Values.operator.image.tag }}"
+        env:
+        - name: CONNECTIONSTRINGS__REDIS
+          value: {{ .Values.global.redisConnectionString }}
+        - name: SYNAPSE_OPERATOR_NAMESPACE
+          value: {{ .Values.operator.env.SYNAPSE_OPERATOR_NAMESPACE }}
+        - name: SYNAPSE_OPERATOR_NAME
+          value: {{ .Values.operator.env.SYNAPSE_OPERATOR_NAME }}
+        - name: SYNAPSE_OPERATOR_RUNNER_API
+          value: {{ .Values.operator.env.SYNAPSE_OPERATOR_RUNNER_API }}
+        - name: DOCKER_HOST
+          value: {{ .Values.operator.env.DOCKER_HOST }}
+        volumeMounts:
+        - name: docker-sock
+          mountPath: /var/run/docker.sock
+      volumes:
+      - name: docker-sock
+        hostPath:
+          path: /var/run/docker.sock
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-correlator
+  labels:
+    app: {{ .Release.Name }}-correlator
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-correlator
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-correlator
+    spec:
+      containers:
+      - name: correlator
+        image: "{{ .Values.correlator.image.repository }}:{{ .Values.correlator.image.tag }}"
+        ports:
+        - containerPort: {{ .Values.correlator.service.port }}
+        env:
+        - name: CONNECTIONSTRINGS__REDIS
+          value: {{ .Values.global.redisConnectionString }}
+        - name: SYNAPSE_CORRELATOR_NAMESPACE
+          value: {{ .Values.correlator.env.SYNAPSE_CORRELATOR_NAMESPACE }}
+        - name: SYNAPSE_CORRELATOR_NAME
+          value: {{ .Values.correlator.env.SYNAPSE_CORRELATOR_NAME }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-garnet-data
+spec:
+  accessModes:
+    - {{ .Values.garnet.persistence.accessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.garnet.persistence.size }}

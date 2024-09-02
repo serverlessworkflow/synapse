@@ -1,0 +1,175 @@
+﻿﻿@*
+    Copyright © 2024-Present The Synapse Authors
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*@
+
+@namespace Synapse.Dashboard.Components
+
+@if (TaskInstance != null)
+{
+    <div class="details task-instance-details p-3">
+        <h6>Details</h6>
+        <div class="row mb-3">
+            <div class="col-md-12 col-lg-4 text-truncate" title="@TaskInstance.Name">
+                <div class="label">Name</div>
+                @TaskInstance.Name
+            </div>
+            <div class="col-md-12 col-lg-4 text-truncate" title="@TaskInstance.Reference">
+                <div class="label">Reference</div>
+                @TaskInstance.Reference                
+            </div>
+            <div class="col-md-12 col-lg-4">
+                <div class="label">Status</div>
+                <span class="badge rounded-pill badge rounded-pill border border-@TaskInstance.Status.GetColorClass() text-@TaskInstance.Status.GetColorClass()">@(TaskInstance.Status ?? TaskInstanceStatus.Pending)</span>
+                @if (!string.IsNullOrWhiteSpace(TaskInstance.StatusReason))
+                {
+                    <div class="fst-italic">@TaskInstance.StatusReason</div>
+                }
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-12 col-lg-4">
+                <div class="label">Start Time</div>
+                @(TaskInstance.StartedAt?.DateTime.RelativeFormat() ?? "-")
+            </div>
+            <div class="col-md-12 col-lg-4">
+                <div class="label">End Time</div>
+                @(TaskInstance.EndedAt?.DateTime.RelativeFormat() ?? "-")
+            </div>
+            <div class="col-md-12 col-lg-4">
+                <div class="label">Duration</div>
+                @if (TaskInstance.StartedAt.HasValue == true && TaskInstance.EndedAt.HasValue == true)
+                {
+                    @TaskInstance.EndedAt.Value.Subtract(TaskInstance.StartedAt.Value).ToString("hh\\:mm\\:ss\\.fff")
+                }
+                else
+                {
+                    @("-")
+                }
+            </div>
+        </div>
+        <div class="row mb-3">
+            <DocumentDetails class="mb-3" Label='Input' Reference="@TaskInstance.InputReference" />
+            <DocumentDetails class="mb-3" Label='Context' Reference="@TaskInstance.ContextReference" />
+            @if (TaskInstance.Error != null)
+            {
+                <DocumentDetails Label='Error' Document="@TaskInstance.Error" />
+            }
+            else if (!string.IsNullOrWhiteSpace(TaskInstance.OutputReference))
+            {
+                <DocumentDetails Label='Output' Reference="@TaskInstance.OutputReference" />
+            }
+        </div>
+        <h6 class="pt-3">Executed Tasks</h6>
+        @if (SubTasks == null || SubTasks.Count() == 0)
+        {
+            @("-")
+        }
+        else
+        {
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-center">Start Time</th>
+                        <th class="text-center">End Time</th>
+                        <th class="text-center">Duration</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var task in SubTasks)
+                    {
+                        <TaskInstanceRow TaskInstance="@task" Tasks="@Tasks"/>
+                    }
+                </tbody>
+            </table>
+        }
+        <h6 class="pt-3">Runs</h6>
+        @if (TaskInstance.Runs == null || TaskInstance.Runs.Count == 0)
+        {
+            @("-")
+        }
+        else
+        {
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Start Time</th>
+                        <th class="text-center">End Time</th>
+                        <th class="text-center">Duration</th>
+                        <th class="text-center">Outcome</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var run in TaskInstance.Runs)
+                    {
+                        <tr>
+                            <td>@run.StartedAt.DateTime.RelativeFormat()</td>
+                            <td class="text-center">@(run.EndedAt?.DateTime.RelativeFormat() ?? "-")</td>
+                            <td class="text-center">@(run.EndedAt.HasValue ? run.EndedAt.Value.Subtract(run.StartedAt).ToString("hh\\:mm\\:ss\\.fff") : "-")</td>
+                            <td class="text-center"><span class="badge rounded-pill badge rounded-pill border border-@run.Outcome.GetColorClass() text-@run.Outcome.GetColorClass()">@(run.Outcome ?? TaskInstanceStatus.Pending)</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        <h6 class="pt-3">Retries</h6>
+        @if (TaskInstance.Retries == null || TaskInstance.Retries.Count == 0)
+        {
+            @("-")
+        }
+        else
+        {
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Attempted At</th>
+                        <th class="text-center">Count</th>
+                        <th class="text-center">Cause</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var retry in TaskInstance.Retries)
+                    {
+                        <tr>
+                            <td>@retry.Time.DateTime.RelativeFormat()</td>
+                            <td class="text-center">@retry.Number</td>
+                            <td class="text-center">
+                                <DocumentDetails Label="Cause" Document="@retry.Cause" />
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+        <h6 class="pt-3">Raw</h6>
+        <DocumentDetails Label="Raw" Document="@TaskInstance" />
+    </div>
+}
+
+@code {
+    [Parameter] public TaskInstance? TaskInstance { get; set; }
+    [Parameter] public IEnumerable<TaskInstance>? Tasks { get; set; }
+
+    IEnumerable<TaskInstance> SubTasks
+    {
+        get
+         {
+            return TaskInstance == null ? [] : (this.Tasks ?? []).Where(t => t.ParentId == TaskInstance.Id);
+        }
+    }
+}

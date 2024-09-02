@@ -1,0 +1,136 @@
+﻿﻿@*
+    Copyright © 2024-Present The Synapse Authors
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*@
+
+@namespace Synapse.Dashboard.Layout
+@inherits LayoutComponentBase
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IOptions<ApplicationOptions> Options
+@inject NavigationManager NavigationManager
+
+<div class="page h-100 d-flex flex-column">    
+    <header class="header navbar navbar-expand-lg flex-row navbar-dark bg-dark-subtle">        
+        <a class="navbar-brand d-flex flex-row align-items-center justify-content-center" href="#">        
+            <svg class="logo" viewBox="-10 -10 60 60">
+                <use href="#logo" />
+            </svg>
+            <span class="logo-typing">SYNAPSE</span>
+        </a>
+        <nav class="navbar-collapse">
+            <ul class="navbar-nav">    
+                <AuthorizeView>
+                    <Authorized>
+                        <div class="dropdown">
+                            <button class="btn nav-link dropdown-toggle @(IsActive("", NavLinkMatch.All) || IsActive("workflows", NavLinkMatch.Prefix) || IsActive("workflow-instances", NavLinkMatch.Prefix) ? "active" : "")" type="button" id="workflowDropdownButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="btn-label">Workflows</span>
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="workflowDropdownButton">
+                                <li>
+                                    <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                                        <span class="btn-label">Definitions</span>
+                                    </NavLink>
+                                </li>
+                                <li>
+                                    <NavLink class="nav-link" href="workflow-instances" Match="NavLinkMatch.All">
+                                        <span class="btn-label">Instances</span>
+                                    </NavLink>
+                                </li>
+                            </ul>
+                        </div>
+                        <li class="nav-item">
+                            <NavLink class="nav-link" href="correlations" Match="NavLinkMatch.All">
+                                <span class="btn-label">Correlations</span>
+                            </NavLink>
+                        </li>
+                        <li class="nav-item">
+                            <div class="dropdown">
+                                <button class="btn nav-link dropdown-toggle @(IsActive("correlators", NavLinkMatch.Prefix) || IsActive("operators", NavLinkMatch.Prefix)  ? "active" : "")" type="button" id="servicesDropdownButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span class="btn-label">Services</span>
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="servicesDropdownButton">
+                                    <li>
+                                        <NavLink class="nav-link" href="correlators" Match="NavLinkMatch.All">
+                                            <span class="btn-label">Correlators</span>
+                                        </NavLink>
+                                    </li>
+                                    <li>
+                                        <NavLink class="nav-link" href="operators" Match="NavLinkMatch.All">
+                                            <span class="btn-label">Operators</span>
+                                        </NavLink>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                    </Authorized>
+                </AuthorizeView>
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="about" Match="NavLinkMatch.All">
+                        <span class="btn-label">About</span>
+                    </NavLink>
+                </li>
+            </ul>
+        </nav>
+        <AuthorizeView>
+            <Authorized>
+                <Dropdown Class="me-3">
+                    <DropdownToggleButton Class="text-muted">@user?.Identity?.Name</DropdownToggleButton>
+                    <DropdownMenu Position="DropdownMenuPosition.End">
+                        <DropdownItem>
+                            <NavLink class="nav-link mx-3 my-2" href="users/profile" Match="NavLinkMatch.All">
+                                <span class="btn-label">Profile</span>
+                            </NavLink>
+                        </DropdownItem>
+                        <DropdownItem>
+                            <NavLink class="nav-link mx-3" href="authentication/logout" Match="NavLinkMatch.All">
+                                <span class="btn-label">Logout</span>
+                            </NavLink>
+                        </DropdownItem>
+                    </DropdownMenu>
+                </Dropdown>
+            </Authorized>
+        </AuthorizeView>
+    </header>
+    <Synapse.Dashboard.Components.Breadcrumb class="d-flex align-items-center px-3 py-2" />
+    <main class="flex-grow d-flex flex-column p-3">
+        @Body
+    </main>
+</div>
+
+<Toasts class="p-3" AutoHide="true" Delay="2000" Placement="ToastsPlacement.MiddleCenter" />
+
+@code{
+
+    ClaimsPrincipal? user;
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+        AuthenticationStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
+        await base.OnInitializedAsync();
+    }
+
+    async void OnAuthenticationStateChanged(Task<AuthenticationState> authenticationStateTask)
+    {
+        user = (await authenticationStateTask).User;
+        this.StateHasChanged();
+    }
+
+    bool IsActive(string href, NavLinkMatch navLinkMatch = NavLinkMatch.Prefix)
+    {
+        var relativePath = NavigationManager.ToBaseRelativePath(NavigationManager.Uri).ToLower();
+        return navLinkMatch == NavLinkMatch.All ? relativePath == href.ToLower() : relativePath.StartsWith(href.ToLower());
+    }
+
+}

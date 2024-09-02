@@ -1,0 +1,238 @@
+﻿﻿@*
+    Copyright © 2024-Present The Synapse Authors
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*@
+
+
+@page "/workflows/details/{namespace}/{name}/{version?}/{instanceName?}"
+@using ServerlessWorkflow.Sdk.Models
+@using Synapse.Api.Client.Services
+@inherits NamespacedResourceManagementComponent<View, WorkflowDetailsStore, WorkflowDetailsState, WorkflowInstance>
+@inject IBreadcrumbManager BreadcrumbManager
+@inject NavigationManager NavigationManager
+
+<ApplicationTitle>Workflow @($"{Name}.{Namespace}:{version}")</ApplicationTitle>
+
+<div class="d-flex flex-grow mh-100">
+    <HorizontalCollapsible class="collapsible-instances">
+        <Label>Instances</Label>
+        <Content>
+            <WorkflowInstancesList class="h-100" 
+                                   Loading="@Loading"
+                                   WorkflowInstances="@Resources"
+                                   SelectedInstanceNames="@SelectedResourceNames"
+                                   ActiveRow="@instanceName"
+                                   Columns="@columns"
+                                   OnSearchInput="Store.SetSearchTerm"
+                                   OnShowDetails="OnShowInstanceDetails"
+                                   OnDelete="OnDeleteWorkflowInstanceAsync"
+                                   OnToggleSelected="Store.ToggleResourceSelection"
+                                   OnDeleteSelected="OnDeleteSelectedResourcesAsync" />
+            <Button Outline="true" Color="ButtonColor.Primary" @onclick="async _ => await Store.OnShowCreateInstanceAsync(workflowDefinition)" class="w-100 mt-3">
+                <Icon Name="IconName.Plus"/>
+            </Button>
+        </Content>
+    </HorizontalCollapsible>
+    <HorizontalCollapsible class="user-select-none position-relative">
+        <Label>Graph</Label>
+        <Content>
+            @if (workflowDefinition == null)
+            {
+                <div class="d-flex justify-content-center mt-5">
+                    <Loader />
+                </div>
+            }
+            else
+            {
+                <WorkflowDiagram 
+                    WorkflowDefinition="@workflowDefinition" 
+                    WorkflowInstances="@(workflowInstance != null ? [workflowInstance] : (Resources ?? []))"
+                    OnMouseUp="async (e) => await Store.SelectNodeInEditor(e)"
+                />
+            }
+        </Content>
+    </HorizontalCollapsible>
+    <HorizontalCollapsible>
+        <Label>Definition</Label>
+        <Content>
+            @if (workflowDefinition == null)
+            {
+                <div class="d-flex justify-content-center mt-5">
+                    <Loader />
+                </div>
+            }
+            else
+            {
+                <div class="d-flex flex-column h-100 mh-100">
+                    <div class="d-flex justify-content-between mb-2">
+                        <div>
+                            <Button Outline="true" Color="ButtonColor.Primary" Size="ButtonSize.Small" class="ms-2" @onclick="_ => OnCreateWorkflowVersion()">
+                                <Icon Name="IconName.FileEarmarkPlus" />
+                            </Button>
+                            <Button Outline="true" Color="ButtonColor.Primary" Size="ButtonSize.Small" class="ms-2" @onclick="_ => Store.OnCopyToClipboard()">
+                                <Icon Name="IconName.Clipboard" />
+                            </Button>
+                        </div>
+                        <PreferredLanguageSelector PreferedLanguageChange="Store.ToggleTextBasedEditorLanguageAsync" />
+                    </div>
+                    <div class="flex-grow">
+                        <StandaloneCodeEditor @ref="Store.TextEditor"
+                                                ConstructionOptions="Store.StandaloneEditorConstructionOptions"
+                                                OnDidInit="Store.OnTextBasedEditorInitAsync"
+                                                CssClass="h-100" />
+                    </div>
+                </div>
+                
+            }
+        </Content>
+    </HorizontalCollapsible>
+    @if (workflowInstance != null)
+    {
+        <HorizontalCollapsible OnClose="OnCloseWorkflowInstance">
+            <Label>Instance</Label>
+            <Content>
+                <div class="d-flex flex-column h-100 mh-100">
+                    <WorkflowInstanceDetails WorkflowInstance="workflowInstance"/>
+                </div>
+            </Content>
+        </HorizontalCollapsible>
+    }
+</div>
+
+<Modal @ref="Store.Modal" IsVerticallyCentered="true" />
+
+<ConfirmDialog @ref="Dialog" />
+
+@code
+{
+    string version = null!;
+    string? instanceName = null!;
+    Workflow workflow = null!;
+    WorkflowDefinition workflowDefinition = null!;
+    WorkflowInstance? workflowInstance;
+    readonly IEnumerable<string> columns = [
+        "Name",
+    "Status",
+    "Start Time",
+    "End Time",
+    "Delete"
+    ];
+
+    [Parameter] public string? Version { get; set; }
+    [Parameter] public string? InstanceName { get; set; }
+
+    /// <inheritdoc/>
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync().ConfigureAwait(false);
+        UpdateBreadcrumb();
+        Store.WorkflowInstanceName.Subscribe(value => OnStateChanged(_ => instanceName = value), token: CancellationTokenSource.Token);
+        Store.WorkflowDefinition.Where(value => value != null).Subscribe(value => OnStateChanged(_ => workflowDefinition = value!), token: CancellationTokenSource.Token);
+        Store.WorkflowDefinitionVersion.Where(value => !string.IsNullOrWhiteSpace(value)).Subscribe(value =>
+        {
+            OnStateChanged(_ => version = value!);
+            UpdateBreadcrumb();
+        }, token: CancellationTokenSource.Token);
+        Store.WorkflowInstance.Subscribe(value =>
+        {
+            OnStateChanged(_ => workflowInstance = value);
+            UpdateBreadcrumb();
+        }, token: CancellationTokenSource.Token);
+        Store.Workflow.Where(value => value != null).Subscribe(value =>
+        {
+            OnStateChanged(_ => workflow = value!);
+            UpdateBreadcrumb();
+        }, token: CancellationTokenSource.Token);
+    }
+
+    /// <inheritdoc/>
+    protected override void OnParametersSet()
+    {
+        if (Version != version)
+        {
+            Store.SetWorkflowDefinitionVersion(Version);
+        }
+        if (InstanceName != instanceName)
+        {
+            Store.SetWorkflowInstanceName(InstanceName);
+        }
+    }
+
+    /// <summary>
+    /// Updates the breadcrumb
+    /// </summary>
+    void UpdateBreadcrumb()
+    {
+        BreadcrumbManager.Use(Breadcrumbs.Workflows);
+        BreadcrumbManager.Add(new($"{Name}.{Namespace}", $"/workflows/details/{Namespace}/{Name}/latest"));
+        if (workflow != null)
+        {
+            BreadcrumbManager.Add(new(VersionSelector()));
+        }
+        if (workflowInstance != null)
+        {
+            BreadcrumbManager.Add(new(workflowInstance.GetName(), $"/workflows/details/{Namespace}/{Name}/{Version}/{workflowInstance.GetName()}"));
+        }
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// Renders the workflows instances table's title
+    /// </summary>
+    /// <returns></returns>
+    RenderFragment VersionSelector() => __builder =>
+    {
+        <select class="form-select w-auto border-0 py-0 ps-0 pe-4 text-decoration-underline text-primary" style="background-position: right 0rem center;" @onchange="(e) => Store.SetWorkflowDefinitionVersion(e.Value!.ToString())">
+            @if (workflow != null)
+            {
+                foreach (var definitionVersion in workflow.Spec.Versions)
+                {
+                    <option value="@definitionVersion.Document.Version" selected="@(definitionVersion.Document.Version == version)">@definitionVersion.Document.Version</option>
+                }
+            }
+        </select>
+    };
+
+    /// <summary>
+    /// Handles the deletion of the targeted <see cref="WorkflowInstance"/>
+    /// </summary>
+    /// <param name="instance">The <see cref="WorkflowInstance"/> to delete</param>
+    protected async Task OnDeleteWorkflowInstanceAsync(WorkflowInstance instance)
+    {
+        if (this.Dialog == null) return;
+        var confirmation = await this.Dialog.ShowAsync(
+            title: $"Are you sure you want to delete '{instance.Metadata.Name}'?",
+            message1: $"The workflow instance will be permanently deleted. Are you sure you want to proceed ?",
+            confirmDialogOptions: new ConfirmDialogOptions()
+                {
+                    YesButtonColor = ButtonColor.Danger,
+                    YesButtonText = "Delete",
+                    NoButtonText = "Abort",
+                    IsVerticallyCentered = true
+                }
+        );
+        if (!confirmation) return;
+        await this.Store.DeleteWorkflowInstanceAsync(instance);
+    }
+
+    void OnCreateWorkflowVersion() => this.NavigationManager.NavigateTo($"/workflows/new/{Namespace}/{Name}");
+
+    void OnShowInstanceDetails(WorkflowInstance instance) => NavigationManager.NavigateTo($"/workflows/details/{Namespace}/{Name}/{version}/{instance.GetName()}");
+
+    void OnCloseWorkflowInstance()
+    {
+        NavigationManager.NavigateTo($"/workflows/details/{Namespace}/{Name}/{version}");
+        StateHasChanged();
+    }
+}

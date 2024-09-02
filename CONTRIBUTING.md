@@ -1,91 +1,29 @@
-# Contributing to Synapse
+# Contributing
 
-This page contains information about reporting issues, how to suggest changes as
-well as the guidelines we follow for how our documents are formatted.
+Thank you for considering contributing to the Synapse project! Your contributions help improve the project and are greatly appreciated. Please follow the guidelines below to ensure a smooth and effective contribution process.
 
-## Table of Contents
+## How to Contribute
 
-- [Reporting an Issue](#reporting-an-issue)
-- [Suggesting a Change](#suggesting-a-change)
-- [Spec Formatting Conventions](#spec-formatting-conventions)
+### Reporting Issues
 
-## Reporting an Issue
+If you encounter any bugs or have suggestions for improvements, please report them using GitHub Issues:
 
-To report an issue, or to suggest an idea for a change that you haven't had time
-to write-up yet, open an [issue](https://github.com/serverlessworkflow/synapse/issues). It
-is best to check our existing
-[issues](https://github.com/serverlessworkflow/synapse/issues) first to see if a similar
-one has already been opened and discussed.
+1. Go to the [Issues page](https://github.com/serverlessworkflow/synapse/issues) of the repository.
+2. Check if the issue has already been reported. If not, click on "New issue".
+3. Provide a clear and concise description of the problem or suggestion. Include any relevant details or screenshots.
 
-## Suggesting a Change
+### Suggesting Enhancements
 
-To suggest a change to this repository, submit a
-[pull request](https://github.com/serverlessworkflow/synapse/pulls) (PR) with the complete
-set of changes you'd like to see. See the
-[Spec Formatting Conventions](#spec-formatting-conventions) section for the
-guidelines we follow for how documents are formatted.
+If you have ideas for new features or enhancements:
 
-Each PR must be signed per the following section.
+1. Open a new issue on the [Issues page](https://github.com/serverlessworkflow/synapse/issues).
+2. Clearly describe the enhancement or feature request and explain why it would be valuable.
 
-### Assigning and Owning work
+### Submitting Pull Requests
 
-If you want to own and work on an issue, add a comment or “#dibs” it asking
-about ownership. A maintainer will then add the Assigned label and modify the
-first comment in the issue to include `Assigned to: @person`
+To contribute code changes, please follow these steps:
 
-## Spec Formatting Conventions
-
-Documents in this repository will adhere to the following rules:
-
-- Lines are wrapped at 80 columns (when possible)
-- Specifications will use [RFC2119](https://tools.ietf.org/html/rfc2119)
-  keywords to indicate normative requirements
-
-## Checks
-
-### Markdown style
-
-Markdown files should be properly formatted before a pull request is sent out.
-In this repository we follow the
-[markdownlint rules](https://github.com/DavidAnson/markdownlint#rules--aliases)
-with some customizations. See [markdownlint](.markdownlint.yaml) or
-[settings](.vscode/settings.json) for details.
-
-We highly encourage to use line breaks in markdown files at `80` characters
-wide. There are tools that can do it for you effectively. Please submit proposal
-to include your editor settings required to enable this behavior so the out of
-the box settings for this repository will be consistent.
-
-If you are using Visual Studio Code,
-you can also use the `fixAll` command of the
-[vscode markdownlint extension](https://github.com/DavidAnson/vscode-markdownlint).
-
-To otherwise check for style violations, use
-
-```bash
-# Ruby and gem are required for mdl
-gem install mdl
-mdl -c .mdlrc .
-```
-
-To fix style violations, follow the
-[instruction](https://github.com/DavidAnson/markdownlint#optionsresultversion)
-with the Node version of markdownlint.
-
-### Typos
-
-In addition, please make sure to clean up typos before you submit the change.
-
-To check for typos, you may use
-
-```bash
-# Golang is needed for the misspell tool.
-make install-misspell
-make misspell
-```
-
-To quickly fix typos, use
-
-```bash
-make misspell-correction
-```
+1. **Fork the repository**: Create a personal fork of the repository on GitHub.
+2. **Clone your fork**: Clone the forked repository to your local machine.
+   ```bash
+   git clone https://github.com/<your-username>/synapse.git

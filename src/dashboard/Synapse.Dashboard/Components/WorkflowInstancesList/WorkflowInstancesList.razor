@@ -1,0 +1,405 @@
+﻿﻿@*
+    Copyright © 2024-Present The Synapse Authors
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*@
+@namespace Synapse.Dashboard.Components
+@inject JSInterop jsInterop
+
+<div class="table-container @ClassNames">
+    @if (Loading)
+    {
+        <Loader />
+    }
+    <div class="d-flex flex-row justify-content-between align-items-center">
+        @Title
+        <span>@(WorkflowInstances?.Count() ?? 0) items</span>
+        <div class="d-flex">
+            @if (Workflows != null && Workflows.Count() > 0) {
+                <select class="form-select m-2" @onchange="OnSelectWorkflowChangedAsync">
+                    <option value="">All workflows</option>
+                    @foreach (var workflowResource in Workflows)
+                    {
+                        <option value="@workflowResource.GetQualifiedName()">@workflowResource.GetQualifiedName()</option>
+                    }
+                </select>
+            }
+            @if (Namespaces != null && Namespaces.Count() > 0) {
+                <select class="form-select m-2" @onchange="OnSelectNamespaceChangedAsync">
+                    <option value="">All namespaces</option>
+                    @foreach (var namespaceResource in Namespaces)
+                    {
+                        <option value="@namespaceResource.GetName()" selected="@(@namespaceResource.GetName() == @namespace)">@namespaceResource.GetName()</option>
+                    }
+                </select>
+            }
+            @if (Operators != null && Operators.Count() > 0)
+            {
+                <select class="form-select m-2" @onchange="OnSelectOperatorChangedAsync">
+                    <option value="">All operators</option>
+                    @foreach (var operatorResource in Operators)
+                    {
+                        var name = operatorResource.GetName() + "." + operatorResource.GetNamespace();
+                        <option value="@name" selected="@(name == operatorName)">@name</option>
+                    }
+                </select>
+            }
+            <input type="search" class="form-control rounded my-2 me-2" placeholder="Search" @oninput="OnSearchInputAsync" />
+            <div class="dropdown d-flex align-content-center">
+                <button class="btn btn-sm btn-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="" @onclick:stopPropagation="true"><i class="bi bi-three-dots-vertical"></i></button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item @(selectedInstanceNames.Count() == 0 ? "text-mute" : "text-danger")" href="#" @onclick="OnDeleteSelected" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Trash" /> Delete selected</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                @foreach (var column in knownColumns)
+                {
+                    if ((Columns.Count() == 0 && column != "Delete") || Columns.Contains(column))
+                    {
+                        <th class="sticky-header text-@GetColumnAlignment(column)">@(column != "Action" && column != "Delete" ? column : "")</th>
+                    }
+                }
+                <th class="sticky-header text-center align-middle">
+                    <input @ref="checkboxAll" type="checkbox" @onclick="async (_) => await OnToggleSelected.InvokeAsync(null)" @onclick:preventDefault="true" @onclick:stopPropagation="true" />
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (WorkflowInstances != null && WorkflowInstances.Any())
+            {
+                <Virtualize Context="instance" Items="@WorkflowInstances.ToList()">
+                    <tr @onclick="async _ => await OnShowClickedAsync(instance)" class="cursor-pointer @(ActiveRow == instance.GetName() ? "table-active" : "")">
+                        @foreach (var column in knownColumns)
+                        {
+                            if ((Columns.Count() == 0 && column != "Delete") || Columns.Contains(column))
+                            {
+                                <td class="text-@GetColumnAlignment(column)">
+                                    @switch(column)
+                                    {
+                                        case "Name":
+                                            @instance.Metadata.Name
+                                            break;
+                                        case "Namespace":
+                                            <a href="#" @onclick="async (_) => { if (OnNamespaceChanged.HasDelegate) await OnNamespaceChanged.InvokeAsync(instance.Metadata.Namespace); }" @onclick:preventDefault="true" @onclick:stopPropagation="true">@instance.Metadata.Namespace</a>
+                                            <a href="/namespaces/@instance.Metadata.Namespace" @onclick:stopPropagation="true"><Icon Name="IconName.BoxArrowUpRight" Class="small" /></a>
+                                            break;
+                                        case "Definition":
+                                            {
+                                                var definitionSegments = instance.Spec.Definition.ToString().Split(':');
+                                                var version = definitionSegments.Last();
+                                                var nameNs = definitionSegments.First();
+                                                var segments = nameNs.Split('.');
+                                                var ns = segments.Last();
+                                                var name = segments.Take(segments.Count() - 1).Join('.');
+                                                <a href="#" @onclick="async (_) => { if (OnWorkflowChanged.HasDelegate) await OnWorkflowChanged.InvokeAsync(nameNs); }" @onclick:preventDefault="true" @onclick:stopPropagation="true">@instance.Spec.Definition.ToString()</a>
+                                                <a href="/workflows/details/@ns/@name/@version" @onclick:stopPropagation="true"><Icon Name="IconName.BoxArrowUpRight" Class="small" /></a>
+                                                break;
+                                            }
+                                        case "Status":
+                                            <span class="badge rounded-pill badge rounded-pill border border-@instance.Status?.Phase.GetColorClass() text-@instance.Status?.Phase.GetColorClass()">@(instance.Status?.Phase ?? WorkflowInstanceStatusPhase.Pending)</span>
+                                            break;
+                                        case "Creation Time":
+                                            @instance.Metadata.CreationTimestamp?.DateTime.RelativeFormat()
+                                            break;
+                                        case "Start Time":
+                                            @(instance.Status?.StartedAt?.DateTime.RelativeFormat() ?? "-")
+                                            break;
+                                        case "End Time":
+                                            @(instance.Status?.EndedAt?.DateTime.RelativeFormat() ?? "-")
+                                            break;
+                                        case "Duration":
+                                            @(instance.Status?.StartedAt.HasValue == true && instance.Status?.EndedAt.HasValue == true ? instance.Status.EndedAt.Value.Subtract(instance.Status.StartedAt.Value).ToString("hh\\:mm\\:ss\\.fff") : "-")
+                                            break;
+                                        case "Operator":
+                                            {
+                                                @if (instance.Metadata.Labels?.TryGetValue(SynapseDefaults.Resources.Labels.Operator, out var operatorName) == true && !string.IsNullOrWhiteSpace(operatorName))
+                                                {
+                                                        var operatorSegments = operatorName.Split(".");
+                                                    var ns = operatorSegments.Last();
+                                                    var name = operatorSegments.Take(operatorSegments.Count() - 1).Join('.');
+                                                    <a href="#" @onclick="async (_) => { if(OnOperatorChanged.HasDelegate) await OnOperatorChanged.InvokeAsync(operatorName); }" @onclick:preventDefault="true" @onclick:stopPropagation="true">@operatorName</a>
+                                                    <a href="/operators/@ns/@name" @onclick:stopPropagation="true"><Icon Name="IconName.BoxArrowUpRight" Class="small" /></a>
+                                                }
+                                                else
+                                                {
+                                                    <span>-</span>
+                                                }
+                                                break;
+                                            }
+                                        case "Actions":
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="" @onclick:stopPropagation="true"><i class="bi bi-three-dots-vertical"></i></button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="#" @onclick="async _ => await OnShowClickedAsync(instance)" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Eye" /> View</a></li>
+                                                    <li><a class="dropdown-item text-danger" href="#" @onclick="async _ => await OnDeleteClickedAsync(instance)" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Trash" /> Delete</a></li>
+                                                </ul>
+                                            </div>
+                                            break;
+                                        case "Delete":
+                                            <button class="btn btn-sm text-danger" @onclick="async _ => await OnDeleteClickedAsync(instance)" @onclick:stopPropagation="true"><Icon Name="IconName.Trash" /></button>
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                </td>
+                            }
+                        }
+                        <td class="text-center align-middle">
+                            <input type="checkbox" checked="@selectedInstanceNames.Contains(instance.GetName())" @onclick="async (_) => await OnToggleSelected.InvokeAsync(instance.GetName())" @onclick:preventDefault="true" @onclick:stopPropagation="true" />
+                        </td>
+                    </tr>
+                </Virtualize>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+
+    protected string? ClassNames => cssClass;
+
+    string? cssClass;
+    [Parameter] public string? Class { get; set; }
+    RenderFragment? title;
+    [Parameter] public RenderFragment? Title { get; set; }
+    bool loading = true;
+    [Parameter] public bool Loading { get; set; } = true;
+    IEnumerable<string> columns = [];
+    [Parameter] public IEnumerable<string> Columns { get; set; } = [];
+    IEnumerable<WorkflowInstance>? workflowInstances;
+    [Parameter] public IEnumerable<WorkflowInstance>? WorkflowInstances { get; set; }
+    IEnumerable<string> selectedInstanceNames = [];
+    [Parameter] public IEnumerable<string> SelectedInstanceNames { get; set; } = [];
+    IEnumerable<Workflow>? workflows { get; set; }
+    [Parameter] public IEnumerable<Workflow>? Workflows { get; set; }
+    IEnumerable<Namespace>? namespaces { get; set; }
+    [Parameter] public IEnumerable<Namespace>? Namespaces { get; set; }
+    string? @namespace { get; set; }
+    [Parameter] public string? Namespace { get; set; }
+    IEnumerable<Operator>? operators { get; set; }
+    [Parameter] public IEnumerable<Operator>? Operators { get; set; }
+    string? operatorName { get; set; }
+    [Parameter] public string? OperatorName { get; set; }
+    string? activeRow { get; set; }
+    [Parameter] public string? ActiveRow { get; set; }
+
+    [Parameter] public EventCallback<string?> OnWorkflowChanged { get; set; }
+    [Parameter] public EventCallback<string?> OnNamespaceChanged { get; set; }
+    [Parameter] public EventCallback<string?> OnOperatorChanged { get; set; }
+    [Parameter] public EventCallback<string?> OnSearchInput { get; set; }
+    [Parameter] public EventCallback<WorkflowInstance> OnShowDetails { get; set; }
+    [Parameter] public EventCallback<string?> OnToggleSelected { get; set; }
+    [Parameter] public EventCallback<WorkflowInstance> OnDelete { get; set; }
+    [Parameter] public EventCallback OnDeleteSelected { get; set; }
+
+    IEnumerable<string> knownColumns = [
+        "Name",
+    "Namespace",
+    "Definition",
+    "Status",
+    "Creation Time",
+    "Start Time",
+    "End Time",
+    "Duration",
+    "Operator",
+    "Actions",
+    "Delete"
+    ];
+
+    ElementReference checkboxAll = default!;
+
+    bool shouldRender = true;
+
+    /// <inheritdoc />
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        if (cssClass != Class)
+        {
+            cssClass = Class;
+            shouldRender = true;
+        }
+        if (title != Title)
+        {
+            title = Title;
+            shouldRender = true;
+        }
+        if (loading != Loading)
+        {
+            loading = Loading;
+            shouldRender = true;
+        }
+        if (columns != Columns)
+        {
+            columns = Columns;
+            shouldRender = true;
+        }
+        if (workflowInstances != WorkflowInstances)
+        {
+            workflowInstances = WorkflowInstances;
+            shouldRender = true;
+        }
+        if (workflows != Workflows)
+        {
+            workflows = Workflows;
+            shouldRender = true;
+        }
+        if (namespaces != Namespaces)
+        {
+            namespaces = Namespaces;
+            shouldRender = true;
+        }
+        if (@namespace != Namespace)
+        {
+            this.@namespace = Namespace;
+            shouldRender = true;
+        }
+        if (operators != Operators)
+        {
+            operators = Operators;
+            shouldRender = true;
+        }
+        if (operatorName != OperatorName)
+        {
+            operatorName = OperatorName;
+            shouldRender = true;
+        }
+        if (selectedInstanceNames != SelectedInstanceNames)
+        {
+            selectedInstanceNames = SelectedInstanceNames;
+
+            if (selectedInstanceNames.Count() == 0)
+            {
+                await this.jsInterop.SetCheckboxStateAsync(checkboxAll, Dashboard.CheckboxState.Unchecked);
+            }
+            else if (selectedInstanceNames.Count() == (workflowInstances?.Count() ?? 0))
+            {
+                await this.jsInterop.SetCheckboxStateAsync(checkboxAll, Dashboard.CheckboxState.Checked);
+            }
+            else
+            {
+                await this.jsInterop.SetCheckboxStateAsync(checkboxAll, Dashboard.CheckboxState.Indeterminate);
+            }
+            shouldRender = true;
+        }
+        if (activeRow != ActiveRow)
+        {
+            activeRow = ActiveRow;
+            await Task.Delay(1);
+            shouldRender = true;
+        }
+    }
+
+    /// <inheritdoc />
+    protected override bool ShouldRender()
+    {
+        if (!shouldRender) return false;
+        shouldRender = false;
+        return true;
+    }
+
+    /// <summary>
+    /// Gets the text alignment of the provided column
+    /// </summary>
+    /// <param name="column">The column to get the alignment for</param>
+    /// <returns></returns>
+    string GetColumnAlignment(string column)
+    {
+        return column == "Name" || column == "Namespace"
+            ? "start"
+            : column == "Action"
+                ? "end"
+                : "center";
+    }
+
+    /// <summary>
+    /// Handles workflow selection changes
+    /// </summary>
+    /// <param name="e">the <see cref="ChangeEventArgs"/> to handle</param>
+    /// <returns></returns>
+    private async Task OnSelectWorkflowChangedAsync(ChangeEventArgs e)
+    {
+        if (this.OnWorkflowChanged.HasDelegate)
+        {
+            await this.OnWorkflowChanged.InvokeAsync(e.Value?.ToString());
+        }
+    }
+
+    /// <summary>
+    /// Handles namespace selection changes
+    /// </summary>
+    /// <param name="e">the <see cref="ChangeEventArgs"/> to handle</param>
+    /// <returns></returns>
+    private async Task OnSelectNamespaceChangedAsync(ChangeEventArgs e)
+    {
+        if (this.OnNamespaceChanged.HasDelegate)
+        {
+            await this.OnNamespaceChanged.InvokeAsync(e.Value?.ToString());
+        }
+    }
+
+    /// <summary>
+    /// Handles operator selection changes
+    /// </summary>
+    /// <param name="e">the <see cref="ChangeEventArgs"/> to handle</param>
+    /// <returns></returns>
+    private async Task OnSelectOperatorChangedAsync(ChangeEventArgs e)
+    {
+        if (this.OnOperatorChanged.HasDelegate)
+        {
+            await this.OnOperatorChanged.InvokeAsync(e.Value?.ToString());
+        }
+    }
+
+    /// <summary>
+    /// Handles search input value changes
+    /// </summary>
+    /// <param name="e">the <see cref="ChangeEventArgs"/> to handle</param>
+    protected async Task OnSearchInputAsync(ChangeEventArgs e)
+    {
+        if (this.OnSearchInput.HasDelegate)
+        {
+            await this.OnSearchInput.InvokeAsync(e.Value?.ToString());
+        }
+    }
+
+    /// <summary>
+    /// Handles the click on the show button
+    /// </summary>
+    /// <param name="instance"></param>
+    /// <returns></returns>
+    protected async Task OnShowClickedAsync(WorkflowInstance instance)
+    {
+        if (this.OnShowDetails.HasDelegate)
+        {
+            await this.OnShowDetails.InvokeAsync(instance);
+        }
+    }
+
+    /// <summary>
+    /// Handles the clikc on the delete button
+    /// </summary>
+    /// <param name="instance"></param>
+    /// <returns></returns>
+    protected async Task OnDeleteClickedAsync(WorkflowInstance instance)
+    {
+        if (this.OnDelete.HasDelegate)
+        {
+            await this.OnDelete.InvokeAsync(instance);
+        }
+    }
+}

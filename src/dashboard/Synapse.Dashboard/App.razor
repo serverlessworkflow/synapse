@@ -1,12 +1,12 @@
-﻿@* 
-    Copyright © 2022-Present The Synapse Authors
-    <p>
+﻿@*
+    Copyright © 2024-Present The Synapse Authors
+
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
-    <p>
+
     http://www.apache.org/licenses/LICENSE-2.0
-    <p>
+
     Unless required by applicable law or agreed to in writing, software
     distributed under the License is distributed on an "AS IS" BASIS,
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,68 +14,66 @@
     limitations under the License.
 *@
 
-@using Microsoft.AspNetCore.SignalR.Client
-@using Neuroglia.Data.Flux
-@using Neuroglia.Data.Flux.Components
-@using System.Reactive.Linq
-@using Newtonsoft.Json.Linq
-@using Synapse.Dashboard.CloudEvents
-@using Synapse.Integration.Events.Correlations
-@using Synapse.Integration.Events.WorkflowActivities
-@using Synapse.Integration.Events.WorkflowInstances
-@using Synapse.Integration.Events.Workflows
 @implements IDisposable
-@inject IServiceProvider ServiceProvider
-@inject HubConnection HubConnection
-@inject IIntegrationEventStream IntegrationEventStream
-@inject IDispatcher Dispatcher;
-@inject Neuroglia.Mapping.IMapper Mapper
+@inject IApplicationLayout Layout
 
-<FluxStore />
-<Router AppAssembly="@typeof(App).Assembly">
-    <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
-        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
-    </Found>
-    <NotFound>
-        <PageTitle>Not found</PageTitle>
-        <LayoutView Layout="@typeof(MainLayout)">
-            <p role="alert">Sorry, there's nothing at this address.</p>
-        </LayoutView>
-    </NotFound>
-</Router>
+<CascadingAuthenticationState>
+    <AuthorizeView>
+        <Authorized>
+            @RouterWithLayout(typeof(MainLayout))
+        </Authorized>
+        <NotAuthorized>
+            @RouterWithLayout(typeof(EmptyLayout))
+        </NotAuthorized>
+    </AuthorizeView>
+</CascadingAuthenticationState>
 
 @code
 {
-
-    private readonly List<IDisposable> subscriptions = new();
+    // see https://github.com/dotnet/aspnetcore/issues/39456
+    RenderFragment RouterWithLayout(Type layoutType) => __builder =>
+    {
+        <Router AppAssembly="@typeof(Program).Assembly">
+            <Found Context="routeData">
+                <PageTitle>Synapse - @Layout.Title?.ChildContent</PageTitle>
+                    <AuthorizeRouteView RouteData="@routeData" DefaultLayout="layoutType">
+                        <NotAuthorized>
+                            @if (context.User.Identity?.IsAuthenticated != true)
+                            {
+                                <RedirectToLogin />
+                            }
+                            else
+                            {
+                                <p role="alert">You are not authorized to access this resource.</p>
+                            }
+                        </NotAuthorized>
+                    </AuthorizeRouteView>
+                <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+            </Found>
+            <NotFound>
+                <PageTitle>Not found</PageTitle>
+                <LayoutView Layout="@layoutType">
+                    <p>Sorry, there's nothing at this address.</p>
+                </LayoutView>
+            </NotFound>
+        </Router>
+    };
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        this.InitializeCloudEventSubscriptions();
-        await this.HubConnection.StartAsync();
+        this.Layout.PropertyChanged += this.OnLayoutPropertyChanged;
     }
 
-    public void InitializeCloudEventSubscriptions()
+    void OnLayoutPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        foreach(var subscriptionType in TypeCacheUtil.FindFilteredTypes("syndash:ce-subs", t => t.IsClass && !t.IsAbstract && !t.IsInterface && typeof(ICloudEventSubscription).IsAssignableFrom(t)))
-        {
-            var subscription = (ICloudEventSubscription)ActivatorUtilities.CreateInstance(this.ServiceProvider, subscriptionType);
-            var handle = this.IntegrationEventStream
-                .Where(subscription.Filters)
-                .Subscribe(subscription.Handle);
-            this.subscriptions.Add(handle);
-        }
+        this.StateHasChanged();
     }
 
-    public virtual void Dispose()
+    public void Dispose()
     {
-        foreach (var subscription in this.subscriptions.ToList())
-        {
-            subscription.Dispose();
-            this.subscriptions.Remove(subscription);
-        }
+        this.Layout.PropertyChanged -= this.OnLayoutPropertyChanged;
+        GC.SuppressFinalize(this);
     }
 
 }

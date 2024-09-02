@@ -1,0 +1,219 @@
+﻿@import "./theme/_variables.scss";
+@import "../lib/bootstrap/scss/mixins";
+
+//https://observablehq.com/@d3/color-schemes
+//* !!! DON'T FORGET TO ADJUST INDEX.HTML <linearGradient>s WHEN ADDING/REMOVING GRADIENTS !!!
+$nodeColors: (
+    "default": $mute,
+    "catch": #ff821d, // keep catch orange
+    "raise": $danger // keep raise red
+);
+
+$nodeTypes:
+    "call",
+    "do",
+    "fork",
+    "for",
+    "listen",
+    "run",
+    "set",
+    "switch",
+    "try-catch",
+    "try",
+    "emit",
+    "wait";
+
+$viridisScale: // generated with 13 steps, using 12 to exclude the last yellow
+  #440154,
+  #481f70,
+  #443983,
+  #3b528b,
+  #31688e,
+  #287c8e,
+  #21918c,
+  #20a486,
+  #35b779,
+  #5ec962,
+  #90d743,
+  #c8e020;
+
+@for $index from 1 through length($nodeTypes) {
+    $name: nth($nodeTypes, $index);
+    $color: nth($viridisScale, $index);
+    $nodeColors: map-merge($nodeColors, ($name: $color));
+}
+
+.graph-canvas {
+    cursor: grab;
+    &.grabbing {
+        cursor: grabbing;
+    }
+}
+
+.graph-container, .graph-canvas {
+    --stroke-color: #{$mute};
+    --fill-color: #{$dark-bg-subtle-dark};
+    display: flex;
+    flex-direction: column;
+
+    .graph-controls {
+        display: flex;
+        justify-content: flex-end;
+        gap: $spacer;
+        padding-right: 1rem;
+
+        .btn {
+            @include button-outline-variant($mute);
+            color: var(--bs-btn-color);
+            fill: var(--bs-btn-color);
+            border: var(--bs-btn-border-width) solid var(--bs-btn-border-color);
+
+            &:hover {
+                color: var(--bs-btn-hover-color);
+                fill: var(--bs-btn-hover-color);
+                background-color: var(--bs-btn-hover-bg);
+                border-color: var(--bs-btn-hover-border-color);
+            }
+        }
+    }
+}
+
+@each $name, $color in $nodeColors {
+    ##{$name}-node-gradient {
+
+        stop[offset="0"] {
+            stop-color: $color;
+        }
+
+        stop[offset="1"] {
+            stop-color: shade-color($color, 30%);
+        }
+    }
+}
+
+.node, .cluster {
+    cursor: pointer;
+    --gradient-url: url(#default-node-gradient);
+
+    @each $name, $color in $nodeColors {
+        &.#{$name}-task-node {
+            --gradient-url: url(##{$name}-node-gradient);
+        }
+    }
+
+    .node-rectangle {
+        stroke: var(--gradient-url);
+        stroke-width: 3px;
+    }
+
+    .node-cartouche {
+        fill: var(--gradient-url);
+    }
+
+    .label-content {
+        width: 100%;
+        height: 100%;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+
+        h3 {
+            margin-bottom: calc($spacer / 4);
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+
+        p {
+            margin: 0;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+
+        pre {
+            margin: 0;
+            height: 35px;
+            text-overflow: ellipsis;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+    }
+
+    &.shape-cartouche {
+        .label-content {
+            text-align: left;
+            padding: 5px 5px 5px 65px;
+        }
+    }
+
+    &.active {
+        rect {
+            fill: rgba(var(--bs-info-rgb), .2);
+        }
+    }
+
+    .badge {
+        circle {
+            stroke-width: 0;
+            fill: var(--bs-primary);
+        }
+
+        foreignObject {
+            text-align: center;
+            font-size: 8px;
+            color: white;
+
+            div {
+                display: flex;
+                align-content: center;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+    }
+
+    .activity-badge {
+        &.activity-badge--active circle {
+            fill: var(--bs-success);
+        }
+
+        &.activity-badge--faulted circle {
+            fill: var(--bs-danger);
+        }
+    }
+
+    &.legend {
+        .node-rectangle {
+            fill: var(--gradient-url);
+        }
+
+        div {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+    }
+}
+
+.symbol {
+    fill: var(--bs-body-color);
+}
+
+.start-node circle {
+    stroke-width: 2px;
+}
+
+.end-node circle {
+    stroke-width: 5px;
+}
+
+.edge-label {
+    .label-content {
+        text-align: center;
+        background-color: #{$dark-bg-subtle-dark};
+    }
+}

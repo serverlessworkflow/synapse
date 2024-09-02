@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+	<Nullable>enable</Nullable>
+	<ImplicitUsings>enable</ImplicitUsings>
+	<NeutralLanguage>en</NeutralLanguage>
+	<GenerateDocumentationFile>True</GenerateDocumentationFile>
+	<VersionPrefix>1.0.0</VersionPrefix>
+	<VersionSuffix>alpha1</VersionSuffix>
+	<AssemblyVersion>$(VersionPrefix)</AssemblyVersion>
+	<FileVersion>$(VersionPrefix)</FileVersion>
+	<Authors>The Synapse Authors</Authors>
+	<Company>Cloud Native Computing Foundation</Company>
+	<Copyright>Copyright © 2024-Present The Synapse Authors. All Rights Reserved.</Copyright>
+	<RepositoryUrl>https://github.com/serverlessworkflow/synapse</RepositoryUrl>
+	<RepositoryType>git</RepositoryType>
+	<PackageProjectUrl>https://github.com/serverlessworkflow/synapse</PackageProjectUrl>
+	<PackageTags>synapse runtime abstractions</PackageTags>
+	<IsPackable>true</IsPackable>
+	<GenerateAppxPackageOnBuild>true</GenerateAppxPackageOnBuild>
+	<NeutralLanguage>en</NeutralLanguage>
+	<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+	<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+	<AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
+	<FileVersion>$(VersionPrefix).0</FileVersion>
+	<DebugType>embedded</DebugType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\core\Synapse.Core.Infrastructure\Synapse.Core.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

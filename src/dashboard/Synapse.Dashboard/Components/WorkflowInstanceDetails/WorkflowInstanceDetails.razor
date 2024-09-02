@@ -1,0 +1,207 @@
+﻿﻿@*
+    Copyright © 2024-Present The Synapse Authors
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*@
+
+@namespace Synapse.Dashboard.Components
+
+@if (workflowInstance != null)
+{
+    <div class="details workflow-instance-details p-3">
+        <h6>Details</h6>
+        <div class="row mb-3">
+            <div class="col-md-12 col-lg-4 text-truncate" title="@workflowInstance.GetName()">
+                <div class="label">Name</div>
+                @workflowInstance.GetName()
+            </div>
+            <div class="col-md-12 col-lg-4 text-truncate" title="@workflowInstance.GetNamespace()">
+                <div class="label">Namespace</div>
+                @workflowInstance.GetNamespace()
+            </div>
+            <div class="col-md-12 col-lg-4">
+                <div class="label">Status</div>
+                <span class="badge rounded-pill badge rounded-pill border border-@workflowInstance.Status?.Phase.GetColorClass() text-@workflowInstance.Status?.Phase.GetColorClass()">@(workflowInstance.Status?.Phase ?? WorkflowInstanceStatusPhase.Pending)</span>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-12 col-lg-4">
+                <div class="label">Start Time</div>
+                @(workflowInstance.Status?.StartedAt?.DateTime.RelativeFormat() ?? "-")
+            </div>
+            <div class="col-md-12 col-lg-4">
+                <div class="label">End Time</div>
+                @(workflowInstance.Status?.EndedAt?.DateTime.RelativeFormat() ?? "-")
+            </div>
+            <div class="col-md-12 col-lg-4">
+                <div class="label">Duration</div>
+                @if (workflowInstance.Status?.StartedAt.HasValue == true && workflowInstance.Status?.EndedAt.HasValue == true)
+                {
+                    @workflowInstance.Status.EndedAt.Value.Subtract(workflowInstance.Status.StartedAt.Value).ToString("hh\\:mm\\:ss\\.fff")
+                }
+                else
+                {
+                    @("-")
+                }
+            </div>
+        </div>
+        <div class="row mb-3">
+            <DocumentDetails class="mb-3" Label='Input' Document="@workflowInstance.Spec?.Input" />
+            <DocumentDetails class="mb-3" Label='Context' Reference="@workflowInstance.Status?.ContextReference" />
+            @if (workflowInstance.Status?.Error != null)
+            {
+                <DocumentDetails Label='Error' Document="@workflowInstance.Status?.Error" />
+            }
+            else if (!string.IsNullOrWhiteSpace(workflowInstance.Status?.OutputReference))
+            {
+                <DocumentDetails Label='Output' Reference="@workflowInstance.Status?.OutputReference" />
+            }
+        </div>
+        <h6 class="pt-3">Executed Tasks</h6>
+        @if (workflowInstance.Status?.Tasks == null || workflowInstance.Status.Tasks.Count == 0)
+        {
+            @("-")
+        }
+        else
+        {
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-center">Start Time</th>
+                        <th class="text-center">End Time</th>
+                        <th class="text-center">Duration</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var task in workflowInstance.Status.Tasks.Where(task => string.IsNullOrWhiteSpace(task.ParentId)) )
+                    {
+                        <TaskInstanceRow TaskInstance="@task" Tasks="@workflowInstance.Status.Tasks" />
+                    }
+                </tbody>
+            </table>
+        }
+        <h6 class="pt-3">Runs</h6>
+        @if (workflowInstance.Status?.Runs == null || workflowInstance.Status.Runs.Count == 0)
+        {
+            @("-")
+        }
+        else
+        {
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Start Time</th>
+                        <th class="text-center">End Time</th>
+                        <th class="text-center">Duration</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var run in workflowInstance.Status.Runs)
+                    {
+                        <tr>
+                            <td>@run.StartedAt.DateTime.RelativeFormat()</td>
+                            <td class="text-center">@(run.EndedAt?.DateTime.RelativeFormat() ?? "-")</td>
+                            <td class="text-center">@(run.EndedAt.HasValue ? run.EndedAt.Value.Subtract(run.StartedAt).ToString("hh\\:mm\\:ss\\.fff") : "-")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        <h6 class="pt-3">Correlation</h6>
+        @if (workflowInstance.Status?.Correlation == null)
+        {
+            @("-")
+        }
+        else
+        {
+            <div class="label">Keys</div>
+            @if (workflowInstance.Status?.Correlation?.Keys == null || workflowInstance.Status.Correlation.Keys.Count == 0)
+            {
+                @("-")
+            }
+            else
+            {
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th class="text-center">Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var keyValuePair in workflowInstance.Status.Correlation.Keys)
+                        {
+                            <tr>
+                                <td>@keyValuePair.Key</td>
+                                <td class="text-center">@keyValuePair.Value</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            <div class="label">Contexts</div>
+            @if (workflowInstance.Status?.Correlation?.Contexts == null || workflowInstance.Status.Correlation.Contexts.Count == 0)
+            {
+                @("-")
+            }
+            else
+            {
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th class="text-center">Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var keyValuePair in workflowInstance.Status.Correlation.Contexts)
+                        {
+                            <CorrelationContextRow Kvp="keyValuePair" />
+                        }
+                    </tbody>
+                </table>
+            }
+        }
+        <h6 class="pt-3">Logs</h6>
+        <WorkflowInstanceLogs Name="@workflowInstance.GetName()" Namespace="@workflowInstance.GetNamespace()" />
+        <h6 class="pt-3">Raw</h6>
+        <DocumentDetails Label="Raw" Document="@workflowInstance" />
+    </div>
+}
+
+@code {
+    private WorkflowInstance? workflowInstance;
+    [Parameter] public WorkflowInstance? WorkflowInstance { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        if (workflowInstance != WorkflowInstance)
+        {
+            workflowInstance = WorkflowInstance;
+            shouldRender = true;
+        }
+    }
+
+    bool shouldRender = true;
+    protected override bool ShouldRender()
+    {
+        if (!shouldRender) return false;
+        shouldRender = false;
+        return true;
+    }
+}

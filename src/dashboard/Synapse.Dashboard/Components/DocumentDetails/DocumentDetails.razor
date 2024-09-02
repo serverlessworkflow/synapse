@@ -1,0 +1,147 @@
+﻿﻿@*
+    Copyright © 2024-Present The Synapse Authors
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*@
+
+@namespace Synapse.Dashboard.Components
+@using Synapse.Dashboard.Components.DocumentDetailsStateManagement
+@inherits StatefulComponent<DocumentDetails, DocumentDetailsStore, DocumentDetailsState>
+
+<div class="d-flex justify-content-between cursor-pointer @ClassNames" @onclick="async (_) => await Store.ToggleAsync()">
+    @if (LabelTemplate != null) {
+        @LabelTemplate
+    }
+    else {
+        <span class="label">@Label</span>
+    }
+    @if (Store.Collapse != null)
+    {
+        <Icon Name="@(isExpanded ? IconName.CaretUp : IconName.CaretDown)" />
+    }
+</div>
+<Collapse @ref="Store.Collapse" OnShowing="Store.LoadReferencedDocumentAsync">
+    @if (isExpanded)  // prevents early rendering when collapsed
+    { 
+        @if (reference == null && Document == null)
+        {
+            <p>No document</p>
+        }
+        else if (!loaded)
+        {
+            <Spinner Class="me-3" Color="SpinnerColor.Primary" Size="SpinnerSize.Small" />
+        }
+        else
+        {
+            <div class="d-flex justify-content-end mb-2">
+                <PreferredLanguageSelector PreferedLanguageChange="Store.ToggleTextBasedEditorLanguageAsync" />
+            </div>
+            <StandaloneCodeEditor @ref="Store.TextEditor"
+                                    ConstructionOptions="Store.StandaloneEditorConstructionOptions"
+                                    OnDidInit="Store.OnTextBasedEditorInitAsync"
+                                    CssClass="h-300-px" />
+        }
+        @if (problemDetails != null)
+        {
+            <div class="problems">
+                <Callout Type="CalloutType.Danger" Heading="@problemDetails.Title">
+                    @problemDetails.Detail
+                </Callout>
+                @if (problemDetails.Errors != null && problemDetails.Errors.Any())
+                {
+                    foreach (KeyValuePair<string, string[]> errorContainer in problemDetails.Errors)
+                    {
+                        <Callout Type="CalloutType.Danger" Heading="@errorContainer.Key">
+                            <ul>
+                                @foreach (string error in errorContainer.Value)
+                                {
+                                    <li>@error</li>
+                                }
+                            </ul>
+                        </Callout>
+                    }
+                }
+            </div>
+        }
+    }
+    else // mocks some content to enable opening animation
+    {
+        <div class="h-300-px"></div>
+    }
+</Collapse>
+@code {
+
+    protected string? ClassNames => Class;
+    [Parameter] public string? Class { get; set; }
+    /// <summary>
+    /// The label to display
+    /// </summary>
+    [Parameter] public string? Label { get; set; }
+    /// <summary>
+    /// The label to display
+    /// </summary>
+    [Parameter] public RenderFragment? LabelTemplate { get; set; }
+    /// <summary>
+    /// The reference of the document to load
+    /// </summary>
+    [Parameter] public string? Reference { get; set; }
+    /// <summary>
+    /// The reference of the document to display
+    /// </summary>
+    [Parameter] public object? Document { get; set; }
+
+    /// <summary>
+    /// The state of the <see cref="Collapse" />
+    /// </summary>
+    bool isExpanded = false;
+    /// <summary>
+    /// The internal reference
+    /// </summary>
+    string? reference;
+    /// <summary>
+    /// The internal boolean indicating if the resource already loaded
+    /// </summary>
+    bool loaded = false;
+    /// <summary>
+    /// The <see cref="ProblemDetails"/> that occurred when trying to save the resource, if any
+    /// </summary>
+    ProblemDetails? problemDetails = null;
+
+    object? __documentShadow;
+
+    /// <inheritdoc/>
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync().ConfigureAwait(false);
+        Store.Reference.Subscribe(value => OnStateChanged(_ => reference = value), token: CancellationTokenSource.Token);
+        Store.Loaded.Subscribe(value => OnStateChanged(_ => loaded = value), token: CancellationTokenSource.Token);
+        Store.IsExpanded.Subscribe(value => OnStateChanged(_ => isExpanded = value), token: CancellationTokenSource.Token);
+        Store.ProblemDetails.Subscribe(value => OnStateChanged(c_mp => problemDetails = value), token: CancellationTokenSource.Token);
+    }
+
+    /// <inheritdoc/>
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        await this.Store.HideAsync();
+        if (Document != __documentShadow)
+        {
+            Store.SetDocument(Document);
+            __documentShadow = Document;
+        }
+        if (reference != Reference)
+        {
+            Store.SetReference(Reference);
+        }
+    }
+}

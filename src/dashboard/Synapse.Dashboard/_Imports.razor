@@ -1,12 +1,12 @@
-﻿@* 
-    Copyright © 2022-Present The Synapse Authors
-    <p>
+﻿﻿@*
+    Copyright © 2024-Present The Synapse Authors
+
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
-    <p>
+
     http://www.apache.org/licenses/LICENSE-2.0
-    <p>
+
     Unless required by applicable law or agreed to in writing, software
     distributed under the License is distributed on an "AS IS" BASIS,
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,26 +14,35 @@
     limitations under the License.
 *@
 
-@using System.ComponentModel
-@using System.Net.Http
-@using System.Net.Http.Json
+@using BlazorBootstrap
+@using BlazorMonaco;
+@using BlazorMonaco.Editor;
+@using IdentityModel
+@using moment.net
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.AspNetCore.Components.Web
 @using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using Microsoft.AspNetCore.Components.WebAssembly.Http
+@using Microsoft.Extensions.Options
 @using Microsoft.JSInterop
-
-@using BlazorMonaco
-@using Neuroglia
 @using Neuroglia.Blazor.Dagre
 @using Neuroglia.Blazor.Dagre.Models
 @using Neuroglia.Blazor.Dagre.Templates
-@using Neuroglia.Data.Flux
-@using ServerlessWorkflow.Sdk
-@using ServerlessWorkflow.Sdk.Models
-@using Synapse.Apis.Management
-@using Synapse.Apis.Monitoring
 @using Synapse.Dashboard
+@using Synapse.Dashboard.Components
+@using Synapse.Dashboard.Configuration
+@using Synapse.Dashboard.Extensions
+@using Synapse.Dashboard.Layout
 @using Synapse.Dashboard.Services
-@using Synapse.Integration.Models
+@using Synapse.Dashboard.StateManagement
+@using Synapse.Resources
+@using System.ComponentModel
+@using System.Net.Http
+@using System.Net.Http.Json
+@using System.Reactive.Linq;
+@using System.Reactive.Subjects
+@using System.Security.Claims

@@ -1,0 +1,62 @@
+services:
+
+  garnet:
+    image: ghcr.io/microsoft/garnet
+    volumes:
+      - garnet_data:/data
+ 
+  api:
+    build:
+      context: ../../
+      dockerfile: ./src/api/Synapse.Api.Server/Dockerfile
+    environment:
+      CONNECTIONSTRINGS__REDIS: ${GARNET_URI}
+      SYNAPSE_DASHBOARD_SERVE: true
+      SYNAPSE_API_AUTH_TOKEN_FILE: /app/tokens.yaml
+    volumes:
+      - ./config/tokens.yaml:/app/tokens.yaml
+    ports:
+      - 8080:8080
+    depends_on:
+      - garnet
+
+  operator:
+    build:
+      context: ../../
+      dockerfile: ./src/operator/Synapse.Operator/Dockerfile
+    environment:
+      CONNECTIONSTRINGS__REDIS: ${GARNET_URI}
+      SYNAPSE_OPERATOR_NAMESPACE: default
+      SYNAPSE_OPERATOR_NAME: operator-1
+      SYNAPSE_OPERATOR_RUNNER_API: http://api:8080
+      DOCKER_HOST: unix:///var/run/docker.sock
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    user: root
+    depends_on:
+      - garnet
+
+  correlator:
+    build:
+      context: ../../
+      dockerfile: ./src/correlator/Synapse.Correlator/Dockerfile
+    environment:
+      CONNECTIONSTRINGS__REDIS: ${GARNET_URI}
+      SYNAPSE_CORRELATOR_NAMESPACE: default
+      SYNAPSE_CORRELATOR_NAME: correlator-1
+    ports:
+      - 8081:8080
+    depends_on:
+      - garnet
+
+volumes:
+
+  garnet_data:
+    driver: local
+
+networks:
+
+  default:
+    name: synapse

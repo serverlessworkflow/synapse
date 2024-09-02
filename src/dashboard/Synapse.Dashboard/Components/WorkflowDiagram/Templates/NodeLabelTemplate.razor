@@ -1,0 +1,30 @@
+@namespace Synapse.Dashboard
+
+@if (LabelTemplate != null)
+{
+    @LabelTemplate
+}
+else if (!string.IsNullOrWhiteSpace(Node.Label) )
+{
+    <g class="label">
+        <foreignObject x="@x"
+                       y="@y"
+                       width="@width"
+                       height="@height">
+            <div title="@Node.Label" class="label-content">@Node.Label</div>
+        </foreignObject>
+    </g>
+}
+
+@code {
+
+    BoundingBox bounds => Node.Bounds!;
+    string x => bounds.X.ToInvariantString() ?? string.Empty;
+    string y => bounds.Y.ToInvariantString() ?? string.Empty;
+    string width => bounds.Width.ToInvariantString() ?? string.Empty;
+    string height => bounds.Height.ToInvariantString() ?? Neuroglia.Blazor.Dagre.Constants.LabelHeight.ToInvariantString();
+
+    [CascadingParameter(Name = "Node")] public INodeViewModel Node { get; set; } = null!;
+    [CascadingParameter(Name = "LabelTemplate")] public RenderFragment? LabelTemplate { get; set; } = null!;
+
+}

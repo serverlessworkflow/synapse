@@ -1,0 +1,111 @@
+﻿﻿@*
+    Copyright © 2024-Present The Synapse Authors
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*@
+
+@page "/workflow-instances/{instanceName?}"
+@attribute [Authorize]
+@namespace Synapse.Dashboard.Pages.WorkflowInstances.List
+@using BlazorBootstrap
+@inherits NamespacedResourceManagementComponent<View, WorkflowInstanceListComponentStore, WorkflowInstanceListState, WorkflowInstance>
+@inject IBreadcrumbManager BreadcrumbManager
+@inject NavigationManager NavigationManager
+
+<ApplicationTitle>Workflow Instances</ApplicationTitle>
+
+<WorkflowInstancesList Loading="@Loading"
+                       Title="Title()"
+                       Workflows="@Workflows"
+                       Namespaces="@Namespaces"
+                       Namespace="@(@namespace)"
+                       Operators="@Operators"
+                       OperatorName="@Operator"
+                       WorkflowInstances="@Resources"
+                       SelectedInstanceNames="@SelectedResourceNames"
+                       OnWorkflowChanged="OnWorkflowChanged"
+                       OnNamespaceChanged="Store.SetNamespace"
+                       OnOperatorChanged="Store.SetOperator"
+                       OnSearchInput="Store.SetSearchTerm"
+                       OnShowDetails="OnShowInstanceDetails"
+                       OnDelete="OnDeleteResourceAsync"
+                       OnToggleSelected="Store.ToggleResourceSelection"
+                       OnDeleteSelected="OnDeleteSelectedResourcesAsync" />
+
+<Button Outline="true" Color="ButtonColor.Primary" @onclick="async _ => await OnShowResourceEditorAsync()"><Icon Name="IconName.Plus" /></Button>
+
+<Offcanvas @ref="EditorOffCanvas" Size="OffcanvasSize.Large" UseStaticBackdrop="false" BodyCssClass="d-flex flex-column" />
+
+<ConfirmDialog @ref="Dialog" />
+
+@code {
+    [Parameter] public string? InstanceName { get; set; }
+
+    RenderFragment Title() => __builder =>
+    {
+        <h4>Workflow Instances</h4>
+    };
+
+    /// <summary>
+    /// Gets the list of available <see cref="Synapse.Resources.Operator"/>s
+    /// </summary>
+    protected EquatableList<Operator>? Operators { get; set; }
+
+    /// <summary>
+    /// Gets selected <see cref="Synapse.Resources.Operator"/>
+    /// </summary>
+    protected string? Operator { get; set; }
+
+    /// <summary>
+    /// Gets the list of available <see cref="Workflow"/>s
+    /// </summary>
+    protected EquatableList<Workflow>? Workflows { get; set; }
+
+    /// <inheritdoc/>
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        BreadcrumbManager.Use(Breadcrumbs.WorkflowInstances);
+        this.Store.Workflows.Subscribe(value => OnStateChanged(_ => Workflows = value), token: CancellationTokenSource.Token);
+        this.Store.Operators.Subscribe(value => OnStateChanged(_ => Operators = value), token: CancellationTokenSource.Token);
+        this.Store.Operator.Subscribe(value => OnStateChanged(_ => Operator = value), token: CancellationTokenSource.Token);
+        this.Store.Resources.Subscribe(value =>
+        {
+            if (!string.IsNullOrWhiteSpace(InstanceName) && value != null && value.Count > 0)
+            {
+                var instance = value.FirstOrDefault(r => r.GetQualifiedName() == InstanceName);
+                if (instance != null) OnShowInstanceDetails(instance);
+            }
+        
+        }, token: CancellationTokenSource.Token);
+    }
+
+    /// <summary>
+    /// Handles changes of the workflow selector
+    /// </summary>
+    /// <param name="workflowQualifiedName">The name of the workflow</param>
+    protected void OnWorkflowChanged(string? workflowQualifiedName)
+    {
+        if (string.IsNullOrWhiteSpace(workflowQualifiedName))
+        {
+            this.Store.RemoveLabelSelector(SynapseDefaults.Resources.Labels.Workflow);
+        }
+        else
+        {
+            this.Store.AddLabelSelector(new(SynapseDefaults.Resources.Labels.Workflow, LabelSelectionOperator.Equals, workflowQualifiedName));
+        }
+    }
+
+    void OnShowInstanceDetails(WorkflowInstance instance) => NavigationManager.NavigateTo($"/workflows/details/{instance.Spec.Definition.Namespace}/{instance.Spec.Definition.Name}/{instance.Spec.Definition.Version}/{instance.GetName()}");
+
+}

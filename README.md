@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/images/synapse-color.png" height="350px" alt="Synapse Logo"/>
+  <img src="assets/images/transparent_logo.png" height="350px" alt="Synapse Logo"/>
 </p>
 
 ---
@@ -13,221 +13,130 @@
 
 ## About
 
-Synapse is a vendor-neutral, free, open-source, and community-driven Workflow Management System (WFMS) implementing the [Serverless Workflow specification](https://github.com/serverlessworkflow/specification).
+Synapse is a vendor-neutral, open-source, and community-driven Workflow Management System (WFMS) designed to implement the [Serverless Workflow specification](https://github.com/serverlessworkflow/specification). 
 
-## Requirements
+It enables developers and organizations to define and execute workflows effortlessly using a high-level, intuitive Domain Specific Language (DSL). 
 
-- [.NET 6](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) or later
+With Synapse, you can create powerful workflows that are cloud vendor-agnostic, easily scalable, and highly customizable.
 
-*Optionally, and depending on which flavor of the Synapse Server you chose to run, you might require:*
+### Features
 
-- [Docker](https://www.docker.com/)
-- [Kubernetes](https://kubernetes.io/)
+- **Easy to Use**: The Serverless Workflow DSL is designed for universal understanding, enabling users to quickly grasp workflow concepts and create complex workflows effortlessly.
+- **Event Driven**: Seamlessly integrate events into workflows with support for various formats, including CloudEvents, allowing for event-driven workflow architectures.
+- **Service Oriented**: Integrate seamlessly with service-oriented architectures, allowing workflows to interact with various services over standard application protocols like HTTP, gRPC, OpenAPI, AsyncAPI, and more.
+- **FaaS Centric**: Invoke functions hosted on various platforms within workflows, promoting a function-as-a-service (FaaS) paradigm and enabling microservices architectures.
+- **Timely**: Define timeouts for workflows and tasks to manage execution duration effectively.
+- **Fault Tolerant**: Easily define error handling strategies to manage and recover from errors that may occur during workflow execution, ensuring robustness and reliability.
+- **Schedulable**: Schedule workflows using CRON expressions or trigger them based on events, providing control over workflow execution timing.
+- **Interoperable**: Integrates seamlessly with different services and resources.
+- **Robust**: Offers features such as conditional branching, event handling, and looping constructs.
+- **Scalable**: Promotes code reusability, maintainability, and scalability across different environments.
+- **Cross-Platform**: Runs on various operating systems, providing flexibility and ease of integration.
 
-## Quick start
+### Microservices
 
-**1. Download and extract synctl:**
+Synapse is composed of several specialized applications, allowing for atomic scalability, resilience, and ease of maintenance:
 
-*On Windows*:
+- **API Server**: Serves an HTTP API to manage Synapse resources, and optionally serves the **Dashboard**, which is Synapse's Graphical User Interface.
+- **Operator**: Controls workflows and workflow instances, and starts workflow runners.
+- **Runner**: Executes a single instance of a workflow.
+- **Correlator**: Performs Complex Event Processing (CEP) and correlates ingested events.
+- **CLI**: Allows interaction with the Synapse API via the command line interface.
 
-```
-wget https://github.com/serverlessworkflow/synapse/releases/latest/download/synctl-win-x64.zip
-tar -xf synctl-win-x64.zip
-```
+## Getting Started
 
-*On Linux*:
+### Prerequisites
 
-```
-wget https://github.com/serverlessworkflow/synapse/releases/latest/download/synctl-linux-x64.tar.gz
-tar -xf synctl-linux-x64.tar.gz
-```
+[Docker]() or [Kubernetes](), depending on the container platform you wish to use.
 
-*On Mac OSX*:
+### Installation
 
-```
-wget https://github.com/serverlessworkflow/synapse/releases/latest/download/synctl-osx-x64.tar.gz
-tar -xf synctl-osx-x64.tar.gz
-```
+The simplest way to get started is by using the provided Docker Compose setup. 
 
-**2. Install Synapse:**
+1. Clone the Synapse repository:
 
-*Natively*:
+    ```bash
+    git clone https://github.com/serverlessworkflow/synapse.git
+    ```
 
-```
-synctl system install native
-```
+2. Navigate to the Docker Compose directory:
 
-*On Docker*:
+    ```bash
+    cd synapse/deployments/docker-compose
+    ```
 
-```
-synctl system install docker
-```
+3. Build the Docker images:
 
-*On Kubernetes*:
+    ```bash
+    docker-compose build
+    ```
 
-```
-synctl system install kubernetes
-```
+4. Start the services using Docker Compose:
 
-**3. Have fun!**
+    ```bash
+    docker-compose up
+    ```
 
-## Server
+This will pull the necessary Docker images and start the Synapse services as defined in the `docker-compose.yml` file. You can then access the Synapse API and dashboard as configured.
 
-### Installing
+### Run using `synctl` Command-line Interface
 
-#### Native
+First, set up the Synapse API server to use with `synctl`:
 
-The Synapse Server can run natively on Windows, Mac and Linux, without any dependencies aside from .NET. Even though it is the easier way to get started, it should only be used for tests purposes. For production, you should prefer the Docker or Kubernetes based setups.
-
-To get started, just download the appropriate [release](https://github.com/serverlessworkflow/synapse/releases/latest) for your system, then start it using the following command:
-
-```shell
-dotnet run ./Synapse.Server.dll
-```
-
-For more information on how to configure a Native Synapse Server, please read the [docs](https://github.com/serverlessworkflow/synapse/wiki).
-
-#### Docker
-
-Docker is the recommended way to run the Synapse Server for those who do not want to host it on a Kubernetes cluster.
-
-To run the server on Docker, simply execute the following command in your system's shell:
-
-```shell
-docker run --name synapse -v /var/run/docker.sock:/var/run/docker.sock -p 42286:42286 -p 41387:41387 ghcr.io/serverlessworkflow/synapse:latest
+```bash
+synctl config set-api default -server=http://localhost:8080
 ```
 
-*Notes: you need to mount the `docker.sock` and/or run the container with the `--network host` option for Synapse to be able to spawn its own containers*
+Then, create a new file with the definition of the workflow to create:
 
-For more information on how to configure Synapse for Docker, please read the [docs]().
-
-#### Docker-Compose
-
-Docker-Compose helps you to get started easier and faster than with Docker, as it allows to declare and configure multiple container at once, which will likely be needed if using persistence, for instance.
-
-To run the server on Docker-Compose, simply execute the following command in your system's shell:
-
-```shell
-docker-compose -f deployment/docker-compose/docker-compose.yml up -d
+```yaml
+# greeter.yaml
+document:
+  dsl: '1.0.0'
+  name: greeter
+  namespace: default
+  version: '0.1.0'
+do:
+  greet:
+    set:
+      greetings: '${ "Hello \(.user.firstName) \(.user.lastName)!" }'
 ```
 
-Alternatively, you can use the file using EventStore and MongoDB powered persistence:
+Next, run the following command to create the workflow on the API:
 
-```shell
-docker-compose -f deployment/docker-compose/eventstore+mongo.yml up -d
+```bash
+synctl workflow create -f greeter.yaml 
 ```
 
-#### Kubernetes
+Finally, run the following command to run the workflow with the specified JSON input:
 
-Kubernetes is the preferred way to run the Synapse Server, as it offers a wide range of tools to configure, run and manage multiple containers at once, which will likely be needed if using persistence, for instance.
-
-To run the server on Kubernetes, simply execute the following command in your system's shell:
-
-```shell
-kubectl apply -f deployment/kubernetes/stand-alone.yaml
+```bash
+synctl workflow run greeter --namespace default --version 0.1.0 --input '{\"user\":{\"firstName\":\"John\",\"lastName\":\"Doe\"}}'
 ```
 
-Alternatively, you can use the file using EventStore and MongoDB powered persistence:
+The command above will provide the fully qualified name of the created workflow instance. You can utilize this name to inspect its output once the execution is finished, as demonstrated below:
 
-```shell
-kubectl apply -f deployment/kubernetes/eventstore+mongo.yaml
+```bash
+synctl workflow-instance get-output greeter-uk58h3dssqp620a --namespace default --output yaml
 ```
 
-## User Interfaces
-
-Synapse provides 2 different UIs for interacting with the server:
-
-### GUI
-<p align="center">
-  <img src="assets/images/synapse_demo.gif" alt="Dashboard demo"/>
-</p>
-The `Dashboard` is a Blazor Web Assembly (WASM) Graphical User Interface (GUI) that comes bundled with the Synapse Server. 
-
-To get started, simply open a web browser and navigate to the Synapse Server's base url.
-
-For more information on how to use the `Dashboard`, please read the [docs](https://github.com/serverlessworkflow/synapse/wiki).
-
-### CLI
-
-`synctl` is a Command Line Interface (CLI) used to interact with the Synapse Server. 
-
-To get started, just download the appropriate [release](https://github.com/serverlessworkflow/synapse/releases/latest) for your system, then type the following command:
-
-```shell
-synctl --help
-```
-
-For more information on how to use `synctl`, please read the [docs](https://github.com/serverlessworkflow/synapse/wiki).
-
-## Application Programing Interfaces
-
-The Synapse Server is shipped with 3 different APIs, each addressing a different use-case. All the implementations of those APIs are supplied with their respective client library.
-
-### Management API
-
-The Synapse Management API is used to manage workflows and their instances.
-
-Implementations:
-
-- [x] HTTP REST
-- [x] [GRPC](https://github.com/grpc/grpc-dotnet)
-- [ ] WebSockets ([SignalR](https://github.com/dotnet/aspnetcore/tree/main/src/SignalR))
-
-### Monitoring API
-
-The Synapse Monitoring API is used for real-time observability of workflows and their instances. It is used by the Dashboard to enable real-time updates.
-
-Implementations:
-
-- [ ] [GRPC](https://github.com/grpc/grpc-dotnet)
-- [x] WebSockets ([SignalR](https://github.com/dotnet/aspnetcore/tree/main/src/SignalR))
-
-### Runtime API
-
-The Synapse Runtime API is used by workers to run workflows and maintain their state. It preferably should not be used by anything else than runtime executors.
-
-Implementations:
-
-- [x] [GRPC](https://github.com/grpc/grpc-dotnet)
-- [ ] WebSockets ([SignalR](https://github.com/dotnet/aspnetcore/tree/main/src/SignalR))
+For more information about `synctl`, please refer to the [documentation](#synctl).
 
 ## Community
 
-We have a growing community working together to build a community-driven and vendor-neutral
-workflow ecosystem. Community contributions are welcome and much needed to foster project growth.
+The Synapse project has a vibrant and growing community dedicated to building a community-driven and vendor-neutral workflow runtime ecosystem. Contributions from the community are encouraged and essential to the continued growth and success of the project.
 
-See [here](community/contributors.md) for the list of community members that have contributed to the specification.
+A list of community members who have contributed to Synapse can be found [here](./community/README.md).
 
-To learn how to contribute to the specification reference the ['how to contribute'](CONTRIBUTING.md) doc.
+To learn how to contribute to Synapse, please refer to the [contribution guidelines](CONTRIBUTING.md).
 
-If you have any copyright questions when contributing to a CNCF project like this one,
-reference the [Ownership of Copyrights in CNCF Project Contributions](https://github.com/cncf/foundation/blob/master/copyright-notices.md) doc.
+For any copyright-related questions when contributing to a CNCF project like Synapse, please refer to the [Ownership of Copyrights in CNCF Project Contributions](https://github.com/cncf/foundation/blob/master/copyright-notices.md) document.
 
 ### Code of Conduct
 
-As contributors and maintainers of this project, and in the interest of fostering
-an open and welcoming community, we pledge to respect all people who contribute
-through reporting issues, posting feature requests, updating documentation,
-submitting pull requests or patches, and other activities.
+As contributors and maintainers of Synapse, and in the interest of fostering an open and welcoming community, we commit to respecting all individuals who contribute through activities such as reporting issues, posting feature requests, updating documentation, submitting pull requests or patches, and other forms of participation.
 
-We are committed to making participation in this project a harassment-free experience for
-everyone, regardless of level of experience, gender, gender identity and expression,
-sexual orientation, disability, personal appearance, body size, race, ethnicity, age,
-religion, or nationality.
+The project is committed to making participation in Synapse a harassment-free experience for everyone, regardless of experience level, gender identity and expression, sexual orientation, disability, personal appearance, body size, race, ethnicity, age, religion, or nationality.
 
-See our full project Code of Conduct information [here](CODE-OF-CONDUCT.md).
+For more detailed information, please see the full project Code of Conduct [here](code-of-conduct.md).
 
-## Repository Structure
-
-Here is the outline of the repository to help navigate the specification
-documents:
-
-| File/Directory | Description | 
-| --- | --- | 
-| [LICENSE](LICENSE) | Specification License doc | 
-| [OWNERS](OWNERS.md) | Defines the current maintainers and approvers | 
-| [MAINTAINERS](MAINTAINERS.md) | Project Maintainers Info | 
-| [GOVERNANCE](GOVERNANCE.md) | Project Governance Info | 
-| [CONTRIBUTING](CONTRIBUTING.md) | Documentation on how to contribute to the project | 
-| [CODE-OF-CONDUCT](code-of-conduct.md) | Defines the project's Code of Conduct | 
-| [ROADMAP](https://github.com/serverlessworkflow/synapse/milestones) | Project Roadmap |

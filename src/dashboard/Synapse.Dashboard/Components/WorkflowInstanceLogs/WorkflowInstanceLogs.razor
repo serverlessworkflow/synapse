@@ -1,0 +1,103 @@
+﻿﻿@*
+    Copyright © 2024-Present The Synapse Authors
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*@
+
+@using Synapse.Dashboard.Components.WorkflowInstanceLogsStateManagement
+@using System.Text.RegularExpressions
+@namespace Synapse.Dashboard.Components
+@inherits StatefulComponent<WorkflowInstanceLogs, WorkflowInstanceLogsStore, WorkflowInstanceLogsState>
+
+<div class="d-flex justify-content-between cursor-pointer" @onclick="async (_) => await Store.ToggleAsync()">
+    Logs
+    <Icon Name="@(isExpanded ? IconName.CaretUp : IconName.CaretDown)" />
+</div>
+<Collapse @ref="Store.Collapse" OnShowing="Store.LoadLogsAsync">
+    @if (isLoading)
+    {
+        <Spinner Class="me-3" Color="SpinnerColor.Primary" Size="SpinnerSize.Small" />
+    }
+    else {
+        <pre @ref="Store.LogsContainer" class="monaco-editor logs-container p-2">
+            @foreach(string line in logs)
+            {
+                var match = Regex.Match(line, timestampLevelPattern);
+                if (string.IsNullOrEmpty(match.Value))
+                {
+<p class="m-0">@line</p>
+                }
+                else
+                {
+                    string timestamp = match.Groups[1].Value;
+                    string level = match.Groups[2].Value;
+                    string color = level.ToLower() switch
+                    {
+                        "fail" => "text-danger",
+                        "critical" => "text-danger",
+                        "error" => "text-danger",
+                        "warning" => "text-warning",
+                        "info" => "text-primary",
+                        "debug" => "text-cinereous",
+                        "trace" => "text-mute",
+                        _ => ""
+                    };
+<p class="m-0">[@timestamp] <span class="@color">@level</span>: @line.Replace(match.Value, "")</p>
+                }
+            }
+            </pre>
+    }
+</Collapse>
+
+@code {
+    private string name = string.Empty;
+    [Parameter] public string Name { get; set; } = string.Empty;
+    private string @namespace = string.Empty;
+    [Parameter] public string Namespace { get; set; } = string.Empty;
+    bool isLoading = false;
+    bool isExpanded = false;
+    IEnumerable<string> logs = [];
+    string timestampLevelPattern = @"\[(\d{2}:\d{2}:\d{2})\] (\w+):";
+
+    /// <inheritdoc/>
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync().ConfigureAwait(false);
+        Store.IsLoading.Subscribe(value => OnStateChanged(_ => isLoading = value), token: CancellationTokenSource.Token);
+        Store.IsExpanded.Subscribe(value => OnStateChanged(_ => isExpanded = value), token: CancellationTokenSource.Token);
+        Store.Name.Subscribe(value => OnStateChanged(_ => name = value), token: CancellationTokenSource.Token);
+        Store.Namespace.Subscribe(value => OnStateChanged(_ => @namespace = value), token: CancellationTokenSource.Token);
+        Store.Logs.Subscribe(value => OnStateChanged(_ => logs = value), token: CancellationTokenSource.Token);
+    }
+
+    /// <inheritdoc/>
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        await this.Store.HideAsync();
+        if (Name != name)
+        {
+            Store.SetName(Name);
+        }
+        if (Namespace != @namespace)
+        {
+            Store.SetNamespace(Namespace);
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        await Store.ScrollDown();
+    }
+}

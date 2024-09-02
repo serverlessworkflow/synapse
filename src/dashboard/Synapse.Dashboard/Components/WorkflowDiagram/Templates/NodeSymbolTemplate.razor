@@ -1,0 +1,40 @@
+@namespace Synapse.Dashboard
+
+@if (!string.IsNullOrWhiteSpace(Symbol))
+{
+    <g class="symbol" transform="translate(@x, @y)">
+        <svg width="@width" height="@height">
+            <use href="#@Symbol" />
+        </svg>
+        <pre>
+            @Constants.ClusterHeight
+            @bounds.Height
+            @_symbolSize
+        </pre>
+    </g>
+}
+
+@code {
+
+    Double _symbolSize = 30;
+    BoundingBox bounds => Node.Bounds!;
+    string? width => Node.Shape != SynapseNodeShape.Cartouche ?
+        (bounds.Width / 2).ToInvariantString() :
+        _symbolSize.ToInvariantString();
+    string? height => Node.Shape != SynapseNodeShape.Cartouche ?
+        (bounds.Height / 2).ToInvariantString() :
+        _symbolSize.ToInvariantString();
+    string? x => Node.Shape != SynapseNodeShape.Cartouche ?
+        (0 - bounds.Width / 4).ToInvariantString() :
+        (0 - (bounds.Width - _symbolSize) / 2).ToInvariantString();
+    string? y => Node.Shape != SynapseNodeShape.Cartouche ?
+        (0 - bounds.Height / 4).ToInvariantString() :
+        !WorkflowNode.IsCluster ?
+            (0 - _symbolSize / 2).ToInvariantString() :
+            (0 - (bounds.Height + _symbolSize - (Constants.ClusterHeight+10)) / 2).ToInvariantString();
+
+    [CascadingParameter(Name = "Node")] public INodeViewModel Node { get; set; } = null!;
+    [CascadingParameter(Name = "Symbol")] public string? Symbol { get; set; }
+    protected virtual IWorkflowNodeViewModel WorkflowNode => (IWorkflowNodeViewModel)this.Node;
+
+}

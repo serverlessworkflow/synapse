@@ -1,0 +1,199 @@
+﻿@page "/correlations"
+@attribute [Authorize]
+@namespace Synapse.Dashboard.Pages.Correlations.List
+@inherits NamespacedResourceManagementComponent<Correlation>
+@inject IBreadcrumbManager BreadcrumbManager
+
+<ApplicationTitle>Correlations</ApplicationTitle>
+
+<div class="table-container">
+    @if (Loading)
+    {
+        <Loader />
+    }
+    <div class="d-flex flex-row justify-content-between align-items-center">
+        <h4>Correlations</h4>
+        <span>@(Resources?.Count ?? 0) items</span>
+        <div class="d-flex">
+            <select class="form-select m-2" @onchange="OnNamespaceChanged">
+                <option value="">All namespaces</option>
+                @if (Namespaces != null && Namespaces.Count > 0)
+                {
+                    foreach (var namespaceResource in Namespaces)
+                    {
+                        <option value="@namespaceResource.GetName()" selected="@(@namespaceResource.GetName() == @namespace)">@namespaceResource.GetName()</option>
+                    }
+                }
+            </select>
+            <input type="search" class="form-control rounded my-2 me-2" placeholder="Search" value="@SearchTerm" @oninput="OnSearchInput" />
+            <div class="dropdown d-flex align-content-center">
+                <button class="btn btn-sm btn-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="" @onclick:stopPropagation="true"><i class="bi bi-three-dots-vertical"></i></button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item @(SelectedResourceNames.Count == 0 ? "text-mute" : "text-danger")" href="#" @onclick="async _ => await (SelectedResourceNames.Count == 0 ?  Task.CompletedTask : OnDeleteSelectedResourcesAsync())" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Trash" /> Delete selected</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th class="sticky-header text-start">Namespace</th>
+                <th class="sticky-header text-start">Name</th>
+                <th class="sticky-header text-center">Creation Time</th>
+                <th class="sticky-header text-center">Last Modified</th>
+                <th class="sticky-header text-center">Status</th>
+                <th class="sticky-header text-center">Lifetime</th>
+                <th class="sticky-header text-center">Consumption Strategy</th>
+                <th class="sticky-header text-center">Events</th>
+                <th class="sticky-header text-center">Outcome Type</th>
+                <th class="sticky-header text-center">Outcome Target</th>
+                <th class="sticky-header text-center">Contexts</th>
+                <th class="sticky-header text-end"></th>
+                <th class="sticky-header text-center align-middle">
+                    <input @ref="CheckboxAll" type="checkbox" @onclick="(_) => Store.ToggleResourceSelection()" @onclick:preventDefault="true" @onclick:stopPropagation="true" />
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Resources != null && Resources.Any())
+            {
+                <Virtualize Context="correlation" Items="@Resources">
+                    <tr @onclick="async _ => await OnShowResourceDetailsAsync(correlation)" class="cursor-pointer">
+                        <td class="text-start" title="The namespace the correlation belongs to">@correlation.Metadata.Namespace</td>
+                        <td class="text-start" title="The correlation's name">@correlation.Metadata.Name</td>
+                        <td class="text-center" title="The date and time at which the correlation has been created">@correlation.Metadata.CreationTimestamp?.DateTime.RelativeFormat()</td>
+                        <td class="text-center" title="The date and time at which the correlation was last modified">@correlation.Status?.LastModified?.DateTime.RelativeFormat()</td>
+                        <td class="text-center" title="@GetStatusPhaseTitle(correlation.Status?.Phase)"><span class="badge rounded-pill border border-@GetStatusPhaseClass(correlation) text-@GetStatusPhaseClass(correlation)">@correlation.Status?.Phase</span></td>
+                        <td class="text-center" title="@GetLifetimeTitle(correlation.Spec.Lifetime)"><span class="badge rounded-pill border border-secondary text-secondary">@correlation.Spec.Lifetime</span></td>
+                        <td class="text-center" title="@GetEventConsumptionStrategyTitle(correlation)"><span class="badge rounded-pill border border-secondary text-secondary">@GetEventConsumptionStrategy(correlation)</span></td>
+                        <td class="text-center" title="The number of event filters defined by the correlation">@GetFilterCount(correlation)</td>
+                        <td class="text-center" title="@GetOutcomeTypeTitle(correlation)"><span class="badge rounded-pill border border-secondary text-secondary">@GetOutcomeType(correlation)</span></td>
+                        <td class="text-center" title="@GetOutcomeTargetTitle(correlation)"><a @onclick:stopPropagation="true" href="@GetOutcomeTargetRef(correlation)">@GetOutcomeTarget(correlation)</a></td>
+                        <td class="text-center" title="The amount of active correlation contexts">@correlation.Status?.Contexts.Count</td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="" @onclick:stopPropagation="true"><i class="bi bi-three-dots-vertical"></i></button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" @onclick="async _ => await OnShowResourceEditorAsync(correlation)" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Pencil" /> Edit</a></li>
+                                <li><a class="dropdown-item text-danger" href="#" @onclick="async _ => await OnDeleteResourceAsync(correlation)" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Trash" /> Delete</a></li>
+                            </ul>
+                        </td>
+                        <td class="text-center align-middle">
+                            <input type="checkbox" checked="@SelectedResourceNames.Contains(correlation.GetName())" @onclick="(_) => Store.ToggleResourceSelection(correlation.GetName())" @onclick:preventDefault="true" @onclick:stopPropagation="true" />
+                        </td>
+                    </tr>
+                </Virtualize>
+            }
+        </tbody>
+    </table>
+</div>
+
+<Button Outline="true" Color="ButtonColor.Primary" @onclick="async _ => await OnShowResourceEditorAsync()"><Icon Name="IconName.Plus" /></Button>
+
+<Offcanvas @ref="DetailsOffCanvas" Size="OffcanvasSize.Large" UseStaticBackdrop="false" BodyCssClass="d-flex flex-column" />
+
+<Offcanvas @ref="EditorOffCanvas" Size="OffcanvasSize.Large" UseStaticBackdrop="false" BodyCssClass="d-flex flex-column" />
+
+<ConfirmDialog @ref="Dialog" />
+
+@code{
+
+    string GetStatusPhaseTitle(string? phase)
+    {
+        return phase switch
+        {
+            CorrelationStatusPhase.Active => "The correlation has been picked up by a correlator and is actively correlation ingested events",
+            CorrelationStatusPhase.Inactive => "The correlation is inactive and is not correlating events",
+            CorrelationStatusPhase.Cancelled => "The correlation has been cancelled",
+            CorrelationStatusPhase.Completed => "The correlation has been completed",
+            _ => "Unknown/unsupported status phase"
+        };
+    }
+
+    string GetLifetimeTitle(string lifetime)
+    {
+        return lifetime switch
+        {
+            CorrelationLifetime.Durable => "A durable, multi-use correlation",
+            CorrelationLifetime.Ephemeral => "A single use correlation",
+            _ => "Unknown/unsupported correlation lifetime"
+        };
+    }
+
+    string GetEventConsumptionStrategyTitle(Correlation correlation)
+    {
+        if (correlation.Spec.Events.All != null) return "Consumes all the defined events";
+        else if (correlation.Spec.Events.Any != null) return "Consumes any of the defined events";
+        else return "Consumes a single event";
+    }
+
+    string GetOutcomeTypeTitle(Correlation correlation)
+    {
+        if (correlation.Spec.Outcome.Start != null) return "Starts a new instance workflow of the specified workflow";
+        else return "Correlate ingested events to a specific workflow instance";
+    }
+
+    string GetOutcomeTargetTitle(Correlation correlation)
+    {
+        if (correlation.Spec.Outcome.Start != null) return "The qualified name of the workflow to start";
+        else return "The qualified name of the workflow instance to correlate events to";
+    }
+
+    string GetStatusPhaseClass(Correlation correlation)
+    {
+        return correlation.Status?.Phase switch
+        {
+            CorrelationStatusPhase.Active => "primary",
+            CorrelationStatusPhase.Cancelled => "warning",
+            CorrelationStatusPhase.Completed => "success",
+            _ => "secondary"
+        };
+    }
+
+    string GetEventConsumptionStrategy(Correlation correlation)
+    {
+        if (correlation.Spec.Events.All != null) return "all";
+        else if (correlation.Spec.Events.Any != null) return "any";
+        else return "one";
+    }
+
+    int GetFilterCount(Correlation correlation)
+    {
+        if (correlation.Spec.Events.All != null) return correlation.Spec.Events.All.Count;
+        else if (correlation.Spec.Events.Any != null) return correlation.Spec.Events.Any.Count;
+        else return 1;
+    }
+
+    string GetOutcomeType(Correlation correlation)
+    {
+        if (correlation.Spec.Outcome.Start != null) return "start";
+        else return "correlate";
+    }
+
+    string GetOutcomeTarget(Correlation correlation)
+    {
+        if (correlation.Spec.Outcome.Start != null) return correlation.Spec.Outcome.Start.Workflow.ToString();
+        else return correlation.Spec.Outcome.Correlate!.Instance;
+    }
+
+    string GetOutcomeTargetRef(Correlation correlation)
+    {
+        if (correlation.Spec.Outcome.Start != null)
+        {
+            var definitionSegments = correlation.Spec.Outcome.Start.Workflow.ToString().Split(':');
+            var version = definitionSegments.Last();
+            var nameNs = definitionSegments.First();
+            var segments = nameNs.Split('.');
+            var ns = segments.Last();
+            var name = segments.Take(segments.Count() - 1).Join('.');
+            return $"/workflows/details/{ns}/{name}/{version}";
+        }
+        else return $"/workflow-instances/{correlation.Spec.Outcome.Correlate!.Instance}";
+    }
+
+    /// <inheritdoc/>
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        BreadcrumbManager.Use(Breadcrumbs.Correlations);
+    }
+}

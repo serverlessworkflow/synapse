@@ -1,0 +1,109 @@
+﻿@*
+    Copyright © 2024-Present The Synapse Authors
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*@
+
+@page "/namespaces/{name?}"
+@attribute [Authorize]
+@namespace Synapse.Dashboard.Pages.Namespaces.List
+@inherits ClusterResourceManagementComponent<Namespace>
+@inject IBreadcrumbManager BreadcrumbManager
+
+<ApplicationTitle>Namespaces</ApplicationTitle>
+
+<div class="table-container">
+    @if (Loading)
+    {
+        <Loader />
+    }
+    <div class="d-flex flex-row justify-content-between align-items-center">
+        <h4>Namespaces</h4>
+        <span>@(Resources?.Count ?? 0) items</span>
+        <div class="d-flex">
+            <input type="search" class="form-control rounded my-2 me-2" placeholder="Search" value="@SearchTerm" @oninput="OnSearchInput" />
+        </div>
+        <div class="dropdown d-flex align-content-center">
+            <button class="btn btn-sm btn-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="" @onclick:stopPropagation="true"><i class="bi bi-three-dots-vertical"></i></button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item @(SelectedResourceNames.Count == 0 ? "text-mute" : "text-danger")" href="#" @onclick="async _ => await (SelectedResourceNames.Count == 0 ?  Task.CompletedTask : OnDeleteSelectedResourcesAsync())" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Trash" /> Delete selected</a></li>
+            </ul>
+        </div>
+    </div>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th class="sticky-header text-start">Name</th>
+                <th class="sticky-header text-center">Creation Time</th>
+                <th class="sticky-header text-end"></th>
+                <th class="sticky-header text-center align-middle">
+                    <input @ref="CheckboxAll" type="checkbox" @onclick="(_) => Store.ToggleResourceSelection()" @onclick:preventDefault="true" @onclick:stopPropagation="true" />
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Resources != null && Resources.Any())
+            {
+                <Virtualize Context="resource" Items="@Resources">
+                    <tr @onclick="async _ => await OnShowResourceDetailsAsync(resource)" class="cursor-pointer">
+                        <td class="text-left">@resource.Metadata.Name</td>
+                        <td class="text-center">@resource.Metadata.CreationTimestamp.ToString()</td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="" @onclick:stopPropagation="true"><i class="bi bi-three-dots-vertical"></i></button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" @onclick="async _ => await OnShowResourceEditorAsync(resource)" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Pencil" /> Edit</a></li>
+                                <li><a class="dropdown-item text-danger" href="#" @onclick="async _ => await OnDeleteResourceAsync(resource)" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Trash" /> Delete</a></li>
+                            </ul>
+                        </td>
+                        <td class="text-center align-middle">
+                            <input type="checkbox" checked="@SelectedResourceNames.Contains(resource.GetName())" @onclick="(_) => Store.ToggleResourceSelection(resource.GetName())" @onclick:preventDefault="true" @onclick:stopPropagation="true" />
+                        </td>
+                    </tr>
+                </Virtualize>
+            }
+        </tbody>
+    </table>
+</div>
+
+<Button Outline="true" Color="ButtonColor.Primary" @onclick="async _ => await OnShowResourceEditorAsync()"><Icon Name="IconName.Plus" /></Button>
+
+<Offcanvas @ref="DetailsOffCanvas" Size="OffcanvasSize.Large" UseStaticBackdrop="false" BodyCssClass="d-flex flex-column" />
+
+<Offcanvas @ref="EditorOffCanvas" Size="OffcanvasSize.Large" UseStaticBackdrop="false" BodyCssClass="d-flex flex-column" />
+
+<ConfirmDialog @ref="Dialog" />
+
+@code {
+    /// <inheritdoc/>
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        BreadcrumbManager.Use(Breadcrumbs.Namespaces);
+    }
+
+    /// <summary>
+    /// Opens the targeted <see cref="Resource"/>'s edition
+    /// </summary>
+    /// <param name="resource">The <see cref="Resource"/> to edit</param>
+    protected override Task OnShowResourceEditorAsync(Namespace? resource = null)
+    {
+        if (this.EditorOffCanvas == null) return Task.CompletedTask;
+        var parameters = new Dictionary<string, object>
+        {
+            { nameof(ResourceEditor<Namespace>.Resource), resource! },
+            { nameof(ResourceEditor<Namespace>.IsCluster), true }
+        };
+        string actionType = resource == null ? "creation" : "edition";
+        return this.EditorOffCanvas.ShowAsync<ResourceEditor<Namespace>>(title: typeof(Namespace).Name + " " + actionType, parameters: parameters);
+    }
+}

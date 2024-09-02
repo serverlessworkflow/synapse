@@ -1,0 +1,51 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+	<TargetFramework>net8.0</TargetFramework>
+	<Nullable>enable</Nullable>
+	<ImplicitUsings>enable</ImplicitUsings>
+	<OutputType>Exe</OutputType>
+	<NeutralLanguage>en</NeutralLanguage>
+	<GenerateDocumentationFile>True</GenerateDocumentationFile>
+	<VersionPrefix>1.0.0</VersionPrefix>
+	<VersionSuffix>alpha1</VersionSuffix>
+	<AssemblyVersion>$(VersionPrefix)</AssemblyVersion>
+	<FileVersion>$(VersionPrefix)</FileVersion>
+	<Authors>The Synapse Authors</Authors>
+	<Company>Cloud Native Computing Foundation</Company>
+	<Copyright>Copyright © 2024-Present The Synapse Authors. All Rights Reserved.</Copyright>
+	<RepositoryUrl>https://github.com/serverlessworkflow/synapse</RepositoryUrl>
+	<RepositoryType>git</RepositoryType>
+	<PackageProjectUrl>https://github.com/serverlessworkflow/synapse</PackageProjectUrl>
+	<PackageTags>synapse correlator</PackageTags>
+	<NeutralLanguage>en</NeutralLanguage>
+	<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+	<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+	<AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
+	<FileVersion>$(VersionPrefix).0</FileVersion>
+	<DebugType>embedded</DebugType>
+	<DockerFileTag>ghcr.io/serverlessworkflow/synapse/correlator</DockerFileTag>
+	<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+	<DockerfileContext>..\..\..</DockerfileContext>
+	<DockerComposeProjectPath>..\..\..\docker-compose.dcproj</DockerComposeProjectPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+	<PackageReference Include="Microsoft.Extensions.Configuration.KeyPerFile" Version="8.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
+	<PackageReference Include="Neuroglia.Data.Expressions.JavaScript" Version="4.15.3" />
+	<PackageReference Include="Neuroglia.Data.Expressions.JQ" Version="4.15.3" />
+    <PackageReference Include="Neuroglia.Eventing.CloudEvents.AspNetCore" Version="4.15.3" />
+	<PackageReference Include="Neuroglia.Mediation.AspNetCore" Version="4.15.3" />
+	<PackageReference Include="Neuroglia.Eventing.CloudEvents.Infrastructure" Version="4.15.3" />
+	<PackageReference Include="Neuroglia.Security.AspNetCore" Version="4.15.3" />
+	<PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.7.3" />
+	<PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.7.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\core\Synapse.Core.Infrastructure\Synapse.Core.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,268 @@
+﻿﻿@*
+    Copyright © 2024-Present The Synapse Authors
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*@
+
+@namespace Synapse.Dashboard.Components
+@using Synapse.Dashboard.Components.ResourceEditorStateManagement
+@typeparam TResource where TResource : Resource, new()
+@inherits StatefulComponent<ResourceEditor<TResource>, ResourceEditorStore<TResource>, ResourceEditorState<TResource>>
+@inject IMonacoEditorHelper MonacoEditorHelper
+@inject IJSRuntime JSRuntime
+
+<div class="container-fluid d-flex flex-grow flex-column">
+    <div class="row flex-grow">
+        <div class="d-flex justify-content-end mb-2">
+            <PreferredLanguageSelector PreferedLanguageChange="ToggleTextBasedEditorLanguageAsync" />
+        </div>
+        <StandaloneCodeEditor @ref="textBasedEditor"
+            ConstructionOptions="MonacoEditorHelper.GetStandaloneEditorConstructionOptions(this.textEditorValue, false, this.MonacoEditorHelper.PreferredLanguage)"
+            OnDidInit="OnTextBasedEditorInit"
+            OnDidChangeModelContent="OnTextBasedValueChanged" />
+        <div class="problems">
+            @if (problemDetails != null)
+            {
+                <Callout Type="CalloutType.Danger" Heading="@problemDetails.Title">
+                    @problemDetails.Detail
+                </Callout>
+                @if (problemDetails.Errors != null && problemDetails.Errors.Any())
+                {
+                    foreach (KeyValuePair<string, string[]> errorContainer in problemDetails.Errors)
+                    {
+                        <Callout Type="CalloutType.Danger" Heading="@errorContainer.Key">
+                            <ul>
+                                @foreach (string error in errorContainer.Value)
+                                {
+                                    <li>@error</li>
+                                }
+                            </ul>
+                        </Callout>
+                    }
+                }
+            }
+        </div>
+        <Button Color="ButtonColor.Primary" Outline="true" Disabled="isUpdating || isSaving" Loading="isSaving" @onclick="async _ => await Store.SubmitResourceAsync()">
+            @if (resource?.Metadata?.Generation == null || resource?.Metadata?.Generation == 0)
+            {
+                <span>Create</span>
+            }
+            else
+            {
+                <span>Update</span>
+            }
+        </Button>
+    </div>
+</div>
+
+@code {
+
+    TResource? resource;
+    /// <summary>
+    /// Gets/sets the resource to display details about
+    /// </summary>
+    [Parameter] public TResource? Resource { get; set; }
+
+    bool isCluster = false;
+    /// <summary>
+    /// Gets/sets a boolean indicating the resource is a cluster
+    /// </summary>
+    [Parameter] public bool IsCluster { get; set; } = false;
+
+    /// <summary>
+    /// The reference of the <see cref="StandaloneCodeEditor" />
+    /// </summary>
+    private StandaloneCodeEditor? textBasedEditor;
+
+    /// <summary>
+    /// The <see cref="Subject" /> used to observe and debounce the input of the text editor
+    /// </summary>
+    private Subject<string> textEditorInput = new Subject<string>();
+
+    /// <summary>
+    /// The content of the text editor
+    /// </summary>
+    private string textEditorValue = string.Empty;
+
+    /// <summary>
+    /// The <see cref="TextModel" /> provided to the <see cref="StandaloneCodeEditor" />
+    /// </summary>
+    private TextModel? textEditorModel = null!;
+
+    /// <summary>
+    /// A boolean indicating if the text editor is being updated
+    /// </summary>
+    private bool isUpdating = false;
+
+    /// <summary>
+    /// A boolean indicating if the resource is being saved
+    /// </summary>
+    private bool isSaving = false;
+
+    /// <summary>
+    /// The <see cref="ProblemDetails"/> that occurred when trying to save the resource, if any
+    /// </summary>
+    private ProblemDetails? problemDetails = null;
+
+    /// <inheritdoc/>
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync().ConfigureAwait(false);
+        this.Store.Resource.Subscribe(resource => this.OnStateChanged(cmp => cmp.resource = resource), token: this.CancellationTokenSource.Token);
+        this.Store.IsUpdating.Subscribe(updating => this.OnStateChanged(cmp => cmp.isUpdating = updating), token: this.CancellationTokenSource.Token);
+        this.Store.IsSaving.Subscribe(OnSavingChanged, token: this.CancellationTokenSource.Token);
+        this.Store.ProblemDetails.Subscribe(problemDetails => this.OnStateChanged(cmp => cmp.problemDetails = problemDetails), token: this.CancellationTokenSource.Token);
+        this.textEditorInput
+            .Throttle(TimeSpan.FromMilliseconds(300))
+            .DistinctUntilChanged()
+            .Subscribe(text => this.Store.SetEditorValue(text));
+        this.Store.TextEditorValue.SubscribeAsync(async textEditorValue =>
+        {
+            this.textEditorValue = textEditorValue;
+            await this.SetTextEditorValueAsync();
+        }, cancellationToken: this.CancellationTokenSource.Token);
+    }
+
+    /// <inheritdoc/>
+    protected override Task OnParametersSetAsync()
+    {
+        if (this.resource == null || this.resource.GetQualifiedName() != this.Resource?.GetQualifiedName())
+        {
+            this.resource = this.Resource; // should happen in this.Store.Resource.Subscribe but prevents possible race when multiple params are set
+            this.Store.SetResource(this.Resource);
+        }
+        if (this.isCluster != this.IsCluster)
+        {
+            this.isCluster = this.IsCluster;
+            this.Store.SetIsCluster(this.IsCluster);
+        }
+        return base.OnParametersSetAsync();
+    }
+
+    /// <summary>
+    /// Sets the editor as read-only when saving
+    /// </summary>
+    /// <param name="saving">Whenever the resource is in a saving state</param>
+    private void OnSavingChanged(bool saving)
+    {
+        this.isSaving = saving;
+        if (this.textBasedEditor != null) this.textBasedEditor.UpdateOptions(new EditorUpdateOptions() { ReadOnly = saving });
+        this.StateHasChanged();
+    }
+
+    /// <summary>
+    /// Handles the <see cref="Editor.OnDidInit" /> event
+    /// </summary>
+    /// <returns>A <see cref="Task"/></returns>
+    private async Task OnTextBasedEditorInit()
+    {
+        var resourceUri = $"inmemory://{typeof(TResource).Name.ToLower()}";
+        this.textEditorModel = await Global.GetModel(this.JSRuntime, resourceUri);
+        if (this.textEditorModel == null)
+        {
+            this.textEditorModel = await Global.CreateModel(this.JSRuntime, this.textEditorValue, this.MonacoEditorHelper.PreferredLanguage, resourceUri);
+            await this.textBasedEditor!.SetModel(this.textEditorModel);
+        }
+        else
+        {
+            await this.SetTextEditorValueAsync();
+            await this.SetTextBasedEditorLanguageAsync();
+        }
+        this.StateHasChanged();
+    }
+
+    /// <summary>
+    /// Handles the <see cref="CodeEditor.OnDidChangeModelContent" /> event
+    /// </summary>
+    /// <param name="e">The source <see cref="ModelContentChangedEvent" /></param>
+    /// <returns>A <see cref="Task"/></returns>
+    private async Task OnTextBasedValueChanged(ModelContentChangedEvent e)
+    {
+        if (!this.isUpdating && this.textBasedEditor != null && this.textEditorInput != null)
+        {
+            var text = await this.textBasedEditor.GetValue();
+            this.textEditorInput.OnNext(text);
+        }
+    }
+
+    /// <summary>
+    /// Changes the editor's text
+    /// </summary>
+    /// <returns>A <see cref="Task"/></returns>
+    private async Task SetTextEditorValueAsync()
+    {
+        if (this.textBasedEditor != null)
+        {
+            var editorText = await this.textBasedEditor.GetValue();
+            if (this.textEditorValue != editorText) await this.textBasedEditor.SetValue(this.textEditorValue);
+        }
+    }
+
+    /// <summary>
+    /// Changes the editor's language
+    /// </summary>
+    /// <returns>A <see cref="Task"/></returns>
+    private async Task SetTextBasedEditorLanguageAsync()
+    {
+        if (this.textBasedEditor != null && this.textEditorModel != null)
+        {
+            //TextModel model = await this.textBasedEditor!.GetModel();
+            await Global.SetModelLanguage(this.JSRuntime, this.textEditorModel, this.MonacoEditorHelper.PreferredLanguage);
+        }
+    }
+
+    /// <summary>
+    /// Changes the editor language
+    /// </summary>
+    /// <param name="language">The new editor's language</param>
+    /// <returns>A <see cref="Task"/></returns>
+    private async Task ToggleTextBasedEditorLanguageAsync(string language)
+    {
+        var model = await this.textBasedEditor!.GetModel();
+        var editorLanguage = await model.GetLanguageId();
+        if (editorLanguage != language)
+        {
+            await this.Store.ChangeTextEditorLanguageAsync(language);
+            await this.SetTextBasedEditorLanguageAsync();
+        }
+    }
+
+    private bool disposed;
+    /// <summary>
+    /// Disposes of the component
+    /// </summary>
+    /// <param name="disposing">A boolean indicating whether or not the dispose of the component</param>
+    protected override void Dispose(bool disposing)
+    {
+        base.Dispose(disposing);
+        if (!this.disposed)
+        {
+            if (disposing)
+            {
+                if (this.textEditorInput != null) this.textEditorInput.Dispose();
+                if (this.textEditorModel != null)
+                {
+                    this.textEditorModel.DisposeModel();
+                    this.textEditorModel = null;
+                }
+                if (this.textBasedEditor != null)
+                {
+                    this.textBasedEditor.Dispose();
+                    this.textBasedEditor = null;
+                }
+            }
+            this.disposed = true;
+        }
+    }
+
+}

@@ -1,0 +1,51 @@
+﻿﻿@*
+    Copyright © 2024-Present The Synapse Authors
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*@
+
+@namespace Synapse.Dashboard.Layout
+@implements IDisposable
+@inject IApplicationLayout Layout
+@code
+{
+
+    /// <summary>
+    /// Gets the application's title content
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <inheritdoc/>
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        if (this.Layout != null) this.Layout.Title = this;
+    }
+
+    /// <inheritdoc/>
+    protected override bool ShouldRender()
+    {
+        var shouldRender = base.ShouldRender();
+        if (shouldRender) this.Layout.OnTitleChanged();
+        return shouldRender;
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        if (this.Layout != null) this.Layout.Title = null;
+        GC.SuppressFinalize(this);
+    }
+
+}

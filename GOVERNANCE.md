@@ -1,138 +1,94 @@
-# Synapse Project Governance
+# Governance
 
-As a CNCF member project, we abide by the [CNCF Code of Conduct](https://github.com/cncf/foundation/blob/master/code-of-conduct.md).
+As a CNCF member project, Synapse adheres to the [CNCF Code of Conduct](https://github.com/cncf/foundation/blob/master/code-of-conduct.md).
 
-For specific guidance on practical contribution steps for any Synapse sub-project please
-see our [contributing guide](CONTRIBUTING.md).
+For specific guidance on contributing to Synapse, please refer to our [contributing guide](contributing.md).
 
-You can contact the project maintainers at any time by sending an email to the 
-[Synapse WMS Maintainers](mailto:cncf-serverlessws-maintainers@lists.cncf.io)
- mailing list.
+For any questions or concerns, contact the project maintainers via the [Serverless Workflow Specification Maintainers](mailto:cncf-serverlessws-maintainers@lists.cncf.io) mailing list.
 
 ## Maintainership
 
-Main responsibilities of maintainers include:
+### Responsibilities
 
-1) They share responsibility in the project's success.
-2) They have made a long-term, recurring time investment to improve the project.
-3) They spend that time doing whatever needs to be done, not necessarily what
-is the most interesting or fun.
+Maintainers are responsible for:
+
+1. Ensuring the project's overall success.
+2. Committing significant time and effort to enhance the project.
+3. Handling necessary tasks, even those that may not be the most engaging.
 
 ## Reviewers
 
-A reviewer is a core role within the project.
-They share in reviewing issues and pull requests. Their pull request approvals 
-are needed to merge a large code change into the project.
+Reviewers play a crucial role by:
 
-## Adding maintainers
+- Reviewing and approving issues and pull requests.
+- Approving pull requests is necessary for code changes to be merged into the project.
 
-Maintainers are first and foremost contributors that have shown they are
-committed to the long term success of a project. Contributors wanting to become
-maintainers are expected to be deeply involved in contributing code, pull
-request review, and triage of issues in the project for more than three months.
+## Emeritus Maintainers
 
-Just contributing does not make you a maintainer, it is about building trust
-with the current maintainers of the project and being a person that they can
-depend on and trust to make decisions in the best interest of the project.
+Emeritus maintainers are former maintainers who have significantly contributed to the project but are no longer able to be actively involved. They continue to:
 
-Periodically, the existing maintainers curate a list of contributors that have
-shown regular activity on the project over the prior months. From this list,
-maintainer candidates are selected and proposed on the project mailing list.
+1. Provide guidance and mentorship to current maintainers and contributors.
+2. Offer historical context and insights based on their past experiences.
+3. Participate in discussions and reviews on an advisory basis.
 
-After a candidate has been announced on the project mailing list, the
-existing maintainers are given fourteen business days to discuss the candidate,
-raise objections and cast their vote. Votes may take place on the mailing list
-or via pull request comment. Candidates must be approved by at least 66% of the
-current maintainers by adding their vote on the mailing list. The reviewer role
-has the same process but only requires 33% of current maintainers. Only
-maintainers of the repository that the candidate is proposed for are allowed to
-vote.
+## Adding Maintainers
 
-If a candidate is approved, a maintainer will contact the candidate to invite
-the candidate to open a pull request that adds the contributor to the
-[MAINTAINERS](MAINTAINERS.md) file. The voting process may take place inside a pull request if a
-maintainer has already discussed the candidacy with the candidate and a
-maintainer is willing to be a sponsor by opening the pull request. The candidate
-becomes a maintainer once the pull request is merged.
+To add a new maintainer:
+
+1. Candidates must demonstrate strong, ongoing commitment to the project by actively contributing, reviewing pull requests, and managing issues for at least three months.
+2. Current maintainers review and propose new maintainers through a pull request.
+3. A candidate requires at least 66% approval from existing maintainers to be added. Only one maintainer per organization is allowed.
+
+For the reviewer role, candidates need 33% approval from current maintainers.
+
+## Adding Emeritus Maintainers
+
+To transition a maintainer to emeritus status:
+
+1. Follow the same voting and approval process as for adding new maintainers.
+2. A pull request is created for the transition, requiring a 66% approval vote from current maintainers.
+3. Once approved, the emeritus maintainer is added to the EMERITUS file and announced to the community.
 
 ## Subprojects
 
-Synapse subprojects all culminate in officially supported and maintained releases
-of the specification. 
-All subprojects must adhere to [CNCF Code of Conduct](https://github.com/cncf/foundation/blob/master/code-of-conduct.md)
-as well as this governance document.
+### Adding Core Subprojects
 
-### Adding core subprojects
+1. To add a new subproject, submit a GitHub issue in the specification repository.
+2. Existing maintainers have fourteen business days to discuss and vote on the proposal.
+3. A subproject requires at least 66% approval from current maintainers.
 
-New subprojects can request to be added to the Synapse GitHub
-organization by submitting a GitHub issue in the specification repository.
+### Stepping Down
 
-The existing maintainers are given fourteen business days to discuss the new
-project, raise objections and cast their vote. Projects must be approved by at
-least 66% of the current maintainers.
+Maintainers intending to step down should:
 
-If a project is approved, a maintainer will add the project to the Synapse
-GitHub organization, and make an announcement on a public Slack channel.
+1. Inform other maintainers and, if possible, help find a successor.
+2. Open a pull request to remove their name from the MAINTAINERS file.
 
-## Stepping down policy
+## Removal of Inactive Maintainers
 
-Life priorities, interests, and passions can change. If you're a maintainer but
-feel you must remove yourself from the list, inform other maintainers that you
-intend to step down, and if possible, help find someone to pick up your work.
-At the very least, ensure your work can be continued where you left off.
+Inactive maintainers are reviewed periodically. If a maintainer has not been active for three months:
 
-After you've informed other maintainers, create a pull request to remove
-yourself from the MAINTAINERS file.
+1. A neutral person will contact them to confirm their desire to continue.
+2. If they wish to step down, a pull request is opened to remove them from the MAINTAINERS file.
+3. If they wish to remain but cannot perform their duties, they can be removed with a 66% vote from the current maintainers.
 
-## Removal of inactive maintainers
+## Decision-Making Process
 
-Similar to the procedure for adding new maintainers, existing maintainers can
-be removed from the list if they do not show significant activity on the
-project. Periodically, the maintainers review the list of maintainers and their
-activity over the last three months.
+Decisions are made through:
 
-If a maintainer has shown insufficient activity over this period, a neutral
-person will contact the maintainer to ask if they want to continue being
-a maintainer. If the maintainer decides to step down as a maintainer, they
-open a pull request to be removed from the MAINTAINERS file.
+1. Opening a pull request, which anyone can do.
+2. Discussing the pull request, which anyone can contribute to.
+3. Merging or refusing the pull request, which depends on the nature of the change.
 
-If the maintainer wants to remain a maintainer, but is unable to perform the
-required duties they can be removed with a vote of at least 66% of
-the current maintainers. An e-mail is sent to the
-mailing list, inviting maintainers of the project to vote. The voting period is
-fourteen business days. Issues related to a maintainers performance should be
-discussed with them among the other maintainers so that they are not surprised
-by a pull request removing them.
+Consensus among maintainers is required for significant decisions. Proposals should be discussed before opening a pull request.
 
-## How are decisions made?
+## Maintainer Pull Requests
 
-Synapse is an open-source project with an open design philosophy. This means
-that the repository is the source of truth for EVERY aspect of the project,
-including its philosophy, design, road map, and APIs. *If it's part of the
-project, it's in the repository. If it's in the repository, it's part of the project.*
-
-As a result, all decisions can be expressed as changes to the repository. An
-implementation change is a change to the source code. An API change is a change
-to the API specification, and so on.
-
-All decisions affecting Synapse, big and small, follow the same 3 steps:
-
-* Step 1: Open a pull request. Anyone can do this.
-
-* Step 2: Discuss the pull request. Anyone can do this.
-
-* Step 3: Merge or refuse the pull request. Who does this depends on the nature
-of the pull request and which areas of the project it affects.
-
-## I'm a maintainer. Should I make pull requests too?
-
-Yes. Nobody should ever push to master directly. All changes should be
-made through a pull request.
+Maintainers must also make changes via pull requests. Direct pushes to master are not allowed. For details, see the [Contributing](contributing.md) guide.
 
 ## Conflict Resolution
 
-If you have a technical dispute that you feel has reached an impasse with a
-subset of the community, any contributor may open an issue, specifically
-calling for a resolution vote of the current core maintainers to resolve the dispute.
-The same voting quorums required (2/3) for adding and removing maintainers
-will apply to conflict resolution.
+To merge changes, at least one maintainer must approve the pull request. If maintainers do not voice their opinions within two days, their approval is assumed via [lazy consensus](http://communitymgt.wikia.com/wiki/Lazy_consensus).
+
+For disputes, efforts should be made to resolve issues amicably. If unresolved, a third-party maintainer can mediate. The core maintainers have the final say, making decisions by consensus or majority vote if necessary, ideally within two weeks.
+

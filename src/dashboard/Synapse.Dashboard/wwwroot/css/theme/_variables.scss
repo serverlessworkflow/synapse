@@ -1,0 +1,91 @@
+﻿@import "../../lib/bootstrap/scss/functions";
+
+
+$variable-prefix: bs- !default; // Deprecated in v5.2.0 for the shorter `$prefix`
+$prefix: $variable-prefix !default;
+
+$primary: #8c68cd !default;
+$primary-text: $primary;
+$primary-bg-subtle: #7d59bd !default;
+$primary-border-subtle: #714db1 !default;
+$primary-dark: $primary;
+$primary-text-dark: $primary;
+$primary-bg-subtle-dark: $primary-bg-subtle;
+$primary-border-subtle-dark: $primary-border-subtle;
+
+$secondary: #3c8cd6 !default;
+$secondary-dark: $secondary;
+$secondary-text-dark: $secondary;
+
+$accent: #9CEC5B !default; //lime
+$accent-dark: $accent;
+$accent-text-dark: $accent;
+$accent-bg-subtle: $accent;
+$accent-bg-subtle-dark: $accent;
+$accent-border-subtle-dark: $accent;
+
+$cinereous: #837569 !default; //light brown/gray
+$cinereous: $cinereous;
+$cinereous-text-dark: $cinereous;
+$cinereous-bg-subtle: $cinereous;
+$cinereous-bg-subtle-dark: $cinereous;
+$cinereous-border-subtle-dark: $cinereous;
+
+$verdigris: #50C5B7 !default; //blue-green
+$verdigris-dark: $verdigris;
+$verdigris-text-dark: $verdigris;
+$verdigris-bg-subtle: $verdigris;
+$verdigris-bg-subtle-dark: $verdigris;
+$verdigris-border-subtle-dark: $verdigris;
+
+$icterine: #F0F465 !default; //pale yellow
+$icterine-dark: $verdigris;
+$icterine-text-dark: $verdigris;
+$icterine-bg-subtle: $icterine;
+$icterine-bg-subtle-dark: $icterine;
+$icterine-border-subtle-dark: $icterine;
+
+@import "../../lib/bootstrap/scss/variables";
+
+
+$link-color-dark: $purple-400;
+$link-hover-color-dark: $purple-200;
+
+
+$mute: $gray-600 !default;
+$mute-dark: $mute;
+$mute-text-dark: $mute;
+
+@import "../../lib/bootstrap/scss/variables-dark";
+
+$table-color: $body-color-dark;
+
+@import "../../lib/bootstrap/scss/functions";
+@import "../../lib/bootstrap/scss/maps";
+@import "../../lib/bootstrap/scss/mixins";
+
+$extra-colors: ( 
+    "accent": $accent,
+    "cinereous": $cinereous,
+    "verdigris": $verdigris,
+    "icterine": $icterine,
+    "mute": $mute 
+);
+
+$colors: map-merge( $colors, $extra-colors );
+$theme-colors: map-merge( $theme-colors, $extra-colors );
+$theme-colors-bg-subtle: map-merge( $theme-colors-bg-subtle, $extra-colors );
+$theme-colors-border-subtle: map-merge( $theme-colors-border-subtle, $extra-colors );
+$theme-colors-text-dark: map-merge( $theme-colors-text-dark, $extra-colors );
+$theme-colors-bg-subtle-dark: map-merge( $theme-colors-bg-subtle-dark, $extra-colors );
+$theme-colors-border-subtle-dark: map-merge( $theme-colors-border-subtle-dark, $extra-colors );
+$theme-colors-rgb: map-loop( $theme-colors, to-rgb, "$value" );
+
+$utilities-colors: map-merge( $utilities-colors, $theme-colors-rgb );
+$utilities-text: map-merge( $utilities-text, $theme-colors-rgb );
+$utilities-text-emphasis-colors: map-merge( $utilities-text-emphasis-colors, $extra-colors );
+$utilities-bg-subtle: map-merge( $utilities-bg-subtle, $extra-colors );
+$utilities-border-subtle: map-merge( $utilities-border-subtle, $extra-colors );
+
+$utilities-text-colors: map-loop( $utilities-text, rgba-css-var, "$key", "text" );
+$utilities-bg-colors: map-loop( $utilities-colors, rgba-css-var, "$key", "bg" );
