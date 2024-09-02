@@ -63,12 +63,12 @@ public record OAuth2Token
     /// Gets the UTC date and time at which the <see cref="OAuth2Token"/> expires
     /// </summary>
     [DataMember(Order = 6, Name = "expires_on"), JsonPropertyName("expires_on"), JsonPropertyOrder(6), YamlMember(Alias = "expires_on", Order = 6)]
-    public virtual DateTime ExpiresAt { get; set; }
+    public virtual DateTime? ExpiresAt { get; set; }
 
     /// <summary>
     /// Gets a boolean indicating whether or not the <see cref="OAuth2Token"/> has expired
     /// </summary>
     [IgnoreDataMember, JsonIgnore, YamlIgnore]
-    public virtual bool HasExpired => DateTime.UtcNow > this.ExpiresAt;
+    public virtual bool HasExpired => this.ExpiresAt.HasValue ? DateTime.UtcNow > this.ExpiresAt : DateTime.UtcNow > this.CreatedAt.Add(TimeSpan.FromSeconds(this.Ttl));
 
 }

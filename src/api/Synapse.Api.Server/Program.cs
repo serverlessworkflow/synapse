@@ -39,10 +39,11 @@ authentication.AddJwtBearer(ServiceAccountAuthenticationDefaults.AuthenticationS
     {
         NameClaimType = JwtClaimTypes.Name,
         RoleClaimType = JwtClaimTypes.Role,
-        //ValidAudience = "api", //todo
-        ValidateAudience = false, //todo
+        ValidAudience = "api",
+        ValidateAudience = false,
         ValidIssuer = options.Authority,
-        ValidateIssuer = true
+        ValidateIssuer = true,
+        IssuerSigningKey = ServiceAccountSigningKey.LoadPublicKey()
     };
 });
 authentication.AddPolicyScheme(FallbackPolicySchemeDefaults.AuthenticationScheme, FallbackPolicySchemeDefaults.AuthenticationScheme, options =>
@@ -144,7 +145,7 @@ if (options.ServeDashboard)
 {
     app.MapFallbackToFile("index.html");
     app.MapFallbackToFile("/workflows/details/{namespace}/{name}/{version?}/{instanceName?}", "index.html");
-    app.MapFallbackToFile("/workflow-intances/{instanceName?}", "index.html");
+    app.MapFallbackToFile("/workflow-instances/{instanceName?}", "index.html");
 }
     
 await app.RunAsync();

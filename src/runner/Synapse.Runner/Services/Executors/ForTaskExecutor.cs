@@ -122,6 +122,7 @@ public class ForTaskExecutor(IServiceProvider serviceProvider, ILogger<ForTaskEx
         var last = executor.Task.Instance;
         var output = executor.Task.Output!;
         this.Executors.Remove(executor);
+        if (this.Task.ContextData != executor.Task.ContextData) await this.Task.SetContextDataAsync(executor.Task.ContextData, cancellationToken).ConfigureAwait(false);
         await executor.DisposeAsync().ConfigureAwait(false);
         var index = int.Parse(last.Reference.OriginalString.Split('/', StringSplitOptions.RemoveEmptyEntries)[^2]) + 1;
         if (index == this.Collection.Count)

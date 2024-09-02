@@ -13,12 +13,12 @@
 
 using IdentityModel.Client;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Neuroglia.Serialization;
 using ServerlessWorkflow.Sdk;
 using ServerlessWorkflow.Sdk.Models.Authentication;
 using System.Collections.Concurrent;
-using System.IdentityModel.Tokens.Jwt;
 using System.Net.Mime;
 using System.Security.Claims;
 using System.Text;
@@ -59,6 +59,8 @@ public class OAuth2TokenManager(ILogger<OAuth2TokenManager> logger, IJsonSeriali
     public virtual async Task<OAuth2Token> GetTokenAsync(OAuth2AuthenticationSchemeDefinitionBase configuration, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(configuration);
+        var tokenKey = $"{configuration.Client?.Id}@{configuration.Authority}";
+        if (this.Tokens.TryGetValue(tokenKey, out var token) && token != null && !token.HasExpired) return token;
         Uri tokenEndpoint;
         if (configuration is OpenIDConnectSchemeDefinition)
         {
@@ -68,7 +70,6 @@ public class OAuth2TokenManager(ILogger<OAuth2TokenManager> logger, IJsonSeriali
         }
         else if (configuration is OAuth2AuthenticationSchemeDefinition oauth2) tokenEndpoint = oauth2.Endpoints.Token;
         else throw new NotSupportedException($"The specified scheme type '{configuration.GetType().FullName}' is not supported in this context");
-        var tokenKey = $"{configuration.Client?.Id}@{configuration.Authority}";
         var properties = new Dictionary<string, string>()
         {
             { "grant_type", configuration.Grant }
@@ -113,15 +114,10 @@ public class OAuth2TokenManager(ILogger<OAuth2TokenManager> logger, IJsonSeriali
             properties["actor_token"] = configuration.Actor.Token;
             properties["actor_token_type"] = configuration.Actor.Type;
         }
-        if (this.Tokens.TryGetValue(tokenKey, out var token) && token != null)
+        if (token != null && token.HasExpired && !string.IsNullOrWhiteSpace(token.RefreshToken))
         {
-            if (token.HasExpired
-                && !string.IsNullOrWhiteSpace(token.RefreshToken))
-            {
-                properties["grant_type"] = "refresh_token";
-                properties["refresh_token"] = token.RefreshToken;
-            }
-            else return token;
+            properties["grant_type"] = "refresh_token";
+            properties["refresh_token"] = token.RefreshToken;
         }
         using var content = configuration.Request.Encoding switch
         {
@@ -168,15 +164,23 @@ public class OAuth2TokenManager(ILogger<OAuth2TokenManager> logger, IJsonSeriali
         ArgumentException.ThrowIfNullOrWhiteSpace(clientId);
         ArgumentException.ThrowIfNullOrWhiteSpace(audience);
         ArgumentNullException.ThrowIfNull(signingCredentials);
-        var tokenHandler = new JwtSecurityTokenHandler();
         var claims = new List<Claim>
         {
             new(JwtRegisteredClaimNames.Sub, clientId),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
         };
-        var token = new JwtSecurityToken(clientId, audience, claims, DateTime.UtcNow, DateTime.UtcNow.AddMinutes(5), signingCredentials);
-        return tokenHandler.WriteToken(token);
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(claims),
+            Issuer = clientId,
+            Audience = audience,
+            NotBefore = DateTime.UtcNow,
+            Expires = DateTime.UtcNow.AddMinutes(5),
+            SigningCredentials = signingCredentials
+        };
+        var tokenHandler = new JsonWebTokenHandler();
+        return tokenHandler.CreateToken(tokenDescriptor);
     }
 
 }

@@ -34,6 +34,8 @@ internal class MockSynapseApiClient(IServiceProvider serviceProvider)
 
     public IDocumentApiClient Documents { get; } = ActivatorUtilities.CreateInstance<MockDocumentApiClient>(serviceProvider);
 
+    public ICloudEventApiClient Events { get; } = ActivatorUtilities.CreateInstance<MockEventApiClient>(serviceProvider);
+
     public INamespacedResourceApiClient<ServiceAccount> ServiceAccounts => throw new NotImplementedException();
 
     public IUserApiClient Users => throw new NotImplementedException();

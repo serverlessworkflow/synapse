@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.OpenApi.Models;
 using Neuroglia;
 using Neuroglia.Security.Services;
+using Synapse.Api.Application;
 using Synapse.Api.Application.Services;
 using Synapse.Api.Http.Controllers;
 using Synapse.Core.Api.Services;
@@ -36,6 +37,7 @@ public static class IServiceCollectionExtensions
     /// <returns>The configured <see cref="IServiceCollection"/></returns>
     public static IServiceCollection AddSynapseHttpApi(this IServiceCollection services)
     {
+        ServiceAccountSigningKey.Initialize();
         services.AddHttpContextAccessor();
         services.AddScoped<IUserAccessor, HttpContextUserAccessor>();
         services.AddControllers()
@@ -45,7 +47,7 @@ public static class IServiceCollectionExtensions
             })
             .AddApplicationPart(typeof(WorkflowsController).Assembly);
         services.AddIdentityServer()
-            .AddDeveloperSigningCredential()
+            .AddSigningCredential(ServiceAccountSigningKey.LoadPrivateKey())
             .AddInMemoryApiResources(SynapseApiDefaults.OpenIDConnect.ApiResources.AsEnumerable())
             .AddInMemoryIdentityResources(SynapseApiDefaults.OpenIDConnect.IdentityResources.AsEnumerable())
             .AddInMemoryApiScopes(SynapseApiDefaults.OpenIDConnect.ApiScopes.AsEnumerable())

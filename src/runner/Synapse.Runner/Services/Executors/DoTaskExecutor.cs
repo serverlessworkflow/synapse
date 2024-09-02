@@ -103,6 +103,7 @@ public class DoTaskExecutor(IServiceProvider serviceProvider, ILogger<DoTaskExec
         var output = executor.Task.Output!;
         var nextDefinition = this.Task.Definition.Do.GetTaskAfter(last);
         this.Executors.Remove(executor);
+        if (this.Task.ContextData != executor.Task.ContextData) await this.Task.SetContextDataAsync(executor.Task.ContextData, cancellationToken).ConfigureAwait(false);
         if (nextDefinition == null || nextDefinition.Value == null)
         {
             await this.SetResultAsync(output, last.Next == FlowDirective.End ? FlowDirective.End : this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
