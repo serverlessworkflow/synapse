@@ -14,7 +14,7 @@
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Cryptography;
 
-namespace Synapse.Api.Server.Configuration;
+namespace Synapse.Api.Application.Configuration;
 
 /// <summary>
 /// Represents the options used to configure the OIDC authentication of a Synapse API server

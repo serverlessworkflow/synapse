@@ -13,7 +13,7 @@
 
 using Neuroglia.Serialization.Yaml;
 
-namespace Synapse.Api.Server.Configuration;
+namespace Synapse.Api.Application.Configuration;
 
 /// <summary>
 /// Represents the options used to configure the authentication policy of a Synapse API server

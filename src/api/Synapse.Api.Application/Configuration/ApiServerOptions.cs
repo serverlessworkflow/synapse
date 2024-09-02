@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Synapse.Api.Server.Configuration;
+namespace Synapse.Api.Application.Configuration;
 
 /// <summary>
 /// Represents the options used to configure a Synapse API server
@@ -31,11 +31,16 @@ public class ApiServerOptions
     /// <summary>
     /// Gets/sets a boolean indicating whether or not to serve the Synapse Dashboard
     /// </summary>
-    public bool ServeDashboard { get; set; } = true;
+    public virtual bool ServeDashboard { get; set; } = true;
 
     /// <summary>
     /// Gets/sets the application's authentication policy
     /// </summary>
-    public AuthenticationPolicyOptions Authentication { get; set; } = new();
+    public virtual AuthenticationPolicyOptions Authentication { get; set; } = new();
+
+    /// <summary>
+    /// Gets/sets the options used to configure the cloud events published by the Synapse API Server
+    /// </summary>
+    public virtual CloudEventOptions? Events { get; set; }
 
 }

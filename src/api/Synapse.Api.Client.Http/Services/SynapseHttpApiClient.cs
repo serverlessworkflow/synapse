@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Synapse.Api.Client.Http.Services;
+
 namespace Synapse.Api.Client.Services;
 
 /// <summary>
@@ -34,6 +36,7 @@ public class SynapseHttpApiClient
         this.Serializer = serializer;
         this.HttpClient = httpClient;
         this.Documents = ActivatorUtilities.CreateInstance<DocumentHttpApiClient>(this.ServiceProvider, this.HttpClient);
+        this.Events = ActivatorUtilities.CreateInstance<CloudEventHttpApiClient>(this.ServiceProvider, this.HttpClient);
         foreach (var apiProperty in GetType().GetProperties().Where(p => p.CanRead && p.PropertyType.GetGenericType(typeof(IResourceApiClient<>)) != null && p.Name != nameof(WorkflowInstances)))
         {
             var apiType = apiProperty.PropertyType.GetGenericType(typeof(IResourceApiClient<>))!;
@@ -72,6 +75,12 @@ public class SynapseHttpApiClient
     public INamespacedResourceApiClient<Correlator> Correlators { get; private set; } = null!;
 
     /// <inheritdoc/>
+    public IDocumentApiClient Documents { get; }
+
+    /// <inheritdoc/>
+    public ICloudEventApiClient Events { get; }
+
+    /// <inheritdoc/>
     public IClusterResourceApiClient<Namespace> Namespaces { get; private set; } = null!;
 
     /// <inheritdoc/>
@@ -82,9 +91,6 @@ public class SynapseHttpApiClient
 
     /// <inheritdoc/>
     public IUserApiClient Users { get; }
-
-    /// <inheritdoc/>
-    public IDocumentApiClient Documents { get; }
 
     /// <inheritdoc/>
     public INamespacedResourceApiClient<Workflow> Workflows { get; private set; } = null!;

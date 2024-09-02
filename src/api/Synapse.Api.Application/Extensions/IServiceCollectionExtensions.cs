@@ -15,6 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Neuroglia.Data.Infrastructure;
 using Neuroglia.Security;
 using Synapse.Api.Application.Commands.Documents;
+using Synapse.Api.Application.Commands.Events;
 using Synapse.Api.Application.Commands.Resources.Generic;
 using Synapse.Api.Application.Queries.Documents;
 using Synapse.Api.Application.Queries.Resources.Generic;
@@ -100,6 +101,7 @@ public static class IServiceCollectionExtensions
         services.AddScoped<IRequestHandler<GetDocumentQuery, IOperationResult<Document>>, GetDocumentQueryHandler>();
         services.AddScoped<IRequestHandler<ReadWorkflowInstanceLogsQuery, IOperationResult<string>>, ReadWorkflowInstanceLogsQueryHandler>();
         services.AddScoped<IRequestHandler<WatchWorkflowInstanceLogsQuery, IOperationResult<IAsyncEnumerable<ITextDocumentWatchEvent>>>, WatchWorkflowInstanceLogsQueryHandler>();
+        services.AddScoped<IRequestHandler<PublishCloudEventCommand, IOperationResult>, PublishCloudEventCommandHandler>();
         return services;
     }
 

@@ -76,6 +76,14 @@ public interface ITaskExecutionContext
     Task<CorrelationContext> CorrelateAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Publishes the specified <see cref="CloudEvent"/>
+    /// </summary>
+    /// <param name="e">The <see cref="CloudEvent"/> to publish</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>A new awaitable <see cref="Task"/></returns>
+    Task PublishAsync(CloudEvent e, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Suspends the <see cref="TaskInstance"/>
     /// </summary>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>

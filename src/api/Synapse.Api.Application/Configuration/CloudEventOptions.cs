@@ -11,19 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-global using IdentityModel;
-global using Microsoft.AspNetCore.Diagnostics;
-global using Microsoft.Extensions.Options;
-global using Neuroglia;
-global using Neuroglia.Serialization;
-global using ServerlessWorkflow.Sdk;
-global using Swashbuckle.AspNetCore.SwaggerUI;
-global using Synapse;
-global using Synapse.Api.Application;
-global using Synapse.Api.Application.Configuration;
-global using Synapse.Api.Application.Services;
-global using Synapse.Api.Http;
-global using Synapse.Api.Http.Hubs;
-global using Synapse.Api.Server;
-global using System.Net.Mime;
-global using System.Security.Claims;
+using Neuroglia.Eventing.CloudEvents;
+
+namespace Synapse.Api.Application.Configuration;
+
+/// <summary>
+/// Represents the options used to configure the Cloud Events published by the Synapse API server
+/// </summary>
+public class CloudEventOptions
+{
+
+    /// <summary>
+    /// Gets/sets the uri, if any, to which to publish <see cref="CloudEvent"/>s
+    /// </summary>
+    public virtual Uri? Endpoint { get; set; }
+
+}

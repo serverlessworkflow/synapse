@@ -26,16 +26,10 @@ namespace Synapse.Runner.Services.Executors;
 /// <param name="context">The current <see cref="ITaskExecutionContext"/></param>
 /// <param name="serializer">The service used to serialize/deserialize objects to/from JSON</param>
 /// <param name="schemaHandlerProvider">The service used to provide <see cref="ISchemaHandler"/> implementations</param>
-/// <param name="cloudEventBus">The service used to stream both input and output <see cref="CloudEvent"/>s</param>
 public class EmitTaskExecutor(IServiceProvider serviceProvider, ILogger<EmitTaskExecutor> logger, ITaskExecutionContextFactory executionContextFactory, 
-    ITaskExecutorFactory executorFactory, ITaskExecutionContext<EmitTaskDefinition> context, ISchemaHandlerProvider schemaHandlerProvider, IJsonSerializer serializer, ICloudEventBus cloudEventBus)
+    ITaskExecutorFactory executorFactory, ITaskExecutionContext<EmitTaskDefinition> context, ISchemaHandlerProvider schemaHandlerProvider, IJsonSerializer serializer)
     : TaskExecutor<EmitTaskDefinition>(serviceProvider, logger, executionContextFactory, executorFactory, context, schemaHandlerProvider, serializer)
 {
-
-    /// <summary>
-    /// Gets the service used to stream both input and output <see cref="CloudEvent"/>s
-    /// </summary>
-    protected ICloudEventBus CloudEventBus { get; } = cloudEventBus;
 
     /// <inheritdoc/>
     protected override async Task DoExecuteAsync(CancellationToken cancellationToken)
@@ -45,7 +39,7 @@ public class EmitTaskExecutor(IServiceProvider serviceProvider, ILogger<EmitTask
         if (!attributes.ContainsKey(CloudEventAttributes.SpecVersion)) attributes[CloudEventAttributes.SpecVersion] = CloudEventSpecVersion.V1.Version;
         if (!attributes.ContainsKey(CloudEventAttributes.Time)) attributes[CloudEventAttributes.Time] = DateTimeOffset.Now;
         var e = (await this.Task.Workflow.Expressions.EvaluateAsync<CloudEvent>(attributes, this.Task.Input, this.GetExpressionEvaluationArguments(), cancellationToken).ConfigureAwait(false))!;
-        this.CloudEventBus.OutputStream.OnNext(e);
+        await this.Task.PublishAsync(e, cancellationToken).ConfigureAwait(false);
         await this.SetResultAsync(e, this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
     }
 

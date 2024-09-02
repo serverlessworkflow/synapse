@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Neuroglia.Eventing.CloudEvents;
+
 namespace Synapse.Api.Client.Services;
 
 /// <summary>
@@ -33,6 +35,11 @@ public interface ISynapseApiClient
     /// Gets the Synapse API used to manage <see cref="Document"/>s
     /// </summary>
     IDocumentApiClient Documents { get; }
+
+    /// <summary>
+    /// Gets the Synapse API used to produce <see cref="CloudEvent"/>s
+    /// </summary>
+    ICloudEventApiClient Events { get; }
 
     /// <summary>
     /// Gets the Synapse API used to manage <see cref="Namespace"/>s

@@ -279,6 +279,13 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
     }
 
     /// <inheritdoc/>
+    public virtual Task PublishAsync(CloudEvent e, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(e);
+        return this.Api.Events.PublishAsync(e, cancellationToken);
+    }
+
+    /// <inheritdoc/>
     public virtual IAsyncEnumerable<TaskInstance> GetTasksAsync(CancellationToken cancellationToken = default) => (this.Instance.Status?.Tasks ?? []).ToAsyncEnumerable();
 
     /// <inheritdoc/>

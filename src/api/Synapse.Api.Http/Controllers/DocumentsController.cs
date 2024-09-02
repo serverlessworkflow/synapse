@@ -17,7 +17,7 @@ using Synapse.Api.Application.Queries.Documents;
 namespace Synapse.Api.Http.Controllers;
 
 /// <summary>
-/// Represents the <see cref="NamespacedResourceController{TResource}"/> used to manage <see cref="Workflow"/>s
+/// Represents the <see cref="NamespacedResourceController{TResource}"/> used to manage <see cref="Document"/>s
 /// </summary>
 /// <param name="mediator">The service used to mediate calls</param>
 [Route("api/v1/documents")]
@@ -39,7 +39,7 @@ public class DocumentsController(IMediator mediator)
     [HttpPost]
     public async Task<IActionResult> CreateDocument([FromBody]Document document, CancellationToken cancellationToken = default)
     {
-        return this.Process(await this.Mediator.ExecuteAsync(new CreateDocumentCommand(document), cancellationToken), (int)HttpStatusCode.Created);
+        return this.Process(await this.Mediator.ExecuteAsync(new CreateDocumentCommand(document), cancellationToken).ConfigureAwait(false), (int)HttpStatusCode.Created);
     }
 
     /// <summary>
@@ -51,7 +51,7 @@ public class DocumentsController(IMediator mediator)
     [HttpGet("{id}")]
     public async Task<IActionResult> GetDocument(string id, CancellationToken cancellationToken = default)
     {
-        return this.Process(await this.Mediator.ExecuteAsync(new GetDocumentQuery(id), cancellationToken));
+        return this.Process(await this.Mediator.ExecuteAsync(new GetDocumentQuery(id), cancellationToken).ConfigureAwait(false));
     }
 
     /// <summary>
@@ -64,7 +64,7 @@ public class DocumentsController(IMediator mediator)
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateDocument(string id, [FromBody]object content, CancellationToken cancellationToken = default)
     {
-        return this.Process(await this.Mediator.ExecuteAsync(new UpdateDocumentCommand(id, content), cancellationToken));
+        return this.Process(await this.Mediator.ExecuteAsync(new UpdateDocumentCommand(id, content), cancellationToken).ConfigureAwait(false));
     }
 
 }

@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+
 namespace Synapse.Runner.Services;
 
 /// <summary>
@@ -69,6 +70,13 @@ public class TaskExecutionContext<TDefinition>(IWorkflowExecutionContext workflo
 
     /// <inheritdoc/>
     public virtual Task<CorrelationContext> CorrelateAsync(CancellationToken cancellationToken = default) => this.Workflow.CorrelateAsync(this, cancellationToken);
+
+    /// <inheritdoc/>
+    public virtual Task PublishAsync(CloudEvent e, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(e);
+        return this.Workflow.PublishAsync(e, cancellationToken);
+    }
 
     /// <inheritdoc/>
     public virtual async Task SuspendAsync(CancellationToken cancellationToken = default)

@@ -11,7 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Synapse.Api.Server.Services;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Synapse.Api.Application.Configuration;
+using System.Security.Claims;
+using System.Text.Encodings.Web;
+
+namespace Synapse.Api.Application.Services;
 
 /// <summary>
 /// Represents the service used to handle the application's static token authentication

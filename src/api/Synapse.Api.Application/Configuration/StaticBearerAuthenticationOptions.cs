@@ -11,10 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
-namespace Synapse.Api.Server.Configuration;
+namespace Synapse.Api.Application.Configuration;
 
 /// <summary>
 /// Represents the <see cref="AuthenticationSchemeOptions"/> used to configure the application's static token based authentication

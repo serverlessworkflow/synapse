@@ -22,7 +22,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Net.Mime;
 using System.Security.Claims;
 using System.Text;
-using YamlDotNet.Core.Tokens;
 
 namespace Synapse.Core.Infrastructure.Services;
 
