@@ -55,10 +55,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\core\Synapse.Core.Infrastructure.Containers.Docker\Synapse.Core.Infrastructure.Containers.Docker.csproj" />
     <ProjectReference Include="..\..\core\Synapse.Core.Infrastructure\Synapse.Core.Infrastructure.csproj" />
     <ProjectReference Include="..\..\runtime\Synapse.Runtime.Abstractions\Synapse.Runtime.Abstractions.csproj" />
-    <ProjectReference Include="..\..\runtime\Synapse.Runtime.Containerized\Synapse.Runtime.Containerized.csproj" />
+    <ProjectReference Include="..\..\runtime\Synapse.Runtime.Docker\Synapse.Runtime.Docker.csproj" />
+    <ProjectReference Include="..\..\runtime\Synapse.Runtime.Kubernetes\Synapse.Runtime.Kubernetes.csproj" />
     <ProjectReference Include="..\..\runtime\Synapse.Runtime.Native\Synapse.Runtime.Native.csproj" />
   </ItemGroup>
 

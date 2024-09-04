@@ -14,10 +14,10 @@
 namespace Synapse.Resources;
 
 /// <summary>
-/// Represents the definition of a native workflow runner process
+/// Represents an object used to configure a native runtime
 /// </summary>
 [DataContract]
-public record NativeRunnerProcessDefinition
+public record NativeRuntimeConfiguration
 {
 
     /// <summary>

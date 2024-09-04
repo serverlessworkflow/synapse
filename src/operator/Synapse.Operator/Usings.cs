@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-global using Docker.DotNet;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Hosting;
@@ -27,7 +26,6 @@ global using Neuroglia.Security.Services;
 global using Neuroglia.Serialization;
 global using ServerlessWorkflow.Sdk.Models;
 global using Synapse;
-global using Synapse.Core.Infrastructure.Containers;
 global using Synapse.Core.Infrastructure.Services;
 global using Synapse.Operator.Configuration;
 global using Synapse.Operator.Services;

@@ -50,6 +50,6 @@ public class OperatorOptions
     /// <summary>
     /// Gets/sets the options used to configure the runners spawned by a Synapse Operator
     /// </summary>
-    public virtual RunnerDefinition Runner { get; set; } = new();
+    public virtual RunnerConfiguration Runner { get; set; } = new();
 
 }

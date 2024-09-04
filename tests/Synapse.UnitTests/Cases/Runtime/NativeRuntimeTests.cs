@@ -23,7 +23,7 @@ public class NativeRuntimeTests
 
     protected override void ConfigureServices(IServiceCollection services)
     {
-        services.Configure<RunnerDefinition>(options => 
+        services.Configure<RunnerConfiguration>(options => 
         {
             options.Api = new()
             {

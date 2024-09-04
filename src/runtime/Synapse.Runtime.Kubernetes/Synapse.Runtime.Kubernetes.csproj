@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -16,7 +16,7 @@
 	<RepositoryUrl>https://github.com/serverlessworkflow/synapse</RepositoryUrl>
 	<RepositoryType>git</RepositoryType>
 	<PackageProjectUrl>https://github.com/serverlessworkflow/synapse</PackageProjectUrl>
-	<PackageTags>synapse runtime containerized</PackageTags>
+	<PackageTags>synapse runtime kubernetes k8s</PackageTags>
 	<IsPackable>true</IsPackable>
 	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	<NeutralLanguage>en</NeutralLanguage>
@@ -24,7 +24,7 @@
 	<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 	<PackageIcon>transparent_logomark_256.png</PackageIcon>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
-	<Description>Contains the services for running Synapse in containerized environments</Description>
+	<Description>Contains the services for running workflows in Kubernetes</Description>
 	<AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
 	<FileVersion>$(VersionPrefix).0</FileVersion>
 	<DebugType>embedded</DebugType>
@@ -40,7 +40,7 @@
       <Pack>True</Pack>
     </None>
   </ItemGroup>
-	
+
   <ItemGroup>
     <ProjectReference Include="..\Synapse.Runtime.Abstractions\Synapse.Runtime.Abstractions.csproj" />
   </ItemGroup>
