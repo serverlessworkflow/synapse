@@ -1,7 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
 	<Nullable>enable</Nullable>
 	<ImplicitUsings>enable</ImplicitUsings>
 	<NeutralLanguage>en</NeutralLanguage>
@@ -16,18 +16,18 @@
 	<RepositoryUrl>https://github.com/serverlessworkflow/synapse</RepositoryUrl>
 	<RepositoryType>git</RepositoryType>
 	<PackageProjectUrl>https://github.com/serverlessworkflow/synapse</PackageProjectUrl>
-	<PackageTags>synapse core</PackageTags>
+	<PackageTags>synapse runtime docker</PackageTags>
 	<IsPackable>true</IsPackable>
 	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	<NeutralLanguage>en</NeutralLanguage>
 	<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
 	<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 	<PackageIcon>transparent_logomark_256.png</PackageIcon>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
-	<Description>Contains the definitions for all resources used by Synapse</Description>
+	<Description>Contains the services for running workflows in Docker</Description>
 	<AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
 	<FileVersion>$(VersionPrefix).0</FileVersion>
 	<DebugType>embedded</DebugType>
-	<RootNamespace>$(MSBuildProjectName.Replace(" ", "_").Replace(".Core", ""))</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -40,32 +40,9 @@
       <Pack>True</Pack>
     </None>
   </ItemGroup>
-	
-  <ItemGroup>
-    <None Remove="Resources\Correlation.yaml" />
-    <None Remove="Resources\Correlator.yaml" />
-    <None Remove="Resources\Operator.yaml" />
-    <None Remove="Resources\ServiceAccount.yaml" />
-    <None Remove="Resources\Workflow.yaml" />
-    <None Remove="Resources\WorkflowInstance.yaml" />
-  </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Correlation.yaml" />
-    <EmbeddedResource Include="Resources\ServiceAccount.yaml" />
-    <EmbeddedResource Include="Resources\Correlator.yaml" />
-    <EmbeddedResource Include="Resources\Operator.yaml" />
-    <EmbeddedResource Include="Resources\Workflow.yaml" />
-    <EmbeddedResource Include="Resources\WorkflowInstance.yaml" />
-  </ItemGroup>
-
-  <ItemGroup>
-	<PackageReference Include="Docker.DotNet" Version="3.125.15" />
-	<PackageReference Include="KubernetesClient" Version="14.0.9" />
-	<PackageReference Include="Neuroglia.Data.Infrastructure.ResourceOriented" Version="4.15.3" />
-	<PackageReference Include="Neuroglia.Eventing.CloudEvents" Version="4.15.3" />
-    <PackageReference Include="Semver" Version="2.3.0" />
-    <PackageReference Include="ServerlessWorkflow.Sdk" Version="1.0.0-alpha2.14" />
+    <ProjectReference Include="..\Synapse.Runtime.Abstractions\Synapse.Runtime.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>

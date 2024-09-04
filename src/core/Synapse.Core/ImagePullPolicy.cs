@@ -14,33 +14,33 @@
 namespace Synapse;
 
 /// <summary>
-/// Enumerates all default operator runtime modes
+/// Enumerates all default container image pull policies
 /// </summary>
-public static class OperatorRuntimeMode
+public static class ImagePullPolicy
 {
 
     /// <summary>
-    /// Gets the native operator runtime mode
+    /// Gets the policy that specifies that the image should always be pulled
     /// </summary>
-    public const string Native = "native";
+    public const string Always = "Always";
     /// <summary>
-    /// Gets the Docker operator runtime mode
+    /// Gets the policy that specifies that the image should be pulled only if it is not already present locally
     /// </summary>
-    public const string Docker = "docker";
+    public const string IfNotPresent = "IfNotPresent";
     /// <summary>
-    /// Gets the Kubernetes operator runtime mode
+    /// Gets the policy that specifies that the image should never be pulled
     /// </summary>
-    public const string Kubernetes = "kubernetes";
+    public const string Never = "Never";
 
     /// <summary>
-    /// Gets a new <see cref="IEnumerable{T}"/> containing all default operator runtime modes
+    /// Gets a new <see cref="IEnumerable{T}"/> containing all default container image pull policies
     /// </summary>
-    /// <returns>A new <see cref="IEnumerable{T}"/> containing all default operator runtime modes</returns>
+    /// <returns>A new <see cref="IEnumerable{T}"/> containing all default container image pull policies</returns>
     public static IEnumerable<string> AsEnumerable()
     {
-        yield return Native;
-        yield return Docker;
-        yield return Kubernetes;
+        yield return Always;
+        yield return IfNotPresent;
+        yield return Never;
     }
 
 }

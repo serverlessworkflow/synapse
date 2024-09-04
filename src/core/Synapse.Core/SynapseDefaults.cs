@@ -565,6 +565,53 @@ public static class SynapseDefaults
         }
 
         /// <summary>
+        /// Exposes constants about runtime-related environment variables
+        /// </summary>
+        public static class Runtime
+        {
+
+            /// <summary>
+            /// Gets the prefix for all runtime related environment variables
+            /// </summary>
+            public const string Prefix = EnvironmentVariables.Prefix + "RUNTIME_";
+
+            /// <summary>
+            /// Exposes constants about Docker runtime-related environment variables
+            /// </summary>
+            public static class Docker
+            {
+
+                /// <summary>
+                /// Gets the prefix for all Docker runtime related environment variables
+                /// </summary>
+                public const string Prefix = Runtime.Prefix + "DOCKER_";
+                /// <summary>
+                /// Gets the environment variable used to specify the YAML file used to configure the Docker runner container
+                /// </summary>
+                public const string Container = Prefix + "CONTAINER";
+
+            }
+
+        }
+
+        /// <summary>
+        /// Exposes constants about secrets-related environment variables
+        /// </summary>
+        public static class Secrets
+        {
+
+            /// <summary>
+            /// Gets the prefix for all secrets related environment variables
+            /// </summary>
+            public const string Prefix = EnvironmentVariables.Prefix + "SECRETS";
+            /// <summary>
+            /// Gets the name of the environment variable used to configure the path to the directory that contains secrets files
+            /// </summary>
+            public const string Directory = Prefix + "DIRECTORY";
+
+        }
+
+        /// <summary>
         /// Exposes constants about service account related environment variables
         /// </summary>
         public static class ServiceAccount
@@ -601,6 +648,47 @@ public static class SynapseDefaults
             /// Gets the environment variable that holds the qualified name of workflow instance to run
             /// </summary>
             public const string Instance = Prefix + "INSTANCE";
+
+        }
+
+    }
+
+    /// <summary>
+    /// Exposes constants about Synapse containers
+    /// </summary>
+    public static class Containers
+    {
+
+        /// <summary>
+        /// Exposes constants about Synapse container images
+        /// </summary>
+        public static class Images
+        {
+
+            /// <summary>
+            /// Gets the name of the Synapse container image registry
+            /// </summary>
+            public const string ImageRegistry = "ghcr.io/serverlessworkflow/synapse";
+            /// <summary>
+            /// Gets the current version of Synapse container images
+            /// </summary>
+            public static string Version = typeof(SynapseDefaults).Assembly.GetName().Version?.ToString(3) ?? "latest";
+            /// <summary>
+            /// Gets the name of the Synapse API container image
+            /// </summary>
+            public static readonly string Api = $"{ImageRegistry}/api:{Version}";
+            /// <summary>
+            /// Gets the name of the Synapse Correlator container image
+            /// </summary>
+            public static readonly string Correlator = $"{ImageRegistry}/correlator:{Version}";
+            /// <summary>
+            /// Gets the name of the Synapse Operator container image
+            /// </summary>
+            public static readonly string Operator = $"{ImageRegistry}/operator:{Version}";
+            /// <summary>
+            /// Gets the name of the Synapse Runner container image
+            /// </summary>
+            public static readonly string Runner = $"{ImageRegistry}/runner:{Version}";
 
         }
 

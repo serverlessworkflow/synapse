@@ -17,8 +17,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "runner", "runner", "{1DA47E
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Core", "src\core\Synapse.Core\Synapse.Core.csproj", "{F2804D69-04C9-463D-B5E5-D3185163EBC0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Core.Infrastructure.Containers.Docker", "src\core\Synapse.Core.Infrastructure.Containers.Docker\Synapse.Core.Infrastructure.Containers.Docker.csproj", "{40EB503E-6E97-4375-A172-6EF55F9E0FF3}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "api", "api", "{63715FC0-736D-4972-A865-41126155DF45}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Dashboard", "src\dashboard\Synapse.Dashboard\Synapse.Dashboard.csproj", "{A9BB7219-B24B-4E40-B10A-69E618BDA272}"
@@ -57,8 +55,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Runtime.Abstractions", "src\runtime\Synapse.Runtime.Abstractions\Synapse.Runtime.Abstractions.csproj", "{A0E5E7F2-8C9C-4F36-B3FD-C09074893023}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Runtime.Native", "src\runtime\Synapse.Runtime.Native\Synapse.Runtime.Native.csproj", "{DC24E506-602F-4FD9-B8C0-CEA6B2AD8888}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Runtime.Containerized", "src\runtime\Synapse.Runtime.Containerized\Synapse.Runtime.Containerized.csproj", "{F327B8F1-9A13-4924-AE1B-E69788AC73E7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Runner", "src\runner\Synapse.Runner\Synapse.Runner.csproj", "{E5FAA9BA-07C3-49CF-AD3B-897AE1D0B018}"
 EndProject
@@ -104,7 +100,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "images", "images", "{811240
 		assets\images\transparent_logo.png = assets\images\transparent_logo.png
 		assets\images\transparent_logomark.ico = assets\images\transparent_logomark.ico
 		assets\images\transparent_logomark.png = assets\images\transparent_logomark.png
-		assets\images\transparent_logomark_256.png = assets\images\transparent_logomark_256.png
 		assets\images\transparent_logomark_black.png = assets\images\transparent_logomark_black.png
 		assets\images\transparent_logomark_white.png = assets\images\transparent_logomark_white.png
 		assets\images\transparent_logo_black.png = assets\images\transparent_logo_black.png
@@ -133,6 +128,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "templates", "templates", "{
 		deployments\helm\templates\services.yaml = deployments\helm\templates\services.yaml
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synapse.Runtime.Docker", "src\runtime\Synapse.Runtime.Docker\Synapse.Runtime.Docker.csproj", "{8FF58403-9E13-4F58-864F-E6FBC877BF37}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synapse.Runtime.Kubernetes", "src\runtime\Synapse.Runtime.Kubernetes\Synapse.Runtime.Kubernetes.csproj", "{9B37AA4A-A342-4A41-A2A1-C8466825A70A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Core.Infrastructure.Containers.Docker", "src\core\Synapse.Core.Infrastructure.Containers.Docker\Synapse.Core.Infrastructure.Containers.Docker.csproj", "{DD6381BD-2C8B-4CE1-99B2-EC585DD818FA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -143,10 +144,6 @@ Global
 		{F2804D69-04C9-463D-B5E5-D3185163EBC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F2804D69-04C9-463D-B5E5-D3185163EBC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F2804D69-04C9-463D-B5E5-D3185163EBC0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{40EB503E-6E97-4375-A172-6EF55F9E0FF3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{40EB503E-6E97-4375-A172-6EF55F9E0FF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{40EB503E-6E97-4375-A172-6EF55F9E0FF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{40EB503E-6E97-4375-A172-6EF55F9E0FF3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A9BB7219-B24B-4E40-B10A-69E618BDA272}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A9BB7219-B24B-4E40-B10A-69E618BDA272}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A9BB7219-B24B-4E40-B10A-69E618BDA272}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -191,10 +188,6 @@ Global
 		{DC24E506-602F-4FD9-B8C0-CEA6B2AD8888}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DC24E506-602F-4FD9-B8C0-CEA6B2AD8888}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DC24E506-602F-4FD9-B8C0-CEA6B2AD8888}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F327B8F1-9A13-4924-AE1B-E69788AC73E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F327B8F1-9A13-4924-AE1B-E69788AC73E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F327B8F1-9A13-4924-AE1B-E69788AC73E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F327B8F1-9A13-4924-AE1B-E69788AC73E7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E5FAA9BA-07C3-49CF-AD3B-897AE1D0B018}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E5FAA9BA-07C3-49CF-AD3B-897AE1D0B018}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E5FAA9BA-07C3-49CF-AD3B-897AE1D0B018}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -219,6 +212,18 @@ Global
 		{A2D3AFB0-C7E0-4778-9D0A-DFCE0E24AF17}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A2D3AFB0-C7E0-4778-9D0A-DFCE0E24AF17}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A2D3AFB0-C7E0-4778-9D0A-DFCE0E24AF17}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8FF58403-9E13-4F58-864F-E6FBC877BF37}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8FF58403-9E13-4F58-864F-E6FBC877BF37}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8FF58403-9E13-4F58-864F-E6FBC877BF37}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8FF58403-9E13-4F58-864F-E6FBC877BF37}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9B37AA4A-A342-4A41-A2A1-C8466825A70A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B37AA4A-A342-4A41-A2A1-C8466825A70A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B37AA4A-A342-4A41-A2A1-C8466825A70A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B37AA4A-A342-4A41-A2A1-C8466825A70A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD6381BD-2C8B-4CE1-99B2-EC585DD818FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD6381BD-2C8B-4CE1-99B2-EC585DD818FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD6381BD-2C8B-4CE1-99B2-EC585DD818FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD6381BD-2C8B-4CE1-99B2-EC585DD818FA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -230,7 +235,6 @@ Global
 		{32EAD165-3D99-42CD-B3AF-05136DCC7F35} = {4B9AF05C-9D6D-48C0-994D-D4A5C28FA24D}
 		{1DA47E5F-B23A-4D3C-96AA-4BD2662AB946} = {4B9AF05C-9D6D-48C0-994D-D4A5C28FA24D}
 		{F2804D69-04C9-463D-B5E5-D3185163EBC0} = {9E296C8A-4D78-4592-B046-11A3A953FD25}
-		{40EB503E-6E97-4375-A172-6EF55F9E0FF3} = {9E296C8A-4D78-4592-B046-11A3A953FD25}
 		{63715FC0-736D-4972-A865-41126155DF45} = {4B9AF05C-9D6D-48C0-994D-D4A5C28FA24D}
 		{A9BB7219-B24B-4E40-B10A-69E618BDA272} = {7DF998B8-0FB1-470E-8ED0-EA1CC7B16901}
 		{327FF68E-E729-4616-B1BE-B262A95890A2} = {63715FC0-736D-4972-A865-41126155DF45}
@@ -244,7 +248,6 @@ Global
 		{175CE1C5-FE17-4C8B-8823-E812BAD4E527} = {4B9AF05C-9D6D-48C0-994D-D4A5C28FA24D}
 		{A0E5E7F2-8C9C-4F36-B3FD-C09074893023} = {175CE1C5-FE17-4C8B-8823-E812BAD4E527}
 		{DC24E506-602F-4FD9-B8C0-CEA6B2AD8888} = {175CE1C5-FE17-4C8B-8823-E812BAD4E527}
-		{F327B8F1-9A13-4924-AE1B-E69788AC73E7} = {175CE1C5-FE17-4C8B-8823-E812BAD4E527}
 		{E5FAA9BA-07C3-49CF-AD3B-897AE1D0B018} = {1DA47E5F-B23A-4D3C-96AA-4BD2662AB946}
 		{91EF9F64-4997-407C-B353-C26B1421D0FB} = {7DF998B8-0FB1-470E-8ED0-EA1CC7B16901}
 		{A9085F4A-5FDF-4F4A-B267-A03BC5E0FDB0} = {32EAD165-3D99-42CD-B3AF-05136DCC7F35}
@@ -256,6 +259,9 @@ Global
 		{2A6EE5DF-BD7E-4CC6-BB9B-7BE5FC128302} = {750922F9-5C47-42FE-945F-576818E6DEC9}
 		{B6A96DC3-E57A-4022-9279-1DB57744C893} = {562C91A3-6E91-4489-9D9D-064E7436D900}
 		{3F5CCCE8-46F8-4873-8EF9-38E14EAE7E01} = {B6A96DC3-E57A-4022-9279-1DB57744C893}
+		{8FF58403-9E13-4F58-864F-E6FBC877BF37} = {175CE1C5-FE17-4C8B-8823-E812BAD4E527}
+		{9B37AA4A-A342-4A41-A2A1-C8466825A70A} = {175CE1C5-FE17-4C8B-8823-E812BAD4E527}
+		{DD6381BD-2C8B-4CE1-99B2-EC585DD818FA} = {9E296C8A-4D78-4592-B046-11A3A953FD25}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2A6C03D6-355A-4B39-9F2B-D0FDE429C0E2}
