@@ -18,7 +18,7 @@ var builder = WebApplication.CreateBuilder(args);
 var applicationOptions = new ApiServerOptions();
 builder.Configuration.Bind(applicationOptions);
 if (applicationOptions.Authentication.Tokens.Count < 1) throw new Exception("The Synapse API server requires that at least one static user token be configured");
-var authority = builder.Environment.RunsInDocker() || builder.Environment.RunsInKubernetes() ? Environment.GetEnvironmentVariable("SYNAPSE_API_AUTH_AUTHORITY") : null;
+var authority = builder.Environment.RunsInDocker() || builder.Environment.RunsInKubernetes() ? Environment.GetEnvironmentVariable("SYNAPSE_API_JWT_AUTHORITY") : null;
 
 builder.Services.Configure<ApiServerOptions>(builder.Configuration);
 builder.Services.AddResponseCompression();

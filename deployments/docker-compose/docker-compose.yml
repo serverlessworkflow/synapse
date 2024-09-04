@@ -11,7 +11,7 @@ services:
       CONNECTIONSTRINGS__REDIS: ${GARNET_URI}
       SYNAPSE_DASHBOARD_SERVE: true
       SYNAPSE_API_AUTH_TOKEN_FILE: /app/tokens.yaml
-      SYNAPSE_API_AUTH_AUTHORITY: http://api:8080
+      SYNAPSE_API_JWT_AUTHORITY: http://api:8080
     volumes:
       - ./config/tokens.yaml:/app/tokens.yaml
     ports:
