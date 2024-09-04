@@ -33,6 +33,7 @@ public class WaitTaskExecutor(IServiceProvider serviceProvider, ILogger<WaitTask
     protected virtual Timer? WaitTimer { get; set; }
 
     /// <inheritdoc/>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD101:Avoid unsupported async delegates", Justification = "<Pending>")]
     protected override Task DoExecuteAsync(CancellationToken cancellationToken)
     {
         this.WaitTimer = new Timer(async state => await this.OnWaitTimeElapsedAsync(cancellationToken).ConfigureAwait(false), null, this.Task.Definition.Wait.ToTimeSpan(), Timeout.InfiniteTimeSpan);

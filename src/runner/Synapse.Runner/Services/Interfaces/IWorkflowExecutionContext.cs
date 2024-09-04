@@ -65,7 +65,7 @@ public interface IWorkflowExecutionContext
     /// <param name="task">The <see cref="TaskDefinition"/> to continue with</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>A new awaitable <see cref="Task"/></returns>
-    Task ContinueWith(TaskDefinition task, CancellationToken cancellationToken = default);
+    Task ContinueWithAsync(TaskDefinition task, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Creates a new <see cref="TaskInstance"/>

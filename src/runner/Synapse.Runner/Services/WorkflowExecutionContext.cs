@@ -73,7 +73,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
     public object? Output { get; protected set; }
 
     /// <inheritdoc/>
-    public virtual Task ContinueWith(TaskDefinition task, CancellationToken cancellationToken = default) => Task.CompletedTask;
+    public virtual Task ContinueWithAsync(TaskDefinition task, CancellationToken cancellationToken = default) => Task.CompletedTask;
 
     /// <inheritdoc/>
     public virtual async Task<TaskInstance> CreateTaskAsync(TaskDefinition definition, string? path, object input, IDictionary<string, object>? context = null, ITaskExecutionContext? parent = null, bool isExtension = false, CancellationToken cancellationToken = default)

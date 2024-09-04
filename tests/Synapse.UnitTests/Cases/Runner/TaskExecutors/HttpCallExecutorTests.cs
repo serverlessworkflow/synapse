@@ -22,7 +22,7 @@ public class HttpCallExecutorTests
 {
 
     [Fact]
-    public async Task Post_And_Read_Json_Should_Work()
+    public async Task Post_And_Read_Json_Should_Work_Async()
     {
         //arrange
         var parameters = (EquatableDictionary<string, object>)JsonSerializer.Default.Convert(new HttpCallDefinition()
@@ -71,7 +71,7 @@ public class HttpCallExecutorTests
     }
 
     [Fact]
-    public async Task Get_Using_Basic_Authentication_Should_Work()
+    public async Task Get_Using_Basic_Authentication_Should_Work_Async()
     {
         var username = "fake-user";
         var password = "fake-password";

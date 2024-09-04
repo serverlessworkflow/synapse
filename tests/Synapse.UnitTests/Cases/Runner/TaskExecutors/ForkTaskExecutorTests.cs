@@ -20,7 +20,7 @@ public class ForkTaskExecutorTests
 {
 
     [Fact]
-    public async Task Execute_Concurrently_Should_Work()
+    public async Task Execute_Concurrently_Should_Work_Async()
     {
         //arrange
         var red = "red";

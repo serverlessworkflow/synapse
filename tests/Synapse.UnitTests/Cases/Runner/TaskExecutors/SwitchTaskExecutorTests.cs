@@ -18,7 +18,7 @@ public class SwitchTaskExecutorTests
 {
 
     [Fact]
-    public async Task Switch_Match_Single_Case_Should_Work()
+    public async Task Switch_Match_Single_Case_Should_Work_Async()
     {
         //arrange
         var color = "color";
@@ -60,7 +60,7 @@ public class SwitchTaskExecutorTests
     }
 
     [Fact]
-    public async Task Switch_Match_Fallback_To_Default_Should_Work()
+    public async Task Switch_Match_Fallback_To_Default_Should_Work_Async()
     {
         //arrange
         var color = "color";
@@ -107,7 +107,7 @@ public class SwitchTaskExecutorTests
     }
 
     [Fact]
-    public async Task Switch_Match_Multiple_Cases_Should_Fault()
+    public async Task Switch_Match_Multiple_Cases_Should_Fault_Async()
     {
         //arrange
         var color = "color";

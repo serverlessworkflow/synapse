@@ -22,7 +22,7 @@ public class GrpcCallExecutorTests
 {
 
     [Fact]
-    public async Task Call_Should_Work()
+    public async Task Call_Should_Work_Async()
     {
         //arrange
         var name = "John Doe";

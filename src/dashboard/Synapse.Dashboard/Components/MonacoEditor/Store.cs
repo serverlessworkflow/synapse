@@ -23,23 +23,18 @@ namespace Synapse.Dashboard.Components.MonacoEditorStateManagement;
 /// <param name="monacoEditorHelper">The service used ease Monaco Editor interactions</param>
 /// <param name="jsonSerializer">The service used to serialize and deserialize JSON</param>
 /// <param name="yamlSerializer">The service used to serialize and deserialize YAML</param>
-public class MonacoEditorStore(
-    ISynapseApiClient apiClient,
-    IJSRuntime jsRuntime,
-    IMonacoEditorHelper monacoEditorHelper,
-    IJsonSerializer jsonSerializer,
-    IYamlSerializer yamlSerializer
-)
+public class MonacoEditorStore(ISynapseApiClient apiClient, IJSRuntime jsRuntime, IMonacoEditorHelper monacoEditorHelper, IJsonSerializer jsonSerializer, IYamlSerializer yamlSerializer)
     : ComponentStore<MonacoEditorState>(new())
 {
     
-    private TextModel? _textModel = null;
-    private string _textModelUri = monacoEditorHelper.GetResourceUri();
+    TextModel? _textModel;
+    string _textModelUri = monacoEditorHelper.GetResourceUri();
 
     /// <summary>
     /// Gets the service used to interact with the Synapse API
     /// </summary>
     protected ISynapseApiClient ApiClient { get; } = apiClient;
+
     /// <summary>
     /// Gets the service used for JS interop
     /// </summary>
@@ -183,7 +178,7 @@ public class MonacoEditorStore(
             {
                 ModelName = modelName
             });
-            this._textModelUri = !string.IsNullOrEmpty(modelName) ? monacoEditorHelper.GetResourceUri(modelName) : monacoEditorHelper.GetResourceUri();
+            this._textModelUri = !string.IsNullOrEmpty(modelName) ? this.MonacoEditorHelper.GetResourceUri(modelName) : this.MonacoEditorHelper.GetResourceUri();
         }
     }
     #endregion

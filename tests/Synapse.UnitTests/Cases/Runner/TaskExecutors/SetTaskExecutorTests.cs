@@ -20,7 +20,7 @@ public class SetTaskExecutorTests
 {
 
     [Fact]
-    public async Task Set_Should_Work()
+    public async Task Set_Should_Work_Async()
     {
         //arrange
         var colors = new string[] { "red", "green", "blue" };

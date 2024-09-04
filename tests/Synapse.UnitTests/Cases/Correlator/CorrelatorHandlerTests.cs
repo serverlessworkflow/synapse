@@ -52,7 +52,7 @@ public class CorrelatorHandlerTests
     protected ICloudEventBus CloudEventBus => ServiceProvider.GetRequiredService<ICloudEventBus>();
 
     [Fact]
-    public async Task Correlate_One_Event_Should_Work()
+    public async Task Correlate_One_Event_Should_Work_Async()
     {
         //arrange
         var correlationId = Guid.NewGuid().ToShortString();
@@ -124,7 +124,7 @@ public class CorrelatorHandlerTests
     }
 
     [Fact]
-    public async Task Correlate_One_Event_With_Matching_Key_From_Attribute_With_Constant_Expectation_Should_Work()
+    public async Task Correlate_One_Event_With_Matching_Key_From_Attribute_With_Constant_Expectation_Should_Work_Async()
     {
         //arrange
         var correlationId = Guid.NewGuid().ToShortString();
@@ -197,7 +197,7 @@ public class CorrelatorHandlerTests
     }
 
     [Fact]
-    public async Task Correlate_One_Event_With_Different_Key_From_Attribute_With_Constant_Expectation_Should_Fail()
+    public async Task Correlate_One_Event_With_Different_Key_From_Attribute_With_Constant_Expectation_Should_Fail_Async()
     {
         //arrange
         var correlationId = Guid.NewGuid().ToShortString();
@@ -262,7 +262,7 @@ public class CorrelatorHandlerTests
     }
 
     [Fact]
-    public async Task Correlate_One_Event_With_Matching_Key_From_Attribute__With_Runtime_Expectation_Should_Work()
+    public async Task Correlate_One_Event_With_Matching_Key_From_Attribute__With_Runtime_Expectation_Should_Work_Async()
     {
         //arrange
         var correlationId = Guid.NewGuid().ToShortString();
@@ -335,7 +335,7 @@ public class CorrelatorHandlerTests
     }
 
     [Fact]
-    public async Task Correlate_All_Events_Should_Work()
+    public async Task Correlate_All_Events_Should_Work_Async()
     {
         //arrange
         var correlationId = Guid.NewGuid().ToShortString();
