@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
 	<NeutralLanguage>en</NeutralLanguage>
 	<GenerateDocumentationFile>True</GenerateDocumentationFile>
-	<VersionPrefix>1.1.0</VersionPrefix>
+	<VersionPrefix>1.0.0</VersionPrefix>
 	<VersionSuffix>alpha1</VersionSuffix>
 	<AssemblyVersion>$(VersionPrefix)</AssemblyVersion>
 	<FileVersion>$(VersionPrefix)</FileVersion>
@@ -17,7 +17,6 @@
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://github.com/serverlessworkflow/synapse</PackageProjectUrl>
     <PackageTags>synapse api server</PackageTags>
-    <NeutralLanguage>en</NeutralLanguage>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>

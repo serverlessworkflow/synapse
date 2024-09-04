@@ -21,7 +21,7 @@ public class FunctionCallExecutorTests
 {
 
     [Fact]
-    public async Task Call_Function_Should_Work()
+    public async Task Call_Function_Should_Work_Async()
     {
         //arrange
         var username = "john.doe@email.com";
@@ -85,7 +85,7 @@ public class FunctionCallExecutorTests
     }
 
     [Fact]
-    public async Task Call_Function_WithInvalidInput_Should_Fault()
+    public async Task Call_Function_WithInvalidInput_Should_Fault_Async()
     {
         //arrange
         var username = "john.doe@email.com";

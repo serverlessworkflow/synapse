@@ -18,7 +18,7 @@ public class ProcessTaskExecutorTests
 {
 
     [Fact]
-    public async Task Run_Container_Should_Work()
+    public async Task Run_Container_Should_Work_Async()
     {
         //arrange
         var greetings = "Hello, World!";
@@ -47,7 +47,7 @@ public class ProcessTaskExecutorTests
     }
 
     [Fact]
-    public async Task Run_Shell_Should_Work()
+    public async Task Run_Shell_Should_Work_Async()
     {
         //arrange
         var greetings = "Hello, World!";

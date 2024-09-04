@@ -20,7 +20,7 @@ public class ExtensionTests
 {
 
     [Fact]
-    public async Task Run_Before_All_Should_Work()
+    public async Task Run_Before_All_Should_Work_Async()
     {
         //arrange
         var variableName = "foo";
@@ -84,7 +84,7 @@ public class ExtensionTests
     }
 
     [Fact]
-    public async Task Run_After_All_Should_Work()
+    public async Task Run_After_All_Should_Work_Async()
     {
         //arrange
         var variableName = "foo";

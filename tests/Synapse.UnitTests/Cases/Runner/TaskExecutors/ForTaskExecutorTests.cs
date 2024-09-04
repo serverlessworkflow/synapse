@@ -23,7 +23,7 @@ public class ForTaskExecutorTests
 {
 
     [Fact]
-    public async Task Iterate_Should_Work()
+    public async Task Iterate_Should_Work_Async()
     {
         //arrange
         var indexes = new int[] { 0, 1, 2 };
@@ -91,7 +91,7 @@ public class ForTaskExecutorTests
     }
 
     [Fact]
-    public async Task Iterate_Until_Exit_Directive_Should_Work()
+    public async Task Iterate_Until_Exit_Directive_Should_Work_Async()
     {
         var letters = new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
         var lastIndex = 11;
@@ -149,7 +149,7 @@ public class ForTaskExecutorTests
     }
 
     [Fact]
-    public async Task Iterate_Until_End_Directive_Should_Work()
+    public async Task Iterate_Until_End_Directive_Should_Work_Async()
     {
         var letters = new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
         var lastIndex = 9;

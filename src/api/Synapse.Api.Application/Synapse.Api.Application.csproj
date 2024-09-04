@@ -6,7 +6,7 @@
 	<ImplicitUsings>enable</ImplicitUsings>
 	<NeutralLanguage>en</NeutralLanguage>
 	<GenerateDocumentationFile>True</GenerateDocumentationFile>
-	<VersionPrefix>1.1.0</VersionPrefix>
+	<VersionPrefix>1.0.0</VersionPrefix>
 	<VersionSuffix>alpha1</VersionSuffix>
 	<AssemblyVersion>$(VersionPrefix)</AssemblyVersion>
 	<FileVersion>$(VersionPrefix)</FileVersion>
@@ -18,19 +18,31 @@
 	<PackageProjectUrl>https://github.com/serverlessworkflow/synapse</PackageProjectUrl>
 	<PackageTags>synapse api application</PackageTags>
 	<IsPackable>true</IsPackable>
-	<GenerateAppxPackageOnBuild>true</GenerateAppxPackageOnBuild>
-	<NeutralLanguage>en</NeutralLanguage>
+	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
 	<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+	<PackageIcon>transparent_logomark_256.png</PackageIcon>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
+	<Description>Contains the Synapse API commands, queries and services</Description>
 	<AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
 	<FileVersion>$(VersionPrefix).0</FileVersion>
 	<DebugType>embedded</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="IdentityServer4" Version="4.1.2" />
-    <PackageReference Include="IdentityServer4.Storage" Version="4.1.2" />
-    <PackageReference Include="Polly" Version="8.4.0" />
+    <None Include="..\..\..\assets\images\transparent_logomark_256.png" Link="transparent_logomark_256.png">
+      <PackagePath>\</PackagePath>
+      <Pack>True</Pack>
+    </None>
+    <None Include="..\..\..\README.md">
+	  <PackagePath>\</PackagePath>
+      <Pack>True</Pack>
+    </None>
+  </ItemGroup>
+	
+  <ItemGroup>
+    <PackageReference Include="IdentityServer4" Version="4.1.2" NoWarn="NU1902" />
+    <PackageReference Include="IdentityServer4.Storage" Version="4.1.2" NoWarn="NU1902" />
   </ItemGroup>
 
   <ItemGroup>
