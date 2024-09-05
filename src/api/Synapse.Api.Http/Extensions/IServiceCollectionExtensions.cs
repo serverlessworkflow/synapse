@@ -66,6 +66,29 @@ public static class IServiceCollectionExtensions
                 var action = (ControllerActionDescriptor)o.ActionDescriptor;
                 return $"{action.ActionName}".ToCamelCase();
             });
+            builder.AddSecurityDefinition("Static Token", new OpenApiSecurityScheme
+            {
+                Description = "Static token authorization using the Bearer scheme",
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "Static Token"
+            });
+            builder.AddSecurityRequirement(new()
+            {
+                {
+                    new()
+                    {
+                        Reference = new()
+                        {
+                            Id = "Static Token",
+                            Type = ReferenceType.SecurityScheme
+                        }
+                    },
+                    Array.Empty<string>()
+                }
+            });
             builder.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
             builder.SwaggerDoc("v1", new OpenApiInfo
             {
