@@ -12,12 +12,14 @@
 // limitations under the License.
 
 using Synapse.Api.Client.Http.Configuration;
+using System.Runtime.Serialization;
 
 namespace Synapse.Runner.Configuration;
 
 /// <summary>
-/// Represents the options used to configure a Synapse Runner application
+/// Represents the options used to configure a Synapse Runner
 /// </summary>
+[DataContract]
 public class RunnerOptions
 {
 
@@ -27,7 +29,12 @@ public class RunnerOptions
     public virtual SynapseHttpApiClientOptions Api { get; set; } = new();
 
     /// <summary>
-    /// Gets/sets the options used to configure the service account used by a Synapse Runner application
+    /// Gets/sets the options used to configure the cloud events published by the Synapse Runner
+    /// </summary>
+    public virtual RunnerCloudEventOptions CloudEvents { get; set; } = new();
+
+    /// <summary>
+    /// Gets/sets the options used to configure the service account used by a Synapse Runner
     /// </summary>
     public virtual ServiceAccountOptions ServiceAccount { get; set; } = new();
 

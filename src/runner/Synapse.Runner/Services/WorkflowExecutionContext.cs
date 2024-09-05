@@ -17,6 +17,9 @@ using Neuroglia;
 using Neuroglia.Data;
 using Neuroglia.Data.Expressions;
 using Neuroglia.Data.Infrastructure.ResourceOriented;
+using Synapse.Events.Tasks;
+using Synapse.Events.Workflows;
+using System.Net.Mime;
 
 namespace Synapse.Runner.Services;
 
@@ -27,9 +30,10 @@ namespace Synapse.Runner.Services;
 /// <param name="expressionEvaluator">The service used to evaluate runtime expressions</param>
 /// <param name="jsonSerializer">The service used to serialize/deserialize objects to/from JSON</param>
 /// <param name="cloudFlowsApi">The service used to interact with the Synapse API</param>
+/// <param name="options">The service used to access the current <see cref="RunnerOptions"/></param>
 /// <param name="definition">The <see cref="WorkflowDefinition"/> of the <see cref="WorkflowInstance"/> to execute</param>
 /// <param name="instance">The <see cref="WorkflowInstance"/> to execute</param>
-public class WorkflowExecutionContext(IServiceProvider services, IExpressionEvaluator expressionEvaluator, IJsonSerializer jsonSerializer, ISynapseApiClient cloudFlowsApi, WorkflowDefinition definition, WorkflowInstance instance)
+public class WorkflowExecutionContext(IServiceProvider services, IExpressionEvaluator expressionEvaluator, IJsonSerializer jsonSerializer, ISynapseApiClient cloudFlowsApi, IOptions<RunnerOptions> options, WorkflowDefinition definition, WorkflowInstance instance)
     : IWorkflowExecutionContext
 {
 
@@ -48,6 +52,11 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
     /// Gets the service used to interact with the Synapse API
     /// </summary>
     protected ISynapseApiClient Api { get; } = cloudFlowsApi;
+
+    /// <summary>
+    /// Gets the current <see cref="RunnerOptions"/>
+    /// </summary>
+    protected RunnerOptions Options { get; } = options.Value;
 
     /// <inheritdoc/>
     public WorkflowDefinition Definition { get; } = definition;
@@ -130,6 +139,22 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         var patchNode = this.Instance.Status?.Tasks == null ? this.JsonSerializer.SerializeToNode(new TaskInstance[] { task }) : this.JsonSerializer.SerializeToNode(task);
         var jsonPatch = new JsonPatch(PatchOperation.Add(pointer, patchNode));
         this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), null, cancellationToken).ConfigureAwait(false);
+        if (this.Options.CloudEvents.PublishLifecycleEvents) await this.Api.Events.PublishAsync(new CloudEvent()
+        {
+            SpecVersion = CloudEventSpecVersion.V1.Version,
+            Id = Guid.NewGuid().ToString(),
+            Time = DateTimeOffset.Now,
+            Source = this.Options.Api.BaseAddress,
+            Type = SynapseDefaults.CloudEvents.Task.Created.v1,
+            Subject = this.Instance.GetQualifiedName(),
+            DataContentType = MediaTypeNames.Application.Json,
+            Data = new TaskCreatedEventV1()
+            {
+                Workflow = this.Instance.GetQualifiedName(),
+                Task = task.Reference,
+                CreatedAt = task.CreatedAt
+            }
+        }, cancellationToken).ConfigureAwait(false);
         return task;
     }
 
@@ -185,6 +210,22 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         this.Instance.Status.ContextReference ??= (await this.Documents.CreateAsync(this.Instance.GetQualifiedName(), this.ContextData, cancellationToken).ConfigureAwait(false)).Id;
         var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
         this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), null, cancellationToken).ConfigureAwait(false);
+        if (this.Options.CloudEvents.PublishLifecycleEvents) await this.Api.Events.PublishAsync(new CloudEvent()
+        {
+            SpecVersion = CloudEventSpecVersion.V1.Version,
+            Id = Guid.NewGuid().ToString(),
+            Time = DateTimeOffset.Now,
+            Source = this.Options.Api.BaseAddress,
+            Type = SynapseDefaults.CloudEvents.Workflow.Started.v1,
+            Subject = this.Instance.GetQualifiedName(),
+            DataContentType = MediaTypeNames.Application.Json,
+            Data = new WorkflowStartedEventV1()
+            {
+                Name = this.Instance.GetQualifiedName(),
+                Definition = this.Instance.Spec.Definition,
+                StartedAt = this.Instance.Status?.StartedAt ?? DateTimeOffset.Now
+            }
+        }, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
@@ -199,6 +240,22 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         task.Runs.Add(new() { StartedAt = DateTimeOffset.Now });
         var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
         this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), null, cancellationToken).ConfigureAwait(false);
+        if (this.Options.CloudEvents.PublishLifecycleEvents) await this.Api.Events.PublishAsync(new CloudEvent()
+        {
+            SpecVersion = CloudEventSpecVersion.V1.Version,
+            Id = Guid.NewGuid().ToString(),
+            Time = DateTimeOffset.Now,
+            Source = this.Options.Api.BaseAddress,
+            Type = SynapseDefaults.CloudEvents.Task.Started.v1,
+            Subject = this.Instance.GetQualifiedName(),
+            DataContentType = MediaTypeNames.Application.Json,
+            Data = new TaskStartedEventV1()
+            {
+                Workflow = this.Instance.GetQualifiedName(),
+                Task = task.Reference,
+                StartedAt = task.StartedAt ?? DateTimeOffset.Now
+            }
+        }, cancellationToken).ConfigureAwait(false);
         return this.Instance.Status?.Tasks?.FirstOrDefault(t => t.Id == task.Id) ?? throw new NullReferenceException($"Failed to find the task instance with the specified id '{task.Id}'. Make sure the task instance resource has been created using the workflow context.");
     }
 
@@ -215,6 +272,21 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         this.Instance.Status.ContextReference ??= (await this.Documents.CreateAsync(this.Instance.GetQualifiedName(), this.ContextData, cancellationToken).ConfigureAwait(false)).Id;
         var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
         this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), null, cancellationToken).ConfigureAwait(false);
+        if (this.Options.CloudEvents.PublishLifecycleEvents) await this.Api.Events.PublishAsync(new CloudEvent()
+        {
+            SpecVersion = CloudEventSpecVersion.V1.Version,
+            Id = Guid.NewGuid().ToString(),
+            Time = DateTimeOffset.Now,
+            Source = this.Options.Api.BaseAddress,
+            Type = SynapseDefaults.CloudEvents.Workflow.Resumed.v1,
+            Subject = this.Instance.GetQualifiedName(),
+            DataContentType = MediaTypeNames.Application.Json,
+            Data = new WorkflowResumedEventV1()
+            {
+                Name = this.Instance.GetQualifiedName(),
+                ResumedAt = this.Instance.Status?.Runs?.LastOrDefault()?.StartedAt ?? DateTimeOffset.Now
+            }
+        }, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
@@ -274,8 +346,41 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
                 context = this.JsonSerializer.Deserialize<CorrelationContext>(patchOperation.Value!)!;
                 taskCompletionSource.SetResult(context);
             });
+        if (this.Options.CloudEvents.PublishLifecycleEvents) await this.Api.Events.PublishAsync(new CloudEvent()
+        {
+            SpecVersion = CloudEventSpecVersion.V1.Version,
+            Id = Guid.NewGuid().ToString(),
+            Time = DateTimeOffset.Now,
+            Source = this.Options.Api.BaseAddress,
+            Type = SynapseDefaults.CloudEvents.Workflow.CorrelationStarted.v1,
+            Subject = this.Instance.GetQualifiedName(),
+            DataContentType = MediaTypeNames.Application.Json,
+            Data = new WorkflowCorrelationStartedEventV1()
+            {
+                Name = this.Instance.GetQualifiedName(),
+                StartedAt = this.Instance.Status?.StartedAt ?? DateTimeOffset.Now
+            }
+        }, cancellationToken).ConfigureAwait(false);
         //todo: after a given amount of time, stop the execution of the workflow instance and put it to sleep
-        return await taskCompletionSource.Task.ConfigureAwait(false);
+        var correlationContext = await taskCompletionSource.Task.ConfigureAwait(false);
+        if (this.Options.CloudEvents.PublishLifecycleEvents) await this.Api.Events.PublishAsync(new CloudEvent()
+        {
+            SpecVersion = CloudEventSpecVersion.V1.Version,
+            Id = Guid.NewGuid().ToString(),
+            Time = DateTimeOffset.Now,
+            Source = this.Options.Api.BaseAddress,
+            Type = SynapseDefaults.CloudEvents.Workflow.CorrelationCompleted.v1,
+            Subject = this.Instance.GetQualifiedName(),
+            DataContentType = MediaTypeNames.Application.Json,
+            Data = new WorkflowCorrelationCompletedEventV1()
+            {
+                Name = this.Instance.GetQualifiedName(),
+                CorrelationContext = correlationContext.Id,
+                CorrelationKeys = correlationContext.Keys,
+                CompletedAt = DateTimeOffset.Now
+            }
+        }, cancellationToken).ConfigureAwait(false);
+        return correlationContext;
     }
 
     /// <inheritdoc/>
@@ -311,6 +416,22 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         task.Runs.Add(new() { StartedAt = DateTimeOffset.Now });
         var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
         this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), null, cancellationToken).ConfigureAwait(false);
+        if (this.Options.CloudEvents.PublishLifecycleEvents) await this.Api.Events.PublishAsync(new CloudEvent()
+        {
+            SpecVersion = CloudEventSpecVersion.V1.Version,
+            Id = Guid.NewGuid().ToString(),
+            Time = DateTimeOffset.Now,
+            Source = this.Options.Api.BaseAddress,
+            Type = SynapseDefaults.CloudEvents.Task.Retrying.v1,
+            Subject = this.Instance.GetQualifiedName(),
+            DataContentType = MediaTypeNames.Application.Json,
+            Data = new RetryingTaskEventV1()
+            {
+                Workflow = this.Instance.GetQualifiedName(),
+                Task = task.Reference,
+                RetryingAt = task.Runs?.LastOrDefault()?.StartedAt ?? DateTimeOffset.Now
+            }
+        }, cancellationToken).ConfigureAwait(false);
         return this.Instance.Status?.Tasks?.FirstOrDefault(t => t.Id == task.Id) ?? throw new NullReferenceException($"Failed to find the task instance with the specified id '{task.Id}'. Make sure the task instance resource has been created using the workflow context.");
     }
 
@@ -329,6 +450,41 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
         this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), null, cancellationToken).ConfigureAwait(false);
         await this.EndAsync(cancellationToken).ConfigureAwait(false);
+        if (this.Options.CloudEvents.PublishLifecycleEvents)
+        {
+            await this.Api.Events.PublishAsync(new CloudEvent()
+            {
+                SpecVersion = CloudEventSpecVersion.V1.Version,
+                Id = Guid.NewGuid().ToString(),
+                Time = DateTimeOffset.Now,
+                Source = this.Options.Api.BaseAddress,
+                Type = SynapseDefaults.CloudEvents.Workflow.Faulted.v1,
+                Subject = this.Instance.GetQualifiedName(),
+                DataContentType = MediaTypeNames.Application.Json,
+                Data = new WorkflowFaultedEventV1()
+                {
+                    Name = this.Instance.GetQualifiedName(),
+                    Error = error,
+                    FaultedAt = run?.EndedAt ?? DateTimeOffset.Now
+                }
+            }, cancellationToken).ConfigureAwait(false);
+            await this.Api.Events.PublishAsync(new CloudEvent()
+            {
+                SpecVersion = CloudEventSpecVersion.V1.Version,
+                Id = Guid.NewGuid().ToString(),
+                Time = DateTimeOffset.Now,
+                Source = this.Options.Api.BaseAddress,
+                Type = SynapseDefaults.CloudEvents.Workflow.Ended.v1,
+                Subject = this.Instance.GetQualifiedName(),
+                DataContentType = MediaTypeNames.Application.Json,
+                Data = new WorkflowEndedEventV1()
+                {
+                    Name = this.Instance.GetQualifiedName(),
+                    Status = this.Instance.Status!.Phase!,
+                    EndedAt = run?.EndedAt ?? DateTimeOffset.Now
+                }
+            }, cancellationToken).ConfigureAwait(false);
+        }
     }
 
     /// <inheritdoc/>
@@ -350,6 +506,43 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         }
         var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
         this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), null, cancellationToken).ConfigureAwait(false);
+        if (this.Options.CloudEvents.PublishLifecycleEvents)
+        {
+            await this.Api.Events.PublishAsync(new CloudEvent()
+            {
+                SpecVersion = CloudEventSpecVersion.V1.Version,
+                Id = Guid.NewGuid().ToString(),
+                Time = DateTimeOffset.Now,
+                Source = this.Options.Api.BaseAddress,
+                Type = SynapseDefaults.CloudEvents.Task.Faulted.v1,
+                Subject = this.Instance.GetQualifiedName(),
+                DataContentType = MediaTypeNames.Application.Json,
+                Data = new TaskFaultedEventV1()
+                {
+                    Workflow = this.Instance.GetQualifiedName(),
+                    Task = task.Reference,
+                    Error = error,
+                    FaultedAt = run?.EndedAt ?? DateTimeOffset.Now
+                }
+            }, cancellationToken).ConfigureAwait(false);
+            await this.Api.Events.PublishAsync(new CloudEvent()
+            {
+                SpecVersion = CloudEventSpecVersion.V1.Version,
+                Id = Guid.NewGuid().ToString(),
+                Time = DateTimeOffset.Now,
+                Source = this.Options.Api.BaseAddress,
+                Type = SynapseDefaults.CloudEvents.Task.Ended.v1,
+                Subject = this.Instance.GetQualifiedName(),
+                DataContentType = MediaTypeNames.Application.Json,
+                Data = new TaskEndedEventV1()
+                {
+                    Workflow = this.Instance.GetQualifiedName(),
+                    Task = task.Reference,
+                    Status = this.Instance.Status!.Phase!,
+                    EndedAt = run?.EndedAt ?? DateTimeOffset.Now
+                }
+            }, cancellationToken).ConfigureAwait(false);
+        }
         return this.Instance.Status?.Tasks?.FirstOrDefault(t => t.Id == task.Id) ?? throw new NullReferenceException($"Failed to find the task instance with the specified id '{task.Id}'. Make sure the task instance resource has been created using the workflow context.");
     }
 
@@ -370,6 +563,40 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
         this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), null, cancellationToken).ConfigureAwait(false);
         await this.EndAsync(cancellationToken).ConfigureAwait(false);
+        if (this.Options.CloudEvents.PublishLifecycleEvents)
+        {
+            await this.Api.Events.PublishAsync(new CloudEvent()
+            {
+                SpecVersion = CloudEventSpecVersion.V1.Version,
+                Id = Guid.NewGuid().ToString(),
+                Time = DateTimeOffset.Now,
+                Source = this.Options.Api.BaseAddress,
+                Type = SynapseDefaults.CloudEvents.Workflow.Completed.v1,
+                Subject = this.Instance.GetQualifiedName(),
+                DataContentType = MediaTypeNames.Application.Json,
+                Data = new WorkflowCompletedEventV1()
+                {
+                    Name = this.Instance.GetQualifiedName(),
+                    CompletedAt = run?.EndedAt ?? DateTimeOffset.Now
+                }
+            }, cancellationToken).ConfigureAwait(false);
+            await this.Api.Events.PublishAsync(new CloudEvent()
+            {
+                SpecVersion = CloudEventSpecVersion.V1.Version,
+                Id = Guid.NewGuid().ToString(),
+                Time = DateTimeOffset.Now,
+                Source = this.Options.Api.BaseAddress,
+                Type = SynapseDefaults.CloudEvents.Workflow.Ended.v1,
+                Subject = this.Instance.GetQualifiedName(),
+                DataContentType = MediaTypeNames.Application.Json,
+                Data = new WorkflowEndedEventV1()
+                {
+                    Name = this.Instance.GetQualifiedName(),
+                    Status = this.Instance.Status!.Phase!,
+                    EndedAt = run?.EndedAt ?? DateTimeOffset.Now
+                }
+            }, cancellationToken).ConfigureAwait(false);
+        }
     }
 
     /// <inheritdoc/>
@@ -390,6 +617,42 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         run.Outcome = task.Status;
         var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
         this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), null, cancellationToken).ConfigureAwait(false);
+        if (this.Options.CloudEvents.PublishLifecycleEvents)
+        {
+            await this.Api.Events.PublishAsync(new CloudEvent()
+            {
+                SpecVersion = CloudEventSpecVersion.V1.Version,
+                Id = Guid.NewGuid().ToString(),
+                Time = DateTimeOffset.Now,
+                Source = this.Options.Api.BaseAddress,
+                Type = SynapseDefaults.CloudEvents.Task.Completed.v1,
+                Subject = this.Instance.GetQualifiedName(),
+                DataContentType = MediaTypeNames.Application.Json,
+                Data = new TaskCompletedEventV1()
+                {
+                    Workflow = this.Instance.GetQualifiedName(),
+                    Task = task.Reference,
+                    CompletedAt = run?.EndedAt ?? DateTimeOffset.Now
+                }
+            }, cancellationToken).ConfigureAwait(false);
+            await this.Api.Events.PublishAsync(new CloudEvent()
+            {
+                SpecVersion = CloudEventSpecVersion.V1.Version,
+                Id = Guid.NewGuid().ToString(),
+                Time = DateTimeOffset.Now,
+                Source = this.Options.Api.BaseAddress,
+                Type = SynapseDefaults.CloudEvents.Task.Ended.v1,
+                Subject = this.Instance.GetQualifiedName(),
+                DataContentType = MediaTypeNames.Application.Json,
+                Data = new TaskEndedEventV1()
+                {
+                    Workflow = this.Instance.GetQualifiedName(),
+                    Task = task.Reference,
+                    Status = this.Instance.Status!.Phase!,
+                    EndedAt = run?.EndedAt ?? DateTimeOffset.Now
+                }
+            }, cancellationToken).ConfigureAwait(false);
+        }
         return this.Instance.Status?.Tasks?.FirstOrDefault(t => t.Id == task.Id) ?? throw new NullReferenceException($"Failed to find the task instance with the specified id '{task.Id}'. Make sure the task instance resource has been created using the workflow context.");
     }
 
@@ -408,6 +671,22 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         task.Next = then;
         var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
         this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), null, cancellationToken).ConfigureAwait(false);
+        if (this.Options.CloudEvents.PublishLifecycleEvents) await this.Api.Events.PublishAsync(new CloudEvent()
+        {
+            SpecVersion = CloudEventSpecVersion.V1.Version,
+            Id = Guid.NewGuid().ToString(),
+            Time = DateTimeOffset.Now,
+            Source = this.Options.Api.BaseAddress,
+            Type = SynapseDefaults.CloudEvents.Task.Skipped.v1,
+            Subject = this.Instance.GetQualifiedName(),
+            DataContentType = MediaTypeNames.Application.Json,
+            Data = new TaskSkippedEventV1()
+            {
+                Workflow = this.Instance.GetQualifiedName(),
+                Task = task.Reference,
+                SkippedAt = task.EndedAt ?? DateTimeOffset.Now
+            }
+        }, cancellationToken).ConfigureAwait(false);
         return this.Instance.Status?.Tasks?.FirstOrDefault(t => t.Id == task.Id) ?? throw new NullReferenceException($"Failed to find the task instance with the specified id '{task.Id}'. Make sure the task instance resource has been created using the workflow context.");
     }
 
@@ -422,6 +701,21 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         if (run != null) run.EndedAt = DateTimeOffset.Now;
         var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
         this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), null, cancellationToken).ConfigureAwait(false);
+        if (this.Options.CloudEvents.PublishLifecycleEvents) await this.Api.Events.PublishAsync(new CloudEvent()
+        {
+            SpecVersion = CloudEventSpecVersion.V1.Version,
+            Id = Guid.NewGuid().ToString(),
+            Time = DateTimeOffset.Now,
+            Source = this.Options.Api.BaseAddress,
+            Type = SynapseDefaults.CloudEvents.Workflow.Suspended.v1,
+            Subject = this.Instance.GetQualifiedName(),
+            DataContentType = MediaTypeNames.Application.Json,
+            Data = new WorkflowSuspendedEventV1()
+            {
+                Name = this.Instance.GetQualifiedName(),
+                SuspendedAt = run?.EndedAt ?? DateTimeOffset.Now
+            }
+        }, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
@@ -437,6 +731,22 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         run.Outcome = task.Status;
         var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
         this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), null, cancellationToken).ConfigureAwait(false);
+        if (this.Options.CloudEvents.PublishLifecycleEvents) await this.Api.Events.PublishAsync(new CloudEvent()
+        {
+            SpecVersion = CloudEventSpecVersion.V1.Version,
+            Id = Guid.NewGuid().ToString(),
+            Time = DateTimeOffset.Now,
+            Source = this.Options.Api.BaseAddress,
+            Type = SynapseDefaults.CloudEvents.Task.Suspended.v1,
+            Subject = this.Instance.GetQualifiedName(),
+            DataContentType = MediaTypeNames.Application.Json,
+            Data = new TaskSuspendedEventV1()
+            {
+                Workflow = this.Instance.GetQualifiedName(),
+                Task = task.Reference,
+                SuspendedAt = run?.EndedAt ?? DateTimeOffset.Now
+            }
+        }, cancellationToken).ConfigureAwait(false);
         return this.Instance.Status?.Tasks?.FirstOrDefault(t => t.Id == task.Id) ?? throw new NullReferenceException($"Failed to find the task instance with the specified id '{task.Id}'. Make sure the task instance resource has been created using the workflow context.");
     }
 
@@ -453,6 +763,40 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
         this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), null, cancellationToken).ConfigureAwait(false);
         await this.EndAsync(cancellationToken).ConfigureAwait(false);
+        if (this.Options.CloudEvents.PublishLifecycleEvents)
+        {
+            await this.Api.Events.PublishAsync(new CloudEvent()
+            {
+                SpecVersion = CloudEventSpecVersion.V1.Version,
+                Id = Guid.NewGuid().ToString(),
+                Time = DateTimeOffset.Now,
+                Source = this.Options.Api.BaseAddress,
+                Type = SynapseDefaults.CloudEvents.Workflow.Cancelled.v1,
+                Subject = this.Instance.GetQualifiedName(),
+                DataContentType = MediaTypeNames.Application.Json,
+                Data = new WorkflowCancelledEventV1()
+                {
+                    Name = this.Instance.GetQualifiedName(),
+                    CancelledAt = run?.EndedAt ?? DateTimeOffset.Now
+                }
+            }, cancellationToken).ConfigureAwait(false);
+            await this.Api.Events.PublishAsync(new CloudEvent()
+            {
+                SpecVersion = CloudEventSpecVersion.V1.Version,
+                Id = Guid.NewGuid().ToString(),
+                Time = DateTimeOffset.Now,
+                Source = this.Options.Api.BaseAddress,
+                Type = SynapseDefaults.CloudEvents.Workflow.Ended.v1,
+                Subject = this.Instance.GetQualifiedName(),
+                DataContentType = MediaTypeNames.Application.Json,
+                Data = new WorkflowEndedEventV1()
+                {
+                    Name = this.Instance.GetQualifiedName(),
+                    Status = this.Instance.Status!.Phase!,
+                    EndedAt = run?.EndedAt ?? DateTimeOffset.Now
+                }
+            }, cancellationToken).ConfigureAwait(false);
+        }
     }
 
     /// <inheritdoc/>
@@ -469,6 +813,42 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         run.Outcome = task.Status;
         var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
         this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), null, cancellationToken).ConfigureAwait(false);
+        if (this.Options.CloudEvents.PublishLifecycleEvents)
+        {
+            await this.Api.Events.PublishAsync(new CloudEvent()
+            {
+                SpecVersion = CloudEventSpecVersion.V1.Version,
+                Id = Guid.NewGuid().ToString(),
+                Time = DateTimeOffset.Now,
+                Source = this.Options.Api.BaseAddress,
+                Type = SynapseDefaults.CloudEvents.Task.Cancelled.v1,
+                Subject = this.Instance.GetQualifiedName(),
+                DataContentType = MediaTypeNames.Application.Json,
+                Data = new TaskCancelledEventV1()
+                {
+                    Workflow = this.Instance.GetQualifiedName(),
+                    Task = task.Reference,
+                    CancelledAt = run?.EndedAt ?? DateTimeOffset.Now
+                }
+            }, cancellationToken).ConfigureAwait(false);
+            await this.Api.Events.PublishAsync(new CloudEvent()
+            {
+                SpecVersion = CloudEventSpecVersion.V1.Version,
+                Id = Guid.NewGuid().ToString(),
+                Time = DateTimeOffset.Now,
+                Source = this.Options.Api.BaseAddress,
+                Type = SynapseDefaults.CloudEvents.Task.Ended.v1,
+                Subject = this.Instance.GetQualifiedName(),
+                DataContentType = MediaTypeNames.Application.Json,
+                Data = new TaskEndedEventV1()
+                {
+                    Workflow = this.Instance.GetQualifiedName(),
+                    Task = task.Reference,
+                    Status = this.Instance.Status!.Phase!,
+                    EndedAt = run?.EndedAt ?? DateTimeOffset.Now
+                }
+            }, cancellationToken).ConfigureAwait(false);
+        }
         return this.Instance.Status?.Tasks?.FirstOrDefault(t => t.Id == task.Id) ?? throw new NullReferenceException($"Failed to find the task instance with the specified id '{task.Id}'. Make sure the task instance resource has been created using the workflow context.");
     }
 
