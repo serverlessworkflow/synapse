@@ -83,7 +83,10 @@ public class DockerContainerPlatform(ILogger<DockerContainerPlatform> logger, IH
         catch (DockerApiException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
         {
             var downloadProgress = new Progress<JSONMessage>();
-            await this.DockerClient.Images.CreateImageAsync(new() { FromImage = definition.Image }, new(), downloadProgress, cancellationToken).ConfigureAwait(false);
+            var imageComponents = definition.Image.Split(':');
+            var imageName = imageComponents[0];
+            var imageTag = imageComponents.Length > 1 ? imageComponents[1] : null;
+            await this.DockerClient.Images.CreateImageAsync(new() { FromImage = imageName, Tag = imageTag }, new(), downloadProgress, cancellationToken).ConfigureAwait(false);
         }
         var parameters = new CreateContainerParameters()
         {
