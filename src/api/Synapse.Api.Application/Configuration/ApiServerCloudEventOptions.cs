@@ -18,8 +18,22 @@ namespace Synapse.Api.Application.Configuration;
 /// <summary>
 /// Represents the options used to configure the Cloud Events published by the Synapse API server
 /// </summary>
-public class CloudEventOptions
+public class ApiServerCloudEventOptions
 {
+
+    /// <summary>
+    /// Initializes a new <see cref="CloudEvent"/>
+    /// </summary>
+    /// <exception cref="Exception"></exception>
+    public ApiServerCloudEventOptions()
+    {
+        var env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Api.CloudEvents.Endpoint);
+        if (!string.IsNullOrWhiteSpace(env))
+        {
+            if (!Uri.TryCreate(env, UriKind.Absolute, out var endpoint)) throw new Exception("The Cloud Events endpoint must be a valid absolute URI");
+            this.Endpoint = endpoint;
+        }
+    }
 
     /// <summary>
     /// Gets/sets the uri, if any, to which to publish <see cref="CloudEvent"/>s

@@ -49,15 +49,19 @@ public class PublishCloudEventCommandHandler(ILogger<PublishCloudEventCommandHan
     /// <inheritdoc/>
     public virtual async Task<IOperationResult> HandleAsync(PublishCloudEventCommand command, CancellationToken cancellationToken = default)
     {
-        if (options.Value.Events?.Endpoint == null) return this.Ok();
+        if (options.Value.CloudEvents.Endpoint == null)
+        {
+            logger.LogWarning("No endpoint configured for cloud events. Event will not be published.");
+            return this.Ok();
+        }
         var json = jsonSerializer.SerializeToText(command.CloudEvent);
         using var content = new StringContent(json, Encoding.UTF8, CloudEventContentType.Json);
-        using var request = new HttpRequestMessage(HttpMethod.Post, options.Value.Events.Endpoint) { Content = content };
+        using var request = new HttpRequestMessage(HttpMethod.Post, options.Value.CloudEvents.Endpoint) { Content = content };
         using var response = await httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
         json = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode)
         {
-            logger.LogError("An error occurred while publishing the cloud event with id '{eventId}' to the configure endpoint '{endpoint}': {ex}", command.CloudEvent.Id, options.Value.Events.Endpoint, json);
+            logger.LogError("An error occurred while publishing the cloud event with id '{eventId}' to the configure endpoint '{endpoint}': {ex}", command.CloudEvent.Id, options.Value.CloudEvents.Endpoint, json);
             response.EnsureSuccessStatusCode();
         }
         return this.Ok();
