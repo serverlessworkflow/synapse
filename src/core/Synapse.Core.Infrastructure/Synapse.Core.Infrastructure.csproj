@@ -35,7 +35,7 @@
 	<PackageReference Include="Neuroglia.Data.Infrastructure.ResourceOriented.Redis" Version="4.15.3" />
 	<PackageReference Include="Neuroglia.Mediation" Version="4.15.3" />
 	<PackageReference Include="Neuroglia.Plugins" Version="4.15.3" />
-	<PackageReference Include="ServerlessWorkflow.Sdk.IO" Version="1.0.0-alpha2.12" />
+	<PackageReference Include="ServerlessWorkflow.Sdk.IO" Version="1.0.0-alpha2.14" />
   </ItemGroup>
 	
   <ItemGroup>
