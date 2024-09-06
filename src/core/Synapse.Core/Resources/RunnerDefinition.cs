@@ -41,9 +41,21 @@ public record RunnerDefinition
     };
 
     /// <summary>
+    /// Gets/sets the container platform used by runners to spawn containers
+    /// </summary>
+    [Required]
+    [DataMember(Order = 3, Name = "containerPlatform"), JsonPropertyOrder(3), JsonPropertyName("containerPlatform"), YamlMember(Order = 3, Alias = "containerPlatform")]
+    public virtual string ContainerPlatform { get; set; } = Synapse.ContainerPlatform.Docker;
+
+    /// <summary>
     /// Gets/sets the endpoint that references the base address and authentication policy for the Synapse API used by runners
     /// </summary>
-    [DataMember(Order = 3, Name = "certificates"), JsonPropertyOrder(3), JsonPropertyName("certificates"), YamlMember(Order = 3, Alias = "certificates")]
+    [DataMember(Order = 4, Name = "certificates"), JsonPropertyOrder(4), JsonPropertyName("certificates"), YamlMember(Order = 4, Alias = "certificates")]
     public virtual CertificateValidationStrategyDefinition? Certificates { get; set; }
-    
+
+    /// <summary>
+    /// Gets/sets a boolean indicating whether or not runners spawned by the configured Synapse Operators should publish lifecycle events
+    /// </summary>
+    [DataMember(Order = 5, Name = "publishLifecycleEvents"), JsonPropertyOrder(5), JsonPropertyName("publishLifecycleEvents"), YamlMember(Order = 5, Alias = "publishLifecycleEvents")]
+    public virtual bool? PublishLifecycleEvents { get; set; } = true;
 }

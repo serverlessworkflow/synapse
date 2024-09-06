@@ -11,32 +11,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Synapse.Resources;
+namespace Synapse;
 
 /// <summary>
-/// Enumerates default correlation lifetimes
+/// Enumerates all supported container platforms
 /// </summary>
-public static class CorrelationLifetime
+public static class ContainerPlatform
 {
 
     /// <summary>
-    /// Indicates a durable correlation
+    /// Gets the Docker container platform
     /// </summary>
-    public const string Durable = "durable";
+    public const string Docker = "docker";
+    /// <summary>
+    /// Gets the Kubernetes container platform
+    /// </summary>
+    public const string Kubernetes = "kubernetes";
 
     /// <summary>
-    /// Indicates an ephemeral correlation, which is a single use correlation
+    /// Gets a new <see cref="IEnumerable{T}"/> containing all default container platforms
     /// </summary>
-    public const string Ephemeral = "ephemeral";
-
-    /// <summary>
-    /// Gets all supported correlation lifetime
-    /// </summary>
-    /// <returns>An <see cref="IEnumerable{T}"/> supporting all default correlation lifetime</returns>
+    /// <returns>A new <see cref="IEnumerable{T}"/> containing all default container platforms</returns>
     public static IEnumerable<string> AsEnumerable()
     {
-        yield return Durable;
-        yield return Ephemeral;
+        yield return Docker;
+        yield return Kubernetes;
     }
 
 }

@@ -39,14 +39,7 @@ var builder = Host.CreateDefaultBuilder()
         });
         services.AddSingleton<IUserAccessor, ApplicationUserAccessor>();
         services.AddSynapse(context.Configuration);
-        services.AddSingleton<IDockerClient>(provider =>
-        {
-            var configuration = new DockerClientConfiguration();
-            return configuration.CreateClient();
-        });
-        services.AddSingleton<DockerContainerPlatform>();
-        services.AddSingleton<IContainerPlatform>(provider => provider.GetRequiredService<DockerContainerPlatform>());
-        services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<DockerContainerPlatform>());
+        services.AddDockerContainerPlatform();
         services.AddScoped<NativeRuntime>();
         services.AddScoped<ContainerRuntime>();
         services.AddScoped<IWorkflowRuntime>(provider => 

@@ -34,6 +34,11 @@ public class RunnerOptions
     public virtual RunnerCloudEventOptions CloudEvents { get; set; } = new();
 
     /// <summary>
+    /// Gets/sets the options used to configure the containers spawned by the Synapse Runner
+    /// </summary>
+    public virtual RunnerContainerOptions Containers { get; set; } = new();
+
+    /// <summary>
     /// Gets/sets the options used to configure the service account used by a Synapse Runner
     /// </summary>
     public virtual ServiceAccountOptions ServiceAccount { get; set; } = new();
