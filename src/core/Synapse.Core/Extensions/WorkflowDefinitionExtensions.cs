@@ -11,8 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Runtime.CompilerServices;
-
 namespace Synapse;
 
 /// <summary>
@@ -27,8 +25,9 @@ public static class WorkflowDefinitionExtensions
     /// <param name="workflow">The <see cref="WorkflowDefinition"/> that defines the specified <see cref="TaskDefinition"/></param>
     /// <param name="task">The name/definition mapping of the <see cref="TaskDefinition"/> to get the following <see cref="TaskDefinition"/> of</param>
     /// <param name="parentReference">A reference to the component that defines the next <see cref="TaskDefinition"/></param>
+    /// <param name="ignoreConditionalTasks">If true, ignore <see cref="TaskDefinition"/> with an if clause</param>
     /// <returns>A name/definition mapping of the next <see cref="TaskDefinition"/>, if any</returns>
-    public static MapEntry<string, TaskDefinition>? GetTaskAfter(this WorkflowDefinition workflow, MapEntry<string, TaskDefinition> task, string parentReference)
+    public static MapEntry<string, TaskDefinition>? GetTaskAfter(this WorkflowDefinition workflow, MapEntry<string, TaskDefinition> task, string parentReference, bool ignoreConditionalTasks = false)
     {
         ArgumentNullException.ThrowIfNull(workflow);
         ArgumentNullException.ThrowIfNull(task);
@@ -37,6 +36,13 @@ public static class WorkflowDefinitionExtensions
         var taskIndex = taskMap.Select(e => e.Key).ToList().IndexOf(task.Key);
         var nextIndex = taskIndex < 0 ? -1 : taskIndex + 1;
         if (nextIndex < 0 || nextIndex >= taskMap.Count) return null;
+        var taskEntry = taskMap.ElementAt(nextIndex);
+        while(ignoreConditionalTasks && !string.IsNullOrEmpty(taskEntry?.Value?.If))
+        {
+            nextIndex++;
+            if (nextIndex < 0 || nextIndex >= taskMap.Count) return null;
+            taskEntry = taskMap.ElementAt(nextIndex);
+        }
         return taskMap.ElementAt(nextIndex);
     }
 
