@@ -456,6 +456,24 @@ public static class SynapseDefaults
 
             }
 
+            /// <summary>
+            /// Exposes constants about environment variables related to cloud events published by the API
+            /// </summary>
+            public static class CloudEvents
+            {
+
+                /// <summary>
+                /// Gets the prefix for all API related environment variables
+                /// </summary>
+                public const string Prefix = Api.Prefix + "CLOUD_EVENTS_";
+
+                /// <summary>
+                /// Gets the absolute uri of the endpoint the API must publish cloud events to
+                /// </summary>
+                public const string Endpoint = Prefix + "ENDPOINT";
+
+            }
+
         }
 
         /// <summary>
@@ -543,7 +561,6 @@ public static class SynapseDefaults
             /// Gets the environment variable used to configure whether or not runners should publish lifecycle events
             /// </summary>
             public const string LifecycleEvents = Prefix + "LIFECYCLE_EVENTS";
-
 
         }
 

@@ -41,6 +41,6 @@ public class ApiServerOptions
     /// <summary>
     /// Gets/sets the options used to configure the cloud events published by the Synapse API Server
     /// </summary>
-    public virtual CloudEventOptions? Events { get; set; }
+    public virtual ApiServerCloudEventOptions CloudEvents { get; set; } = new();
 
 }
