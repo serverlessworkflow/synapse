@@ -24,16 +24,29 @@ public class OperatorOptions
     /// </summary>
     public OperatorOptions()
     {
-        Namespace = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Operator.Namespace)!;
-        Name = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Operator.Name)!;
-        var uri = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Operator.Runner.Api);
-        if (!string.IsNullOrWhiteSpace(uri))
+        this.Namespace = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Operator.Namespace)!;
+        this.Name = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Operator.Name)!;
+        var env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.Api);
+        if (!string.IsNullOrWhiteSpace(env))
         {
             this.Runner ??= new();
-            this.Runner.Api ??= new() 
-            { 
-                Uri = new(uri)
+            if (this.Runner.Api == null) this.Runner.Api ??= new()
+            {
+                Uri = new(env)
             };
+            else this.Runner.Api.Uri = new(env);
+        }
+        env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.LifecycleEvents);
+        if (!string.IsNullOrWhiteSpace(env) && bool.TryParse(env, out var publishLifeCycleEvents))
+        {
+            this.Runner ??= new();
+            this.Runner.PublishLifecycleEvents = publishLifeCycleEvents;
+        }
+        env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.ContainerPlatform);
+        if (!string.IsNullOrWhiteSpace(env))
+        {
+            this.Runner ??= new();
+            this.Runner.ContainerPlatform = env;
         }
     }
 

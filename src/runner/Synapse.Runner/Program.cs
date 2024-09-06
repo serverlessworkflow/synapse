@@ -11,6 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Synapse;
+using Synapse.Core.Infrastructure.Containers;
+
 if (args.Length != 0 && args.Contains("--debug") && !Debugger.IsAttached) Debugger.Launch();
 
 var builder = Host.CreateDefaultBuilder()
@@ -60,6 +63,17 @@ var builder = Host.CreateDefaultBuilder()
                 return token.AccessToken;
             };
         });
+        switch (options.Containers.Platform)
+        {
+            case ContainerPlatform.Docker:
+                services.AddDockerContainerPlatform();
+                break;
+            case ContainerPlatform.Kubernetes:
+                //todo: implement Kubernetes
+                break;
+            default: 
+                throw new NotSupportedException($"The specified container platform '{options.Containers.Platform}' is not supported");
+        }
         services.AddSingleton<IOAuth2TokenManager, OAuth2TokenManager>();
         services.AddSingleton<ITaskExecutionContextFactory, TaskExecutionContextFactory>();
         services.AddSingleton<ITaskExecutorFactory, TaskExecutorFactory>();

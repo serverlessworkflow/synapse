@@ -28,12 +28,9 @@ public static class DockerContainerServiceCollectionExtensions
     /// Adds and configures a new <see cref="DockerContainerPlatform"/>
     /// </summary>
     /// <param name="services">The <see cref="IServiceCollection"/> to configure</param>
-    /// <param name="dockerClientConfiguration">The <see cref="DockerClientConfiguration"/> used to configure the <see cref="IDockerClient"/> to use, if any</param>
     /// <returns>The configured <see cref="IServiceCollection"/></returns>
-    public static IServiceCollection AddDockerContainerPlatform(this IServiceCollection services, DockerClientConfiguration? dockerClientConfiguration = null)
+    public static IServiceCollection AddDockerContainerPlatform(this IServiceCollection services)
     {
-        dockerClientConfiguration ??= new DockerClientConfiguration();
-        services.TryAddSingleton<IDockerClient>(dockerClientConfiguration.CreateClient());
         services.TryAddSingleton<DockerContainerPlatform>();
         services.AddSingleton<IContainerPlatform>(provider => provider.GetRequiredService<DockerContainerPlatform>());
         services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<DockerContainerPlatform>());

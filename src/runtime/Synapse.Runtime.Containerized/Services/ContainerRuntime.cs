@@ -61,6 +61,8 @@ public class ContainerRuntime(ILoggerFactory loggerFactory, IHostEnvironment env
         containerDefinition.Environment[SynapseDefaults.EnvironmentVariables.Workflow.Instance] = workflowInstance.GetQualifiedName();
         containerDefinition.Environment[SynapseDefaults.EnvironmentVariables.ServiceAccount.Name] = serviceAccount.GetQualifiedName();
         containerDefinition.Environment[SynapseDefaults.EnvironmentVariables.ServiceAccount.Key] = serviceAccount.Spec.Key;
+        containerDefinition.Environment[SynapseDefaults.EnvironmentVariables.Runner.ContainerPlatform] = this.Options.ContainerPlatform;
+        containerDefinition.Environment[SynapseDefaults.EnvironmentVariables.Runner.LifecycleEvents] = (this.Options.PublishLifecycleEvents ?? true).ToString();
         var container = await this.ContainerPlatform.CreateAsync(containerDefinition, cancellationToken).ConfigureAwait(false);
         return this.Processes.AddOrUpdate(workflowInstance.GetQualifiedName(), new ContainerProcess(container), (key, current) => current);
     }

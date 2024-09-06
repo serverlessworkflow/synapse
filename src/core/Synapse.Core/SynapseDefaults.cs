@@ -518,23 +518,32 @@ public static class SynapseDefaults
             /// </summary>
             public const string Name = Prefix + "NAME";
 
+        }
+
+        /// <summary>
+        /// Exposes constants about runner-related environment variables
+        /// </summary>
+        public static class Runner
+        {
+
             /// <summary>
-            /// Exposes constants about an operator's runner-related environment variables
+            /// Gets the prefix for all runner related environment variables
             /// </summary>
-            public static class Runner
-            {
+            public const string Prefix = EnvironmentVariables.Prefix + "RUNNER_";
 
-                /// <summary>
-                /// Gets the prefix for all operator runner related environment variables
-                /// </summary>
-                public const string Prefix = Operator.Prefix + "RUNNER_";
+            /// <summary>
+            /// Gets the environment variable used to configure the API used by runners
+            /// </summary>
+            public const string Api = Prefix + "API";
+            /// <summary>
+            /// Gets the environment variable used to configure the container platform used by runners
+            /// </summary>
+            public const string ContainerPlatform = Prefix + "CONTAINER_PLATFORM";
+            /// <summary>
+            /// Gets the environment variable used to configure whether or not runners should publish lifecycle events
+            /// </summary>
+            public const string LifecycleEvents = Prefix + "LIFECYCLE_EVENTS";
 
-                /// <summary>
-                /// Gets the environment variable used to configure the API used by runners spawned by the operator
-                /// </summary>
-                public const string Api = Prefix + "API";
-
-            }
 
         }
 

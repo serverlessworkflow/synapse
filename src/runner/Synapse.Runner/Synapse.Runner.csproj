@@ -68,6 +68,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\api\Synapse.Api.Client.Http\Synapse.Api.Client.Http.csproj" />
+    <ProjectReference Include="..\..\core\Synapse.Core.Infrastructure.Containers.Docker\Synapse.Core.Infrastructure.Containers.Docker.csproj" />
     <ProjectReference Include="..\..\core\Synapse.Core.Infrastructure\Synapse.Core.Infrastructure.csproj" />
   </ItemGroup>
 

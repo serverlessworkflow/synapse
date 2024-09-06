@@ -74,6 +74,8 @@ public class NativeRuntime(ILoggerFactory loggerFactory, IHostEnvironment enviro
         startInfo.Environment.Add(SynapseDefaults.EnvironmentVariables.Workflow.Instance, workflowInstance.GetQualifiedName());
         startInfo.Environment[SynapseDefaults.EnvironmentVariables.ServiceAccount.Name] = serviceAccount.GetQualifiedName();
         startInfo.Environment[SynapseDefaults.EnvironmentVariables.ServiceAccount.Key] = serviceAccount.Spec.Key;
+        startInfo.Environment[SynapseDefaults.EnvironmentVariables.Runner.ContainerPlatform] = this.Options.ContainerPlatform;
+        startInfo.Environment[SynapseDefaults.EnvironmentVariables.Runner.LifecycleEvents] = (this.Options.PublishLifecycleEvents ?? true).ToString();
         if (this.Options.Certificates?.Validate == false) startInfo.Environment.Add(SynapseDefaults.EnvironmentVariables.SkipCertificateValidation, "true");
         var process = new Process()
         {
