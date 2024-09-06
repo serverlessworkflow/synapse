@@ -11,9 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Synapse.Api.Application.Commands.Resources.Generic;
-using Synapse.Api.Application.Queries.Resources.Generic;
-
 namespace Synapse.Api.Http;
 
 /// <summary>

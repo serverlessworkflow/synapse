@@ -209,9 +209,9 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
                 }
             case "openapi":
                 {
-                    var definition = (OpenApiCallDefinition)this.JsonSerializer.Convert(context.TaskDefinition.With, typeof(OpenApiCallDefinition))!;
+                    //var definition = (OpenApiCallDefinition)this.JsonSerializer.Convert(context.TaskDefinition.With, typeof(OpenApiCallDefinition))!;
                     callType = context.TaskDefinition.Call.ToLower();
-                    content = definition.OperationId;
+                    //content = definition.OperationId;
                     break;
                 }
             default:
