@@ -11,12 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Neuroglia.Eventing.CloudEvents;
-using Neuroglia.Serialization;
-using Synapse.Api.Application.Configuration;
-using System.Text;
+using Synapse.Api.Application.Services;
 
 namespace Synapse.Api.Application.Commands.Events;
 
@@ -38,32 +34,15 @@ public class PublishCloudEventCommand(CloudEvent e)
 /// <summary>
 /// Represents the service used to handle <see cref="PublishCloudEventCommand"/>s
 /// </summary>
-/// <param name="logger">The service used to perform logging</param>
-/// <param name="options">The service used to access the current <see cref="ApiServerOptions"/></param>
-/// <param name="jsonSerializer">The service used to serialize/deserialize data to/from JSON</param>
-/// <param name="httpClient">The service used to perform HTTP requests</param>
-public class PublishCloudEventCommandHandler(ILogger<PublishCloudEventCommandHandler> logger, IOptions<ApiServerOptions> options, IJsonSerializer jsonSerializer, HttpClient httpClient)
+/// <param name="cloudEventPublisher">The service used to publish <see cref="CloudEvent"/>s</param>
+public class PublishCloudEventCommandHandler(ICloudEventPublisher cloudEventPublisher)
     : ICommandHandler<PublishCloudEventCommand>
 {
 
     /// <inheritdoc/>
     public virtual async Task<IOperationResult> HandleAsync(PublishCloudEventCommand command, CancellationToken cancellationToken = default)
     {
-        if (options.Value.CloudEvents.Endpoint == null)
-        {
-            logger.LogWarning("No endpoint configured for cloud events. Event will not be published.");
-            return this.Ok();
-        }
-        var json = jsonSerializer.SerializeToText(command.CloudEvent);
-        using var content = new StringContent(json, Encoding.UTF8, CloudEventContentType.Json);
-        using var request = new HttpRequestMessage(HttpMethod.Post, options.Value.CloudEvents.Endpoint) { Content = content };
-        using var response = await httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
-        json = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-        if (!response.IsSuccessStatusCode)
-        {
-            logger.LogError("An error occurred while publishing the cloud event with id '{eventId}' to the configure endpoint '{endpoint}': {ex}", command.CloudEvent.Id, options.Value.CloudEvents.Endpoint, json);
-            response.EnsureSuccessStatusCode();
-        }
+        await cloudEventPublisher.PublishAsync(command.CloudEvent, cancellationToken).ConfigureAwait(false);
         return this.Ok();
     }
 
