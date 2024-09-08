@@ -612,53 +612,6 @@ public static class SynapseDefaults
         }
 
         /// <summary>
-        /// Exposes constants about runtime-related environment variables
-        /// </summary>
-        public static class Runtime
-        {
-
-            /// <summary>
-            /// Gets the prefix for all runtime related environment variables
-            /// </summary>
-            public const string Prefix = EnvironmentVariables.Prefix + "RUNTIME_";
-
-            /// <summary>
-            /// Exposes constants about Docker runtime-related environment variables
-            /// </summary>
-            public static class Docker
-            {
-
-                /// <summary>
-                /// Gets the prefix for all Docker runtime related environment variables
-                /// </summary>
-                public const string Prefix = Runtime.Prefix + "DOCKER_";
-                /// <summary>
-                /// Gets the environment variable used to specify the YAML file used to configure the Docker runner container
-                /// </summary>
-                public const string Container = Prefix + "CONTAINER";
-
-            }
-
-        }
-
-        /// <summary>
-        /// Exposes constants about secrets-related environment variables
-        /// </summary>
-        public static class Secrets
-        {
-
-            /// <summary>
-            /// Gets the prefix for all secrets related environment variables
-            /// </summary>
-            public const string Prefix = EnvironmentVariables.Prefix + "SECRETS";
-            /// <summary>
-            /// Gets the name of the environment variable used to configure the path to the directory that contains secrets files
-            /// </summary>
-            public const string Directory = Prefix + "DIRECTORY";
-
-        }
-
-        /// <summary>
         /// Exposes constants about service account related environment variables
         /// </summary>
         public static class ServiceAccount
