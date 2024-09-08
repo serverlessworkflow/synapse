@@ -22,7 +22,7 @@ public class WorkflowExecutorTests
 {
 
     [Fact]
-    public async Task Run_Workflow_Should_Work()
+    public async Task Run_Workflow_Should_Work_Async()
     {
         //arrange
         var yaml = @"

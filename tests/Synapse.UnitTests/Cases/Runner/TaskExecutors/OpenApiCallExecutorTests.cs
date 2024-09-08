@@ -22,7 +22,7 @@ public class OpenApiCallExecutorTests
 {
 
     [Fact]
-    public async Task GetPetById_Should_Work()
+    public async Task GetPetById_Should_Work_Async()
     {
         //arrange
         var status = "available";

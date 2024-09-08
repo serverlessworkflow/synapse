@@ -6,7 +6,7 @@
 	<ImplicitUsings>enable</ImplicitUsings>
 	<NeutralLanguage>en</NeutralLanguage>
 	<GenerateDocumentationFile>True</GenerateDocumentationFile>
-	<VersionPrefix>1.1.0</VersionPrefix>
+	<VersionPrefix>1.0.0</VersionPrefix>
 	<VersionSuffix>alpha1</VersionSuffix>
 	<AssemblyVersion>$(VersionPrefix)</AssemblyVersion>
 	<FileVersion>$(VersionPrefix)</FileVersion>
@@ -18,24 +18,38 @@
 	<PackageProjectUrl>https://github.com/serverlessworkflow/synapse</PackageProjectUrl>
 	<PackageTags>synapse core infrastructure</PackageTags>
 	<IsPackable>true</IsPackable>
-	<GenerateAppxPackageOnBuild>true</GenerateAppxPackageOnBuild>
+	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	<NeutralLanguage>en</NeutralLanguage>
 	<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
 	<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+	<PackageIcon>transparent_logomark_256.png</PackageIcon>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
+	<Description>Contains essential infrastructure components for the Synapse applications, including utilities and services that support the implementation and management of core functionalities</Description>
 	<AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
 	<FileVersion>$(VersionPrefix).0</FileVersion>
 	<DebugType>embedded</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="..\..\..\assets\images\transparent_logomark_256.png" Link="transparent_logomark_256.png">
+      <PackagePath>\</PackagePath>
+      <Pack>True</Pack>
+    </None>
+    <None Include="..\..\..\README.md">
+	  <PackagePath>\</PackagePath>
+      <Pack>True</Pack>
+    </None>
+  </ItemGroup>
+	
+  <ItemGroup>
 	<PackageReference Include="IdentityModel" Version="7.0.0" />
 	<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.0.2" />
-	<PackageReference Include="Neuroglia.Data.Expressions.Abstractions" Version="4.15.3" />
-	<PackageReference Include="Neuroglia.Data.Infrastructure.Redis" Version="4.15.3" />
-	<PackageReference Include="Neuroglia.Data.Infrastructure.ResourceOriented.Redis" Version="4.15.3" />
-	<PackageReference Include="Neuroglia.Mediation" Version="4.15.3" />
-	<PackageReference Include="Neuroglia.Plugins" Version="4.15.3" />
-	<PackageReference Include="ServerlessWorkflow.Sdk.IO" Version="1.0.0-alpha2.14" />
+	<PackageReference Include="Neuroglia.Data.Expressions.Abstractions" Version="4.15.4" />
+	<PackageReference Include="Neuroglia.Data.Infrastructure.Redis" Version="4.15.4" />
+	<PackageReference Include="Neuroglia.Data.Infrastructure.ResourceOriented.Redis" Version="4.15.4" />
+	<PackageReference Include="Neuroglia.Mediation" Version="4.15.4" />
+	<PackageReference Include="Neuroglia.Plugins" Version="4.15.4" />
+	<PackageReference Include="ServerlessWorkflow.Sdk.IO" Version="1.0.0-alpha2.15" />
   </ItemGroup>
 	
   <ItemGroup>

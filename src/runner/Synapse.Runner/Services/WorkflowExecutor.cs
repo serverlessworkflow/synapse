@@ -232,6 +232,8 @@ public class WorkflowExecutor(IServiceProvider serviceProvider, ILogger<Workflow
     /// Handles the timeout of the <see cref="WorkflowInstance"/> to execute
     /// </summary>
     /// <param name="state">The timer's state</param>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "<Pending>")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "VSTHRD200:Use \"Async\" suffix for async methods", Justification = "<Pending>")]
     protected virtual async void OnTimeoutAsync(object? state)
     {
         await this.SetErrorAsync(new Error()

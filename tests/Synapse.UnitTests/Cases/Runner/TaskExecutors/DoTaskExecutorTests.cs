@@ -22,7 +22,7 @@ public class DoTaskExecutorTests
 {
 
     [Fact]
-    public async Task Execute_Should_Work()
+    public async Task Execute_Should_Work_Async()
     {
         //arrange
         var red = "red";
@@ -99,7 +99,7 @@ public class DoTaskExecutorTests
     }
 
     [Fact]
-    public async Task Execute_Until_Exit_Directive_Should_Work()
+    public async Task Execute_Until_Exit_Directive_Should_Work_Async()
     {
         //arrange
         var red = "red";
@@ -153,7 +153,7 @@ public class DoTaskExecutorTests
     }
 
     [Fact]
-    public async Task Execute_Until_End_Directive_Should_Work()
+    public async Task Execute_Until_End_Directive_Should_Work_Async()
     {
         //arrange
         var red = "red";
@@ -206,7 +206,7 @@ public class DoTaskExecutorTests
     }
 
     [Fact]
-    public async Task Execute_Faulted_SubTask_Should_Fault()
+    public async Task Execute_Faulted_SubTask_Should_Fault_Async()
     {
         //arrange
         var error = new ErrorDefinition()

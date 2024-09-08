@@ -23,7 +23,7 @@ public class NativeRuntimeTests
 
     protected override void ConfigureServices(IServiceCollection services)
     {
-        services.Configure<RunnerDefinition>(options => 
+        services.Configure<RunnerConfiguration>(options => 
         {
             options.Api = new()
             {
@@ -39,7 +39,7 @@ public class NativeRuntimeTests
     }
 
     [Fact]
-    public async Task Create_Process_Should_Work()
+    public async Task Create_Process_Should_Work_Async()
     {
         //arrange
         var input = new EquatableDictionary<string, object>()

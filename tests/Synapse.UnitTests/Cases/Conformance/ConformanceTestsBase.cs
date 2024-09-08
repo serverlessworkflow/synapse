@@ -120,7 +120,7 @@ public abstract class ConformanceTestsBase
     }
 
     [Given(@"a workflow with definition:")]
-    public async Task Given_A_Workflow_Definition(DocString inputString)
+    public async Task Given_A_Workflow_Definition_Async(DocString inputString)
     {
         using var stream = new MemoryStream(Encoding.UTF8.GetBytes(inputString.Content));
         Definition = await Services.GetRequiredService<IWorkflowDefinitionReader>().ReadAsync(stream);
@@ -145,7 +145,7 @@ public abstract class ConformanceTestsBase
     }
 
     [When(@"the workflow is executed")]
-    public async Task When_The_Workflow_Is_Executed()
+    public async Task When_The_Workflow_Is_Executed_Async()
     {
         Instance = await Resources.AddAsync(new WorkflowInstance()
         {
@@ -261,7 +261,7 @@ public abstract class ConformanceTestsBase
     }
 
     [And(@"(.*) should complete")]
-    public async Task Then_Task_Should_Complete(string taskName, DocString outputString)
+    public async Task Then_Task_Should_Complete_Async(string taskName, DocString outputString)
     {
         var task = ExecutionContext.Instance.Status?.Tasks?.FirstOrDefault(t => t.Name == taskName);
         task.Should().NotBeNull();
@@ -273,7 +273,7 @@ public abstract class ConformanceTestsBase
     }
 
     [And(@"(.*) should complete with output:")]
-    public async Task Then_Task_Should_Complete_With_Output(string taskName, DocString outputString)
+    public async Task Then_Task_Should_Complete_With_Output_Async(string taskName, DocString outputString)
     {
         var task = ExecutionContext.Instance.Status?.Tasks?.FirstOrDefault(t => t.Name == taskName);
         task.Should().NotBeNull();

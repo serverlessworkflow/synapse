@@ -11,8 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using ServerlessWorkflow.Sdk.Models.Processes;
-
 namespace Synapse.Resources;
 
 /// <summary>
@@ -23,21 +21,27 @@ public record RuntimeDefinition
 {
 
     /// <summary>
-    /// Gets/sets the options used to configure the runtime, when using the native mode
+    /// Gets/sets the options used to configure the native runtime
     /// </summary>
     [DataMember(Order = 1, Name = "native"), JsonPropertyOrder(1), JsonPropertyName("native"), YamlMember(Order = 1, Alias = "native")]
-    public virtual NativeRunnerProcessDefinition? Native { get; set; }
+    public virtual NativeRuntimeConfiguration? Native { get; set; }
 
     /// <summary>
-    /// Gets/sets the options used to configure the runtime, when using the container mode
+    /// Gets/sets the options used to configure the Docker runtime
     /// </summary>
-    [DataMember(Order = 2, Name = "container"), JsonPropertyOrder(2), JsonPropertyName("container"), YamlMember(Order = 2, Alias = "container")]
-    public virtual ContainerProcessDefinition? Container { get; set; }
+    [DataMember(Order = 2, Name = "docker"), JsonPropertyOrder(2), JsonPropertyName("docker"), YamlMember(Order = 2, Alias = "docker")]
+    public virtual DockerRuntimeConfiguration? Docker { get; set; }
+
+    /// <summary>
+    /// Gets/sets the options used to configure the Kubernetes runtime
+    /// </summary>
+    [DataMember(Order = 3, Name = "kubernetes"), JsonPropertyOrder(3), JsonPropertyName("kubernetes"), YamlMember(Order = 3, Alias = "kubernetes")]
+    public virtual KubernetesRuntimeConfiguration? Kubernetes { get; set; }
 
     /// <summary>
     /// Gets the runtime mode
     /// </summary>
     [IgnoreDataMember, JsonIgnore, YamlIgnore]
-    public virtual string Mode => this.Native != null ? OperatorRuntimeMode.Native : this.Container != null ? OperatorRuntimeMode.Containerized : throw new Exception("The runtime mode must be set");
+    public virtual string Mode => this.Native != null ? OperatorRuntimeMode.Native : this.Docker != null ? OperatorRuntimeMode.Docker : this.Kubernetes != null ? OperatorRuntimeMode.Kubernetes : throw new Exception("The runtime mode must be set");
 
 }

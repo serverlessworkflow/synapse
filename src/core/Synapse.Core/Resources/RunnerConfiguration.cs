@@ -14,10 +14,10 @@
 namespace Synapse.Resources;
 
 /// <summary>
-/// Represents the definition of a Synapse workflow runner
+/// Represents an object used to configure a Synapse workflow runner
 /// </summary>
 [DataContract]
-public record RunnerDefinition
+public record RunnerConfiguration
 {
 
     /// <summary>
@@ -34,10 +34,7 @@ public record RunnerDefinition
     [DataMember(Order = 2, Name = "runtime"), JsonPropertyOrder(2), JsonPropertyName("runtime"), YamlMember(Order = 2, Alias = "runtime")]
     public virtual RuntimeDefinition Runtime { get; set; } = new()
     {
-        Container = new()
-        {
-            Image = "ghcr.io/serverlessworkflow/synapse/runner"
-        }
+        Docker = new()
     };
 
     /// <summary>

@@ -18,7 +18,7 @@ public class WaitTaskExecutorTests
 {
 
     [Fact]
-    public async Task Wait_Should_Work()
+    public async Task Wait_Should_Work_Async()
     {
         //arrange
         var duration = Duration.FromMilliseconds(150);

@@ -24,8 +24,8 @@ namespace Synapse.Runtime.Services;
 /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
 /// <param name="environment">The current <see cref="IHostEnvironment"/></param>
 /// <param name="httpClientFactory">The service used to create <see cref="System.Net.Http.HttpClient"/>s</param>
-/// <param name="options">The service used to access the current <see cref="RunnerDefinition"/></param>
-public class NativeRuntime(ILoggerFactory loggerFactory, IHostEnvironment environment, IHttpClientFactory httpClientFactory, IOptionsMonitor<RunnerDefinition> options)
+/// <param name="options">The service used to access the current <see cref="RunnerConfiguration"/></param>
+public class NativeRuntime(ILoggerFactory loggerFactory, IHostEnvironment environment, IHttpClientFactory httpClientFactory, IOptionsMonitor<RunnerConfiguration> options)
     : WorkflowRuntimeBase(loggerFactory)
 {
 
@@ -40,9 +40,9 @@ public class NativeRuntime(ILoggerFactory loggerFactory, IHostEnvironment enviro
     protected HttpClient HttpClient { get; } = httpClientFactory.CreateClient();
 
     /// <summary>
-    /// Gets the current <see cref="RunnerDefinition"/>
+    /// Gets the current <see cref="RunnerConfiguration"/>
     /// </summary>
-    protected RunnerDefinition Options => options.CurrentValue;
+    protected RunnerConfiguration Options => options.CurrentValue;
 
     /// <summary>
     /// Gets a <see cref="ConcurrentDictionary{TKey, TValue}"/> containing all known worker processes

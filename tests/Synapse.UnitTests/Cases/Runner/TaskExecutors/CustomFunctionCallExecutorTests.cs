@@ -20,7 +20,7 @@ public class CustomFunctionCallExecutorTests
 {
 
     [Fact]
-    public async Task Call_CustomFunction_Should_Work()
+    public async Task Call_CustomFunction_Should_Work_Async()
     {
         //arrange
         var username = "John Doe";

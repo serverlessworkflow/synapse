@@ -18,8 +18,8 @@ namespace Synapse.Operator.Services;
 /// </summary>
 /// <param name="repository">The service used to manage <see cref="IResource"/>s</param>
 /// <param name="options">The current <see cref="OperatorOptions"/></param>
-/// <param name="runnerOptions">The current <see cref="RunnerDefinition"/></param>
-public class OperatorController(IResourceRepository repository, IOptionsMonitor<OperatorOptions> options, IOptionsMonitor<RunnerDefinition> runnerOptions)
+/// <param name="runnerOptions">The current <see cref="RunnerConfiguration"/></param>
+public class OperatorController(IResourceRepository repository, IOptionsMonitor<OperatorOptions> options, IOptionsMonitor<RunnerConfiguration> runnerOptions)
     : IOperatorController
 {
 
@@ -34,9 +34,9 @@ public class OperatorController(IResourceRepository repository, IOptionsMonitor<
     protected OperatorOptions Options => options.CurrentValue;
 
     /// <summary>
-    /// Gets the current <see cref="RunnerDefinition"/>
+    /// Gets the current <see cref="RunnerConfiguration"/>
     /// </summary>
-    protected RunnerDefinition RunnerOptions => runnerOptions.CurrentValue;
+    protected RunnerConfiguration RunnerOptions => runnerOptions.CurrentValue;
 
     /// <inheritdoc/>
     public IResourceMonitor<Resources.Operator> Operator { get; protected set; } = null!;

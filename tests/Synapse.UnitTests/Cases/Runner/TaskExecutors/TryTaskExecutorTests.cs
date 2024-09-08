@@ -18,7 +18,7 @@ public class TryTaskExecutorTests
 {
 
     [Fact]
-    public async Task Catch_Error_Should_Work()
+    public async Task Catch_Error_Should_Work_Async()
     {
         //arrange
         var error = new ErrorDefinition()
@@ -65,7 +65,7 @@ public class TryTaskExecutorTests
     }
 
     [Fact]
-    public async Task Catch_Error_Should_Fault()
+    public async Task Catch_Error_Should_Fault_Async()
     {
         //arrange
         var error = new ErrorDefinition()
@@ -117,7 +117,7 @@ public class TryTaskExecutorTests
     }
 
     [Fact]
-    public async Task Catch_Error_Should_Retry_N_Times_Then_Fault()
+    public async Task Catch_Error_Should_Retry_N_Times_Then_Fault_Async()
     {
         //arrange
         var retryCount = 5u;
