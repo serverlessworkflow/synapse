@@ -23,7 +23,7 @@ jobs:
       - name: Build
         run: dotnet build "./Synapse.sln" --configuration Release --no-restore 
       - name: Push
-        run: dotnet nuget push "./src/*/*/*/bin/Release/*.nupkg" --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+        run: dotnet nuget push "./src/*/*/bin/Release/*.nupkg" --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
 
   publish-server-image:
     runs-on: ubuntu-latest
