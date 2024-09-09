@@ -88,9 +88,13 @@ spec:
         - name: CONNECTIONSTRINGS__REDIS
           value: {{ .Values.global.redisConnectionString }}
         - name: SYNAPSE_OPERATOR_NAMESPACE
-          value: {{ .Values.operator.env.SYNAPSE_OPERATOR_NAMESPACE }}
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
         - name: SYNAPSE_OPERATOR_NAME
-          value: {{ .Values.operator.env.SYNAPSE_OPERATOR_NAME }}
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: SYNAPSE_OPERATOR_RUNNER_API
           value: {{ .Values.operator.env.SYNAPSE_OPERATOR_RUNNER_API }}
         - name: DOCKER_HOST
@@ -128,9 +132,13 @@ spec:
         - name: CONNECTIONSTRINGS__REDIS
           value: {{ .Values.global.redisConnectionString }}
         - name: SYNAPSE_CORRELATOR_NAMESPACE
-          value: {{ .Values.correlator.env.SYNAPSE_CORRELATOR_NAMESPACE }}
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
         - name: SYNAPSE_CORRELATOR_NAME
-          value: {{ .Values.correlator.env.SYNAPSE_CORRELATOR_NAME }}
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

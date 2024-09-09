@@ -14,25 +14,21 @@
 using k8s;
 using k8s.Models;
 using Microsoft.Extensions.Logging;
-using Synapse.Runtime.Services;
-using System.Reactive.Subjects;
+using Synapse.Core.Infrastructure.Services;
 
-namespace Synapse.Runtime.Kubernetes.Services;
+namespace Synapse.Core.Infrastructure.Containers;
 
 /// <summary>
-/// Represents the Kubernetes implementation of the <see cref="IWorkflowProcess"/> interface
+/// Represents a Kubernetes <see cref="IContainer"/>
 /// </summary>
-/// <param name="pod">The <see cref="V1Pod"/> associated with the <see cref="IWorkflowProcess"/></param>
+/// <param name="pod">The <see cref="V1Pod"/> the <see cref="IContainer"/> belongs to</param>
 /// <param name="logger">The service used to perform logging</param>
-/// <param name="kubernetes">The service used to interact with the Kubernetes API</param>
-public class KubernetesWorkflowProcess(V1Pod pod, ILogger<KubernetesWorkflowProcess> logger, IKubernetes kubernetes)
-    : WorkflowProcessBase
+/// <param name="kubernetes">The service used to interact with the Docker API</param>
+public class KubernetesContainer(V1Pod pod, ILogger<KubernetesContainer> logger, IKubernetes kubernetes)
+    : IContainer
 {
 
-    long? _exitCode;
-
-    /// <inheritdoc/>
-    public override string Id => $"{this.Pod.Name()}.{this.Pod.Namespace()}";
+    bool _disposed;
 
     /// <summary>
     /// Gets the <see cref="V1Pod"/> the container belongs to
@@ -45,36 +41,26 @@ public class KubernetesWorkflowProcess(V1Pod pod, ILogger<KubernetesWorkflowProc
     protected ILogger Logger { get; } = logger;
 
     /// <summary>
-    /// Gets the service used to interact with the Kubernetes API
+    /// Gets the service used to interact with the Docker API
     /// </summary>
     protected virtual IKubernetes Kubernetes { get; } = kubernetes;
 
     /// <inheritdoc/>
-    public override IObservable<string>? StandardOutput => this.StandardOutputSubject;
-
-    /// <summary>
-    /// Gets the <see cref="Subject{T}"/> used to observe the process's STDOUT
-    /// </summary>
-    protected virtual Subject<string> StandardOutputSubject { get; } = new();
+    public virtual StreamReader? StandardOutput { get; protected set; }
 
     /// <inheritdoc/>
-    public override IObservable<string>? StandardError => this.StandardErrorSubject;
-
-    /// <summary>
-    /// Gets the <see cref="Subject{T}"/> used to observe the process's STDERR
-    /// </summary>
-    protected virtual Subject<string> StandardErrorSubject { get; } = new();
+    public virtual StreamReader? StandardError { get; protected set; }
 
     /// <inheritdoc/>
-    public override long? ExitCode => this._exitCode;
+    public long? ExitCode { get; protected set; }
 
     /// <summary>
-    /// Gets the <see cref="KubernetesWorkflowProcess"/>'s <see cref="System.Threading.CancellationTokenSource"/>
+    /// Gets the <see cref="KubernetesContainer"/>'s <see cref="System.Threading.CancellationTokenSource"/>
     /// </summary>
     protected CancellationTokenSource CancellationTokenSource { get; } = new();
 
     /// <inheritdoc/>
-    public override async Task StartAsync(CancellationToken cancellationToken = default)
+    public virtual async Task StartAsync(CancellationToken cancellationToken = default)
     {
         try
         {
@@ -82,11 +68,11 @@ public class KubernetesWorkflowProcess(V1Pod pod, ILogger<KubernetesWorkflowProc
             this.Pod = await this.Kubernetes.CoreV1.CreateNamespacedPodAsync(this.Pod, this.Pod.Namespace(), cancellationToken: cancellationToken);
             this.Logger.LogDebug("The pod '{pod}' has been successfully created", $"{this.Pod.Name()}.{this.Pod.Namespace()}");
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             this.Logger.LogError("An error occurred while creating the specified pod '{pod}': {ex}", $"{this.Pod.Name()}.{this.Pod.Namespace()}", ex);
         }
-        _ = Task.Run(() => this.ReadPodLogsAsync(cancellationToken), cancellationToken);
+        await this.ReadPodLogsAsync(cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -98,9 +84,7 @@ public class KubernetesWorkflowProcess(V1Pod pod, ILogger<KubernetesWorkflowProc
     {
         await this.WaitForReadyAsync(cancellationToken);
         var logStream = await this.Kubernetes.CoreV1.ReadNamespacedPodLogAsync(this.Pod.Name(), this.Pod.Namespace(), cancellationToken: cancellationToken).ConfigureAwait(false);
-        using var reader = new StreamReader(logStream);
-        string? line;
-        while ((line = await reader.ReadLineAsync(cancellationToken).ConfigureAwait(false)) != null) this.StandardOutputSubject.OnNext(line);
+       this.StandardOutput = new StreamReader(logStream);
     }
 
     /// <summary>
@@ -128,37 +112,56 @@ public class KubernetesWorkflowProcess(V1Pod pod, ILogger<KubernetesWorkflowProc
         {
             if (item.Status.Phase != "Succeeded" || item.Status.Phase != "Failed") continue;
             var containerStatus = item.Status.ContainerStatuses.FirstOrDefault();
-            this._exitCode = containerStatus?.State.Terminated?.ExitCode ?? -1;
+            this.ExitCode = containerStatus?.State.Terminated?.ExitCode ?? -1;
             break;
         }
     }
 
     /// <inheritdoc/>
-    public override async Task StopAsync(CancellationToken cancellationToken = default)
+    public virtual async Task StopAsync(CancellationToken cancellationToken = default)
     {
         await this.Kubernetes.CoreV1.DeleteNamespacedPodAsync(this.Pod.Name(), this.Pod.Namespace(), cancellationToken: cancellationToken).ConfigureAwait(false);
         await this.CancellationTokenSource.CancelAsync().ConfigureAwait(false);
     }
 
     /// <summary>
-    /// Disposes of the <see cref="KubernetesWorkflowProcess"/>
+    /// Disposes of the <see cref="KubernetesContainer"/>
     /// </summary>
-    /// <param name="disposing">A boolean indicating whether or not the <see cref="KubernetesWorkflowProcess"/> is being disposed of</param>
+    /// <param name="disposing">A boolean indicating whether or not the <see cref="KubernetesContainer"/> is being disposed of</param>
     /// <returns>A new awaitable <see cref="ValueTask"/></returns>
-    protected override async ValueTask DisposeAsync(bool disposing)
+    protected virtual async ValueTask DisposeAsync(bool disposing)
     {
-        this.CancellationTokenSource.Dispose();
-        await base.DisposeAsync(disposing).ConfigureAwait(false);
+        if (!this._disposed) return;
+        this.StandardOutput?.Dispose();
+        this.StandardError?.Dispose();
+        this._disposed = true;
+        await Task.CompletedTask.ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async ValueTask DisposeAsync()
+    {
+        await this.DisposeAsync(true).ConfigureAwait(false);
+        GC.SuppressFinalize(this);
     }
 
     /// <summary>
-    /// Disposes of the <see cref="KubernetesWorkflowProcess"/>
+    /// Disposes of the <see cref="KubernetesContainer"/>
     /// </summary>
-    /// <param name="disposing">A boolean indicating whether or not the <see cref="KubernetesWorkflowProcess"/> is being disposed of</param>
-    protected override void Dispose(bool disposing)
+    /// <param name="disposing">A boolean indicating whether or not the <see cref="KubernetesContainer"/> is being disposed of</param>
+    protected virtual void Dispose(bool disposing)
     {
-        this.CancellationTokenSource.Dispose();
-        base.Dispose(disposing);
+        if (!this._disposed) return;
+        this.StandardOutput?.Dispose();
+        this.StandardError?.Dispose();
+        this._disposed = true;
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        this.Dispose(true);
+        GC.SuppressFinalize(this);
     }
 
 }

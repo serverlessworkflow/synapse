@@ -25,6 +25,7 @@
 	<PackageIcon>transparent_logomark_256.png</PackageIcon>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
 	<Description>Contains the Docker container platform for running Synapse in a containerized environment.</Description>
+	<AssemblyInformationalVersion>$(VersionPrefix)-$(VersionSuffix)</AssemblyInformationalVersion>
 	<AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
 	<FileVersion>$(VersionPrefix).0</FileVersion>
 	<DebugType>embedded</DebugType>
@@ -46,7 +47,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Synapse.Core\Synapse.Core.csproj" />
     <ProjectReference Include="..\Synapse.Core.Infrastructure\Synapse.Core.Infrastructure.csproj" />
   </ItemGroup>
 

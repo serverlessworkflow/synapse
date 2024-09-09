@@ -42,7 +42,6 @@ var builder = Host.CreateDefaultBuilder()
         });
         services.AddSingleton<IUserAccessor, ApplicationUserAccessor>();
         services.AddSynapse(context.Configuration);
-        
         services.AddScoped<NativeRuntime>();
         services.AddScoped<DockerRuntime>();
         services.AddScoped<KubernetesRuntime>();

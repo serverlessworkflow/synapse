@@ -21,15 +21,45 @@ public record NativeRuntimeConfiguration
 {
 
     /// <summary>
-    /// Gets/sets the path to the file to execute to run a workflow instance
+    /// Gets the default path to the directory that contains the runner binaries
     /// </summary>
-    [DataMember(Order = 1, Name = "executable"), JsonPropertyOrder(1), JsonPropertyName("executable"), YamlMember(Order = 1, Alias = "executable")]
-    public virtual string Executable { get; set; } = "Synapse.Runner";
+    public static readonly string DefaultDirectory = Path.Combine(AppContext.BaseDirectory, "bin", "runner");
+    /// <summary>
+    /// Gets the default path to the runner executable file
+    /// </summary>
+    public const string DefaultExecutable = "Synapse.Runner";
 
     /// <summary>
-    /// Gets/sets the working directory
+    /// Initializes a new <see cref="NativeRuntimeConfiguration"/>
     /// </summary>
-    [DataMember(Order = 2, Name = "directory"), JsonPropertyOrder(2), JsonPropertyName("directory"), YamlMember(Order = 2, Alias = "directory")]
-    public virtual string Directory { get; set; } = Path.Combine(AppContext.BaseDirectory, "bin", "runner");
+    public NativeRuntimeConfiguration()
+    {
+        var env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runtime.Native.Directory);
+        if (!string.IsNullOrWhiteSpace(env))
+        {
+            if (!System.IO.Directory.Exists(env)) throw new FileNotFoundException("The runner directory does not exist or cannot be found", env);
+            this.Directory = env;
+        }
+        env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runtime.Native.Executable);
+        if (!string.IsNullOrWhiteSpace(env))
+        {
+            var filePath = Path.Combine(this.Directory, env);
+            if (!File.Exists(filePath)) throw new FileNotFoundException("The runner executable file does not exist or cannot be found", filePath);
+            this.Executable = env;
+        }
+    }
+
+    /// <summary>
+    /// Gets/sets the runner's working directory
+    /// </summary>
+    [DataMember(Order = 1, Name = "directory"), JsonPropertyOrder(1), JsonPropertyName("directory"), YamlMember(Order = 1, Alias = "directory")]
+    public virtual string Directory { get; set; } = DefaultDirectory;
+
+    /// <summary>
+    /// Gets/sets the path to the file to execute to run a workflow instance
+    /// </summary>
+    [DataMember(Order = 2, Name = "executable"), JsonPropertyOrder(2), JsonPropertyName("executable"), YamlMember(Order = 2, Alias = "executable")]
+    public virtual string Executable { get; set; } = DefaultExecutable;
+
 
 }

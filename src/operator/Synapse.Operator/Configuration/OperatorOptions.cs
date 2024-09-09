@@ -26,7 +26,27 @@ public class OperatorOptions
     {
         this.Namespace = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Operator.Namespace)!;
         this.Name = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Operator.Name)!;
-        var env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.Api);
+        var env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runtime.Mode);
+        if (!string.IsNullOrWhiteSpace(env))
+        {
+            this.Runner.Runtime = env switch
+            {
+                OperatorRuntimeMode.Docker => new()
+                {
+                    Docker = new()
+                },
+                OperatorRuntimeMode.Kubernetes => new()
+                {
+                    Kubernetes = new()
+                },
+                OperatorRuntimeMode.Native => new()
+                {
+                    Native = new()
+                },
+                _ => throw new NotSupportedException($"The specified operator runtime mode '{env}' is not supported"),
+            };
+        }
+        env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.Api);
         if (!string.IsNullOrWhiteSpace(env))
         {
             this.Runner ??= new();
@@ -43,11 +63,7 @@ public class OperatorOptions
             this.Runner.PublishLifecycleEvents = publishLifeCycleEvents;
         }
         env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.ContainerPlatform);
-        if (!string.IsNullOrWhiteSpace(env))
-        {
-            this.Runner ??= new();
-            this.Runner.ContainerPlatform = env;
-        }
+        if (!string.IsNullOrWhiteSpace(env)) this.Runner.ContainerPlatform = env;
     }
 
     /// <summary>

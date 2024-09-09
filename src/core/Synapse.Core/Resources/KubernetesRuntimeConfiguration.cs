@@ -37,7 +37,7 @@ public record KubernetesRuntimeConfiguration
                 new("runner")
                 {
                     Image = SynapseDefaults.Containers.Images.Runner,
-                    ImagePullPolicy = ImagePullPolicy.Always,
+                    ImagePullPolicy = ImagePullPolicy.IfNotPresent,
                     Ports =
                     [
                         new()
@@ -63,6 +63,10 @@ public record KubernetesRuntimeConfiguration
         if (!string.IsNullOrWhiteSpace(env)) this.Secrets.VolumeName = env;
         env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runtime.Kubernetes.Secrets.MountPath);
         if (!string.IsNullOrWhiteSpace(env)) this.Secrets.MountPath = env;
+        env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runtime.Kubernetes.Namespace);
+        if (!string.IsNullOrWhiteSpace(env)) this.Namespace = env;
+        env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runtime.Kubernetes.ServiceAccount);
+        if (!string.IsNullOrWhiteSpace(env)) this.ServiceAccount = env;
     }
 
     /// <summary>
@@ -82,6 +86,18 @@ public record KubernetesRuntimeConfiguration
     /// </summary>
     [DataMember(Order = 3, Name = "secrets"), JsonPropertyOrder(3), JsonPropertyName("secrets"), YamlMember(Order = 3, Alias = "secrets")]
     public virtual KubernetesRuntimeSecretsConfiguration Secrets { get; set; } = new();
+
+    /// <summary>
+    /// Gets/sets the namespace in which to create runner pods. If not set, defaults to the namespace defined in the <see cref="PodTemplate"/>
+    /// </summary>
+    [DataMember(Order = 4, Name = "namespace"), JsonPropertyOrder(4), JsonPropertyName("namespace"), YamlMember(Order = 4, Alias = "namespace")]
+    public virtual string? Namespace { get; set; }
+
+    /// <summary>
+    /// Gets/sets the name of the service account that grants the runner the ability to spawn containers when its container platform has been set to `kubernetes`
+    /// </summary>
+    [DataMember(Order = 5, Name = "serviceAccount"), JsonPropertyOrder(5), JsonPropertyName("serviceAccount"), YamlMember(Order = 5, Alias = "serviceAccount")]
+    public virtual string? ServiceAccount { get; set; }
 
     /// <summary>
     /// Loads the runner container template

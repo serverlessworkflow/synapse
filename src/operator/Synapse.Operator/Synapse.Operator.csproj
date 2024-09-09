@@ -21,6 +21,7 @@
 	<NeutralLanguage>en</NeutralLanguage>
 	<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
 	<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+	<AssemblyInformationalVersion>$(VersionPrefix)-$(VersionSuffix)</AssemblyInformationalVersion>
 	<AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
 	<FileVersion>$(VersionPrefix).0</FileVersion>
 	<DebugType>embedded</DebugType>

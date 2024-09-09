@@ -24,6 +24,7 @@
 	<PackageIcon>transparent_logomark_256.png</PackageIcon>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
 	<Description>Contains abstractions and interfaces used by clients of the Synapse API</Description>
+	<AssemblyInformationalVersion>$(VersionPrefix)-$(VersionSuffix)</AssemblyInformationalVersion>
 	<AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
 	<FileVersion>$(VersionPrefix).0</FileVersion>
 	<DebugType>embedded</DebugType>
