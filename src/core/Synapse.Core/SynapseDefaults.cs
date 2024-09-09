@@ -14,6 +14,7 @@
 using Synapse.Resources;
 using Neuroglia.Data.Infrastructure.ResourceOriented;
 using System.Diagnostics;
+using System.Reflection;
 
 namespace Synapse;
 
@@ -576,6 +577,11 @@ public static class SynapseDefaults
             public const string Prefix = EnvironmentVariables.Prefix + "RUNTIME_";
 
             /// <summary>
+            /// Gets the environment variable used to configure the runtime mode
+            /// </summary>
+            public const string Mode = Prefix + "MODE";
+
+            /// <summary>
             /// Exposes constants about Docker runtime-related environment variables
             /// </summary>
             public static class Docker
@@ -682,6 +688,14 @@ public static class SynapseDefaults
                 /// Gets the environment variable used to specify the YAML file used to configure the Kubernetes runner pod
                 /// </summary>
                 public const string Pod = Prefix + "POD";
+                /// <summary>
+                /// Gets the environment variable used to configure the namespace to create runner pods into
+                /// </summary>
+                public const string Namespace = Prefix + "NAMESPACE";
+                /// <summary>
+                /// Gets the environment variable used to configure the name of the service account that grants the runner the ability to spawn containers when its container platform has been set to `kubernetes`
+                /// </summary>
+                public const string ServiceAccount = Prefix + "SERVICE_ACCOUNT";
 
                 /// <summary>
                 /// Exposes constants about environment variables used to configure the secrets used by a Docker runtime
@@ -704,6 +718,28 @@ public static class SynapseDefaults
                     public const string MountPath = Prefix + "MOUNT_PATH";
 
                 }
+
+            }
+
+            /// <summary>
+            /// Exposes constants about Native runtime-related environment variables
+            /// </summary>
+            public static class Native
+            {
+
+                /// <summary>
+                /// Gets the prefix for all native runtime related environment variables
+                /// </summary>
+                public const string Prefix = Runtime.Prefix + "NATIVE_";
+
+                /// <summary>
+                /// Gets the environment variable used to configure the working directory that contains the runner binaries
+                /// </summary>
+                public const string Directory = Prefix + "DIRECTORY";
+                /// <summary>
+                /// Gets the environment variable used to configure the path to the runner's executable file
+                /// </summary>
+                public const string Executable = Prefix + "EXECUTABLE";
 
             }
 
@@ -780,6 +816,8 @@ public static class SynapseDefaults
         public static class Images
         {
 
+            static string? _version;
+
             /// <summary>
             /// Gets the name of the Synapse container image registry
             /// </summary>
@@ -787,7 +825,17 @@ public static class SynapseDefaults
             /// <summary>
             /// Gets the current version of Synapse container images
             /// </summary>
-            public static readonly string Version = typeof(SynapseDefaults).Assembly.GetName().Version?.ToString(3) ?? "latest";
+            public static string Version
+            {
+                get
+                {
+                    if (!string.IsNullOrWhiteSpace(_version)) return _version;
+                    _version = typeof(SynapseDefaults).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "latest";
+                    if (_version.EndsWith('-')) _version = _version[..^1];
+                    if (_version.Contains('+')) _version = _version[.._version.IndexOf('+')];
+                    return _version;
+                }
+            }
             /// <summary>
             /// Gets the name of the Synapse API container image
             /// </summary>
@@ -803,7 +851,7 @@ public static class SynapseDefaults
             /// <summary>
             /// Gets the name of the Synapse Runner container image
             /// </summary>
-            public static readonly string Runner = $"{ImageRegistry}/runner:latest"; //todo: $"{ImageRegistry}/runner:{Version}";
+            public static readonly string Runner = $"{ImageRegistry}/runner:{Version}";
 
         }
 

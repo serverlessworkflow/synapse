@@ -36,10 +36,9 @@ public class RunnerContainerOptions
                 this.Docker = new();
                 break;
             case ContainerPlatform.Kubernetes:
-                //todo: implement Kubernetes
+                this.Kubernetes = new();
                 break;
-            default: 
-                throw new NotSupportedException($"The specified container platform '{env}' is not supported");
+            default: throw new NotSupportedException($"The specified container platform '{env}' is not supported");
         }
     }
 
@@ -49,8 +48,13 @@ public class RunnerContainerOptions
     public virtual DockerContainerPlatformOptions? Docker { get; set; }
 
     /// <summary>
+    /// Gets/sets the options used to configure the Kubernetes container platform, if any
+    /// </summary>
+    public virtual KubernetesContainerPlatformOptions? Kubernetes { get; set; }
+
+    /// <summary>
     /// Gets the container platform used by the configured runner
     /// </summary>
-    public virtual string Platform => this.Docker != null ? ContainerPlatform.Docker : throw new NullReferenceException("The runner's container platform must be configured");
+    public virtual string Platform => this.Docker != null ? ContainerPlatform.Docker : this.Kubernetes != null ? ContainerPlatform.Kubernetes : throw new NullReferenceException("The runner's container platform must be configured");
 
 }

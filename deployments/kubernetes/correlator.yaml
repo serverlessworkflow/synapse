@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: correlator-1
+  namespace: synapse
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: correlator
+  template:
+    metadata:
+      labels:
+        app: correlator
+    spec:
+      containers:
+        - name: correlator
+          image: ghcr.io/serverlessworkflow/synapse/correlator:1.0.0-alpha1
+          env:
+            - name: CONNECTIONSTRINGS__REDIS
+              value: garnet:6379
+            - name: SYNAPSE_CORRELATOR_NAMESPACE
+              value: default
+            - name: SYNAPSE_CORRELATOR_NAME
+              value: correlator-1
+          ports:
+            - containerPort: 8080
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: correlator
+  namespace: synapse
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: correlator
+  type: ClusterIP

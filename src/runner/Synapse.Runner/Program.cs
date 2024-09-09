@@ -69,7 +69,7 @@ var builder = Host.CreateDefaultBuilder()
                 services.AddDockerContainerPlatform();
                 break;
             case ContainerPlatform.Kubernetes:
-                //services.AddKubernetesContainerPlatform(); //todo
+                services.AddKubernetesContainerPlatform();
                 break;
             default: 
                 throw new NotSupportedException($"The specified container platform '{options.Containers.Platform}' is not supported");

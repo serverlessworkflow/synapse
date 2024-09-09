@@ -128,11 +128,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "templates", "templates", "{
 		deployments\helm\templates\services.yaml = deployments\helm\templates\services.yaml
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synapse.Runtime.Docker", "src\runtime\Synapse.Runtime.Docker\Synapse.Runtime.Docker.csproj", "{8FF58403-9E13-4F58-864F-E6FBC877BF37}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Runtime.Docker", "src\runtime\Synapse.Runtime.Docker\Synapse.Runtime.Docker.csproj", "{8FF58403-9E13-4F58-864F-E6FBC877BF37}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synapse.Runtime.Kubernetes", "src\runtime\Synapse.Runtime.Kubernetes\Synapse.Runtime.Kubernetes.csproj", "{9B37AA4A-A342-4A41-A2A1-C8466825A70A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Runtime.Kubernetes", "src\runtime\Synapse.Runtime.Kubernetes\Synapse.Runtime.Kubernetes.csproj", "{9B37AA4A-A342-4A41-A2A1-C8466825A70A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Synapse.Core.Infrastructure.Containers.Docker", "src\core\Synapse.Core.Infrastructure.Containers.Docker\Synapse.Core.Infrastructure.Containers.Docker.csproj", "{DD6381BD-2C8B-4CE1-99B2-EC585DD818FA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "kubernetes", "kubernetes", "{B3F3DB1B-23E7-45FA-8934-448BFFB294E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synapse.Core.Infrastructure.Containers.Kubernetes", "src\core\Synapse.Core.Infrastructure.Containers.Kubernetes\Synapse.Core.Infrastructure.Containers.Kubernetes.csproj", "{41C99069-BD99-4FD2-BF33-984CF03B53E8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -224,6 +228,10 @@ Global
 		{DD6381BD-2C8B-4CE1-99B2-EC585DD818FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DD6381BD-2C8B-4CE1-99B2-EC585DD818FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DD6381BD-2C8B-4CE1-99B2-EC585DD818FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{41C99069-BD99-4FD2-BF33-984CF03B53E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{41C99069-BD99-4FD2-BF33-984CF03B53E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{41C99069-BD99-4FD2-BF33-984CF03B53E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{41C99069-BD99-4FD2-BF33-984CF03B53E8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -262,6 +270,8 @@ Global
 		{8FF58403-9E13-4F58-864F-E6FBC877BF37} = {175CE1C5-FE17-4C8B-8823-E812BAD4E527}
 		{9B37AA4A-A342-4A41-A2A1-C8466825A70A} = {175CE1C5-FE17-4C8B-8823-E812BAD4E527}
 		{DD6381BD-2C8B-4CE1-99B2-EC585DD818FA} = {9E296C8A-4D78-4592-B046-11A3A953FD25}
+		{B3F3DB1B-23E7-45FA-8934-448BFFB294E8} = {562C91A3-6E91-4489-9D9D-064E7436D900}
+		{41C99069-BD99-4FD2-BF33-984CF03B53E8} = {9E296C8A-4D78-4592-B046-11A3A953FD25}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2A6C03D6-355A-4B39-9F2B-D0FDE429C0E2}

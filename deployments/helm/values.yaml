@@ -33,8 +33,6 @@ operator:
   service:
     type: ClusterIP
   env:
-    SYNAPSE_OPERATOR_NAMESPACE: default
-    SYNAPSE_OPERATOR_NAME: operator-1
     SYNAPSE_OPERATOR_RUNNER_API: http://api:8080
     DOCKER_HOST: unix:///var/run/docker.sock
 
@@ -45,9 +43,6 @@ correlator:
   service:
     type: ClusterIP
     port: 8081
-  env:
-    SYNAPSE_CORRELATOR_NAMESPACE: default
-    SYNAPSE_CORRELATOR_NAME: correlator-1
 
 serviceAccount:
   create: true

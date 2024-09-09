@@ -48,31 +48,38 @@ public class SecretsManager(ILogger<SecretsManager> logger, ISerializerProvider 
     /// <inheritdoc/>
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var path = string.IsNullOrWhiteSpace(this.Options.Secrets.Directory)
+        try
+        {
+            var path = string.IsNullOrWhiteSpace(this.Options.Secrets.Directory)
             ? RunnerSecretsOptions.DefaultDirectory
             : this.Options.Secrets.Directory;
-        var directory = new DirectoryInfo(path);
-        if (!directory.Exists) directory.Create();
-        foreach (var file in directory.GetFiles())
+            var directory = new DirectoryInfo(path);
+            if (!directory.Exists) directory.Create();
+            foreach (var file in directory.GetFiles())
+            {
+                using var stream = file.OpenRead();
+                var mediaTypeName = MimeTypes.GetMimeType(file.Name);
+                var serializer = this.SerializerProvider.GetSerializersFor(mediaTypeName).FirstOrDefault();
+                if (serializer == null)
+                {
+                    this.Logger.LogWarning("Skipped loading secret '{secretFile}': failed to find a serializer for the specified media type '{mediaType}'", file.Name, mediaTypeName);
+                    continue;
+                }
+                try
+                {
+                    var secret = serializer.Deserialize<object>(stream)!;
+                    this.Secrets.Add(file.Name, secret);
+                }
+                catch (Exception ex)
+                {
+                    this.Logger.LogWarning("Skipped loading secret '{secretFile}': an exception occurred while deserializing the secret object: {ex}", file.Name, ex.ToString());
+                    continue;
+                }
+            }
+        }
+        catch(Exception ex)
         {
-            using var stream = file.OpenRead();
-            var mediaTypeName = MimeTypes.GetMimeType(file.Name);
-            var serializer = this.SerializerProvider.GetSerializersFor(mediaTypeName).FirstOrDefault();
-            if (serializer == null)
-            {
-                this.Logger.LogWarning("Skipped loading secret '{secretFile}': failed to find a serializer for the specified media type '{mediaType}'", file.Name, mediaTypeName);
-                continue;
-            }
-            try
-            {
-                var secret = serializer.Deserialize<object>(stream)!;
-                this.Secrets.Add(file.Name, secret);
-            }
-            catch (Exception ex)
-            {
-                this.Logger.LogWarning("Skipped loading secret '{secretFile}': an exception occurred while deserializing the secret object: {ex}", file.Name, ex.ToString());
-                continue;
-            }
+            this.Logger.LogWarning("Failed to load secrets because there are none or because they are improperly configured. Error: {ex}", ex);
         }
         return Task.CompletedTask;
     }

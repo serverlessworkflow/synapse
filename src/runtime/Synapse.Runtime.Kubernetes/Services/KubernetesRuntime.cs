@@ -80,62 +80,73 @@ public class KubernetesRuntime(IServiceProvider serviceProvider, ILoggerFactory 
         ArgumentNullException.ThrowIfNull(workflow);
         ArgumentNullException.ThrowIfNull(workflowInstance);
         ArgumentNullException.ThrowIfNull(serviceAccount);
-        if (this.Kubernetes == null) await this.InitializeAsync(cancellationToken).ConfigureAwait(false);
-        var workflowDefinition = workflow.Spec.Versions.Get(workflowInstance.Spec.Definition.Version) ?? throw new NullReferenceException($"Failed to find version '{workflowInstance.Spec.Definition.Version}' of workflow '{workflow.GetQualifiedName()}'");
-        var pod = this.Runner.Runtime.Kubernetes!.PodTemplate.Clone()!;
-        pod.Metadata ??= new();
-        pod.Metadata.Name = $"{workflowInstance.GetName()}-{Guid.NewGuid().ToString("N")[..15].ToLowerInvariant()}";
-        pod.Metadata.NamespaceProperty = workflowInstance.GetNamespace();
-        if (pod.Spec == null || pod.Spec.Containers == null || !pod.Spec.Containers.Any()) throw new InvalidOperationException("The specified Kubernetes runtime pod template is not valid");
-        var volumeMounts = new List<V1VolumeMount>();
-        pod.Spec.Volumes ??= [];
-        if (workflowDefinition.Use?.Secrets?.Count > 0)
+        try
         {
-            var secretsVolume = new V1Volume(this.Runner.Runtime.Kubernetes.Secrets.VolumeName)
+            this.Logger.LogDebug("Creating a new Kubernetes pod for workflow instance '{workflowInstance}'...", workflowInstance.GetQualifiedName());
+            if (this.Kubernetes == null) await this.InitializeAsync(cancellationToken).ConfigureAwait(false);
+            var workflowDefinition = workflow.Spec.Versions.Get(workflowInstance.Spec.Definition.Version) ?? throw new NullReferenceException($"Failed to find version '{workflowInstance.Spec.Definition.Version}' of workflow '{workflow.GetQualifiedName()}'");
+            var pod = this.Runner.Runtime.Kubernetes!.PodTemplate.Clone()!;
+            pod.Metadata ??= new();
+            pod.Metadata.Name = $"{workflowInstance.GetQualifiedName()}-{Guid.NewGuid().ToString("N")[..15].ToLowerInvariant()}";
+            if (!string.IsNullOrWhiteSpace(this.Runner.Runtime.Kubernetes.Namespace)) pod.Metadata.NamespaceProperty = this.Runner.Runtime.Kubernetes.Namespace;
+            if (pod.Spec == null || pod.Spec.Containers == null || !pod.Spec.Containers.Any()) throw new InvalidOperationException("The specified Kubernetes runtime pod template is not valid");
+            var volumeMounts = new List<V1VolumeMount>();
+            pod.Spec.Volumes ??= [];
+            if (workflowDefinition.Use?.Secrets?.Count > 0)
             {
-                Projected = new()
+                var secretsVolume = new V1Volume(this.Runner.Runtime.Kubernetes.Secrets.VolumeName)
                 {
-                    Sources = []
-                }
-            };
-            pod.Spec.Volumes.Add(secretsVolume);
-            var secretsVolumeMount = new V1VolumeMount(this.Runner.Runtime.Kubernetes.Secrets.MountPath, secretsVolume.Name, readOnlyProperty: true);
-            volumeMounts.Add(secretsVolumeMount);
-            foreach (var secret in workflowDefinition.Use.Secrets)
-            {
-                secretsVolume.Projected.Sources.Add(new()
-                {
-                    Secret = new()
+                    Projected = new()
                     {
-                        Name = secret,
-                        Optional = false
+                        Sources = []
                     }
-                });
+                };
+                pod.Spec.Volumes.Add(secretsVolume);
+                var secretsVolumeMount = new V1VolumeMount(this.Runner.Runtime.Kubernetes.Secrets.MountPath, secretsVolume.Name, readOnlyProperty: true);
+                volumeMounts.Add(secretsVolumeMount);
+                foreach (var secret in workflowDefinition.Use.Secrets)
+                {
+                    secretsVolume.Projected.Sources.Add(new()
+                    {
+                        Secret = new()
+                        {
+                            Name = secret,
+                            Optional = false
+                        }
+                    });
+                }
             }
-        }
-        foreach (var container in pod.Spec.Containers)
-        {
-            container.Env ??= [];
-            container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Api.Uri, this.Runner.Api.Uri.OriginalString);
-            container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.ContainerPlatform, this.Runner.ContainerPlatform);
-            container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.LifecycleEvents, (this.Runner.PublishLifecycleEvents ?? true).ToString());
-            container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Secrets.Directory, this.Runner.Runtime.Kubernetes.Secrets.MountPath);
-            container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.ServiceAccount.Name, serviceAccount.GetQualifiedName());
-            container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.ServiceAccount.Key, serviceAccount.Spec.Key);
-            container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Workflow.Instance, workflowInstance.GetQualifiedName());
-            if (this.Runner.Certificates?.Validate == false) container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.SkipCertificateValidation, "true");
-            container.VolumeMounts = volumeMounts;
-        }
-        var process = ActivatorUtilities.CreateInstance<KubernetesWorkflowProcess>(this.ServiceProvider, this.Kubernetes!, pod);
-        this.Processes.AddOrUpdate(process.Id, _ => process, (key, current) =>
-        {
-            current.StopAsync().GetAwaiter().GetResult();
+            foreach (var container in pod.Spec.Containers)
+            {
+                container.Env ??= [];
+                container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Api.Uri, this.Runner.Api.Uri.OriginalString);
+                container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.ContainerPlatform, this.Runner.ContainerPlatform);
+                container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.LifecycleEvents, (this.Runner.PublishLifecycleEvents ?? true).ToString());
+                container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Secrets.Directory, this.Runner.Runtime.Kubernetes.Secrets.MountPath);
+                container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.ServiceAccount.Name, serviceAccount.GetQualifiedName());
+                container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.ServiceAccount.Key, serviceAccount.Spec.Key);
+                container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Workflow.Instance, workflowInstance.GetQualifiedName());
+                if (this.Runner.Certificates?.Validate == false) container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.SkipCertificateValidation, "true");
+                container.VolumeMounts = volumeMounts;
+            }
+            if(this.Runner.ContainerPlatform == ContainerPlatform.Kubernetes) pod.Spec.ServiceAccountName = this.Runner.Runtime.Kubernetes.ServiceAccount;
+            var process = ActivatorUtilities.CreateInstance<KubernetesWorkflowProcess>(this.ServiceProvider, this.Kubernetes!, pod);
+            this.Processes.AddOrUpdate(process.Id, _ => process, (key, current) =>
+            {
+                current.StopAsync().GetAwaiter().GetResult();
 #pragma warning disable CA2012 // Use ValueTasks correctly
-            current.DisposeAsync().GetAwaiter().GetResult();
+                current.DisposeAsync().GetAwaiter().GetResult();
 #pragma warning restore CA2012 // Use ValueTasks correctly
+                return process;
+            });
+            this.Logger.LogDebug("A new container with id '{id}' has been successfully created to run workflow instance '{workflowInstance}'", process.Id, workflowInstance.GetQualifiedName());
             return process;
-        });
-        return process;
+        }
+        catch (Exception ex)
+        {
+            this.Logger.LogError("An error occurred while creating a new Kubernetes process for workflow instance '{workflowInstance}': {ex}", workflowInstance.GetQualifiedName(), ex);
+            throw;
+        }
     }
 
     /// <inheritdoc/>

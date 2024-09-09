@@ -21,7 +21,7 @@ namespace Synapse.Core.Infrastructure.Containers;
 /// <summary>
 /// Defines extensions for <see cref="IServiceCollection"/>s
 /// </summary>
-public static class DockerContainerServiceCollectionExtensions
+public static class DockerContainerPlatformServiceCollectionExtensions
 {
 
     /// <summary>

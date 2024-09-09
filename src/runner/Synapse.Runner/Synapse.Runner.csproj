@@ -21,6 +21,7 @@
 	<NeutralLanguage>en</NeutralLanguage>
 	<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
 	<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+	<AssemblyInformationalVersion>$(VersionPrefix)-$(VersionSuffix)</AssemblyInformationalVersion>
 	<AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
 	<FileVersion>$(VersionPrefix).0</FileVersion>
 	<DebugType>embedded</DebugType>
@@ -70,6 +71,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\api\Synapse.Api.Client.Http\Synapse.Api.Client.Http.csproj" />
     <ProjectReference Include="..\..\core\Synapse.Core.Infrastructure.Containers.Docker\Synapse.Core.Infrastructure.Containers.Docker.csproj" />
+    <ProjectReference Include="..\..\core\Synapse.Core.Infrastructure.Containers.Kubernetes\Synapse.Core.Infrastructure.Containers.Kubernetes.csproj" />
     <ProjectReference Include="..\..\core\Synapse.Core.Infrastructure\Synapse.Core.Infrastructure.csproj" />
   </ItemGroup>
 
