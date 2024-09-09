@@ -6,6 +6,8 @@ EXPOSE 8080
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
+COPY ["README.md", "README.md"]
+COPY ["assets/images/transparent_logomark_256.png", "assets/images/transparent_logomark_256.png"]
 COPY ["src/api/Synapse.Api.Server/Synapse.Api.Server.csproj", "src/api/Synapse.Api.Server/"]
 RUN dotnet restore "./src/api/Synapse.Api.Server/Synapse.Api.Server.csproj"
 COPY . .

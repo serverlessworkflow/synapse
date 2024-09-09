@@ -66,7 +66,7 @@ public class OAuth2TokenManager(ILogger<OAuth2TokenManager> logger, IJsonSeriali
         {
             var discoveryRequest = new DiscoveryDocumentRequest()
             {
-                Address = configuration.Authority.OriginalString,
+                Address = configuration.Authority!.OriginalString,
                 Policy = new()
                 {
                     RequireHttps = false
@@ -80,7 +80,7 @@ public class OAuth2TokenManager(ILogger<OAuth2TokenManager> logger, IJsonSeriali
         else throw new NotSupportedException($"The specified scheme type '{configuration.GetType().FullName}' is not supported in this context");
         var properties = new Dictionary<string, string>()
         {
-            { "grant_type", configuration.Grant }
+            { "grant_type", configuration.Grant! }
         };
         switch (configuration.Client?.Authentication)
         {

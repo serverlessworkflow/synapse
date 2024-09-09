@@ -10,6 +10,8 @@ WORKDIR /app
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
+COPY ["README.md", "README.md"]
+COPY ["assets/images/transparent_logomark_256.png", "assets/images/transparent_logomark_256.png"]
 COPY ["src/runner/Synapse.Runner/Synapse.Runner.csproj", "src/runner/Synapse.Runner/"]
 COPY ["src/api/Synapse.Api.Client.Http/Synapse.Api.Client.Http.csproj", "src/api/Synapse.Api.Client.Http/"]
 COPY ["src/api/Synapse.Api.Client.Core/Synapse.Api.Client.Core.csproj", "src/api/Synapse.Api.Client.Core/"]

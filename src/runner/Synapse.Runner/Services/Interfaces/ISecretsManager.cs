@@ -11,21 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Synapse.Core.Infrastructure.Services;
+namespace Synapse.Runner.Services;
 
 /// <summary>
-/// Defines the fundamentals of a service used to provide external resources
+/// Defines the fundamentals of a service used to manage secrets
 /// </summary>
-public interface IExternalResourceProvider
+public interface ISecretsManager
 {
 
     /// <summary>
-    /// Reads the specified external resource
+    /// Gets all available secrets
     /// </summary>
-    /// <param name="workflow">The <see cref="WorkflowDefinition"/> in the context of which to read the specified resource</param>
-    /// <param name="resource">The reference to the external resource to get</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-    /// <returns>A <see cref="Stream"/> used to read the external resource's contents</returns>
-    Task<Stream> ReadAsync(WorkflowDefinition workflow, ExternalResourceDefinition resource, CancellationToken cancellationToken = default);
+    /// <returns>A new <see cref="IDictionary{TKey, TValue}"/> that contains the key/value mappings of all available secrets</returns>
+    Task<IDictionary<string, object>> GetSecretsAsync(CancellationToken cancellationToken = default);
 
 }

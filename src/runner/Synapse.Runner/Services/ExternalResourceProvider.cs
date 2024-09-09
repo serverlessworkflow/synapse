@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Synapse.Core.Infrastructure.Services;
+namespace Synapse.Runner.Services;
 
 /// <summary>
 /// Represents the default implementation of the <see cref="IExternalResourceProvider"/> interface

@@ -39,6 +39,11 @@ public class RunnerOptions
     public virtual RunnerContainerOptions Containers { get; set; } = new();
 
     /// <summary>
+    /// Gets the  options used to configure the secrets of the Synapse Runner
+    /// </summary>
+    public virtual RunnerSecretsOptions Secrets { get; set; } = new();
+
+    /// <summary>
     /// Gets/sets the options used to configure the service account used by a Synapse Runner
     /// </summary>
     public virtual ServiceAccountOptions ServiceAccount { get; set; } = new();
