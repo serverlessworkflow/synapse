@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Synapse.Core.Infrastructure.Services;
-using ServerlessWorkflow.Sdk;
-using Microsoft.Extensions.DependencyInjection;
+using Docker.DotNet.Models;
+using Neuroglia.Data.Infrastructure.ResourceOriented;
+using ServerlessWorkflow.Sdk.Models.Authentication;
 using System.Text;
 
 namespace Synapse;
@@ -51,22 +51,47 @@ public class AuthorizationInfo(string scheme, string parameter)
         ArgumentNullException.ThrowIfNull(nameof(authentication));
         ArgumentNullException.ThrowIfNull(nameof(serviceProvider));
         string scheme, parameter;
+        var logger = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("AuthenticationPolicyHandler");
+        var isSecretBased = authentication.TryGetBaseSecret(out var secretName);
+        object? authenticationProperties = null;
+        if (isSecretBased && !string.IsNullOrWhiteSpace(secretName))
+        {
+            logger.LogDebug("Authentication is secret based");
+            var secretsManager = serviceProvider.GetRequiredService<ISecretsManager>();
+            var secrets = await secretsManager.GetSecretsAsync(cancellationToken).ConfigureAwait(false);
+            if (!secrets.TryGetValue(secretName, out authenticationProperties) || authenticationProperties == null)
+            {
+                logger.LogError("Failed to resolve the specified secret '{secret}'", secretName);
+                throw new NullReferenceException($"Failed to resolve the specified secret '{secretName}'");
+            }
+            logger.LogDebug("Authentication secret loaded");
+        }
         switch (authentication.Scheme)
         {
             case AuthenticationScheme.Basic:
                 if (authentication.Basic == null) throw new Exception("Missing or invalid configuration of the specified authentication scheme");
+                var basic = authenticationProperties == null ? authentication.Basic : authenticationProperties.ConvertTo<BasicAuthenticationSchemeDefinition>()!;
                 scheme = AuthenticationScheme.Basic;
-                parameter = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{authentication.Basic.Username}:{authentication.Basic.Password}"));
+                parameter = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{basic.Username}:{basic.Password}"));
                 break;
             case AuthenticationScheme.Bearer:
                 if (authentication.Bearer == null) throw new Exception("Missing or invalid configuration of the specified authentication scheme");
-                scheme = AuthenticationScheme.Basic;
-                parameter = authentication.Bearer.Token;
+                var bearer = authenticationProperties == null ? authentication.Bearer : authenticationProperties.ConvertTo<BearerAuthenticationSchemeDefinition>()!;
+                scheme = AuthenticationScheme.Bearer;
+                parameter = bearer.Token ?? throw new Exception("The Bearer token must be set");
                 break;
             case AuthenticationScheme.OAuth2:
                 if (authentication.OAuth2 == null) throw new Exception("Missing or invalid configuration of the specified authentication scheme");
+                var oauth2 = authenticationProperties == null ? authentication.OAuth2 : authenticationProperties.ConvertTo<OAuth2AuthenticationSchemeDefinition>()!;
                 scheme = AuthenticationScheme.Bearer;
-                var token = await serviceProvider.GetRequiredService<IOAuth2TokenManager>().GetTokenAsync(authentication.OAuth2, cancellationToken).ConfigureAwait(false) ?? throw new NullReferenceException($"Failed to generate an OAUTH2 token");
+                var token = await serviceProvider.GetRequiredService<IOAuth2TokenManager>().GetTokenAsync(oauth2, cancellationToken).ConfigureAwait(false) ?? throw new NullReferenceException("Failed to generate an OAUTH2 token");
+                parameter = token.AccessToken!;
+                break;
+            case AuthenticationScheme.OpenIDConnect:
+                if (authentication.Oidc == null) throw new Exception("Missing or invalid configuration of the specified authentication scheme");
+                var oidc = authenticationProperties == null ? authentication.Oidc : authenticationProperties.ConvertTo<OpenIDConnectSchemeDefinition>()!;
+                scheme = AuthenticationScheme.Bearer;
+                token = await serviceProvider.GetRequiredService<IOAuth2TokenManager>().GetTokenAsync(oidc, cancellationToken).ConfigureAwait(false) ?? throw new NullReferenceException("Failed to generate an OIDC token");
                 parameter = token.AccessToken!;
                 break;
             default:

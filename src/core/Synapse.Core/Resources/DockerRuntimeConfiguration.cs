@@ -36,16 +36,37 @@ public record DockerRuntimeConfiguration
     };
 
     /// <summary>
+    /// Initializes a new <see cref="DockerRuntimeConfiguration"/>
+    /// </summary>
+    public DockerRuntimeConfiguration()
+    {
+        var env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runtime.Docker.Api.Endpoint);
+        if (!string.IsNullOrWhiteSpace(env) && Uri.TryCreate(env, UriKind.RelativeOrAbsolute, out var uri)) this.Api.Endpoint = uri;
+        env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runtime.Docker.Api.Version);
+        if (!string.IsNullOrWhiteSpace(env)) this.Api.Version = env;
+        env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runtime.Docker.Image.Registry);
+        if (!string.IsNullOrWhiteSpace(env)) this.ImageRegistry = env;
+        env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runtime.Docker.Image.PullPolicy);
+        if (!string.IsNullOrWhiteSpace(env)) this.ImagePullPolicy = env;
+        env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runtime.Docker.Secrets.Directory);
+        if (!string.IsNullOrWhiteSpace(env)) this.Secrets.Directory = env;
+        env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runtime.Docker.Secrets.MountPath);
+        if (!string.IsNullOrWhiteSpace(env)) this.Secrets.MountPath = env;
+        env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runtime.Docker.Network);
+        if (!string.IsNullOrWhiteSpace(env)) this.Network = env;
+    }
+
+    /// <summary>
     /// Gets/sets the Docker API to use
     /// </summary>
     [DataMember(Order = 1, Name = "api"), JsonPropertyOrder(1), JsonPropertyName("api"), YamlMember(Order = 1, Alias = "api")]
     public virtual DockerApiConfiguration Api { get; set; } = new();
 
     /// <summary>
-    /// Gets/sets the name of the image repository to use when pulling the runtime's container image
+    /// Gets/sets the name of the image registry to use when pulling the runtime's container image
     /// </summary>
-    [DataMember(Order = 2, Name = "imageRepository"), JsonPropertyOrder(2), JsonPropertyName("imageRepository"), YamlMember(Order = 2, Alias = "imageRepository")]
-    public virtual string? ImageRepository { get; set; }
+    [DataMember(Order = 2, Name = "imageRegistry"), JsonPropertyOrder(2), JsonPropertyName("imageRegistry"), YamlMember(Order = 2, Alias = "imageRegistry")]
+    public virtual string? ImageRegistry { get; set; }
 
     /// <summary>
     /// Gets/sets the Docker image pull policy. Supported values are 'Always', 'IfNotPresent' and 'Never'. Defaults to 'Always'.

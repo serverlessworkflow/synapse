@@ -57,6 +57,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
 	<PackageReference Include="Microsoft.OpenApi.Readers" Version="1.6.21" />
 	<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
+	<PackageReference Include="MimeKit" Version="4.7.1" />
 	<PackageReference Include="Neuroglia.Data.Expressions.JavaScript" Version="4.15.4" />
 	<PackageReference Include="Neuroglia.Data.Expressions.JQ" Version="4.15.4" />
 	<PackageReference Include="Neuroglia.Eventing.CloudEvents.Infrastructure" Version="4.15.4" />

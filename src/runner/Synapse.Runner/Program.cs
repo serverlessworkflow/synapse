@@ -69,11 +69,14 @@ var builder = Host.CreateDefaultBuilder()
                 services.AddDockerContainerPlatform();
                 break;
             case ContainerPlatform.Kubernetes:
-                //todo: implement Kubernetes
+                //services.AddKubernetesContainerPlatform(); //todo
                 break;
             default: 
                 throw new NotSupportedException($"The specified container platform '{options.Containers.Platform}' is not supported");
         }
+        services.AddSingleton<SecretsManager>();
+        services.AddSingleton<ISecretsManager>(provider => provider.GetRequiredService<SecretsManager>());
+        services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<SecretsManager>());
         services.AddSingleton<IOAuth2TokenManager, OAuth2TokenManager>();
         services.AddSingleton<ITaskExecutionContextFactory, TaskExecutionContextFactory>();
         services.AddSingleton<ITaskExecutorFactory, TaskExecutorFactory>();

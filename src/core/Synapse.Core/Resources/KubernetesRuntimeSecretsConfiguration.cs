@@ -30,7 +30,7 @@ public record KubernetesRuntimeSecretsConfiguration
     public const string DefaultMountPath = "/run/secrets/synapse";
 
     /// <summary>
-    /// Gets/sets the name on which to mounts secrets
+    /// Gets/sets the name of the volume on which to mounts secrets
     /// </summary>
     [DataMember(Order = 1, Name = "volumeName"), JsonPropertyOrder(1), JsonPropertyName("volumeName"), YamlMember(Order = 1, Alias = "volumeName")]
     public virtual string VolumeName { get; set; } = DefaultVolumeName;

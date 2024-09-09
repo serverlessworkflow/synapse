@@ -29,6 +29,7 @@ services:
       SYNAPSE_RUNNER_API: http://api:8080
       SYNAPSE_RUNNER_LIFECYCLE_EVENTS: true
       SYNAPSE_RUNNER_CONTAINER_PLATFORM: docker
+      SYNAPSE_RUNTIME_DOCKER_SECRETS_DIRECTORY: C:\Users\User\.synapse\secrets
       DOCKER_HOST: unix:///var/run/docker.sock
     extra_hosts:
       - "host.docker.internal:host-gateway"

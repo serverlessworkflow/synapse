@@ -117,6 +117,8 @@ public class KubernetesRuntime(IServiceProvider serviceProvider, ILoggerFactory 
         {
             container.Env ??= [];
             container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Api.Uri, this.Runner.Api.Uri.OriginalString);
+            container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.ContainerPlatform, this.Runner.ContainerPlatform);
+            container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.LifecycleEvents, (this.Runner.PublishLifecycleEvents ?? true).ToString());
             container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Secrets.Directory, this.Runner.Runtime.Kubernetes.Secrets.MountPath);
             container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.ServiceAccount.Name, serviceAccount.GetQualifiedName());
             container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.ServiceAccount.Key, serviceAccount.Spec.Key);
@@ -124,7 +126,7 @@ public class KubernetesRuntime(IServiceProvider serviceProvider, ILoggerFactory 
             if (this.Runner.Certificates?.Validate == false) container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.SkipCertificateValidation, "true");
             container.VolumeMounts = volumeMounts;
         }
-        var process = ActivatorUtilities.CreateInstance<KubernetesWorkflowProcess>(this.ServiceProvider, pod);
+        var process = ActivatorUtilities.CreateInstance<KubernetesWorkflowProcess>(this.ServiceProvider, this.Kubernetes!, pod);
         this.Processes.AddOrUpdate(process.Id, _ => process, (key, current) =>
         {
             current.StopAsync().GetAwaiter().GetResult();

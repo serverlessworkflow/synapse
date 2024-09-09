@@ -53,6 +53,19 @@ public record KubernetesRuntimeConfiguration
     };
 
     /// <summary>
+    /// Initializes a new <see cref="KubernetesRuntimeConfiguration"/>
+    /// </summary>
+    public KubernetesRuntimeConfiguration()
+    {
+        var env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runtime.Kubernetes.Kubeconfig);
+        if (!string.IsNullOrWhiteSpace(env)) this.Kubeconfig = env;
+        env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runtime.Kubernetes.Secrets.VolumeName);
+        if (!string.IsNullOrWhiteSpace(env)) this.Secrets.VolumeName = env;
+        env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runtime.Kubernetes.Secrets.MountPath);
+        if (!string.IsNullOrWhiteSpace(env)) this.Secrets.MountPath = env;
+    }
+
+    /// <summary>
     /// Gets/sets the path to the Kubeconfig file to use, if any. If not set, defaults to 'InCluster' configuration
     /// </summary>
     [DataMember(Order = 1, Name = "kubeconfig"), JsonPropertyOrder(1), JsonPropertyName("kubeconfig"), YamlMember(Order = 1, Alias = "kubeconfig")]
@@ -76,7 +89,7 @@ public record KubernetesRuntimeConfiguration
     /// <returns>The runner container template</returns>
     public static V1Pod LoadPodTemplate()
     {
-        var templateFilePath = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runtime.Docker.Container);
+        var templateFilePath = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runtime.Kubernetes.Pod);
         if (string.IsNullOrWhiteSpace(templateFilePath) || !File.Exists(templateFilePath)) return DefaultPodTemplate;
         var yaml = File.ReadAllText(templateFilePath);
         return YamlSerializer.Default.Deserialize<V1Pod>(yaml)!;

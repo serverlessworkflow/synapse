@@ -9,6 +9,8 @@ EXPOSE 8080
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
+COPY ["README.md", "README.md"]
+COPY ["assets/images/transparent_logomark_256.png", "assets/images/transparent_logomark_256.png"]
 COPY ["src/correlator/Synapse.Correlator/Synapse.Correlator.csproj", "src/correlator/Synapse.Correlator/"]
 COPY ["src/core/Synapse.Core.Infrastructure/Synapse.Core.Infrastructure.csproj", "src/core/Synapse.Core.Infrastructure/"]
 COPY ["src/core/Synapse.Core/Synapse.Core.csproj", "src/core/Synapse.Core/"]

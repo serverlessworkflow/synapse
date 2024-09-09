@@ -585,10 +585,125 @@ public static class SynapseDefaults
                 /// Gets the prefix for all Docker runtime related environment variables
                 /// </summary>
                 public const string Prefix = Runtime.Prefix + "DOCKER_";
+
                 /// <summary>
                 /// Gets the environment variable used to specify the YAML file used to configure the Docker runner container
                 /// </summary>
                 public const string Container = Prefix + "CONTAINER";
+                /// <summary>
+                /// Gets the environment variable used to configure the network runner containers should be connected to
+                /// </summary>
+                public const string Network = Prefix + "NETWORK";
+
+                /// <summary>
+                /// Exposes constants about environment variables used to configure the API of a Docker runtime
+                /// </summary>
+                public static class Api
+                {
+
+                    /// <summary>
+                    /// Gets the prefix for all Docker runtime API related environment variables
+                    /// </summary>
+                    public const string Prefix = Docker.Prefix + "API_";
+
+                    /// <summary>
+                    /// Gets the environment variable used to configure the endpoint of the Docker API to use
+                    /// </summary>
+                    public const string Endpoint = Prefix + "ENDPOINT";
+                    /// <summary>
+                    /// Gets the environment variable used to configure the version of the Docker API to use
+                    /// </summary>
+                    public const string Version = Prefix + "VERSION";
+
+                }
+
+                /// <summary>
+                /// Exposes constants about environment variables used to configure the runner images of a Docker runtime
+                /// </summary>
+                public static class Image
+                {
+
+                    /// <summary>
+                    /// Gets the prefix for all Docker runtime image related environment variables
+                    /// </summary>
+                    public const string Prefix = Docker.Prefix + "IMAGE_";
+
+                    /// <summary>
+                    /// Gets the environment variable used to configure the image registry to use when pulling runner images
+                    /// </summary>
+                    public const string Registry = Prefix + "REGISTRY";
+                    /// <summary>
+                    /// Gets the environment variable used to configure the policy to use when pulling runner images
+                    /// </summary>
+                    public const string PullPolicy = Prefix + "PULL_POLICY";
+
+                }
+
+                /// <summary>
+                /// Exposes constants about environment variables used to configure the secrets used by a Docker runtime
+                /// </summary>
+                public static class Secrets
+                {
+
+                    /// <summary>
+                    /// Gets the prefix for all Docker runtime secrets related environment variables
+                    /// </summary>
+                    public const string Prefix = Docker.Prefix + "SECRETS_";
+
+                    /// <summary>
+                    /// Gets the environment variable used to configure the directory that contains the secrets to mount onto runner containers
+                    /// </summary>
+                    public const string Directory = Prefix + "DIRECTORY";
+                    /// <summary>
+                    /// Gets the environment variable used to configure the directory to mount the secrets volume to
+                    /// </summary>
+                    public const string MountPath = Prefix + "MOUNT_PATH";
+
+                }
+
+            }
+
+            /// <summary>
+            /// Exposes constants about Kubernetes runtime-related environment variables
+            /// </summary>
+            public static class Kubernetes
+            {
+
+                /// <summary>
+                /// Gets the prefix for all Kubernetes runtime related environment variables
+                /// </summary>
+                public const string Prefix = Runtime.Prefix + "K8S_";
+
+                /// <summary>
+                /// Gets the environment variable used to configure the path to the Kubeconfig file to use
+                /// </summary>
+                public const string Kubeconfig = Prefix + "KUBECONFIG";
+                /// <summary>
+                /// Gets the environment variable used to specify the YAML file used to configure the Kubernetes runner pod
+                /// </summary>
+                public const string Pod = Prefix + "POD";
+
+                /// <summary>
+                /// Exposes constants about environment variables used to configure the secrets used by a Docker runtime
+                /// </summary>
+                public static class Secrets
+                {
+
+                    /// <summary>
+                    /// Gets the prefix for all Kubernetes runtime secrets related environment variables
+                    /// </summary>
+                    public const string Prefix = Kubernetes.Prefix + "SECRETS_";
+
+                    /// <summary>
+                    /// Gets the environment variable used to configure the name of the volume onto which to mount secrets
+                    /// </summary>
+                    public const string VolumeName = Prefix + "VOLUME_NAME";
+                    /// <summary>
+                    /// Gets the environment variable used to configure the directory to mount the secrets volume to
+                    /// </summary>
+                    public const string MountPath = Prefix + "MOUNT_PATH";
+
+                }
 
             }
 
@@ -672,7 +787,7 @@ public static class SynapseDefaults
             /// <summary>
             /// Gets the current version of Synapse container images
             /// </summary>
-            public static string Version = typeof(SynapseDefaults).Assembly.GetName().Version?.ToString(3) ?? "latest";
+            public static readonly string Version = typeof(SynapseDefaults).Assembly.GetName().Version?.ToString(3) ?? "latest";
             /// <summary>
             /// Gets the name of the Synapse API container image
             /// </summary>
@@ -688,7 +803,7 @@ public static class SynapseDefaults
             /// <summary>
             /// Gets the name of the Synapse Runner container image
             /// </summary>
-            public static readonly string Runner = $"{ImageRegistry}/runner:{Version}";
+            public static readonly string Runner = $"{ImageRegistry}/runner:latest"; //todo: $"{ImageRegistry}/runner:{Version}";
 
         }
 

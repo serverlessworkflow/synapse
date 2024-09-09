@@ -73,38 +73,60 @@ public class DockerRuntime(IServiceProvider serviceProvider, ILoggerFactory logg
         ArgumentNullException.ThrowIfNull(workflow);
         ArgumentNullException.ThrowIfNull(workflowInstance);
         ArgumentNullException.ThrowIfNull(serviceAccount);
-        if (this.Docker == null) await this.InitializeAsync(cancellationToken).ConfigureAwait(false);
-        var container = this.Runner.Runtime.Docker!.ContainerTemplate.Clone()!;
-        container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Api.Uri, this.Runner.Api.Uri.OriginalString);
-        container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Secrets.Directory, this.Runner.Runtime.Docker.Secrets.MountPath);
-        container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.ServiceAccount.Name, serviceAccount.GetQualifiedName());
-        container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.ServiceAccount.Key, serviceAccount.Spec.Key);
-        container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Workflow.Instance, workflowInstance.GetQualifiedName());
-        if (this.Runner.Certificates?.Validate == false) container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.SkipCertificateValidation, "true");
-        var hostConfig = new HostConfig()
+        try
         {
-            Mounts = []
-        };
-        if (!Directory.Exists(this.Runner.Runtime.Docker.Secrets.Directory)) Directory.CreateDirectory(this.Runner.Runtime.Docker.Secrets.Directory);
-        hostConfig.Mounts.Add(new()
+            this.Logger.LogDebug("Creating a new Docker container for workflow instance '{workflowInstance}'...", workflowInstance.GetQualifiedName());
+            if (this.Docker == null) await this.InitializeAsync(cancellationToken).ConfigureAwait(false);
+            var container = this.Runner.Runtime.Docker!.ContainerTemplate.Clone()!;
+            container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Api.Uri, this.Runner.Api.Uri.OriginalString);
+            container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.ContainerPlatform, this.Runner.ContainerPlatform);
+            container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.LifecycleEvents, (this.Runner.PublishLifecycleEvents ?? true).ToString());
+            container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Secrets.Directory, this.Runner.Runtime.Docker.Secrets.MountPath);
+            container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.ServiceAccount.Name, serviceAccount.GetQualifiedName());
+            container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.ServiceAccount.Key, serviceAccount.Spec.Key);
+            container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Workflow.Instance, workflowInstance.GetQualifiedName());
+            container.SetEnvironmentVariable("DOCKER_HOST", "unix:///var/run/docker.sock");
+            container.User = "root";
+            if (this.Runner.Certificates?.Validate == false) container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.SkipCertificateValidation, "true");
+            var hostConfig = new HostConfig()
+            {
+                Mounts = []
+            };
+            if (!Directory.Exists(this.Runner.Runtime.Docker.Secrets.Directory)) Directory.CreateDirectory(this.Runner.Runtime.Docker.Secrets.Directory);
+            hostConfig.Mounts.Add(new()
+            {
+                Type = "bind",
+                Source = this.Runner.Runtime.Docker.Secrets.Directory,
+                Target = this.Runner.Runtime.Docker.Secrets.MountPath
+            });
+            hostConfig.Mounts.Add(new()
+            {
+                Type = "bind",
+                Source = "/var/run/docker.sock",
+                Target = "/var/run/docker.sock"
+            });
+            hostConfig.ExtraHosts =
+            [
+                "host.docker.internal:host-gateway"
+            ];
+            var parameters = new CreateContainerParameters(container)
+            {
+                Name = $"{workflowInstance.GetQualifiedName()}-{Guid.NewGuid().ToString("N")[..15].ToLowerInvariant()}",
+                HostConfig = hostConfig
+            };
+            var result = await this.Docker!.Containers.CreateContainerAsync(parameters, cancellationToken).ConfigureAwait(false);
+            if (this.Environment.RunsInDocker()) await this.Docker.Networks.ConnectNetworkAsync(this.Runner.Runtime.Docker.Network, new NetworkConnectParameters() { Container = result.ID }, cancellationToken);
+            if (result.Warnings.Count > 0) this.Logger.LogWarning("Warnings have been raised during container creation: {warnings}", string.Join(System.Environment.NewLine, result.Warnings));
+            var process = ActivatorUtilities.CreateInstance<DockerWorkflowProcess>(this.ServiceProvider, this.Docker!, result.ID);
+            this.Processes.TryAdd(process.Id, process);
+            this.Logger.LogDebug("A new container with id '{id}' has been successfully created to run workflow instance '{workflowInstance}'", process.Id, workflowInstance.GetQualifiedName());
+            return process;
+        }
+        catch(Exception ex)
         {
-            Type = "bind",
-            Source = this.Runner.Runtime.Docker.Secrets.Directory,
-            Target = this.Runner.Runtime.Docker.Secrets.MountPath
-        });
-        var parameters = new CreateContainerParameters(container)
-        {
-            Name = $"{workflowInstance.GetQualifiedName()}-{Guid.NewGuid().ToString("N")[..15].ToLowerInvariant()}",
-            HostConfig = hostConfig
-        };
-        var result = await this.Docker!.Containers.CreateContainerAsync(parameters, cancellationToken).ConfigureAwait(false);
-        if (this.Environment.RunsInDocker()) await this.Docker.Networks.ConnectNetworkAsync(this.Runner.Runtime.Docker.Network, new NetworkConnectParameters() { Container = result.ID }, cancellationToken);
-#pragma warning disable CA2254 // Template should be a static expression
-        foreach (var warning in result.Warnings) this.Logger.LogWarning(warning);
-#pragma warning restore CA2254 // Template should be a static expression
-        var process = ActivatorUtilities.CreateInstance<DockerWorkflowProcess>(this.ServiceProvider, result.ID);
-        this.Processes.TryAdd(process.Id, process);
-        return process;
+            this.Logger.LogError("An error occurred while creating a new Docker process for workflow instance '{workflowInstance}': {ex}", workflowInstance.GetQualifiedName(), ex);
+            throw;
+        }
     }
 
     /// <inheritdoc/>
