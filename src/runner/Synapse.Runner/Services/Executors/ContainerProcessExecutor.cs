@@ -24,7 +24,9 @@ namespace Synapse.Runner.Services.Executors;
 /// <param name="context">The current <see cref="ITaskExecutionContext"/></param>
 /// <param name="schemaHandlerProvider">The service used to provide <see cref="ISchemaHandler"/> implementations</param>
 /// <param name="serializer">The service used to serialize/deserialize objects to/from JSON</param>
-public class ContainerProcessExecutor(IServiceProvider serviceProvider, ILogger<ContainerProcessExecutor> logger, ITaskExecutionContextFactory executionContextFactory, ITaskExecutorFactory executorFactory, IContainerPlatform containers, ITaskExecutionContext<RunTaskDefinition> context, ISchemaHandlerProvider schemaHandlerProvider, IJsonSerializer serializer)
+/// <param name="options">The service used to access the current <see cref="RunnerOptions"/></param>
+public class ContainerProcessExecutor(IServiceProvider serviceProvider, ILogger<ContainerProcessExecutor> logger, ITaskExecutionContextFactory executionContextFactory, ITaskExecutorFactory executorFactory, 
+    IContainerPlatform containers, ITaskExecutionContext<RunTaskDefinition> context, ISchemaHandlerProvider schemaHandlerProvider, IJsonSerializer serializer, IOptions<RunnerOptions> options)
     : TaskExecutor<RunTaskDefinition>(serviceProvider, logger, executionContextFactory, executorFactory, context, schemaHandlerProvider, serializer)
 {
 
@@ -37,6 +39,11 @@ public class ContainerProcessExecutor(IServiceProvider serviceProvider, ILogger<
     /// Gets the definition of the container process to run
     /// </summary>
     protected ContainerProcessDefinition ProcessDefinition => this.Task.Definition.Run.Container!;
+
+    /// <summary>
+    /// Gets the current <see cref="RunnerOptions"/>
+    /// </summary>
+    protected RunnerOptions Options { get; } = options.Value;
 
     /// <summary>
     /// Gets the <see cref="IContainer"/> to run
@@ -57,6 +64,7 @@ public class ContainerProcessExecutor(IServiceProvider serviceProvider, ILogger<
             await this.Container!.StartAsync(cancellationToken).ConfigureAwait(false);
             await this.Container.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
             var standardOutput = (this.Container.StandardOutput == null ? null : await this.Container.StandardOutput.ReadToEndAsync(cancellationToken).ConfigureAwait(false))?.Trim();
+            if (this.Options.Containers.Platform == ContainerPlatform.Docker) standardOutput = standardOutput?[8..];
             var standardError = (this.Container.StandardError == null ? null : await this.Container.StandardError.ReadToEndAsync(cancellationToken).ConfigureAwait(false))?.Trim();
             var result = standardOutput; //todo: do something with return data encoding (ex: plain-text, json);
             await this.SetResultAsync(result, this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
