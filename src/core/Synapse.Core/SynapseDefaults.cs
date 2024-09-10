@@ -766,7 +766,7 @@ public static class SynapseDefaults
             /// <summary>
             /// Gets the prefix for all secrets related environment variables
             /// </summary>
-            public const string Prefix = EnvironmentVariables.Prefix + "SECRETS";
+            public const string Prefix = EnvironmentVariables.Prefix + "SECRETS_";
             /// <summary>
             /// Gets the name of the environment variable used to configure the path to the directory that contains secrets files
             /// </summary>
