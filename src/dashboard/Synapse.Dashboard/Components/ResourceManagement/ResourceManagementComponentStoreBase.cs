@@ -350,6 +350,10 @@ public abstract class ResourceManagementComponentStoreBase<TState, TResource>(IS
                 this.Reduce(state =>
                 {
                     var resources = state.Resources == null ? [] : new EquatableList<TResource>(state.Resources);
+                    if (resources.Any(r => r.GetQualifiedName() == e.Resource.GetQualifiedName()))
+                    {
+                        return state;
+                    }
                     resources.Add(e.Resource);
                     return state with
                     {
