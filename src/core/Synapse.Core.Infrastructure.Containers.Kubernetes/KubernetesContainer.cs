@@ -107,10 +107,10 @@ public class KubernetesContainer(V1Pod pod, ILogger<KubernetesContainer> logger,
     /// <inheritdoc/>
     public virtual async Task WaitForExitAsync(CancellationToken cancellationToken = default)
     {
-        var response = this.Kubernetes.CoreV1.ListNamespacedPodWithHttpMessagesAsync(this.Pod.Namespace(), fieldSelector: $"metadata.name={Pod.Name()}", cancellationToken: cancellationToken);
+        var response = this.Kubernetes.CoreV1.ListNamespacedPodWithHttpMessagesAsync(this.Pod.Namespace(), fieldSelector: $"metadata.name={Pod.Name()}", watch: true, cancellationToken: cancellationToken);
         await foreach (var (_, item) in response.WatchAsync<V1Pod, V1PodList>(cancellationToken: cancellationToken).ConfigureAwait(false))
         {
-            if (item.Status.Phase != "Succeeded" || item.Status.Phase != "Failed") continue;
+            if (item.Status.Phase != "Succeeded" && item.Status.Phase != "Failed") continue;
             var containerStatus = item.Status.ContainerStatuses.FirstOrDefault();
             this.ExitCode = containerStatus?.State.Terminated?.ExitCode ?? -1;
             break;

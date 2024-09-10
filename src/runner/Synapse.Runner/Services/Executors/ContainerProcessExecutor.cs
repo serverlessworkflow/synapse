@@ -56,7 +56,7 @@ public class ContainerProcessExecutor(IServiceProvider serviceProvider, ILogger<
         {
             await this.Container!.StartAsync(cancellationToken).ConfigureAwait(false);
             await this.Container.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
-            var standardOutput = (this.Container.StandardOutput == null ? null : await this.Container.StandardOutput.ReadToEndAsync(cancellationToken).ConfigureAwait(false))?.Trim()[8..];
+            var standardOutput = (this.Container.StandardOutput == null ? null : await this.Container.StandardOutput.ReadToEndAsync(cancellationToken).ConfigureAwait(false))?.Trim();
             var standardError = (this.Container.StandardError == null ? null : await this.Container.StandardError.ReadToEndAsync(cancellationToken).ConfigureAwait(false))?.Trim();
             var result = standardOutput; //todo: do something with return data encoding (ex: plain-text, json);
             await this.SetResultAsync(result, this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);

@@ -152,7 +152,7 @@ public abstract class ConformanceTestsBase
             Metadata = new()
             {
                 Namespace = Definition.Document.Namespace,
-                Name = $"{Definition.Document.Name}-{Guid.NewGuid().ToString("N")[..15]}"
+                Name = $"{Definition.Document.Name}-{Guid.NewGuid().ToString("N")[..12]}"
             },
             Spec = new()
             {

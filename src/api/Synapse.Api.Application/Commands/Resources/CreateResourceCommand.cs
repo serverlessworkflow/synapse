@@ -79,7 +79,7 @@ public class CreateResourceCommandHandler(IResourceRepository repository)
     /// <inheritdoc/>
     public virtual async Task<IOperationResult<IResource>> HandleAsync(CreateResourceCommand command, CancellationToken cancellationToken)
     {
-        if (command.Resource.GetName().Trim().EndsWith('-')) command.Resource.Metadata.Name = $"{command.Resource.GetName().Trim()}{Guid.NewGuid().ToString("N")[..15]}";
+        if (command.Resource.GetName().Trim().EndsWith('-')) command.Resource.Metadata.Name = $"{command.Resource.GetName().Trim()}{Guid.NewGuid().ToString("N")[..12]}";
         var resource = await repository.AddAsync(command.Resource, command.Group, command.Version, command.Plural, command.DryRun, cancellationToken);
         return new OperationResult<IResource>((int)HttpStatusCode.Created, resource);
     }

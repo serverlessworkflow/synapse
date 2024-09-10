@@ -78,6 +78,8 @@ public class DockerRuntime(IServiceProvider serviceProvider, ILoggerFactory logg
             this.Logger.LogDebug("Creating a new Docker container for workflow instance '{workflowInstance}'...", workflowInstance.GetQualifiedName());
             if (this.Docker == null) await this.InitializeAsync(cancellationToken).ConfigureAwait(false);
             var container = this.Runner.Runtime.Docker!.ContainerTemplate.Clone()!;
+            container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.Namespace, workflowInstance.GetNamespace()!);
+            container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.Name, $"{workflowInstance.GetName()}-{Guid.NewGuid().ToString("N")[..12].ToLowerInvariant()}");
             container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Api.Uri, this.Runner.Api.Uri.OriginalString);
             container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.ContainerPlatform, this.Runner.ContainerPlatform);
             container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.LifecycleEvents, (this.Runner.PublishLifecycleEvents ?? true).ToString());
@@ -111,7 +113,7 @@ public class DockerRuntime(IServiceProvider serviceProvider, ILoggerFactory logg
             ];
             var parameters = new CreateContainerParameters(container)
             {
-                Name = $"{workflowInstance.GetQualifiedName()}-{Guid.NewGuid().ToString("N")[..15].ToLowerInvariant()}",
+                Name = $"{workflowInstance.GetQualifiedName()}-{Guid.NewGuid().ToString("N")[..12].ToLowerInvariant()}",
                 HostConfig = hostConfig
             };
             var result = await this.Docker!.Containers.CreateContainerAsync(parameters, cancellationToken).ConfigureAwait(false);

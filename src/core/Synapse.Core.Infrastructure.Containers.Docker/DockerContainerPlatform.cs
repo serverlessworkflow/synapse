@@ -93,6 +93,7 @@ public class DockerContainerPlatform(ILogger<DockerContainerPlatform> logger, IH
         }
         var parameters = new CreateContainerParameters()
         {
+            Name = $"{System.Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.Name)}-{definition.Image}-{Guid.NewGuid().ToString("N")[..6].ToLowerInvariant()}",
             Image = definition.Image,
             Cmd = string.IsNullOrWhiteSpace(definition.Command) ? null : ["/bin/sh", "-c", definition.Command],
             Env = definition.Environment?.Select(e => $"{e.Key}={e.Value}").ToList(),

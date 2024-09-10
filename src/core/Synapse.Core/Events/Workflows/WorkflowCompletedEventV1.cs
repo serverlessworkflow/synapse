@@ -32,4 +32,10 @@ public record WorkflowCompletedEventV1
     [DataMember(Name = "completedAt", Order = 2), JsonPropertyName("completedAt"), JsonPropertyOrder(2), YamlMember(Alias = "completedAt", Order = 2)]
     public DateTimeOffset CompletedAt { get; set; } = DateTimeOffset.Now;
 
+    /// <summary>
+    /// Gets/sets the workflow instance's output
+    /// </summary>
+    [DataMember(Name = "output", Order = 3), JsonPropertyName("output"), JsonPropertyOrder(3), YamlMember(Alias = "output", Order = 3)]
+    public object? Output { get; set; }
+
 }
