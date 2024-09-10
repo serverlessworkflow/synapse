@@ -15,6 +15,7 @@
 	<Copyright>Copyright © 2024-Present The Synapse Authors. All Rights Reserved.</Copyright>
 	<RepositoryUrl>https://github.com/serverlessworkflow/synapse</RepositoryUrl>
 	<RepositoryType>git</RepositoryType>
+	<PackageId>Synapse</PackageId>
 	<PackageProjectUrl>https://github.com/serverlessworkflow/synapse</PackageProjectUrl>
 	<PackageTags>synapse core</PackageTags>
 	<IsPackable>true</IsPackable>
