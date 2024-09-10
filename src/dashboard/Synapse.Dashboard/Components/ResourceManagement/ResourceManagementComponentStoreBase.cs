@@ -12,6 +12,7 @@
 // limitations under the License.
 
 using Synapse.Api.Client.Services;
+using Synapse.Dashboard.Components.DocumentDetailsStateManagement;
 
 namespace Synapse.Dashboard.Components.ResourceManagement;
 
@@ -20,13 +21,19 @@ namespace Synapse.Dashboard.Components.ResourceManagement;
 /// </summary>
 /// <typeparam name="TState">The type of the state managed by the component store</typeparam>
 /// <typeparam name="TResource">The type of <see cref="IResource"/>s to manage</typeparam>
+/// <param name="logger">The service used to perform logging</param>
 /// <param name="apiClient">The service used to interact with the Synapse API</param>
 /// <param name="resourceEventHub">The <see cref="IResourceEventWatchHub"/> websocket service client</param>
-public abstract class ResourceManagementComponentStoreBase<TState, TResource>(ISynapseApiClient apiClient, ResourceWatchEventHubClient resourceEventHub)
+public abstract class ResourceManagementComponentStoreBase<TState, TResource>(ILogger<ResourceManagementComponentStoreBase<TState, TResource>> logger, ISynapseApiClient apiClient, ResourceWatchEventHubClient resourceEventHub)
      : ComponentStore<TState>(new())
     where TResource : Resource, new()
     where TState : ResourceManagementComponentState<TResource>, new()
 {
+
+    /// <summary>
+    /// Gets the service used to perform logging
+    /// </summary>
+    protected ILogger<ResourceManagementComponentStoreBase<TState, TResource>> Logger { get; } = logger;
 
     /// <summary>
     /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="ResourceDefinition"/>s of the specified type
@@ -83,7 +90,7 @@ public abstract class ResourceManagementComponentStoreBase<TState, TResource>(IS
     /// Gets an <see cref="IObservable{T}"/> used to observe the <see cref="ResourcesFilter"/> 
     /// </summary>
     protected virtual IObservable<ResourcesFilter> Filter => this.LabelSelectors
-        .Select(labelSelectors =>  new ResourcesFilter() { LabelSelectors = labelSelectors })
+        .Select(labelSelectors => new ResourcesFilter() { LabelSelectors = labelSelectors })
         .DistinctUntilChanged();
 
     /// <summary>
@@ -127,15 +134,17 @@ public abstract class ResourceManagementComponentStoreBase<TState, TResource>(IS
         await this.GetResourceDefinitionAsync().ConfigureAwait(false);
         await this.ResourceEventHub.StartAsync().ConfigureAwait(false);
         this.ResourceWatch = await this.ResourceEventHub.WatchAsync<TResource>().ConfigureAwait(false);
-        this.ResourceWatch.SubscribeAsync(
-            onNextAsync: this.OnResourceWatchEventAsync, 
-            onErrorAsync: ex => Task.Run(() => Console.WriteLine(ex)), 
-            onCompletedAsync: () => Task.CompletedTask, 
-            cancellationToken: this.CancellationTokenSource.Token
-        );
+        this.ResourceWatch
+            .Do(e => this.Logger.LogTrace("ResourceWatch received event '{type}' for '{name}'", e.Type.ToString(), e.Resource.GetName()))
+            .SubscribeAsync(
+                onNextAsync: this.OnResourceWatchEventAsync,
+                onErrorAsync: ex => Task.Run(() => this.Logger.LogError("ResourceWatch exception: {exception}", ex.ToString())),
+                onCompletedAsync: () => Task.CompletedTask,
+                cancellationToken: this.CancellationTokenSource.Token
+            );
         this.Filter.Throttle(TimeSpan.FromMilliseconds(10)).SubscribeAsync(
             onNextAsync: this.ListResourcesAsync,
-            onErrorAsync: ex => Task.Run(() => Console.WriteLine(ex)),
+            onErrorAsync: ex => Task.Run(() => this.Logger.LogError("Resource filter exception: {exception}", ex.ToString())),
             onCompletedAsync: () => Task.CompletedTask,
             cancellationToken: this.CancellationTokenSource.Token
         );
@@ -227,7 +236,7 @@ public abstract class ResourceManagementComponentStoreBase<TState, TResource>(IS
         {
             if (string.IsNullOrWhiteSpace(name))
             {
-                if (state.SelectedResourceNames.Any())
+                if (state.SelectedResourceNames.Count > 0)
                 {
                     return state with
                     {
@@ -268,7 +277,7 @@ public abstract class ResourceManagementComponentStoreBase<TState, TResource>(IS
     {
         var selectedResourcesNames = this.Get(state => state.SelectedResourceNames);
         var resources = (this.Get(state => state.Resources) ?? []).Where(resource => selectedResourcesNames.Contains(resource.GetName()));
-        foreach(var resource in resources)
+        foreach (var resource in resources)
         {
             await this.DeleteResourceAsync(resource);
         }
@@ -313,8 +322,7 @@ public abstract class ResourceManagementComponentStoreBase<TState, TResource>(IS
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.ToString());
-            // todo: implement proper error handling
+            this.Logger.LogError("Unable to list resources: {exception}", ex.ToString());
         }
     }
 
@@ -426,10 +434,11 @@ public abstract class ResourceManagementComponentStoreBase<TState, TResource>(IS
 /// <remarks>
 /// Initializes a new <see cref="ResourceManagementComponentStoreBase{TResource}"/>
 /// </remarks>
+/// <param name="logger">The service used to perform logging</param>
 /// <param name="apiClient">The service used to interact with the Synapse API</param>
 /// <param name="resourceEventHub">The <see cref="IResourceEventWatchHub"/> websocket service client</param>
-public abstract class ResourceManagementComponentStoreBase<TResource>(ISynapseApiClient apiClient, ResourceWatchEventHubClient resourceEventHub)
-     : ResourceManagementComponentStoreBase<ResourceManagementComponentState<TResource>, TResource>(apiClient, resourceEventHub)
+public abstract class ResourceManagementComponentStoreBase<TResource>(ILogger<ResourceManagementComponentStoreBase<TResource>> logger, ISynapseApiClient apiClient, ResourceWatchEventHubClient resourceEventHub)
+     : ResourceManagementComponentStoreBase<ResourceManagementComponentState<TResource>, TResource>(logger, apiClient, resourceEventHub)
     where TResource : Resource, new()
 {
 

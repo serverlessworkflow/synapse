@@ -19,12 +19,14 @@ namespace Synapse.Dashboard.Components.DocumentDetailsStateManagement;
 /// <summary>
 /// Represents the <see cref="ComponentStore{TState}" /> of a <see cref="DocumentDetails"/>
 /// </summary>
+/// <param name="logger">The service used to perform logging</param>
 /// <param name="apiClient">The service used interact with Synapse API</param>
 /// <param name="jsRuntime">The service used from JS interop</param>
 /// <param name="monacoEditorHelper">The service used ease Monaco Editor interactions</param>
 /// <param name="jsonSerializer">The service used to serialize and deserialize JSON</param>
 /// <param name="yamlSerializer">The service used to serialize and deserialize YAML</param>
 public class DocumentDetailsStore(
+    ILogger<DocumentDetailsStore> logger,
     ISynapseApiClient apiClient,
     IJSRuntime jsRuntime,
     IMonacoEditorHelper monacoEditorHelper,
@@ -38,9 +40,15 @@ public class DocumentDetailsStore(
     private readonly string _textModelUri = monacoEditorHelper.GetResourceUri();
 
     /// <summary>
+    /// Gets the service used to perform logging
+    /// </summary>
+    protected ILogger<DocumentDetailsStore> Logger { get; } = logger;
+
+    /// <summary>
     /// Gets the service used to interact with the Synapse API
     /// </summary>
     protected ISynapseApiClient ApiClient { get; } = apiClient;
+
     /// <summary>
     /// Gets the service used for JS interop
     /// </summary>
@@ -192,8 +200,7 @@ public class DocumentDetailsStore(
         }
         catch (Exception ex)
         {
-            // todo: handle ex
-            Console.WriteLine(ex.ToString());
+            this.Logger.LogError("Unable to set document, exception: {exception}", ex.ToString());
         }
     }
     #endregion
@@ -273,8 +280,7 @@ public class DocumentDetailsStore(
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.ToString());
-            // todo: handle exception
+            this.Logger.LogError("Unabled to load referenced document: {exception}", ex.ToString());
         }
     }
 
@@ -317,8 +323,7 @@ public class DocumentDetailsStore(
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.ToString());
-            // todo: handle exception
+            this.Logger.LogError("Unabled to set text editor language: {exception}", ex.ToString());
         }
     }
 
@@ -342,7 +347,7 @@ public class DocumentDetailsStore(
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                this.Logger.LogError("Unabled to set text editor value: {exception}", ex.ToString());
                 await this.MonacoEditorHelper.ChangePreferredLanguageAsync(language == PreferredLanguage.YAML ? PreferredLanguage.JSON : PreferredLanguage.YAML);
             }
         }
