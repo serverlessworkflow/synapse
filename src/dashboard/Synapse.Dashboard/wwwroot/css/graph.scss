@@ -59,18 +59,19 @@ $viridisScale: // generated with 13 steps, using 12 to exclude the last yellow
     .graph-controls {
         display: flex;
         justify-content: flex-end;
-        gap: $spacer;
+        gap: calc($spacer / 2);
         padding-right: 1rem;
 
         .btn {
-            @include button-outline-variant($mute);
+            @include button-outline-variant($primary);
             color: var(--bs-btn-color);
+            stroke: var(--bs-btn-color);
             fill: var(--bs-btn-color);
             border: var(--bs-btn-border-width) solid var(--bs-btn-border-color);
-
             &:hover {
                 color: var(--bs-btn-hover-color);
                 fill: var(--bs-btn-hover-color);
+                stroke: var(--bs-btn-hover-color);
                 background-color: var(--bs-btn-hover-bg);
                 border-color: var(--bs-btn-hover-border-color);
             }

@@ -77,10 +77,10 @@
                 <div class="d-flex flex-column h-100 mh-100">
                     <div class="d-flex justify-content-between mb-2">
                         <div>
-                            <Button Outline="true" Color="ButtonColor.Primary" Size="ButtonSize.Small" class="ms-2" @onclick="_ => OnCreateWorkflowVersion()">
+                            <Button Outline="true" Color="ButtonColor.Primary" Size="ButtonSize.Small" class="ms-2" @onclick="OnCreateWorkflowVersion" TooltipTitle="Create new from">
                                 <Icon Name="IconName.FileEarmarkPlus" />
                             </Button>
-                            <Button Outline="true" Color="ButtonColor.Primary" Size="ButtonSize.Small" class="ms-2" @onclick="_ => Store.OnCopyToClipboard()">
+                            <Button Outline="true" Color="ButtonColor.Primary" Size="ButtonSize.Small" @onclick="Store.OnCopyToClipboard" TooltipTitle="Copy to clipboard">
                                 <Icon Name="IconName.Clipboard" />
                             </Button>
                         </div>

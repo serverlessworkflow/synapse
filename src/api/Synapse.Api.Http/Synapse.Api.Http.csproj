@@ -43,8 +43,8 @@
   </ItemGroup>
 	
   <ItemGroup>
-    <PackageReference Include="Neuroglia.Mediation.AspNetCore" Version="4.15.4" />
-    <PackageReference Include="Neuroglia.Security.AspNetCore" Version="4.15.4" />
+    <PackageReference Include="Neuroglia.Mediation.AspNetCore" Version="4.15.6" />
+    <PackageReference Include="Neuroglia.Security.AspNetCore" Version="4.15.6" />
 	<PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.7.3" />
   </ItemGroup>
 

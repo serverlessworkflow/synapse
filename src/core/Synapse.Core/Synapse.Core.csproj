@@ -63,8 +63,8 @@
   <ItemGroup>
 	<PackageReference Include="Docker.DotNet" Version="3.125.15" />
 	<PackageReference Include="KubernetesClient" Version="14.0.12" />
-	<PackageReference Include="Neuroglia.Data.Infrastructure.ResourceOriented" Version="4.15.4" />
-	<PackageReference Include="Neuroglia.Eventing.CloudEvents" Version="4.15.4" />
+	<PackageReference Include="Neuroglia.Data.Infrastructure.ResourceOriented" Version="4.15.6" />
+	<PackageReference Include="Neuroglia.Eventing.CloudEvents" Version="4.15.6" />
     <PackageReference Include="Semver" Version="2.3.0" />
     <PackageReference Include="ServerlessWorkflow.Sdk" Version="1.0.0-alpha2.15" />
   </ItemGroup>
