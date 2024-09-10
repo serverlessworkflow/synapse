@@ -12,6 +12,7 @@
 // limitations under the License.
 
 using Neuroglia.Data.Infrastructure.ResourceOriented;
+using System.ComponentModel;
 
 namespace Synapse.Runtime.Services;
 
@@ -70,12 +71,15 @@ public class NativeRuntime(ILoggerFactory loggerFactory, IHostEnvironment enviro
             CreateNoWindow = true,
             UseShellExecute = false
         };
-        startInfo.Environment.Add(SynapseDefaults.EnvironmentVariables.Api.Uri, this.Options.Api.Uri.OriginalString);
-        startInfo.Environment.Add(SynapseDefaults.EnvironmentVariables.Workflow.Instance, workflowInstance.GetQualifiedName());
-        startInfo.Environment[SynapseDefaults.EnvironmentVariables.ServiceAccount.Name] = serviceAccount.GetQualifiedName();
-        startInfo.Environment[SynapseDefaults.EnvironmentVariables.ServiceAccount.Key] = serviceAccount.Spec.Key;
+        startInfo.Environment[SynapseDefaults.EnvironmentVariables.Runner.Namespace] = workflowInstance.GetNamespace()!;
+        startInfo.Environment[SynapseDefaults.EnvironmentVariables.Runner.Name] = $"{workflowInstance.GetName()}-{Guid.NewGuid().ToString("N")[..12].ToLowerInvariant()}";
+        startInfo.Environment[SynapseDefaults.EnvironmentVariables.Api.Uri] = this.Options.Api.Uri.OriginalString;
         startInfo.Environment[SynapseDefaults.EnvironmentVariables.Runner.ContainerPlatform] = this.Options.ContainerPlatform;
         startInfo.Environment[SynapseDefaults.EnvironmentVariables.Runner.LifecycleEvents] = (this.Options.PublishLifecycleEvents ?? true).ToString();
+        startInfo.Environment[SynapseDefaults.EnvironmentVariables.Secrets.Directory] = this.Options.Runtime.Native.SecretsDirectory;
+        startInfo.Environment[SynapseDefaults.EnvironmentVariables.ServiceAccount.Name] = serviceAccount.GetQualifiedName();
+        startInfo.Environment[SynapseDefaults.EnvironmentVariables.ServiceAccount.Key] = serviceAccount.Spec.Key;
+        startInfo.Environment[SynapseDefaults.EnvironmentVariables.Workflow.Instance] = workflowInstance.GetQualifiedName();
         if (this.Options.Certificates?.Validate == false) startInfo.Environment.Add(SynapseDefaults.EnvironmentVariables.SkipCertificateValidation, "true");
         var process = new Process()
         {

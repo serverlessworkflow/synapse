@@ -562,6 +562,14 @@ public static class SynapseDefaults
             /// Gets the environment variable used to configure whether or not runners should publish lifecycle events
             /// </summary>
             public const string LifecycleEvents = Prefix + "LIFECYCLE_EVENTS";
+            /// <summary>
+            /// Gets the environment variable used to configure the runner's namespace
+            /// </summary>
+            public const string Namespace = Prefix + "NAMESPACE";
+            /// <summary>
+            /// Gets the environment variable used to configure the runner's name
+            /// </summary>
+            public const string Name = Prefix + "NAME";
 
         }
 
@@ -740,6 +748,10 @@ public static class SynapseDefaults
                 /// Gets the environment variable used to configure the path to the runner's executable file
                 /// </summary>
                 public const string Executable = Prefix + "EXECUTABLE";
+                /// <summary>
+                /// Gets the environment variable used to configure the directory that contains the secrets made available to runners
+                /// </summary>
+                public const string SecretsDirectory = Prefix + "SECRETS_DIRECTORY";
 
             }
 

@@ -23,7 +23,7 @@ public record Document
 
     /// <inheritdoc/>
     [DataMember(Name = "id", Order = 1), JsonPropertyName("id"), JsonPropertyOrder(1), YamlMember(Alias = "id", Order = 1)]
-    public string Id { get; set; } = Guid.NewGuid().ToString("N")[..15];
+    public string Id { get; set; } = Guid.NewGuid().ToString("N")[..12];
 
     /// <summary>
     /// Gets/sets the document's name

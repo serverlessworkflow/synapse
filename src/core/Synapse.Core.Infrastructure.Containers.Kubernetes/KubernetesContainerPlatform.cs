@@ -77,17 +77,22 @@ public class KubernetesContainerPlatform(IServiceProvider serviceProvider, ILogg
         if (this.Kubernetes == null) throw new NullReferenceException("The KubernetesContainerPlatform has not been properly initialized");
         var pod = new V1Pod()
         {
+            Metadata = new()
+            {
+                NamespaceProperty = $"{System.Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.Namespace)}",
+                Name = $"{System.Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.Name)}-{definition.Image}-{Guid.NewGuid().ToString("N")[..6].ToLowerInvariant()}"
+            },
             Spec = new()
             {
+                RestartPolicy = "Never",
                 Containers = 
                 [
-                    new()
+                    new(definition.Image)
                     {
                         Image = definition.Image,
                         ImagePullPolicy = this.Options.ImagePullPolicy,
                         Command = string.IsNullOrWhiteSpace(definition.Command) ? null : ["/bin/sh", "-c", definition.Command],
-                        Env = definition.Environment?.Select(e => new V1EnvVar(e.Key, e.Value)).ToList(),
-                        RestartPolicy = "Never"
+                        Env = definition.Environment?.Select(e => new V1EnvVar(e.Key, e.Value)).ToList()
                     }
                 ]
             }

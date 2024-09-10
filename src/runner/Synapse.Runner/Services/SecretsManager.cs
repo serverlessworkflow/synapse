@@ -51,8 +51,8 @@ public class SecretsManager(ILogger<SecretsManager> logger, ISerializerProvider 
         try
         {
             var path = string.IsNullOrWhiteSpace(this.Options.Secrets.Directory)
-            ? RunnerSecretsOptions.DefaultDirectory
-            : this.Options.Secrets.Directory;
+                ? RunnerSecretsOptions.DefaultDirectory
+                : this.Options.Secrets.Directory;
             var directory = new DirectoryInfo(path);
             if (!directory.Exists) directory.Create();
             foreach (var file in directory.GetFiles())
@@ -72,14 +72,14 @@ public class SecretsManager(ILogger<SecretsManager> logger, ISerializerProvider 
                 }
                 catch (Exception ex)
                 {
-                    this.Logger.LogWarning("Skipped loading secret '{secretFile}': an exception occurred while deserializing the secret object: {ex}", file.Name, ex.ToString());
+                    this.Logger.LogWarning("Skipped loading secret '{secretFile}': an exception occurred while deserializing the secret object: {ex}", file.Name, ex.Message);
                     continue;
                 }
             }
         }
         catch(Exception ex)
         {
-            this.Logger.LogWarning("Failed to load secrets because there are none or because they are improperly configured. Error: {ex}", ex);
+            this.Logger.LogWarning("Failed to load secrets because there are none or because they are improperly configured. Error: {ex}", ex.Message);
         }
         return Task.CompletedTask;
     }

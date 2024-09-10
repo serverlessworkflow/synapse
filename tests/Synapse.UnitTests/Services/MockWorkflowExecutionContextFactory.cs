@@ -46,7 +46,7 @@ internal static class MockWorkflowExecutionContextFactory
         {
             Metadata = new()
             {
-                Name = $"{workflow.GetName()}-{Guid.NewGuid().ToString("N")[..15]}",
+                Name = $"{workflow.GetName()}-{Guid.NewGuid().ToString("N")[..12]}",
                 Namespace = workflow.GetNamespace()
             },
             Spec = new()

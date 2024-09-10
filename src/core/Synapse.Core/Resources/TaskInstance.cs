@@ -24,7 +24,7 @@ public record TaskInstance
     /// Gets the task's id
     /// </summary>
     [DataMember(Name = "id", Order = 1), JsonPropertyName("id"), JsonPropertyOrder(1), YamlMember(Alias = "id", Order = 1)]
-    public virtual string Id { get; set; } = Guid.NewGuid().ToString("N")[..15];
+    public virtual string Id { get; set; } = Guid.NewGuid().ToString("N")[..12];
 
     /// <summary>
     /// Gets the task's name, if any

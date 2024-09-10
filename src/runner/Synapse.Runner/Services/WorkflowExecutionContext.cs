@@ -577,7 +577,8 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
                 Data = new WorkflowCompletedEventV1()
                 {
                     Name = this.Instance.GetQualifiedName(),
-                    CompletedAt = run?.EndedAt ?? DateTimeOffset.Now
+                    CompletedAt = run?.EndedAt ?? DateTimeOffset.Now,
+                    Output = this.Output
                 }
             }, cancellationToken).ConfigureAwait(false);
             await this.Api.Events.PublishAsync(new CloudEvent()
