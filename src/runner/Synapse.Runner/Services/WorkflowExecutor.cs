@@ -265,7 +265,7 @@ public class WorkflowExecutor(IServiceProvider serviceProvider, ILogger<Workflow
     /// <returns>A new awaitable <see cref="Task"/></returns>
     protected virtual async Task OnTaskCompletedAsync(ITaskExecutor executor, CancellationToken cancellationToken)
     {
-        var nextDefinition = executor.Task.Instance.Next switch
+        var nextDefinition = (executor.Task.Instance.Status == TaskInstanceStatus.Skipped ? FlowDirective.Continue : executor.Task.Instance.Next) switch
         {
             FlowDirective.End or FlowDirective.Exit => null,
             _ => this.Workflow.Definition.GetTaskAfter(executor.Task.Instance)

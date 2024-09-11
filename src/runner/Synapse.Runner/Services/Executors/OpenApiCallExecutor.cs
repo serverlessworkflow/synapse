@@ -109,14 +109,16 @@ public class OpenApiCallExecutor(IServiceProvider serviceProvider, ILogger<OpenA
         this.OpenApi = (OpenApiCallDefinition)this.JsonSerializer.Convert(this.Task.Definition.With, typeof(OpenApiCallDefinition))!;
         using var httpClient = this.HttpClientFactory.CreateClient();
         await httpClient.ConfigureAuthenticationAsync(this.Task.Workflow.Definition, this.OpenApi.Document.Endpoint.Authentication, this.ServiceProvider, cancellationToken).ConfigureAwait(false);
-        var uri = StringFormatter.NamedFormat(this.OpenApi.Document.EndpointUri.OriginalString, this.Task.Input.ToDictionary());
-        if (uri.IsRuntimeExpression()) uri = await this.Task.Workflow.Expressions.EvaluateAsync<string>(uri, this.Task.Input, this.GetExpressionEvaluationArguments(), cancellationToken).ConfigureAwait(false);
-        using var request = new HttpRequestMessage(HttpMethod.Get, uri);
+        var uriString = StringFormatter.NamedFormat(this.OpenApi.Document.EndpointUri.OriginalString, this.Task.Input.ToDictionary());
+        if (uriString.IsRuntimeExpression()) uriString = await this.Task.Workflow.Expressions.EvaluateAsync<string>(uriString, this.Task.Input, this.GetExpressionEvaluationArguments(), cancellationToken).ConfigureAwait(false);
+        if (string.IsNullOrWhiteSpace(uriString)) throw new NullReferenceException("The OpenAPI endpoint URI cannot be null or whitespace");
+        if (!Uri.TryCreate(uriString, UriKind.RelativeOrAbsolute, out var uri) || uri == null) throw new Exception($"Failed to parse the specified string '{uriString}' into a new URI");
+        using var request = new HttpRequestMessage(HttpMethod.Get, uriString);
         using var response = await httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode)
         {
             var responseContent = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-            this.Logger.LogInformation("Failed to retrieve the OpenAPI document at location '{uri}'. The remote server responded with a non-success status code '{statusCode}'.", this.OpenApi.Document.EndpointUri, response.StatusCode);
+            this.Logger.LogInformation("Failed to retrieve the OpenAPI document at location '{uri}'. The remote server responded with a non-success status code '{statusCode}'.", uri, response.StatusCode);
             this.Logger.LogDebug("Response content:\r\n{responseContent}", responseContent ?? "None");
             response.EnsureSuccessStatusCode();
         }
@@ -125,11 +127,11 @@ public class OpenApiCallExecutor(IServiceProvider serviceProvider, ILogger<OpenA
         var operation = this.Document.Paths
             .SelectMany(p => p.Value.Operations)
             .FirstOrDefault(o => o.Value.OperationId == this.OpenApi.OperationId);
-        if (operation.Value == null) throw new NullReferenceException($"Failed to find an operation with id '{this.OpenApi.OperationId}' in OpenAPI document at '{this.OpenApi.Document.EndpointUri}'");
+        if (operation.Value == null) throw new NullReferenceException($"Failed to find an operation with id '{this.OpenApi.OperationId}' in OpenAPI document at '{uri}'");
         this.HttpMethod = operation.Key.ToHttpMethod();
         this.Operation = operation.Value;
         this.Servers = this.Document.Servers.Select(s => s.Url).ToList();
-        if (this.Servers.Count == 0) this.Servers.Add(this.OpenApi.Document.EndpointUri.OriginalString.Replace(this.OpenApi.Document.EndpointUri.PathAndQuery, string.Empty));
+        if (this.Servers.Count == 0) this.Servers.Add(uri.OriginalString.Replace(uri.PathAndQuery, string.Empty));
         var path = this.Document.Paths.Single(p => p.Value.Operations.Any(o => o.Value.OperationId == operation.Value.OperationId));
         this.Path = path.Key;
         await this.BuildParametersAsync(cancellationToken).ConfigureAwait(false);
