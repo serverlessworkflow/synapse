@@ -28,6 +28,10 @@ public record NativeRuntimeConfiguration
     /// Gets the default path to the runner executable file
     /// </summary>
     public const string DefaultExecutable = "Synapse.Runner";
+    /// <summary>
+    /// Gets the default path to the directory that contains the secrets made available to runners
+    /// </summary>
+    public static readonly string DefaultSecretsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".synapse", "secrets");
 
     /// <summary>
     /// Initializes a new <see cref="NativeRuntimeConfiguration"/>
@@ -47,6 +51,8 @@ public record NativeRuntimeConfiguration
             if (!File.Exists(filePath)) throw new FileNotFoundException("The runner executable file does not exist or cannot be found", filePath);
             this.Executable = env;
         }
+        env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runtime.Native.SecretsDirectory);
+        if (!string.IsNullOrWhiteSpace(env)) this.SecretsDirectory = env;
     }
 
     /// <summary>
@@ -61,5 +67,10 @@ public record NativeRuntimeConfiguration
     [DataMember(Order = 2, Name = "executable"), JsonPropertyOrder(2), JsonPropertyName("executable"), YamlMember(Order = 2, Alias = "executable")]
     public virtual string Executable { get; set; } = DefaultExecutable;
 
+    /// <summary>
+    /// Gets/sets the path to the directory that contains the secrets made available to runners
+    /// </summary>
+    [DataMember(Order = 3, Name = "secretsDirectory"), JsonPropertyOrder(3), JsonPropertyName("secretsDirectory"), YamlMember(Order = 3, Alias = "secretsDirectory")]
+    public virtual string SecretsDirectory { get; set; } = DefaultSecretsDirectory;
 
 }

@@ -25,14 +25,16 @@ public static class HttpClientExtensions
     /// Configures the <see cref="HttpClient"/> to use the specified authentication mechanism 
     /// </summary>
     /// <param name="httpClient">The <see cref="HttpClient"/> to configure</param>
+    /// <param name="workflow">The <see cref="WorkflowDefinition"/> that defines the authentication to configure</param>
     /// <param name="authentication">An object that describes the authentication mechanism to use</param>
     /// <param name="serviceProvider">The current <see cref="IServiceProvider"/></param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>A new awaitable <see cref="Task"/></returns>
-    public static async Task ConfigureAuthenticationAsync(this HttpClient httpClient, AuthenticationPolicyDefinition? authentication, IServiceProvider serviceProvider, CancellationToken cancellationToken = default)
+    public static async Task ConfigureAuthenticationAsync(this HttpClient httpClient, WorkflowDefinition workflow, AuthenticationPolicyDefinition? authentication, IServiceProvider serviceProvider, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(workflow);
         if (authentication == null) return;
-        var authorization = await AuthorizationInfo.CreateAsync(authentication, serviceProvider, cancellationToken).ConfigureAwait(false);
+        var authorization = await AuthorizationInfo.CreateAsync(workflow, authentication, serviceProvider, cancellationToken).ConfigureAwait(false);
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(authorization.Scheme, authorization.Parameter);
     }
 

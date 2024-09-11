@@ -272,7 +272,6 @@ public class WorkflowExecutor(IServiceProvider serviceProvider, ILogger<Workflow
         };
         var completedTask = executor.Task;
         this.Executors.Remove(executor);
-        await executor.DisposeAsync().ConfigureAwait(false);
         if (nextDefinition == null)
         {
             await this.SetResultAsync(completedTask.Output, cancellationToken).ConfigureAwait(false);

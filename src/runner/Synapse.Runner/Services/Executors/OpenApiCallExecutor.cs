@@ -109,7 +109,7 @@ public class OpenApiCallExecutor(IServiceProvider serviceProvider, ILogger<OpenA
     {
         this.OpenApi = (OpenApiCallDefinition)this.JsonSerializer.Convert(this.Task.Definition.With, typeof(OpenApiCallDefinition))!;
         using var httpClient = this.HttpClientFactory.CreateClient();
-        await httpClient.ConfigureAuthenticationAsync(this.OpenApi.Document.Endpoint.Authentication, this.ServiceProvider, cancellationToken).ConfigureAwait(false);
+        await httpClient.ConfigureAuthenticationAsync(this.Task.Workflow.Definition, this.OpenApi.Document.Endpoint.Authentication, this.ServiceProvider, cancellationToken).ConfigureAwait(false);
         using var request = new HttpRequestMessage(HttpMethod.Get, this.OpenApi.Document.EndpointUri);
         using var response = await httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode)
@@ -226,7 +226,7 @@ public class OpenApiCallExecutor(IServiceProvider serviceProvider, ILogger<OpenA
                 }
             }
             using var httpClient = this.HttpClientFactory.CreateClient();
-            await httpClient.ConfigureAuthenticationAsync(this.OpenApi.Authentication, this.ServiceProvider, cancellationToken).ConfigureAwait(false);
+            await httpClient.ConfigureAuthenticationAsync(this.Task.Workflow.Definition, this.OpenApi.Authentication, this.ServiceProvider, cancellationToken).ConfigureAwait(false);
             using var response = await httpClient.SendAsync(request, cancellationToken);
             if (response.StatusCode == HttpStatusCode.ServiceUnavailable) continue;
             var rawContent = await response.Content.ReadAsByteArrayAsync(cancellationToken)!;

@@ -54,8 +54,10 @@ public class ExternalResourceProvider(IServiceProvider serviceProvider, IHttpCli
     /// <returns>The specified <see cref="ExternalResourceDefinition"/>'s content <see cref="Stream"/></returns>
     protected virtual async Task<Stream> ReadOverHttpAsync(WorkflowDefinition workflow, ExternalResourceDefinition resource, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(workflow);
+        ArgumentNullException.ThrowIfNull(resource);
         using var httpClient = this.HttpClientFactory.CreateClient();
-        await httpClient.ConfigureAuthenticationAsync(resource.Endpoint.Authentication, this.ServiceProvider, cancellationToken).ConfigureAwait(false);
+        await httpClient.ConfigureAuthenticationAsync(workflow, resource.Endpoint.Authentication, this.ServiceProvider, cancellationToken).ConfigureAwait(false);
         return await httpClient.GetStreamAsync(resource.EndpointUri, cancellationToken).ConfigureAwait(false);
     }
 

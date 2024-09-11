@@ -115,9 +115,34 @@ public abstract class TaskExecutor<TDefinition>(IServiceProvider serviceProvider
     /// <inheritdoc/>
     public virtual async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
-        await this.DoInitializeAsync(cancellationToken).ConfigureAwait(false);
-        await this.Task.InitializeAsync(cancellationToken).ConfigureAwait(false);
-        this.Subject.OnNext(new TaskLifeCycleEvent(TaskLifeCycleEventType.Initialized));
+        try
+        {
+            await this.DoInitializeAsync(cancellationToken).ConfigureAwait(false);
+            await this.Task.InitializeAsync(cancellationToken).ConfigureAwait(false);
+            this.Subject.OnNext(new TaskLifeCycleEvent(TaskLifeCycleEventType.Initialized));
+        }
+        catch(HttpRequestException ex)
+        {
+            await this.SetErrorAsync(new Error()
+            {
+                Type = ErrorType.Communication,
+                Title = ErrorTitle.Communication,
+                Status = ex.StatusCode.HasValue ? (ushort)ex.StatusCode : (ushort)ErrorStatus.Communication,
+                Detail = ex.Message,
+                Instance = this.Task.Instance.Reference
+            }, cancellationToken).ConfigureAwait(false);
+        }
+        catch(Exception ex)
+        {
+            await this.SetErrorAsync(new Error()
+            {
+                Type = ErrorType.Runtime,
+                Title = ErrorTitle.Runtime,
+                Status = ErrorStatus.Runtime,
+                Detail = ex.Message,
+                Instance = this.Task.Instance.Reference
+            }, cancellationToken).ConfigureAwait(false);
+        } 
     }
 
     /// <summary>
@@ -171,6 +196,28 @@ public abstract class TaskExecutor<TDefinition>(IServiceProvider serviceProvider
             await this.TaskCompletionSource.Task.ConfigureAwait(false);
         }
         catch (OperationCanceledException) { }
+        catch (HttpRequestException ex)
+        {
+            await this.SetErrorAsync(new Error()
+            {
+                Type = ErrorType.Communication,
+                Title = ErrorTitle.Communication,
+                Status = ex.StatusCode.HasValue ? (ushort)ex.StatusCode : (ushort)ErrorStatus.Communication,
+                Detail = ex.Message,
+                Instance = this.Task.Instance.Reference
+            }, cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            await this.SetErrorAsync(new Error()
+            {
+                Type = ErrorType.Runtime,
+                Title = ErrorTitle.Runtime,
+                Status = ErrorStatus.Runtime,
+                Detail = ex.Message,
+                Instance = this.Task.Instance.Reference
+            }, cancellationToken).ConfigureAwait(false);
+        }
     }
 
     /// <summary>
@@ -198,7 +245,6 @@ public abstract class TaskExecutor<TDefinition>(IServiceProvider serviceProvider
             }
             input = executor.Task.Output ?? new();
             this.Executors.Remove(executor);
-            await executor.DisposeAsync().ConfigureAwait(false);
         }
     }
 

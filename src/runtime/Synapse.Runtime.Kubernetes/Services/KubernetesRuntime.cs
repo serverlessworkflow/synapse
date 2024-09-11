@@ -87,7 +87,7 @@ public class KubernetesRuntime(IServiceProvider serviceProvider, ILoggerFactory 
             var workflowDefinition = workflow.Spec.Versions.Get(workflowInstance.Spec.Definition.Version) ?? throw new NullReferenceException($"Failed to find version '{workflowInstance.Spec.Definition.Version}' of workflow '{workflow.GetQualifiedName()}'");
             var pod = this.Runner.Runtime.Kubernetes!.PodTemplate.Clone()!;
             pod.Metadata ??= new();
-            pod.Metadata.Name = $"{workflowInstance.GetQualifiedName()}-{Guid.NewGuid().ToString("N")[..15].ToLowerInvariant()}";
+            pod.Metadata.Name = $"{workflowInstance.GetQualifiedName()}-{Guid.NewGuid().ToString("N")[..12].ToLowerInvariant()}";
             if (!string.IsNullOrWhiteSpace(this.Runner.Runtime.Kubernetes.Namespace)) pod.Metadata.NamespaceProperty = this.Runner.Runtime.Kubernetes.Namespace;
             if (pod.Spec == null || pod.Spec.Containers == null || !pod.Spec.Containers.Any()) throw new InvalidOperationException("The specified Kubernetes runtime pod template is not valid");
             var volumeMounts = new List<V1VolumeMount>();
@@ -119,6 +119,8 @@ public class KubernetesRuntime(IServiceProvider serviceProvider, ILoggerFactory 
             foreach (var container in pod.Spec.Containers)
             {
                 container.Env ??= [];
+                container.Env.Add(new(SynapseDefaults.EnvironmentVariables.Runner.Namespace, valueFrom: new(fieldRef: new("metadata.namespace"))));
+                container.Env.Add(new(SynapseDefaults.EnvironmentVariables.Runner.Name, valueFrom: new(fieldRef: new("metadata.name"))));
                 container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Api.Uri, this.Runner.Api.Uri.OriginalString);
                 container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.ContainerPlatform, this.Runner.ContainerPlatform);
                 container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.LifecycleEvents, (this.Runner.PublishLifecycleEvents ?? true).ToString());

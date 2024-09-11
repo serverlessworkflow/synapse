@@ -7,7 +7,7 @@
 	<NeutralLanguage>en</NeutralLanguage>
 	<GenerateDocumentationFile>True</GenerateDocumentationFile>
 	<VersionPrefix>1.0.0</VersionPrefix>
-	<VersionSuffix>alpha1</VersionSuffix>
+	<VersionSuffix>alpha2</VersionSuffix>
 	<AssemblyVersion>$(VersionPrefix)</AssemblyVersion>
 	<FileVersion>$(VersionPrefix)</FileVersion>
 	<Authors>The Synapse Authors</Authors>
@@ -15,6 +15,7 @@
 	<Copyright>Copyright © 2024-Present The Synapse Authors. All Rights Reserved.</Copyright>
 	<RepositoryUrl>https://github.com/serverlessworkflow/synapse</RepositoryUrl>
 	<RepositoryType>git</RepositoryType>
+	<PackageId>Synapse</PackageId>
 	<PackageProjectUrl>https://github.com/serverlessworkflow/synapse</PackageProjectUrl>
 	<PackageTags>synapse core</PackageTags>
 	<IsPackable>true</IsPackable>

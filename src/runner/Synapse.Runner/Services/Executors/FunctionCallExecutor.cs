@@ -115,7 +115,6 @@ public class FunctionCallExecutor(IServiceProvider serviceProvider, ILogger<Func
         ArgumentNullException.ThrowIfNull(executor);
         var error = executor.Task.Instance.Error ?? throw new NullReferenceException();
         this.Executors.Remove(executor);
-        await executor.DisposeAsync().ConfigureAwait(false);
         await this.SetErrorAsync(error, cancellationToken).ConfigureAwait(false);
     }
 

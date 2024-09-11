@@ -80,11 +80,9 @@ public class ForkTaskExecutor(IServiceProvider serviceProvider, ILogger<ForkTask
         using var @lock = await this.Lock.LockAsync(cancellationToken).ConfigureAwait(false);
         var error = executor.Task.Instance.Error ?? throw new NullReferenceException();
         this.Executors.Remove(executor);
-        await executor.DisposeAsync().ConfigureAwait(false);
         foreach (var subExecutor in this.Executors)
         {
             await subExecutor.CancelAsync(cancellationToken).ConfigureAwait(false);
-            await subExecutor.DisposeAsync().ConfigureAwait(false);
             this.Executors.Remove(executor);
         }
         await this.SetErrorAsync(error, cancellationToken).ConfigureAwait(false);
@@ -102,11 +100,7 @@ public class ForkTaskExecutor(IServiceProvider serviceProvider, ILogger<ForkTask
         using var @lock = await this.Lock.LockAsync(cancellationToken).ConfigureAwait(false);
         if (this.Task.Instance.Status != TaskInstanceStatus.Running)
         {
-            if (this.Executors.Remove(executor))
-            {
-                await executor.CancelAsync(cancellationToken).ConfigureAwait(false);
-                await executor.DisposeAsync().ConfigureAwait(false);
-            }
+            if (this.Executors.Remove(executor)) await executor.CancelAsync(cancellationToken).ConfigureAwait(false);
         }
         if (this.Task.Definition.Fork.Compete == true)
         {
@@ -115,7 +109,6 @@ public class ForkTaskExecutor(IServiceProvider serviceProvider, ILogger<ForkTask
             {
                 this.Executors.Remove(concurrentTaskExecutor);
                 await concurrentTaskExecutor.CancelAsync(cancellationToken).ConfigureAwait(false);
-                await concurrentTaskExecutor.DisposeAsync().ConfigureAwait(false);
             }
             await this.SetResultAsync(output, this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
         }
