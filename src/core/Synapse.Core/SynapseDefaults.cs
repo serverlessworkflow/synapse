@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Synapse.Resources;
 using Neuroglia.Data.Infrastructure.ResourceOriented;
+using Synapse.Resources;
 using System.Diagnostics;
 using System.Reflection;
 
@@ -766,7 +766,7 @@ public static class SynapseDefaults
             /// <summary>
             /// Gets the prefix for all secrets related environment variables
             /// </summary>
-            public const string Prefix = EnvironmentVariables.Prefix + "SECRETS";
+            public const string Prefix = EnvironmentVariables.Prefix + "SECRETS_";
             /// <summary>
             /// Gets the name of the environment variable used to configure the path to the directory that contains secrets files
             /// </summary>

@@ -105,7 +105,6 @@ public class ForTaskExecutor(IServiceProvider serviceProvider, ILogger<ForTaskEx
         ArgumentNullException.ThrowIfNull(executor);
         var error = executor.Task.Instance.Error ?? throw new NullReferenceException();
         this.Executors.Remove(executor);
-        await executor.DisposeAsync().ConfigureAwait(false);
         await this.SetErrorAsync(error, cancellationToken).ConfigureAwait(false);
     }
 
@@ -123,7 +122,6 @@ public class ForTaskExecutor(IServiceProvider serviceProvider, ILogger<ForTaskEx
         var output = executor.Task.Output!;
         this.Executors.Remove(executor);
         if (this.Task.ContextData != executor.Task.ContextData) await this.Task.SetContextDataAsync(executor.Task.ContextData, cancellationToken).ConfigureAwait(false);
-        await executor.DisposeAsync().ConfigureAwait(false);
         var index = int.Parse(last.Reference.OriginalString.Split('/', StringSplitOptions.RemoveEmptyEntries)[^2]) + 1;
         if (index == this.Collection.Count)
         {
