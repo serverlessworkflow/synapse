@@ -98,7 +98,6 @@ public class DoTaskExecutor(IServiceProvider serviceProvider, ILogger<DoTaskExec
     /// <returns>A new awaitable <see cref="Task"/></returns>
     protected virtual async Task OnSubtaskCompletedAsync(ITaskExecutor executor, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(executor);
         var last = executor.Task.Instance;
         var output = executor.Task.Output!;
         var nextDefinition = this.Task.Definition.Do.GetTaskAfter(last);
@@ -106,12 +105,12 @@ public class DoTaskExecutor(IServiceProvider serviceProvider, ILogger<DoTaskExec
         if (this.Task.ContextData != executor.Task.ContextData) await this.Task.SetContextDataAsync(executor.Task.ContextData, cancellationToken).ConfigureAwait(false);
         if (nextDefinition == null || nextDefinition.Value == null)
         {
-            await this.SetResultAsync(output, last.Next == FlowDirective.End ? FlowDirective.End : this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
+            await this.SetResultAsync(output, last.Status != TaskInstanceStatus.Skipped && last.Next == FlowDirective.End ? FlowDirective.End : this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
             return;
         }
         var nextDefinitionIndex = this.Task.Definition.Do.Keys.ToList().IndexOf(nextDefinition.Key);
         TaskInstance next;
-        switch (executor.Task.Instance.Next)
+        switch (executor.Task.Instance.Status == TaskInstanceStatus.Skipped ? FlowDirective.Continue : executor.Task.Instance.Next)
         {
             case FlowDirective.End:
                 await this.SetResultAsync(output, FlowDirective.End, cancellationToken).ConfigureAwait(false);
