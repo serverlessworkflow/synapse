@@ -45,13 +45,13 @@ public abstract class NamespacedResourceManagementComponent<TComponent, TStore, 
     /// <inheritdoc/>
     protected override async Task OnInitializedAsync()
     {
-        await base.OnInitializedAsync();
         this.Store.Namespace.Subscribe(value => this.OnStateChanged(_ =>
         {
             this.@namespace = value;
-            if (Namespace != value) this.Namespace = value;
+            //if (Namespace != value) this.Namespace = value;
         }), token: this.CancellationTokenSource.Token);
         this.Store.Namespaces.Subscribe(value => this.OnStateChanged(_ => Namespaces = value), token: this.CancellationTokenSource.Token);
+        await base.OnInitializedAsync();
     }
 
     /// <inheritdoc/>

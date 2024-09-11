@@ -12,8 +12,6 @@
 // limitations under the License.
 
 using Synapse.Api.Client.Services;
-using Synapse.Dashboard.Components.DocumentDetailsStateManagement;
-using System.Reactive.Linq;
 
 namespace Synapse.Dashboard.Components.ResourceManagement;
 
@@ -87,8 +85,8 @@ public class NamespacedResourceManagementComponentStore<TState, TResource>(ILogg
     /// <inheritdoc/>
     public override async Task InitializeAsync()
     {
-        await base.InitializeAsync();
         await this.ListNamespaceAsync().ConfigureAwait(false);
+        await base.InitializeAsync();
     }
 
 }

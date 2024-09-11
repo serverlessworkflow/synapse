@@ -12,7 +12,6 @@
 // limitations under the License.
 
 using Synapse.Api.Client.Services;
-using Synapse.Dashboard.Components.DocumentDetailsStateManagement;
 
 namespace Synapse.Dashboard.Components.ResourceManagement;
 

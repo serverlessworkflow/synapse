@@ -93,7 +93,7 @@ public abstract class ResourceManagementComponent<TComponent, TStore, TState, TR
     /// </summary>
     protected ElementReference? CheckboxAll { get; set; } = null;
 
-    string activeResourcesName = null!;
+    string activeResourceName = null!;
     /// <summary>
     /// Gets/sets the name of the active resource
     /// </summary>
@@ -102,7 +102,6 @@ public abstract class ResourceManagementComponent<TComponent, TStore, TState, TR
     /// <inheritdoc/>
     protected override async Task OnInitializedAsync()
     {
-        await base.OnInitializedAsync().ConfigureAwait(false);
         Observable.CombineLatest(
             this.Store.Resources,
             this.Store.SelectedResourceNames,
@@ -131,7 +130,7 @@ public abstract class ResourceManagementComponent<TComponent, TStore, TState, TR
                 }
             }
         }, cancellationToken: this.CancellationTokenSource.Token);
-        this.Store.ActiveResourceName.Subscribe(value => this.OnStateChanged(_ => this.activeResourcesName = value), token: this.CancellationTokenSource.Token);
+        this.Store.ActiveResourceName.Subscribe(value => this.OnStateChanged(_ => this.activeResourceName = value), token: this.CancellationTokenSource.Token);
         this.Store.SearchTerm.Subscribe(value => this.OnStateChanged(_ => this.SearchTerm = value), token: this.CancellationTokenSource.Token);
         this.Store.Loading.Subscribe(value => this.OnStateChanged(_ => this.Loading = value), token: this.CancellationTokenSource.Token);
         this.Store.Definition.SubscribeAsync(async definition =>
@@ -152,13 +151,14 @@ public abstract class ResourceManagementComponent<TComponent, TStore, TState, TR
                 await this.OnShowResourceDetailsAsync(resource);
             }
         }, cancellationToken: CancellationTokenSource.Token);
+        await base.OnInitializedAsync().ConfigureAwait(false);
     }
 
 
     /// <inheritdoc/>
     protected override async Task OnParametersSetAsync()
     {
-        if (!string.IsNullOrEmpty(Name) && Name != activeResourcesName)
+        if (!string.IsNullOrEmpty(Name) && Name != activeResourceName)
         {
             Store.SetActiveResourceName(Name);
         }
