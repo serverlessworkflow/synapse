@@ -17,6 +17,7 @@ using ServerlessWorkflow.Sdk;
 using ServerlessWorkflow.Sdk.Models;
 using ServerlessWorkflow.Sdk.Models.Calls;
 using ServerlessWorkflow.Sdk.Models.Tasks;
+using Synapse.Dashboard.Components.DocumentDetailsStateManagement;
 using System.Diagnostics;
 
 namespace Synapse.Dashboard.Services;
@@ -24,9 +25,10 @@ namespace Synapse.Dashboard.Services;
 /// <summary>
 /// Represents the default implementation of the <see cref="IWorkflowGraphBuilder"/> interface
 /// </summary>
+/// <param name="logger">The service used to perform logging</param>
 /// <param name="yamlSerializer">The service to serialize and deserialize YAML</param>
 /// <param name="jsonSerializer">The service to serialize and deserialize YAML</param>
-public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerializer jsonSerializer)
+public class WorkflowGraphBuilder(ILogger<WorkflowGraphBuilder> logger, IYamlSerializer yamlSerializer, IJsonSerializer jsonSerializer)
     : IWorkflowGraphBuilder
 {
 
@@ -39,6 +41,11 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
     /// Gets the default radius for start and end nodes
     /// </summary>
     public const int StartEndNodeRadius = 50;
+
+    /// <summary>
+    /// Gets the service used to perform logging
+    /// </summary>
+    protected ILogger<WorkflowGraphBuilder> Logger { get; } = logger;
 
     /// <summary>
     /// Gets the service used to serialize and deserialize YAML
@@ -73,7 +80,7 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
         }
         this.BuildEdge(graph, startNode, nextNode);
         sw.Stop();
-        Console.WriteLine($"WorkflowGraphBuilder.Build took {sw.ElapsedMilliseconds} ms");
+        this.Logger.LogTrace("WorkflowGraphBuilder.Build took {elapsedTime} ms", sw.ElapsedMilliseconds);
         return graph;
     }
 

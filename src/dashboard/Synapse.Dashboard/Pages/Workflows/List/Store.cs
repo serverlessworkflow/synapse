@@ -12,6 +12,7 @@
 // limitations under the License.
 
 using Synapse.Api.Client.Services;
+using Synapse.Dashboard.Components.DocumentDetailsStateManagement;
 using Synapse.Resources;
 
 namespace Synapse.Dashboard.Pages.Workflows.List;
@@ -19,10 +20,11 @@ namespace Synapse.Dashboard.Pages.Workflows.List;
 /// <summary>
 /// Represents the <see cref="View"/>'s store
 /// </summary>
+/// <param name="logger">The service used to perform logging</param>
 /// <param name="apiClient">The service used to interact with the Synapse API</param>
 /// <param name="resourceEventHub">The hub used to watch resource events</param>
-public class WorkflowListComponentStore(ISynapseApiClient apiClient, ResourceWatchEventHubClient resourceEventHub)
-    : NamespacedResourceManagementComponentStore<WorkflowListState, Workflow>(apiClient, resourceEventHub)
+public class WorkflowListComponentStore(ILogger<WorkflowListComponentStore> logger, ISynapseApiClient apiClient, ResourceWatchEventHubClient resourceEventHub)
+    : NamespacedResourceManagementComponentStore<WorkflowListState, Workflow>(logger, apiClient, resourceEventHub)
 {
 
     /// <summary>

@@ -22,7 +22,7 @@
 @inject IBreadcrumbManager BreadcrumbManager
 @inject NavigationManager NavigationManager
 
-<ApplicationTitle>Workflow @($"{Name}.{Namespace}:{version}")</ApplicationTitle>
+<ApplicationTitle>Workflow @($"{Name}.{@namespace}:{version}")</ApplicationTitle>
 
 <div class="d-flex flex-grow mh-100">
     <HorizontalCollapsible class="collapsible-instances">
@@ -77,10 +77,10 @@
                 <div class="d-flex flex-column h-100 mh-100">
                     <div class="d-flex justify-content-between mb-2">
                         <div>
-                            <Button Outline="true" Color="ButtonColor.Primary" Size="ButtonSize.Small" class="ms-2" @onclick="_ => OnCreateWorkflowVersion()">
+                            <Button Outline="true" Color="ButtonColor.Primary" Size="ButtonSize.Small" class="ms-2" @onclick="OnCreateWorkflowVersion" TooltipTitle="Create new from">
                                 <Icon Name="IconName.FileEarmarkPlus" />
                             </Button>
-                            <Button Outline="true" Color="ButtonColor.Primary" Size="ButtonSize.Small" class="ms-2" @onclick="_ => Store.OnCopyToClipboard()">
+                            <Button Outline="true" Color="ButtonColor.Primary" Size="ButtonSize.Small" @onclick="Store.OnCopyToClipboard" TooltipTitle="Copy to clipboard">
                                 <Icon Name="IconName.Clipboard" />
                             </Button>
                         </div>
@@ -135,7 +135,6 @@
     /// <inheritdoc/>
     protected override async Task OnInitializedAsync()
     {
-        await base.OnInitializedAsync().ConfigureAwait(false);
         UpdateBreadcrumb();
         Store.WorkflowInstanceName.Subscribe(value => OnStateChanged(_ => instanceName = value), token: CancellationTokenSource.Token);
         Store.WorkflowDefinition.Where(value => value != null).Subscribe(value => OnStateChanged(_ => workflowDefinition = value!), token: CancellationTokenSource.Token);
@@ -154,6 +153,7 @@
             OnStateChanged(_ => workflow = value!);
             UpdateBreadcrumb();
         }, token: CancellationTokenSource.Token);
+        await base.OnInitializedAsync().ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
@@ -175,14 +175,14 @@
     void UpdateBreadcrumb()
     {
         BreadcrumbManager.Use(Breadcrumbs.Workflows);
-        BreadcrumbManager.Add(new($"{Name}.{Namespace}", $"/workflows/details/{Namespace}/{Name}/latest"));
+        BreadcrumbManager.Add(new($"{Name}.{@namespace}", $"/workflows/details/{@namespace}/{Name}/latest"));
         if (workflow != null)
         {
             BreadcrumbManager.Add(new(VersionSelector()));
         }
         if (workflowInstance != null)
         {
-            BreadcrumbManager.Add(new(workflowInstance.GetName(), $"/workflows/details/{Namespace}/{Name}/{Version}/{workflowInstance.GetName()}"));
+            BreadcrumbManager.Add(new(workflowInstance.GetName(), $"/workflows/details/{@namespace}/{Name}/{Version}/{workflowInstance.GetName()}"));
         }
         StateHasChanged();
     }
@@ -226,13 +226,13 @@
         await this.Store.DeleteWorkflowInstanceAsync(instance);
     }
 
-    void OnCreateWorkflowVersion() => this.NavigationManager.NavigateTo($"/workflows/new/{Namespace}/{Name}");
+    void OnCreateWorkflowVersion() => this.NavigationManager.NavigateTo($"/workflows/new/{@namespace}/{Name}");
 
-    void OnShowInstanceDetails(WorkflowInstance instance) => NavigationManager.NavigateTo($"/workflows/details/{Namespace}/{Name}/{version}/{instance.GetName()}");
+    void OnShowInstanceDetails(WorkflowInstance instance) => NavigationManager.NavigateTo($"/workflows/details/{@namespace}/{Name}/{version}/{instance.GetName()}");
 
     void OnCloseWorkflowInstance()
     {
-        NavigationManager.NavigateTo($"/workflows/details/{Namespace}/{Name}/{version}");
+        NavigationManager.NavigateTo($"/workflows/details/{@namespace}/{Name}/{version}");
         StateHasChanged();
     }
 }

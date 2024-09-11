@@ -35,18 +35,27 @@
         </defs>
     </svg>
     <DagreGraph @ref="Store.DagreGraph" OnMouseDown="HandleOnMouseDown" OnMouseUp="HandleOnMouseUp" Options="options" Graph="graph">
+        <CenterControl>
+            <CenterControl />
+        </CenterControl>
+        <ZoomToFitControl>
+            <ZoomToFitControl />
+        </ZoomToFitControl>
+        <SaveAsPngControl>
+            <SaveAsPngControl />
+        </SaveAsPngControl>
         <ExtraControls>
-            <button class="btn" type="button" title="legend" @onclick="Store.ToggleLegendAsync">
+            <Button Outline="true" Color="ButtonColor.Primary" Size="ButtonSize.Small" @onclick="Store.ToggleLegendAsync" TooltipTitle="Legend">
                 <svg>
                     <use href="#legend" />
                 </svg>
-            </button>
+            </Button>
         </ExtraControls>
     </DagreGraph>
 
     @if (isLegendVisible)
     {
-        <WorkflowDiagramLegend />
+        <Legend />
     }
 }
 

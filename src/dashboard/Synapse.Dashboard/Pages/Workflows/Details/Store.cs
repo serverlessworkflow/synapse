@@ -14,6 +14,7 @@
 using Neuroglia.Blazor.Dagre.Models;
 using ServerlessWorkflow.Sdk.Models;
 using Synapse.Api.Client.Services;
+using Synapse.Dashboard.Components.DocumentDetailsStateManagement;
 using Synapse.Resources;
 
 namespace Synapse.Dashboard.Pages.Workflows.Details;
@@ -21,6 +22,7 @@ namespace Synapse.Dashboard.Pages.Workflows.Details;
 /// <summary>
 /// Represents the <see cref="View"/>'s store
 /// </summary>
+/// <param name="logger">The service used to perform logging</param>
 /// <param name="apiClient">The service used to interact with the Synapse API</param>
 /// <param name="resourceEventHub">The hub used to watch resource events</param>
 /// <param name="jsRuntime">The service used for JS interop</param>
@@ -30,6 +32,7 @@ namespace Synapse.Dashboard.Pages.Workflows.Details;
 /// <param name="monacoInterop">The service used to build a bridge with the monaco interop extension</param>
 /// <param name="toastService">The service used display toast messages</param>
 public class WorkflowDetailsStore(
+    ILogger<WorkflowDetailsStore> logger,
     ISynapseApiClient apiClient,
     ResourceWatchEventHubClient resourceEventHub,
     IJSRuntime jsRuntime,
@@ -39,7 +42,7 @@ public class WorkflowDetailsStore(
     MonacoInterop monacoInterop,
     ToastService toastService
 )
-    : NamespacedResourceManagementComponentStore<WorkflowDetailsState, WorkflowInstance>(apiClient, resourceEventHub)
+    : NamespacedResourceManagementComponentStore<WorkflowDetailsState, WorkflowInstance>(logger, apiClient, resourceEventHub)
 {
 
     private TextModel? _textModel = null;
@@ -215,7 +218,7 @@ public class WorkflowDetailsStore(
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                this.Logger.LogError("Unable to set text editor value: {exception}", ex.ToString());
                 await this.MonacoEditorHelper.ChangePreferredLanguageAsync(language == PreferredLanguage.YAML ? PreferredLanguage.JSON : PreferredLanguage.YAML);
             }
         }
@@ -239,8 +242,7 @@ public class WorkflowDetailsStore(
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.ToString());
-            // todo: implement proper error handling
+            this.Logger.LogError("Unable to get workflow '{name}.{ns}': {exception}", name, ns, ex.ToString());
         }
     }
 
@@ -291,8 +293,7 @@ public class WorkflowDetailsStore(
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.ToString());
-            // todo: handle exception
+            this.Logger.LogError("Unable to set text editor language: {exception}", ex.ToString());
         }
     }
 
@@ -313,8 +314,7 @@ public class WorkflowDetailsStore(
         catch (Exception ex)
         {
             this.ToastService.Notify(new(ToastType.Danger, "Failed to copy the definition to the clipboard."));
-            Console.WriteLine(ex.ToString());
-            // todo: handle exception
+            this.Logger.LogError("Unable to copy to clipboard: {exception}", ex.ToString());
         }
     }
 
@@ -377,8 +377,7 @@ public class WorkflowDetailsStore(
         }
         catch (Exception ex)
         {
-            // todo: handle ex
-            Console.WriteLine(ex.ToString());
+            this.Logger.LogError("Unable to set create workflow instance: {exception}", ex.ToString());
         }
         await this.Modal!.HideAsync();
     }

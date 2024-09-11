@@ -12,7 +12,6 @@
 // limitations under the License.
 
 using Synapse.Api.Client.Services;
-using System.Reactive.Linq;
 
 namespace Synapse.Dashboard.Components.ResourceManagement;
 
@@ -21,10 +20,11 @@ namespace Synapse.Dashboard.Components.ResourceManagement;
 /// </summary>
 /// <typeparam name="TState">The type of the component's state</typeparam>
 /// <typeparam name="TResource">The type of <see cref="IResource"/>s to manage</typeparam>
+/// <param name="logger">The service used to perform logging</param>
 /// <param name="apiClient">The service used to interact with the Synapse API</param>
 /// <param name="resourceEventHub">The <see cref="IResourceEventWatchHub"/> websocket service client</param>
-public class NamespacedResourceManagementComponentStore<TState, TResource>(ISynapseApiClient apiClient, ResourceWatchEventHubClient resourceEventHub)
-    : ResourceManagementComponentStoreBase<TState, TResource>(apiClient, resourceEventHub)
+public class NamespacedResourceManagementComponentStore<TState, TResource>(ILogger<NamespacedResourceManagementComponentStore<TState, TResource>> logger, ISynapseApiClient apiClient, ResourceWatchEventHubClient resourceEventHub)
+    : ResourceManagementComponentStoreBase<TState, TResource>(logger, apiClient, resourceEventHub)
     where TResource : Resource, new()
     where TState : NamespacedResourceManagementComponentState<TResource>, new()
 {
@@ -85,8 +85,8 @@ public class NamespacedResourceManagementComponentStore<TState, TResource>(ISyna
     /// <inheritdoc/>
     public override async Task InitializeAsync()
     {
-        await base.InitializeAsync();
         await this.ListNamespaceAsync().ConfigureAwait(false);
+        await base.InitializeAsync();
     }
 
 }
