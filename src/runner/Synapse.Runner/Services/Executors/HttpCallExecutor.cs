@@ -131,7 +131,7 @@ public class HttpCallExecutor(IServiceProvider serviceProvider, ILogger<HttpCall
             }
         }
         var uri = StringFormatter.NamedFormat(this.Http.EndpointUri.OriginalString, this.Task.Input.ToDictionary());
-        if (uri.IsRuntimeExpression()) uri = await this.Task.Workflow.Expressions.EvaluateAsync<string>(uri, this.Task.Input, this.Task.Arguments, cancellationToken).ConfigureAwait(false);
+        if (uri.IsRuntimeExpression()) uri = await this.Task.Workflow.Expressions.EvaluateAsync<string>(uri, this.Task.Input, this.GetExpressionEvaluationArguments(), cancellationToken).ConfigureAwait(false);
         using var request = new HttpRequestMessage(new HttpMethod(this.Http.Method), uri) { Content = requestContent };
         using var response = await this.HttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode) //todo: could be configurable on HTTP call?
