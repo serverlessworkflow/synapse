@@ -30,7 +30,7 @@ var builder = Host.CreateDefaultBuilder()
         services.Configure<OperatorOptions>(context.Configuration);
         services.AddSingleton(provider =>
         {
-            var options = provider.GetRequiredService<IOptions<OperatorOptions>>().Value;
+            var options = provider.GetRequiredService<IOptionsMonitor<OperatorOptions>>().CurrentValue;
             return Options.Create(options.Runner);
         });
         services.AddLogging(builder =>
