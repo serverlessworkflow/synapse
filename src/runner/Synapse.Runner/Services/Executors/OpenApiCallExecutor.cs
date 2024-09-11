@@ -16,7 +16,6 @@ using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi.Readers;
 using Neuroglia;
 using Neuroglia.Data.Expressions;
-using Neuroglia.Data.Infrastructure.ResourceOriented;
 using System.Net.Mime;
 using System.Text;
 
@@ -110,7 +109,9 @@ public class OpenApiCallExecutor(IServiceProvider serviceProvider, ILogger<OpenA
         this.OpenApi = (OpenApiCallDefinition)this.JsonSerializer.Convert(this.Task.Definition.With, typeof(OpenApiCallDefinition))!;
         using var httpClient = this.HttpClientFactory.CreateClient();
         await httpClient.ConfigureAuthenticationAsync(this.Task.Workflow.Definition, this.OpenApi.Document.Endpoint.Authentication, this.ServiceProvider, cancellationToken).ConfigureAwait(false);
-        using var request = new HttpRequestMessage(HttpMethod.Get, this.OpenApi.Document.EndpointUri);
+        var uri = StringFormatter.NamedFormat(this.OpenApi.Document.EndpointUri.OriginalString, this.Task.Input.ToDictionary());
+        if (uri.IsRuntimeExpression()) uri = await this.Task.Workflow.Expressions.EvaluateAsync<string>(uri, this.Task.Input, this.Task.Arguments, cancellationToken).ConfigureAwait(false);
+        using var request = new HttpRequestMessage(HttpMethod.Get, uri);
         using var response = await httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode)
         {
