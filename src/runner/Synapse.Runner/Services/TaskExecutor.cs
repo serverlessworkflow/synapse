@@ -345,15 +345,15 @@ public abstract class TaskExecutor<TDefinition>(IServiceProvider serviceProvider
         else if (this.Task.Definition.Output?.As != null) output = await this.Task.Workflow.Expressions.EvaluateAsync<object>(this.Task.Definition.Output.As, output ?? new(), arguments, cancellationToken).ConfigureAwait(false);
         if (this.Task.Definition.Export?.As is string toExpression) 
         {
-            var context = (await this.Task.Workflow.Expressions.EvaluateAsync<IDictionary<string, object>>(toExpression, this.Task.ContextData, arguments, cancellationToken).ConfigureAwait(false))!;
+            var context = (await this.Task.Workflow.Expressions.EvaluateAsync<IDictionary<string, object>>(toExpression, output ?? new(), arguments, cancellationToken).ConfigureAwait(false))!;
             await this.Task.SetContextDataAsync(context, cancellationToken).ConfigureAwait(false);
         }
         else if (this.Task.Definition.Export?.As != null)
         {
-            var context = (await this.Task.Workflow.Expressions.EvaluateAsync<IDictionary<string, object>>(this.Task.Definition.Export.As, this.Task.ContextData, arguments, cancellationToken).ConfigureAwait(false))!;
+            var context = (await this.Task.Workflow.Expressions.EvaluateAsync<IDictionary<string, object>>(this.Task.Definition.Export.As, output ?? new(), arguments, cancellationToken).ConfigureAwait(false))!;
             await this.Task.SetContextDataAsync(context, cancellationToken).ConfigureAwait(false);
         }
-        await this.AfterExecuteAsync(cancellationToken).ConfigureAwait(false); //todo: act upon last directive
+        await this.AfterExecuteAsync(cancellationToken).ConfigureAwait(false);
         await this.DoSetResultAsync(output, then, cancellationToken).ConfigureAwait(false);
         await this.Task.SetResultAsync(output, then, cancellationToken).ConfigureAwait(false);
         this.Subject.OnNext(new TaskLifeCycleEvent(TaskLifeCycleEventType.Completed));
