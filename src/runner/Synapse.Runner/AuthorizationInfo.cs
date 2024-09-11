@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Docker.DotNet.Models;
 using Neuroglia.Data.Infrastructure.ResourceOriented;
 using ServerlessWorkflow.Sdk.Models.Authentication;
 using System.Text;
