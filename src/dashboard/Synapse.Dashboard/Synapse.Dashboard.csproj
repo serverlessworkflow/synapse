@@ -6,25 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
 	<NeutralLanguage>en</NeutralLanguage>
 	<GenerateDocumentationFile>True</GenerateDocumentationFile>
-	<StaticWebAssetProjectMode>Default</StaticWebAssetProjectMode>
+	<!--<StaticWebAssetProjectMode>Default</StaticWebAssetProjectMode>-->
   </PropertyGroup>
-
-  <ItemGroup>
-    <Content Remove="wwwroot\css\horizontal-collapse.scss" />
-    <Content Remove="wwwroot\css\workflow-instance-details.scss" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <_ContentIncludedByDefault Remove="wwwroot\css\horizontal-collapse.scss" />
-    <_ContentIncludedByDefault Remove="wwwroot\css\workflow-instance-details.scss" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Components\WorkflowInstanceDetails\CorrelationContextRow.razor" />
-    <None Include="Components\WorkflowInstanceDetails\TaskInstanceRow.razor" />
-    <None Include="wwwroot\css\horizontal-collapse.scss" />
-    <None Include="wwwroot\css\workflow-instance-details.scss" />
-  </ItemGroup>
 
   <ItemGroup>
 	<PackageReference Include="Blazor.Bootstrap" Version="3.0.0" />
@@ -40,12 +23,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\api\Synapse.Api.Client.Http\Synapse.Api.Client.Http.csproj" />
     <ProjectReference Include="..\Synapse.Dashboard.StateManagement\Synapse.Dashboard.StateManagement.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Update="Components\DocumentDetails\DocumentDetails.razor">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-    </Content>
   </ItemGroup>
 
 </Project>

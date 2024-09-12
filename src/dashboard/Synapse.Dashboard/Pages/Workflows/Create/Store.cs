@@ -12,9 +12,11 @@
 // limitations under the License.
 
 using JsonCons.Utilities;
+using Neuroglia.Collections;
 using Neuroglia.Data;
 using Semver;
 using ServerlessWorkflow.Sdk.Models;
+using ServerlessWorkflow.Sdk.Validation;
 using Synapse.Api.Client.Services;
 using Synapse.Resources;
 using System.Text.RegularExpressions;
@@ -33,6 +35,7 @@ namespace Synapse.Dashboard.Pages.Workflows.Create;
 /// <param name="navigationManager">The service used to provides an abstraction for querying and managing URI navigation</param>
 /// <param name="specificationSchemaManager">The service used to download the specification schemas</param>
 /// <param name="monacoInterop">The service to build a bridge with the monaco interop extension</param>
+/// <param name="workflowDefinitionValidator">The service to validate workflow defintions</param>
 public class CreateWorkflowViewStore(
     ILogger<CreateWorkflowViewStore> logger,
     ISynapseApiClient api,
@@ -42,7 +45,8 @@ public class CreateWorkflowViewStore(
     IJSRuntime jsRuntime,
     NavigationManager navigationManager,
     SpecificationSchemaManager specificationSchemaManager,
-    MonacoInterop monacoInterop
+    MonacoInterop monacoInterop,
+    IWorkflowDefinitionValidator workflowDefinitionValidator
 )
     : ComponentStore<CreateWorkflowViewState>(new())
 {
@@ -96,6 +100,11 @@ public class CreateWorkflowViewStore(
     /// Gets the service to build a bridge with the monaco interop extension
     /// </summary>
     protected MonacoInterop MonacoInterop { get; } = monacoInterop;
+
+    /// <summary>
+    /// Gets the service to  to validate workflow defintions
+    /// </summary>
+    protected IWorkflowDefinitionValidator WorkflowDefinitionValidator { get; } = workflowDefinitionValidator;
 
     /// <summary>
     /// The <see cref="BlazorMonaco.Editor.StandaloneEditorConstructionOptions"/> provider function
@@ -210,7 +219,7 @@ public class CreateWorkflowViewStore(
     }
 
     /// <summary>
-    /// Sets the state's <see cref="ResourceEditorState{TResource}" /> <see cref="ProblemDetails"/>'s related data
+    /// Sets the state's <see cref="CreateWorkflowViewState" /> <see cref="ProblemDetails"/>'s related data
     /// </summary>
     /// <param name="problem">The <see cref="ProblemDetails"/> to populate the data with</param>
     public void SetProblemDetails(ProblemDetails? problem)
@@ -349,7 +358,8 @@ public class CreateWorkflowViewStore(
     {
         if (this.TextEditor == null) return;
         var document = await this.TextEditor.GetValue();
-        this.Reduce(state => state with {
+        this.Reduce(state => state with
+        {
             WorkflowDefinitionText = document
         });
     }
@@ -382,8 +392,24 @@ public class CreateWorkflowViewStore(
         try
         {
             var workflowDefinition = this.MonacoEditorHelper.PreferredLanguage == PreferredLanguage.JSON ?
-                this.JsonSerializer.Deserialize<WorkflowDefinition>(workflowDefinitionText) :
-                this.YamlSerializer.Deserialize<WorkflowDefinition>(workflowDefinitionText);
+                this.JsonSerializer.Deserialize<WorkflowDefinition>(workflowDefinitionText)! :
+                this.YamlSerializer.Deserialize<WorkflowDefinition>(workflowDefinitionText)!;
+            var validationResult = await this.WorkflowDefinitionValidator.ValidateAsync(workflowDefinition);
+            if (!validationResult.IsValid)
+            {
+                var errors = new Dictionary<string, string[]>();
+                validationResult.Errors?.Select(e => e.Reference ?? "")?.Distinct()?.ToList()?.ForEach(reference =>
+                {
+                    errors.Add(reference, validationResult.Errors!.Where(e => e.Reference == reference).Select(e => e.Details ?? "").ToArray());
+                });
+                this.Reduce(state => state with
+                {
+                    ProblemTitle = "Invalid definition",
+                    ProblemDetail = "The workflow definition is not valid.",
+                    ProblemErrors = errors
+                });
+                return;
+            }
             var @namespace = workflowDefinition!.Document.Namespace;
             var name = workflowDefinition.Document.Name;
             var version = workflowDefinition.Document.Version;
@@ -443,6 +469,33 @@ public class CreateWorkflowViewStore(
         catch (ProblemDetailsException ex)
         {
             this.SetProblemDetails(ex.Problem);
+        }
+        catch (YamlDotNet.Core.YamlException ex)
+        {
+            this.Reduce(state => state with
+            {
+                ProblemTitle = "Serialization error",
+                ProblemDetail = "The workflow definition cannot be serialized.",
+                ProblemErrors = new Dictionary<string, string[]>()
+                {
+                    {"Message", [ex.Message] },
+                    {"Start", [ex.Start.ToString()] },
+                    {"End", [ex.End.ToString()] }
+                }
+            });
+        }
+        catch (System.Text.Json.JsonException ex)
+        {
+            this.Reduce(state => state with
+            {
+                ProblemTitle = "Serialization error",
+                ProblemDetail = "The workflow definition cannot be serialized.",
+                ProblemErrors = new Dictionary<string, string[]>()
+                {
+                    {"Message", [ex.Message] },
+                    {"LineNumber", [ex.LineNumber?.ToString()??""] }
+                }
+            });
         }
         catch (Exception ex)
         {

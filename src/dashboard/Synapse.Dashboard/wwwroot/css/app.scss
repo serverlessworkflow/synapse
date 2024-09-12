@@ -170,3 +170,12 @@ input[type="search"]::-webkit-search-cancel-button {
     background-color: var(--vscode-editor-background);
     color: var(--vscode-editor-foreground);
 }
+
+.problems {
+    position: absolute;
+    bottom: 65px;
+    left: 0;
+    max-height: 300px;
+    overflow: scroll;
+    width: 100%;
+}
