@@ -120,14 +120,8 @@ public class ResourceEditorStore<TResource>(ILogger<ResourceEditorStore<TResourc
         await base.InitializeAsync().ConfigureAwait(false);
         this.Resource.Subscribe(resource =>
         {
-            if (monacoEditorHelper.PreferredLanguage == PreferredLanguage.YAML)
-            {
-                this.SetEditorValue(YamlSerializer.Default.Serialize(resource));
-            }
-            else
-            {
-                this.SetEditorValue(YamlSerializer.Default.Serialize(resource));
-            }
+            if (monacoEditorHelper.PreferredLanguage == PreferredLanguage.YAML) this.SetEditorValue(yamlSerializer.ConvertFromJson(jsonSerializer.SerializeToText(resource)));
+            else this.SetEditorValue(jsonSerializer.SerializeToText(resource));
         }, token: this.CancellationTokenSource.Token);
     }
 
