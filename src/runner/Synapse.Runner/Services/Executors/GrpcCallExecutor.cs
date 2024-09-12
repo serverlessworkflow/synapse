@@ -62,9 +62,14 @@ public class GrpcCallExecutor(IServiceProvider serviceProvider, ILogger<GrpcCall
             var callInvoker = new DefaultCallInvoker(channel);
             this.GrpcClient = DynamicGrpcClient.FromDescriptorProtos(callInvoker: callInvoker, [fileDescriptor]);
         }
-        catch (ErrorRaisedException ex) { await this.SetErrorAsync(ex.Error, cancellationToken).ConfigureAwait(false); }
+        catch (ErrorRaisedException ex) 
+        {
+            this.Logger.LogError("An error occured while initializing the task '{task}': {ex}", this.Task.Instance.Reference, ex);
+            await this.SetErrorAsync(ex.Error, cancellationToken).ConfigureAwait(false); 
+        }
         catch (Exception ex)
         {
+            this.Logger.LogError("An error occured while initializing the task '{task}': {ex}", this.Task.Instance.Reference, ex);
             await this.SetErrorAsync(new()
             {
                 Status = ErrorStatus.Validation,

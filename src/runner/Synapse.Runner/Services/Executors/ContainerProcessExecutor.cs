@@ -71,6 +71,7 @@ public class ContainerProcessExecutor(IServiceProvider serviceProvider, ILogger<
         }
         catch(Exception ex)
         {
+            this.Logger.LogError("An error occured while executing the task '{task}': {ex}", this.Task.Instance.Reference, ex);
             var message = ex.Message;
             try { if (this.Container?.StandardError != null) message = await this.Container.StandardError.ReadToEndAsync(cancellationToken).ConfigureAwait(false); } catch { }
             var error = ex.ToError(this.Task.Instance.Reference);

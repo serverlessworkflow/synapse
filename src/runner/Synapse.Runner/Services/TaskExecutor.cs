@@ -123,6 +123,7 @@ public abstract class TaskExecutor<TDefinition>(IServiceProvider serviceProvider
         }
         catch(HttpRequestException ex)
         {
+            this.Logger.LogError("An error occured while initializing the task '{task}': {ex}", this.Task.Instance.Reference, ex);
             await this.SetErrorAsync(new Error()
             {
                 Type = ErrorType.Communication,
@@ -134,6 +135,7 @@ public abstract class TaskExecutor<TDefinition>(IServiceProvider serviceProvider
         }
         catch(Exception ex)
         {
+            this.Logger.LogError("An error occured while initializing the task '{task}': {ex}", this.Task.Instance.Reference, ex);
             await this.SetErrorAsync(new Error()
             {
                 Type = ErrorType.Runtime,
@@ -198,6 +200,7 @@ public abstract class TaskExecutor<TDefinition>(IServiceProvider serviceProvider
         catch (OperationCanceledException) { }
         catch (HttpRequestException ex)
         {
+            this.Logger.LogError("An error occured while executing the task '{task}': {ex}", this.Task.Instance.Reference, ex);
             await this.SetErrorAsync(new Error()
             {
                 Type = ErrorType.Communication,
@@ -209,6 +212,7 @@ public abstract class TaskExecutor<TDefinition>(IServiceProvider serviceProvider
         }
         catch (Exception ex)
         {
+            this.Logger.LogError("An error occured while executing the task '{task}': {ex}", this.Task.Instance.Reference, ex);
             await this.SetErrorAsync(new Error()
             {
                 Type = ErrorType.Runtime,
