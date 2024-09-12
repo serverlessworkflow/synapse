@@ -16,8 +16,6 @@ using Neuroglia.Data;
 using Semver;
 using ServerlessWorkflow.Sdk.Models;
 using Synapse.Api.Client.Services;
-using Synapse.Dashboard.Components.DocumentDetailsStateManagement;
-using Synapse.Dashboard.Components.ResourceEditorStateManagement;
 using Synapse.Resources;
 using System.Text.RegularExpressions;
 
@@ -539,7 +537,7 @@ public class CreateWorkflowViewStore(
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.ToString());
+            this.Logger.LogError("Unable to set the validation schema: {exception}", ex.ToString());
             this.SetProblemDetails(new ProblemDetails(new Uri("about:blank"), "Unable to set the validation schema", 404, $"Unable to set the validation schema for the specification version '{version}'. Make sure the version exists."));
         }
         this._processingVersion = false;
