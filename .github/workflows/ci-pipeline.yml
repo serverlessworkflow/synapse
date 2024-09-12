@@ -19,10 +19,10 @@ jobs:
     uses: ./.github/workflows/build-dotnet.yml
     secrets: inherit
 
-  release:
-    needs: [build]
-    uses: ./.github/workflows/release.yml
-    secrets: inherit
+  # release:
+  #   needs: [build]
+  #   uses: ./.github/workflows/release.yml
+  #   secrets: inherit
 
   ## Automatically triggered on release(?)
   # publish:
