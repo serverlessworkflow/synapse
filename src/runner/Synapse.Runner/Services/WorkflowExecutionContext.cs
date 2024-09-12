@@ -29,11 +29,11 @@ namespace Synapse.Runner.Services;
 /// <param name="services">The current <see cref="IServiceProvider"/></param>
 /// <param name="expressionEvaluator">The service used to evaluate runtime expressions</param>
 /// <param name="jsonSerializer">The service used to serialize/deserialize objects to/from JSON</param>
-/// <param name="cloudFlowsApi">The service used to interact with the Synapse API</param>
+/// <param name="api">The service used to interact with the Synapse API</param>
 /// <param name="options">The service used to access the current <see cref="RunnerOptions"/></param>
 /// <param name="definition">The <see cref="WorkflowDefinition"/> of the <see cref="WorkflowInstance"/> to execute</param>
 /// <param name="instance">The <see cref="WorkflowInstance"/> to execute</param>
-public class WorkflowExecutionContext(IServiceProvider services, IExpressionEvaluator expressionEvaluator, IJsonSerializer jsonSerializer, ISynapseApiClient cloudFlowsApi, IOptions<RunnerOptions> options, WorkflowDefinition definition, WorkflowInstance instance)
+public class WorkflowExecutionContext(IServiceProvider services, IExpressionEvaluator expressionEvaluator, IJsonSerializer jsonSerializer, ISynapseApiClient api, IOptions<RunnerOptions> options, WorkflowDefinition definition, WorkflowInstance instance)
     : IWorkflowExecutionContext
 {
 
@@ -51,7 +51,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
     /// <summary>
     /// Gets the service used to interact with the Synapse API
     /// </summary>
-    protected ISynapseApiClient Api { get; } = cloudFlowsApi;
+    protected ISynapseApiClient Api { get; } = api;
 
     /// <summary>
     /// Gets the current <see cref="RunnerOptions"/>

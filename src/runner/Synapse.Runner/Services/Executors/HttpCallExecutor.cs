@@ -60,6 +60,7 @@ public class HttpCallExecutor(IServiceProvider serviceProvider, ILogger<HttpCall
         }
         catch(Exception ex)
         {
+            this.Logger.LogError("An error occured while initializing the task '{task}': {ex}", this.Task.Instance.Reference, ex);
             await this.SetErrorAsync(new()
             {
                 Status = ErrorStatus.Validation,

@@ -28,10 +28,6 @@ public class ExtensionTaskExecutor(IServiceProvider serviceProvider, ILogger<Ext
 {
 
     /// <inheritdoc/>
-    protected override Task DoExecuteAsync(CancellationToken cancellationToken)
-    {
-        this.GetType();
-        throw new NotImplementedException();
-    }
+    protected override Task DoExecuteAsync(CancellationToken cancellationToken) => throw new NotImplementedException();
 
 }

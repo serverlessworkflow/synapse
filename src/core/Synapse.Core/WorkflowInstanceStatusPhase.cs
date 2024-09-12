@@ -28,13 +28,13 @@ public static class WorkflowInstanceStatusPhase
     /// </summary>
     public const string Running = "running";
     /// <summary>
-    /// Indicates that the workflow ran to completion
-    /// </summary>
-    public const string Completed = "completed";
-    /// <summary>
     /// Indicates that the workflow's execution is waiting for user or event input
     /// </summary>
     public const string Waiting = "waiting";
+    /// <summary>
+    /// Indicates that the workflow ran to completion
+    /// </summary>
+    public const string Completed = "completed";
     /// <summary>
     /// Indicates that the workflow's execution has been cancelled
     /// </summary>

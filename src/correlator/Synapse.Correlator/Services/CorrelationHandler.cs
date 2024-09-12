@@ -367,7 +367,7 @@ public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRep
                         Metadata = new()
                         {
                             Namespace = this.Correlation.Resource.Spec.Outcome.Start!.Workflow.Namespace,
-                            Name = $"{this.Correlation.Resource.Spec.Outcome.Start!.Workflow.Namespace}-"
+                            Name = $"{this.Correlation.Resource.Spec.Outcome.Start!.Workflow.Name}-"
                         },
                         Spec = new()
                         {
