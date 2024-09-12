@@ -23,7 +23,7 @@ namespace Synapse.Dashboard.Services;
 public class SpecificationSchemaManager(IYamlSerializer yamlSerializer, HttpClient httpClient)
 {
 
-    Dictionary<string, string> _knownSchemas = new Dictionary<string, string>();
+    readonly Dictionary<string, string> _knownSchemas = [];
 
     string? _latestVersion = null;
 
@@ -56,7 +56,7 @@ public class SpecificationSchemaManager(IYamlSerializer yamlSerializer, HttpClie
     /// <returns>A awaitable task</returns>
     public async Task<string> GetSchema(string version)
     {
-        if (this._knownSchemas.ContainsKey(version)) return this._knownSchemas[version];
+        if (_knownSchemas.TryGetValue(version, out string? value)) return value;
         var address = $"https://raw.githubusercontent.com/serverlessworkflow/specification/{version}/schema/workflow.yaml";
         var yamlSchema = await this.HttpClient.GetStringAsync(address);
         this._knownSchemas.Add(version, this.YamlSerializer.ConvertToJson(yamlSchema));

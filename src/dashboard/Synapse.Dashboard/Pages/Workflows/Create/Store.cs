@@ -16,9 +16,8 @@ using Neuroglia.Data;
 using Semver;
 using ServerlessWorkflow.Sdk.Models;
 using Synapse.Api.Client.Services;
-using Synapse.Dashboard.Components.DocumentDetailsStateManagement;
-using Synapse.Dashboard.Components.ResourceEditorStateManagement;
 using Synapse.Resources;
+using System.Text.RegularExpressions;
 
 namespace Synapse.Dashboard.Pages.Workflows.Create;
 
@@ -50,7 +49,8 @@ public class CreateWorkflowViewStore(
 
     private TextModel? _textModel = null;
     private string _textModelUri = string.Empty;
-    private bool _disposed;
+    private bool _disposed = false;
+    private bool _processingVersion = false;
 
     /// <summary>
     /// Gets the service used to perform logging
@@ -122,6 +122,10 @@ public class CreateWorkflowViewStore(
     /// Gets an <see cref="IObservable{T}"/> used to observe changes to the state's <see cref="CreateWorkflowViewState.WorkflowDefinition"/> property
     /// </summary>
     public IObservable<WorkflowDefinition?> WorkflowDefinition => this.Select(state => state.WorkflowDefinition).DistinctUntilChanged();
+    /// <summary>
+    /// Gets an <see cref="IObservable{T}"/> used to observe changes to the state's <see cref="CreateWorkflowViewState.WorkflowDefinitionText"/> property
+    /// </summary>
+    public IObservable<string?> WorkflowDefinitionText => this.Select(state => state.WorkflowDefinitionText).DistinctUntilChanged();
 
     /// <summary>
     /// Gets an <see cref="IObservable{T}"/> used to observe changes to the state's <see cref="CreateWorkflowViewState.Loading"/> property
@@ -296,16 +300,17 @@ public class CreateWorkflowViewStore(
     /// <returns></returns>
     public async Task SetTextBasedEditorLanguageAsync()
     {
+        if (this.TextEditor == null)
+        {
+            return;
+        }
         try
         {
             var language = this.MonacoEditorHelper.PreferredLanguage;
-            if (this.TextEditor != null)
-            {
-                this._textModel = await Global.GetModel(this.JSRuntime, this._textModelUri);
-                this._textModel ??= await Global.CreateModel(this.JSRuntime, "", language, this._textModelUri);
-                await Global.SetModelLanguage(this.JSRuntime, this._textModel, language);
-                await this.TextEditor!.SetModel(this._textModel);
-            }
+            this._textModel = await Global.GetModel(this.JSRuntime, this._textModelUri);
+            this._textModel ??= await Global.CreateModel(this.JSRuntime, "", language, this._textModelUri);
+            await Global.SetModelLanguage(this.JSRuntime, this._textModel, language);
+            await this.TextEditor!.SetModel(this._textModel);
         }
         catch (Exception ex)
         {
@@ -320,19 +325,33 @@ public class CreateWorkflowViewStore(
     async Task SetTextEditorValueAsync()
     {
         var document = this.Get(state => state.WorkflowDefinitionText);
-        if (this.TextEditor != null && !string.IsNullOrWhiteSpace(document))
+        if (this.TextEditor == null || string.IsNullOrWhiteSpace(document))
         {
-            await this.TextEditor.SetValue(document);
-            try
-            {
-                //await this.TextEditor.Trigger("", "editor.action.triggerSuggest");
-                await this.TextEditor.Trigger("", "editor.action.formatDocument");
-            }
-            catch (Exception ex)
-            {
-                this.Logger.LogError("Unable to set text editor value: {exception}", ex.ToString());
-            }
+            return;
         }
+        await this.TextEditor.SetValue(document);
+        try
+        {
+            await this.TextEditor.Trigger("", "editor.action.formatDocument");
+        }
+        catch (Exception ex)
+        {
+            this.Logger.LogError("Unable to set text editor value: {exception}", ex.ToString());
+        }
+    }
+
+    /// <summary>
+    /// Handles text editor content changes
+    /// </summary>
+    /// <param name="e">The <see cref="ModelContentChangedEvent"/></param>
+    /// <returns>An awaitable task</returns>
+    public async Task OnDidChangeModelContent(ModelContentChangedEvent e)
+    {
+        if (this.TextEditor == null) return;
+        var document = await this.TextEditor.GetValue();
+        this.Reduce(state => state with {
+            WorkflowDefinitionText = document
+        });
     }
 
     /// <summary>
@@ -446,10 +465,6 @@ public class CreateWorkflowViewStore(
             string document = "";
             if (definition != null)
             {
-                if (definition.Document?.Dsl != null)
-                {
-                    await this.SetValidationSchema($"v{definition.Document.Dsl}");
-                }
                 document = this.MonacoEditorHelper.PreferredLanguage == PreferredLanguage.JSON ?
                     this.JsonSerializer.SerializeToText(definition) :
                     this.YamlSerializer.SerializeToText(definition);
@@ -468,6 +483,25 @@ public class CreateWorkflowViewStore(
         {
             await this.GetWorkflowDefinitionAsync(workflow.ns, workflow.name);
         }, cancellationToken: this.CancellationTokenSource.Token);
+        this.WorkflowDefinitionText.Where(document => !string.IsNullOrEmpty(document)).Throttle(new(100)).SubscribeAsync(async (document) => {
+            if (string.IsNullOrWhiteSpace(document))
+            {
+                return;
+            }
+            var currentDslVersion = this.Get(state => state.DslVersion);
+            var versionExtractor = new Regex("'?\"?(dsl|DSL)'?\"?\\s*:\\s*'?\"?([\\w\\.\\-\\+]*)'?\"?");
+            var match = versionExtractor.Match(document);
+            if (match == null)
+            {
+                return;
+            }
+            var documentDslVersion = match.Groups[2].Value;
+            if (documentDslVersion == currentDslVersion)
+            {
+                return;
+            }
+            await this.SetValidationSchema("v" + documentDslVersion);
+        }, cancellationToken: this.CancellationTokenSource.Token);
         await base.InitializeAsync();
     }
 
@@ -479,10 +513,34 @@ public class CreateWorkflowViewStore(
     protected async Task SetValidationSchema(string? version = null)
     {
         version ??= await this.SpecificationSchemaManager.GetLatestVersion();
-        var schema = await this.SpecificationSchemaManager.GetSchema(version);
-        var type = $"create_{typeof(WorkflowDefinition).Name.ToLower()}_{version}";
-        await this.MonacoInterop.AddValidationSchemaAsync(schema, $"https://synapse.io/schemas/{type}.json", $"{type}*").ConfigureAwait(false);
-        this._textModelUri = this.MonacoEditorHelper.GetResourceUri(type);
+        var currentVersion = this.Get(state => state.DslVersion);
+        if (currentVersion == version)
+        {
+            return;
+        }
+        if (this._processingVersion)
+        {
+            return;
+        }
+        this.SetProblemDetails(null);
+        this._processingVersion = true;
+        try
+        {
+            var schema = await this.SpecificationSchemaManager.GetSchema(version);
+            var type = $"create_{typeof(WorkflowDefinition).Name.ToLower()}_{version}_schema";
+            await this.MonacoInterop.AddValidationSchemaAsync(schema, $"https://synapse.io/schemas/{type}.json", $"{type}*").ConfigureAwait(false);
+            this._textModelUri = this.MonacoEditorHelper.GetResourceUri(type);
+            this.Reduce(state => state with
+            {
+                DslVersion = version
+            });
+        }
+        catch (Exception ex)
+        {
+            this.Logger.LogError("Unable to set the validation schema: {exception}", ex.ToString());
+            this.SetProblemDetails(new ProblemDetails(new Uri("about:blank"), "Unable to set the validation schema", 404, $"Unable to set the validation schema for the specification version '{version}'. Make sure the version exists."));
+        }
+        this._processingVersion = false;
     }
 
     /// <summary>
