@@ -8,13 +8,14 @@ on:
   workflow_dispatch:
 
 jobs:
-  versioning:
-    if: github.repository == 'serverlessworkflow/synapse' && github.ref_name == 'main'
-    uses: ./.github/workflows/versioning.yml
-    secrets: inherit
+  # versioning:
+  #   if: github.repository == 'serverlessworkflow/synapse' && github.ref_name == 'main'
+  #   uses: ./.github/workflows/versioning.yml
+  #   secrets: inherit
 
   build:
-    needs: [versioning]
+    if: github.repository == 'serverlessworkflow/synapse' && github.ref_name == 'main'
+    #needs: [versioning]
     uses: ./.github/workflows/build-dotnet.yml
     secrets: inherit
 
