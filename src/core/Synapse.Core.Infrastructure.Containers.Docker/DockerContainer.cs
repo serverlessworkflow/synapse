@@ -19,8 +19,8 @@ namespace Synapse.Core.Infrastructure.Containers;
 /// Represents a Docker <see cref="IContainer"/>
 /// </summary>
 /// <param name="id">The container's ID</param>
-/// <param name="dockerClient">The service used to interact with the Docker API</param>
-public class DockerContainer(string id, IDockerClient dockerClient)
+/// <param name="docker">The service used to interact with the Docker API</param>
+public class DockerContainer(string id, IDockerClient docker)
     : IContainer
 {
 
@@ -34,7 +34,7 @@ public class DockerContainer(string id, IDockerClient dockerClient)
     /// <summary>
     /// Gets the service used to interact with the Docker API
     /// </summary>
-    protected virtual IDockerClient DockerClient { get; } = dockerClient;
+    protected virtual IDockerClient Docker { get; } = docker;
 
     /// <inheritdoc/>
     public virtual StreamReader? StandardOutput { get; protected set; }
@@ -48,10 +48,10 @@ public class DockerContainer(string id, IDockerClient dockerClient)
     /// <inheritdoc/>
     public virtual async Task StartAsync(CancellationToken cancellationToken = default)
     {
-        await this.DockerClient.Containers.StartContainerAsync(this.Id, new() { }, cancellationToken).ConfigureAwait(false);
+        await this.Docker.Containers.StartContainerAsync(this.Id, new() { }, cancellationToken).ConfigureAwait(false);
 #pragma warning disable CS0618 // Type or member is obsolete
-        var standardOutputStream = await this.DockerClient.Containers.GetContainerLogsAsync(this.Id, new() { Follow = true, ShowStdout = true, ShowStderr = true, Timestamps = false }, cancellationToken).ConfigureAwait(false);
-        var standardErrorStream = await this.DockerClient.Containers.GetContainerLogsAsync(this.Id, new() { Follow = true, ShowStdout = false, ShowStderr = true, Timestamps = false }, cancellationToken).ConfigureAwait(false);
+        var standardOutputStream = await this.Docker.Containers.GetContainerLogsAsync(this.Id, new() { Follow = true, ShowStdout = true, ShowStderr = true, Timestamps = false }, cancellationToken).ConfigureAwait(false);
+        var standardErrorStream = await this.Docker.Containers.GetContainerLogsAsync(this.Id, new() { Follow = true, ShowStdout = false, ShowStderr = true, Timestamps = false }, cancellationToken).ConfigureAwait(false);
 #pragma warning restore CS0618 // Type or member is obsolete
         this.StandardOutput = new(standardOutputStream);
         this.StandardError = new(standardErrorStream);
@@ -60,12 +60,12 @@ public class DockerContainer(string id, IDockerClient dockerClient)
     /// <inheritdoc/>
     public virtual async Task WaitForExitAsync(CancellationToken cancellationToken = default)
     {
-        var response = await this.DockerClient.Containers.WaitContainerAsync(this.Id, cancellationToken).ConfigureAwait(false);
+        var response = await this.Docker.Containers.WaitContainerAsync(this.Id, cancellationToken).ConfigureAwait(false);
         this.ExitCode = response.StatusCode;
     }
 
     /// <inheritdoc/>
-    public virtual Task StopAsync(CancellationToken cancellationToken = default) => this.DockerClient.Containers.StopContainerAsync(this.Id, new() { }, cancellationToken);
+    public virtual Task StopAsync(CancellationToken cancellationToken = default) => this.Docker.Containers.StopContainerAsync(this.Id, new() { }, cancellationToken);
 
     /// <summary>
     /// Disposes of the <see cref="DockerContainer"/>

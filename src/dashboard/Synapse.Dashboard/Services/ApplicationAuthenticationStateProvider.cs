@@ -14,6 +14,7 @@
 using IdentityModel;
 using Microsoft.AspNetCore.Components.Authorization;
 using Synapse.Api.Client.Services;
+using Synapse.Dashboard.Components.DocumentDetailsStateManagement;
 using System.Security.Claims;
 
 namespace Synapse.Dashboard.Services;
@@ -21,14 +22,20 @@ namespace Synapse.Dashboard.Services;
 /// <summary>
 /// Represents an <see cref="AuthenticationStateProvider"/> implementation used to determine the current authentication state using Synapse Static Bearer Tokens
 /// </summary>
+/// <param name="logger">The service used to perform logging</param>
 /// <param name="api">The service used to interact with the Synapse API</param>
 /// <param name="tokenManager">The service used to manage security tokens</param>
 /// <param name="navigationManager">The service used to provides an abstraction for querying and managing URI navigation.</param>
-public class ApplicationAuthenticationStateProvider(ISynapseApiClient api, ISecurityTokenManager tokenManager, NavigationManager navigationManager)
+public class ApplicationAuthenticationStateProvider(ILogger<ApplicationAuthenticationStateProvider> logger, ISynapseApiClient api, ISecurityTokenManager tokenManager, NavigationManager navigationManager)
     : AuthenticationStateProvider
 {
 
     static readonly ClaimsPrincipal Anonymous = new();
+
+    /// <summary>
+    /// Gets the service used to perform logging
+    /// </summary>
+    protected ILogger<ApplicationAuthenticationStateProvider> Logger { get; } = logger;
 
     /// <summary>
     /// Gets the service used to interact with the Synapse API
@@ -55,8 +62,7 @@ public class ApplicationAuthenticationStateProvider(ISynapseApiClient api, ISecu
         }
         catch (Exception ex)
         {
-            // todo: better error handling
-            Console.WriteLine(ex);
+            this.Logger.LogError("Unable to get authentication state: {exception}", ex.ToString());
             await this.TokenManager.SetTokenAsync("");
             navigationManager.NavigateTo("/");
             return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));

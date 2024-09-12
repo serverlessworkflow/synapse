@@ -24,9 +24,13 @@ public static class OperatorRuntimeMode
     /// </summary>
     public const string Native = "native";
     /// <summary>
-    /// Gets the containerized operator runtime mode
+    /// Gets the Docker operator runtime mode
     /// </summary>
-    public const string Containerized = "containerized";
+    public const string Docker = "docker";
+    /// <summary>
+    /// Gets the Kubernetes operator runtime mode
+    /// </summary>
+    public const string Kubernetes = "kubernetes";
 
     /// <summary>
     /// Gets a new <see cref="IEnumerable{T}"/> containing all default operator runtime modes
@@ -35,7 +39,8 @@ public static class OperatorRuntimeMode
     public static IEnumerable<string> AsEnumerable()
     {
         yield return Native;
-        yield return Containerized;
+        yield return Docker;
+        yield return Kubernetes;
     }
 
 }

@@ -21,7 +21,7 @@ public class TaskExecutorTests
 {
 
     [Fact]
-    public async Task Task_Should_Timeout()
+    public async Task Task_Should_Timeout_Async()
     {
         //arrange
         var definition = new RunTaskDefinition()
@@ -61,7 +61,7 @@ public class TaskExecutorTests
     }
 
     [Fact]
-    public async Task Filter_Task_Input_And_Output_Should_Work()
+    public async Task Filter_Task_Input_And_Output_Should_Work_Async()
     {
         //arrange
         var colors = new string[] { "red", "green", "blue" };

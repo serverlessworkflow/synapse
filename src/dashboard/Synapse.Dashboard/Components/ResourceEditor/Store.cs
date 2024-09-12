@@ -15,6 +15,7 @@ using JsonCons.Utilities;
 using Neuroglia.Data;
 using Neuroglia.Serialization.Yaml;
 using Synapse.Api.Client.Services;
+using Synapse.Dashboard.Components.DocumentDetailsStateManagement;
 
 namespace Synapse.Dashboard.Components.ResourceEditorStateManagement;
 
@@ -24,14 +25,20 @@ namespace Synapse.Dashboard.Components.ResourceEditorStateManagement;
 /// <remarks>
 /// Initializes a new <see cref="ResourceEditorStore{TResource}"/>
 /// </remarks>
+/// <param name="logger">The service used to perform logging</param>
 /// <param name="apiClient">The service used to interact with a Synapse API</param>
 /// <param name="monacoEditorHelper">The service used to facilitate the Monaco editor interactions</param>
 /// <param name="jsonSerializer">The The service used to serialize/deserialize objects to/from JSON</param>
 /// <param name="yamlSerializer">The service used to serialize/deserialize objects to/from YAML</param>
-public class ResourceEditorStore<TResource>(ISynapseApiClient apiClient, IMonacoEditorHelper monacoEditorHelper, IJsonSerializer jsonSerializer, IYamlSerializer yamlSerializer)
+public class ResourceEditorStore<TResource>(ILogger<ResourceEditorStore<TResource>> logger, ISynapseApiClient apiClient, IMonacoEditorHelper monacoEditorHelper, IJsonSerializer jsonSerializer, IYamlSerializer yamlSerializer)
     : ComponentStore<ResourceEditorState<TResource>>(new())
     where TResource : Resource, new()
 {
+
+    /// <summary>
+    /// Gets the service used to perform logging
+    /// </summary>
+    protected ILogger<ResourceEditorStore<TResource>> Logger { get; } = logger;
 
     /// <summary>
     /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="ResourceEditorState{TResource}.Resource"/> changes
@@ -113,14 +120,8 @@ public class ResourceEditorStore<TResource>(ISynapseApiClient apiClient, IMonaco
         await base.InitializeAsync().ConfigureAwait(false);
         this.Resource.Subscribe(resource =>
         {
-            if (monacoEditorHelper.PreferredLanguage == PreferredLanguage.YAML)
-            {
-                this.SetEditorValue(YamlSerializer.Default.Serialize(resource));
-            }
-            else
-            {
-                this.SetEditorValue(YamlSerializer.Default.Serialize(resource));
-            }
+            if (monacoEditorHelper.PreferredLanguage == PreferredLanguage.YAML) this.SetEditorValue(yamlSerializer.ConvertFromJson(jsonSerializer.SerializeToText(resource)));
+            else this.SetEditorValue(jsonSerializer.SerializeToText(resource));
         }, token: this.CancellationTokenSource.Token);
     }
 
@@ -238,7 +239,7 @@ public class ResourceEditorStore<TResource>(ISynapseApiClient apiClient, IMonaco
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.ToString());
+            this.Logger.LogError("Unabled to change text editor language: {exception}", ex.ToString());
             await monacoEditorHelper.ChangePreferredLanguageAsync(language == PreferredLanguage.YAML ? PreferredLanguage.JSON : PreferredLanguage.YAML);
         }
     }
@@ -287,7 +288,7 @@ public class ResourceEditorStore<TResource>(ISynapseApiClient apiClient, IMonaco
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.ToString()); // todo: improve logging
+            this.Logger.LogError("Unable to create resource: {exception}", ex.ToString());
         }
         this.SetSaving(false);
     }
@@ -327,7 +328,7 @@ public class ResourceEditorStore<TResource>(ISynapseApiClient apiClient, IMonaco
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString()); // todo: improve logging
+                this.Logger.LogError("Unable to update resource: {exception}", ex.ToString());
             }
         }
         this.SetSaving(false);

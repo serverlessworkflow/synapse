@@ -24,7 +24,7 @@ public record OperatorSpec
     /// Gets/sets the options used to configure the runtime used by the Synapse Operator to spawn workflow instance processes
     /// </summary>
     [DataMember(Order = 1, Name = "runner"), JsonPropertyOrder(1), JsonPropertyName("runner"), YamlMember(Order = 1, Alias = "runner")]
-    public virtual RunnerDefinition Runner { get; set; } = new()
+    public virtual RunnerConfiguration Runner { get; set; } = new()
     {
         Runtime = new()
     };

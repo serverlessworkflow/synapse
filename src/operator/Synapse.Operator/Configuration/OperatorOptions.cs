@@ -24,17 +24,46 @@ public class OperatorOptions
     /// </summary>
     public OperatorOptions()
     {
-        Namespace = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Operator.Namespace)!;
-        Name = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Operator.Name)!;
-        var uri = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Operator.Runner.Api);
-        if (!string.IsNullOrWhiteSpace(uri))
+        this.Namespace = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Operator.Namespace)!;
+        this.Name = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Operator.Name)!;
+        var env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runtime.Mode);
+        if (!string.IsNullOrWhiteSpace(env))
         {
-            this.Runner ??= new();
-            this.Runner.Api ??= new() 
-            { 
-                Uri = new(uri)
+            this.Runner.Runtime = env switch
+            {
+                OperatorRuntimeMode.Docker => new()
+                {
+                    Docker = new()
+                },
+                OperatorRuntimeMode.Kubernetes => new()
+                {
+                    Kubernetes = new()
+                },
+                OperatorRuntimeMode.Native => new()
+                {
+                    Native = new()
+                },
+                _ => throw new NotSupportedException($"The specified operator runtime mode '{env}' is not supported"),
             };
         }
+        env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.Api);
+        if (!string.IsNullOrWhiteSpace(env))
+        {
+            this.Runner ??= new();
+            if (this.Runner.Api == null) this.Runner.Api ??= new()
+            {
+                Uri = new(env)
+            };
+            else this.Runner.Api.Uri = new(env);
+        }
+        env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.LifecycleEvents);
+        if (!string.IsNullOrWhiteSpace(env) && bool.TryParse(env, out var publishLifeCycleEvents))
+        {
+            this.Runner ??= new();
+            this.Runner.PublishLifecycleEvents = publishLifeCycleEvents;
+        }
+        env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.ContainerPlatform);
+        if (!string.IsNullOrWhiteSpace(env)) this.Runner.ContainerPlatform = env;
     }
 
     /// <summary>
@@ -50,6 +79,6 @@ public class OperatorOptions
     /// <summary>
     /// Gets/sets the options used to configure the runners spawned by a Synapse Operator
     /// </summary>
-    public virtual RunnerDefinition Runner { get; set; } = new();
+    public virtual RunnerConfiguration Runner { get; set; } = new();
 
 }

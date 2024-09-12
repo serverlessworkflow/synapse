@@ -11,18 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using IdentityServer4.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 var builder = WebApplication.CreateBuilder(args);
 var applicationOptions = new ApiServerOptions();
 builder.Configuration.Bind(applicationOptions);
 if (applicationOptions.Authentication.Tokens.Count < 1) throw new Exception("The Synapse API server requires that at least one static user token be configured");
+var authority = builder.Environment.RunsInDocker() || builder.Environment.RunsInKubernetes() ? Environment.GetEnvironmentVariable("SYNAPSE_API_JWT_AUTHORITY") : null;
 
 builder.Services.Configure<ApiServerOptions>(builder.Configuration);
 builder.Services.AddResponseCompression();
 builder.Services.AddSynapse(builder.Configuration);
 builder.Services.AddSynapseApi();
-builder.Services.AddSynapseHttpApi();
+builder.Services.AddSynapseHttpApi(authority);
 
 var authentication = builder.Services.AddAuthentication(FallbackPolicySchemeDefaults.AuthenticationScheme);
 authentication.AddScheme<StaticBearerAuthenticationOptions, StaticBearerAuthenticationHandler>(StaticBearerDefaults.AuthenticationScheme, options =>
@@ -31,9 +33,7 @@ authentication.AddScheme<StaticBearerAuthenticationOptions, StaticBearerAuthenti
 });
 authentication.AddJwtBearer(ServiceAccountAuthenticationDefaults.AuthenticationScheme, options =>
 {
-    options.Authority = builder.Environment.RunsInDocker() || builder.Environment.RunsInKubernetes()
-        ? "http://localhost:8080"
-        : "http://localhost:5257";
+    options.Authority = authority ?? "http://localhost:5257";
     options.RequireHttpsMetadata = false;
     options.TokenValidationParameters = new()
     {
@@ -109,6 +109,11 @@ app.UseResponseCompression();
 if (options.ServeDashboard) app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
 app.UseRouting();
+if (!string.IsNullOrWhiteSpace(authority)) app.Use(async (ctx, next) =>
+{
+    ctx.SetIdentityServerOrigin(authority);
+    await next();
+});
 app.UseIdentityServer();
 app.UseAuthentication();
 app.UseAuthorization();

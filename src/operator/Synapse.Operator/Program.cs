@@ -11,6 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Synapse.Runtime.Docker.Services;
+using Synapse.Runtime.Kubernetes.Services;
+
 if (args.Length != 0 && args.Contains("--debug") && !Debugger.IsAttached) Debugger.Launch();
 
 var builder = Host.CreateDefaultBuilder()
@@ -27,7 +30,7 @@ var builder = Host.CreateDefaultBuilder()
         services.Configure<OperatorOptions>(context.Configuration);
         services.AddSingleton(provider =>
         {
-            var options = provider.GetRequiredService<IOptions<OperatorOptions>>().Value;
+            var options = provider.GetRequiredService<IOptionsMonitor<OperatorOptions>>().CurrentValue;
             return Options.Create(options.Runner);
         });
         services.AddLogging(builder =>
@@ -39,23 +42,17 @@ var builder = Host.CreateDefaultBuilder()
         });
         services.AddSingleton<IUserAccessor, ApplicationUserAccessor>();
         services.AddSynapse(context.Configuration);
-        services.AddSingleton<IDockerClient>(provider =>
-        {
-            var configuration = new DockerClientConfiguration();
-            return configuration.CreateClient();
-        });
-        services.AddSingleton<DockerContainerPlatform>();
-        services.AddSingleton<IContainerPlatform>(provider => provider.GetRequiredService<DockerContainerPlatform>());
-        services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<DockerContainerPlatform>());
         services.AddScoped<NativeRuntime>();
-        services.AddScoped<ContainerRuntime>();
+        services.AddScoped<DockerRuntime>();
+        services.AddScoped<KubernetesRuntime>();
         services.AddScoped<IWorkflowRuntime>(provider => 
         {
             var options = provider.GetRequiredService<IOptionsMonitor<OperatorOptions>>().CurrentValue;
             return options.Runner.Runtime.Mode switch
             {
                 OperatorRuntimeMode.Native => provider.GetRequiredService<NativeRuntime>(),
-                OperatorRuntimeMode.Containerized => provider.GetRequiredService<ContainerRuntime>(),
+                OperatorRuntimeMode.Docker => provider.GetRequiredService<DockerRuntime>(),
+                OperatorRuntimeMode.Kubernetes => provider.GetRequiredService<KubernetesRuntime>(),
                 _ => throw new NotSupportedException($"The specified operator runtime mode '{options.Runner.Runtime.Mode}' is not supported")
             };
         });

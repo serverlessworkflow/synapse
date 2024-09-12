@@ -12,34 +12,36 @@
 // limitations under the License.
 
 using Synapse.Api.Client.Services;
+using Synapse.Dashboard.Components.DocumentDetailsStateManagement;
 
 namespace Synapse.Dashboard.Components.MonacoEditorStateManagement;
 
 /// <summary>
 /// Represents the <see cref="ComponentStore{TState}" /> of a <see cref="MonacoEditor"/>
 /// </summary>
+/// <param name="logger">The service used to perform logging</param>
 /// <param name="apiClient">The service used interact with Synapse API</param>
 /// <param name="jsRuntime">The service used from JS interop</param>
 /// <param name="monacoEditorHelper">The service used ease Monaco Editor interactions</param>
 /// <param name="jsonSerializer">The service used to serialize and deserialize JSON</param>
 /// <param name="yamlSerializer">The service used to serialize and deserialize YAML</param>
-public class MonacoEditorStore(
-    ISynapseApiClient apiClient,
-    IJSRuntime jsRuntime,
-    IMonacoEditorHelper monacoEditorHelper,
-    IJsonSerializer jsonSerializer,
-    IYamlSerializer yamlSerializer
-)
+public class MonacoEditorStore(ILogger<MonacoEditorStore> logger, ISynapseApiClient apiClient, IJSRuntime jsRuntime, IMonacoEditorHelper monacoEditorHelper, IJsonSerializer jsonSerializer, IYamlSerializer yamlSerializer)
     : ComponentStore<MonacoEditorState>(new())
 {
     
-    private TextModel? _textModel = null;
-    private string _textModelUri = monacoEditorHelper.GetResourceUri();
+    TextModel? _textModel;
+    string _textModelUri = monacoEditorHelper.GetResourceUri();
+
+    /// <summary>
+    /// Gets the service used to perform logging
+    /// </summary>
+    protected ILogger<MonacoEditorStore> Logger { get; } = logger;
 
     /// <summary>
     /// Gets the service used to interact with the Synapse API
     /// </summary>
     protected ISynapseApiClient ApiClient { get; } = apiClient;
+
     /// <summary>
     /// Gets the service used for JS interop
     /// </summary>
@@ -183,7 +185,7 @@ public class MonacoEditorStore(
             {
                 ModelName = modelName
             });
-            this._textModelUri = !string.IsNullOrEmpty(modelName) ? monacoEditorHelper.GetResourceUri(modelName) : monacoEditorHelper.GetResourceUri();
+            this._textModelUri = !string.IsNullOrEmpty(modelName) ? this.MonacoEditorHelper.GetResourceUri(modelName) : this.MonacoEditorHelper.GetResourceUri();
         }
     }
     #endregion
@@ -219,7 +221,7 @@ public class MonacoEditorStore(
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.ToString());
+            this.Logger.LogError("Unabled to set text editor value: {exception}", ex.ToString());
             await this.MonacoEditorHelper.ChangePreferredLanguageAsync(language == PreferredLanguage.YAML ? PreferredLanguage.JSON : PreferredLanguage.YAML);
         }
     }
@@ -253,8 +255,7 @@ public class MonacoEditorStore(
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.ToString());
-            // todo: handle exception
+            this.Logger.LogError("Unabled to set text editor language: {exception}", ex.ToString());
         }
     }
 

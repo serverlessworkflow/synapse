@@ -28,7 +28,7 @@ public static class WorkflowDefinitionExtensions
     public static MapEntry<string, TaskDefinition>? GetTaskAfter(this WorkflowDefinition workflow, TaskInstance after)
     {
         ArgumentNullException.ThrowIfNull(after);
-        switch (after.Next)
+        switch (after.Status == TaskInstanceStatus.Skipped ? FlowDirective.Continue : after.Next)
         {
             case FlowDirective.Continue:
                 var afterTask = workflow.Do[after.Name!];

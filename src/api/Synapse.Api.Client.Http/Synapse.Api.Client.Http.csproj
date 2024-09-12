@@ -6,8 +6,8 @@
 	<ImplicitUsings>enable</ImplicitUsings>
 	<NeutralLanguage>en</NeutralLanguage>
 	<GenerateDocumentationFile>True</GenerateDocumentationFile>
-	<VersionPrefix>1.1.0</VersionPrefix>
-	<VersionSuffix>alpha1</VersionSuffix>
+	<VersionPrefix>1.0.0</VersionPrefix>
+	<VersionSuffix>alpha2</VersionSuffix>
 	<AssemblyVersion>$(VersionPrefix)</AssemblyVersion>
 	<FileVersion>$(VersionPrefix)</FileVersion>
 	<Authors>The Synapse Authors</Authors>
@@ -18,18 +18,32 @@
 	<PackageProjectUrl>https://github.com/serverlessworkflow/synapse</PackageProjectUrl>
 	<PackageTags>synapse api client http</PackageTags>
 	<IsPackable>true</IsPackable>
-	<GenerateAppxPackageOnBuild>true</GenerateAppxPackageOnBuild>
-	<NeutralLanguage>en</NeutralLanguage>
+	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
 	<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+	<PackageIcon>transparent_logomark_256.png</PackageIcon>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
+	<Description>Contains the HTTP client for the Synapse API</Description>
+	<AssemblyInformationalVersion>$(VersionPrefix)-$(VersionSuffix)</AssemblyInformationalVersion>
 	<AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
 	<FileVersion>$(VersionPrefix).0</FileVersion>
 	<DebugType>embedded</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="..\..\..\assets\images\transparent_logomark_256.png" Link="transparent_logomark_256.png">
+      <PackagePath>\</PackagePath>
+      <Pack>True</Pack>
+    </None>
+    <None Include="..\..\..\README.md">
+	  <PackagePath>\</PackagePath>
+      <Pack>True</Pack>
+    </None>
+  </ItemGroup>
+	
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.8" />
-	<PackageReference Include="ServerlessWorkflow.Sdk.IO" Version="1.0.0-alpha2.12" />
+	<PackageReference Include="ServerlessWorkflow.Sdk.IO" Version="1.0.0-alpha2.15" />
     <PackageReference Include="System.Reactive" Version="6.0.1" />
   </ItemGroup>
 

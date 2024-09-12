@@ -17,6 +17,7 @@ using ServerlessWorkflow.Sdk;
 using ServerlessWorkflow.Sdk.Models;
 using ServerlessWorkflow.Sdk.Models.Calls;
 using ServerlessWorkflow.Sdk.Models.Tasks;
+using Synapse.Dashboard.Components.DocumentDetailsStateManagement;
 using System.Diagnostics;
 
 namespace Synapse.Dashboard.Services;
@@ -24,9 +25,10 @@ namespace Synapse.Dashboard.Services;
 /// <summary>
 /// Represents the default implementation of the <see cref="IWorkflowGraphBuilder"/> interface
 /// </summary>
+/// <param name="logger">The service used to perform logging</param>
 /// <param name="yamlSerializer">The service to serialize and deserialize YAML</param>
 /// <param name="jsonSerializer">The service to serialize and deserialize YAML</param>
-public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerializer jsonSerializer)
+public class WorkflowGraphBuilder(ILogger<WorkflowGraphBuilder> logger, IYamlSerializer yamlSerializer, IJsonSerializer jsonSerializer)
     : IWorkflowGraphBuilder
 {
 
@@ -39,6 +41,11 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
     /// Gets the default radius for start and end nodes
     /// </summary>
     public const int StartEndNodeRadius = 50;
+
+    /// <summary>
+    /// Gets the service used to perform logging
+    /// </summary>
+    protected ILogger<WorkflowGraphBuilder> Logger { get; } = logger;
 
     /// <summary>
     /// Gets the service used to serialize and deserialize YAML
@@ -73,7 +80,7 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
         }
         this.BuildEdge(graph, startNode, nextNode);
         sw.Stop();
-        Console.WriteLine($"WorkflowGraphBuilder.Build took {sw.ElapsedMilliseconds} ms");
+        this.Logger.LogTrace("WorkflowGraphBuilder.Build took {elapsedTime} ms", sw.ElapsedMilliseconds);
         return graph;
     }
 
@@ -88,10 +95,10 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
     /// Returns the name, index and reference of the next node
     /// </summary>
     /// <param name="context">The rendering context for the task nodes</param>
-    /// <param name="currentNode">The current task node</param>
+    /// <param name="ignoreConditionalTasks">If true, skips <see cref="TaskDefinition"/> with an if clause</param>
     /// <param name="transition">A transition, if different from the context task definition's</param>
     /// <returns>The next task <see cref="TaskIdentity"/></returns>
-    protected TaskIdentity? GetNextTaskIdentity(TaskNodeRenderingContext context, NodeViewModel currentNode, string? transition = null)
+    protected TaskIdentity? GetNextTaskIdentity(TaskNodeRenderingContext context, bool ignoreConditionalTasks, string? transition = null)
     {
         transition = !string.IsNullOrWhiteSpace(transition) ? transition : context.TaskDefinition.Then;
         if (transition == FlowDirective.End) return null;
@@ -101,10 +108,10 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
             {
                 return null;
             }
-            return this.GetNextTaskIdentity(context.ParentContext, currentNode);
+            return this.GetNextTaskIdentity(context.ParentContext, ignoreConditionalTasks);
         }
         var nextTaskName = string.IsNullOrWhiteSpace(transition) || transition == FlowDirective.Continue
-                ? context.Workflow.GetTaskAfter(new(context.TaskName, context.TaskDefinition), context.ParentReference)?.Key
+                ? context.Workflow.GetTaskAfter(new(context.TaskName, context.TaskDefinition), context.ParentReference, ignoreConditionalTasks)?.Key
                 : transition;
         if (string.IsNullOrWhiteSpace(nextTaskName))
         {
@@ -112,7 +119,7 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
             {
                 return null;
             }
-            return this.GetNextTaskIdentity(context.ParentContext, currentNode);
+            return this.GetNextTaskIdentity(context.ParentContext, ignoreConditionalTasks);
         }
         var nextTaskIndex = context.Workflow.IndexOf(nextTaskName, context.ParentReference);
         var nextTaskReference = $"{context.ParentReference}/{nextTaskIndex}/{nextTaskName}";
@@ -120,16 +127,36 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
     }
 
     /// <summary>
+    /// Gets a <see cref="NodeViewModel"/> by reference in the provided <see cref="TaskNodeRenderingContext"/>
+    /// </summary>
+    /// <param name="context">The source <see cref="TaskNodeRenderingContext"/></param>
+    /// <param name="reference">The reference to look for</param>
+    /// <returns></returns>
+    protected NodeViewModel GetNodeByReference(TaskNodeRenderingContext context, string reference)
+    {
+        if (context.Graph.AllClusters.ContainsKey(reference))
+        {
+            return (NodeViewModel)context.Graph.AllClusters[reference].AllNodes.First().Value;
+        }
+        if (context.Graph.AllNodes.ContainsKey(reference))
+        {
+            return (NodeViewModel)context.Graph.AllNodes[reference];
+        }
+        throw new IndexOutOfRangeException($"Unabled to find the task with reference '{reference}' in the provided context.");
+    }
+
+    /// <summary>
     /// Gets the next <see cref="NodeViewModel"/> in the graph
     /// </summary>
     /// <param name="context">The rendering context for the task nodes</param>
     /// <param name="currentNode">The current task node</param>
+    /// <param name="ignoreConditionalTasks">If true, skips <see cref="TaskDefinition"/> with an if clause</param>
     /// <param name="transition">A transition, if different from the context task definition's</param>
     /// <returns>The next task <see cref="NodeViewModel"/></returns>
     /// <exception cref="Exception"></exception>
-    protected NodeViewModel GetNextNode(TaskNodeRenderingContext context, NodeViewModel currentNode, string? transition = null)
+    protected NodeViewModel GetNextNode(TaskNodeRenderingContext context, NodeViewModel currentNode, bool ignoreConditionalTasks = false, string? transition = null)
     {
-        var nextTaskIdentity = this.GetNextTaskIdentity(context, currentNode, transition);
+        var nextTaskIdentity = this.GetNextTaskIdentity(context, ignoreConditionalTasks, transition);
         if (nextTaskIdentity == null)
         {
             return context.EndNode;
@@ -139,11 +166,13 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
         {
             this.BuildTaskNode(new(nextTaskIdentity.Context.Workflow, nextTaskIdentity.Context.Graph, nextTaskIdentity.Index, nextTaskIdentity.Name, nextTask, nextTaskIdentity.Context.TaskGroup, nextTaskIdentity.Context.ParentReference, nextTaskIdentity.Context.ParentContext, nextTaskIdentity.Context.EndNode, currentNode));
         }
-        if (context.Graph.AllClusters.ContainsKey(nextTaskIdentity.Reference))
+        if (string.IsNullOrEmpty(nextTask.If))
         {
-            return (NodeViewModel)context.Graph.AllClusters[nextTaskIdentity.Reference].AllNodes.First().Value;
+            return this.GetNodeByReference(context, nextTaskIdentity.Reference);
         }
-        return (NodeViewModel)context.Graph.AllNodes[nextTaskIdentity.Reference];
+        var nextNode = this.GetNodeByReference(context, nextTaskIdentity.Reference);
+        this.BuildEdge(context.Graph, currentNode, nextNode);
+        return this.GetNextNode(context, currentNode, true, transition);
     }
 
     /// <summary>
@@ -209,9 +238,9 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
                 }
             case "openapi":
                 {
-                    var definition = (OpenApiCallDefinition)this.JsonSerializer.Convert(context.TaskDefinition.With, typeof(OpenApiCallDefinition))!;
+                    //var definition = (OpenApiCallDefinition)this.JsonSerializer.Convert(context.TaskDefinition.With, typeof(OpenApiCallDefinition))!;
                     callType = context.TaskDefinition.Call.ToLower();
-                    content = definition.OperationId;
+                    //content = definition.OperationId;
                     break;
                 }
             default:
@@ -239,10 +268,16 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
         cluster.AddChild(port);
         if (context.TaskGroup == null) context.Graph.AddCluster(cluster);
         else context.TaskGroup.AddChild(cluster);
-        this.BuildTaskNode(new(context.Workflow, context.Graph, 0, context.TaskDefinition.Do.First().Key, context.TaskDefinition.Do.First().Value, cluster, context.TaskReference + "/do", context, context.EndNode, context.PreviousNode));
+        var innerContext = new TaskNodeRenderingContext(context.Workflow, context.Graph, 0, context.TaskDefinition.Do.First().Key, context.TaskDefinition.Do.First().Value, cluster, context.TaskReference + "/do", context, context.EndNode, context.PreviousNode);
+        this.BuildTaskNode(innerContext);
         if (taskCount > 0)
         {
-            this.BuildEdge(context.Graph, port, (NodeViewModel)cluster.AllNodes.Skip(1).First().Value);
+            var firstDoNode = (NodeViewModel)cluster.AllNodes.Skip(1).First().Value;
+            this.BuildEdge(context.Graph, port, firstDoNode);
+            if (taskCount > 1 && !string.IsNullOrWhiteSpace(context.TaskDefinition.Do.First().Value.If))
+            {
+                this.BuildEdge(context.Graph, port, this.GetNextNode(innerContext, firstDoNode));
+            }
         }
         else
         {
@@ -445,7 +480,7 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
         else context.TaskGroup.AddChild(node);
         foreach (var switchCase in context.TaskDefinition.Switch)
         {
-            var switchCaseNode = this.GetNextNode(context, node, switchCase.Value.Then);
+            var switchCaseNode = this.GetNextNode(context, node, false, switchCase.Value.Then);
             this.BuildEdge(context.Graph, node, switchCaseNode, switchCase.Key);
         }
         if (!context.TaskDefinition.Switch.Any(switchCase => string.IsNullOrEmpty(switchCase.Value.When)))
@@ -475,10 +510,16 @@ public class WorkflowGraphBuilder(IYamlSerializer yamlSerializer, IJsonSerialize
         tryCluster.AddChild(tryPort);
         containerCluster.AddChild(tryCluster);
         this.BuildEdge(context.Graph, containerPort, tryPort);
-        this.BuildTaskNode(new(context.Workflow, context.Graph, 0, context.TaskDefinition.Try.First().Key, context.TaskDefinition.Try.First().Value, tryCluster, context.TaskReference + "/try", context, context.EndNode, context.PreviousNode));
+        var innerContext = new TaskNodeRenderingContext(context.Workflow, context.Graph, 0, context.TaskDefinition.Try.First().Key, context.TaskDefinition.Try.First().Value, tryCluster, context.TaskReference + "/try", context, context.EndNode, context.PreviousNode);
+        this.BuildTaskNode(innerContext);
         if (taskCount > 0)
         {
-            this.BuildEdge(context.Graph, tryPort, tryCluster.AllNodes.Values.Skip(1).First());
+            var firstNode = (NodeViewModel)tryCluster.AllNodes.Skip(1).First().Value;
+            this.BuildEdge(context.Graph, tryPort, firstNode);
+            if (taskCount > 1 && !string.IsNullOrWhiteSpace(context.TaskDefinition.Try.First().Value.If))
+            {
+                this.BuildEdge(context.Graph, tryPort, this.GetNextNode(innerContext, firstNode));
+            }
         }
         var catchContent = this.YamlSerializer.SerializeToText(context.TaskDefinition.Catch);
         if (context.TaskDefinition.Catch.Do == null || context.TaskDefinition.Catch.Do.Count == 0)

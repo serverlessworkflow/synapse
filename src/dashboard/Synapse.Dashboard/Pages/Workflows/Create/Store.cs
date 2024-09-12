@@ -16,6 +16,7 @@ using Neuroglia.Data;
 using Semver;
 using ServerlessWorkflow.Sdk.Models;
 using Synapse.Api.Client.Services;
+using Synapse.Dashboard.Components.DocumentDetailsStateManagement;
 using Synapse.Dashboard.Components.ResourceEditorStateManagement;
 using Synapse.Resources;
 using System.Text.RegularExpressions;
@@ -25,6 +26,7 @@ namespace Synapse.Dashboard.Pages.Workflows.Create;
 /// <summary>
 /// Represents the <see cref="CreateWorkflowViewState"/>
 /// </summary>
+/// <param name="logger">The service used to perform logging</param>
 /// <param name="api">The service used to interact with the Synapse API</param>
 /// <param name="monacoEditorHelper">The service used to help handling Monaco editors</param>
 /// <param name="jsonSerializer">The service used to serialize/deserialize data to/from JSON</param>
@@ -34,6 +36,7 @@ namespace Synapse.Dashboard.Pages.Workflows.Create;
 /// <param name="specificationSchemaManager">The service used to download the specification schemas</param>
 /// <param name="monacoInterop">The service to build a bridge with the monaco interop extension</param>
 public class CreateWorkflowViewStore(
+    ILogger<CreateWorkflowViewStore> logger,
     ISynapseApiClient api,
     IMonacoEditorHelper monacoEditorHelper,
     IJsonSerializer jsonSerializer,
@@ -50,6 +53,11 @@ public class CreateWorkflowViewStore(
     private string _textModelUri = string.Empty;
     private bool _disposed = false;
     private bool _processingVersion = false;
+
+    /// <summary>
+    /// Gets the service used to perform logging
+    /// </summary>
+    protected ILogger<CreateWorkflowViewStore> Logger { get; } = logger;
 
     /// <summary>
     /// Gets the service used to interact with the Synapse API
@@ -273,7 +281,7 @@ public class CreateWorkflowViewStore(
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.ToString());
+            this.Logger.LogError("Unable to change text editor language: {exception}", ex.ToString());
             await this.MonacoEditorHelper.ChangePreferredLanguageAsync(language == PreferredLanguage.YAML ? PreferredLanguage.JSON : PreferredLanguage.YAML);
         }
     }
@@ -308,8 +316,7 @@ public class CreateWorkflowViewStore(
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.ToString());
-            // todo: handle exception
+            this.Logger.LogError("Unable to set text editor language: {exception}", ex.ToString());
         }
     }
 
@@ -331,8 +338,7 @@ public class CreateWorkflowViewStore(
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.ToString());
-            // todo: handle exception
+            this.Logger.LogError("Unable to set text editor value: {exception}", ex.ToString());
         }
     }
 
@@ -442,8 +448,7 @@ public class CreateWorkflowViewStore(
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.ToString());
-            // todo: handle exception
+            this.Logger.LogError("Unable to save workflow definition: {exception}", ex.ToString());
         }
         finally
         {
@@ -509,7 +514,7 @@ public class CreateWorkflowViewStore(
     /// <returns>An awaitable task</returns>
     protected async Task SetValidationSchema(string? version = null)
     {
-        version = version ?? await this.SpecificationSchemaManager.GetLatestVersion();
+        version ??= await this.SpecificationSchemaManager.GetLatestVersion();
         var currentVersion = this.Get(state => state.DslVersion);
         if (currentVersion == version)
         {

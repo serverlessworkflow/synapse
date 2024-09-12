@@ -232,6 +232,8 @@ public class WorkflowExecutor(IServiceProvider serviceProvider, ILogger<Workflow
     /// Handles the timeout of the <see cref="WorkflowInstance"/> to execute
     /// </summary>
     /// <param name="state">The timer's state</param>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "<Pending>")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "VSTHRD200:Use \"Async\" suffix for async methods", Justification = "<Pending>")]
     protected virtual async void OnTimeoutAsync(object? state)
     {
         await this.SetErrorAsync(new Error()
@@ -263,14 +265,13 @@ public class WorkflowExecutor(IServiceProvider serviceProvider, ILogger<Workflow
     /// <returns>A new awaitable <see cref="Task"/></returns>
     protected virtual async Task OnTaskCompletedAsync(ITaskExecutor executor, CancellationToken cancellationToken)
     {
-        var nextDefinition = executor.Task.Instance.Next switch
+        var nextDefinition = (executor.Task.Instance.Status == TaskInstanceStatus.Skipped ? FlowDirective.Continue : executor.Task.Instance.Next) switch
         {
             FlowDirective.End or FlowDirective.Exit => null,
             _ => this.Workflow.Definition.GetTaskAfter(executor.Task.Instance)
         };
         var completedTask = executor.Task;
         this.Executors.Remove(executor);
-        await executor.DisposeAsync().ConfigureAwait(false);
         if (nextDefinition == null)
         {
             await this.SetResultAsync(completedTask.Output, cancellationToken).ConfigureAwait(false);

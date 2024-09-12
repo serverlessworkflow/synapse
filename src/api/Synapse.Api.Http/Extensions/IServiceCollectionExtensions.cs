@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using IdentityServer4.Models;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.OpenApi.Models;
 using Neuroglia;
@@ -34,8 +33,9 @@ public static class IServiceCollectionExtensions
     /// Adds and configures the Synapse HTTP API and its related services
     /// </summary>
     /// <param name="services">The <see cref="IServiceCollection"/> to configure</param>
+    /// <param name="authority">The API's JWT authority</param>
     /// <returns>The configured <see cref="IServiceCollection"/></returns>
-    public static IServiceCollection AddSynapseHttpApi(this IServiceCollection services)
+    public static IServiceCollection AddSynapseHttpApi(this IServiceCollection services, string? authority = null)
     {
         ServiceAccountSigningKey.Initialize();
         services.AddHttpContextAccessor();
@@ -46,7 +46,10 @@ public static class IServiceCollectionExtensions
                 options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
             })
             .AddApplicationPart(typeof(WorkflowsController).Assembly);
-        services.AddIdentityServer()
+        services.AddIdentityServer(options =>
+        {
+            if (!string.IsNullOrWhiteSpace(authority)) options.IssuerUri = authority;
+        })
             .AddSigningCredential(ServiceAccountSigningKey.LoadPrivateKey())
             .AddInMemoryApiResources(SynapseApiDefaults.OpenIDConnect.ApiResources.AsEnumerable())
             .AddInMemoryIdentityResources(SynapseApiDefaults.OpenIDConnect.IdentityResources.AsEnumerable())
@@ -62,6 +65,29 @@ public static class IServiceCollectionExtensions
             {
                 var action = (ControllerActionDescriptor)o.ActionDescriptor;
                 return $"{action.ActionName}".ToCamelCase();
+            });
+            builder.AddSecurityDefinition("Static Token", new OpenApiSecurityScheme
+            {
+                Description = "Static token authorization using the Bearer scheme",
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "Static Token"
+            });
+            builder.AddSecurityRequirement(new()
+            {
+                {
+                    new()
+                    {
+                        Reference = new()
+                        {
+                            Id = "Static Token",
+                            Type = ReferenceType.SecurityScheme
+                        }
+                    },
+                    Array.Empty<string>()
+                }
             });
             builder.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
             builder.SwaggerDoc("v1", new OpenApiInfo

@@ -12,6 +12,7 @@
 // limitations under the License.
 
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Neuroglia.Data.Infrastructure;
 using Neuroglia.Security;
 using Synapse.Api.Application.Commands.Documents;
@@ -21,6 +22,7 @@ using Synapse.Api.Application.Queries.Documents;
 using Synapse.Api.Application.Queries.Resources.Generic;
 using Synapse.Api.Application.Queries.Users;
 using Synapse.Api.Application.Queries.WorkflowInstances;
+using Synapse.Api.Application.Services;
 using Synapse.Resources;
 
 namespace Synapse.Api.Application;
@@ -40,6 +42,10 @@ public static class IServiceCollectionExtensions
     {
         services.AddApiCommands();
         services.AddApiQueries();
+
+        services.AddSingleton<CloudEventPublisher>();
+        services.AddSingleton<ICloudEventPublisher>(provider => provider.GetRequiredService<CloudEventPublisher>());
+        services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<CloudEventPublisher>());
 
         return services;
     }

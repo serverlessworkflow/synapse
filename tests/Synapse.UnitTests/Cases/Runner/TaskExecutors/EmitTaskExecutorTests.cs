@@ -21,7 +21,7 @@ public class EmitTaskExecutorTests
 {
 
     [Fact]
-    public async Task Emit_Should_Work()
+    public async Task Emit_Should_Work_Async()
     {
         //arrange
         var id = Guid.NewGuid().ToString();

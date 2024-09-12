@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Synapse.Resources;
 using Neuroglia.Data.Infrastructure.ResourceOriented;
+using Synapse.Resources;
 using System.Diagnostics;
+using System.Reflection;
 
 namespace Synapse;
 
@@ -38,6 +39,311 @@ public static class SynapseDefaults
         /// Gets the Synapse API audience
         /// </summary>
         public const string Api = "synapse-api";
+
+    }
+
+    /// <summary>
+    /// Exposes constants about cloud events produced by Synapse
+    /// </summary>
+    public static class CloudEvents
+    {
+
+        /// <summary>
+        /// Gets the type prefix for all cloud events produced by Synapse
+        /// </summary>
+        public const string TypePrefix = "io.synapse-wfms.events.";
+
+        /// <summary>
+        /// Exposes constants about workflow-related cloud events
+        /// </summary>
+        public static class Workflow
+        {
+
+            /// <summary>
+            /// Gets the type prefix for all workflow-related cloud events produced by Synapse
+            /// </summary>
+            public const string TypePrefix = CloudEvents.TypePrefix + "workflows.";
+
+            /// <summary>
+            /// Exposes constants about the cloud event used to notify that a workflow started
+            /// </summary>
+            public static class Started
+            {
+
+                const string TypeName = "started";
+                /// <summary>
+                /// Gets the type of the workflow started cloud event version 1
+                /// </summary>
+                public const string v1 = TypePrefix + TypeName + ".v1";
+
+            }
+
+            /// <summary>
+            /// Exposes constants about the cloud event used to notify that a workflow has been suspended
+            /// </summary>
+            public static class Suspended
+            {
+
+                const string TypeName = "suspended";
+                /// <summary>
+                /// Gets the type of the workflow suspended cloud event version 1
+                /// </summary>
+                public const string v1 = TypePrefix + TypeName + ".v1";
+
+            }
+
+            /// <summary>
+            /// Exposes constants about the cloud event used to notify that a workflow has been resumed
+            /// </summary>
+            public static class Resumed
+            {
+
+                const string TypeName = "resumed";
+                /// <summary>
+                /// Gets the type of the workflow resumed cloud event version 1
+                /// </summary>
+                public const string v1 = TypePrefix + TypeName + ".v1";
+
+            }
+
+            /// <summary>
+            /// Exposes constants about the cloud event used to notify that a workflow has started correlating events
+            /// </summary>
+            public static class CorrelationStarted
+            {
+
+                const string TypeName = "correlation-started";
+                /// <summary>
+                /// Gets the type of the workflow correlation started cloud event version 1
+                /// </summary>
+                public const string v1 = TypePrefix + TypeName + ".v1";
+
+            }
+
+            /// <summary>
+            /// Exposes constants about the cloud event used to notify that a workflow has finished correlating events
+            /// </summary>
+            public static class CorrelationCompleted
+            {
+
+                const string TypeName = "correlation-completed";
+                /// <summary>
+                /// Gets the type of the workflow correlation completed cloud event version 1
+                /// </summary>
+                public const string v1 = TypePrefix + TypeName + ".v1";
+
+            }
+
+            /// <summary>
+            /// Exposes constants about the cloud event used to notify that a workflow has faulted
+            /// </summary>
+            public static class Faulted
+            {
+
+                const string TypeName = "faulted";
+                /// <summary>
+                /// Gets the type of the workflow faulted cloud event version 1
+                /// </summary>
+                public const string v1 = TypePrefix + TypeName + ".v1";
+
+            }
+
+            /// <summary>
+            /// Exposes constants about the cloud event used to notify that a workflow ran to completion
+            /// </summary>
+            public static class Completed
+            {
+
+                const string TypeName = "completed";
+                /// <summary>
+                /// Gets the type of the workflow completed cloud event version 1
+                /// </summary>
+                public const string v1 = TypePrefix + TypeName + ".v1";
+
+            }
+
+            /// <summary>
+            /// Exposes constants about the cloud event used to notify that the execution of a workflow has been cancelled
+            /// </summary>
+            public static class Cancelled
+            {
+
+                const string TypeName = "cancelled";
+                /// <summary>
+                /// Gets the type of the workflow cancelled cloud event version 1
+                /// </summary>
+                public const string v1 = TypePrefix + TypeName + ".v1";
+
+            }
+
+            /// <summary>
+            /// Exposes constants about the cloud event used to notify that the execution of a workflow has ended
+            /// </summary>
+            public static class Ended
+            {
+
+                const string TypeName = "ended";
+                /// <summary>
+                /// Gets the type of the workflow ended cloud event version 1
+                /// </summary>
+                public const string v1 = TypePrefix + TypeName + ".v1";
+
+            }
+
+        }
+
+        /// <summary>
+        /// Exposes constants about task-related cloud events
+        /// </summary>
+        public static class Task
+        {
+
+            /// <summary>
+            /// Gets the type prefix for all task-related cloud events produced by Synapse
+            /// </summary>
+            public const string TypePrefix = CloudEvents.TypePrefix + "tasks.";
+
+            /// <summary>
+            /// Exposes constants about the cloud event used to notify that a task has been created
+            /// </summary>
+            public static class Created
+            {
+
+                const string TypeName = "created";
+                /// <summary>
+                /// Gets the type of the task created cloud event version 1
+                /// </summary>
+                public const string v1 = TypePrefix + TypeName + ".v1";
+
+            }
+
+            /// <summary>
+            /// Exposes constants about the cloud event used to notify that a task started
+            /// </summary>
+            public static class Started
+            {
+
+                const string TypeName = "started";
+                /// <summary>
+                /// Gets the type of the task started cloud event version 1
+                /// </summary>
+                public const string v1 = TypePrefix + TypeName + ".v1";
+
+            }
+
+            /// <summary>
+            /// Exposes constants about the cloud event used to notify that a task has been suspended
+            /// </summary>
+            public static class Suspended
+            {
+
+                const string TypeName = "suspended";
+                /// <summary>
+                /// Gets the type of the task suspended cloud event version 1
+                /// </summary>
+                public const string v1 = TypePrefix + TypeName + ".v1";
+
+            }
+
+            /// <summary>
+            /// Exposes constants about the cloud event used to notify that a task has been resumed
+            /// </summary>
+            public static class Resumed
+            {
+
+                const string TypeName = "resumed";
+                /// <summary>
+                /// Gets the type of the task resumed cloud event version 1
+                /// </summary>
+                public const string v1 = TypePrefix + TypeName + ".v1";
+
+            }
+
+            /// <summary>
+            /// Exposes constants about the cloud event used to notify that a task is being retried
+            /// </summary>
+            public static class Retrying
+            {
+
+                const string TypeName = "retrying";
+                /// <summary>
+                /// Gets the type of the retrying task cloud event version 1
+                /// </summary>
+                public const string v1 = TypePrefix + TypeName + ".v1";
+
+            }
+
+            /// <summary>
+            /// Exposes constants about the cloud event used to notify that a task has been skipped
+            /// </summary>
+            public static class Skipped
+            {
+
+                const string TypeName = "skipped";
+                /// <summary>
+                /// Gets the type of the task skipped cloud event version 1
+                /// </summary>
+                public const string v1 = TypePrefix + TypeName + ".v1";
+
+            }
+
+            /// <summary>
+            /// Exposes constants about the cloud event used to notify that a task has faulted
+            /// </summary>
+            public static class Faulted
+            {
+
+                const string TypeName = "faulted";
+                /// <summary>
+                /// Gets the type of the task faulted cloud event version 1
+                /// </summary>
+                public const string v1 = TypePrefix + TypeName + ".v1";
+
+            }
+
+            /// <summary>
+            /// Exposes constants about the cloud event used to notify that a task ran to completion
+            /// </summary>
+            public static class Completed
+            {
+
+                const string TypeName = "completed";
+                /// <summary>
+                /// Gets the type of the task completed cloud event version 1
+                /// </summary>
+                public const string v1 = TypePrefix + TypeName + ".v1";
+
+            }
+
+            /// <summary>
+            /// Exposes constants about the cloud event used to notify that the execution of a task has been cancelled
+            /// </summary>
+            public static class Cancelled
+            {
+
+                const string TypeName = "cancelled";
+                /// <summary>
+                /// Gets the type of the task cancelled cloud event version 1
+                /// </summary>
+                public const string v1 = TypePrefix + TypeName + ".v1";
+
+            }
+
+            /// <summary>
+            /// Exposes constants about the cloud event used to notify that the execution of a task has ended
+            /// </summary>
+            public static class Ended
+            {
+
+                const string TypeName = "ended";
+                /// <summary>
+                /// Gets the type of the task ended cloud event version 1
+                /// </summary>
+                public const string v1 = TypePrefix + TypeName + ".v1";
+
+            }
+
+        }
 
     }
 
@@ -151,6 +457,24 @@ public static class SynapseDefaults
 
             }
 
+            /// <summary>
+            /// Exposes constants about environment variables related to cloud events published by the API
+            /// </summary>
+            public static class CloudEvents
+            {
+
+                /// <summary>
+                /// Gets the prefix for all API related environment variables
+                /// </summary>
+                public const string Prefix = Api.Prefix + "CLOUD_EVENTS_";
+
+                /// <summary>
+                /// Gets the absolute uri of the endpoint the API must publish cloud events to
+                /// </summary>
+                public const string Endpoint = Prefix + "ENDPOINT";
+
+            }
+
         }
 
         /// <summary>
@@ -213,23 +537,240 @@ public static class SynapseDefaults
             /// </summary>
             public const string Name = Prefix + "NAME";
 
+        }
+
+        /// <summary>
+        /// Exposes constants about runner-related environment variables
+        /// </summary>
+        public static class Runner
+        {
+
             /// <summary>
-            /// Exposes constants about an operator's runner-related environment variables
+            /// Gets the prefix for all runner related environment variables
             /// </summary>
-            public static class Runner
+            public const string Prefix = EnvironmentVariables.Prefix + "RUNNER_";
+
+            /// <summary>
+            /// Gets the environment variable used to configure the API used by runners
+            /// </summary>
+            public const string Api = Prefix + "API";
+            /// <summary>
+            /// Gets the environment variable used to configure the container platform used by runners
+            /// </summary>
+            public const string ContainerPlatform = Prefix + "CONTAINER_PLATFORM";
+            /// <summary>
+            /// Gets the environment variable used to configure whether or not runners should publish lifecycle events
+            /// </summary>
+            public const string LifecycleEvents = Prefix + "LIFECYCLE_EVENTS";
+            /// <summary>
+            /// Gets the environment variable used to configure the runner's namespace
+            /// </summary>
+            public const string Namespace = Prefix + "NAMESPACE";
+            /// <summary>
+            /// Gets the environment variable used to configure the runner's name
+            /// </summary>
+            public const string Name = Prefix + "NAME";
+
+        }
+
+        /// <summary>
+        /// Exposes constants about runtime-related environment variables
+        /// </summary>
+        public static class Runtime
+        {
+
+            /// <summary>
+            /// Gets the prefix for all runtime related environment variables
+            /// </summary>
+            public const string Prefix = EnvironmentVariables.Prefix + "RUNTIME_";
+
+            /// <summary>
+            /// Gets the environment variable used to configure the runtime mode
+            /// </summary>
+            public const string Mode = Prefix + "MODE";
+
+            /// <summary>
+            /// Exposes constants about Docker runtime-related environment variables
+            /// </summary>
+            public static class Docker
             {
 
                 /// <summary>
-                /// Gets the prefix for all operator runner related environment variables
+                /// Gets the prefix for all Docker runtime related environment variables
                 /// </summary>
-                public const string Prefix = Operator.Prefix + "RUNNER_";
+                public const string Prefix = Runtime.Prefix + "DOCKER_";
 
                 /// <summary>
-                /// Gets the environment variable used to configure the API used by runners spawned by the operator
+                /// Gets the environment variable used to specify the YAML file used to configure the Docker runner container
                 /// </summary>
-                public const string Api = Prefix + "API";
+                public const string Container = Prefix + "CONTAINER";
+                /// <summary>
+                /// Gets the environment variable used to configure the network runner containers should be connected to
+                /// </summary>
+                public const string Network = Prefix + "NETWORK";
+
+                /// <summary>
+                /// Exposes constants about environment variables used to configure the API of a Docker runtime
+                /// </summary>
+                public static class Api
+                {
+
+                    /// <summary>
+                    /// Gets the prefix for all Docker runtime API related environment variables
+                    /// </summary>
+                    public const string Prefix = Docker.Prefix + "API_";
+
+                    /// <summary>
+                    /// Gets the environment variable used to configure the endpoint of the Docker API to use
+                    /// </summary>
+                    public const string Endpoint = Prefix + "ENDPOINT";
+                    /// <summary>
+                    /// Gets the environment variable used to configure the version of the Docker API to use
+                    /// </summary>
+                    public const string Version = Prefix + "VERSION";
+
+                }
+
+                /// <summary>
+                /// Exposes constants about environment variables used to configure the runner images of a Docker runtime
+                /// </summary>
+                public static class Image
+                {
+
+                    /// <summary>
+                    /// Gets the prefix for all Docker runtime image related environment variables
+                    /// </summary>
+                    public const string Prefix = Docker.Prefix + "IMAGE_";
+
+                    /// <summary>
+                    /// Gets the environment variable used to configure the image registry to use when pulling runner images
+                    /// </summary>
+                    public const string Registry = Prefix + "REGISTRY";
+                    /// <summary>
+                    /// Gets the environment variable used to configure the policy to use when pulling runner images
+                    /// </summary>
+                    public const string PullPolicy = Prefix + "PULL_POLICY";
+
+                }
+
+                /// <summary>
+                /// Exposes constants about environment variables used to configure the secrets used by a Docker runtime
+                /// </summary>
+                public static class Secrets
+                {
+
+                    /// <summary>
+                    /// Gets the prefix for all Docker runtime secrets related environment variables
+                    /// </summary>
+                    public const string Prefix = Docker.Prefix + "SECRETS_";
+
+                    /// <summary>
+                    /// Gets the environment variable used to configure the directory that contains the secrets to mount onto runner containers
+                    /// </summary>
+                    public const string Directory = Prefix + "DIRECTORY";
+                    /// <summary>
+                    /// Gets the environment variable used to configure the directory to mount the secrets volume to
+                    /// </summary>
+                    public const string MountPath = Prefix + "MOUNT_PATH";
+
+                }
 
             }
+
+            /// <summary>
+            /// Exposes constants about Kubernetes runtime-related environment variables
+            /// </summary>
+            public static class Kubernetes
+            {
+
+                /// <summary>
+                /// Gets the prefix for all Kubernetes runtime related environment variables
+                /// </summary>
+                public const string Prefix = Runtime.Prefix + "K8S_";
+
+                /// <summary>
+                /// Gets the environment variable used to configure the path to the Kubeconfig file to use
+                /// </summary>
+                public const string Kubeconfig = Prefix + "KUBECONFIG";
+                /// <summary>
+                /// Gets the environment variable used to specify the YAML file used to configure the Kubernetes runner pod
+                /// </summary>
+                public const string Pod = Prefix + "POD";
+                /// <summary>
+                /// Gets the environment variable used to configure the namespace to create runner pods into
+                /// </summary>
+                public const string Namespace = Prefix + "NAMESPACE";
+                /// <summary>
+                /// Gets the environment variable used to configure the name of the service account that grants the runner the ability to spawn containers when its container platform has been set to `kubernetes`
+                /// </summary>
+                public const string ServiceAccount = Prefix + "SERVICE_ACCOUNT";
+
+                /// <summary>
+                /// Exposes constants about environment variables used to configure the secrets used by a Docker runtime
+                /// </summary>
+                public static class Secrets
+                {
+
+                    /// <summary>
+                    /// Gets the prefix for all Kubernetes runtime secrets related environment variables
+                    /// </summary>
+                    public const string Prefix = Kubernetes.Prefix + "SECRETS_";
+
+                    /// <summary>
+                    /// Gets the environment variable used to configure the name of the volume onto which to mount secrets
+                    /// </summary>
+                    public const string VolumeName = Prefix + "VOLUME_NAME";
+                    /// <summary>
+                    /// Gets the environment variable used to configure the directory to mount the secrets volume to
+                    /// </summary>
+                    public const string MountPath = Prefix + "MOUNT_PATH";
+
+                }
+
+            }
+
+            /// <summary>
+            /// Exposes constants about Native runtime-related environment variables
+            /// </summary>
+            public static class Native
+            {
+
+                /// <summary>
+                /// Gets the prefix for all native runtime related environment variables
+                /// </summary>
+                public const string Prefix = Runtime.Prefix + "NATIVE_";
+
+                /// <summary>
+                /// Gets the environment variable used to configure the working directory that contains the runner binaries
+                /// </summary>
+                public const string Directory = Prefix + "DIRECTORY";
+                /// <summary>
+                /// Gets the environment variable used to configure the path to the runner's executable file
+                /// </summary>
+                public const string Executable = Prefix + "EXECUTABLE";
+                /// <summary>
+                /// Gets the environment variable used to configure the directory that contains the secrets made available to runners
+                /// </summary>
+                public const string SecretsDirectory = Prefix + "SECRETS_DIRECTORY";
+
+            }
+
+        }
+
+        /// <summary>
+        /// Exposes constants about secrets-related environment variables
+        /// </summary>
+        public static class Secrets
+        {
+
+            /// <summary>
+            /// Gets the prefix for all secrets related environment variables
+            /// </summary>
+            public const string Prefix = EnvironmentVariables.Prefix + "SECRETS_";
+            /// <summary>
+            /// Gets the name of the environment variable used to configure the path to the directory that contains secrets files
+            /// </summary>
+            public const string Directory = Prefix + "DIRECTORY";
 
         }
 
@@ -270,6 +811,59 @@ public static class SynapseDefaults
             /// Gets the environment variable that holds the qualified name of workflow instance to run
             /// </summary>
             public const string Instance = Prefix + "INSTANCE";
+
+        }
+
+    }
+
+    /// <summary>
+    /// Exposes constants about Synapse containers
+    /// </summary>
+    public static class Containers
+    {
+
+        /// <summary>
+        /// Exposes constants about Synapse container images
+        /// </summary>
+        public static class Images
+        {
+
+            static string? _version;
+
+            /// <summary>
+            /// Gets the name of the Synapse container image registry
+            /// </summary>
+            public const string ImageRegistry = "ghcr.io/serverlessworkflow/synapse";
+            /// <summary>
+            /// Gets the current version of Synapse container images
+            /// </summary>
+            public static string Version
+            {
+                get
+                {
+                    if (!string.IsNullOrWhiteSpace(_version)) return _version;
+                    _version = typeof(SynapseDefaults).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "latest";
+                    if (_version.EndsWith('-')) _version = _version[..^1];
+                    if (_version.Contains('+')) _version = _version[.._version.IndexOf('+')];
+                    return _version;
+                }
+            }
+            /// <summary>
+            /// Gets the name of the Synapse API container image
+            /// </summary>
+            public static readonly string Api = $"{ImageRegistry}/api:{Version}";
+            /// <summary>
+            /// Gets the name of the Synapse Correlator container image
+            /// </summary>
+            public static readonly string Correlator = $"{ImageRegistry}/correlator:{Version}";
+            /// <summary>
+            /// Gets the name of the Synapse Operator container image
+            /// </summary>
+            public static readonly string Operator = $"{ImageRegistry}/operator:{Version}";
+            /// <summary>
+            /// Gets the name of the Synapse Runner container image
+            /// </summary>
+            public static readonly string Runner = $"{ImageRegistry}/runner:{Version}";
 
         }
 

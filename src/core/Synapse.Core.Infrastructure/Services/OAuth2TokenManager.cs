@@ -64,15 +64,23 @@ public class OAuth2TokenManager(ILogger<OAuth2TokenManager> logger, IJsonSeriali
         Uri tokenEndpoint;
         if (configuration is OpenIDConnectSchemeDefinition)
         {
-            var discoveryDocument = await this.HttpClient.GetDiscoveryDocumentAsync(configuration.Authority.OriginalString, cancellationToken).ConfigureAwait(false);
-            if (string.IsNullOrWhiteSpace(discoveryDocument.TokenEndpoint)) throw new NullReferenceException("The token endpoint is not documented by the OIDC discovery document");
+            var discoveryRequest = new DiscoveryDocumentRequest()
+            {
+                Address = configuration.Authority!.OriginalString,
+                Policy = new()
+                {
+                    RequireHttps = false
+                }
+            };
+            var discoveryDocument = await this.HttpClient.GetDiscoveryDocumentAsync(discoveryRequest, cancellationToken).ConfigureAwait(false);
+            if (string.IsNullOrWhiteSpace(discoveryDocument.TokenEndpoint)) throw new NullReferenceException($"The token endpoint is not documented by the OIDC discovery document.{(discoveryDocument.IsError ? $" Discovery error [{discoveryDocument.ErrorType}]: {discoveryDocument.Error}" : string.Empty)}");
             tokenEndpoint = new(discoveryDocument.TokenEndpoint!);
         }
         else if (configuration is OAuth2AuthenticationSchemeDefinition oauth2) tokenEndpoint = oauth2.Endpoints.Token;
         else throw new NotSupportedException($"The specified scheme type '{configuration.GetType().FullName}' is not supported in this context");
         var properties = new Dictionary<string, string>()
         {
-            { "grant_type", configuration.Grant }
+            { "grant_type", configuration.Grant! }
         };
         switch (configuration.Client?.Authentication)
         {

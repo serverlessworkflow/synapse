@@ -18,7 +18,7 @@ public class RaiseTaskExecutorTests
 {
 
     [Fact]
-    public async Task Raise_Static_Error_Should_Work()
+    public async Task Raise_Static_Error_Should_Work_Async()
     {
         //arrange
         var error = new ErrorDefinition()

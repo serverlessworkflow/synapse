@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-1
+  namespace: synapse
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/serverlessworkflow/synapse/api:1.0.0-alpha1
+          env:
+            - name: CONNECTIONSTRINGS__REDIS
+              value: garnet:6379
+            - name: SYNAPSE_DASHBOARD_SERVE
+              value: 'true'
+            - name: SYNAPSE_API_AUTH_TOKEN_FILE
+              value: /app/tokens.yaml
+            - name: SYNAPSE_API_JWT_AUTHORITY
+              value: http://api:8080
+            - name: SYNAPSE_API_CLOUD_EVENTS_ENDPOINT
+              value: https://webhook.site/a4aff725-0711-48b2-a9d2-5d1b806d04d0
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: tokens
+              mountPath: /app/tokens.yaml
+              subPath: tokens.yaml
+      volumes:
+        - name: tokens
+          hostPath:
+            path: /run/desktop/mnt/host/c/Users/User/.synapse
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: api
+  namespace: synapse
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: api
+  type: ClusterIP

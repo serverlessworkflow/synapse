@@ -12,7 +12,7 @@
 // limitations under the License.
 
 using Synapse.Api.Client.Services;
-using System.Reactive.Linq;
+using Synapse.Dashboard.Components.DocumentDetailsStateManagement;
 
 namespace Synapse.Dashboard.Components.ResourceManagement;
 
@@ -23,10 +23,11 @@ namespace Synapse.Dashboard.Components.ResourceManagement;
 /// <remarks>
 /// Initializes a new <see cref="ClusterResourceManagementComponentStore{TResource}"/>
 /// </remarks>
+/// <param name="logger">The service used to perform logging</param>
 /// <param name="apiClient">The service used to interact with the Synapse API</param>
 /// <param name="resourceEventHub">The <see cref="IResourceEventWatchHub"/> websocket service client</param>
-public class ClusterResourceManagementComponentStore<TResource>(ISynapseApiClient apiClient, ResourceWatchEventHubClient resourceEventHub)
-    : ResourceManagementComponentStoreBase<TResource>(apiClient, resourceEventHub)
+public class ClusterResourceManagementComponentStore<TResource>(ILogger<ClusterResourceManagementComponentStore<TResource>> logger, ISynapseApiClient apiClient, ResourceWatchEventHubClient resourceEventHub)
+    : ResourceManagementComponentStoreBase<TResource>(logger, apiClient, resourceEventHub)
     where TResource : Resource, new()
 {
 
@@ -64,8 +65,7 @@ public class ClusterResourceManagementComponentStore<TResource>(ISynapseApiClien
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.ToString());
-            // todo: implement proper error handling
+            this.Logger.LogError("Unable to list resources, {exception}", ex.ToString());
         }
     }
 

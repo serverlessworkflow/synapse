@@ -121,7 +121,7 @@ public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRep
                         this.Logger.LogInformation("Creating a new correlation context...");
                         context = new CorrelationContext()
                         {
-                            Id = Guid.NewGuid().ToString("N")[..15],
+                            Id = Guid.NewGuid().ToString("N")[..12],
                             Events = [new(filter.Key, e)],
                             Keys = CorrelationKeys == null ? new() : new(CorrelationKeys)
                         };
@@ -150,7 +150,7 @@ public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRep
                         this.Logger.LogInformation("Creating a new correlation context...");
                         context = new CorrelationContext()
                         {
-                            Id = Guid.NewGuid().ToString("N")[..15],
+                            Id = Guid.NewGuid().ToString("N")[..12],
                             Events = [new(filter.Key, e)],
                             Keys = CorrelationKeys == null ? new() : new(CorrelationKeys)
                         };

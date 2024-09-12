@@ -20825,31 +20825,33 @@ tr.row-placeholder td::after {
 .graph-container .graph-controls, .graph-canvas .graph-controls {
   display: flex;
   justify-content: flex-end;
-  gap: 1rem;
+  gap: 0.5rem;
   padding-right: 1rem;
 }
 .graph-container .graph-controls .btn, .graph-canvas .graph-controls .btn {
-  --bs-btn-color: #6c757d;
-  --bs-btn-border-color: #6c757d;
-  --bs-btn-hover-color: #fff;
-  --bs-btn-hover-bg: #6c757d;
-  --bs-btn-hover-border-color: #6c757d;
-  --bs-btn-focus-shadow-rgb: 108, 117, 125;
-  --bs-btn-active-color: #fff;
-  --bs-btn-active-bg: #6c757d;
-  --bs-btn-active-border-color: #6c757d;
+  --bs-btn-color: #8c68cd;
+  --bs-btn-border-color: #8c68cd;
+  --bs-btn-hover-color: #000;
+  --bs-btn-hover-bg: #8c68cd;
+  --bs-btn-hover-border-color: #8c68cd;
+  --bs-btn-focus-shadow-rgb: 140, 104, 205;
+  --bs-btn-active-color: #000;
+  --bs-btn-active-bg: #8c68cd;
+  --bs-btn-active-border-color: #8c68cd;
   --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
-  --bs-btn-disabled-color: #6c757d;
+  --bs-btn-disabled-color: #8c68cd;
   --bs-btn-disabled-bg: transparent;
-  --bs-btn-disabled-border-color: #6c757d;
+  --bs-btn-disabled-border-color: #8c68cd;
   --bs-gradient: none;
   color: var(--bs-btn-color);
+  stroke: var(--bs-btn-color);
   fill: var(--bs-btn-color);
   border: var(--bs-btn-border-width) solid var(--bs-btn-border-color);
 }
 .graph-container .graph-controls .btn:hover, .graph-canvas .graph-controls .btn:hover {
   color: var(--bs-btn-hover-color);
   fill: var(--bs-btn-hover-color);
+  stroke: var(--bs-btn-hover-color);
   background-color: var(--bs-btn-hover-bg);
   border-color: var(--bs-btn-hover-border-color);
 }

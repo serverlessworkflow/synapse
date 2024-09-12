@@ -1,5 +1,5 @@
-<p align="center">
-  <img src="assets/images/transparent_logo.png" height="350px" alt="Synapse Logo"/>
+﻿<p align="center">
+  <img src="./assets/images/transparent_logo.png" height="350px" alt="Synapse Logo"/>
 </p>
 
 ---
@@ -19,6 +19,10 @@ It enables developers and organizations to define and execute workflows effortle
 
 With Synapse, you can create powerful workflows that are cloud vendor-agnostic, easily scalable, and highly customizable.
 
+<p align="center">
+  <img src="./assets/images/preview.gif" alt="Synapse Preview"/>
+</p>
+
 ### Features
 
 - **Easy to Use**: The Serverless Workflow DSL is designed for universal understanding, enabling users to quickly grasp workflow concepts and create complex workflows effortlessly.
@@ -33,7 +37,7 @@ With Synapse, you can create powerful workflows that are cloud vendor-agnostic, 
 - **Scalable**: Promotes code reusability, maintainability, and scalability across different environments.
 - **Cross-Platform**: Runs on various operating systems, providing flexibility and ease of integration.
 
-### Microservices
+### Architecture
 
 Synapse is composed of several specialized applications, allowing for atomic scalability, resilience, and ease of maintenance:
 
@@ -42,6 +46,12 @@ Synapse is composed of several specialized applications, allowing for atomic sca
 - **Runner**: Executes a single instance of a workflow.
 - **Correlator**: Performs Complex Event Processing (CEP) and correlates ingested events.
 - **CLI**: Allows interaction with the Synapse API via the command line interface.
+
+<p align="center">
+  <img src="./assets/images/architecture-c4-l2.png" alt="Synapse Architecture C4 Diagram - Container Layer"/>
+</p>
+
+*For more information about the Synapse architecture, please refer to the [wiki](https://github.com/serverlessworkflow/synapse/wiki/Architecture).* 📖
 
 ## Getting Started
 
@@ -78,6 +88,8 @@ The simplest way to get started is by using the provided Docker Compose setup.
     ```
 
 This will pull the necessary Docker images and start the Synapse services as defined in the `docker-compose.yml` file. You can then access the Synapse API and dashboard as configured.
+
+*For more information about installing Synapse, please refer to the [wiki](https://github.com/serverlessworkflow/synapse/wiki/Installation)*. 📖
 
 ### Run using `synctl` Command-line Interface
 
@@ -120,15 +132,15 @@ The command above will provide the fully qualified name of the created workflow 
 synctl workflow-instance get-output greeter-uk58h3dssqp620a --namespace default --output yaml
 ```
 
-For more information about `synctl`, please refer to the [documentation](#synctl).
+*For more information about `synctl`, please refer to the [wiki](https://github.com/serverlessworkflow/synapse/wiki/CLI-Usage).* 📖
 
 ## Community
 
 The Synapse project has a vibrant and growing community dedicated to building a community-driven and vendor-neutral workflow runtime ecosystem. Contributions from the community are encouraged and essential to the continued growth and success of the project.
 
-A list of community members who have contributed to Synapse can be found [here](./community/README.md).
+A list of community members who have contributed to Synapse can be found [here](./community/README.md). 👥
 
-To learn how to contribute to Synapse, please refer to the [contribution guidelines](CONTRIBUTING.md).
+To learn how to contribute to Synapse, please refer to the [contribution guidelines](CONTRIBUTING.md). 📝
 
 For any copyright-related questions when contributing to a CNCF project like Synapse, please refer to the [Ownership of Copyrights in CNCF Project Contributions](https://github.com/cncf/foundation/blob/master/copyright-notices.md) document.
 
@@ -138,5 +150,5 @@ As contributors and maintainers of Synapse, and in the interest of fostering an 
 
 The project is committed to making participation in Synapse a harassment-free experience for everyone, regardless of experience level, gender identity and expression, sexual orientation, disability, personal appearance, body size, race, ethnicity, age, religion, or nationality.
 
-For more detailed information, please see the full project Code of Conduct [here](code-of-conduct.md).
+For more detailed information, please see the full project Code of Conduct [here](code-of-conduct.md). 🛡️
 
