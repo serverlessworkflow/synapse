@@ -11,8 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using FluentValidation;
 using Microsoft.AspNetCore.Components.Authorization;
 using Neuroglia.Blazor.Dagre;
+using ServerlessWorkflow.Sdk.Models;
+using ServerlessWorkflow.Sdk.Validation;
 using System.Text.Json;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
@@ -45,7 +48,17 @@ builder.Services.AddOidcAuthentication(options =>
 {
     builder.Configuration.Bind("Authentication:OIDC", options.ProviderOptions);
 });
-
+// Seems to bring conflict between scope & singleton services
+//builder.Services.AddServerlessWorkflowValidation();
+/* From AddServerlessWorkflowValidation */
+builder.Services.AddScoped<IWorkflowDefinitionValidator, WorkflowDefinitionValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<WorkflowDefinition>();
+var defaultPropertyNameResolver = ValidatorOptions.Global.PropertyNameResolver;
+ValidatorOptions.Global.PropertyNameResolver = (type, member, lambda) =>
+{
+    return member == null ? defaultPropertyNameResolver(type, member, lambda) : member.Name.ToCamelCase();
+};
+/* End of AddServerlessWorkflowValidation */
 builder.Services.AddSingleton<IMonacoEditorHelper, MonacoEditorHelper>();
 builder.Services.AddScoped<IApplicationLayout, ApplicationLayout>();
 builder.Services.AddScoped<SpecificationSchemaManager>();

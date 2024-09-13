@@ -4,8 +4,8 @@
     "inputFile": "wwwroot/css/app.scss"
   },
   {
-    "outputFile": "Components/Layout/MainLayout.razor.css",
-    "inputFile": "Components/Layout/MainLayout.razor.scss"
+    "outputFile": "Layout/MainLayout.razor.css",
+    "inputFile": "Layout/MainLayout.razor.scss"
   },
   {
     "outputFile": "Components/ResourceEditor/ResourceEditor.razor.css",

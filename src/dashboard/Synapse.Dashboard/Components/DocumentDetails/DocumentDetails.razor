@@ -53,24 +53,24 @@
         }
         @if (problemDetails != null)
         {
-            <div class="problems">
-                <Callout Type="CalloutType.Danger" Heading="@problemDetails.Title">
-                    @problemDetails.Detail
-                </Callout>
-                @if (problemDetails.Errors != null && problemDetails.Errors.Any())
-                {
-                    foreach (KeyValuePair<string, string[]> errorContainer in problemDetails.Errors)
+            <div class="problems p-3">
+                <Callout Color="CalloutColor.Danger" Heading="@problemDetails.Title">
+                    <p>@problemDetails.Detail</p>
+
+                    @if (problemDetails.Errors != null && problemDetails.Errors.Any())
                     {
-                        <Callout Type="CalloutType.Danger" Heading="@errorContainer.Key">
+                        foreach (KeyValuePair<string, string[]> errorContainer in problemDetails.Errors)
+                        {
+                            <strong>@errorContainer.Key:</strong>
                             <ul>
                                 @foreach (string error in errorContainer.Value)
                                 {
                                     <li>@error</li>
                                 }
                             </ul>
-                        </Callout>
+                        }
                     }
-                }
+                </Callout>
             </div>
         }
     }
