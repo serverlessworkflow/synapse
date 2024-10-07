@@ -44,7 +44,7 @@ public record CreateWorkflowViewState
     {
         Document = new()
         {
-            Dsl = "1.0.0-alpha2",
+            Dsl = "1.0.0-alpha3",
             Namespace = Neuroglia.Data.Infrastructure.ResourceOriented.Namespace.DefaultNamespaceName,
             Name = "new-workflow",
             Version = "0.1.0"
