@@ -45,8 +45,6 @@ public static class IServiceCollectionExtensions
     {
         services.AddHttpClient();
         services.AddSerialization();
-        services.AddJsonSerializer();
-        services.AddYamlDotNetSerializer();
         services.AddMediator();
         services.AddScoped<IUserInfoProvider, UserInfoProvider>();
         services.AddServerlessWorkflowIO();

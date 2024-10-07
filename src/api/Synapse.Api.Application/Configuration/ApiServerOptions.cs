@@ -43,4 +43,9 @@ public class ApiServerOptions
     /// </summary>
     public virtual ApiServerCloudEventOptions CloudEvents { get; set; } = new();
 
+    /// <summary>
+    /// Gets/sets the options used to configure the seeding, if any, of Synapse's database
+    /// </summary>
+    public virtual DatabaseSeedingOptions Seeding { get; set; } = new();
+
 }
