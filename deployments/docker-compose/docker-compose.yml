@@ -9,7 +9,7 @@ services:
     image: ghcr.io/serverlessworkflow/synapse/api
     environment:
       CONNECTIONSTRINGS__REDIS: ${GARNET_URI}
-      SYNAPSE_DASHBOARD_SERVE: true
+      SYNAPSE_DASHBOARD_SERVE: 'true'
       SYNAPSE_API_AUTH_TOKEN_FILE: /app/tokens.yaml
       SYNAPSE_API_JWT_AUTHORITY: http://api:8080
       SYNAPSE_API_CLOUD_EVENTS_ENDPOINT: https://webhook.site/a4aff725-0711-48b2-a9d2-5d1b806d04d0
@@ -27,7 +27,7 @@ services:
       SYNAPSE_OPERATOR_NAMESPACE: default
       SYNAPSE_OPERATOR_NAME: operator-1
       SYNAPSE_RUNNER_API: http://api:8080
-      SYNAPSE_RUNNER_LIFECYCLE_EVENTS: true
+      SYNAPSE_RUNNER_LIFECYCLE_EVENTS: 'true'
       SYNAPSE_RUNNER_CONTAINER_PLATFORM: docker
       SYNAPSE_RUNTIME_DOCKER_SECRETS_DIRECTORY: C:\Users\User\.synapse\secrets
       DOCKER_HOST: unix:///var/run/docker.sock
