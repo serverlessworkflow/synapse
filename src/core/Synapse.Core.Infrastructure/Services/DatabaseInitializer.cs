@@ -57,7 +57,7 @@ public class DatabaseInitializer(ILoggerFactory loggerFactory, IServiceProvider 
             }, false, cancellationToken).ConfigureAwait(false);
             await this.Database.InitializeAsync(cancellationToken);
         }
-        catch (ProblemDetailsException ex) when (ex.Problem.Status == (int)HttpStatusCode.Conflict || (ex.Problem.Status == (int)HttpStatusCode.BadRequest && ex.Problem.Title == "Conflict")) { continue; }
+        catch (ProblemDetailsException ex) when (ex.Problem.Status == (int)HttpStatusCode.Conflict || (ex.Problem.Status == (int)HttpStatusCode.BadRequest && ex.Problem.Title == "Conflict")) { }
     }
 
 }
