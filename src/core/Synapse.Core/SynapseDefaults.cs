@@ -1065,9 +1065,9 @@ return message;
     {
 
         /// <summary>
-        /// Exposes Synapse task extension properties
+        /// Exposes Synapse task metadata properties
         /// </summary>
-        public static class ExtensionProperties
+        public static class Metadata
         {
 
             /// <summary>
