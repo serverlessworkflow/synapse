@@ -78,9 +78,9 @@ public class ForTaskExecutor(IServiceProvider serviceProvider, ILogger<ForTaskEx
         var taskDefinition = new DoTaskDefinition()
         {
             Do = this.Task.Definition.Do,
-            Extensions =
+            Metadata =
             [
-                new(SynapseDefaults.Tasks.ExtensionProperties.PathPrefix.Name, false)
+                new(SynapseDefaults.Tasks.Metadata.PathPrefix.Name, false)
             ]
         };
         if (task == null) task = await this.Task.Workflow.CreateTaskAsync(taskDefinition, this.GetPathFor("0"), this.Task.Input, null, this.Task, false, cancellationToken).ConfigureAwait(false);
@@ -134,9 +134,9 @@ public class ForTaskExecutor(IServiceProvider serviceProvider, ILogger<ForTaskEx
                 var taskDefinition = new DoTaskDefinition()
                 {
                     Do = this.Task.Definition.Do,
-                    Extensions =
+                    Metadata =
                     [
-                        new(SynapseDefaults.Tasks.ExtensionProperties.PathPrefix.Name, false)
+                        new(SynapseDefaults.Tasks.Metadata.PathPrefix.Name, false)
                     ]
                 };
                 var next = await this.Task.Workflow.CreateTaskAsync(taskDefinition, this.GetPathFor(index.ToString()), output, null, this.Task, false, cancellationToken).ConfigureAwait(false);

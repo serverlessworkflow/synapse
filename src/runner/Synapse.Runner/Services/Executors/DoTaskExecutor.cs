@@ -40,7 +40,7 @@ public class DoTaskExecutor(IServiceProvider serviceProvider, ILogger<DoTaskExec
     /// <param name="index">The index of the subtask to get the path to</param>
     /// <param name="name">The name of the subtask to get the path to</param>
     /// <returns>The path to the specified subtask</returns>
-    protected virtual string GetPathFor(int index, string name) => this.Task.Definition.Extensions?.TryGetValue(SynapseDefaults.Tasks.ExtensionProperties.PathPrefix.Name, out var value) == true && value is bool prefix && prefix == false
+    protected virtual string GetPathFor(int index, string name) => this.Task.Definition.Metadata?.TryGetValue(SynapseDefaults.Tasks.Metadata.PathPrefix.Name, out var value) == true && value is bool prefix && prefix == false
         ? $"{index}/{name}"
         : $"{nameof(DoTaskDefinition.Do).ToCamelCase()}/{index}/{name}";
 

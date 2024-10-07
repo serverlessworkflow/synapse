@@ -570,6 +570,49 @@ return message;
         }
 
         /// <summary>
+        /// Exposes constants about database-related environment variables
+        /// </summary>
+        public static class Database
+        {
+
+            /// <summary>
+            /// Gets the prefix for all correlator related environment variables
+            /// </summary>
+            public const string Prefix = EnvironmentVariables.Prefix + "DATABASE_";
+
+            /// <summary>
+            /// Exposes constants about environment variables related to database seeding
+            /// </summary>
+            public static class Seeding
+            {
+
+                /// <summary>
+                /// Gets the prefix for all API related environment variables
+                /// </summary>
+                public const string Prefix = Database.Prefix + "SEEDING_";
+
+                /// <summary>
+                /// Gets the name of the environment variables used to configure whether or not to reset the database upon starting the API server
+                /// </summary>
+                public const string Reset = Prefix + "RESET";
+                /// <summary>
+                /// Gets the name of the environment variables used to configure the directory from which to load the static resources used to seed the database
+                /// </summary>
+                public const string Directory = Prefix + "DIRECTORY";
+                /// <summary>
+                /// Gets the name of the environment variables used to configure whether or not to overwrite existing resources
+                /// </summary>
+                public const string Overwrite = Prefix + "OVERWRITE";
+                /// <summary>
+                /// Gets the name of the environment variables used to configure the GLOB pattern used to match the static resource files to use to seed the database
+                /// </summary>
+                public const string FilePattern = Prefix + "FILE_PATTERN";
+
+            }
+
+        }
+
+        /// <summary>
         /// Exposes constants about operator-related environment variables
         /// </summary>
         public static class Operator
@@ -1022,9 +1065,9 @@ return message;
     {
 
         /// <summary>
-        /// Exposes Synapse task extension properties
+        /// Exposes Synapse task metadata properties
         /// </summary>
-        public static class ExtensionProperties
+        public static class Metadata
         {
 
             /// <summary>
