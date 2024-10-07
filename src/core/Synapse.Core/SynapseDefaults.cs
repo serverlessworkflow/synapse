@@ -54,6 +54,40 @@ public static class SynapseDefaults
         public const string TypePrefix = "io.synapse-wfms.events.";
 
         /// <summary>
+        /// Exposes constants about the Synapse cloud event bus
+        /// </summary>
+        public static class Bus
+        {
+
+            /// <summary>
+            /// Gets the name of the stream used to observe cloud events published to the Synapse cloud event bus
+            /// </summary>
+            public const string StreamName = "cloud-events";
+            /// <summary>
+            /// Gets the name of the field used to store the serialized cloud event
+            /// </summary>
+            public const string EventFieldName = "event";
+            /// <summary>
+            /// Gets the key of the list used to store all existing consumer groups
+            /// </summary>
+            public const string ConsumerGroupListKey = "cloud-events-consumer-groups";
+            /// <summary>
+            /// Gets the LUA script used to distribute cloud event bus messages amongst consumer groups
+            /// </summary>
+            public static string MessageDistributionScript = @"
+local message = redis.call('RPOP', KEYS[1]);
+if message then 
+    local consumerGroups = redis.call('SMEMBERS', KEYS[2]); 
+    for _, group in ipairs(consumerGroups) do 
+        redis.call('LPUSH', group, message); 
+    end; 
+end; 
+return message;
+";
+
+        }
+
+        /// <summary>
         /// Exposes constants about workflow-related cloud events
         /// </summary>
         public static class Workflow
@@ -496,6 +530,24 @@ public static class SynapseDefaults
             /// Gets the environment variable used to configure the correlator's name
             /// </summary>
             public const string Name = Prefix + "NAME";
+
+            /// <summary>
+            /// Exposes constants about the cloud events related environment variables of a correlator
+            /// </summary>
+            public static class Events
+            {
+
+                /// <summary>
+                /// Gets the prefix for all correlator related environment variables
+                /// </summary>
+                public const string Prefix = Correlator.Prefix + "EVENTS_";
+
+                /// <summary>
+                /// Gets the name of the consumer group the correlator to configure belongs to, if any
+                /// </summary>
+                public const string ConsumerGroup = Prefix + "CONSUMER";
+
+            }
 
         }
 

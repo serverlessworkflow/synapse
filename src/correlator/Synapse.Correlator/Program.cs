@@ -31,6 +31,9 @@ builder.Services.AddJavaScriptExpressionEvaluator();
 builder.Services.AddCloudEventBus();
 builder.Services.AddTransient<IRequestHandler<IngestCloudEventCommand, IOperationResult>, IngestCloudEventCommandHandler>();
 
+builder.Services.AddSingleton<RedisCloudEventIngestor>();
+builder.Services.AddHostedService(provider => provider.GetRequiredService<RedisCloudEventIngestor>());
+
 builder.Services.AddScoped<CorrelatorController>();
 builder.Services.AddScoped<ICorrelatorController>(provider => provider.GetRequiredService<CorrelatorController>());
 
