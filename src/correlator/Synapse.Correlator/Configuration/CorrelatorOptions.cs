@@ -24,8 +24,14 @@ public class CorrelatorOptions
     /// </summary>
     public CorrelatorOptions()
     {
-        Namespace = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Correlator.Namespace)!;
-        Name = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Correlator.Name)!;
+        this.Namespace = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Correlator.Namespace)!;
+        this.Name = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Correlator.Name)!;
+        var env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Correlator.Events.ConsumerGroup);
+        if (!string.IsNullOrWhiteSpace(env))
+        {
+            this.Events ??= new();
+            this.Events.ConsumerGroup = env;
+        }
     }
 
     /// <summary>
@@ -37,5 +43,10 @@ public class CorrelatorOptions
     /// Gets/sets the correlator's name
     /// </summary>
     public virtual string Name { get; set; }
+
+    /// <summary>
+    /// Gets/sets the options used to configure the way a Synapse Correlator consumes cloud events
+    /// </summary>
+    public virtual CloudEventConsumptionOptions? Events { get; set; }
 
 }

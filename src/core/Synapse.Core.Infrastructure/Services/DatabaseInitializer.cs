@@ -12,8 +12,10 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using Neuroglia;
 using Neuroglia.Data.Infrastructure.ResourceOriented;
 using Synapse.Resources;
+using System.Net;
 using System.Security.Cryptography;
 
 namespace Synapse.Core.Infrastructure.Services;
@@ -29,28 +31,33 @@ public class DatabaseInitializer(ILoggerFactory loggerFactory, IServiceProvider 
     /// <inheritdoc/>
     protected override async Task SeedAsync(CancellationToken cancellationToken)
     {
-        foreach (var definition in SynapseDefaults.Resources.Definitions.AsEnumerable()) await this.Database.CreateResourceAsync(definition, cancellationToken: cancellationToken).ConfigureAwait(false);
+        foreach (var definition in SynapseDefaults.Resources.Definitions.AsEnumerable())
+        {
+            try { await this.Database.CreateResourceAsync(definition, cancellationToken: cancellationToken).ConfigureAwait(false); }
+            catch (ProblemDetailsException ex) when (ex.Problem.Status == (int)HttpStatusCode.Conflict || (ex.Problem.Status == (int)HttpStatusCode.BadRequest && ex.Problem.Title == "Conflict")) { continue; }
+        }
         var keyBytes = new byte[64];
         using var rng = RandomNumberGenerator.Create();
         rng.GetBytes(keyBytes);
         var key = Convert.ToBase64String(keyBytes);
-        await this.Database.CreateResourceAsync(new ServiceAccount()
+        try
         {
-            Metadata = new()
+            await this.Database.CreateResourceAsync(new ServiceAccount()
             {
-                Namespace = Namespace.DefaultNamespaceName,
-                Name = ServiceAccount.DefaultServiceAccountName
-            },
-            Spec = new()
-            {
-                Key = key,
-                Claims = new Dictionary<string, string>()
+                Metadata = new()
                 {
-
+                    Namespace = Namespace.DefaultNamespaceName,
+                    Name = ServiceAccount.DefaultServiceAccountName
+                },
+                Spec = new()
+                {
+                    Key = key,
+                    Claims = new Dictionary<string, string>() { }
                 }
-            }
-        }, false, cancellationToken).ConfigureAwait(false);
-        await this.Database.InitializeAsync(cancellationToken);
+            }, false, cancellationToken).ConfigureAwait(false);
+            await this.Database.InitializeAsync(cancellationToken);
+        }
+        catch (ProblemDetailsException ex) when (ex.Problem.Status == (int)HttpStatusCode.Conflict || (ex.Problem.Status == (int)HttpStatusCode.BadRequest && ex.Problem.Title == "Conflict")) { }
     }
 
 }

@@ -17,6 +17,7 @@ using Microsoft.Extensions.Options;
 using Neuroglia.Eventing.CloudEvents;
 using Neuroglia.Serialization;
 using Polly;
+using StackExchange.Redis;
 using Synapse.Api.Application.Configuration;
 using System.Text;
 using System.Threading.Channels;
@@ -27,10 +28,11 @@ namespace Synapse.Api.Application.Services;
 /// Represents the default implementation of the <see cref="ICloudEventPublisher"/> interface
 /// </summary>
 /// <param name="logger">The service used to perform logging</param>
+/// <param name="connectionMultiplexer">The service used to connect to the Redis API</param>
 /// <param name="options">The service used to access the current <see cref="ApiServerOptions"/></param>
 /// <param name="jsonSerializer">The service used to serialize/deserialize data to/from JSON</param>
 /// <param name="httpClient">The service used to perform HTTP requests</param>
-public class CloudEventPublisher(ILogger<CloudEventPublisher> logger, IJsonSerializer jsonSerializer, IOptions<ApiServerOptions> options, HttpClient httpClient)
+public class CloudEventPublisher(ILogger<CloudEventPublisher> logger, IConnectionMultiplexer connectionMultiplexer, IJsonSerializer jsonSerializer, IOptions<ApiServerOptions> options, HttpClient httpClient)
     : IHostedService, ICloudEventPublisher, IDisposable, IAsyncDisposable
 {
 
@@ -40,6 +42,16 @@ public class CloudEventPublisher(ILogger<CloudEventPublisher> logger, IJsonSeria
     /// Gets the service used to perform logging
     /// </summary>
     protected ILogger Logger { get; } = logger;
+
+    /// <summary>
+    /// Gets the service used to connect to the Redis API
+    /// </summary>
+    protected IConnectionMultiplexer ConnectionMultiplexer { get; } = connectionMultiplexer;
+
+    /// <summary>
+    /// Gets the Redis database to use
+    /// </summary>
+    protected StackExchange.Redis.IDatabase Database { get; } = connectionMultiplexer.GetDatabase();
 
     /// <summary>
     /// Gets the service used to serialize/deserialize data to/from JSON
@@ -66,11 +78,28 @@ public class CloudEventPublisher(ILogger<CloudEventPublisher> logger, IJsonSeria
     /// </summary>
     protected Channel<CloudEvent> Channel { get; } = System.Threading.Channels.Channel.CreateUnbounded<CloudEvent>();
 
+    /// <summary>
+    /// Gets a boolean indicating whether or not the Redis version used by the cloud event publisher supports streaming commands
+    /// </summary>
+    protected bool SupportsStreaming { get; private set; }
+
     /// <inheritdoc/>
     public virtual Task StartAsync(CancellationToken cancellationToken)
     {
         if (options.Value.CloudEvents.Endpoint == null) logger.LogWarning("No endpoint configured for cloud events. Events will not be published.");
         else _ = this.PublishEnqueuedEventsAsync();
+        var version = ((string)(this.Database.Execute("INFO", "server"))!).Split('\n').FirstOrDefault(line => line.StartsWith("redis_version:"))?[14..]?.Trim() ?? "undetermined";
+        try
+        {
+            this.Database.StreamInfo(SynapseDefaults.CloudEvents.Bus.StreamName);
+            this.SupportsStreaming = true;
+            this.Logger.LogInformation("Redis server version '{version}' supports streaming commands. Streaming feature is enabled", version);
+        }
+        catch (RedisServerException ex) when (ex.Message.StartsWith("ERR unknown command"))
+        {
+            this.SupportsStreaming = false;
+            this.Logger.LogInformation("Redis server version '{version}' does not support streaming commands. Streaming feature is emulated using lists", version);
+        }
         return Task.CompletedTask;
     }
 
@@ -79,6 +108,13 @@ public class CloudEventPublisher(ILogger<CloudEventPublisher> logger, IJsonSeria
     {
         ArgumentNullException.ThrowIfNull(e);
         await this.Channel.Writer.WriteAsync(e, cancellationToken).ConfigureAwait(false);
+        var json = this.JsonSerializer.SerializeToText(e);
+        if (this.SupportsStreaming) await this.Database.StreamAddAsync(SynapseDefaults.CloudEvents.Bus.StreamName, SynapseDefaults.CloudEvents.Bus.EventFieldName, json).ConfigureAwait(false);
+        else
+        {
+            await this.Database.ListLeftPushAsync(SynapseDefaults.CloudEvents.Bus.StreamName, json).ConfigureAwait(false);
+            await this.Database.ScriptEvaluateAsync(SynapseDefaults.CloudEvents.Bus.MessageDistributionScript, [SynapseDefaults.CloudEvents.Bus.StreamName, SynapseDefaults.CloudEvents.Bus.ConsumerGroupListKey]).ConfigureAwait(false);
+        }
     }
 
     /// <inheritdoc/>
