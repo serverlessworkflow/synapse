@@ -15,15 +15,15 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="FluentAssertions" Version="6.12.1" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="Moq" Version="4.20.72" />
-    <PackageReference Include="Neuroglia.Data.Expressions.JQ" Version="4.15.6" />
-    <PackageReference Include="Neuroglia.Data.Infrastructure.Memory" Version="4.15.6" />
-    <PackageReference Include="Neuroglia.Data.Infrastructure.ResourceOriented.Redis" Version="4.15.6" />
-    <PackageReference Include="ServerlessWorkflow.Sdk.Builders" Version="1.0.0-alpha2.16" />
-	<PackageReference Include="ServerlessWorkflow.Sdk.IO" Version="1.0.0-alpha2.16" />
+    <PackageReference Include="Neuroglia.Data.Expressions.JQ" Version="4.15.8" />
+    <PackageReference Include="Neuroglia.Data.Infrastructure.Memory" Version="4.15.8" />
+    <PackageReference Include="Neuroglia.Data.Infrastructure.ResourceOriented.Redis" Version="4.15.8" />
+    <PackageReference Include="ServerlessWorkflow.Sdk.Builders" Version="1.0.0-alpha3" />
+	<PackageReference Include="ServerlessWorkflow.Sdk.IO" Version="1.0.0-alpha3" />
 	<PackageReference Include="Testcontainers" Version="3.10.0" />
     <PackageReference Include="xunit" Version="2.9.2" />
     <PackageReference Include="Xunit.Gherkin.Quick" Version="4.5.0" />
