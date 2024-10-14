@@ -41,11 +41,11 @@
         <div class="row mb-3">
             <div class="col-md-12 col-lg-4">
                 <div class="label">Start Time</div>
-                @(TaskInstance.StartedAt?.DateTime.RelativeFormat() ?? "-")
+                @(TaskInstance.StartedAt?.RelativeFormat() ?? "-")
             </div>
             <div class="col-md-12 col-lg-4">
                 <div class="label">End Time</div>
-                @(TaskInstance.EndedAt?.DateTime.RelativeFormat() ?? "-")
+                @(TaskInstance.EndedAt?.RelativeFormat() ?? "-")
             </div>
             <div class="col-md-12 col-lg-4">
                 <div class="label">Duration</div>
@@ -117,8 +117,8 @@
                     @foreach (var run in TaskInstance.Runs)
                     {
                         <tr>
-                            <td>@run.StartedAt.DateTime.RelativeFormat()</td>
-                            <td class="text-center">@(run.EndedAt?.DateTime.RelativeFormat() ?? "-")</td>
+                            <td>@run.StartedAt.RelativeFormat()</td>
+                            <td class="text-center">@(run.EndedAt?.RelativeFormat() ?? "-")</td>
                             <td class="text-center">@(run.EndedAt.HasValue ? run.EndedAt.Value.Subtract(run.StartedAt).ToString("hh\\:mm\\:ss\\.fff") : "-")</td>
                             <td class="text-center"><span class="badge rounded-pill badge rounded-pill border border-@run.Outcome.GetColorClass() text-@run.Outcome.GetColorClass()">@(run.Outcome ?? TaskInstanceStatus.Pending)</span></td>
                         </tr>
@@ -145,7 +145,7 @@
                     @foreach (var retry in TaskInstance.Retries)
                     {
                         <tr>
-                            <td>@retry.Time.DateTime.RelativeFormat()</td>
+                            <td>@retry.Time.RelativeFormat()</td>
                             <td class="text-center">@retry.Number</td>
                             <td class="text-center">
                                 <DocumentDetails Label="Cause" Document="@retry.Cause" />
