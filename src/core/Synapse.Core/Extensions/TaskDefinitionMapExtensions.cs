@@ -47,11 +47,11 @@ public static class TaskDefinitionMapExtensions
     {
         ArgumentNullException.ThrowIfNull(tasks);
         ArgumentNullException.ThrowIfNull(task);
-        return task.Next switch
+        return (task.Status == TaskInstanceStatus.Skipped ? FlowDirective.Continue : task.Next) switch
         {
             FlowDirective.Continue or null => tasks.GetTaskAfter(task.Name!),
             FlowDirective.End or FlowDirective.Exit => null,
-            _ => tasks.GetEntry(task.Next)
+            _ => tasks.GetEntry(task.Next!)
         };
     }
 

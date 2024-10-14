@@ -35,7 +35,7 @@ namespace Synapse.Dashboard.Pages.Workflows.Create;
 /// <param name="navigationManager">The service used to provides an abstraction for querying and managing URI navigation</param>
 /// <param name="specificationSchemaManager">The service used to download the specification schemas</param>
 /// <param name="monacoInterop">The service to build a bridge with the monaco interop extension</param>
-/// <param name="workflowDefinitionValidator">The service to validate workflow defintions</param>
+/// <param name="workflowDefinitionValidator">The service to validate workflow definitions</param>
 public class CreateWorkflowViewStore(
     ILogger<CreateWorkflowViewStore> logger,
     ISynapseApiClient api,

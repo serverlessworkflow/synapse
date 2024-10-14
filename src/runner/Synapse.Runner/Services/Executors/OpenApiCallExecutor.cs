@@ -191,7 +191,14 @@ public class OpenApiCallExecutor(IServiceProvider serviceProvider, ILogger<OpenA
         if (this.OpenApi == null || this.Operation == null) throw new InvalidOperationException("The executor must be initialized before execution");
         if (this.Task.Input == null) this.Parameters = new Dictionary<string, object>();
         if (this.OpenApi.Parameters == null) return;
-        this.Parameters = await this.Task.Workflow.Expressions.EvaluateAsync<IDictionary<string, object>>(this.OpenApi.Parameters, this.Task.Input!, this.GetExpressionEvaluationArguments(), cancellationToken).ConfigureAwait(false);
+        var arguments = this.GetExpressionEvaluationArguments();
+        if (this.OpenApi.Authentication != null)
+        {
+            var authorization = await AuthorizationInfo.CreateAsync(this.Task.Workflow.Definition, this.OpenApi.Authentication, this.ServiceProvider, cancellationToken).ConfigureAwait(false);
+            arguments ??= new Dictionary<string, object>();
+            arguments.Add("authorization", authorization);
+        }
+        this.Parameters = await this.Task.Workflow.Expressions.EvaluateAsync<IDictionary<string, object>>(this.OpenApi.Parameters, this.Task.Input!, arguments, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
