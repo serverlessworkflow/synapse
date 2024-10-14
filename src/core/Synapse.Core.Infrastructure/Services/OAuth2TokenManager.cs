@@ -127,11 +127,11 @@ public class OAuth2TokenManager(ILogger<OAuth2TokenManager> logger, IJsonSeriali
             properties["grant_type"] = "refresh_token";
             properties["refresh_token"] = token.RefreshToken;
         }
-        using var content = configuration.Request.Encoding switch
+        using var content = configuration.Request?.Encoding switch
         {
-            OAuth2RequestEncoding.FormUrl => (HttpContent)new FormUrlEncodedContent(properties),
+            null or OAuth2RequestEncoding.FormUrl => (HttpContent)new FormUrlEncodedContent(properties),
             OAuth2RequestEncoding.Json => new StringContent(this.JsonSerializer.SerializeToText(properties), Encoding.UTF8, MediaTypeNames.Application.Json),
-            _ => throw new NotSupportedException($"The specified OAUTH2 request encoding '{configuration.Request.Encoding}' is not supported")
+            _ => throw new NotSupportedException($"The specified OAUTH2 request encoding '{configuration.Request?.Encoding ?? OAuth2RequestEncoding.FormUrl}' is not supported")
         };
         using var request = new HttpRequestMessage(HttpMethod.Post, tokenEndpoint) { Content = content };
         if (configuration.Client?.Authentication == OAuth2ClientAuthenticationMethod.Basic)
