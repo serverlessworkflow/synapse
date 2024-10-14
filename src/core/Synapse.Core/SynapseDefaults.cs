@@ -440,18 +440,30 @@ return message;
                 {
 
                     /// <summary>
-                    /// Gets the prefix for all JWT Bearer related environment variables
+                    /// Gets the prefix for all JWT related environment variables
                     /// </summary>
                     public const string Prefix = Authentication.Prefix + "JWT_";
 
                     /// <summary>
-                    /// Gets the name of the environment variables used to specify the JWT Bearer authority to use
+                    /// Gets the name of the environment variables used to specify the JWT authority to use
                     /// </summary>
                     public const string Authority = Prefix + "AUTHORITY";
                     /// <summary>
-                    /// Gets the name of the environment variables used to specify the JWT Bearer audience
+                    /// Gets the name of the environment variables used to specify the JWT audience
                     /// </summary>
                     public const string Audience = Prefix + "AUDIENCE";
+                    /// <summary>
+                    /// Gets the name of the environment variables used to configure the key used to verify the signature of JWT tokens
+                    /// </summary>
+                    public const string SigningKey = Prefix + "SIGNING_KEY";
+                    /// <summary>
+                    /// Gets the name of the environment variables used to configure the expected issuer of JWT tokens
+                    /// </summary>
+                    public const string Issuer = Prefix + "ISSUER";
+                    /// <summary>
+                    /// Gets the name of the environment variables used to configure whether or not to validate the issuer of JWT tokens
+                    /// </summary>
+                    public const string ValidateIssuer = Prefix + "VALIDATE_ISSUER";
 
                 }
 

@@ -45,6 +45,25 @@ public class AuthenticationPolicyOptions
             this.Jwt ??= new();
             this.Jwt.Audience = env;
         }
+        env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Api.Authentication.Jwt.SigningKey);
+        if (!string.IsNullOrWhiteSpace(env))
+        {
+            this.Jwt ??= new();
+            this.Jwt.SigningKey = env;
+        }
+        env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Api.Authentication.Jwt.Issuer);
+        if (!string.IsNullOrWhiteSpace(env))
+        {
+            this.Jwt ??= new();
+            this.Jwt.Issuer = env;
+        }
+        env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Api.Authentication.Jwt.ValidateIssuer);
+        if (!string.IsNullOrWhiteSpace(env))
+        {
+            if (!bool.TryParse(env, out var validateIssuer)) throw new Exception($"Failed to parse the specified value '{env}' into a boolean");
+            this.Jwt ??= new();
+            this.Jwt.ValidateIssuer = validateIssuer;
+        }
         env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Api.Authentication.Oidc.Authority);
         if (!string.IsNullOrWhiteSpace(env))
         {

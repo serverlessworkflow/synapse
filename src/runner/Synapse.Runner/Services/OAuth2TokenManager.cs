@@ -12,18 +12,15 @@
 // limitations under the License.
 
 using IdentityModel.Client;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
-using Neuroglia.Serialization;
-using ServerlessWorkflow.Sdk;
 using ServerlessWorkflow.Sdk.Models.Authentication;
 using System.Collections.Concurrent;
 using System.Net.Mime;
 using System.Security.Claims;
 using System.Text;
 
-namespace Synapse.Core.Infrastructure.Services;
+namespace Synapse.Runner.Services;
 
 /// <summary>
 /// Represents the default implementation of the <see cref="IOAuth2TokenManager"/> interface
@@ -69,6 +66,7 @@ public class OAuth2TokenManager(ILogger<OAuth2TokenManager> logger, IJsonSeriali
                 Address = configuration.Authority!.OriginalString,
                 Policy = new()
                 {
+                    ValidateIssuerName = false,
                     RequireHttps = false
                 }
             };

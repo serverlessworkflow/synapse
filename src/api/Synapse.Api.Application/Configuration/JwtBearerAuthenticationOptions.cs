@@ -43,6 +43,11 @@ public class JwtBearerAuthenticationOptions
     public virtual string? Issuer { get; set; }
 
     /// <summary>
+    /// Gets/sets a boolean indicating whether or not to validate the issuer of JWT tokens
+    /// </summary>
+    public virtual bool ValidateIssuer { get; set; } = true;
+
+    /// <summary>
     /// Gets the configured issuer signing key
     /// </summary>
     /// <returns>A new <see cref="SecurityKey"/></returns>

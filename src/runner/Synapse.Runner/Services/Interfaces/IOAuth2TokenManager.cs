@@ -13,7 +13,7 @@
 
 using ServerlessWorkflow.Sdk.Models.Authentication;
 
-namespace Synapse.Core.Infrastructure.Services;
+namespace Synapse.Runner.Services;
 
 /// <summary>
 /// Defines the fundamentals of a service used to manage <see cref="OAuth2Token"/>s
