@@ -30,8 +30,9 @@ public static class DateTimeExtensions
     /// <returns>The <see cref="DateTimeOffset"/>, formatted in a relative fashion</returns>
     public static string RelativeFormat(this DateTimeOffset dateTime)
     {
+        var localDateTime = dateTime.ToLocalTime();
         var now = DateTimeOffset.Now;
-        var delta = now.Subtract(dateTime);
+        var delta = now.Subtract(localDateTime);
         if (Math.Abs(delta.Days) >= 1)
         {
             var cultureFormats = CultureInfo.GetCultureInfo("en-US").DateTimeFormat;
@@ -44,9 +45,9 @@ public static class DateTimeExtensions
                 defaults.LastWeek,
                 $"{cultureFormats.ShortDatePattern} {cultureFormats.ShortTimePattern}"
             );
-            return now.DateTime.CalendarTime(dateTime.DateTime, formats);
+            return now.DateTime.CalendarTime(localDateTime.DateTime, formats);
         }
-        else if (delta < TimeSpan.Zero) return dateTime.DateTime.ToNow();
-        else return dateTime.DateTime.FromNow();
+        else if (delta < TimeSpan.Zero) return localDateTime.DateTime.ToNow();
+        else return localDateTime.DateTime.FromNow();
     }
 }
