@@ -95,6 +95,7 @@ internal class RunnerApplication(IServiceProvider serviceProvider, IHostApplicat
         catch(Exception ex)
         {
             this.Logger.LogError("An error occurred while running the specified workflow instance: {ex}", ex);
+            this.ApplicationLifetime.StopApplication();
         }
     }
 
