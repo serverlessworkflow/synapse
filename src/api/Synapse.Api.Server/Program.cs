@@ -75,7 +75,7 @@ if (applicationOptions.Authentication.Jwt != null)
             ValidAudience = applicationOptions.Authentication.Jwt.Audience,
             ValidateAudience = !string.IsNullOrWhiteSpace(applicationOptions.Authentication.Jwt.Audience),
             ValidIssuer = applicationOptions.Authentication.Jwt.Issuer,
-            ValidateIssuer = !string.IsNullOrWhiteSpace(applicationOptions.Authentication.Jwt.Issuer),
+            ValidateIssuer = applicationOptions.Authentication.Jwt.ValidateIssuer,
             IssuerSigningKey = applicationOptions.Authentication.Jwt.GetSigningKey()
         };
     });
