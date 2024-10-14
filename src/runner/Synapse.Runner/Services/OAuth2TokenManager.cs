@@ -67,6 +67,7 @@ public class OAuth2TokenManager(ILogger<OAuth2TokenManager> logger, IJsonSeriali
                 Policy = new()
                 {
                     ValidateIssuerName = false,
+                    ValidateEndpoints = false,
                     RequireHttps = false
                 }
             };
