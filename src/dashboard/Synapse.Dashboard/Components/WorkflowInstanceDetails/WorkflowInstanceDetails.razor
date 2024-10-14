@@ -37,11 +37,11 @@
         <div class="row mb-3">
             <div class="col-md-12 col-lg-4">
                 <div class="label">Start Time</div>
-                @(workflowInstance.Status?.StartedAt?.DateTime.RelativeFormat() ?? "-")
+                @(workflowInstance.Status?.StartedAt?.RelativeFormat() ?? "-")
             </div>
             <div class="col-md-12 col-lg-4">
                 <div class="label">End Time</div>
-                @(workflowInstance.Status?.EndedAt?.DateTime.RelativeFormat() ?? "-")
+                @(workflowInstance.Status?.EndedAt?.RelativeFormat() ?? "-")
             </div>
             <div class="col-md-12 col-lg-4">
                 <div class="label">Duration</div>
@@ -112,8 +112,8 @@
                     @foreach (var run in workflowInstance.Status.Runs)
                     {
                         <tr>
-                            <td>@run.StartedAt.DateTime.RelativeFormat()</td>
-                            <td class="text-center">@(run.EndedAt?.DateTime.RelativeFormat() ?? "-")</td>
+                            <td>@run.StartedAt.RelativeFormat()</td>
+                            <td class="text-center">@(run.EndedAt?.RelativeFormat() ?? "-")</td>
                             <td class="text-center">@(run.EndedAt.HasValue ? run.EndedAt.Value.Subtract(run.StartedAt).ToString("hh\\:mm\\:ss\\.fff") : "-")</td>
                         </tr>
                     }

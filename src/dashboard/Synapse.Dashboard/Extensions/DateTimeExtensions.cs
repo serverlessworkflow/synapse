@@ -22,14 +22,15 @@ namespace Synapse.Dashboard.Extensions;
 /// </summary>
 public static class DateTimeExtensions
 {
+
     /// <summary>
-    /// Formats the provided <see cref="DateTime"/> in a relative fashion (e.g.: 3 minutes ago, Yesterday at 1:00pm...)
+    /// Formats the provided <see cref="DateTimeOffset"/> in a relative fashion (e.g.: 3 minutes ago, Yesterday at 1:00pm...)
     /// </summary>
-    /// <param name="dateTime"></param>
-    /// <returns></returns>
-    public static string RelativeFormat(this DateTime dateTime)
+    /// <param name="dateTime">The extended <see cref="DateTimeOffset"/></param>
+    /// <returns>The <see cref="DateTimeOffset"/>, formatted in a relative fashion</returns>
+    public static string RelativeFormat(this DateTimeOffset dateTime)
     {
-        var now = DateTime.Now;
+        var now = DateTimeOffset.Now;
         var delta = now.Subtract(dateTime);
         if (Math.Abs(delta.Days) >= 1)
         {
@@ -43,15 +44,9 @@ public static class DateTimeExtensions
                 defaults.LastWeek,
                 $"{cultureFormats.ShortDatePattern} {cultureFormats.ShortTimePattern}"
             );
-            return now.CalendarTime(dateTime, formats);
+            return now.DateTime.CalendarTime(dateTime.DateTime, formats);
         }
-        else if (delta < TimeSpan.Zero)
-        {
-            return dateTime.ToNow();
-        }
-        else
-        {
-            return dateTime.FromNow();
-        }
+        else if (delta < TimeSpan.Zero) return dateTime.DateTime.ToNow();
+        else return dateTime.DateTime.FromNow();
     }
 }

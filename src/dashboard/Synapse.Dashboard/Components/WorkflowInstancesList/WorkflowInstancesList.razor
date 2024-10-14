@@ -113,13 +113,13 @@
                                             <span class="badge rounded-pill badge rounded-pill border border-@instance.Status?.Phase.GetColorClass() text-@instance.Status?.Phase.GetColorClass()">@(instance.Status?.Phase ?? WorkflowInstanceStatusPhase.Pending)</span>
                                             break;
                                         case "Creation Time":
-                                            @instance.Metadata.CreationTimestamp?.DateTime.RelativeFormat()
+                                            @instance.Metadata.CreationTimestamp?.RelativeFormat()
                                             break;
                                         case "Start Time":
-                                            @(instance.Status?.StartedAt?.DateTime.RelativeFormat() ?? "-")
+                                            @(instance.Status?.StartedAt?.RelativeFormat() ?? "-")
                                             break;
                                         case "End Time":
-                                            @(instance.Status?.EndedAt?.DateTime.RelativeFormat() ?? "-")
+                                            @(instance.Status?.EndedAt?.RelativeFormat() ?? "-")
                                             break;
                                         case "Duration":
                                             @(instance.Status?.StartedAt.HasValue == true && instance.Status?.EndedAt.HasValue == true ? instance.Status.EndedAt.Value.Subtract(instance.Status.StartedAt.Value).ToString("hh\\:mm\\:ss\\.fff") : "-")

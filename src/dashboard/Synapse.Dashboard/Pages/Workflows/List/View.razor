@@ -93,9 +93,9 @@
                             <a href="#" @onclick="_ => Store.SetNamespace(resource.Metadata.Namespace)" @onclick:preventDefault="true" @onclick:stopPropagation="true">@resource.Metadata.Namespace</a>
                             <a href="/namespaces/@resource.Metadata.Namespace" @onclick:stopPropagation="true"><Icon Name="IconName.BoxArrowUpRight" Class="small" /></a>
                         </td>
-                        <td class="text-center">@resource.Metadata.CreationTimestamp?.DateTime.RelativeFormat()</td>
-                        <td class="text-center">@(resource.Status?.Versions.Where(v => v.Value.LastStartedAt.HasValue).Select(v => v.Value.LastStartedAt).Order().LastOrDefault()?.DateTime.RelativeFormat() ?? "-")</td>
-                        <td class="text-center">@(resource.Status?.Versions.Where(v => v.Value.LastEndedAt.HasValue).Select(v => v.Value.LastEndedAt).Order().LastOrDefault()?.DateTime.RelativeFormat() ?? "-")</td>
+                        <td class="text-center">@resource.Metadata.CreationTimestamp?.RelativeFormat()</td>
+                        <td class="text-center">@(resource.Status?.Versions.Where(v => v.Value.LastStartedAt.HasValue).Select(v => v.Value.LastStartedAt).Order().LastOrDefault()?.RelativeFormat() ?? "-")</td>
+                        <td class="text-center">@(resource.Status?.Versions.Where(v => v.Value.LastEndedAt.HasValue).Select(v => v.Value.LastEndedAt).Order().LastOrDefault()?.RelativeFormat() ?? "-")</td>
                         <td class="text-center">@resource.Spec.Versions.Count</td>
                         <td class="text-center">@resource.Spec.Versions.GetLatest().Document.Version</td>
                         <td class="text-center">@resource.Status?.Versions.Values.Sum(s => s.TotalInstances)</td>
