@@ -538,7 +538,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
                 {
                     Workflow = this.Instance.GetQualifiedName(),
                     Task = task.Reference,
-                    Status = this.Instance.Status!.Phase!,
+                    Status = task.Status!,
                     EndedAt = run?.EndedAt ?? DateTimeOffset.Now
                 }
             }, cancellationToken).ConfigureAwait(false);
