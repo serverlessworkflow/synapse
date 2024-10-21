@@ -55,7 +55,13 @@ public class FunctionCallExecutor(IServiceProvider serviceProvider, ILogger<Func
     {
         await base.InitializeAsync(cancellationToken).ConfigureAwait(false);
         if (this.Task.Workflow.Definition.Use?.Functions?.TryGetValue(this.Task.Definition.Call, out var function) == true && function != null) this.Function = function;
-        else if (Uri.TryCreate(this.Task.Definition.Call, UriKind.Absolute, out var uri)) this.Function = await this.GetCustomFunctionAsync(uri, cancellationToken).ConfigureAwait(false);
+        else if (Uri.TryCreate(this.Task.Definition.Call, UriKind.Absolute, out var uri) && (uri.IsFile || !string.IsNullOrWhiteSpace(uri.Host))) this.Function = await this.GetCustomFunctionAsync(uri, cancellationToken).ConfigureAwait(false);
+        else if (this.Task.Definition.Call.Contains('@'))
+        {
+            var components = this.Task.Definition.Call.Split('@', StringSplitOptions.RemoveEmptyEntries);
+            if (components.Length != 2) throw new NotSupportedException($"Unknown/unsupported function '{this.Task.Definition.Call}'");
+            this.Function = await this.GetCustomFunctionAsync(components[0], components[1], cancellationToken).ConfigureAwait(false);
+        }
         else throw new NotSupportedException($"Unknown/unsupported function '{this.Task.Definition.Call}'");
     }
 
@@ -81,6 +87,33 @@ public class FunctionCallExecutor(IServiceProvider serviceProvider, ILogger<Func
         {
             throw new ProblemDetailsException(new(ErrorType.Communication, ErrorTitle.Communication, ErrorStatus.Communication, $"Failed to load the custom function defined at '{uri}': {ex.Message}"));
         }
+    }
+
+    /// <summary>
+    /// Gets the custom function with the specified name from the specified catalog
+    /// </summary>
+    /// <param name="functionName">The name of the custom function to get</param>
+    /// <param name="catalogName">The name of the catalog to get the custom function from</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>The <see cref="TaskDefinition"/> of the custom function with the specified name</returns>
+    protected virtual async Task<TaskDefinition> GetCustomFunctionAsync(string functionName, string catalogName, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(functionName);
+        ArgumentException.ThrowIfNullOrWhiteSpace(catalogName);
+        if (catalogName == SynapseDefaults.Tasks.CustomFunctions.Catalogs.Default)
+        {
+            var components = functionName.Split(':', StringSplitOptions.RemoveEmptyEntries);
+            if (components.Length != 2) throw new Exception($"The specified value '{functionName}' is not a valid custom function versioned qualified name ({{name}}.{{namespace}}:{{version}})");
+            var qualifiedName = components[0];
+            var version = components[1];
+            components = qualifiedName.Split('.', StringSplitOptions.RemoveEmptyEntries);
+            if (components.Length != 2) throw new Exception($"The specified value '{functionName}' is not a valid custom function qualified name ({{name}}.{{namespace}})");
+            var name = components[0];
+            var @namespace = components[1];
+            var function = await this.Task.Workflow.CustomFunctions.GetAsync(name, @namespace, cancellationToken).ConfigureAwait(false) ?? throw new NullReferenceException($"Failed to find the specified custom function '{qualifiedName}'");
+            return function.Spec.Versions.Get(version) ?? throw new NullReferenceException($"Failed to find the version '{version}' of the custom function '{qualifiedName}'");
+        }
+        else throw new NotImplementedException("Using non-default custom function catalog is not yet implemented"); //todo: implement
     }
 
     /// <inheritdoc/>

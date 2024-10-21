@@ -1,0 +1,29 @@
+﻿apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: custom-functions.synapse.io
+spec:
+  scope: Namespaced
+  group: synapse.io
+  names:
+    plural: custom-functions
+    singular: custom-function
+    kind: CustomFunction
+    shortNames:
+    - cf
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              description: Configures the Synapse Custom Function
+              properties: {} #todo
+            status:
+              type: object
+          required:
+            - spec

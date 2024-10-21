@@ -16,24 +16,24 @@ using System.Runtime.Serialization;
 namespace Synapse.Runner.Configuration;
 
 /// <summary>
-/// Represents the options used to configure the cloud events produced by a Synapse Runner
+/// Represents the options used to configure how a Synapse Runner should handle certificates
 /// </summary>
 [DataContract]
-public class RunnerCloudEventOptions
+public class RunnerCertificateOptions
 {
 
     /// <summary>
-    /// Initializes a new <see cref="RunnerCloudEventOptions"/>
+    /// Initializes a new <see cref="RunnerCertificateOptions"/>
     /// </summary>
-    public RunnerCloudEventOptions()
+    public RunnerCertificateOptions()
     {
-        var env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.LifecycleEvents);
-        if(!string.IsNullOrWhiteSpace(env) && bool.TryParse(env, out var publishLifecycleEvents)) this.PublishLifecycleEvents = publishLifecycleEvents;
+        var env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.SkipCertificateValidation);
+        if (!string.IsNullOrWhiteSpace(env) && bool.TryParse(env, out var skipValidation)) this.Validate = !skipValidation;
     }
 
     /// <summary>
-    /// Gets/sets a boolean indicating whether or not the Synapse Runner should produce lifecycle events. Defaults to `true`.
+    /// Gets/sets a boolean indicating whether or not the runner should validate certificates
     /// </summary>
-    public virtual bool PublishLifecycleEvents { get; set; } = true;
+    public virtual bool Validate { get; set; } = true;
 
 }

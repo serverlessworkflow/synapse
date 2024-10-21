@@ -84,14 +84,21 @@ public class CloudEventPublisher(ILogger<CloudEventPublisher> logger, IConnectio
     protected bool SupportsStreaming { get; private set; }
 
     /// <inheritdoc/>
-    public virtual Task StartAsync(CancellationToken cancellationToken)
+    public virtual async Task StartAsync(CancellationToken cancellationToken)
     {
         if (options.Value.CloudEvents.Endpoint == null) logger.LogWarning("No endpoint configured for cloud events. Events will not be published.");
         else _ = this.PublishEnqueuedEventsAsync();
         var version = ((string)(this.Database.Execute("INFO", "server"))!).Split('\n').FirstOrDefault(line => line.StartsWith("redis_version:"))?[14..]?.Trim() ?? "undetermined";
         try
         {
-            this.Database.StreamInfo(SynapseDefaults.CloudEvents.Bus.StreamName);
+            try
+            {
+                await this.Database.StreamInfoAsync(SynapseDefaults.CloudEvents.Bus.StreamName).ConfigureAwait(false);
+            }
+            catch (RedisServerException ex) when (ex.Message.StartsWith("ERR no such key"))
+            {
+                this.Logger.LogWarning("The cloud event stream is currently unavailable, but it should be created when cloud events are published or when correlators are activated");
+            }
             this.SupportsStreaming = true;
             this.Logger.LogInformation("Redis server version '{version}' supports streaming commands. Streaming feature is enabled", version);
         }
@@ -100,7 +107,10 @@ public class CloudEventPublisher(ILogger<CloudEventPublisher> logger, IConnectio
             this.SupportsStreaming = false;
             this.Logger.LogInformation("Redis server version '{version}' does not support streaming commands. Streaming feature is emulated using lists", version);
         }
-        return Task.CompletedTask;
+        catch(Exception ex)
+        {
+            this.Logger.LogWarning("An error occurred while starting the cloud event publisher, possibly affecting the server's ability to publish cloud events to correlators: {ex}", ex);
+        }
     }
 
     /// <inheritdoc/>

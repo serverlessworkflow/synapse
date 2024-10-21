@@ -27,7 +27,7 @@ public class MonacoInterop(IJSRuntime jsRuntime)
     /// <summary>
     /// A reference to the js interop module
     /// </summary>
-    readonly Lazy<Task<IJSObjectReference>> moduleTask = new(() => jsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/monaco-editor-interop-extension.js?v=2").AsTask());
+    readonly Lazy<Task<IJSObjectReference>> moduleTask = new(() => jsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/monaco-editor-interop-extension.js?v=3.1").AsTask());
 
     /// <summary>
     /// Adds the provided schema to monaco editor's diagnostics options

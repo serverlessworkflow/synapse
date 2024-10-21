@@ -67,6 +67,9 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
     /// <inheritdoc/>
     public IDocumentApiClient Documents => this.Api.Documents;
 
+    /// <inheritdoc/>
+    public INamespacedResourceApiClient<CustomFunction> CustomFunctions => this.Api.CustomFunctions;
+
     /// <summary>
     /// Gets the object used to asynchronously lock the <see cref="TaskExecutor{TDefinition}"/>
     /// </summary>

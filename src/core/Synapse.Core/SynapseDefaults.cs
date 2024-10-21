@@ -999,6 +999,11 @@ return message;
             public static ResourceDefinition Correlator { get; } = new CorrelatorResourceDefinition();
 
             /// <summary>
+            /// Gets the definition of Custom Function resources
+            /// </summary>
+            public static ResourceDefinition CustomFunctions { get; } = new CustomFunctionResourceDefinition();
+
+            /// <summary>
             /// Gets the definition of Operator resources
             /// </summary>
             public static ResourceDefinition Operator { get; } = new OperatorResourceDefinition();
@@ -1026,6 +1031,7 @@ return message;
             {
                 yield return Correlation;
                 yield return Correlator;
+                yield return CustomFunctions;
                 yield return Operator;
                 yield return ServiceAccount;
                 yield return Workflow;
@@ -1075,6 +1081,27 @@ return message;
     /// </summary>
     public static class Tasks
     {
+
+        /// <summary>
+        /// Exposes constants about custom functions
+        /// </summary>
+        public static class CustomFunctions
+        {
+
+            /// <summary>
+            /// Exposes constants about custom function catalogs
+            /// </summary>
+            public static class Catalogs
+            {
+
+                /// <summary>
+                /// Gets the name of the default custom function catalog
+                /// </summary>
+                public const string Default = "default";
+
+            }
+
+        }
 
         /// <summary>
         /// Exposes Synapse task metadata properties

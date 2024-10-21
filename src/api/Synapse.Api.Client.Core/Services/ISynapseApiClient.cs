@@ -32,6 +32,11 @@ public interface ISynapseApiClient
     INamespacedResourceApiClient<Correlator> Correlators { get; }
 
     /// <summary>
+    /// Gets the Synapse API used to manage <see cref="CustomFunction"/>s
+    /// </summary>
+    INamespacedResourceApiClient<CustomFunction> CustomFunctions { get; }
+
+    /// <summary>
     /// Gets the Synapse API used to manage <see cref="Document"/>s
     /// </summary>
     IDocumentApiClient Documents { get; }

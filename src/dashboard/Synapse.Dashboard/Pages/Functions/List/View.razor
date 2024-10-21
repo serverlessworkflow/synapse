@@ -1,0 +1,139 @@
+﻿﻿@*
+    Copyright © 2024-Present The Synapse Authors
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*@
+
+@page "/functions/{namespace?}/{name?}"
+@attribute [Authorize]
+@namespace Synapse.Dashboard.Pages.Functions.List
+@using BlazorBootstrap
+@inherits NamespacedResourceManagementComponent<View, FunctionListComponentStore, FunctionListState, CustomFunction>
+@inject IBreadcrumbManager BreadcrumbManager
+@inject NavigationManager NavigationManager
+
+<ApplicationTitle>Custom Functions</ApplicationTitle>
+
+<div class="table-container">
+    @if (Loading)
+    {
+        <Loader />
+    }
+    <div class="d-flex flex-row justify-content-between align-items-center">
+        <h4>Custom Functions</h4>
+        <span>@(Resources?.Count ?? 0) items</span>
+        <div class="d-flex">
+            <select class="form-select m-2" @onchange="OnNamespaceChanged">
+                <option value="">All namespaces</option>
+                @if (Namespaces != null && Namespaces.Count > 0)
+                {
+                    foreach (var namespaceResource in Namespaces)
+                    {
+                        <option value="@namespaceResource.GetName()" selected="@(@namespaceResource.GetName() == @namespace)">@namespaceResource.GetName()</option>
+                    }
+                }
+            </select>
+            <input type="search" class="form-control rounded my-2 me-2" placeholder="Search" value="@SearchTerm" @oninput="OnSearchInput" />
+            <div class="dropdown d-flex align-content-center">
+                <button class="btn btn-sm btn-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="" @onclick:stopPropagation="true"><i class="bi bi-three-dots-vertical"></i></button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item @(SelectedResourceNames.Count == 0 ? "text-mute" : "text-danger")" href="#" @onclick="async _ => await (SelectedResourceNames.Count == 0 ?  Task.CompletedTask : OnDeleteSelectedResourcesAsync())" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Trash" /> Delete selected</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th class="sticky-header text-start">Name</th>
+                <th class="sticky-header text-start">Namespace</th>
+                <th class="sticky-header text-center">Creation Time</th>
+                <th class="sticky-header text-center">Versions</th>
+                <th class="sticky-header text-center">Latest</th>
+                <th class="sticky-header text-end"></th>
+                <th class="sticky-header text-center align-middle">
+                    <input @ref="CheckboxAll" type="checkbox" @onclick="(_) => Store.ToggleResourceSelection()" @onclick:preventDefault="true" @onclick:stopPropagation="true" />
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Resources != null && Resources.Count > 0)
+            {
+                <Virtualize Context="resource" Items="@Resources">
+                    <tr @onclick="async _ => await OnShowResourceDetailsAsync(resource)" class="cursor-pointer">
+                        <td class="text-start">@resource.Metadata.Name</td>
+                        <td class="text-start">
+                            <a href="#" @onclick="_ => Store.SetNamespace(resource.Metadata.Namespace)" @onclick:preventDefault="true" @onclick:stopPropagation="true">@resource.Metadata.Namespace</a>
+                            <a href="/namespaces/@resource.Metadata.Namespace" @onclick:stopPropagation="true"><Icon Name="IconName.BoxArrowUpRight" Class="small" /></a>
+                        </td>
+                        <td class="text-center">@resource.Metadata.CreationTimestamp?.RelativeFormat()</td>
+                        <td class="text-center">@resource.Spec.Versions.Count</td>
+                        <td class="text-center">@resource.Spec.Versions.GetLatestVersion()</td>
+                        <td class="text-end">
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="" @onclick:stopPropagation="true"><i class="bi bi-three-dots-vertical"></i></button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#" @onclick="_ => OnCreateFunctionVersion(resource.GetNamespace()!, resource.GetName())" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Copy" /> New version</a></li>
+                                    <li><a class="dropdown-item text-danger" href="#" @onclick="async _ => await OnDeleteResourceAsync(resource)" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Trash" /> Delete</a></li>
+                                </ul>
+                            </div>
+                        </td>
+                        <td class="text-center align-middle">
+                            <input type="checkbox" checked="@SelectedResourceNames.Contains(resource.GetName())" @onclick="(_) => Store.ToggleResourceSelection(resource.GetName())" @onclick:preventDefault="true" @onclick:stopPropagation="true" />
+                        </td>
+                    </tr>
+                </Virtualize>
+            }
+        </tbody>
+    </table>
+</div>
+
+<Button Outline="true" Color="ButtonColor.Primary" @onclick="_ => OnCreateFunction()"><Icon Name="IconName.Plus" /></Button>
+
+<Offcanvas @ref="DetailsOffCanvas" Size="OffcanvasSize.Large" UseStaticBackdrop="false" BodyCssClass="d-flex flex-column" />
+
+<ConfirmDialog @ref="Dialog" />
+@code {
+
+    [Parameter] public string? FunctionName { get; set; }
+
+    RenderFragment Title() => __builder =>
+    {
+        <h4>Custom Functions</h4>
+    };
+
+    void OnCreateFunction() => this.NavigationManager.NavigateTo("/functions/new");
+
+    void OnCreateFunctionVersion(string ns, string name) => this.NavigationManager.NavigateTo($"/functions/new/{ns}/{name}");
+
+    /// <inheritdoc/>
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        BreadcrumbManager.Use(Breadcrumbs.Functions);
+    }
+
+    /// <summary>
+    /// Opens the targeted <see cref="CustomFunction"/>'s details
+    /// </summary>
+    /// <param name="resource">The <see cref="Resource"/> to show the details for</param>
+    protected override Task OnShowResourceDetailsAsync(CustomFunction resource)
+    {
+        if (this.DetailsOffCanvas == null) return Task.CompletedTask;
+        var parameters = new Dictionary<string, object>
+        {
+            { nameof(CustomFunctionDetails.Resource), resource }
+        };
+        return this.DetailsOffCanvas.ShowAsync<CustomFunctionDetails>(title: "Custom function details", parameters: parameters);
+    }
+}

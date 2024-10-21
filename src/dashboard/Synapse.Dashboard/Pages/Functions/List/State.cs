@@ -11,19 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Synapse.Resources;
+using Synapse.Resources;
+
+namespace Synapse.Dashboard.Pages.Functions.List;
 
 /// <summary>
-/// Represents the configuration of a certificate validation strategy
+/// Represents the <see cref="View"/>'s state
 /// </summary>
-[DataContract]
-public record CertificateValidationStrategyDefinition
+public record FunctionListState
+    : NamespacedResourceManagementComponentState<CustomFunction>
 {
 
-    /// <summary>
-    /// Gets/sets a boolean indicating whether or not to validate certificates when performing requests
-    /// </summary>
-    [DataMember(Order = 1, Name = "validate"), JsonPropertyOrder(1), JsonPropertyName("validate"), YamlMember(Order = 1, Alias = "validate")]
-    public virtual bool? Validate { get; set; }
+
 
 }

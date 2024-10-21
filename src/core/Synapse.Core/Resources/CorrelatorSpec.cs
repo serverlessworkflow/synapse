@@ -14,7 +14,7 @@
 namespace Synapse.Resources;
 
 /// <summary>
-/// Represents the object used to configure the desired state of an <see cref="Correlator"/>
+/// Represents the object used to configure the desired state of a <see cref="Correlator"/>
 /// </summary>
 [DataContract]
 public record CorrelatorSpec
