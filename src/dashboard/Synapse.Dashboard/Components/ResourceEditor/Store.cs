@@ -302,10 +302,7 @@ public class ResourceEditorStore<TResource>(ILogger<ResourceEditorStore<TResourc
         this.SetProblemDetails(null);
         this.SetSaving(true);
         var resource = this.Get(state => state.Resource);
-        if (resource == null)
-        {
-            return;
-        }
+        if (resource == null) return;
         var textEditorValue = this.Get(state => state.TextEditorValue);
         if (monacoEditorHelper.PreferredLanguage == PreferredLanguage.YAML) textEditorValue = yamlSerializer.ConvertToJson(textEditorValue);
         var jsonPatch = JsonPatch.FromDiff(jsonSerializer.SerializeToElement(resource)!.Value, jsonSerializer.SerializeToElement(jsonSerializer.Deserialize<TResource>(textEditorValue))!.Value);

@@ -29,6 +29,11 @@ public class RunnerOptions
     public virtual SynapseHttpApiClientOptions Api { get; set; } = new();
 
     /// <summary>
+    /// Gets/sets the options used to configure how the Synapse Runner should handle certificates
+    /// </summary>
+    public virtual RunnerCertificateOptions Certificates { get; set; } = new();
+
+    /// <summary>
     /// Gets/sets the options used to configure the cloud events published by the Synapse Runner
     /// </summary>
     public virtual RunnerCloudEventOptions CloudEvents { get; set; } = new();

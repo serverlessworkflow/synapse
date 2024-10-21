@@ -11,19 +11,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Neuroglia.Data.Infrastructure.ResourceOriented;
+
 namespace Synapse.Resources;
 
 /// <summary>
-/// Represents the configuration of a certificate validation strategy
+/// Represents the resource used to describe and configure a custom, callable task
 /// </summary>
 [DataContract]
-public record CertificateValidationStrategyDefinition
+public record CustomFunction
+    : Resource<CustomFunctionSpec>
 {
 
     /// <summary>
-    /// Gets/sets a boolean indicating whether or not to validate certificates when performing requests
+    /// Gets the <see cref="CustomFunction"/>'s resource type
     /// </summary>
-    [DataMember(Order = 1, Name = "validate"), JsonPropertyOrder(1), JsonPropertyName("validate"), YamlMember(Order = 1, Alias = "validate")]
-    public virtual bool? Validate { get; set; }
+    public static readonly ResourceDefinitionInfo ResourceDefinition = new CustomFunctionResourceDefinition()!;
+
+    /// <inheritdoc/>
+    public CustomFunction() : base(ResourceDefinition) { }
+
+    /// <inheritdoc/>
+    public CustomFunction(ResourceMetadata metadata, CustomFunctionSpec spec) : base(ResourceDefinition, metadata, spec) { }
 
 }

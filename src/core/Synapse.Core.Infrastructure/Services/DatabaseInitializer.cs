@@ -29,6 +29,16 @@ public class DatabaseInitializer(ILoggerFactory loggerFactory, IServiceProvider 
 {
 
     /// <inheritdoc/>
+    public override async Task StartAsync(CancellationToken stoppingToken)
+    {
+        try
+        {
+            await this.InitializeAsync(stoppingToken).ConfigureAwait(false);
+        }
+        catch (ProblemDetailsException ex) when (ex.Problem.Status == (int)HttpStatusCode.Conflict || (ex.Problem.Status == (int)HttpStatusCode.BadRequest && ex.Problem.Title == "Conflict")) { }
+    }
+
+    /// <inheritdoc/>
     protected override async Task SeedAsync(CancellationToken cancellationToken)
     {
         foreach (var definition in SynapseDefaults.Resources.Definitions.AsEnumerable())

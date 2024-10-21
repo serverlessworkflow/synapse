@@ -11,19 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Synapse.Resources;
+namespace Synapse.Api.Http.Controllers;
 
 /// <summary>
-/// Represents the configuration of a certificate validation strategy
+/// Represents the <see cref="NamespacedResourceController{TResource}"/> used to manage <see cref="CustomFunction"/>s
 /// </summary>
-[DataContract]
-public record CertificateValidationStrategyDefinition
+/// <param name="mediator">The service used to mediate calls</param>
+/// <param name="jsonSerializer">The service used to serialize/deserialize objects to/from JSON</param>
+[Route("api/v1/custom-functions")]
+public class CustomFunctionsController(IMediator mediator, IJsonSerializer jsonSerializer)
+    : NamespacedResourceController<CustomFunction>(mediator, jsonSerializer)
 {
 
-    /// <summary>
-    /// Gets/sets a boolean indicating whether or not to validate certificates when performing requests
-    /// </summary>
-    [DataMember(Order = 1, Name = "validate"), JsonPropertyOrder(1), JsonPropertyName("validate"), YamlMember(Order = 1, Alias = "validate")]
-    public virtual bool? Validate { get; set; }
+
 
 }

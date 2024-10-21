@@ -230,21 +230,20 @@ public class WorkflowGraphBuilder(ILogger<WorkflowGraphBuilder> logger, IYamlSer
                 }
             case "http":
                 {
-                    // todo
-                    //var definition = (HttpCallDefinition)this.JsonSerializer.Convert(context.TaskDefinition.With, typeof(HttpCallDefinition))!;
+                    var definition = (HttpCallDefinition)this.JsonSerializer.Convert(context.TaskDefinition.With, typeof(HttpCallDefinition))!;
                     callType = context.TaskDefinition.Call.ToLower();
-                    //content = definition.Endpoint.Uri.ToString();
+                    content = definition.Endpoint.Uri.ToString();
                     break;
                 }
             case "openapi":
                 {
-                    //var definition = (OpenApiCallDefinition)this.JsonSerializer.Convert(context.TaskDefinition.With, typeof(OpenApiCallDefinition))!;
+                    var definition = (OpenApiCallDefinition)this.JsonSerializer.Convert(context.TaskDefinition.With, typeof(OpenApiCallDefinition))!;
                     callType = context.TaskDefinition.Call.ToLower();
-                    //content = definition.OperationId;
+                    content = definition.OperationId;
                     break;
                 }
             default:
-                callType = string.Empty; 
+                callType = context.TaskDefinition.Call; 
                 break;
         }
         var node = new CallTaskNodeViewModel(context.TaskReference, context.TaskName, content, callType);

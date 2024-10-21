@@ -14,16 +14,17 @@
 namespace Synapse.Resources;
 
 /// <summary>
-/// Represents the configuration of a certificate validation strategy
+/// Represents the object used to configure the desired state of a <see cref="CustomFunction"/>
 /// </summary>
 [DataContract]
-public record CertificateValidationStrategyDefinition
+public record CustomFunctionSpec
 {
 
     /// <summary>
-    /// Gets/sets a boolean indicating whether or not to validate certificates when performing requests
+    /// Gets/sets the versions of the configured custom function
     /// </summary>
-    [DataMember(Order = 1, Name = "validate"), JsonPropertyOrder(1), JsonPropertyName("validate"), YamlMember(Order = 1, Alias = "validate")]
-    public virtual bool? Validate { get; set; }
+    [Required, MinLength(1)]
+    [DataMember(Name = "versions", Order = 1), JsonPropertyName("versions"), JsonPropertyOrder(1), YamlMember(Alias = "versions", Order = 1)]
+    public virtual Map<string, TaskDefinition> Versions { get; set; } = null!;
 
 }

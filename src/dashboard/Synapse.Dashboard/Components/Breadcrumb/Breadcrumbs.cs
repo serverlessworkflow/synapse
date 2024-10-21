@@ -41,6 +41,10 @@ public static class Breadcrumbs
     /// </summary>
     public static BreadcrumbItem[] Namespaces = [new("Namespaces", "/operators")];
     /// <summary>
+    /// Holds the breadcrumb items for <see cref="CustomFunction"/> related routes
+    /// </summary>
+    public static BreadcrumbItem[] Functions = [new("Functions", "/functions")];
+    /// <summary>
     /// Holds the breadcrumb items for <see cref="Correlator"/> related routes
     /// </summary>
     public static BreadcrumbItem[] Correlators = [new("Correlators", "/correlators")];
