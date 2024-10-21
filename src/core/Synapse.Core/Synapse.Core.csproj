@@ -7,7 +7,7 @@
 	<NeutralLanguage>en</NeutralLanguage>
 	<GenerateDocumentationFile>True</GenerateDocumentationFile>
 	<VersionPrefix>1.0.0</VersionPrefix>
-	<VersionSuffix>alpha3.3</VersionSuffix>
+	<VersionSuffix>alpha4</VersionSuffix>
 	<AssemblyVersion>$(VersionPrefix)</AssemblyVersion>
 	<FileVersion>$(VersionPrefix)</FileVersion>
 	<Authors>The Synapse Authors</Authors>
@@ -46,7 +46,6 @@
   <ItemGroup>
     <None Remove="Resources\Correlation.yaml" />
     <None Remove="Resources\Correlator.yaml" />
-    <None Remove="Resources\CustomFunction.yaml" />
     <None Remove="Resources\Operator.yaml" />
     <None Remove="Resources\ServiceAccount.yaml" />
     <None Remove="Resources\Workflow.yaml" />
@@ -55,7 +54,6 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Resources\Correlation.yaml" />
-    <EmbeddedResource Include="Resources\CustomFunction.yaml" />
     <EmbeddedResource Include="Resources\ServiceAccount.yaml" />
     <EmbeddedResource Include="Resources\Correlator.yaml" />
     <EmbeddedResource Include="Resources\Operator.yaml" />
@@ -69,7 +67,7 @@
 	<PackageReference Include="Neuroglia.Data.Infrastructure.ResourceOriented" Version="4.15.8" />
 	<PackageReference Include="Neuroglia.Eventing.CloudEvents" Version="4.15.8" />
     <PackageReference Include="Semver" Version="2.3.0" />
-    <PackageReference Include="ServerlessWorkflow.Sdk" Version="1.0.0-alpha4" />
+    <PackageReference Include="ServerlessWorkflow.Sdk" Version="1.0.0-alpha3" />
   </ItemGroup>
 
 </Project>
