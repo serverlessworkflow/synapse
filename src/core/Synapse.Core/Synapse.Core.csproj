@@ -46,6 +46,7 @@
   <ItemGroup>
     <None Remove="Resources\Correlation.yaml" />
     <None Remove="Resources\Correlator.yaml" />
+    <None Remove="Resources\CustomFunction.yaml" />
     <None Remove="Resources\Operator.yaml" />
     <None Remove="Resources\ServiceAccount.yaml" />
     <None Remove="Resources\Workflow.yaml" />
@@ -54,6 +55,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Resources\Correlation.yaml" />
+    <EmbeddedResource Include="Resources\CustomFunction.yaml" />
     <EmbeddedResource Include="Resources\ServiceAccount.yaml" />
     <EmbeddedResource Include="Resources\Correlator.yaml" />
     <EmbeddedResource Include="Resources\Operator.yaml" />
