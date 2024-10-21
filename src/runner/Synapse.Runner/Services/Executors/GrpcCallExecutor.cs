@@ -64,12 +64,12 @@ public class GrpcCallExecutor(IServiceProvider serviceProvider, ILogger<GrpcCall
         }
         catch (ErrorRaisedException ex) 
         {
-            this.Logger.LogError("An error occured while initializing the task '{task}': {ex}", this.Task.Instance.Reference, ex);
+            this.Logger.LogError("An error occurred while initializing the task '{task}': {ex}", this.Task.Instance.Reference, ex);
             await this.SetErrorAsync(ex.Error, cancellationToken).ConfigureAwait(false); 
         }
         catch (Exception ex)
         {
-            this.Logger.LogError("An error occured while initializing the task '{task}': {ex}", this.Task.Instance.Reference, ex);
+            this.Logger.LogError("An error occurred while initializing the task '{task}': {ex}", this.Task.Instance.Reference, ex);
             await this.SetErrorAsync(new()
             {
                 Status = ErrorStatus.Validation,
