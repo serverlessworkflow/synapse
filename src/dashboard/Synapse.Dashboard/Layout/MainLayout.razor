@@ -61,7 +61,7 @@
                         </li>
                         <li class="nav-item">
                             <div class="dropdown">
-                                <button class="btn nav-link dropdown-toggle @(IsActive("correlators", NavLinkMatch.Prefix) || IsActive("operators", NavLinkMatch.Prefix)  ? "active" : "")" type="button" id="servicesDropdownButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                <button class="btn nav-link dropdown-toggle @(IsActive("correlators", NavLinkMatch.Prefix) || IsActive("operators", NavLinkMatch.Prefix) || IsActive("service-accounts", NavLinkMatch.Prefix)  ? "active" : "")" type="button" id="servicesDropdownButton" data-bs-toggle="dropdown" aria-expanded="false">
                                     <span class="btn-label">Services</span>
                                 </button>
                                 <ul class="dropdown-menu" aria-labelledby="servicesDropdownButton">
@@ -73,6 +73,11 @@
                                     <li>
                                         <NavLink class="nav-link" href="operators" Match="NavLinkMatch.All">
                                             <span class="btn-label">Operators</span>
+                                        </NavLink>
+                                    </li>
+                                    <li>
+                                        <NavLink class="nav-link" href="service-accounts" Match="NavLinkMatch.All">
+                                            <span class="btn-label">Serivce Accounts</span>
                                         </NavLink>
                                     </li>
                                 </ul>

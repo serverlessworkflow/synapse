@@ -67,7 +67,7 @@ public class NamespacedResourceManagementComponentStore<TState, TResource>(ILogg
     /// Lists all available <see cref="Namespace"/>s
     /// </summary>
     /// <returns>A new awaitable <see cref="Task"/></returns>
-    public virtual async Task ListNamespaceAsync()
+    public virtual async Task ListNamespacesAsync()
     {
         var namespaceList = new EquatableList<Namespace>(await (await this.ApiClient.Namespaces.ListAsync().ConfigureAwait(false)).OrderBy(ns => ns.GetQualifiedName()).ToListAsync().ConfigureAwait(false));
         this.Reduce(s => s with
@@ -85,7 +85,7 @@ public class NamespacedResourceManagementComponentStore<TState, TResource>(ILogg
     /// <inheritdoc/>
     public override async Task InitializeAsync()
     {
-        await this.ListNamespaceAsync().ConfigureAwait(false);
+        await this.ListNamespacesAsync().ConfigureAwait(false);
         await base.InitializeAsync();
     }
 

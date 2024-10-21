@@ -40,7 +40,7 @@ public abstract class ResourceManagementComponent<TComponent, TStore, TState, TR
     /// Gets/sets the service used for JS interop
     /// </summary>
     [Inject]
-    protected JSInterop jsInterop { get; set; } = default!;
+    protected JSInterop JsInterop { get; set; } = default!;
 
     /// <summary>
     /// Gets the service used to serialize/deserialize objects to/from JSON
@@ -118,15 +118,15 @@ public abstract class ResourceManagementComponent<TComponent, TStore, TState, TR
 
                 if (selectedResourceNames.Count == 0)
                 {
-                    await this.jsInterop.SetCheckboxStateAsync(this.CheckboxAll.Value, CheckboxState.Unchecked);
+                    await this.JsInterop.SetCheckboxStateAsync(this.CheckboxAll.Value, CheckboxState.Unchecked);
                 }
                 else if (selectedResourceNames.Count == (resources?.Count ?? 0))
                 {
-                    await this.jsInterop.SetCheckboxStateAsync(this.CheckboxAll.Value, CheckboxState.Checked);
+                    await this.JsInterop.SetCheckboxStateAsync(this.CheckboxAll.Value, CheckboxState.Checked);
                 }
                 else
                 {
-                    await this.jsInterop.SetCheckboxStateAsync(this.CheckboxAll.Value, CheckboxState.Indeterminate);
+                    await this.JsInterop.SetCheckboxStateAsync(this.CheckboxAll.Value, CheckboxState.Indeterminate);
                 }
             }
         }, cancellationToken: this.CancellationTokenSource.Token);
@@ -222,12 +222,12 @@ public abstract class ResourceManagementComponent<TComponent, TStore, TState, TR
     /// Opens the targeted <see cref="Resource"/>'s details
     /// </summary>
     /// <param name="resource">The <see cref="Resource"/> to show the details for</param>
-    protected Task OnShowResourceDetailsAsync(TResource resource)
+    protected virtual Task OnShowResourceDetailsAsync(TResource resource)
     {
         if (this.DetailsOffCanvas == null) return Task.CompletedTask;
         var parameters = new Dictionary<string, object>
         {
-            { nameof(ResourceEditor<TResource>.Resource), resource }
+            { nameof(ResourceDetails<TResource>.Resource), resource }
         };
         return this.DetailsOffCanvas.ShowAsync<ResourceDetails<TResource>>(title: typeof(TResource).Name + " details", parameters: parameters);
     }

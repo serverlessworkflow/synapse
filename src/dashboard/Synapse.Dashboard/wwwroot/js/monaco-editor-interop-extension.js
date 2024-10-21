@@ -9,6 +9,12 @@ import { LineCounter, parseDocument } from "https://esm.sh/yaml";
  * @returns
  */
 export function addValidationSchema(schema, schemaUri, schemaType) {
+    try {
+        schema = JSON.parse(schema);
+    }
+    catch {
+        schema = { $ref: schema };
+    }
     // JSON
     if (!monaco.languages.json.jsonDefaults.diagnosticsOptions.schemas.find(s => s.uri === schemaUri)) {
         monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
@@ -18,7 +24,7 @@ export function addValidationSchema(schema, schemaUri, schemaType) {
             schemas: [
                 ...monaco.languages.json.jsonDefaults.diagnosticsOptions.schemas,
                 {
-                    schema: JSON.parse(schema),
+                    schema,
                     uri: schemaUri,
                     fileMatch: [schemaType]
                 }
@@ -36,7 +42,7 @@ export function addValidationSchema(schema, schemaUri, schemaType) {
             schemas: [
                 ...monacoYaml.yamlDefaults.diagnosticsOptions.schemas,
                 {
-                    schema: JSON.parse(schema),
+                    schema,
                     uri: schemaUri,
                     fileMatch: [schemaType]
                 }

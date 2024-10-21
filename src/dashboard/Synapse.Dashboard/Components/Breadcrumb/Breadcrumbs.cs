@@ -53,6 +53,10 @@ public static class Breadcrumbs
     /// </summary>
     public static BreadcrumbItem[] Correlations = [new("Correlations", "/correlations")];
     /// <summary>
+    /// Holds the breadcrumb items for <see cref="ServiceAccount"/> related routes
+    /// </summary>
+    public static BreadcrumbItem[] ServiceAccounts = [new("Service Accounts", "/service-accounts")];
+    /// <summary>
     /// Holds the breadcrumb items for about related routes
     /// </summary>
     public static BreadcrumbItem[] About = [new("About", "/about")];
