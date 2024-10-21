@@ -61,10 +61,15 @@ public static class IServiceCollectionExtensions
         services.AddSingleton<ITextDocumentRepository<string>, RedisTextDocumentRepository<string>>();
         services.AddSingleton<ITextDocumentRepository>(provider => provider.GetRequiredService<ITextDocumentRepository<string>>());
 
+        services.AddSingleton<ISchemaHandlerProvider, SchemaHandlerProvider>();
+        services.AddSingleton<ISchemaHandler, JsonSchemaHandler>();
+
         services.AddScoped<IResourceRepository, ResourceRepository>();
         services.AddScoped<IAdmissionControl, AdmissionControl>();
         services.AddScoped<IVersionControl, VersionControl>();
         services.AddScoped<IResourceMutator, WorkflowInstanceMutator>();
+        services.AddScoped<IResourceValidator, WorkflowInstanceValidator>();
+        services.AddScoped<IResourceValidator, CorrelationValidator>();
         services.AddSingleton<IPatchHandler, JsonMergePatchHandler>();
         services.AddSingleton<IPatchHandler, JsonPatchHandler>();
         services.AddSingleton<IPatchHandler, JsonStrategicMergePatchHandler>();
