@@ -106,26 +106,12 @@ public class CreateFunctionViewStore(
     /// </summary>
     public StandaloneCodeEditor? TextEditor { get; set; }
 
-    /// <summary>
-    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="Namespace"/>s
-    /// </summary>
-    public IObservable<EquatableList<Namespace>?> Namespaces => this.Select(s => s.Namespaces).DistinctUntilChanged();
-
     #region Selectors
-    /// <summary>
-    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="CreateFunctionViewState.Namespace"/> changes
-    /// </summary>
-    public IObservable<string?> Namespace => this.Select(state => state.Namespace).DistinctUntilChanged();
 
     /// <summary>
     /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="CreateFunctionViewState.Name"/> changes
     /// </summary>
     public IObservable<string?> Name => this.Select(state => state.Name).DistinctUntilChanged();
-
-    /// <summary>
-    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="CreateFunctionViewState.ChosenNamespace"/> changes
-    /// </summary>
-    public IObservable<string?> ChosenNamespace => this.Select(state => state.ChosenNamespace).DistinctUntilChanged();
 
     /// <summary>
     /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="CreateFunctionViewState.ChosenName"/> changes
@@ -203,18 +189,6 @@ public class CreateFunctionViewStore(
     #endregion
 
     #region Setters
-    /// <summary>
-    /// Sets the state's <see cref="CreateFunctionViewState.Namespace"/>
-    /// </summary>
-    /// <param name="ns">The new <see cref="CreateFunctionViewState.Namespace"/> value</param>
-    public void SetNamespace(string? ns)
-    {
-        this.Reduce(state => state with
-        {
-            Namespace = ns,
-            Loading = true
-        });
-    }
 
     /// <summary>
     /// Sets the state's <see cref="CreateFunctionViewState.Name"/>
@@ -226,17 +200,6 @@ public class CreateFunctionViewStore(
         {
             Name = name,
             Loading = true
-        });
-    }
-    /// <summary>
-    /// Sets the state's <see cref="CreateFunctionViewState.ChosenNamespace"/>
-    /// </summary>
-    /// <param name="ns">The new <see cref="CreateFunctionViewState.ChosenNamespace"/> value</param>
-    public void SetChosenNamespace(string? ns)
-    {
-        this.Reduce(state => state with
-        {
-            ChosenNamespace = ns
         });
     }
 
@@ -273,14 +236,12 @@ public class CreateFunctionViewStore(
     /// <summary>
     /// Gets the <see cref="CustomFunction"/> for the specified namespace and name
     /// </summary>
-    /// <param name="namespace">The namespace the <see cref="CustomFunction"/> to create a new version of belongs to</param>
     /// <param name="name">The name of the <see cref="CustomFunction"/> to create a new version of</param>
     /// <returns>A new awaitable <see cref="Task"/></returns>
-    public async Task GetCustomFunctionAsync(string @namespace, string name)
+    public async Task GetCustomFunctionAsync(string name)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(@namespace);
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
-        var resources = await this.ApiClient.CustomFunctions.GetAsync(name, @namespace) ?? throw new NullReferenceException($"Failed to find the specified function '{name}.{@namespace}'");
+        var resources = await this.ApiClient.CustomFunctions.GetAsync(name) ?? throw new NullReferenceException($"Failed to find the specified function '{name}'");
         var version = resources.Spec.Versions.GetLatestVersion();
         var function = resources.Spec.Versions.GetLatest();
         var nextVersion = SemVersion.Parse(version, SemVersionStyles.Strict);
@@ -429,15 +390,14 @@ public class CreateFunctionViewStore(
             var function = this.MonacoEditorHelper.PreferredLanguage == PreferredLanguage.JSON ?
                 this.JsonSerializer.Deserialize<TaskDefinition>(functionText)! :
                 this.YamlSerializer.Deserialize<TaskDefinition>(functionText)!;
-            var @namespace = this.Get(state => state.Namespace) ?? this.Get(state => state.ChosenNamespace);
             var name = this.Get(state => state.Name) ?? this.Get(state => state.ChosenName);
             var version = this.Get(state => state.Version).ToString();
-            if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(@namespace))
+            if (string.IsNullOrEmpty(name))
             {
                 this.Reduce(state => state with
                 {
                     ProblemTitle = "Invalid function",
-                    ProblemDetail = "The name or namespace cannot be empty."
+                    ProblemDetail = "The name cannot be empty."
                 });
                 return;
             }
@@ -448,7 +408,7 @@ public class CreateFunctionViewStore(
             CustomFunction? resource = null;
             try
             {
-                resource = await this.ApiClient.CustomFunctions.GetAsync(name, @namespace);
+                resource = await this.ApiClient.CustomFunctions.GetAsync(name);
             }
             catch
             {
@@ -460,7 +420,6 @@ public class CreateFunctionViewStore(
                 {
                     Metadata = new()
                     {
-                        Namespace = @namespace,
                         Name = name
                     },
                     Spec = new()
@@ -478,10 +437,10 @@ public class CreateFunctionViewStore(
                 if (patch != null)
                 {
                     var resourcePatch = new Patch(PatchType.JsonPatch, jsonPatch);
-                    await this.ApiClient.ManageNamespaced<CustomFunction>().PatchAsync(name, @namespace, resourcePatch, null, this.CancellationTokenSource.Token);
+                    await this.ApiClient.ManageCluster<CustomFunction>().PatchAsync(name, resourcePatch, null, this.CancellationTokenSource.Token);
                 }
             }
-            this.NavigationManager.NavigateTo($"/functions/{@namespace}/{name}");
+            this.NavigationManager.NavigateTo($"/functions/{name}");
         }
         catch (ProblemDetailsException ex)
         {
@@ -531,9 +490,8 @@ public class CreateFunctionViewStore(
     /// <inheritdoc/>
     public override async Task InitializeAsync()
     {
-        await this.ListNamespacesAsync().ConfigureAwait(false);
         this.Function.SubscribeAsync(async definition => {
-            string document = "";
+            string document = string.Empty;
             if (definition != null)
             {
                 document = this.MonacoEditorHelper.PreferredLanguage == PreferredLanguage.JSON ?
@@ -546,14 +504,10 @@ public class CreateFunctionViewStore(
             });
             await this.OnTextBasedEditorInitAsync();
         }, cancellationToken: this.CancellationTokenSource.Token);
-        Observable.CombineLatest(
-            this.Namespace.Where(ns => !string.IsNullOrWhiteSpace(ns)),
-            this.Name.Where(name => !string.IsNullOrWhiteSpace(name)),
-            (ns, name) => (ns!, name!)
-        ).SubscribeAsync(async ((string ns, string name) function) =>
-        {
-            await this.GetCustomFunctionAsync(function.ns, function.name);
-        }, cancellationToken: this.CancellationTokenSource.Token);
+        this.Name.Where(name => !string.IsNullOrWhiteSpace(name))
+            .SubscribeAsync(async name => 
+                await this.GetCustomFunctionAsync(name!), 
+                cancellationToken: this.CancellationTokenSource.Token);
         await this.SetValidationSchema();
         await base.InitializeAsync();
     }
@@ -585,19 +539,6 @@ public class CreateFunctionViewStore(
             this.SetProblemDetails(new ProblemDetails(new Uri("about:blank"), "Unable to set the validation schema", 404, $"Unable to set the validation schema for the specification version '{version}'. Make sure the version exists."));
         }
         this._processingVersion = false;
-    }
-
-    /// <summary>
-    /// Lists all available <see cref="Namespace"/>s
-    /// </summary>
-    /// <returns>A new awaitable <see cref="Task"/></returns>
-    public virtual async Task ListNamespacesAsync()
-    {
-        var namespaceList = new EquatableList<Namespace>(await (await this.ApiClient.Namespaces.ListAsync().ConfigureAwait(false)).OrderBy(ns => ns.GetQualifiedName()).ToListAsync().ConfigureAwait(false));
-        this.Reduce(s => s with
-        {
-            Namespaces = namespaceList
-        });
     }
 
     /// <summary>

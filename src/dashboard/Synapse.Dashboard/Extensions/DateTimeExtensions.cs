@@ -15,7 +15,7 @@ using moment.net;
 using moment.net.Models;
 using System.Globalization;
 
-namespace Synapse.Dashboard.Extensions;
+namespace Synapse.Dashboard;
 
 /// <summary>
 /// Provides extension methods for <see cref="DateTime"/>

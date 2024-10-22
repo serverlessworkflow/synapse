@@ -25,8 +25,8 @@ namespace Synapse.Dashboard.Components.ResourceManagement;
 /// <param name="resourceEventHub">The <see cref="IResourceEventWatchHub"/> websocket service client</param>
 public class NamespacedResourceManagementComponentStore<TState, TResource>(ILogger<NamespacedResourceManagementComponentStore<TState, TResource>> logger, ISynapseApiClient apiClient, ResourceWatchEventHubClient resourceEventHub)
     : ResourceManagementComponentStoreBase<TState, TResource>(logger, apiClient, resourceEventHub)
-    where TResource : Resource, new()
     where TState : NamespacedResourceManagementComponentState<TResource>, new()
+    where TResource : Resource, new()
 {
 
     /// <summary>

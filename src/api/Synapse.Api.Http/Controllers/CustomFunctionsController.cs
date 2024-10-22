@@ -14,13 +14,13 @@
 namespace Synapse.Api.Http.Controllers;
 
 /// <summary>
-/// Represents the <see cref="NamespacedResourceController{TResource}"/> used to manage <see cref="CustomFunction"/>s
+/// Represents the <see cref="ClusterResourceController{TResource}"/> used to manage <see cref="CustomFunction"/>s
 /// </summary>
 /// <param name="mediator">The service used to mediate calls</param>
 /// <param name="jsonSerializer">The service used to serialize/deserialize objects to/from JSON</param>
 [Route("api/v1/custom-functions")]
 public class CustomFunctionsController(IMediator mediator, IJsonSerializer jsonSerializer)
-    : NamespacedResourceController<CustomFunction>(mediator, jsonSerializer)
+    : ClusterResourceController<CustomFunction>(mediator, jsonSerializer)
 {
 
 

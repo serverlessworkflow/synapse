@@ -23,7 +23,7 @@ namespace Synapse.Dashboard.Pages.Functions.List;
 /// <param name="apiClient">The service used to interact with the Synapse API</param>
 /// <param name="resourceEventHub">The hub used to watch resource events</param>
 public class FunctionListComponentStore(ILogger<FunctionListComponentStore> logger, ISynapseApiClient apiClient, ResourceWatchEventHubClient resourceEventHub)
-    : NamespacedResourceManagementComponentStore<FunctionListState, CustomFunction>(logger, apiClient, resourceEventHub)
+    : ClusterResourceManagementComponentStore<CustomFunction>(logger, apiClient, resourceEventHub)
 {
 
 

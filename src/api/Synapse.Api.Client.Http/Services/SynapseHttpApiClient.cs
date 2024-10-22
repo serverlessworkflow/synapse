@@ -75,7 +75,7 @@ public class SynapseHttpApiClient
     public INamespacedResourceApiClient<Correlator> Correlators { get; private set; } = null!;
 
     /// <inheritdoc/>
-    public INamespacedResourceApiClient<CustomFunction> CustomFunctions { get; private set; } = null!;
+    public IClusterResourceApiClient<CustomFunction> CustomFunctions { get; private set; } = null!;
 
     /// <inheritdoc/>
     public IDocumentApiClient Documents { get; }

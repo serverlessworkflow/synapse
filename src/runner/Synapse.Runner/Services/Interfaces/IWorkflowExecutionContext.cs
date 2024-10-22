@@ -47,7 +47,7 @@ public interface IWorkflowExecutionContext
     /// <summary>
     /// Gets the Synapse API used to manage <see cref="CustomFunction"/>s
     /// </summary>
-    INamespacedResourceApiClient<CustomFunction> CustomFunctions { get; }
+    IClusterResourceApiClient<CustomFunction> CustomFunctions { get; }
 
     /// <summary>
     /// Gets/sets the workflow's context data

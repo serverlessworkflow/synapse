@@ -14,11 +14,11 @@
     limitations under the License.
 *@
 
-@page "/functions/{namespace?}/{name?}"
+@page "/functions/{name?}"
 @attribute [Authorize]
 @namespace Synapse.Dashboard.Pages.Functions.List
 @using BlazorBootstrap
-@inherits NamespacedResourceManagementComponent<View, FunctionListComponentStore, FunctionListState, CustomFunction>
+@inherits ClusterResourceManagementComponent<CustomFunction>
 @inject IBreadcrumbManager BreadcrumbManager
 @inject NavigationManager NavigationManager
 
@@ -33,16 +33,6 @@
         <h4>Custom Functions</h4>
         <span>@(Resources?.Count ?? 0) items</span>
         <div class="d-flex">
-            <select class="form-select m-2" @onchange="OnNamespaceChanged">
-                <option value="">All namespaces</option>
-                @if (Namespaces != null && Namespaces.Count > 0)
-                {
-                    foreach (var namespaceResource in Namespaces)
-                    {
-                        <option value="@namespaceResource.GetName()" selected="@(@namespaceResource.GetName() == @namespace)">@namespaceResource.GetName()</option>
-                    }
-                }
-            </select>
             <input type="search" class="form-control rounded my-2 me-2" placeholder="Search" value="@SearchTerm" @oninput="OnSearchInput" />
             <div class="dropdown d-flex align-content-center">
                 <button class="btn btn-sm btn-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="" @onclick:stopPropagation="true"><i class="bi bi-three-dots-vertical"></i></button>
@@ -56,7 +46,6 @@
         <thead>
             <tr>
                 <th class="sticky-header text-start">Name</th>
-                <th class="sticky-header text-start">Namespace</th>
                 <th class="sticky-header text-center">Creation Time</th>
                 <th class="sticky-header text-center">Versions</th>
                 <th class="sticky-header text-center">Latest</th>
@@ -72,10 +61,6 @@
                 <Virtualize Context="resource" Items="@Resources">
                     <tr @onclick="async _ => await OnShowResourceDetailsAsync(resource)" class="cursor-pointer">
                         <td class="text-start">@resource.Metadata.Name</td>
-                        <td class="text-start">
-                            <a href="#" @onclick="_ => Store.SetNamespace(resource.Metadata.Namespace)" @onclick:preventDefault="true" @onclick:stopPropagation="true">@resource.Metadata.Namespace</a>
-                            <a href="/namespaces/@resource.Metadata.Namespace" @onclick:stopPropagation="true"><Icon Name="IconName.BoxArrowUpRight" Class="small" /></a>
-                        </td>
                         <td class="text-center">@resource.Metadata.CreationTimestamp?.RelativeFormat()</td>
                         <td class="text-center">@resource.Spec.Versions.Count</td>
                         <td class="text-center">@resource.Spec.Versions.GetLatestVersion()</td>
@@ -83,7 +68,7 @@
                             <div class="dropdown">
                                 <button class="btn btn-sm btn-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="" @onclick:stopPropagation="true"><i class="bi bi-three-dots-vertical"></i></button>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#" @onclick="_ => OnCreateFunctionVersion(resource.GetNamespace()!, resource.GetName())" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Copy" /> New version</a></li>
+                                    <li><a class="dropdown-item" href="#" @onclick="_ => OnCreateFunctionVersion(resource.GetName())" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Copy" /> New version</a></li>
                                     <li><a class="dropdown-item text-danger" href="#" @onclick="async _ => await OnDeleteResourceAsync(resource)" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Trash" /> Delete</a></li>
                                 </ul>
                             </div>
@@ -114,7 +99,7 @@
 
     void OnCreateFunction() => this.NavigationManager.NavigateTo("/functions/new");
 
-    void OnCreateFunctionVersion(string ns, string name) => this.NavigationManager.NavigateTo($"/functions/new/{ns}/{name}");
+    void OnCreateFunctionVersion(string name) => this.NavigationManager.NavigateTo($"/functions/new/{name}");
 
     /// <inheritdoc/>
     protected override async Task OnInitializedAsync()
@@ -136,4 +121,5 @@
         };
         return this.DetailsOffCanvas.ShowAsync<CustomFunctionDetails>(title: "Custom function details", parameters: parameters);
     }
+
 }
