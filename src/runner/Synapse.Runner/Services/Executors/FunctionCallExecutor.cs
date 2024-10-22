@@ -13,6 +13,7 @@
 
 using Neuroglia;
 using Neuroglia.Data.Expressions;
+using Semver;
 
 namespace Synapse.Runner.Services.Executors;
 
@@ -34,6 +35,8 @@ public class FunctionCallExecutor(IServiceProvider serviceProvider, ILogger<Func
 {
 
     const string CustomFunctionDefinitionFile = "function.yaml";
+    const string GithubHost = "github.com";
+    const string GitlabHost = "gitlab";
 
     /// <summary>
     /// Gets the service used to serialize/deserialize objects to/from YAML
@@ -55,7 +58,7 @@ public class FunctionCallExecutor(IServiceProvider serviceProvider, ILogger<Func
     {
         await base.InitializeAsync(cancellationToken).ConfigureAwait(false);
         if (this.Task.Workflow.Definition.Use?.Functions?.TryGetValue(this.Task.Definition.Call, out var function) == true && function != null) this.Function = function;
-        else if (Uri.TryCreate(this.Task.Definition.Call, UriKind.Absolute, out var uri) && (uri.IsFile || !string.IsNullOrWhiteSpace(uri.Host))) this.Function = await this.GetCustomFunctionAsync(uri, cancellationToken).ConfigureAwait(false);
+        else if (Uri.TryCreate(this.Task.Definition.Call, UriKind.Absolute, out var uri) && (uri.IsFile || !string.IsNullOrWhiteSpace(uri.Host))) this.Function = await this.GetCustomFunctionAsync(new() { Uri = uri }, cancellationToken).ConfigureAwait(false);
         else if (this.Task.Definition.Call.Contains('@'))
         {
             var components = this.Task.Definition.Call.Split('@', StringSplitOptions.RemoveEmptyEntries);
@@ -68,16 +71,22 @@ public class FunctionCallExecutor(IServiceProvider serviceProvider, ILogger<Func
     /// <summary>
     /// Gets the custom function at the specified uri
     /// </summary>
-    /// <param name="uri">The uri of that references the custom function to get</param>
+    /// <param name="endpoint">The uri of that references the custom function to get</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>The <see cref="TaskDefinition"/> of the custom function defined at the specified uri</returns>
-    protected virtual async Task<TaskDefinition> GetCustomFunctionAsync(Uri uri, CancellationToken cancellationToken = default)
+    protected virtual async Task<TaskDefinition> GetCustomFunctionAsync(EndpointDefinition endpoint, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(uri);
+        ArgumentNullException.ThrowIfNull(endpoint);
+        var uri = endpoint.Uri;
         if (!uri.OriginalString.EndsWith(CustomFunctionDefinitionFile)) uri = new Uri(uri, CustomFunctionDefinitionFile);
+        if (uri.Host.Equals(GithubHost, StringComparison.OrdinalIgnoreCase)) uri = this.TransformGithubUriToRawUri(uri);
+        else if (uri.Host.Contains(GitlabHost)) uri = this.TransformGitlabUriToRawUri(uri);
+        var authentication = endpoint.Authentication == null ? null : await this.Task.Workflow.Expressions.EvaluateAsync<AuthenticationPolicyDefinition>(endpoint.Authentication, this.Task.Input, this.Task.Arguments, cancellationToken).ConfigureAwait(false);
+        using var httpClient = this.ServiceProvider.GetRequiredService<IHttpClientFactory>().CreateClient();
+        await httpClient.ConfigureAuthenticationAsync(this.Task.Workflow.Definition, authentication, this.ServiceProvider, cancellationToken).ConfigureAwait(false);
         try
         {
-            using var response = await this.HttpClient.GetAsync(uri, cancellationToken).ConfigureAwait(false);
+            using var response = await httpClient.GetAsync(uri, cancellationToken).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
             var yaml = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
             var function = this.YamlSerializer.Deserialize<TaskDefinition>(yaml)!;
@@ -85,7 +94,7 @@ public class FunctionCallExecutor(IServiceProvider serviceProvider, ILogger<Func
         }
         catch(Exception ex)
         {
-            throw new ProblemDetailsException(new(ErrorType.Communication, ErrorTitle.Communication, ErrorStatus.Communication, $"Failed to load the custom function defined at '{uri}': {ex.Message}"));
+            throw new ProblemDetailsException(new(ErrorType.Communication, ErrorTitle.Communication, ErrorStatus.Communication, $"Failed to load the custom function defined at '{endpoint}': {ex.Message}"));
         }
     }
 
@@ -100,16 +109,52 @@ public class FunctionCallExecutor(IServiceProvider serviceProvider, ILogger<Func
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(functionName);
         ArgumentException.ThrowIfNullOrWhiteSpace(catalogName);
+        var components = functionName.Split(':', StringSplitOptions.RemoveEmptyEntries);
+        if (components.Length != 2) throw new Exception($"The specified value '{functionName}' is not a valid custom function qualified name ({{name}}:{{version}})");
+        var name = components[0];
+        var version = components[1];
+        if (!SemVersion.TryParse(version, SemVersionStyles.Strict, out _)) throw new Exception($"The specified value '{version}' is not a valid semantic version 2.0");
         if (catalogName == SynapseDefaults.Tasks.CustomFunctions.Catalogs.Default)
         {
-            var components = functionName.Split(':', StringSplitOptions.RemoveEmptyEntries);
-            if (components.Length != 2) throw new Exception($"The specified value '{functionName}' is not a valid custom function qualified name ({{name}}:{{version}})");
-            var name = components[0];
-            var version = components[1];
             var function = await this.Task.Workflow.CustomFunctions.GetAsync(name, cancellationToken).ConfigureAwait(false) ?? throw new NullReferenceException($"Failed to find the specified custom function '{name}'");
             return function.Spec.Versions.Get(version) ?? throw new NullReferenceException($"Failed to find the version '{version}' of the custom function '{name}'");
         }
-        else throw new NotImplementedException("Using non-default custom function catalog is not yet implemented"); //todo: implement
+        else
+        {
+            if (this.Task.Workflow.Definition.Use?.Catalogs?.TryGetValue(catalogName, out var catalog) != true || catalog == null) throw new NullReferenceException($"Failed to find a catalog with the specified name '{catalogName}'");
+            return await this.GetCustomFunctionAsync(new()
+            {
+                Uri = new(catalog.Endpoint.Uri, $"/functions/{name}/{version}"),
+                Authentication = catalog.Endpoint.Authentication
+            }, cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>
+    /// Transforms the specified Github content <see cref="Uri"/> into a Github raw content <see cref="Uri"/>
+    /// </summary>
+    /// <param name="uri">The <see cref="Uri"/> to transform</param>
+    /// <returns>The Github raw content <see cref="Uri"/></returns>
+    protected virtual Uri TransformGithubUriToRawUri(Uri uri)
+    {
+        ArgumentNullException.ThrowIfNull(uri);
+        if (uri.Host.Equals(GithubHost, StringComparison.OrdinalIgnoreCase)) return uri;
+        var rawUri = uri.AbsoluteUri.Replace(GithubHost, "raw.githubusercontent.com", StringComparison.OrdinalIgnoreCase);
+        rawUri = rawUri.Replace("/tree/", "/refs/heads/", StringComparison.OrdinalIgnoreCase);
+        return new(rawUri, UriKind.Absolute);
+    }
+
+    /// <summary>
+    /// Transforms the specified Gitlab content <see cref="Uri"/> into a Gitlab raw content <see cref="Uri"/>
+    /// </summary>
+    /// <param name="uri">The <see cref="Uri"/> to transform</param>
+    /// <returns>The Gitlab raw content <see cref="Uri"/></returns>
+    protected virtual Uri TransformGitlabUriToRawUri(Uri uri)
+    {
+        ArgumentNullException.ThrowIfNull(uri);
+        if (!uri.AbsoluteUri.Contains(GitlabHost, StringComparison.OrdinalIgnoreCase)) return uri;
+        var rawUri = uri.AbsoluteUri.Replace("/-/blob/", "/-/raw/", StringComparison.OrdinalIgnoreCase);
+        return new(rawUri, UriKind.Absolute);
     }
 
     /// <inheritdoc/>
