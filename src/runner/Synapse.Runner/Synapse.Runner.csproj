@@ -64,7 +64,7 @@
 	<PackageReference Include="Neuroglia.Eventing.CloudEvents.Infrastructure" Version="4.15.8" />
 	<PackageReference Include="Neuroglia.Scripting.NodeJS" Version="4.15.8" />
 	<PackageReference Include="Neuroglia.Scripting.Python" Version="4.15.8" />
-	<PackageReference Include="protobuf-net.Grpc.ClientFactory" Version="1.1.1" />
+	<PackageReference Include="protobuf-net.Grpc.ClientFactory" Version="1.2.2" />
     <PackageReference Include="System.Reactive" Version="6.0.1" />
   </ItemGroup>
 

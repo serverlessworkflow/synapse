@@ -43,7 +43,7 @@
 	
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.10" />
-	<PackageReference Include="ServerlessWorkflow.Sdk.IO" Version="1.0.0-alpha3" />
+	<PackageReference Include="ServerlessWorkflow.Sdk.IO" Version="1.0.0-alpha4.1" />
     <PackageReference Include="System.Reactive" Version="6.0.1" />
   </ItemGroup>
 

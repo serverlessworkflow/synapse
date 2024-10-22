@@ -69,7 +69,7 @@
 	<PackageReference Include="Neuroglia.Data.Infrastructure.ResourceOriented" Version="4.15.8" />
 	<PackageReference Include="Neuroglia.Eventing.CloudEvents" Version="4.15.8" />
     <PackageReference Include="Semver" Version="2.3.0" />
-    <PackageReference Include="ServerlessWorkflow.Sdk" Version="1.0.0-alpha3" />
+    <PackageReference Include="ServerlessWorkflow.Sdk" Version="1.0.0-alpha4.1" />
   </ItemGroup>
 
 </Project>
