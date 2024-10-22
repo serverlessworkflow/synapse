@@ -98,10 +98,12 @@
 <ConfirmDialog @ref="Dialog" />
 
 @code {
+
     /// <inheritdoc/>
     protected override void OnInitialized()
     {
         base.OnInitialized();
         BreadcrumbManager.Use(Breadcrumbs.Correlators);
     }
+
 }

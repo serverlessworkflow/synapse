@@ -103,15 +103,11 @@ public class FunctionCallExecutor(IServiceProvider serviceProvider, ILogger<Func
         if (catalogName == SynapseDefaults.Tasks.CustomFunctions.Catalogs.Default)
         {
             var components = functionName.Split(':', StringSplitOptions.RemoveEmptyEntries);
-            if (components.Length != 2) throw new Exception($"The specified value '{functionName}' is not a valid custom function versioned qualified name ({{name}}.{{namespace}}:{{version}})");
-            var qualifiedName = components[0];
-            var version = components[1];
-            components = qualifiedName.Split('.', StringSplitOptions.RemoveEmptyEntries);
-            if (components.Length != 2) throw new Exception($"The specified value '{functionName}' is not a valid custom function qualified name ({{name}}.{{namespace}})");
+            if (components.Length != 2) throw new Exception($"The specified value '{functionName}' is not a valid custom function qualified name ({{name}}:{{version}})");
             var name = components[0];
-            var @namespace = components[1];
-            var function = await this.Task.Workflow.CustomFunctions.GetAsync(name, @namespace, cancellationToken).ConfigureAwait(false) ?? throw new NullReferenceException($"Failed to find the specified custom function '{qualifiedName}'");
-            return function.Spec.Versions.Get(version) ?? throw new NullReferenceException($"Failed to find the version '{version}' of the custom function '{qualifiedName}'");
+            var version = components[1];
+            var function = await this.Task.Workflow.CustomFunctions.GetAsync(name, cancellationToken).ConfigureAwait(false) ?? throw new NullReferenceException($"Failed to find the specified custom function '{name}'");
+            return function.Spec.Versions.Get(version) ?? throw new NullReferenceException($"Failed to find the version '{version}' of the custom function '{name}'");
         }
         else throw new NotImplementedException("Using non-default custom function catalog is not yet implemented"); //todo: implement
     }

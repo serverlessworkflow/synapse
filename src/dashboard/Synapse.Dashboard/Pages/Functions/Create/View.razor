@@ -15,7 +15,7 @@
 *@
 
 @page "/functions/new"
-@page "/functions/new/{namespace}/{name}"
+@page "/functions/new/{name}"
 @using ServerlessWorkflow.Sdk.Models
 @using Synapse.Api.Client.Services
 @inherits StatefulComponent<View, CreateFunctionViewStore, CreateFunctionViewState>
@@ -24,7 +24,7 @@
 
 <ApplicationTitle>New function</ApplicationTitle>
 
-<h4>New Function @((!string.IsNullOrEmpty(ns) || !string.IsNullOrEmpty(name) || !string.IsNullOrEmpty(chosenName) || !string.IsNullOrEmpty(chosenNamespace)) ? $"({name??chosenName}.{ns??chosenNamespace}:{version})" : "")</h4>
+<h4>New Function @((!string.IsNullOrEmpty(name) || !string.IsNullOrEmpty(chosenName)) ? $"({name??chosenName}:{version})" : "")</h4>
 
 @if (loading)
 {
@@ -32,21 +32,11 @@
         <Loader />
     </div>
 }
-else if (string.IsNullOrEmpty(ns) && string.IsNullOrEmpty(name) && string.IsNullOrEmpty(chosenName) && string.IsNullOrEmpty(chosenNamespace))
+else if (string.IsNullOrEmpty(name) && string.IsNullOrEmpty(chosenName))
 {
     <div class="d-flex mb-2 gap-2">
         <input type="text" class="form-control text-center" @oninput="e => nameInputValue = (string?)e.Value" placeholder="Name" />
-        <select class="form-select" @onchange="e => namespaceSelectValue = (string?)e.Value">
-            <option value="">Select namespace</option>
-            @if (Namespaces != null && Namespaces.Count > 0)
-            {
-                foreach (var namespaceResource in Namespaces)
-                {
-                    <option value="@namespaceResource.GetName()">@namespaceResource.GetName()</option>
-                }
-            }
-        </select>
-        <Button Color="ButtonColor.Primary" Outline="true" @onclick="SetNameAndNamespace">
+        <Button Color="ButtonColor.Primary" Outline="true" @onclick="SetName">
             Next
         </Button>
     </div>
@@ -97,10 +87,8 @@ else
 
 @code {
 
-    string? ns;
     string? name;
     string? version;
-    string? chosenNamespace;
     string? chosenName;
     string? nameInputValue;
     string? namespaceSelectValue;
@@ -108,22 +96,17 @@ else
     bool saving;
     ProblemDetails? problemDetails = null;
 
-    [Parameter] public string? Namespace { get; set; }
     [Parameter] public string? Name { get; set; }
-    public EquatableList<Namespace>? Namespaces { get; set; }
 
     /// <inheritdoc/>
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
         BreadcrumbManager.Use(Breadcrumbs.Functions);
-        BreadcrumbManager.Add(new($"New", $"/functions/new"));
-        Store.Namespace.Subscribe(value => OnStateChanged(_ => ns = value), token: CancellationTokenSource.Token);
+        BreadcrumbManager.Add(new("New", "/functions/new"));
         Store.Name.Subscribe(value => OnStateChanged(_ => name = value), token: CancellationTokenSource.Token);
-        Store.ChosenNamespace.Subscribe(value => OnStateChanged(_ => chosenNamespace = value), token: CancellationTokenSource.Token);
         Store.ChosenName.Subscribe(value => OnStateChanged(_ => chosenName = value), token: CancellationTokenSource.Token);
-        Store.Version.Subscribe(value => OnStateChanged(_ => version = value.ToString()), token: CancellationTokenSource.Token);
-        Store.Namespaces.Subscribe(value => this.OnStateChanged(_ => Namespaces = value), token: this.CancellationTokenSource.Token);
+        Store.Version.Subscribe(value => OnStateChanged(_ => version = value?.ToString()), token: CancellationTokenSource.Token);
         Store.Loading.Subscribe(value => OnStateChanged(_ => loading = value), token: CancellationTokenSource.Token);
         Store.Saving.Subscribe(value => OnStateChanged(_ => saving = value), token: CancellationTokenSource.Token);
         Store.ProblemDetails.Subscribe(problemDetails => OnStateChanged(cmp => cmp.problemDetails = problemDetails), token: CancellationTokenSource.Token);
@@ -132,24 +115,12 @@ else
     /// <inheritdoc/>
     protected override void OnParametersSet()
     {
-        if (Namespace != ns)
-        {
-            Store.SetNamespace(Namespace);
-            loading = true;
-        }
-        if (Name != name)
-        {
-            Store.SetName(Name);
-        }
+        if (Name != name) Store.SetName(Name);
     }
 
-    protected void SetNameAndNamespace()
+    protected void SetName()
     {
-        if (string.IsNullOrEmpty(nameInputValue) || string.IsNullOrEmpty(namespaceSelectValue))
-        {
-            return;
-        }
-        Store.SetChosenNamespace(namespaceSelectValue);
+        if (string.IsNullOrEmpty(nameInputValue)) return;
         Store.SetChosenName(nameInputValue);
     }
 

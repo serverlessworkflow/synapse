@@ -3,7 +3,7 @@ kind: CustomResourceDefinition
 metadata:
   name: custom-functions.synapse.io
 spec:
-  scope: Namespaced
+  scope: Cluster
   group: synapse.io
   names:
     plural: custom-functions

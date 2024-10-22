@@ -34,7 +34,7 @@ public interface ISynapseApiClient
     /// <summary>
     /// Gets the Synapse API used to manage <see cref="CustomFunction"/>s
     /// </summary>
-    INamespacedResourceApiClient<CustomFunction> CustomFunctions { get; }
+    IClusterResourceApiClient<CustomFunction> CustomFunctions { get; }
 
     /// <summary>
     /// Gets the Synapse API used to manage <see cref="Document"/>s

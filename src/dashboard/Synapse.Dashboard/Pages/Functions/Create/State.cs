@@ -23,25 +23,11 @@ namespace Synapse.Dashboard.Pages.Functions.Create;
 [Feature]
 public record CreateFunctionViewState
 {
-    /// <summary>
-    /// Gets a <see cref="EquatableList{T}"/> that contains all <see cref="Neuroglia.Data.Infrastructure.ResourceOriented.Namespace"/>s
-    /// </summary>
-    public EquatableList<Namespace>? Namespaces { get; set; }
-
-    /// <summary>
-    /// Gets/sets the <see cref="CustomFunction"/>'s namespace
-    /// </summary>
-    public string? Namespace { get; set; }
 
     /// <summary>
     /// Gets/sets the <see cref="CustomFunction"/>'s name
     /// </summary>
     public string? Name { get; set; }
-
-    /// <summary>
-    /// Gets/sets the <see cref="CustomFunction"/>'s namespace, when the user is creating one
-    /// </summary>
-    public string? ChosenNamespace { get; set; }
 
     /// <summary>
     /// Gets/sets the <see cref="CustomFunction"/>'s name, when the user is creating one
