@@ -334,9 +334,10 @@ public class CreateFunctionViewStore(
         {
             return;
         }
-        await this.TextEditor.SetValue(document);
         try
         {
+            await this.TextEditor.SetValue(document);
+            await Task.Delay(10);
             await this.TextEditor.Trigger("", "editor.action.formatDocument");
         }
         catch (Exception ex)

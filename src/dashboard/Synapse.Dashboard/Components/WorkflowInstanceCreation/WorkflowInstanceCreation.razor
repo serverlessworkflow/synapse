@@ -19,7 +19,7 @@
 @inject MonacoInterop MonacoInterop
 @inject IJsonSerializer Serializer
 
-<MonacoEditor OnTextChanged="OnTextChanged" ModelName="@modelName" />
+<MonacoEditor OnTextChanged="OnTextChanged" ModelName="@modelName" Document="input" />
 <div class="text-center">
     <Button Outline="true" Color="ButtonColor.Primary" class="m-auto mt-3" @onclick="async (_) => await OnStart()">
         <Icon Name="IconName.Play" />
@@ -30,8 +30,10 @@
 @code {
     string payload = string.Empty;
     string modelName = string.Empty;
+    EquatableDictionary<string, object>? input;
 
     [Parameter] public WorkflowDefinition? WorkflowDefinition { get; set; }
+    [Parameter] public EquatableDictionary<string, object>? Input { get; set; }
     [Parameter] public EventCallback<string> OnCreate { get; set; }
 
     void OnTextChanged(string value)
@@ -50,12 +52,15 @@
     protected override async Task OnParametersSetAsync()
     {
         await base.OnParametersSetAsync();
-        if (this.WorkflowDefinition?.Input?.Schema?.Document != null)
+        if (Input != input)
         {
-            modelName = this.WorkflowDefinition.Document.Name + "-" + this.WorkflowDefinition.Document.Version;
-            await this.MonacoInterop.AddValidationSchemaAsync(this.Serializer.SerializeToText(this.WorkflowDefinition.Input.Schema.Document), $"https://synapse.io/schemas/{modelName}.json", $"{modelName}*").ConfigureAwait(false);
-    }
-        
+            input = Input;
+        }
+        if (WorkflowDefinition?.Input?.Schema?.Document != null)
+        {
+            modelName = WorkflowDefinition.Document.Name + "-" + WorkflowDefinition.Document.Version;
+            await MonacoInterop.AddValidationSchemaAsync(Serializer.SerializeToText(WorkflowDefinition.Input.Schema.Document), $"https://synapse.io/schemas/{modelName}.json", $"{modelName}*").ConfigureAwait(false);
+        }
     }
 
 }
