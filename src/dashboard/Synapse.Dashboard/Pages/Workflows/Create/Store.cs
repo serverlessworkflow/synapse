@@ -338,9 +338,10 @@ public class CreateWorkflowViewStore(
         {
             return;
         }
-        await this.TextEditor.SetValue(document);
         try
         {
+            await this.TextEditor.SetValue(document);
+            await Task.Delay(10);
             await this.TextEditor.Trigger("", "editor.action.formatDocument");
         }
         catch (Exception ex)
@@ -357,6 +358,7 @@ public class CreateWorkflowViewStore(
     public async Task OnDidChangeModelContent(ModelContentChangedEvent e)
     {
         if (this.TextEditor == null) return;
+
         var document = await this.TextEditor.GetValue();
         this.Reduce(state => state with
         {

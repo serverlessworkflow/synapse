@@ -149,6 +149,9 @@
                                                 </ul>
                                             </div>
                                             break;
+                                        case "Replay":
+                                            <button class="btn btn-sm text-primary" @onclick="async _ => await OnReplayClickedAsync(instance)" @onclick:stopPropagation="true"><Icon Name="IconName.ArrowClockwise" /></button>
+                                            break;
                                         case "Delete":
                                             <button class="btn btn-sm text-danger" @onclick="async _ => await OnDeleteClickedAsync(instance)" @onclick:stopPropagation="true"><Icon Name="IconName.Trash" /></button>
                                             break;
@@ -204,6 +207,7 @@
     [Parameter] public EventCallback<WorkflowInstance> OnShowDetails { get; set; }
     [Parameter] public EventCallback<string?> OnToggleSelected { get; set; }
     [Parameter] public EventCallback<WorkflowInstance> OnDelete { get; set; }
+    [Parameter] public EventCallback<WorkflowInstance> OnReplay { get; set; }
     [Parameter] public EventCallback OnDeleteSelected { get; set; }
 
     IEnumerable<string> knownColumns = [
@@ -217,6 +221,7 @@
     "Duration",
     "Operator",
     "Actions",
+    "Replay",
     "Delete"
     ];
 
@@ -391,7 +396,7 @@
     }
 
     /// <summary>
-    /// Handles the clikc on the delete button
+    /// Handles the click on the delete button
     /// </summary>
     /// <param name="instance"></param>
     /// <returns></returns>
@@ -400,6 +405,19 @@
         if (this.OnDelete.HasDelegate)
         {
             await this.OnDelete.InvokeAsync(instance);
+        }
+    }
+
+    /// <summary>
+    /// Handles the click on the replay button
+    /// </summary>
+    /// <param name="instance"></param>
+    /// <returns></returns>
+    protected async Task OnReplayClickedAsync(WorkflowInstance instance)
+    {
+        if (this.OnReplay.HasDelegate)
+        {
+            await this.OnReplay.InvokeAsync(instance);
         }
     }
 }

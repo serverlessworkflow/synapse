@@ -37,6 +37,7 @@
                                    OnSearchInput="Store.SetSearchTerm"
                                    OnShowDetails="OnShowInstanceDetails"
                                    OnDelete="OnDeleteWorkflowInstanceAsync"
+                                   OnReplay="async instance => await Store.OnShowCreateInstanceAsync(workflowDefinition, instance.Spec?.Input)"
                                    OnToggleSelected="Store.ToggleResourceSelection"
                                    OnDeleteSelected="OnDeleteSelectedResourcesAsync" />
             <Button Outline="true" Color="ButtonColor.Primary" @onclick="async _ => await Store.OnShowCreateInstanceAsync(workflowDefinition)" class="w-100 mt-3">
@@ -126,6 +127,7 @@
     "Status",
     "Start Time",
     "End Time",
+    "Replay",
     "Delete"
     ];
 
