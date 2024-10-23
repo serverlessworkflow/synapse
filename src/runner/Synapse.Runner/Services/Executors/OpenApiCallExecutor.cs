@@ -124,10 +124,12 @@ public class OpenApiCallExecutor(IServiceProvider serviceProvider, ILogger<OpenA
         }
         using var responseStream = await response.Content!.ReadAsStreamAsync(cancellationToken)!;
         this.Document = new OpenApiStreamReader().Read(responseStream, out var diagnostic);
+        var operationId = this.OpenApi.OperationId;
+        if (operationId.IsRuntimeExpression()) operationId = await this.Task.Workflow.Expressions.EvaluateAsync<string>(operationId, this.Task.Input, this.GetExpressionEvaluationArguments(), cancellationToken).ConfigureAwait(false);
         var operation = this.Document.Paths
             .SelectMany(p => p.Value.Operations)
-            .FirstOrDefault(o => o.Value.OperationId == this.OpenApi.OperationId);
-        if (operation.Value == null) throw new NullReferenceException($"Failed to find an operation with id '{this.OpenApi.OperationId}' in OpenAPI document at '{uri}'");
+            .FirstOrDefault(o => o.Value.OperationId == operationId);
+        if (operation.Value == null) throw new NullReferenceException($"Failed to find an operation with id '{operationId}' in OpenAPI document at '{uri}'");
         this.HttpMethod = operation.Key.ToHttpMethod();
         this.Operation = operation.Value;
         this.Servers = this.Document.Servers.Select(s => s.Url).ToList();
@@ -141,23 +143,23 @@ public class OpenApiCallExecutor(IServiceProvider serviceProvider, ILogger<OpenA
         foreach (var param in parameters.Where(p => p.In == ParameterLocation.Cookie))
         {
             if (this.Parameters.TryGetValue(param.Name, out var value, StringComparison.OrdinalIgnoreCase) && value != null) this.Cookies.Add(param.Name, value.ToString()!);
-            else if (param.Required) throw new NullReferenceException($"Failed to find the definition of the required parameter '{param.Name}' in the OpenAPI operation with id '{this.OpenApi.OperationId}'");
+            else if (param.Required) throw new NullReferenceException($"Failed to find the definition of the required parameter '{param.Name}' in the OpenAPI operation with id '{operationId}'");
         }
         foreach (var param in parameters.Where(p => p.In == ParameterLocation.Header))
         {
             if (this.Parameters.TryGetValue(param.Name, out var value, StringComparison.OrdinalIgnoreCase) && value != null) this.Headers.Add(param.Name, value.ToString()!);
-            else if (param.Required) throw new NullReferenceException($"Failed to find the definition of the required parameter '{param.Name}' in the OpenAPI operation with id '{this.OpenApi.OperationId}'");
+            else if (param.Required) throw new NullReferenceException($"Failed to find the definition of the required parameter '{param.Name}' in the OpenAPI operation with id '{operationId}'");
         }
         foreach (var param in parameters.Where(p => p.In == ParameterLocation.Path))
         {
             if (this.Parameters.TryGetValue(param.Name, out var value, StringComparison.OrdinalIgnoreCase) && value != null) this.Path = this.Path.Replace($"{{{param.Name}}}", value.ToString());
-            else if (param.Required) throw new NullReferenceException($"Failed to find the definition of the required parameter '{param.Name}' in the OpenAPI operation with id '{this.OpenApi.OperationId}'");
+            else if (param.Required) throw new NullReferenceException($"Failed to find the definition of the required parameter '{param.Name}' in the OpenAPI operation with id '{operationId}'");
         }
         var queryParameters = new Dictionary<string, string>();
         foreach (var param in parameters.Where(p => p.In == ParameterLocation.Query))
         {
             if (this.Parameters.TryGetValue(param.Name, out var value, StringComparison.OrdinalIgnoreCase) && value != null) queryParameters.Add(param.Name, value.ToString()!);
-            else if (param.Required) throw new NullReferenceException($"Failed to find the definition of the required parameter '{param.Name}' in the OpenAPI operation with id '{this.OpenApi.OperationId}'");
+            else if (param.Required) throw new NullReferenceException($"Failed to find the definition of the required parameter '{param.Name}' in the OpenAPI operation with id '{operationId}'");
         }
         this.Query = string.Join("&", queryParameters.Select(kvp => $"{kvp.Key}={kvp.Value}"));
         if (operation.Value.RequestBody != null)
@@ -177,7 +179,7 @@ public class OpenApiCallExecutor(IServiceProvider serviceProvider, ILogger<OpenA
                     this.Body = this.Parameters;
                 }
             }
-            if (this.Body == null && operation.Value.RequestBody.Required) throw new NullReferenceException($"Failed to determine the required body parameter for the OpenAPI operation with id '{this.OpenApi.OperationId}'");
+            if (this.Body == null && operation.Value.RequestBody.Required) throw new NullReferenceException($"Failed to determine the required body parameter for the OpenAPI operation with id '{operationId}'");
         }
     }
 
@@ -281,7 +283,7 @@ public class OpenApiCallExecutor(IServiceProvider serviceProvider, ILogger<OpenA
             break;
         }
         output ??= new();
-        if (!success) throw new HttpRequestException($"Failed to execute the Open APU operation with id '{this.Operation.OperationId}': No service available", null, HttpStatusCode.ServiceUnavailable);
+        if (!success) throw new HttpRequestException($"Failed to execute the Open API operation with id '{this.Operation.OperationId}': No service available", null, HttpStatusCode.ServiceUnavailable);
         await this.SetResultAsync(output, this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
     }
 
