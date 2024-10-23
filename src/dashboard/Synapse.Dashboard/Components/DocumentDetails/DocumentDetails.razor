@@ -43,7 +43,12 @@
         }
         else
         {
-            <div class="d-flex justify-content-end mb-2">
+            <div class="d-flex justify-content-between mb-2">
+                <div>
+                    <Button Outline="true" Color="ButtonColor.Primary" Size="ButtonSize.Small" @onclick="Store.OnCopyToClipboard" TooltipTitle="Copy to clipboard">
+                        <Icon Name="IconName.Clipboard" />
+                    </Button>
+                </div>
                 <PreferredLanguageSelector PreferedLanguageChange="Store.ToggleTextBasedEditorLanguageAsync" />
             </div>
             <StandaloneCodeEditor @ref="Store.TextEditor"

@@ -25,13 +25,15 @@ namespace Synapse.Dashboard.Components.DocumentDetailsStateManagement;
 /// <param name="monacoEditorHelper">The service used ease Monaco Editor interactions</param>
 /// <param name="jsonSerializer">The service used to serialize and deserialize JSON</param>
 /// <param name="yamlSerializer">The service used to serialize and deserialize YAML</param>
+/// <param name="toastService">The service used display toast messages</param>
 public class DocumentDetailsStore(
     ILogger<DocumentDetailsStore> logger,
     ISynapseApiClient apiClient,
     IJSRuntime jsRuntime,
     IMonacoEditorHelper monacoEditorHelper,
     IJsonSerializer jsonSerializer,
-    IYamlSerializer yamlSerializer
+    IYamlSerializer yamlSerializer,
+    ToastService toastService
 )
     : ComponentStore<DocumentDetailsState>(new())
 {
@@ -68,6 +70,11 @@ public class DocumentDetailsStore(
     /// Gets the service used to serialize and deserialize YAML
     /// </summary>
     protected IYamlSerializer YamlSerializer { get; } = yamlSerializer;
+
+    /// <summary>
+    /// Gets the service used display toast messages
+    /// </summary>
+    protected ToastService ToastService { get; } = toastService;
 
     /// <summary>
     /// The <see cref="BlazorMonaco.Editor.StandaloneEditorConstructionOptions"/> provider function
@@ -350,6 +357,27 @@ public class DocumentDetailsStore(
                 this.Logger.LogError("Unabled to set text editor value: {exception}", ex.ToString());
                 await this.MonacoEditorHelper.ChangePreferredLanguageAsync(language == PreferredLanguage.YAML ? PreferredLanguage.JSON : PreferredLanguage.YAML);
             }
+        }
+    }
+
+    /// <summary>
+    /// Copies to content of the Monaco editor to the clipboard
+    /// </summary>
+    /// <returns>A awaitable task</returns>
+    public async Task OnCopyToClipboard()
+    {
+        if (this.TextEditor == null) return;
+        var text = await this.TextEditor.GetValue();
+        if (string.IsNullOrWhiteSpace(text)) return;
+        try
+        {
+            await this.JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", text);
+            this.ToastService.Notify(new(ToastType.Success, "Definition copied to the clipboard!"));
+        }
+        catch (Exception ex)
+        {
+            this.ToastService.Notify(new(ToastType.Danger, "Failed to copy the definition to the clipboard."));
+            this.Logger.LogError("Unable to copy to clipboard: {exception}", ex.ToString());
         }
     }
     #endregion
