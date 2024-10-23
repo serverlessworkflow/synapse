@@ -36,10 +36,13 @@ public class MonacoEditorHelper
             ReadOnly = readOnly,
             Value = value,
             TabSize = 2,
+            FormatOnPaste = true,
+            FormatOnType = true,
             QuickSuggestions = new QuickSuggestionsOptions
             {
                 Other = "true",
-                Strings = "true"
+                Strings = "true",
+                Comments = "fasle"
             }
         };
     }
