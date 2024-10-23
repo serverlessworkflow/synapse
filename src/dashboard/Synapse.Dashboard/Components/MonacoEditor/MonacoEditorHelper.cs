@@ -42,7 +42,6 @@ public class MonacoEditorHelper
             {
                 Other = "true",
                 Strings = "true",
-                Comments = "fasle"
             }
         };
     }
