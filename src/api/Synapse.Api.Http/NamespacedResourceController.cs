@@ -170,6 +170,7 @@ public abstract class NamespacedResourceController<TResource>(IMediator mediator
         this.Response.Headers.ContentType = "text/event-stream";
         this.Response.Headers.CacheControl = "no-cache";
         this.Response.Headers.Connection = "keep-alive";
+        await this.Response.Body.FlushAsync(cancellationToken).ConfigureAwait(false);
         await foreach (var e in response.Data!)
         {
             var sseMessage = $"data: {this.JsonSerializer.SerializeToText(e)}\\n\\n";
@@ -211,6 +212,7 @@ public abstract class NamespacedResourceController<TResource>(IMediator mediator
         this.Response.Headers.ContentType = "text/event-stream";
         this.Response.Headers.CacheControl = "no-cache";
         this.Response.Headers.Connection = "keep-alive";
+        await this.Response.Body.FlushAsync(cancellationToken).ConfigureAwait(false);
         await foreach(var e in response.Data!)
         {
             var sseMessage = $"data: {this.JsonSerializer.SerializeToText(e)}\\n\\n";

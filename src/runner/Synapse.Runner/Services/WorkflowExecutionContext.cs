@@ -335,7 +335,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         }
         var taskCompletionSource = new TaskCompletionSource<CorrelationContext>();
         using var cancellationTokenRegistration = cancellationToken.Register(() => taskCompletionSource.TrySetCanceled());
-        using var subscription = (await this.Api.WorkflowInstances.MonitorAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, cancellationToken))
+        using var subscription = this.Api.WorkflowInstances.MonitorAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, cancellationToken)
             .ToObservable()
             .Where(e => e.Type == ResourceWatchEventType.Updated)
             .Select(e => e.Resource.Status?.Correlation?.Contexts)

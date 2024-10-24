@@ -93,17 +93,16 @@ public class WorkflowProcessExecutor(IServiceProvider serviceProvider, ILogger<W
                 {
                     Definition = new()
                     {
-                        Namespace = this.ProcessDefinition.Namespace,
-                        Name = this.ProcessDefinition.Name,
-                        Version = this.ProcessDefinition.Version
+                        Namespace = workflowDefinition.Document.Namespace,
+                        Name = workflowDefinition.Document.Name,
+                        Version = workflowDefinition.Document.Version
                     },
                     Input = input
                 }
             };
             workflowInstance = await this.Api.WorkflowInstances.CreateAsync(workflowInstance, cancellationToken).ConfigureAwait(false);
         }
-        var watchEvents = await this.Api.WorkflowInstances.MonitorAsync(workflowInstance.GetName(), workflowInstance.GetNamespace()!, cancellationToken).ConfigureAwait(false);
-        await foreach(var watchEvent in watchEvents)
+        await foreach(var watchEvent in this.Api.WorkflowInstances.MonitorAsync(workflowInstance.GetName(), workflowInstance.GetNamespace()!, cancellationToken))
         {
             switch (watchEvent.Resource.Status?.Phase)
             {

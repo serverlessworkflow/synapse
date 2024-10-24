@@ -15,6 +15,7 @@ using Neuroglia.Data;
 using Neuroglia.Data.Infrastructure.ResourceOriented;
 using Neuroglia.Data.Infrastructure.ResourceOriented.Services;
 using Synapse.Api.Client.Services;
+using System.Runtime.CompilerServices;
 
 namespace Synapse.UnitTests.Services;
 
@@ -26,10 +27,16 @@ internal class MockClusterResourceApiClient<TResource>(IResourceRepository resou
     public Task<TResource> CreateAsync(TResource resource, CancellationToken cancellationToken = default) => resources.AddAsync(resource, false, cancellationToken);
 
     public Task<IAsyncEnumerable<TResource>> ListAsync(IEnumerable<LabelSelector>? labelSelectors = null, CancellationToken cancellationToken = default) => Task.FromResult(resources.GetAllAsync<TResource>(null, labelSelectors, cancellationToken)!);
-    
-    public async Task<IAsyncEnumerable<IResourceWatchEvent<TResource>>> WatchAsync(IEnumerable<LabelSelector>? labelSelectors = null, CancellationToken cancellationToken = default) => (await resources.WatchAsync<TResource>(null!, labelSelectors, cancellationToken).ConfigureAwait(false)).ToAsyncEnumerable();
-    
-    public async Task<IAsyncEnumerable<IResourceWatchEvent<TResource>>> MonitorAsync(string name, CancellationToken cancellationToken = default) => (await resources.MonitorAsync<TResource>(name, null!, false, cancellationToken).ConfigureAwait(false)).ToAsyncEnumerable();
+
+    public async IAsyncEnumerable<IResourceWatchEvent<TResource>> WatchAsync(IEnumerable<LabelSelector>? labelSelectors = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        await foreach (var e in (await resources.WatchAsync<TResource>(null!, labelSelectors, cancellationToken).ConfigureAwait(false)).ToAsyncEnumerable()) yield return e;
+    }
+
+    public async IAsyncEnumerable<IResourceWatchEvent<TResource>> MonitorAsync(string name, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        await foreach(var e in (await resources.MonitorAsync<TResource>(name, null!, false, cancellationToken).ConfigureAwait(false)).ToAsyncEnumerable()) yield return e;
+    }
     
     public Task<TResource> GetAsync(string name, CancellationToken cancellationToken = default) => resources.GetAsync<TResource>(name, null, cancellationToken)!;
     
