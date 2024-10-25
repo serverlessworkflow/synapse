@@ -698,11 +698,11 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
     /// <inheritdoc/>
     public virtual async Task SuspendAsync(CancellationToken cancellationToken = default)
     {
-        if (this.Instance.Status?.Phase == WorkflowInstanceStatusPhase.Waiting) return;
+        if (this.Instance.Status?.Phase == WorkflowInstanceStatusPhase.Suspended) return;
         using var @lock = await this.Lock.LockAsync(cancellationToken).ConfigureAwait(false);
         var originalInstance = this.Instance.Clone();
         this.Instance.Status ??= new();
-        this.Instance.Status.Phase = WorkflowInstanceStatusPhase.Waiting;
+        this.Instance.Status.Phase = WorkflowInstanceStatusPhase.Suspended;
         var run = this.Instance.Status.Runs?.LastOrDefault();
         if (run != null) run.EndedAt = DateTimeOffset.Now;
         var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);

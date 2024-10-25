@@ -124,7 +124,7 @@ internal class RunnerApplication(IServiceProvider serviceProvider, IHostApplicat
     {
         switch (phase)
         {
-            case WorkflowInstanceStatusPhase.Waiting:
+            case WorkflowInstanceStatusPhase.Suspended:
                 await this.OnSuspendAsync(cancellationToken).ConfigureAwait(false);
                 break;
             case WorkflowInstanceStatusPhase.Cancelled:
