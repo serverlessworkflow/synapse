@@ -9,10 +9,12 @@ import { LineCounter, parseDocument } from "https://esm.sh/yaml";
  * @returns
  */
 export function addValidationSchema(schema, schemaUri, schemaType) {
+    let isUrl = false;
     try {
         schema = JSON.parse(schema);
     }
     catch {
+        isUrl = true;
         schema = { $ref: schema };
     }
     // JSON
@@ -24,7 +26,11 @@ export function addValidationSchema(schema, schemaUri, schemaType) {
             schemas: [
                 ...monaco.languages.json.jsonDefaults.diagnosticsOptions.schemas,
                 {
-                    schema,
+                    schema: isUrl ?
+                        {
+                            $ref: schema.$ref.replace('.yaml', '.json')
+                        } :
+                        schema,
                     uri: schemaUri,
                     fileMatch: [schemaType]
                 }

@@ -40,7 +40,7 @@ public interface INamespacedResourceApiClient<TResource>
     /// <param name="labelSelectors">Defines the expected labels, if any, of the resources to watch</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>A new <see cref="IAsyncEnumerable{T}"/> used to asynchronously enumerate resulting <see cref="IResourceWatchEvent"/>s</returns>
-    Task<IAsyncEnumerable<IResourceWatchEvent<TResource>>> WatchAsync(string? @namespace = null, IEnumerable<LabelSelector>? labelSelectors = null, CancellationToken cancellationToken = default);
+    IAsyncEnumerable<IResourceWatchEvent<TResource>> WatchAsync(string? @namespace = null, IEnumerable<LabelSelector>? labelSelectors = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Monitors the resource with the specified name
@@ -49,7 +49,7 @@ public interface INamespacedResourceApiClient<TResource>
     /// <param name="namespace">The namespace the resource to monitor belongs to</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>A new <see cref="IAsyncEnumerable{T}"/> used to asynchronously enumerate resulting <see cref="IResourceWatchEvent"/>s</returns>
-    Task<IAsyncEnumerable<IResourceWatchEvent<TResource>>> MonitorAsync(string name, string @namespace, CancellationToken cancellationToken = default);
+    IAsyncEnumerable<IResourceWatchEvent<TResource>> MonitorAsync(string name, string @namespace, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets the resource with the specified name

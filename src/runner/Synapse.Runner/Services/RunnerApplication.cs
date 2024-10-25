@@ -95,11 +95,11 @@ internal class RunnerApplication(IServiceProvider serviceProvider, IHostApplicat
             var expressionEvaluator = this.ServiceProvider.GetRequiredService<IExpressionEvaluatorProvider>().GetEvaluator(expressionLanguage)
                 ?? throw new NullReferenceException($"Failed to find an expression evaluator for the language '{expressionLanguage}' defined by workflow '{instance.Spec.Definition.Namespace}.{instance.Spec.Definition.Name}:{instance.Spec.Definition.Version}'");
             var context = ActivatorUtilities.CreateInstance<WorkflowExecutionContext>(this.ServiceProvider, expressionEvaluator, definition, instance);
-            this.Events = (await this.ApiClient.WorkflowInstances.MonitorAsync(this.Options.Workflow.GetInstanceName(), this.Options.Workflow.GetInstanceNamespace(), cancellationToken).ConfigureAwait(false)).ToObservable();
+            this.Events = this.ApiClient.WorkflowInstances.MonitorAsync(this.Options.Workflow.GetInstanceName(), this.Options.Workflow.GetInstanceNamespace(), cancellationToken).ToObservable();
             this.Events
                 .Where(e => e.Type == ResourceWatchEventType.Updated && e.Resource.Status?.Phase != context.Instance.Status?.Phase)
                 .Select(e => e.Resource.Status?.Phase)
-                .SubscribeAsync(async phase => await this.OnHandleStatusPhaseChangedAsync(phase, cancellationToken).ConfigureAwait(false));
+                .SubscribeAsync(async phase => await this.OnHandleStatusPhaseChangedAsync(phase, cancellationToken).ConfigureAwait(false), cancellationToken: cancellationToken);
             this.Executor = ActivatorUtilities.CreateInstance<WorkflowExecutor>(this.ServiceProvider, context);
             await this.Executor.ExecuteAsync(cancellationToken).ConfigureAwait(false);
         }

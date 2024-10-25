@@ -38,7 +38,7 @@ public interface IClusterResourceApiClient<TResource>
     /// <param name="labelSelectors">Defines the expected labels, if any, of the resources to watch</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>A new <see cref="IAsyncEnumerable{T}"/> used to asynchronously enumerate resulting <see cref="IResourceWatchEvent"/>s</returns>
-    Task<IAsyncEnumerable<IResourceWatchEvent<TResource>>> WatchAsync(IEnumerable<LabelSelector>? labelSelectors = null, CancellationToken cancellationToken = default);
+    IAsyncEnumerable<IResourceWatchEvent<TResource>> WatchAsync(IEnumerable<LabelSelector>? labelSelectors = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Monitors the resource with the specified name
@@ -46,7 +46,7 @@ public interface IClusterResourceApiClient<TResource>
     /// <param name="name">The name of the resource to monitor</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>A new <see cref="IAsyncEnumerable{T}"/> used to asynchronously enumerate resulting <see cref="IResourceWatchEvent"/>s</returns>
-    Task<IAsyncEnumerable<IResourceWatchEvent<TResource>>> MonitorAsync(string name, CancellationToken cancellationToken = default);
+    IAsyncEnumerable<IResourceWatchEvent<TResource>> MonitorAsync(string name, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets the resource with the specified name

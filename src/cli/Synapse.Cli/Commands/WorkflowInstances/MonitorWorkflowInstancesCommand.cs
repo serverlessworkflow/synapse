@@ -64,8 +64,7 @@ internal class MonitorWorkflowInstancesCommand
     public async Task HandleAsync(string name, string @namespace, string output)
     {
         this.EnsureConfigured();
-        var enumerable = await this.Api.WorkflowInstances.MonitorAsync(name, @namespace);
-        await foreach (var e in enumerable)
+        await foreach (var e in this.Api.WorkflowInstances.MonitorAsync(name, @namespace))
         {
             string outputText = output.ToLowerInvariant() switch
             {

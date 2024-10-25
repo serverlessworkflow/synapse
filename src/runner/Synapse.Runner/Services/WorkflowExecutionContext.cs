@@ -20,6 +20,7 @@ using Neuroglia.Data.Infrastructure.ResourceOriented;
 using Synapse.Events.Tasks;
 using Synapse.Events.Workflows;
 using System.Net.Mime;
+using System.Runtime.CompilerServices;
 
 namespace Synapse.Runner.Services;
 
@@ -272,9 +273,9 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         this.Instance.Status.StartedAt ??= DateTimeOffset.Now;
         this.Instance.Status.Runs ??= [];
         this.Instance.Status.Runs.Add(new() { StartedAt = DateTimeOffset.Now });
-        this.Instance.Status.ContextReference ??= (await this.Documents.CreateAsync(this.Instance.GetQualifiedName(), this.ContextData, cancellationToken).ConfigureAwait(false)).Id;
         var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
         this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), null, cancellationToken).ConfigureAwait(false);
+        this.ContextData = (await this.Api.Documents.GetAsync(this.Instance.Status!.ContextReference, cancellationToken).ConfigureAwait(false)).Content.ConvertTo<IDictionary<string, object>>()!;
         if (this.Options.CloudEvents.PublishLifecycleEvents) await this.Api.Events.PublishAsync(new CloudEvent()
         {
             SpecVersion = CloudEventSpecVersion.V1.Version,
@@ -335,7 +336,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         }
         var taskCompletionSource = new TaskCompletionSource<CorrelationContext>();
         using var cancellationTokenRegistration = cancellationToken.Register(() => taskCompletionSource.TrySetCanceled());
-        using var subscription = (await this.Api.WorkflowInstances.MonitorAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, cancellationToken))
+        using var subscription = this.Api.WorkflowInstances.MonitorAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, cancellationToken)
             .ToObservable()
             .Where(e => e.Type == ResourceWatchEventType.Updated)
             .Select(e => e.Resource.Status?.Correlation?.Contexts)

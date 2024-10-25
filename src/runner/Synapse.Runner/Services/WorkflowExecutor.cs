@@ -12,6 +12,7 @@
 // limitations under the License.
 
 using Neuroglia.Data.Infrastructure.ResourceOriented;
+using ServerlessWorkflow.Sdk.Models;
 
 namespace Synapse.Runner.Services;
 
@@ -131,7 +132,7 @@ public class WorkflowExecutor(IServiceProvider serviceProvider, ILogger<Workflow
     protected virtual async Task StartAsync(CancellationToken cancellationToken)
     {
         await this.Workflow.StartAsync(cancellationToken).ConfigureAwait(false);
-        var taskDefinition = this.Workflow.Definition.Do.First(); //todo: we might add much more complex rules here (event based, etc)
+        var taskDefinition = this.Workflow.Definition.Do.First();
         var task = await this.Workflow.CreateTaskAsync(taskDefinition.Value, taskDefinition.Key, this.Workflow.Instance.Spec.Input ?? [], cancellationToken: cancellationToken).ConfigureAwait(false);
         var executor = await this.CreateTaskExecutorAsync(task, taskDefinition.Value, this.Workflow.ContextData, this.Workflow.Arguments, cancellationToken).ConfigureAwait(false);
         await executor.ExecuteAsync(cancellationToken).ConfigureAwait(false);
@@ -144,17 +145,27 @@ public class WorkflowExecutor(IServiceProvider serviceProvider, ILogger<Workflow
     /// <returns>A new awaitable <see cref="Task"/></returns>
     protected virtual async Task ResumeAsync(CancellationToken cancellationToken)
     {
-        //todo
         await this.Workflow.ResumeAsync(cancellationToken).ConfigureAwait(false);
+        var task = this.Workflow.Instance.Status?.Tasks?.FirstOrDefault(t => string.IsNullOrWhiteSpace(t.ParentId) && (t.Status == null || t.IsOperative || t.Status == TaskInstanceStatus.Suspended));
+        if (task == null) return;
+        var taskDefinition = this.Workflow.Definition.GetComponent<TaskDefinition>(task.Reference.OriginalString);
+        var executor = await this.CreateTaskExecutorAsync(task, taskDefinition, this.Workflow.ContextData, this.Workflow.Arguments, cancellationToken).ConfigureAwait(false);
+        await executor.ExecuteAsync(cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
     public virtual async Task SuspendAsync(CancellationToken cancellationToken = default)
     {
+        foreach (var executor in this.Executors)
+        {
+            await executor.SuspendAsync(cancellationToken).ConfigureAwait(false);
+            this.Executors.Remove(executor);
+        }
         this.Stopwatch.Stop();
         await this.Workflow.SuspendAsync(cancellationToken).ConfigureAwait(false);
         this.LifeCycleEvents.OnNext(new WorkflowLifeCycleEvent(WorkflowLifeCycleEventType.Suspended));
         if (!this.TaskCompletionSource.Task.IsCompleted) this.TaskCompletionSource.SetResult();
+        this.CancellationTokenSource?.Cancel();
     }
 
     /// <summary>
@@ -192,9 +203,16 @@ public class WorkflowExecutor(IServiceProvider serviceProvider, ILogger<Workflow
     /// <inheritdoc/>
     public virtual async Task CancelAsync(CancellationToken cancellationToken = default)
     {
+        foreach(var executor in this.Executors)
+        {
+            await executor.CancelAsync(cancellationToken).ConfigureAwait(false);
+            this.Executors.Remove(executor);
+        }
+        this.Stopwatch.Stop();
         await this.Workflow.CancelAsync(cancellationToken).ConfigureAwait(false);
         this.LifeCycleEvents.OnNext(new WorkflowLifeCycleEvent(WorkflowLifeCycleEventType.Cancelled));
         if (!this.TaskCompletionSource.Task.IsCompleted) this.TaskCompletionSource.SetCanceled(cancellationToken);
+        this.CancellationTokenSource?.Cancel();
     }
 
     /// <inheritdoc/>

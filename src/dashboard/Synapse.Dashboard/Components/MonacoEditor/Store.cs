@@ -290,7 +290,7 @@ public class MonacoEditorStore(ILogger<MonacoEditorStore> logger, ISynapseApiCli
         try
         {
             await this.JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", text);
-            this.ToastService.Notify(new(ToastType.Success, "Definition copied to the clipboard!"));
+            this.ToastService.Notify(new(ToastType.Success, "Copied to the clipboard!"));
         }
         catch (Exception ex)
         {

@@ -33,6 +33,7 @@ public class WorkflowInstanceHandler(ILogger<WorkflowInstanceHandler> logger, IO
 
     bool _persistingLogs;
     bool _disposed;
+    bool _suspended;
 
     /// <summary>
     /// Gets the service used to perform logging
@@ -70,9 +71,9 @@ public class WorkflowInstanceHandler(ILogger<WorkflowInstanceHandler> logger, IO
     protected IResourceMonitor<WorkflowInstance> WorkflowInstance { get; } = workflowInstance;
 
     /// <summary>
-    /// Gets the handler's subscription to the handled <see cref="Resources.WorkflowInstance"/>
+    /// Gets the handler's subscription used to monitor changes to the handled <see cref="Resources.WorkflowInstance"/>'s correlation contexts
     /// </summary>
-    protected IDisposable? WorkflowInstanceSubscription { get; set; }
+    protected IDisposable? CorrelationContextSubscription { get; set; }
 
     /// <summary>
     /// Gets the <see cref="IDisposable"/> that represents the subscription to the logs produced by the  <see cref="WorkflowInstanceHandler"/>'s <see cref="IWorkflowProcess"/> 
@@ -106,12 +107,17 @@ public class WorkflowInstanceHandler(ILogger<WorkflowInstanceHandler> logger, IO
     /// <returns>A new awaitable <see cref="Task"/></returns>
     public virtual async Task HandleAsync(CancellationToken cancellationToken = default)
     {
-        this.WorkflowInstanceSubscription = this.WorkflowInstance
+        this.CorrelationContextSubscription = this.WorkflowInstance
             .Where(e => e.Type == ResourceWatchEventType.Updated)
             .Select(e => e.Resource.Status?.Correlation?.Contexts)
             .Scan((Previous: (EquatableDictionary<string, CorrelationContext>?)null, Current: (EquatableDictionary<string, CorrelationContext>?)null), (accumulator, current) => (accumulator.Current ?? [], current))
             .Where(v => v.Current?.Count > v.Previous?.Count) //ensures we are not handling changes in a circular loop: if length of current is smaller than previous, it means a context has been processed
             .SubscribeAsync(async e => await OnCorrelationContextsChangedAsync(e, cancellationToken).ConfigureAwait(false));
+        this.WorkflowInstance.Where(e => e.Type == ResourceWatchEventType.Updated)
+            .Select(e => e.Resource.Status?.Phase)
+            .DistinctUntilChanged()
+            .Where(ShouldResumeExecution)
+            .SubscribeAsync(async _ => await this.StartProcessAsync(cancellationToken).ConfigureAwait(false));
         if (string.IsNullOrWhiteSpace(this.WorkflowInstance.Resource.Status?.Phase)
             || this.WorkflowInstance.Resource.Status.Phase == WorkflowInstanceStatusPhase.Pending
             || this.WorkflowInstance.Resource.Status.Phase == WorkflowInstanceStatusPhase.Running)
@@ -158,6 +164,21 @@ public class WorkflowInstanceHandler(ILogger<WorkflowInstanceHandler> logger, IO
     }
 
     /// <summary>
+    /// Determines whether or not the handler should resume the execution of the handled workflow instance
+    /// </summary>
+    /// <param name="statusPhase">The handled workflow instance's current status phase</param>
+    /// <returns>A boolean indicating whether or not the handler should resume the execution of the handled workflow instance</returns>
+    protected virtual bool ShouldResumeExecution(string? statusPhase)
+    {
+        if (statusPhase == WorkflowInstanceStatusPhase.Waiting)
+        {
+            this._suspended = true;
+            return false;
+        }
+        return this._suspended && statusPhase == WorkflowInstanceStatusPhase.Running;
+    }
+
+    /// <summary>
     /// Handles changes to the the handled workflow instance's correlation contexts
     /// </summary>
     /// <param name="value">The context composite value, which contains the previous and the current state</param>
@@ -194,7 +215,7 @@ public class WorkflowInstanceHandler(ILogger<WorkflowInstanceHandler> logger, IO
     {
         if (!disposing || this._disposed) return;
         await this.WorkflowInstance.DisposeAsync().ConfigureAwait(false);
-        this.WorkflowInstanceSubscription?.Dispose();
+        this.CorrelationContextSubscription?.Dispose();
         this.LogSubscription?.Dispose();
         if (this.Process != null) await this.Process.DisposeAsync().ConfigureAwait(false);
         if (this.LogBatchTimer != null) await this.LogBatchTimer.DisposeAsync().ConfigureAwait(false);
@@ -218,7 +239,7 @@ public class WorkflowInstanceHandler(ILogger<WorkflowInstanceHandler> logger, IO
     {
         if (!disposing || this._disposed) return;
         this.WorkflowInstance.Dispose();
-        this.WorkflowInstanceSubscription?.Dispose();
+        this.CorrelationContextSubscription?.Dispose();
         this.LogSubscription?.Dispose();
         this.Process?.Dispose();
         this.LogBatchTimer?.Dispose();

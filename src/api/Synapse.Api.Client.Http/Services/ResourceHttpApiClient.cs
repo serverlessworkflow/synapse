@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Runtime.CompilerServices;
+
 namespace Synapse.Api.Client.Services;
 
 /// <summary>
@@ -105,25 +107,32 @@ public class ResourceHttpApiClient<TResource>(IServiceProvider serviceProvider, 
     }
 
     /// <inheritdoc/>
-    public virtual async Task<IAsyncEnumerable<IResourceWatchEvent<TResource>>> WatchAsync(string? @namespace = null, IEnumerable<LabelSelector>? labelSelectors = null, CancellationToken cancellationToken = default)
+    public virtual async IAsyncEnumerable<IResourceWatchEvent<TResource>> WatchAsync(string? @namespace = null, IEnumerable<LabelSelector>? labelSelectors = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var resource = new TResource();
-        var uri = string.IsNullOrWhiteSpace(@namespace) ? $"/api/{resource.Definition.Version}/{resource.Definition.Plural}/watch" : $"/api/{resource.Definition.Version}/{resource.Definition.Plural}/{@namespace}/watch";
+        var uri = string.IsNullOrWhiteSpace(@namespace) ? $"/api/{resource.Definition.Version}/{resource.Definition.Plural}/watch/sse" : $"/api/{resource.Definition.Version}/{resource.Definition.Plural}/{@namespace}/watch";
         var queryStringArguments = new Dictionary<string, string>();
         if (labelSelectors?.Any() == true) queryStringArguments.Add("labelSelector", labelSelectors.Select(s => s.ToString()).Join(','));
         if (queryStringArguments.Count != 0) uri += $"?{queryStringArguments.Select(kvp => $"{kvp.Key}={kvp.Value}").Join('&')}";
         using var request = await this.ProcessRequestAsync(new HttpRequestMessage(HttpMethod.Get, uri), cancellationToken).ConfigureAwait(false);
-        request.EnableWebAssemblyStreamingResponse();
         var response = await this.HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
         var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-        return this.JsonSerializer.DeserializeAsyncEnumerable<ResourceWatchEvent<TResource>>(responseStream, cancellationToken)!;
+        using var streamReader = new StreamReader(await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false));
+        while (!streamReader.EndOfStream)
+        {
+            var sseMessage = await streamReader.ReadLineAsync(cancellationToken).ConfigureAwait(false);
+            if (string.IsNullOrWhiteSpace(sseMessage)) continue;
+            var json = sseMessage["data: ".Length..].Trim();
+            var e = JsonSerializer.Deserialize<ResourceWatchEvent<TResource>>(json)!;
+            yield return e;
+        }
     }
 
     /// <inheritdoc/>
-    public virtual async Task<IAsyncEnumerable<IResourceWatchEvent<TResource>>> WatchAsync(IEnumerable<LabelSelector>? labelSelectors = null, CancellationToken cancellationToken = default)
+    public virtual async IAsyncEnumerable<IResourceWatchEvent<TResource>> WatchAsync(IEnumerable<LabelSelector>? labelSelectors = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var resource = new TResource();
-        var uri = $"/api/{resource.Definition.Version}/{resource.Definition.Plural}/watch";
+        var uri = $"/api/{resource.Definition.Version}/{resource.Definition.Plural}/watch/sse";
         var queryStringArguments = new Dictionary<string, string>();
         if (labelSelectors?.Any() == true) queryStringArguments.Add("labelSelector", labelSelectors.Select(s => s.ToString()).Join(','));
         if (queryStringArguments.Count != 0) uri += $"?{queryStringArguments.Select(kvp => $"{kvp.Key}={kvp.Value}").Join('&')}";
@@ -131,34 +140,56 @@ public class ResourceHttpApiClient<TResource>(IServiceProvider serviceProvider, 
         request.EnableWebAssemblyStreamingResponse();
         var response = await this.HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
         var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-        return this.JsonSerializer.DeserializeAsyncEnumerable<ResourceWatchEvent<TResource>>(responseStream, cancellationToken)!;
+        using var streamReader = new StreamReader(await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false));
+        while (!streamReader.EndOfStream)
+        {
+            var sseMessage = await streamReader.ReadLineAsync(cancellationToken).ConfigureAwait(false);
+            if (string.IsNullOrWhiteSpace(sseMessage)) continue;
+            var json = sseMessage["data: ".Length..].Trim();
+            var e = JsonSerializer.Deserialize<ResourceWatchEvent<TResource>>(json)!;
+            yield return e;
+        }
     }
 
     /// <inheritdoc/>
-    public virtual async Task<IAsyncEnumerable<IResourceWatchEvent<TResource>>> MonitorAsync(string name, string @namespace, CancellationToken cancellationToken = default)
+    public virtual async IAsyncEnumerable<IResourceWatchEvent<TResource>> MonitorAsync(string name, string @namespace, [EnumeratorCancellation]CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         ArgumentException.ThrowIfNullOrWhiteSpace(@namespace);
         var resource = new TResource();
-        var uri = $"/api/{resource.Definition.Version}/{resource.Definition.Plural}/{@namespace}/{name}/monitor";
+        var uri = $"/api/{resource.Definition.Version}/{resource.Definition.Plural}/{@namespace}/{name}/monitor/sse";
         using var request = await this.ProcessRequestAsync(new HttpRequestMessage(HttpMethod.Get, uri), cancellationToken).ConfigureAwait(false);
-        request.EnableWebAssemblyStreamingResponse();
         var response = await this.HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
         var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-        return this.JsonSerializer.DeserializeAsyncEnumerable<ResourceWatchEvent<TResource>>(responseStream, cancellationToken)!;
+        using var streamReader = new StreamReader(await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false));
+        while (!streamReader.EndOfStream)
+        {
+            var sseMessage = await streamReader.ReadLineAsync(cancellationToken).ConfigureAwait(false);
+            if (string.IsNullOrWhiteSpace(sseMessage)) continue;
+            var json = sseMessage["data: ".Length..].Trim();
+            var e = JsonSerializer.Deserialize<ResourceWatchEvent<TResource>>(json)!;
+            yield return e;
+        }
     }
 
     /// <inheritdoc/>
-    public virtual async Task<IAsyncEnumerable<IResourceWatchEvent<TResource>>> MonitorAsync(string name, CancellationToken cancellationToken = default)
+    public virtual async IAsyncEnumerable<IResourceWatchEvent<TResource>> MonitorAsync(string name, [EnumeratorCancellation]CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         var resource = new TResource();
-        var uri = $"/api/{resource.Definition.Version}/{resource.Definition.Plural}/{name}/monitor";
+        var uri = $"/api/{resource.Definition.Version}/{resource.Definition.Plural}/{name}/monitor/sse";
         using var request = await this.ProcessRequestAsync(new HttpRequestMessage(HttpMethod.Get, uri), cancellationToken).ConfigureAwait(false);
-        request.EnableWebAssemblyStreamingResponse();
         var response = await this.HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
         var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-        return this.JsonSerializer.DeserializeAsyncEnumerable<ResourceWatchEvent<TResource>>(responseStream, cancellationToken)!;
+        using var streamReader = new StreamReader(await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false));
+        while (!streamReader.EndOfStream)
+        {
+            var sseMessage = await streamReader.ReadLineAsync(cancellationToken).ConfigureAwait(false);
+            if (string.IsNullOrWhiteSpace(sseMessage)) continue;
+            var json = sseMessage["data: ".Length..].Trim();
+            var e = JsonSerializer.Deserialize<ResourceWatchEvent<TResource>>(json)!;
+            yield return e;
+        }
     }
 
     /// <inheritdoc/>

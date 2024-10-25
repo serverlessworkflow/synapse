@@ -309,7 +309,7 @@ public class WorkflowDetailsStore(
         try
         {
             await this.JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", text);
-            this.ToastService.Notify(new(ToastType.Success, "Definition copied to the clipboard!"));
+            this.ToastService.Notify(new(ToastType.Success, "Copied to the clipboard!"));
         }
         catch (Exception ex)
         {
@@ -322,13 +322,14 @@ public class WorkflowDetailsStore(
     /// Displays the modal used to provide the new workflow input
     /// </summary>
     /// <returns>A awaitable task</returns>
-    public async Task OnShowCreateInstanceAsync(WorkflowDefinition workflowDefinition)
+    public async Task OnShowCreateInstanceAsync(WorkflowDefinition workflowDefinition, EquatableDictionary<string, object>? input = null)
     {
         if (this.Modal != null)
         {
             var parameters = new Dictionary<string, object>
             {
                 { nameof(WorkflowInstanceCreation.WorkflowDefinition), workflowDefinition },
+                { nameof(WorkflowInstanceCreation.Input), input! },
                 { nameof(WorkflowInstanceCreation.OnCreate), EventCallback.Factory.Create<string>(this, CreateInstanceAsync) }
             };
             await this.Modal.ShowAsync<WorkflowInstanceCreation>(title: "Start a new worklfow", parameters: parameters);
