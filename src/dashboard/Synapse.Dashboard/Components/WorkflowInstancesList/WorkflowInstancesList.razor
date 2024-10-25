@@ -58,7 +58,10 @@
             <div class="dropdown d-flex align-content-center">
                 <button class="btn btn-sm btn-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="" @onclick:stopPropagation="true"><i class="bi bi-three-dots-vertical"></i></button>
                 <ul class="dropdown-menu">
-                    <li><a class="dropdown-item @(selectedInstanceNames.Count() == 0 ? "text-mute" : "text-danger")" href="#" @onclick="OnDeleteSelected" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Trash" /> Delete selected</a></li>
+                    <li><button class="dropdown-item @(selectedInstanceNames.Count() == 0 ? "text-mute" : "")" disabled="@(selectedInstanceNames.Count() == 0)" @onclick="OnSuspendSelectedClickedAsync" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Pause" /> Suspend selected</button></li>
+                    <li><button class="dropdown-item @(selectedInstanceNames.Count() == 0 ? "text-mute" : "")" disabled="@(selectedInstanceNames.Count() == 0)" @onclick="OnResumeSelectedClickedAsync" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Play" /> Resume selected</button></li>
+                    <li><button class="dropdown-item @(selectedInstanceNames.Count() == 0 ? "text-mute" : "")" disabled="@(selectedInstanceNames.Count() == 0)" @onclick="OnCancelSelectedClickedAsync" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.X" /> Cancel selected</button></li>
+                    <li><button class="dropdown-item @(selectedInstanceNames.Count() == 0 ? "text-mute" : "text-danger")" disabled="@(selectedInstanceNames.Count() == 0)" @onclick="OnDeleteSelected" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Trash" /> Delete selected</button></li>
                 </ul>
             </div>
         </div>
@@ -68,9 +71,9 @@
             <tr>
                 @foreach (var column in knownColumns)
                 {
-                    if ((Columns.Count() == 0 && column != "Delete") || Columns.Contains(column))
+                    if ((Columns.Count() == 0 && !DirectActions.Contains(column)) || Columns.Contains(column))
                     {
-                        <th class="sticky-header text-@GetColumnAlignment(column)">@(column != "Action" && column != "Delete" ? column : "")</th>
+                        <th class="sticky-header text-@GetColumnAlignment(column)">@(column != "Actions" && !DirectActions.Contains(column) ? column : "")</th>
                     }
                 }
                 <th class="sticky-header text-center align-middle">
@@ -85,7 +88,7 @@
                     <tr @onclick="async _ => await OnShowClickedAsync(instance)" class="cursor-pointer @(ActiveRow == instance.GetName() ? "table-active" : "")">
                         @foreach (var column in knownColumns)
                         {
-                            if ((Columns.Count() == 0 && column != "Delete") || Columns.Contains(column))
+                            if ((Columns.Count() == 0 && !DirectActions.Contains(column)) || Columns.Contains(column))
                             {
                                 <td class="text-@GetColumnAlignment(column)">
                                     @switch(column)
@@ -144,16 +147,44 @@
                                             <div class="dropdown">
                                                 <button class="btn btn-sm btn-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="" @onclick:stopPropagation="true"><i class="bi bi-three-dots-vertical"></i></button>
                                                 <ul class="dropdown-menu">
-                                                    <li><a class="dropdown-item" href="#" @onclick="async _ => await OnShowClickedAsync(instance)" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Eye" /> View</a></li>
-                                                    <li><a class="dropdown-item text-danger" href="#" @onclick="async _ => await OnDeleteClickedAsync(instance)" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Trash" /> Delete</a></li>
+                                                    @if (instance.Status?.Phase == WorkflowInstanceStatusPhase.Running)
+                                                    {
+                                                        <li><button class="dropdown-item" @onclick="async _ => await OnSuspendClickedAsync(instance)" @onclick:stopPropagation="true"><Icon Name="IconName.Pause" /> Suspend</button></li>
+                                                    }
+                                                    @if (instance.Status?.Phase == WorkflowInstanceStatusPhase.Suspended)
+                                                    {
+                                                        <li><button class="dropdown-item" @onclick="async _ => await OnResumeClickedAsync(instance)" @onclick:stopPropagation="true"><Icon Name="IconName.Play" /> Resume</button></li>
+                                                    }
+                                                    @if (instance.IsOperative)
+                                                    {
+                                                        <li><button class="dropdown-item" @onclick="async _ => await OnCancelClickedAsync(instance)" @onclick:stopPropagation="true"><Icon Name="IconName.X" /> Cancel</button></li>
+                                                    }
+                                                    <li><button class="dropdown-item" @onclick="async _ => await OnReplayClickedAsync(instance)" @onclick:stopPropagation="true"><Icon Name="IconName.ArrowClockwise" /> Replay</button></li>
+                                                    <li><button class="dropdown-item text-danger" @onclick="async _ => await OnDeleteClickedAsync(instance)" @onclick:stopPropagation="true"><Icon Name="IconName.Trash" /> Delete</button></li>
                                                 </ul>
                                             </div>
                                             break;
+                                        case "Resume":
+                                            @if (instance.Status?.Phase == WorkflowInstanceStatusPhase.Running)
+                                            {
+                                                <button class="btn btn-sm text-primary" @onclick="async _ => await OnSuspendClickedAsync(instance)" @onclick:stopPropagation="true" title="Suspend"><Icon Name="IconName.Pause" /></button>
+                                            }
+                                            @if (instance.Status?.Phase == WorkflowInstanceStatusPhase.Suspended)
+                                            {
+                                                <button class="btn btn-sm text-primary" @onclick="async _ => await OnResumeClickedAsync(instance)" @onclick:stopPropagation="true" title="Resume"><Icon Name="IconName.Play" /></button>
+                                            }
+                                            break;
+                                        case "Cancel":
+                                            @if (instance.IsOperative)
+                                            {
+                                                <button class="btn btn-sm text-warning" @onclick="async _ => await OnCancelClickedAsync(instance)" @onclick:stopPropagation="true" title="Cancel"><Icon Name="IconName.X" /></button>
+                                            }
+                                            break;
                                         case "Replay":
-                                            <button class="btn btn-sm text-primary" @onclick="async _ => await OnReplayClickedAsync(instance)" @onclick:stopPropagation="true"><Icon Name="IconName.ArrowClockwise" /></button>
+                                            <button class="btn btn-sm text-primary" @onclick="async _ => await OnReplayClickedAsync(instance)" @onclick:stopPropagation="true" title="Replay"><Icon Name="IconName.ArrowClockwise" /></button>
                                             break;
                                         case "Delete":
-                                            <button class="btn btn-sm text-danger" @onclick="async _ => await OnDeleteClickedAsync(instance)" @onclick:stopPropagation="true"><Icon Name="IconName.Trash" /></button>
+                                            <button class="btn btn-sm text-danger" @onclick="async _ => await OnDeleteClickedAsync(instance)" @onclick:stopPropagation="true" title="Delete"><Icon Name="IconName.Trash" /></button>
                                             break;
                                         default:
                                             break;
@@ -208,9 +239,21 @@
     [Parameter] public EventCallback<string?> OnToggleSelected { get; set; }
     [Parameter] public EventCallback<WorkflowInstance> OnDelete { get; set; }
     [Parameter] public EventCallback<WorkflowInstance> OnReplay { get; set; }
+    [Parameter] public EventCallback<WorkflowInstance> OnSuspend { get; set; }
+    [Parameter] public EventCallback<WorkflowInstance> OnResume { get; set; }
+    [Parameter] public EventCallback<WorkflowInstance> OnCancel { get; set; }
     [Parameter] public EventCallback OnDeleteSelected { get; set; }
+    [Parameter] public EventCallback OnSuspendSelected { get; set; }
+    [Parameter] public EventCallback OnResumeSelected { get; set; }
+    [Parameter] public EventCallback OnCancelSelected { get; set; }
 
-    IEnumerable<string> knownColumns = [
+    public static IEnumerable<string> DirectActions = [
+        "Resume",
+    "Cancel",
+    "Replay",
+    "Delete"
+    ];
+    static IEnumerable<string> knownColumns = [
         "Name",
     "Namespace",
     "Definition",
@@ -221,8 +264,7 @@
     "Duration",
     "Operator",
     "Actions",
-    "Replay",
-    "Delete"
+    ..DirectActions
     ];
 
     ElementReference checkboxAll = default!;
@@ -324,11 +366,14 @@
     /// <returns></returns>
     string GetColumnAlignment(string column)
     {
-        return column == "Name" || column == "Namespace"
-            ? "start"
-            : column == "Action"
-                ? "end"
-                : "center";
+        return (
+            column == "Name" || column == "Namespace" 
+                ? "start"
+                : column == "Action"
+                    ? "end"
+                    : "center"
+            ) 
+            + (DirectActions.Contains(column) ? " p-0": "");
     }
 
     /// <summary>
@@ -385,7 +430,7 @@
     /// <summary>
     /// Handles the click on the show button
     /// </summary>
-    /// <param name="instance"></param>
+    /// <param name="instance">The instance to show</param>
     /// <returns></returns>
     protected async Task OnShowClickedAsync(WorkflowInstance instance)
     {
@@ -398,7 +443,7 @@
     /// <summary>
     /// Handles the click on the delete button
     /// </summary>
-    /// <param name="instance"></param>
+    /// <param name="instance">The instance to delete</param>
     /// <returns></returns>
     protected async Task OnDeleteClickedAsync(WorkflowInstance instance)
     {
@@ -411,13 +456,103 @@
     /// <summary>
     /// Handles the click on the replay button
     /// </summary>
-    /// <param name="instance"></param>
+    /// <param name="instance">The instance to replay</param>
     /// <returns></returns>
     protected async Task OnReplayClickedAsync(WorkflowInstance instance)
     {
         if (this.OnReplay.HasDelegate)
         {
             await this.OnReplay.InvokeAsync(instance);
+        }
+    }
+
+    /// <summary>
+    /// Handles the click on the suspend button
+    /// </summary>
+    /// <param name="instance">The instance to suspend</param>
+    /// <returns></returns>
+    protected async Task OnSuspendClickedAsync(WorkflowInstance instance)
+    {
+        if (this.OnSuspend.HasDelegate)
+        {
+            await this.OnSuspend.InvokeAsync(instance);
+        }
+    }
+
+    /// <summary>
+    /// Handles the click on the resume button
+    /// </summary>
+    /// <param name="instance">The instance to resume</param>
+    /// <returns></returns>
+    protected async Task OnResumeClickedAsync(WorkflowInstance instance)
+    {
+        if (this.OnResume.HasDelegate)
+        {
+            await this.OnResume.InvokeAsync(instance);
+        }
+    }
+
+    /// <summary>
+    /// Handles the click on the cancel button
+    /// </summary>
+    /// <param name="instance">The instance to cancel</param>
+    /// <returns></returns>
+    protected async Task OnCancelClickedAsync(WorkflowInstance instance)
+    {
+        if (this.OnCancel.HasDelegate)
+        {
+            await this.OnCancel.InvokeAsync(instance);
+        }
+    }
+
+    protected async Task OnSuspendSelectedClickedAsync()
+    {
+        var selected = selectedInstanceNames.ToList();
+        var nonRuningInstances = (WorkflowInstances??[]).Where(instance => selected.Contains(instance.GetName()) && instance.Status?.Phase != WorkflowInstanceStatusPhase.Running);
+        foreach(var instance in nonRuningInstances)
+        {
+            if (this.OnToggleSelected.HasDelegate)
+            {
+                await OnToggleSelected.InvokeAsync(instance.GetName());
+            }
+        }
+        if (this.OnSuspendSelected.HasDelegate)
+        {
+            await OnSuspendSelected.InvokeAsync();
+        }
+    }
+
+    protected async Task OnResumeSelectedClickedAsync()
+    {
+        var selected = selectedInstanceNames.ToList();
+        var nonSuspendedInstances = (WorkflowInstances ?? []).Where(instance => selected.Contains(instance.GetName()) && instance.Status?.Phase != WorkflowInstanceStatusPhase.Suspended);
+        foreach (var instance in nonSuspendedInstances)
+        {
+            if (this.OnToggleSelected.HasDelegate)
+            {
+                await OnToggleSelected.InvokeAsync(instance.GetName());
+            }
+        }
+        if (this.OnResumeSelected.HasDelegate)
+        {
+            await OnResumeSelected.InvokeAsync();
+        } 
+    }
+
+    protected async Task OnCancelSelectedClickedAsync()
+    {
+        var selected = selectedInstanceNames.ToList();
+        var nonOperativeInstances = (WorkflowInstances ?? []).Where(instance => selected.Contains(instance.GetName()) && !instance.IsOperative);
+        foreach (var instance in nonOperativeInstances)
+        {
+            if (this.OnToggleSelected.HasDelegate)
+            {
+                await OnToggleSelected.InvokeAsync(instance.GetName());
+            }
+        }
+        if (this.OnCancelSelected.HasDelegate)
+        {
+            await OnCancelSelected.InvokeAsync();
         }
     }
 }

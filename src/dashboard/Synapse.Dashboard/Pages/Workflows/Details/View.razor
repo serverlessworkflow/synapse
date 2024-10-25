@@ -36,9 +36,15 @@
                                    Columns="@columns"
                                    OnSearchInput="Store.SetSearchTerm"
                                    OnShowDetails="OnShowInstanceDetails"
+                                   OnSuspend="async (instance) => await Store.SuspendInstanceAsync(instance)"
+                                   OnResume="async (instance) => await Store.ResumeInstanceAsync(instance)"
+                                   OnCancel="async (instance) => await Store.CancelInstanceAsync(instance)"
+                                   OnReplay="async (instance) => await Store.OnShowCreateInstanceAsync(workflowDefinition, instance.Spec?.Input)"
                                    OnDelete="OnDeleteWorkflowInstanceAsync"
-                                   OnReplay="async instance => await Store.OnShowCreateInstanceAsync(workflowDefinition, instance.Spec?.Input)"
                                    OnToggleSelected="Store.ToggleResourceSelection"
+                                   OnSuspendSelected="async () => await Store.OnSuspendSelectedInstancesAsync()"
+                                   OnResumeSelected="async () => await Store.OnResumeSelectedInstancesAsync()"
+                                   OnCancelSelected="async () => await Store.OnCancelSelectedInstancesAsync()"
                                    OnDeleteSelected="OnDeleteSelectedResourcesAsync" />
             <Button Outline="true" Color="ButtonColor.Primary" @onclick="async _ => await Store.OnShowCreateInstanceAsync(workflowDefinition)" class="w-100 mt-3">
                 <Icon Name="IconName.Plus"/>
@@ -124,11 +130,10 @@
     WorkflowInstance? workflowInstance;
     readonly IEnumerable<string> columns = [
         "Name",
-    "Status",
-    "Start Time",
-    "End Time",
-    "Replay",
-    "Delete"
+        "Status",
+        "Start Time",
+        "End Time",
+        ..WorkflowInstancesList.DirectActions
     ];
 
     [Parameter] public string? Version { get; set; }

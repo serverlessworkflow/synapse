@@ -43,6 +43,7 @@ public static class StatusExtensions
         //CorrelationContextStatus.Completed => "success",
         WorkflowInstanceStatusPhase.Waiting => "cinereous",
         TaskInstanceStatus.Suspended => "icterine",
+        //WorkflowInstanceStatusPhase.Suspended => "icterine",
         TaskInstanceStatus.Skipped => "cinereous",
         WorkflowInstanceStatusPhase.Pending => "mute",
         //TaskInstanceStatus.Pending => "mute",

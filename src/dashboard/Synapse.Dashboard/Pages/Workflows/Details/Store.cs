@@ -12,6 +12,7 @@
 // limitations under the License.
 
 using Neuroglia.Blazor.Dagre.Models;
+using Neuroglia.Data.Infrastructure.ResourceOriented;
 using ServerlessWorkflow.Sdk.Models;
 using Synapse.Api.Client.Services;
 using Synapse.Dashboard.Components.DocumentDetailsStateManagement;
@@ -318,9 +319,12 @@ public class WorkflowDetailsStore(
         }
     }
 
+
     /// <summary>
     /// Displays the modal used to provide the new workflow input
     /// </summary>
+    /// <param name="workflowDefinition">The definition to start a new instance of</param>
+    /// <param name="input">A default input payload, if any</param>
     /// <returns>A awaitable task</returns>
     public async Task OnShowCreateInstanceAsync(WorkflowDefinition workflowDefinition, EquatableDictionary<string, object>? input = null)
     {
@@ -334,6 +338,90 @@ public class WorkflowDetailsStore(
             };
             await this.Modal.ShowAsync<WorkflowInstanceCreation>(title: "Start a new worklfow", parameters: parameters);
         }
+    }
+
+    /// <summary>
+    /// Suspends the provided instance
+    /// </summary>
+    /// <param name="workflowInstance">The instance to suspend</param>
+    /// <returns>A awaitable task</returns>
+    public async Task SuspendInstanceAsync(WorkflowInstance workflowInstance)
+    {
+        await this.ApiClient.WorkflowInstances.SuspendAsync(workflowInstance.GetName(), workflowInstance.GetNamespace()!).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Resumes the provided instance
+    /// </summary>
+    /// <param name="workflowInstance">The instance to resume</param>
+    /// <returns>A awaitable task</returns>
+    public async Task ResumeInstanceAsync(WorkflowInstance workflowInstance)
+    {
+        await this.ApiClient.WorkflowInstances.ResumeAsync(workflowInstance.GetName(), workflowInstance.GetNamespace()!).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Cancels the provided instance
+    /// </summary>
+    /// <param name="workflowInstance">The instance to resume</param>
+    /// <returns>A awaitable task</returns>
+    public async Task CancelInstanceAsync(WorkflowInstance workflowInstance)
+    {
+        await this.ApiClient.WorkflowInstances.CancelAsync(workflowInstance.GetName(), workflowInstance.GetNamespace()!).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Suspends selected instances
+    /// </summary>
+    /// <returns>A awaitable task</returns>
+    public async Task OnSuspendSelectedInstancesAsync()
+    {
+        var selectedResourcesNames = this.Get(state => state.SelectedResourceNames);
+        var resources = (this.Get(state => state.Resources) ?? []).Where(resource => selectedResourcesNames.Contains(resource.GetName()));
+        foreach (var resource in resources)
+        {
+            await this.SuspendInstanceAsync(resource);
+        }
+        this.Reduce(state => state with
+        {
+            SelectedResourceNames = []
+        });
+    }
+
+    /// <summary>
+    /// Resumes selected instances
+    /// </summary>
+    /// <returns>A awaitable task</returns>
+    public async Task OnResumeSelectedInstancesAsync()
+    {
+        var selectedResourcesNames = this.Get(state => state.SelectedResourceNames);
+        var resources = (this.Get(state => state.Resources) ?? []).Where(resource => selectedResourcesNames.Contains(resource.GetName()));
+        foreach (var resource in resources)
+        {
+            await this.ResumeInstanceAsync(resource);
+        }
+        this.Reduce(state => state with
+        {
+            SelectedResourceNames = []
+        });
+    }
+
+    /// <summary>
+    /// Cancels selected instances
+    /// </summary>
+    /// <returns>A awaitable task</returns>
+    public async Task OnCancelSelectedInstancesAsync()
+    {
+        var selectedResourcesNames = this.Get(state => state.SelectedResourceNames);
+        var resources = (this.Get(state => state.Resources) ?? []).Where(resource => selectedResourcesNames.Contains(resource.GetName()));
+        foreach (var resource in resources)
+        {
+            await this.CancelInstanceAsync(resource);
+        }
+        this.Reduce(state => state with
+        {
+            SelectedResourceNames = []
+        });
     }
 
     /// <summary>
