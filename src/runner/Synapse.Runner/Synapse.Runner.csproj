@@ -51,7 +51,7 @@
   <ItemGroup>
 	<PackageReference Include="Docker.DotNet" Version="3.125.15" />
 	<PackageReference Include="DynamicGrpc" Version="1.4.0" />
-	<PackageReference Include="Google.Protobuf" Version="3.28.2" />
+	<PackageReference Include="Google.Protobuf" Version="3.28.3" />
 	<PackageReference Include="Grpc.Core" Version="2.46.6" />
 	<PackageReference Include="Microsoft.Extensions.Configuration.KeyPerFile" Version="8.0.10" />
 	<PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />

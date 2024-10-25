@@ -49,7 +49,12 @@ public class ShellProcessExecutor(IServiceProvider serviceProvider, ILogger<Shel
             RedirectStandardError = true,
             CreateNoWindow = true
         };
-        using var process = Process.Start(startInfo) ?? throw new NullReferenceException($"Failed to create the shell process defined at '{this.Task.Instance.Reference}'");
+        var process = Process.Start(startInfo) ?? throw new NullReferenceException($"Failed to create the shell process defined at '{this.Task.Instance.Reference}'");
+        if (this.Task.Definition.Run.Await != false)
+        {
+            await this.SetResultAsync(new(), this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
+            return;
+        }
         await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
         var rawOutput = (await process.StandardOutput.ReadToEndAsync(cancellationToken).ConfigureAwait(false)).Trim();
         var errorMessage = (await process.StandardError.ReadToEndAsync(cancellationToken).ConfigureAwait(false)).Trim();
@@ -62,6 +67,7 @@ public class ShellProcessExecutor(IServiceProvider serviceProvider, ILogger<Shel
             Detail = errorMessage,
             Instance = this.Task.Instance.Reference
         }, cancellationToken).ConfigureAwait(false);
+        process.Dispose();
     }
 
 }
