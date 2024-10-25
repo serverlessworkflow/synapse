@@ -63,7 +63,7 @@ public class WorkflowExecutor(IServiceProvider serviceProvider, ILogger<Workflow
     /// <summary>
     /// Gets the <see cref="ISubject{T}"/> used to stream <see cref="IWorkflowLifeCycleEvent"/>s
     /// </summary>
-    protected Subject<IWorkflowLifeCycleEvent> Subject { get; } = new();
+    protected Subject<IWorkflowLifeCycleEvent> LifeCycleEvents { get; } = new();
 
     /// <summary>
     /// Gets a <see cref="ConcurrentHashSet{T}"/> containing all child <see cref="ITaskExecutor"/>s
@@ -153,7 +153,7 @@ public class WorkflowExecutor(IServiceProvider serviceProvider, ILogger<Workflow
     {
         this.Stopwatch.Stop();
         await this.Workflow.SuspendAsync(cancellationToken).ConfigureAwait(false);
-        this.Subject.OnNext(new WorkflowLifeCycleEvent(WorkflowLifeCycleEventType.Suspended));
+        this.LifeCycleEvents.OnNext(new WorkflowLifeCycleEvent(WorkflowLifeCycleEventType.Suspended));
         if (!this.TaskCompletionSource.Task.IsCompleted) this.TaskCompletionSource.SetResult();
     }
 
@@ -167,8 +167,8 @@ public class WorkflowExecutor(IServiceProvider serviceProvider, ILogger<Workflow
     {
         this.Stopwatch.Stop();
         await this.Workflow.SetErrorAsync(error, cancellationToken).ConfigureAwait(false);
-        this.Subject.OnNext(new WorkflowLifeCycleEvent(WorkflowLifeCycleEventType.Faulted));
-        this.Subject.OnError(new ErrorRaisedException(error));
+        this.LifeCycleEvents.OnNext(new WorkflowLifeCycleEvent(WorkflowLifeCycleEventType.Faulted));
+        this.LifeCycleEvents.OnError(new ErrorRaisedException(error));
         if (!this.TaskCompletionSource.Task.IsCompleted) this.TaskCompletionSource.SetResult();
     }
 
@@ -184,8 +184,8 @@ public class WorkflowExecutor(IServiceProvider serviceProvider, ILogger<Workflow
         this.Stopwatch.Stop();
         var output = result;
         await this.Workflow.SetResultAsync(output, cancellationToken).ConfigureAwait(false);
-        this.Subject.OnNext(new WorkflowLifeCycleEvent(WorkflowLifeCycleEventType.Completed));
-        this.Subject.OnCompleted();
+        this.LifeCycleEvents.OnNext(new WorkflowLifeCycleEvent(WorkflowLifeCycleEventType.Completed));
+        this.LifeCycleEvents.OnCompleted();
         if (!this.TaskCompletionSource.Task.IsCompleted) this.TaskCompletionSource.SetResult();
     }
 
@@ -193,12 +193,12 @@ public class WorkflowExecutor(IServiceProvider serviceProvider, ILogger<Workflow
     public virtual async Task CancelAsync(CancellationToken cancellationToken = default)
     {
         await this.Workflow.CancelAsync(cancellationToken).ConfigureAwait(false);
-        this.Subject.OnNext(new WorkflowLifeCycleEvent(WorkflowLifeCycleEventType.Cancelled));
+        this.LifeCycleEvents.OnNext(new WorkflowLifeCycleEvent(WorkflowLifeCycleEventType.Cancelled));
         if (!this.TaskCompletionSource.Task.IsCompleted) this.TaskCompletionSource.SetCanceled(cancellationToken);
     }
 
     /// <inheritdoc/>
-    public virtual IDisposable Subscribe(IObserver<IWorkflowLifeCycleEvent> observer) => this.Subject.Subscribe(observer);
+    public virtual IDisposable Subscribe(IObserver<IWorkflowLifeCycleEvent> observer) => this.LifeCycleEvents.Subscribe(observer);
 
     /// <summary>
     /// Creates a new <see cref="ITaskExecutor"/> for the specified <see cref="TaskInstance"/>
@@ -232,8 +232,6 @@ public class WorkflowExecutor(IServiceProvider serviceProvider, ILogger<Workflow
     /// Handles the timeout of the <see cref="WorkflowInstance"/> to execute
     /// </summary>
     /// <param name="state">The timer's state</param>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "<Pending>")]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "VSTHRD200:Use \"Async\" suffix for async methods", Justification = "<Pending>")]
     protected virtual async void OnTimeoutAsync(object? state)
     {
         await this.SetErrorAsync(new Error()
@@ -295,7 +293,7 @@ public class WorkflowExecutor(IServiceProvider serviceProvider, ILogger<Workflow
         try { this.TaskCompletionSource.SetCanceled(); } catch { }
         this.CancellationTokenSource?.Dispose();
         if (this.Timer != null) await this.Timer.DisposeAsync().ConfigureAwait(false);
-        this.Subject.Dispose();
+        this.LifeCycleEvents.Dispose();
         this._disposed = true;
     }
 
@@ -318,7 +316,7 @@ public class WorkflowExecutor(IServiceProvider serviceProvider, ILogger<Workflow
         try { this.TaskCompletionSource.SetCanceled(); } catch { }
         this.CancellationTokenSource?.Dispose();
         this.Timer?.Dispose();
-        this.Subject.Dispose();
+        this.LifeCycleEvents.Dispose();
         this._disposed = true;
     }
 

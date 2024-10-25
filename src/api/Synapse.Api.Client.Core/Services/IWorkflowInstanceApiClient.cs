@@ -23,6 +23,33 @@ public interface IWorkflowInstanceApiClient
 {
 
     /// <summary>
+    /// Suspends the execution of the specified workflow instance
+    /// </summary>
+    /// <param name="name">The name of the workflow instance to suspend the execution of</param>
+    /// <param name="namespace">The namespace the workflow instance to suspend the execution of belongs to</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>A new awaitable <see cref="Task"/></returns>
+    Task SuspendAsync(string name, string @namespace, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Resumes the execution of the specified workflow instance
+    /// </summary>
+    /// <param name="name">The name of the workflow instance to resume the execution of</param>
+    /// <param name="namespace">The namespace the workflow instance to resume the execution of belongs to</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>A new awaitable <see cref="Task"/></returns>
+    Task ResumeAsync(string name, string @namespace, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Cancels the execution of the specified workflow instance
+    /// </summary>
+    /// <param name="name">The name of the workflow instance to cancel the execution of</param>
+    /// <param name="namespace">The namespace the workflow instance to cancel the execution of belongs to</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>A new awaitable <see cref="Task"/></returns>
+    Task CancelAsync(string name, string @namespace, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Reads the logs of the specified <see cref="WorkflowInstance"/>
     /// </summary>
     /// <param name="name">The name of the <see cref="WorkflowInstance"/> to read the logs of</param>

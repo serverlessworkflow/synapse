@@ -117,7 +117,7 @@ public class WorkflowProcessExecutor(IServiceProvider serviceProvider, ILogger<W
                     }, cancellationToken).ConfigureAwait(false);
                     break;
                 case WorkflowInstanceStatusPhase.Faulted:
-                    await this.SetErrorAsync(workflowInstance.Status!.Error!, cancellationToken).ConfigureAwait(false);
+                    await this.SetErrorAsync(watchEvent.Resource.Status.Error!, cancellationToken).ConfigureAwait(false);
                     return;
                 case WorkflowInstanceStatusPhase.Completed:
                     var output = string.IsNullOrWhiteSpace(watchEvent.Resource.Status?.OutputReference) ? null : (await this.Api.Documents.GetAsync(watchEvent.Resource.Status.OutputReference, cancellationToken).ConfigureAwait(false)).Content;

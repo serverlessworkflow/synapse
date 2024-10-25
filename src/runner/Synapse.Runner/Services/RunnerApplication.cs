@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Neuroglia.Data.Infrastructure.ResourceOriented;
+
 namespace Synapse.Runner.Services;
 
 /// <summary>
@@ -57,6 +59,11 @@ internal class RunnerApplication(IServiceProvider serviceProvider, IHostApplicat
     protected RunnerOptions Options { get; } = options.Value;
 
     /// <summary>
+    /// Gets the <see cref="IObservable{T}"/> used to monitor the workflow instance to run
+    /// </summary>
+    protected IObservable<IResourceWatchEvent<WorkflowInstance>>? Events { get; private set; }
+
+    /// <summary>
     /// Gets the service used to execute the workflow instance to run
     /// </summary>
     protected IWorkflowExecutor? Executor { get; private set; }
@@ -88,15 +95,19 @@ internal class RunnerApplication(IServiceProvider serviceProvider, IHostApplicat
             var expressionEvaluator = this.ServiceProvider.GetRequiredService<IExpressionEvaluatorProvider>().GetEvaluator(expressionLanguage)
                 ?? throw new NullReferenceException($"Failed to find an expression evaluator for the language '{expressionLanguage}' defined by workflow '{instance.Spec.Definition.Namespace}.{instance.Spec.Definition.Name}:{instance.Spec.Definition.Version}'");
             var context = ActivatorUtilities.CreateInstance<WorkflowExecutionContext>(this.ServiceProvider, expressionEvaluator, definition, instance);
+            this.Events = (await this.ApiClient.WorkflowInstances.MonitorAsync(this.Options.Workflow.GetInstanceName(), this.Options.Workflow.GetInstanceNamespace(), cancellationToken).ConfigureAwait(false)).ToObservable();
+            this.Events
+                .Where(e => e.Type == ResourceWatchEventType.Updated && e.Resource.Status?.Phase != context.Instance.Status?.Phase)
+                .Select(e => e.Resource.Status?.Phase)
+                .SubscribeAsync(async phase => await this.OnHandleStatusPhaseChangedAsync(phase, cancellationToken).ConfigureAwait(false));
             this.Executor = ActivatorUtilities.CreateInstance<WorkflowExecutor>(this.ServiceProvider, context);
             await this.Executor.ExecuteAsync(cancellationToken).ConfigureAwait(false);
-            this.ApplicationLifetime.StopApplication();
         }
         catch(Exception ex)
         {
             this.Logger.LogError("An error occurred while running the specified workflow instance: {ex}", ex);
-            this.ApplicationLifetime.StopApplication();
         }
+        this.ApplicationLifetime.StopApplication();
     }
 
     /// <inheritdoc/>
@@ -107,6 +118,41 @@ internal class RunnerApplication(IServiceProvider serviceProvider, IHostApplicat
             await this.Executor.DisposeAsync().ConfigureAwait(false);
             this.Executor = null;
         }
+    }
+
+    protected virtual async Task OnHandleStatusPhaseChangedAsync(string? phase, CancellationToken cancellationToken)
+    {
+        switch (phase)
+        {
+            case WorkflowInstanceStatusPhase.Waiting:
+                await this.OnSuspendAsync(cancellationToken).ConfigureAwait(false);
+                break;
+            case WorkflowInstanceStatusPhase.Cancelled:
+                await this.OnCancelAsync(cancellationToken).ConfigureAwait(false);
+                break;
+            default:
+                return;
+        }
+    }
+
+    protected virtual async Task OnSuspendAsync(CancellationToken cancellationToken)
+    {
+        if (this.Executor == null)
+        {
+            this.ApplicationLifetime.StopApplication();
+            return;
+        }
+        await this.Executor.SuspendAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    protected virtual async Task OnCancelAsync(CancellationToken cancellationToken)
+    {
+        if (this.Executor == null)
+        {
+            this.ApplicationLifetime.StopApplication();
+            return;
+        }
+        await this.Executor.CancelAsync(cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>

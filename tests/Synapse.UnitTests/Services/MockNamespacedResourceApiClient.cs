@@ -23,26 +23,28 @@ internal class MockNamespacedResourceApiClient<TResource>(IResourceRepository re
     where TResource : class, IResource, new()
 {
 
-    public Task<TResource> CreateAsync(TResource resource, CancellationToken cancellationToken = default) => resources.AddAsync(resource, false, cancellationToken);
+    protected IResourceRepository Resources { get; } = resources;
 
-    public Task DeleteAsync(string name, string @namespace, CancellationToken cancellationToken = default) => resources.RemoveAsync<TResource>(name, @namespace, false, cancellationToken);
+    public Task<TResource> CreateAsync(TResource resource, CancellationToken cancellationToken = default) => this.Resources.AddAsync(resource, false, cancellationToken);
 
-    public Task<IAsyncEnumerable<TResource>> ListAsync(string? @namespace, IEnumerable<LabelSelector>? labelSelectors = null, CancellationToken cancellationToken = default) => Task.FromResult(resources.GetAllAsync<TResource>(@namespace, labelSelectors, cancellationToken: cancellationToken)!);
+    public Task DeleteAsync(string name, string @namespace, CancellationToken cancellationToken = default) => this.Resources.RemoveAsync<TResource>(name, @namespace, false, cancellationToken);
 
-    public async Task<IAsyncEnumerable<IResourceWatchEvent<TResource>>> WatchAsync(string? @namespace = null, IEnumerable<LabelSelector>? labelSelectors = null, CancellationToken cancellationToken = default) => (await resources.WatchAsync<TResource>(@namespace, labelSelectors, cancellationToken).ConfigureAwait(false)).ToAsyncEnumerable();
+    public Task<IAsyncEnumerable<TResource>> ListAsync(string? @namespace, IEnumerable<LabelSelector>? labelSelectors = null, CancellationToken cancellationToken = default) => Task.FromResult(this.Resources.GetAllAsync<TResource>(@namespace, labelSelectors, cancellationToken: cancellationToken)!);
 
-    public async Task<IAsyncEnumerable<IResourceWatchEvent<TResource>>> MonitorAsync(string name, string @namespace, CancellationToken cancellationToken = default) => (await resources.MonitorAsync<TResource>(name, @namespace, false, cancellationToken).ConfigureAwait(false)).ToAsyncEnumerable();
+    public async Task<IAsyncEnumerable<IResourceWatchEvent<TResource>>> WatchAsync(string? @namespace = null, IEnumerable<LabelSelector>? labelSelectors = null, CancellationToken cancellationToken = default) => (await this.Resources.WatchAsync<TResource>(@namespace, labelSelectors, cancellationToken).ConfigureAwait(false)).ToAsyncEnumerable();
 
-    public Task<TResource> GetAsync(string name, string @namespace, CancellationToken cancellationToken = default) => resources.GetAsync<TResource>(name, @namespace, cancellationToken)!;
+    public async Task<IAsyncEnumerable<IResourceWatchEvent<TResource>>> MonitorAsync(string name, string @namespace, CancellationToken cancellationToken = default) => (await this.Resources.MonitorAsync<TResource>(name, @namespace, false, cancellationToken).ConfigureAwait(false)).ToAsyncEnumerable();
 
-    public async Task<ResourceDefinition> GetDefinitionAsync(CancellationToken cancellationToken = default) => ((ResourceDefinition)(await resources.GetDefinitionAsync<TResource>(cancellationToken))!)!;
+    public Task<TResource> GetAsync(string name, string @namespace, CancellationToken cancellationToken = default) => this.Resources.GetAsync<TResource>(name, @namespace, cancellationToken)!;
 
-    public Task<TResource> PatchAsync(string name, string @namespace, Patch patch, string? resourceVersion = null, CancellationToken cancellationToken = default) => resources.PatchAsync<TResource>(patch, name, @namespace, resourceVersion, false, cancellationToken);
+    public async Task<ResourceDefinition> GetDefinitionAsync(CancellationToken cancellationToken = default) => ((ResourceDefinition)(await this.Resources.GetDefinitionAsync<TResource>(cancellationToken))!)!;
 
-    public Task<TResource> PatchStatusAsync(string name, string @namespace, Patch patch, string? resourceVersion = null, CancellationToken cancellationToken = default) => resources.PatchStatusAsync<TResource>(patch, name, @namespace, resourceVersion, false, cancellationToken);
+    public Task<TResource> PatchAsync(string name, string @namespace, Patch patch, string? resourceVersion = null, CancellationToken cancellationToken = default) => this.Resources.PatchAsync<TResource>(patch, name, @namespace, resourceVersion, false, cancellationToken);
 
-    public Task<TResource> ReplaceAsync(TResource resource, CancellationToken cancellationToken = default) => resources.ReplaceAsync(resource, false, cancellationToken);
+    public Task<TResource> PatchStatusAsync(string name, string @namespace, Patch patch, string? resourceVersion = null, CancellationToken cancellationToken = default) => this.Resources.PatchStatusAsync<TResource>(patch, name, @namespace, resourceVersion, false, cancellationToken);
 
-    public Task<TResource> ReplaceStatusAsync(TResource resource, CancellationToken cancellationToken = default) => resources.ReplaceStatusAsync(resource, false, cancellationToken);
+    public Task<TResource> ReplaceAsync(TResource resource, CancellationToken cancellationToken = default) => this.Resources.ReplaceAsync(resource, false, cancellationToken);
+
+    public Task<TResource> ReplaceStatusAsync(TResource resource, CancellationToken cancellationToken = default) => this.Resources.ReplaceStatusAsync(resource, false, cancellationToken);
 
 }

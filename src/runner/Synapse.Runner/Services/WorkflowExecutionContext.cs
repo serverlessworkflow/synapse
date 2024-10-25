@@ -697,6 +697,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
     /// <inheritdoc/>
     public virtual async Task SuspendAsync(CancellationToken cancellationToken = default)
     {
+        if (this.Instance.Status?.Phase == WorkflowInstanceStatusPhase.Waiting) return;
         using var @lock = await this.Lock.LockAsync(cancellationToken).ConfigureAwait(false);
         var originalInstance = this.Instance.Clone();
         this.Instance.Status ??= new();
@@ -757,6 +758,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
     /// <inheritdoc/>
     public virtual async Task CancelAsync(CancellationToken cancellationToken = default)
     {
+        if (this.Instance.Status?.Phase == WorkflowInstanceStatusPhase.Cancelled) return;
         using var @lock = await this.Lock.LockAsync(cancellationToken).ConfigureAwait(false);
         var originalInstance = this.Instance.Clone();
         this.Instance.Status ??= new();

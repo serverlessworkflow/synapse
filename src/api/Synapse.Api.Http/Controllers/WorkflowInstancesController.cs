@@ -12,6 +12,7 @@
 // limitations under the License.
 
 using Neuroglia.Data.Infrastructure;
+using Synapse.Api.Application.Commands.WorkflowInstances;
 using Synapse.Api.Application.Queries.WorkflowInstances;
 
 namespace Synapse.Api.Http.Controllers;
@@ -27,6 +28,54 @@ public class WorkflowInstancesController(IMediator mediator, IJsonSerializer jso
 {
 
     /// <summary>
+    /// Suspends the execution of the specified workflow instance
+    /// </summary>
+    /// <param name="name">The name of the workflow instance to suspend</param>
+    /// <param name="namespace">The namespace the workflow instance to suspend belongs to</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>A new <see cref="IActionResult"/></returns>
+    [HttpPut("{namespace}/{name}/suspend")]
+    [ProducesResponseType((int)HttpStatusCode.Accepted)]
+    [ProducesErrorResponseType(typeof(Neuroglia.ProblemDetails))]
+    public async Task<IActionResult> SuspendWorkflowInstance(string name, string @namespace, CancellationToken cancellationToken = default)
+    {
+        if(!this.ModelState.IsValid) return this.ValidationProblem(this.ModelState);
+        return this.Process(await this.Mediator.ExecuteAsync(new SuspendWorkflowInstanceCommand(name, @namespace)).ConfigureAwait(false));
+    }
+
+    /// <summary>
+    /// Resumes the execution of the specified workflow instance
+    /// </summary>
+    /// <param name="name">The name of the workflow instance to resume</param>
+    /// <param name="namespace">The namespace the workflow instance to resume belongs to</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>A new <see cref="IActionResult"/></returns>
+    [HttpPut("{namespace}/{name}/resume")]
+    [ProducesResponseType((int)HttpStatusCode.Accepted)]
+    [ProducesErrorResponseType(typeof(Neuroglia.ProblemDetails))]
+    public async Task<IActionResult> ResumeWorkflowInstance(string name, string @namespace, CancellationToken cancellationToken = default)
+    {
+        if (!this.ModelState.IsValid) return this.ValidationProblem(this.ModelState);
+        return this.Process(await this.Mediator.ExecuteAsync(new ResumeWorkflowInstanceCommand(name, @namespace)).ConfigureAwait(false));
+    }
+
+    /// <summary>
+    /// Cancels the execution of the specified workflow instance
+    /// </summary>
+    /// <param name="name">The name of the workflow instance to cancel</param>
+    /// <param name="namespace">The namespace the workflow instance to cancel belongs to</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>A new <see cref="IActionResult"/></returns>
+    [HttpPut("{namespace}/{name}/cancel")]
+    [ProducesResponseType((int)HttpStatusCode.Accepted)]
+    [ProducesErrorResponseType(typeof(Neuroglia.ProblemDetails))]
+    public async Task<IActionResult> CancelWorkflowInstance(string name, string @namespace, CancellationToken cancellationToken = default)
+    {
+        if (!this.ModelState.IsValid) return this.ValidationProblem(this.ModelState);
+        return this.Process(await this.Mediator.ExecuteAsync(new CancelWorkflowInstanceCommand(name, @namespace)).ConfigureAwait(false));
+    }
+
+    /// <summary>
     /// Gets the logs produced by workflow instance with the the specified name and namespace
     /// </summary>
     /// <param name="name">The name of the workflow instance to read the logs of</param>
@@ -36,7 +85,7 @@ public class WorkflowInstancesController(IMediator mediator, IJsonSerializer jso
     [HttpGet("{namespace}/{name}/logs")]
     [ProducesResponseType(typeof(Resource), (int)HttpStatusCode.Created)]
     [ProducesErrorResponseType(typeof(Neuroglia.ProblemDetails))]
-    public async Task<IActionResult> GetResourceLogs(string name, string @namespace, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetWorkflowInstanceLogs(string name, string @namespace, CancellationToken cancellationToken = default)
     {
         if (!this.ModelState.IsValid) return this.ValidationProblem(this.ModelState);
         return this.Process(await this.Mediator.ExecuteAsync(new ReadWorkflowInstanceLogsQuery(name, @namespace), cancellationToken).ConfigureAwait(false));
@@ -52,7 +101,7 @@ public class WorkflowInstancesController(IMediator mediator, IJsonSerializer jso
     [HttpGet("{namespace}/{name}/logs/watch")]
     [ProducesResponseType(typeof(IAsyncEnumerable<ResourceWatchEvent>), (int)HttpStatusCode.OK)]
     [ProducesErrorResponseType(typeof(Neuroglia.ProblemDetails))]
-    public virtual async Task<IAsyncEnumerable<ITextDocumentWatchEvent>> WatchResourceLogs(string name, string @namespace, CancellationToken cancellationToken = default)
+    public virtual async Task<IAsyncEnumerable<ITextDocumentWatchEvent>> WatchWorkflowInstanceLogs(string name, string @namespace, CancellationToken cancellationToken = default)
     {
         var response = await this.Mediator.ExecuteAsync(new WatchWorkflowInstanceLogsQuery(name, @namespace), cancellationToken).ConfigureAwait(false);
         return response.Data!;
