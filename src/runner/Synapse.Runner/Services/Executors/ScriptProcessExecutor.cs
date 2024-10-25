@@ -68,7 +68,12 @@ public class ScriptProcessExecutor(IServiceProvider serviceProvider, ILogger<Scr
         var environment = this.ProcessDefinition.Environment == null 
             ? null 
             : await this.ProcessDefinition.Environment.ToAsyncEnumerable().ToDictionaryAwaitAsync(kvp => ValueTask.FromResult(kvp.Key), async kvp => (await this.EvaluateAndSerializeAsync(kvp.Value, cancellationToken).ConfigureAwait(false))!, cancellationToken).ConfigureAwait(false);
-        using var process = await executor.ExecuteAsync(script, arguments, environment, cancellationToken).ConfigureAwait(false);
+        var process = await executor.ExecuteAsync(script, arguments, environment, cancellationToken).ConfigureAwait(false);
+        if (this.Task.Definition.Run.Await != false)
+        {
+            await this.SetResultAsync(new(), this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
+            return;
+        }
         await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
         var rawOutput = (await process.StandardOutput.ReadToEndAsync(cancellationToken).ConfigureAwait(false)).Trim();
         var errorMessage = (await process.StandardError.ReadToEndAsync(cancellationToken).ConfigureAwait(false)).Trim();
@@ -81,6 +86,7 @@ public class ScriptProcessExecutor(IServiceProvider serviceProvider, ILogger<Scr
             Detail = errorMessage,
             Instance = this.Task.Instance.Reference
         }, cancellationToken).ConfigureAwait(false);
+        process.Dispose();
     }
 
     /// <summary>

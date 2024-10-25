@@ -111,38 +111,42 @@ public class WorkflowProcessExecutor(IServiceProvider serviceProvider, ILogger<W
             };
             this.Subflow = await this.Api.WorkflowInstances.CreateAsync(this.Subflow, cancellationToken).ConfigureAwait(false);
         }
-        await foreach(var watchEvent in this.Api.WorkflowInstances.MonitorAsync(this.Subflow.GetName(), this.Subflow.GetNamespace()!, cancellationToken))
+        if (this.Task.Definition.Run.Await == false) await this.SetResultAsync(new(), this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
+        else
         {
-            switch (watchEvent.Resource.Status?.Phase)
+            await foreach (var watchEvent in this.Api.WorkflowInstances.MonitorAsync(this.Subflow.GetName(), this.Subflow.GetNamespace()!, cancellationToken))
             {
-                case WorkflowInstanceStatusPhase.Cancelled:
-                    if (!this.Cancelling)
-                    {
-                        await this.SetErrorAsync(new()
+                switch (watchEvent.Resource.Status?.Phase)
+                {
+                    case WorkflowInstanceStatusPhase.Cancelled:
+                        if (!this.Cancelling)
                         {
-                            Type = ErrorType.Runtime,
-                            Status = ErrorStatus.Runtime,
-                            Title = ErrorTitle.Runtime,
-                            Detail = $"The execution of workflow instance '{this.Subflow.GetQualifiedName()}' has been cancelled"
-                        }, cancellationToken).ConfigureAwait(false);
-                    }
-                    break;
-                case WorkflowInstanceStatusPhase.Faulted:
-                    await this.SetErrorAsync(watchEvent.Resource.Status.Error!, cancellationToken).ConfigureAwait(false);
-                    return;
-                case WorkflowInstanceStatusPhase.Completed:
-                    var output = string.IsNullOrWhiteSpace(watchEvent.Resource.Status?.OutputReference) ? null : (await this.Api.Documents.GetAsync(watchEvent.Resource.Status.OutputReference, cancellationToken).ConfigureAwait(false)).Content;
-                    await this.SetResultAsync(output, this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
-                    return;
+                            await this.SetErrorAsync(new()
+                            {
+                                Type = ErrorType.Runtime,
+                                Status = ErrorStatus.Runtime,
+                                Title = ErrorTitle.Runtime,
+                                Detail = $"The execution of workflow instance '{this.Subflow.GetQualifiedName()}' has been cancelled"
+                            }, cancellationToken).ConfigureAwait(false);
+                        }
+                        break;
+                    case WorkflowInstanceStatusPhase.Faulted:
+                        await this.SetErrorAsync(watchEvent.Resource.Status.Error!, cancellationToken).ConfigureAwait(false);
+                        return;
+                    case WorkflowInstanceStatusPhase.Completed:
+                        var output = string.IsNullOrWhiteSpace(watchEvent.Resource.Status?.OutputReference) ? null : (await this.Api.Documents.GetAsync(watchEvent.Resource.Status.OutputReference, cancellationToken).ConfigureAwait(false)).Content;
+                        await this.SetResultAsync(output, this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
+                        return;
+                }
+                if (this.Cancelling) break;
             }
-            if (this.Cancelling) break;
         }
     }
 
     /// <inheritdoc/>
     public override async Task CancelAsync(CancellationToken cancellationToken = default)
     {
-        if(this.Subflow != null)
+        if (this.Subflow != null && this.Task.Definition.Run.Await != false)
         {
             try
             {

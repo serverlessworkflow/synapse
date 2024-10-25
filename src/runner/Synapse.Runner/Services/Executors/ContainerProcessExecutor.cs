@@ -62,6 +62,11 @@ public class ContainerProcessExecutor(IServiceProvider serviceProvider, ILogger<
         try
         {
             await this.Container!.StartAsync(cancellationToken).ConfigureAwait(false);
+            if (this.Task.Definition.Run.Await != false)
+            {
+                await this.SetResultAsync(new(), this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
+                return;
+            }
             await this.Container.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
             var standardOutput = (this.Container.StandardOutput == null ? null : await this.Container.StandardOutput.ReadToEndAsync(cancellationToken).ConfigureAwait(false))?.Trim();
             if (this.Options.Containers.Platform == ContainerPlatform.Docker) standardOutput = standardOutput?[8..];
