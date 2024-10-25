@@ -108,7 +108,7 @@ public class WorkflowExecutor(IServiceProvider serviceProvider, ILogger<Workflow
                     await this.StartAsync(this.CancellationTokenSource.Token).ConfigureAwait(false);
                     break;
                 case WorkflowInstanceStatusPhase.Running:
-                case WorkflowInstanceStatusPhase.Waiting:
+                case WorkflowInstanceStatusPhase.Suspended:
                     await this.ResumeAsync(this.CancellationTokenSource.Token).ConfigureAwait(false);
                     break;
                 default:

@@ -37,7 +37,7 @@ internal class MockWorkflowInstanceApiClient(IResourceRepository resources, ITex
         if (original.Status?.Phase != WorkflowInstanceStatusPhase.Running) throw new ProblemDetailsException(new(ProblemTypes.AdmissionFailed, ProblemTitles.AdmissionFailed, (int)HttpStatusCode.BadRequest, $"The workflow instance '{workflowInstanceReference}' is in an expected phase '{original.Status?.Phase}'"));
         var updated = original.Clone()!;
         updated.Status ??= new();
-        updated.Status.Phase = WorkflowInstanceStatusPhase.Waiting;
+        updated.Status.Phase = WorkflowInstanceStatusPhase.Suspended;
         var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(original, updated);
         await this.Resources.PatchStatusAsync<WorkflowInstance>(new(PatchType.JsonPatch, jsonPatch), name, @namespace, cancellationToken: cancellationToken).ConfigureAwait(false);
     }
@@ -49,7 +49,7 @@ internal class MockWorkflowInstanceApiClient(IResourceRepository resources, ITex
         var workflowInstanceReference = new ResourceReference<WorkflowInstance>(name, @namespace);
         var original = await this.Resources.GetAsync<WorkflowInstance>(name, @namespace, cancellationToken).ConfigureAwait(false)
             ?? throw new ProblemDetailsException(new(ProblemTypes.NotFound, ProblemTitles.NotFound, (int)HttpStatusCode.NotFound, ProblemDescriptions.ResourceNotFound.Format(workflowInstanceReference.ToString())));
-        if (original.Status?.Phase != WorkflowInstanceStatusPhase.Waiting) throw new ProblemDetailsException(new(ProblemTypes.AdmissionFailed, ProblemTitles.AdmissionFailed, (int)HttpStatusCode.BadRequest, $"The workflow instance '{workflowInstanceReference}' is in an expected phase '{original.Status?.Phase}'"));
+        if (original.Status?.Phase != WorkflowInstanceStatusPhase.Suspended) throw new ProblemDetailsException(new(ProblemTypes.AdmissionFailed, ProblemTitles.AdmissionFailed, (int)HttpStatusCode.BadRequest, $"The workflow instance '{workflowInstanceReference}' is in an expected phase '{original.Status?.Phase}'"));
         var updated = original.Clone()!;
         updated.Status ??= new();
         updated.Status.Phase = WorkflowInstanceStatusPhase.Running;
@@ -64,7 +64,7 @@ internal class MockWorkflowInstanceApiClient(IResourceRepository resources, ITex
         var workflowInstanceReference = new ResourceReference<WorkflowInstance>(name, @namespace);
         var original = await this.Resources.GetAsync<WorkflowInstance>(name, @namespace, cancellationToken).ConfigureAwait(false)
             ?? throw new ProblemDetailsException(new(ProblemTypes.NotFound, ProblemTitles.NotFound, (int)HttpStatusCode.NotFound, ProblemDescriptions.ResourceNotFound.Format(workflowInstanceReference.ToString())));
-        if (original.Status?.Phase != WorkflowInstanceStatusPhase.Pending && original.Status?.Phase != WorkflowInstanceStatusPhase.Running && original.Status?.Phase != WorkflowInstanceStatusPhase.Waiting)
+        if (original.Status?.Phase != WorkflowInstanceStatusPhase.Pending && original.Status?.Phase != WorkflowInstanceStatusPhase.Running && original.Status?.Phase != WorkflowInstanceStatusPhase.Suspended)
             throw new ProblemDetailsException(new(ProblemTypes.AdmissionFailed, ProblemTitles.AdmissionFailed, (int)HttpStatusCode.BadRequest, $"The workflow instance '{workflowInstanceReference}' is in an expected phase '{original.Status?.Phase}'"));
         var updated = original.Clone()!;
         updated.Status ??= new();

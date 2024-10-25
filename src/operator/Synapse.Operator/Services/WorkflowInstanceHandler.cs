@@ -170,7 +170,7 @@ public class WorkflowInstanceHandler(ILogger<WorkflowInstanceHandler> logger, IO
     /// <returns>A boolean indicating whether or not the handler should resume the execution of the handled workflow instance</returns>
     protected virtual bool ShouldResumeExecution(string? statusPhase)
     {
-        if (statusPhase == WorkflowInstanceStatusPhase.Waiting)
+        if (statusPhase == WorkflowInstanceStatusPhase.Suspended)
         {
             this._suspended = true;
             return false;

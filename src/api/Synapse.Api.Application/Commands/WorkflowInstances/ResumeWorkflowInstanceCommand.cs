@@ -51,7 +51,7 @@ public class ResumeWorkflowInstanceCommandHandler(IResourceRepository resources)
         var workflowInstanceReference = new ResourceReference<WorkflowInstance>(command.Name, command.Namespace);
         var original = await resources.GetAsync<WorkflowInstance>(command.Name, command.Namespace, cancellationToken).ConfigureAwait(false) 
             ?? throw new ProblemDetailsException(new(ProblemTypes.NotFound, ProblemTitles.NotFound, (int)HttpStatusCode.NotFound, ProblemDescriptions.ResourceNotFound.Format(workflowInstanceReference.ToString())));
-        if (!string.IsNullOrWhiteSpace(original.Status?.Phase) && original.Status?.Phase != WorkflowInstanceStatusPhase.Waiting) throw new ProblemDetailsException(new(ProblemTypes.AdmissionFailed, ProblemTitles.AdmissionFailed, (int)HttpStatusCode.BadRequest, $"The workflow instance '{workflowInstanceReference}' is in an expected phase '{original.Status?.Phase}'"));
+        if (!string.IsNullOrWhiteSpace(original.Status?.Phase) && original.Status?.Phase != WorkflowInstanceStatusPhase.Suspended) throw new ProblemDetailsException(new(ProblemTypes.AdmissionFailed, ProblemTitles.AdmissionFailed, (int)HttpStatusCode.BadRequest, $"The workflow instance '{workflowInstanceReference}' is in an expected phase '{original.Status?.Phase}'"));
         var updated = original.Clone()!;
         updated.Status ??= new();
         updated.Status.Phase = WorkflowInstanceStatusPhase.Running;

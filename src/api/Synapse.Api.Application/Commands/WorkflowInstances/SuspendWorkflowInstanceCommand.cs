@@ -54,7 +54,7 @@ public class SuspendWorkflowInstanceCommandHandler(IResourceRepository resources
         if (original.Status?.Phase != WorkflowInstanceStatusPhase.Running) throw new ProblemDetailsException(new(ProblemTypes.AdmissionFailed, ProblemTitles.AdmissionFailed, (int)HttpStatusCode.BadRequest, $"The workflow instance '{workflowInstanceReference}' is in an expected phase '{original.Status?.Phase}'"));
         var updated = original.Clone()!;
         updated.Status ??= new();
-        updated.Status.Phase = WorkflowInstanceStatusPhase.Waiting;
+        updated.Status.Phase = WorkflowInstanceStatusPhase.Suspended;
         var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(original, updated);
         await resources.PatchStatusAsync<WorkflowInstance>(new(PatchType.JsonPatch, jsonPatch), command.Name, command.Namespace, cancellationToken: cancellationToken).ConfigureAwait(false);
         return this.Ok();
