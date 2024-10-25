@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Neuroglia.Data.Infrastructure.ResourceOriented;
+
 namespace Synapse.Api.Http;
 
 /// <summary>
@@ -120,20 +122,11 @@ public abstract class NamespacedResourceController<TResource>(IMediator mediator
     [HttpGet("watch")]
     [ProducesResponseType(typeof(IAsyncEnumerable<ResourceWatchEvent>), (int)HttpStatusCode.OK)]
     [ProducesErrorResponseType(typeof(Neuroglia.ProblemDetails))]
-    public virtual async Task<IActionResult> WatchResources(string? labelSelector = null, CancellationToken cancellationToken = default)
+    public virtual async Task<IAsyncEnumerable<IResourceWatchEvent<TResource>>> WatchResources(string? labelSelector = null, CancellationToken cancellationToken = default)
     {
-        if (!this.TryParseLabelSelectors(labelSelector, out var labelSelectors)) return this.InvalidLabelSelector(labelSelector!);
+        if (!this.TryParseLabelSelectors(labelSelector, out var labelSelectors)) throw new Exception($"Invalid label selector '{labelSelector}'");
         var response = await this.Mediator.ExecuteAsync(new WatchResourcesQuery<TResource>(null, labelSelectors), cancellationToken).ConfigureAwait(false);
-        this.Response.Headers.ContentType = "text/event-stream";
-        this.Response.Headers.CacheControl = "no-cache";
-        this.Response.Headers.Connection = "keep-alive";
-        await foreach (var e in response.Data!)
-        {
-            var sseMessage = $"data: {this.JsonSerializer.SerializeToText(e)}\\n\\n";
-            await this.Response.Body.WriteAsync(Encoding.UTF8.GetBytes(sseMessage), cancellationToken).ConfigureAwait(false);
-            await this.Response.Body.FlushAsync(cancellationToken).ConfigureAwait(false);
-        }
-        return this.Ok();
+        return response.Data!;
     }
 
     /// <summary>
@@ -171,9 +164,9 @@ public abstract class NamespacedResourceController<TResource>(IMediator mediator
         this.Response.Headers.CacheControl = "no-cache";
         this.Response.Headers.Connection = "keep-alive";
         await this.Response.Body.FlushAsync(cancellationToken).ConfigureAwait(false);
-        await foreach (var e in response.Data!)
+        await foreach (var e in response.Data!.WithCancellation(cancellationToken))
         {
-            var sseMessage = $"data: {this.JsonSerializer.SerializeToText(e)}\\n\\n";
+            var sseMessage = $"data: {this.JsonSerializer.SerializeToText(e)}\n\n";
             await this.Response.Body.WriteAsync(Encoding.UTF8.GetBytes(sseMessage), cancellationToken).ConfigureAwait(false);
             await this.Response.Body.FlushAsync(cancellationToken).ConfigureAwait(false);
         }
@@ -213,9 +206,9 @@ public abstract class NamespacedResourceController<TResource>(IMediator mediator
         this.Response.Headers.CacheControl = "no-cache";
         this.Response.Headers.Connection = "keep-alive";
         await this.Response.Body.FlushAsync(cancellationToken).ConfigureAwait(false);
-        await foreach(var e in response.Data!)
+        await foreach(var e in response.Data!.WithCancellation(cancellationToken))
         {
-            var sseMessage = $"data: {this.JsonSerializer.SerializeToText(e)}\\n\\n";
+            var sseMessage = $"data: {this.JsonSerializer.SerializeToText(e)}\n\n";
             await this.Response.Body.WriteAsync(Encoding.UTF8.GetBytes(sseMessage), cancellationToken).ConfigureAwait(false);
             await this.Response.Body.FlushAsync(cancellationToken).ConfigureAwait(false);
         }

@@ -117,10 +117,10 @@ public class ResourceHttpApiClient<TResource>(IServiceProvider serviceProvider, 
         using var request = await this.ProcessRequestAsync(new HttpRequestMessage(HttpMethod.Get, uri), cancellationToken).ConfigureAwait(false);
         var response = await this.HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
         var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-        using var streamReader = new StreamReader(await response.Content.ReadAsStreamAsync());
+        using var streamReader = new StreamReader(await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false));
         while (!streamReader.EndOfStream)
         {
-            var sseMessage = await streamReader.ReadLineAsync();
+            var sseMessage = await streamReader.ReadLineAsync(cancellationToken).ConfigureAwait(false);
             if (string.IsNullOrWhiteSpace(sseMessage)) continue;
             var json = sseMessage["data: ".Length..].Trim();
             var e = JsonSerializer.Deserialize<ResourceWatchEvent<TResource>>(json)!;
@@ -140,10 +140,10 @@ public class ResourceHttpApiClient<TResource>(IServiceProvider serviceProvider, 
         request.EnableWebAssemblyStreamingResponse();
         var response = await this.HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
         var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-        using var streamReader = new StreamReader(await response.Content.ReadAsStreamAsync());
+        using var streamReader = new StreamReader(await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false));
         while (!streamReader.EndOfStream)
         {
-            var sseMessage = await streamReader.ReadLineAsync();
+            var sseMessage = await streamReader.ReadLineAsync(cancellationToken).ConfigureAwait(false);
             if (string.IsNullOrWhiteSpace(sseMessage)) continue;
             var json = sseMessage["data: ".Length..].Trim();
             var e = JsonSerializer.Deserialize<ResourceWatchEvent<TResource>>(json)!;
@@ -161,10 +161,10 @@ public class ResourceHttpApiClient<TResource>(IServiceProvider serviceProvider, 
         using var request = await this.ProcessRequestAsync(new HttpRequestMessage(HttpMethod.Get, uri), cancellationToken).ConfigureAwait(false);
         var response = await this.HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
         var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-        using var streamReader = new StreamReader(await response.Content.ReadAsStreamAsync());
+        using var streamReader = new StreamReader(await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false));
         while (!streamReader.EndOfStream)
         {
-            var sseMessage = await streamReader.ReadLineAsync();
+            var sseMessage = await streamReader.ReadLineAsync(cancellationToken).ConfigureAwait(false);
             if (string.IsNullOrWhiteSpace(sseMessage)) continue;
             var json = sseMessage["data: ".Length..].Trim();
             var e = JsonSerializer.Deserialize<ResourceWatchEvent<TResource>>(json)!;
@@ -181,10 +181,10 @@ public class ResourceHttpApiClient<TResource>(IServiceProvider serviceProvider, 
         using var request = await this.ProcessRequestAsync(new HttpRequestMessage(HttpMethod.Get, uri), cancellationToken).ConfigureAwait(false);
         var response = await this.HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
         var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-        using var streamReader = new StreamReader(await response.Content.ReadAsStreamAsync());
+        using var streamReader = new StreamReader(await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false));
         while (!streamReader.EndOfStream)
         {
-            var sseMessage = await streamReader.ReadLineAsync();
+            var sseMessage = await streamReader.ReadLineAsync(cancellationToken).ConfigureAwait(false);
             if (string.IsNullOrWhiteSpace(sseMessage)) continue;
             var json = sseMessage["data: ".Length..].Trim();
             var e = JsonSerializer.Deserialize<ResourceWatchEvent<TResource>>(json)!;

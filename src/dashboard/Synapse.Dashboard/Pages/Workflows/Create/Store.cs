@@ -538,24 +538,16 @@ public class CreateWorkflowViewStore(
         {
             await this.GetWorkflowDefinitionAsync(workflow.ns, workflow.name);
         }, cancellationToken: this.CancellationTokenSource.Token);
-        this.WorkflowDefinitionText.Where(document => !string.IsNullOrEmpty(document)).Throttle(new(100)).SubscribeAsync(async (document) => {
-            if (string.IsNullOrWhiteSpace(document))
-            {
-                return;
-            }
+        this.WorkflowDefinitionText.Where(document => !string.IsNullOrEmpty(document)).Throttle(new(100)).SubscribeAsync(async (document) => 
+        {
+            if (string.IsNullOrWhiteSpace(document)) return;
             var currentDslVersion = this.Get(state => state.DslVersion);
             var versionExtractor = new Regex("'?\"?(dsl|DSL)'?\"?\\s*:\\s*'?\"?([\\w\\.\\-\\+]*)'?\"?");
             var match = versionExtractor.Match(document);
-            if (match == null)
-            {
-                return;
-            }
+            if (match == null) return;
             var documentDslVersion = match.Groups[2].Value;
-            if (documentDslVersion == currentDslVersion)
-            {
-                return;
-            }
-            await this.SetValidationSchema("v" + documentDslVersion);
+            if (documentDslVersion == currentDslVersion) return;
+            await this.SetValidationSchema(documentDslVersion);
         }, cancellationToken: this.CancellationTokenSource.Token);
         await base.InitializeAsync();
     }

@@ -58,12 +58,14 @@ public class DoTaskExecutor(IServiceProvider serviceProvider, ILogger<DoTaskExec
     /// <inheritdoc/>
     protected override async Task DoExecuteAsync(CancellationToken cancellationToken)
     {
-        var last = await this.Task.GetSubTasksAsync(cancellationToken).LastOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+        var subtasks = this.Task.GetSubTasksAsync(cancellationToken);
+        var last = await subtasks.LastOrDefaultAsync(cancellationToken).ConfigureAwait(false);
         var nextDefinition = last == null
             ? this.Tasks.First()
-            : last.IsOperative
+            : last.Status == null || last.IsOperative || last.Status == TaskInstanceStatus.Suspended
                 ? this.Task.Definition.Do.FirstOrDefault(e => e.Key == last.Name) ?? throw new NullReferenceException($"Failed to find a task with the specified name '{last.Name}' at '{this.Task.Instance.Reference}'")
                 : this.Task.Definition.Do.GetTaskAfter(last);
+        if (last != null && (last.Status == null || last.IsOperative || last.Status == TaskInstanceStatus.Suspended)) last = await subtasks.LastOrDefaultAsync(t => last.Status != null && !t.IsOperative && t.Status != TaskInstanceStatus.Suspended).ConfigureAwait(false);
         if (nextDefinition == null)
         {
             await this.SetResultAsync(last!.OutputReference, this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);

@@ -39,6 +39,7 @@ var builder = Host.CreateDefaultBuilder()
             });
         });
         services.AddSerialization();
+        services.AddJsonSerializer(options => options.DefaultBufferSize = 128);
         services.AddJQExpressionEvaluator();
         services.AddJavaScriptExpressionEvaluator();
         services.AddNodeJSScriptExecutor();

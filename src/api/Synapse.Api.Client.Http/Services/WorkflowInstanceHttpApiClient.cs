@@ -24,6 +24,39 @@ public class WorkflowInstanceHttpApiClient(IServiceProvider serviceProvider, ILo
 {
 
     /// <inheritdoc/>
+    public virtual async Task SuspendAsync(string name, string @namespace, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        ArgumentException.ThrowIfNullOrWhiteSpace(@namespace);
+        var resource = new WorkflowInstance();
+        var uri = $"/api/{resource.Definition.Version}/{resource.Definition.Plural}/{@namespace}/{name}/suspend";
+        using var request = await this.ProcessRequestAsync(new HttpRequestMessage(HttpMethod.Put, uri), cancellationToken).ConfigureAwait(false);
+        using var response = await this.ProcessResponseAsync(await this.HttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false), cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public virtual async Task ResumeAsync(string name, string @namespace, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        ArgumentException.ThrowIfNullOrWhiteSpace(@namespace);
+        var resource = new WorkflowInstance();
+        var uri = $"/api/{resource.Definition.Version}/{resource.Definition.Plural}/{@namespace}/{name}/resume";
+        using var request = await this.ProcessRequestAsync(new HttpRequestMessage(HttpMethod.Put, uri), cancellationToken).ConfigureAwait(false);
+        using var response = await this.ProcessResponseAsync(await this.HttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false), cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public virtual async Task CancelAsync(string name, string @namespace, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        ArgumentException.ThrowIfNullOrWhiteSpace(@namespace);
+        var resource = new WorkflowInstance();
+        var uri = $"/api/{resource.Definition.Version}/{resource.Definition.Plural}/{@namespace}/{name}/cancel";
+        using var request = await this.ProcessRequestAsync(new HttpRequestMessage(HttpMethod.Put, uri), cancellationToken).ConfigureAwait(false);
+        using var response = await this.ProcessResponseAsync(await this.HttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false), cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
     public virtual async Task<string> ReadLogsAsync(string name, string @namespace, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);

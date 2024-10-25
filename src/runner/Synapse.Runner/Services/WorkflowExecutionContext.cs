@@ -20,6 +20,7 @@ using Neuroglia.Data.Infrastructure.ResourceOriented;
 using Synapse.Events.Tasks;
 using Synapse.Events.Workflows;
 using System.Net.Mime;
+using System.Runtime.CompilerServices;
 
 namespace Synapse.Runner.Services;
 
@@ -272,9 +273,9 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         this.Instance.Status.StartedAt ??= DateTimeOffset.Now;
         this.Instance.Status.Runs ??= [];
         this.Instance.Status.Runs.Add(new() { StartedAt = DateTimeOffset.Now });
-        this.Instance.Status.ContextReference ??= (await this.Documents.CreateAsync(this.Instance.GetQualifiedName(), this.ContextData, cancellationToken).ConfigureAwait(false)).Id;
         var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
         this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), null, cancellationToken).ConfigureAwait(false);
+        this.ContextData = (await this.Api.Documents.GetAsync(this.Instance.Status!.ContextReference, cancellationToken).ConfigureAwait(false)).Content.ConvertTo<IDictionary<string, object>>()!;
         if (this.Options.CloudEvents.PublishLifecycleEvents) await this.Api.Events.PublishAsync(new CloudEvent()
         {
             SpecVersion = CloudEventSpecVersion.V1.Version,
@@ -697,6 +698,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
     /// <inheritdoc/>
     public virtual async Task SuspendAsync(CancellationToken cancellationToken = default)
     {
+        if (this.Instance.Status?.Phase == WorkflowInstanceStatusPhase.Waiting) return;
         using var @lock = await this.Lock.LockAsync(cancellationToken).ConfigureAwait(false);
         var originalInstance = this.Instance.Clone();
         this.Instance.Status ??= new();
@@ -757,6 +759,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
     /// <inheritdoc/>
     public virtual async Task CancelAsync(CancellationToken cancellationToken = default)
     {
+        if (this.Instance.Status?.Phase == WorkflowInstanceStatusPhase.Cancelled) return;
         using var @lock = await this.Lock.LockAsync(cancellationToken).ConfigureAwait(false);
         var originalInstance = this.Instance.Clone();
         this.Instance.Status ??= new();

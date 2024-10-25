@@ -115,6 +115,7 @@ public abstract class TaskExecutor<TDefinition>(IServiceProvider serviceProvider
     /// <inheritdoc/>
     public virtual async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
+        if (this.Task.Instance.Status != null && !this.Task.Instance.IsOperative) return;
         try
         {
             await this.DoInitializeAsync(cancellationToken).ConfigureAwait(false);
@@ -157,8 +158,8 @@ public abstract class TaskExecutor<TDefinition>(IServiceProvider serviceProvider
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD003:Avoid awaiting foreign Tasks", Justification = "<Pending>")]
     public virtual async Task ExecuteAsync(CancellationToken cancellationToken = default)
     {
-        this.CancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         if (this.Task.Instance.Status != null && !this.Task.Instance.IsOperative) return;
+        this.CancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         if (this.Task.Definition.Timeout?.After != null)
         {
             var duration = this.Task.Definition.Timeout.After.ToTimeSpan();
@@ -286,11 +287,17 @@ public abstract class TaskExecutor<TDefinition>(IServiceProvider serviceProvider
     /// <inheritdoc/>
     public virtual async Task SuspendAsync(CancellationToken cancellationToken = default)
     {
+        foreach (var executor in this.Executors)
+        {
+            await executor.SuspendAsync(cancellationToken).ConfigureAwait(false);
+            this.Executors.Remove(executor);
+        }
         this.Stopwatch.Stop();
         await this.DoSuspendAsync(cancellationToken).ConfigureAwait(false);
         await this.Task.SuspendAsync(cancellationToken).ConfigureAwait(false);
         this.Subject.OnNext(new TaskLifeCycleEvent(TaskLifeCycleEventType.Suspended));
         if (!this.TaskCompletionSource.Task.IsCompleted) this.TaskCompletionSource.SetResult();
+        this.CancellationTokenSource?.Cancel();
     }
 
     /// <summary>
@@ -404,10 +411,17 @@ public abstract class TaskExecutor<TDefinition>(IServiceProvider serviceProvider
     /// <inheritdoc/>
     public virtual async Task CancelAsync(CancellationToken cancellationToken = default)
     {
+        foreach(var executor in this.Executors)
+        {
+            await executor.CancelAsync(cancellationToken).ConfigureAwait(false);
+            this.Executors.Remove(executor);
+        }
+        this.Stopwatch.Stop();
         await this.Task.CancelAsync(cancellationToken).ConfigureAwait(false);
         await this.DoCancelAsync(cancellationToken).ConfigureAwait(false);
         this.Subject.OnNext(new TaskLifeCycleEvent(TaskLifeCycleEventType.Cancelled));
         if (!this.TaskCompletionSource.Task.IsCompleted) this.TaskCompletionSource.SetCanceled(cancellationToken);
+        this.CancellationTokenSource?.Cancel();
     }
 
     /// <summary>

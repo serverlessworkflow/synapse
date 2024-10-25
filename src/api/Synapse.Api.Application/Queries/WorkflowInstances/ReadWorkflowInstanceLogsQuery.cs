@@ -19,31 +19,21 @@ namespace Synapse.Api.Application.Queries.WorkflowInstances;
 /// <summary>
 /// Represents the query used to read the logs of the specified workflow instance
 /// </summary>
-public class ReadWorkflowInstanceLogsQuery
-    : Query<string>
+/// <param name="name">The name of the <see cref="WorkflowInstance"/> to read the logs of</param>
+/// <param name="namespace">The namespace the <see cref="WorkflowInstance"/> to read the logs of belongs to</param>
+public class ReadWorkflowInstanceLogsQuery(string name, string @namespace)
+        : Query<string>
 {
-
-    /// <summary>
-    /// Initializes a new <see cref="ReadWorkflowInstanceLogsQuery"/>
-    /// </summary>
-    /// <param name="name">The name of the <see cref="WorkflowInstance"/> to read the logs of</param>
-    /// <param name="namespace">The namespace the <see cref="WorkflowInstance"/> to read the logs of belongs to</param>
-    public ReadWorkflowInstanceLogsQuery(string name, string? @namespace)
-    {
-        if (string.IsNullOrWhiteSpace(name)) throw new ArgumentNullException(nameof(name));
-        this.Name = name;
-        this.Namespace = @namespace;
-    }
 
     /// <summary>
     /// Gets the name of the <see cref="WorkflowInstance"/> to read the logs of
     /// </summary>
-    public string Name { get; }
+    public string Name { get; } = name;
 
     /// <summary>
     /// Gets the namespace the <see cref="WorkflowInstance"/> to read the logs of belongs to
     /// </summary>
-    public string? Namespace { get; }
+    public string Namespace { get; } = @namespace;
 
 }
 

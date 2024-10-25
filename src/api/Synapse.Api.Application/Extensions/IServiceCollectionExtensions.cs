@@ -18,6 +18,7 @@ using Neuroglia.Security;
 using Synapse.Api.Application.Commands.Documents;
 using Synapse.Api.Application.Commands.Events;
 using Synapse.Api.Application.Commands.Resources.Generic;
+using Synapse.Api.Application.Commands.WorkflowInstances;
 using Synapse.Api.Application.Queries.Documents;
 using Synapse.Api.Application.Queries.Resources.Generic;
 using Synapse.Api.Application.Queries.Users;
@@ -159,6 +160,9 @@ public static class IServiceCollectionExtensions
             services.Add(new ServiceDescriptor(handlerServiceType, handlerImplementationType, serviceLifetime));
 
         }
+        services.AddScoped<IRequestHandler<SuspendWorkflowInstanceCommand, IOperationResult>, SuspendWorkflowInstanceCommandHandler>();
+        services.AddScoped<IRequestHandler<ResumeWorkflowInstanceCommand, IOperationResult>, ResumeWorkflowInstanceCommandHandler>();
+        services.AddScoped<IRequestHandler<CancelWorkflowInstanceCommand, IOperationResult>, CancelWorkflowInstanceCommandHandler>();
         services.AddScoped<IRequestHandler<CreateDocumentCommand, IOperationResult<Document>>, CreateDocumentCommandHandler>();
         services.AddScoped<IRequestHandler<UpdateDocumentCommand, IOperationResult<Document>>, UpdateDocumentCommandHandler>();
         return services;
