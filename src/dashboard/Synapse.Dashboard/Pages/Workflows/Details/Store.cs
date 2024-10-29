@@ -531,7 +531,21 @@ public class WorkflowDetailsStore(
                 await this.MonacoEditorHelper.ChangePreferredLanguageAsync(PreferredLanguage.YAML);
             }
         }, cancellationToken: this.CancellationTokenSource.Token);
+        this.MonacoEditorHelper.PreferredThemeChanged += OnPreferedThemeChangedAsync;
         await base.InitializeAsync();
+    }
+
+    /// <summary>
+    /// Updates the editor theme
+    /// </summary>
+    /// <param name="newTheme"></param>
+    /// <returns></returns>
+    protected async Task OnPreferedThemeChangedAsync(string newTheme)
+    {
+        if (this.TextEditor != null)
+        {
+            await this.TextEditor.UpdateOptions(new EditorUpdateOptions() { Theme = newTheme });
+        }
     }
 
     /// <summary>
@@ -554,6 +568,7 @@ public class WorkflowDetailsStore(
                     this.TextEditor.Dispose();
                     this.TextEditor = null;
                 }
+                this.MonacoEditorHelper.PreferredThemeChanged -= OnPreferedThemeChangedAsync;
             }
             this._disposed = true;
         }

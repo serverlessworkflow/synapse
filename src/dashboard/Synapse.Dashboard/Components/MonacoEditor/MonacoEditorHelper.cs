@@ -18,18 +18,23 @@ public class MonacoEditorHelper
     : IMonacoEditorHelper
 {
     private int _modelCount = 0;
+    private string _preferredTheme = "vs-dark";
 
     /// <inheritdoc />
     public string PreferredLanguage { get; protected set; } = "yaml";
+
 
     /// <inheritdoc />
     public event PreferredLanguageChangedEventHandler? PreferredLanguageChanged;
 
     /// <inheritdoc />
+    public event PreferredThemeChangedEventHandler? PreferredThemeChanged;
+
+    /// <inheritdoc />
     public Func<StandaloneCodeEditor, StandaloneEditorConstructionOptions> GetStandaloneEditorConstructionOptions(string value = "", bool readOnly = false, string language = "yaml") {
         return (StandaloneCodeEditor editor) => new StandaloneEditorConstructionOptions
         {
-            Theme = "vs-dark",
+            Theme = _preferredTheme,
             AutomaticLayout = true,
             Minimap = new EditorMinimapOptions { Enabled = false },
             Language = language,
@@ -63,18 +68,31 @@ public class MonacoEditorHelper
         if (!string.IsNullOrEmpty(language) && language != this.PreferredLanguage)
         {
             this.PreferredLanguage = language;
-            await this.OnPreferredLanguageChangeAsync(language);
+            if (this.PreferredLanguageChanged != null)
+            {
+                await this.PreferredLanguageChanged.Invoke(language);
+            }
         }
     }
 
     /// <inheritdoc />
-    protected async Task OnPreferredLanguageChangeAsync(string language)
+    public async Task ChangePreferredThemeAsync(string theme)
     {
-        if (this.PreferredLanguageChanged != null)
+        if (!string.IsNullOrEmpty(theme) && theme != this._preferredTheme)
         {
-            await this.PreferredLanguageChanged.Invoke(language);
+            if (theme == "dark")
+            {
+                theme = "vs-dark";
+            }
+            else if (theme == "light") {
+                theme = "vs";
+            }
+            this._preferredTheme = theme;
+            if (this.PreferredThemeChanged != null)
+            {
+                await this.PreferredThemeChanged.Invoke(theme);
+            }
         }
-        await Task.CompletedTask;
     }
 
     /// <inheritdoc />

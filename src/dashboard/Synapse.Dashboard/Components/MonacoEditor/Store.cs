@@ -310,7 +310,21 @@ public class MonacoEditorStore(ILogger<MonacoEditorStore> logger, ISynapseApiCli
         {
             this.TextEditor?.UpdateOptions(new EditorUpdateOptions() { ReadOnly = isReadOnly });
         }, token: this.CancellationTokenSource.Token);
+        this.MonacoEditorHelper.PreferredThemeChanged += OnPreferedThemeChangedAsync;
         return base.InitializeAsync();
+    }
+
+    /// <summary>
+    /// Updates the editor theme
+    /// </summary>
+    /// <param name="newTheme"></param>
+    /// <returns></returns>
+    protected async Task OnPreferedThemeChangedAsync(string newTheme)
+    {
+        if (this.TextEditor != null)
+        {
+            await this.TextEditor.UpdateOptions(new EditorUpdateOptions() { Theme = newTheme });
+        }
     }
 
     private bool disposed;
@@ -334,6 +348,7 @@ public class MonacoEditorStore(ILogger<MonacoEditorStore> logger, ISynapseApiCli
                     this.TextEditor.Dispose();
                     this.TextEditor = null;
                 }
+                this.MonacoEditorHelper.PreferredThemeChanged -= OnPreferedThemeChangedAsync;
             }
             this.disposed = true;
         }

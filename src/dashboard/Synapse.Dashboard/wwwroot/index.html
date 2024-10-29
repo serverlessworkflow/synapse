@@ -42,6 +42,12 @@ limitations under the License.
     <link href="_content/Neuroglia.Blazor.Dagre/neuroglia-blazor-dagre.min.css" rel="stylesheet" />
     <link href="Synapse.Dashboard.styles.css" rel="stylesheet" />
     <link href="css/app.css" rel="stylesheet" />
+    <script type="text/javascript">
+        const preferedTheme = localStorage.getItem('preferedTheme') || 'dark';
+        if (preferedTheme == 'light') {
+            document.documentElement.removeAttribute('data-bs-theme');
+        }
+    </script>
 </head>
 
 <body>

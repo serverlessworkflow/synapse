@@ -19,9 +19,12 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IOptions<ApplicationOptions> Options
 @inject NavigationManager NavigationManager
+@inject JSInterop JsInterop
+@inject ILocalStorage Storage
+@inject IMonacoEditorHelper MonacoEditorHelper
 
 <div class="page h-100 d-flex flex-column">    
-    <header class="header navbar navbar-expand-lg flex-row navbar-dark bg-dark-subtle">        
+    <header class="header navbar navbar-expand-lg flex-row">        
         <a class="navbar-brand d-flex flex-row align-items-center justify-content-center" href="#">        
             <svg class="logo" viewBox="-10 -10 60 60">
                 <use href="#logo" />
@@ -92,6 +95,7 @@
                 </li>
             </ul>
         </nav>
+        <button class="btn btn-sm" @onclick="OnThemeClickedAsync" title="@(theme == "dark" ? "light" : "dark")"><Icon Name="@(theme == "dark" ? IconName.Sun : IconName.Moon)" /></button>
         <AuthorizeView>
             <Authorized>
                 <Dropdown Class="me-3">
@@ -123,11 +127,14 @@
 @code{
 
     ClaimsPrincipal? user;
+    string theme = "dark";
 
     protected override async Task OnInitializedAsync()
     {
         user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
         AuthenticationStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
+        theme = await Storage.GetItemAsync("preferedTheme") ?? "dark";
+        await MonacoEditorHelper.ChangePreferredThemeAsync(theme);
         await base.OnInitializedAsync();
     }
 
@@ -141,6 +148,12 @@
     {
         var relativePath = NavigationManager.ToBaseRelativePath(NavigationManager.Uri).ToLower();
         return navLinkMatch == NavLinkMatch.All ? relativePath == href.ToLower() : relativePath.StartsWith(href.ToLower());
+    }
+
+    async Task OnThemeClickedAsync()
+    {
+        theme = theme == "dark" ? "light" : "dark";
+        await JsInterop.SetThemeAsync(theme);
     }
 
 }

@@ -137,6 +137,7 @@
             this.textEditorValue = textEditorValue;
             await this.SetTextEditorValueAsync();
         }, cancellationToken: this.CancellationTokenSource.Token);
+        this.MonacoEditorHelper.PreferredThemeChanged += OnPreferedThemeChangedAsync;
     }
 
     /// <inheritdoc/>
@@ -153,6 +154,19 @@
             this.Store.SetIsCluster(this.IsCluster);
         }
         return base.OnParametersSetAsync();
+    }
+
+    /// <summary>
+    /// Updates the editor theme
+    /// </summary>
+    /// <param name="newTheme"></param>
+    /// <returns></returns>
+    protected async Task OnPreferedThemeChangedAsync(string newTheme)
+    {
+        if (this.textBasedEditor != null)
+        {
+            await this.textBasedEditor.UpdateOptions(new EditorUpdateOptions() { Theme = newTheme });
+        }
     }
 
     /// <summary>
@@ -287,6 +301,7 @@
                     this.textBasedEditor.Dispose();
                     this.textBasedEditor = null;
                 }
+                this.MonacoEditorHelper.PreferredThemeChanged -= OnPreferedThemeChangedAsync;
             }
             this.disposed = true;
         }

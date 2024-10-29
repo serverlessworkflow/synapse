@@ -31,3 +31,16 @@ export function scrollDown(el, height) {
     if (!el) return;
     el.scrollTop = height || el.scrollHeight;
 }
+
+/**
+ * Sets the theme
+ * @param {any} theme "light" or "dark"
+ */
+export function setTheme(theme) {
+    if (theme == 'light') {
+        document.documentElement.removeAttribute('data-bs-theme');
+    }
+    else {
+        document.documentElement.setAttribute('data-bs-theme', 'dark');
+    }
+}

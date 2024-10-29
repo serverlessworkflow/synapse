@@ -31,7 +31,7 @@
             </div>
             <div class="col-md-12 col-lg-4">
                 <div class="label">Status</div>
-                <span class="badge rounded-pill badge rounded-pill border border-@TaskInstance.Status.GetColorClass() text-@TaskInstance.Status.GetColorClass()">@(TaskInstance.Status ?? TaskInstanceStatus.Pending)</span>
+                <span class="badge rounded-pill badge rounded-pill border @TaskInstance.Status.GetColorClass()">@(TaskInstance.Status ?? TaskInstanceStatus.Pending)</span>
                 @if (!string.IsNullOrWhiteSpace(TaskInstance.StatusReason))
                 {
                     <div class="fst-italic">@TaskInstance.StatusReason</div>
@@ -120,7 +120,7 @@
                             <td>@run.StartedAt.RelativeFormat()</td>
                             <td class="text-center">@(run.EndedAt?.RelativeFormat() ?? "-")</td>
                             <td class="text-center">@(run.EndedAt.HasValue ? run.EndedAt.Value.Subtract(run.StartedAt).ToString("hh\\:mm\\:ss\\.fff") : "-")</td>
-                            <td class="text-center"><span class="badge rounded-pill badge rounded-pill border border-@run.Outcome.GetColorClass() text-@run.Outcome.GetColorClass()">@(run.Outcome ?? TaskInstanceStatus.Pending)</span></td>
+                            <td class="text-center"><span class="badge rounded-pill badge rounded-pill border @run.Outcome.GetColorClass()">@(run.Outcome ?? TaskInstanceStatus.Pending)</span></td>
                         </tr>
                     }
                 </tbody>

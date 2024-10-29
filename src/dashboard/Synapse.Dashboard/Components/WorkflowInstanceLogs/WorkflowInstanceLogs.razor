@@ -20,7 +20,7 @@
 @inherits StatefulComponent<WorkflowInstanceLogs, WorkflowInstanceLogsStore, WorkflowInstanceLogsState>
 
 <div class="d-flex justify-content-between cursor-pointer" @onclick="async (_) => await Store.ToggleAsync()">
-    Logs
+    <span class="label">Logs</span>
     <Icon Name="@(isExpanded ? IconName.CaretUp : IconName.CaretDown)" />
 </div>
 <Collapse @ref="Store.Collapse" OnShowing="Store.LoadLogsAsync">

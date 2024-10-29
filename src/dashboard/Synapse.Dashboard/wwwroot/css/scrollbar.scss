@@ -2,15 +2,17 @@
 
 :root,
 [data-bs-theme=light] {
-    --scrollbar-background: #{$body-bg};
-    --scrollbar-background-active: inherit;
-    --scrollbar-thumb-background: inherit;
+    --scroll-size: 8px;
+    --scroll-radius: 0px;
+    --scroll-track: #{$body-bg};
+    --scroll-track-active: inherit;
+    --scroll-thumb-color: inherit;
 }
 
 [data-bs-theme="dark"] {
-    --scrollbar-background: #{$body-bg-dark};
-    --scrollbar-background-active: #{$dark-bg-subtle-dark};
-    --scrollbar-thumb-background: #{$primary-bg-subtle-dark};
+    --scroll-track: #{$body-bg-dark};
+    --scroll-track-active: #{$dark-bg-subtle-dark};
+    --scroll-thumb-color: #{$primary-bg-subtle-dark};
 }
 
 ::-webkit-scrollbar {
@@ -24,7 +26,7 @@
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--scrollbar-thumb-background);
+    background: var(--scroll-thumb-color);
     border: 0px none #ffffff;
     border-radius: $border-radius;
 }
@@ -38,17 +40,17 @@
 }
 
 ::-webkit-scrollbar-track {
-    background: var(--scrollbar-background);
+    background: var(--scroll-track);
     border: 0px none #ffffff;
     border-radius: $border-radius;
 }
 
 ::-webkit-scrollbar-track:hover {
-    background: var(--scrollbar-background-active);
+    background: var(--scroll-track-active);
 }
 
 ::-webkit-scrollbar-track:active {
-    background: var(--scrollbar-background-active);
+    background: var(--scroll-track-active);
 }
 
 ::-webkit-scrollbar-corner {

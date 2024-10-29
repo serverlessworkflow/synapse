@@ -11,25 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Synapse.Dashboard.StateManagement;
-
 namespace Synapse.Dashboard.Services;
 
 /// <summary>
 /// The service used to build a bridge with JS interop
 /// </summary>
-/// <remarks>
-/// Constructs a new <see cref="MonacoInterop"/>
-/// </remarks>
 /// <param name="jsRuntime">The service used to interop with JS</param>
-public class JSInterop(IJSRuntime jsRuntime)
+/// <param name="storage">The service used to build a bridge with the localStorage</param>
+/// <param name="monacoEditorHelper">The serviceused to facilitate the Monaco editor configuration</param>
+public class JSInterop(IJSRuntime jsRuntime, ILocalStorage storage, IMonacoEditorHelper monacoEditorHelper)
     : IAsyncDisposable
 {
 
     /// <summary>
     /// A reference to the js interop module
     /// </summary>
-    readonly Lazy<Task<IJSObjectReference>> moduleTask = new(() => jsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/js-interop.js").AsTask());
+    readonly Lazy<Task<IJSObjectReference>> moduleTask = new(() => jsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/js-interop.js?v=2").AsTask());
 
     /// <summary>
     /// Sets a checkbox tri-state
@@ -53,6 +50,19 @@ public class JSInterop(IJSRuntime jsRuntime)
     {
         var module = await moduleTask.Value;
         await module.InvokeVoidAsync("scrollDown", element, height);
+    }
+
+    /// <summary>
+    /// Sets the theme
+    /// </summary>
+    /// <param name="theme">The theme to set</param>
+    /// <returns></returns>
+    public async ValueTask SetThemeAsync(string theme)
+    {
+        var module = await moduleTask.Value;
+        await module.InvokeVoidAsync("setTheme", theme);
+        await storage.SetItemAsync("preferedTheme", theme);
+        await monacoEditorHelper.ChangePreferredThemeAsync(theme);
     }
 
     /// <inheritdoc />

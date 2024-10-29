@@ -62,7 +62,16 @@ $mute-text-dark: $mute;
 @import "../../lib/bootstrap/scss/maps";
 @import "../../lib/bootstrap/scss/mixins";
 
-$extra-colors: ( "accent": $accent, "cinereous": $cinereous, "verdigris": $verdigris, "icterine": $icterine, "mute": $mute );
+$extra-colors: (
+    "accent": $accent,
+    "cinereous": $cinereous,
+    "verdigris": $verdigris,
+    "icterine": $icterine,
+    "mute": $mute,
+    "teal": $teal,
+    "orange": $orange,
+    "yellow": $yellow
+);
 
 $colors: map-merge( $colors, $extra-colors );
 $theme-colors: map-merge( $theme-colors, $extra-colors );

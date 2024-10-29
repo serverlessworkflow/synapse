@@ -31,7 +31,7 @@
             </div>
             <div class="col-md-12 col-lg-4">
                 <div class="label">Status</div>
-                <span class="badge rounded-pill badge rounded-pill border border-@workflowInstance.Status?.Phase.GetColorClass() text-@workflowInstance.Status?.Phase.GetColorClass()">@(workflowInstance.Status?.Phase ?? WorkflowInstanceStatusPhase.Pending)</span>
+                <span class="badge rounded-pill badge rounded-pill border @workflowInstance.Status?.Phase.GetColorClass()">@(workflowInstance.Status?.Phase ?? WorkflowInstanceStatusPhase.Pending)</span>
             </div>
         </div>
         <div class="row mb-3">
