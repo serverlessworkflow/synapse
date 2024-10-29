@@ -1,0 +1,45 @@
+﻿$statusColors: (
+    "running": "teal",
+    "active": "teal",
+    "faulted": "danger",
+    "cancelled": "orange",
+    "completed": "success",
+    "waiting": "cinereous",
+    "suspended": "yellow",
+    "skipped": "cinereous",
+    "pending": "mute",
+    "inactive": "mute",
+    "stopped": "secondary"
+);
+
+$statusColorsDark: (
+    "running": "accent",
+    "active": "accent",
+    "cancelled": "warning",
+    "waiting": "cinereous",
+    "suspended": "icterine",
+    "skipped": "cinereous",
+    "pending": "mute",
+    "inactive": "mute",
+);
+
+@each $name, $color in $statusColors {
+    .status-#{$name} {
+        --status-color: var(--bs-#{$color}-rgb);
+    }
+}
+
+[data-bs-theme="dark"] {
+    @each $name, $color in $statusColorsDark {
+        .status-#{$name} {
+            --status-color: var(--bs-#{$color}-rgb);
+        }
+    }
+}
+
+.status {
+    --bs-text-opacity: 1;
+    --bs-border-opacity: 1;
+    color: rgba(var(--status-color), var(--bs-text-opacity)) !important;
+    border-color: rgba(var(--status-color), var(--bs-border-opacity)) !important;
+}

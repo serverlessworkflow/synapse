@@ -50,9 +50,15 @@ $viridisScale: // generated with 13 steps, using 12 to exclude the last yellow
     }
 }
 
+[data-bs-theme="dark"] {
+    .graph-container, .graph-canvas {
+        --fill-color: #{$dark-bg-subtle-dark};
+    }
+}
+
 .graph-container, .graph-canvas {
     --stroke-color: #{$mute};
-    --fill-color: #{$dark-bg-subtle-dark};
+    --fill-color: #{$body-bg};
     display: flex;
     flex-direction: column;
 
@@ -68,6 +74,7 @@ $viridisScale: // generated with 13 steps, using 12 to exclude the last yellow
             stroke: var(--bs-btn-color);
             fill: var(--bs-btn-color);
             border: var(--bs-btn-border-width) solid var(--bs-btn-border-color);
+
             &:hover {
                 color: var(--bs-btn-hover-color);
                 fill: var(--bs-btn-hover-color);

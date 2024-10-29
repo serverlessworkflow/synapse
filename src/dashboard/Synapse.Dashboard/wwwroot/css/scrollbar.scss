@@ -1,5 +1,20 @@
 ﻿@import "./theme/_variables.scss";
 
+:root,
+[data-bs-theme=light] {
+    --scroll-size: 8px;
+    --scroll-radius: 0px;
+    --scroll-track: #{$body-bg};
+    --scroll-track-active: inherit;
+    --scroll-thumb-color: inherit;
+}
+
+[data-bs-theme="dark"] {
+    --scroll-track: #{$body-bg-dark};
+    --scroll-track-active: #{$dark-bg-subtle-dark};
+    --scroll-thumb-color: #{$primary-bg-subtle-dark};
+}
+
 ::-webkit-scrollbar {
     width: 4px;
     height: 4px;
@@ -11,7 +26,7 @@
 }
 
 ::-webkit-scrollbar-thumb {
-    background: $primary-bg-subtle-dark;
+    background: var(--scroll-thumb-color);
     border: 0px none #ffffff;
     border-radius: $border-radius;
 }
@@ -25,17 +40,17 @@
 }
 
 ::-webkit-scrollbar-track {
-    background: $body-bg-dark;
+    background: var(--scroll-track);
     border: 0px none #ffffff;
     border-radius: $border-radius;
 }
 
 ::-webkit-scrollbar-track:hover {
-    background: $dark-bg-subtle-dark;
+    background: var(--scroll-track-active);
 }
 
 ::-webkit-scrollbar-track:active {
-    background: $dark-bg-subtle-dark;
+    background: var(--scroll-track-active);
 }
 
 ::-webkit-scrollbar-corner {

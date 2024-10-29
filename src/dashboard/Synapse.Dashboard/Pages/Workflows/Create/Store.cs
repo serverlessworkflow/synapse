@@ -549,6 +549,7 @@ public class CreateWorkflowViewStore(
             if (documentDslVersion == currentDslVersion) return;
             await this.SetValidationSchema(documentDslVersion);
         }, cancellationToken: this.CancellationTokenSource.Token);
+        this.MonacoEditorHelper.PreferredThemeChanged += OnPreferedThemeChangedAsync;
         await base.InitializeAsync();
     }
 
@@ -591,6 +592,19 @@ public class CreateWorkflowViewStore(
     }
 
     /// <summary>
+    /// Updates the editor theme
+    /// </summary>
+    /// <param name="newTheme"></param>
+    /// <returns></returns>
+    protected async Task OnPreferedThemeChangedAsync(string newTheme)
+    {
+        if (this.TextEditor != null)
+        {
+            await this.TextEditor.UpdateOptions(new EditorUpdateOptions() { Theme = newTheme });
+        }
+    }
+
+    /// <summary>
     /// Disposes of the store
     /// </summary>
     /// <param name="disposing">A boolean indicating whether or not the dispose of the store</param>
@@ -610,6 +624,7 @@ public class CreateWorkflowViewStore(
                     this.TextEditor.Dispose();
                     this.TextEditor = null;
                 }
+                this.MonacoEditorHelper.PreferredThemeChanged -= OnPreferedThemeChangedAsync;
             }
             this._disposed = true;
         }

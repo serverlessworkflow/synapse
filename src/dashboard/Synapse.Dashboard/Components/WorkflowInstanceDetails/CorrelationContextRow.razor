@@ -18,7 +18,7 @@
 
 <tr @onclick="async _ => await OnToggleRow()" class="cursor-pointer">
     <td>@Kvp.Key</td>
-    <td class="text-center"><span class="badge rounded-pill badge rounded-pill border border-@Kvp.Value.Status.GetColorClass() text-@Kvp.Value.Status.GetColorClass()">@(Kvp.Value?.Status ?? CorrelationContextStatus.Inactive)</span></td>
+    <td class="text-center"><span class="badge rounded-pill badge rounded-pill border @Kvp.Value.Status.GetColorClass()">@(Kvp.Value?.Status ?? CorrelationContextStatus.Inactive)</span></td>
     <td class="text-end"><Icon Name="@(isOpen ? IconName.CaretUp : IconName.CaretDown)" /></td>
 </tr>
 @if (isOpen)

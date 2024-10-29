@@ -64,6 +64,7 @@ builder.Services.AddScoped<IApplicationLayout, ApplicationLayout>();
 builder.Services.AddScoped<SpecificationSchemaManager>();
 builder.Services.AddSingleton<JSInterop>();
 builder.Services.AddSingleton<MonacoInterop>();
+builder.Services.AddSingleton<ILocalStorage, LocalStorage>();
 builder.Services.AddSingleton<IGraphLayoutService, GraphLayoutService>();
 builder.Services.AddSingleton<IWorkflowGraphBuilder, WorkflowGraphBuilder>();
 builder.Services.AddSingleton<IBreadcrumbManager, BreadcrumbManager>();

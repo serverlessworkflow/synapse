@@ -1,9 +1,17 @@
 ﻿.workflow-instance-details {
-    h6 {
-        font-weight: bold;
-    }
-
     .label {
-        font-weight: lighter;
+        font-weight: bolder;
+    }
+}
+
+[data-bs-theme="dark"] {
+    .workflow-instance-details {
+        h6 {
+            font-weight: bold;
+        }
+
+        .label {
+            font-weight: lighter;
+        }
     }
 }

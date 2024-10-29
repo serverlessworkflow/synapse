@@ -1,4 +1,12 @@
-﻿.table-container {
+﻿@import "./theme/_variables.scss";
+
+[data-bs-theme="dark"] {
+    .table {
+        --#{$prefix}table-color: #{$body-color-dark};
+    }
+}
+
+.table-container {
     max-height: 100%;
     overflow-y: scroll;
     flex-grow: 1;
@@ -11,7 +19,6 @@
         right: 0;
         bottom: 0;
         left: 0;
-        background: rgba(var(--bs-gray-900-rgb), 0.3);
         display: flex;
         align-items: center;
         justify-content: center;

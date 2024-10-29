@@ -1,7 +1,8 @@
 ﻿[
   {
     "outputFile": "wwwroot/css/app.css",
-    "inputFile": "wwwroot/css/app.scss"
+    "inputFile": "wwwroot/css/app.scss",
+    "sourceMap": true
   },
   {
     "outputFile": "Layout/MainLayout.razor.css",
@@ -10,9 +11,5 @@
   {
     "outputFile": "Components/ResourceEditor/ResourceEditor.razor.css",
     "inputFile": "Components/ResourceEditor/ResourceEditor.razor.scss"
-  },
-  {
-    "outputFile": "Components/WorkflowInstanceDetails/WorkflowInstanceDetails.razor.css",
-    "inputFile": "Components/WorkflowInstanceDetails/WorkflowInstanceDetails.razor.scss"
   }
 ]

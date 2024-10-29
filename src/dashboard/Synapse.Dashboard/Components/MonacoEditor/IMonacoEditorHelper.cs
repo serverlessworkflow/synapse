@@ -19,6 +19,12 @@ namespace Synapse.Dashboard.Components;
 /// <param name="newLanguage">The new preferred language.</param>
 /// <returns>A task representing the asynchronous operation of handling the event.</returns>
 public delegate Task PreferredLanguageChangedEventHandler(string newLanguage);
+/// <summary>
+/// Represents a delegate that is used to handle events related to changes in a user's preferred theme.
+/// </summary>
+/// <param name="newTheme">The new preferred theme.</param>
+/// <returns>A task representing the asynchronous operation of handling the event.</returns>
+public delegate Task PreferredThemeChangedEventHandler(string newTheme);
 
 /// <summary>
 /// Represents a service used to facilitate the Monaco editor configuration
@@ -34,6 +40,11 @@ public interface IMonacoEditorHelper
     /// Emits when the editor language changes
     /// </summary>
     event PreferredLanguageChangedEventHandler? PreferredLanguageChanged;
+
+    /// <summary>
+    /// Emits when the editor theme changes
+    /// </summary>
+    event PreferredThemeChangedEventHandler? PreferredThemeChanged;
 
     /// <summary>
     /// A function used to facilitate the construction of <see cref="StandaloneEditorConstructionOptions"/> 
@@ -57,6 +68,13 @@ public interface IMonacoEditorHelper
     /// <param name="language">The new language to use</param>
     /// <returns>A task representing the asynchronous operation</returns>
     Task ChangePreferredLanguageAsync(string language);
+
+    /// <summary>
+    /// Changes the preferred editor theme
+    /// </summary>
+    /// <param name="theme">The new theme to use</param>
+    /// <returns>A task representing the asynchronous operation</returns>
+    Task ChangePreferredThemeAsync(string theme);
 
     /// <summary>
     /// Returns the number of <see cref="TextModel"/> created and increases the count

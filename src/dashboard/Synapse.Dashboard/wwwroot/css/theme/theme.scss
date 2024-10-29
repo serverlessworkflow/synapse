@@ -66,11 +66,55 @@ $font-size-root: 15px;
     --bs-gray-700-rgb: #{to-rgb($gray-700)};
     --bs-gray-800-rgb: #{to-rgb($gray-800)};
     --bs-gray-900-rgb: #{to-rgb($gray-900)};
-    --scroll-size: 8px;
-    --scroll-radius: 0px;
-    --scroll-track: var(--bs-light);
-    --scroll-thumb-color: var(--bs-primary);
     --bb-offcanvas-horizontal-width-lg: 768px !important;
+}
+
+header.header.navbar {
+    --bs-bg-opacity: 1;
+    background-color: rgba(var(--bs-light-rgb), var(--bs-bg-opacity));
+}
+
+
+.dropdown:not(.header *) {
+    .btn {
+        $value: map-get($theme-colors,"light");
+        @include button-variant(
+            transparent,
+            $value,
+            $hover-background: shade-color($value, $btn-hover-bg-shade-amount),
+            $hover-border: shade-color($value, $btn-hover-border-shade-amount), 
+            $active-background: shade-color($value, $btn-active-bg-shade-amount),
+            $active-border: shade-color($value, $btn-active-border-shade-amount)
+        );
+    }
+}
+
+[data-bs-theme="dark"] {
+    header.header.navbar {
+        --#{$prefix}navbar-color: #{$navbar-dark-color};
+        --#{$prefix}navbar-hover-color: #{$navbar-dark-hover-color};
+        --#{$prefix}navbar-disabled-color: #{$navbar-dark-disabled-color};
+        --#{$prefix}navbar-active-color: #{$navbar-dark-active-color};
+        --#{$prefix}navbar-brand-color: #{$navbar-dark-brand-color};
+        --#{$prefix}navbar-brand-hover-color: #{$navbar-dark-brand-hover-color};
+        --#{$prefix}navbar-toggler-border-color: #{$navbar-dark-toggler-border-color};
+        --#{$prefix}navbar-toggler-icon-bg: #{escape-svg($navbar-dark-toggler-icon-bg)};
+        background-color: var(--bs-dark-bg-subtle);
+    }
+
+    .dropdown:not(.header *) {
+        .btn {
+            $value: map-get($theme-colors,"dark");
+            @include button-variant(
+                $value,
+                $value,
+                $hover-background: tint-color($value, $btn-hover-bg-tint-amount),
+                $hover-border: tint-color($value, $btn-hover-border-tint-amount),
+                $active-background: tint-color($value, $btn-active-bg-tint-amount),
+                $active-border: tint-color($value, $btn-active-border-tint-amount)
+            );
+        }
+    }
 }
 
 $btn-padding-y-xsm: .20rem !default;
