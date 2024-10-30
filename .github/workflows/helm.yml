@@ -29,6 +29,6 @@ jobs:
         with:
           #skip_existing: true
           #packages_with_index: true
-          charts_dir: deployments/helm
+          charts_dir: deployments
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
