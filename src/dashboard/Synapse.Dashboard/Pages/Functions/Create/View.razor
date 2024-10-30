@@ -53,8 +53,9 @@ else
                           CssClass="h-100" />
     @if (problemDetails != null)
     {
-        <div class="problems p-3">
-            <Callout Color="CalloutColor.Danger" Heading="@problemDetails.Title">
+        <div class="problems px-3">
+            <Callout Color="CalloutColor.Danger" Heading="@problemDetails.Title" Class="position-relative">
+                <Icon Name="IconName.X" Class="position-absolute" @onclick="() => Store.SetProblemDetails(null)" />
                 <p>@problemDetails.Detail</p>
 
                 @if (problemDetails.Errors != null && problemDetails.Errors.Any())

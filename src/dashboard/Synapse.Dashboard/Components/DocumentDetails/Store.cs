@@ -13,6 +13,7 @@
 
 using Synapse.Api.Client.Services;
 using Synapse.Dashboard.Components.WorkflowInstanceLogsStateManagement;
+using Synapse.Dashboard.Pages.Functions.Create;
 
 namespace Synapse.Dashboard.Components.DocumentDetailsStateManagement;
 
@@ -379,6 +380,22 @@ public class DocumentDetailsStore(
             this.ToastService.Notify(new(ToastType.Danger, "Failed to copy the definition to the clipboard."));
             this.Logger.LogError("Unable to copy to clipboard: {exception}", ex.ToString());
         }
+    }
+
+    /// <summary>
+    /// Sets the state's <see cref="CreateFunctionViewState" /> <see cref="ProblemDetails"/>'s related data
+    /// </summary>
+    /// <param name="problem">The <see cref="ProblemDetails"/> to populate the data with</param>
+    public void SetProblemDetails(ProblemDetails? problem)
+    {
+        this.Reduce(state => state with
+        {
+            ProblemType = problem?.Type,
+            ProblemTitle = problem?.Title ?? string.Empty,
+            ProblemStatus = problem?.Status ?? 0,
+            ProblemDetail = problem?.Detail ?? string.Empty,
+            ProblemErrors = problem?.Errors?.ToDictionary(kvp => kvp.Key, kvp => kvp.Value) ?? []
+        });
     }
     #endregion
 
