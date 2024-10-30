@@ -18,8 +18,19 @@ using ServerlessWorkflow.Sdk.Models;
 using ServerlessWorkflow.Sdk.Validation;
 using System.Text.Json;
 
-var builder = WebAssemblyHostBuilder.CreateDefault(args);
+var defaultPropertyNameResolver = ValidatorOptions.Global.PropertyNameResolver;
+ValidatorOptions.Global.PropertyNameResolver = (type, member, lambda) =>
+{
+    return member == null ? defaultPropertyNameResolver(type, member, lambda) : member.Name.ToCamelCase();
+};
+var defaultSerializationOptionsConfiguration = Neuroglia.Serialization.Json.JsonSerializer.DefaultOptionsConfiguration;
+Neuroglia.Serialization.Json.JsonSerializer.DefaultOptionsConfiguration = (options) =>
+{
+    defaultSerializationOptionsConfiguration(options);
+    options.WriteIndented = true;
+};
 
+var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 builder.Services.AddLogging();
@@ -53,11 +64,6 @@ builder.Services.AddOidcAuthentication(options =>
 /* From AddServerlessWorkflowValidation */
 builder.Services.AddScoped<IWorkflowDefinitionValidator, WorkflowDefinitionValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<WorkflowDefinition>();
-var defaultPropertyNameResolver = ValidatorOptions.Global.PropertyNameResolver;
-ValidatorOptions.Global.PropertyNameResolver = (type, member, lambda) =>
-{
-    return member == null ? defaultPropertyNameResolver(type, member, lambda) : member.Name.ToCamelCase();
-};
 /* End of AddServerlessWorkflowValidation */
 builder.Services.AddSingleton<IMonacoEditorHelper, MonacoEditorHelper>();
 builder.Services.AddScoped<IApplicationLayout, ApplicationLayout>();
