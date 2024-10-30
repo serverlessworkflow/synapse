@@ -80,7 +80,8 @@ header.header.navbar {
         $value: map-get($theme-colors,"light");
         @include button-variant(
             transparent,
-            $value,
+            transparent,
+            $color: $body-color,
             $hover-background: shade-color($value, $btn-hover-bg-shade-amount),
             $hover-border: shade-color($value, $btn-hover-border-shade-amount), 
             $active-background: shade-color($value, $btn-active-bg-shade-amount),

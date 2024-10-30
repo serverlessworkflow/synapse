@@ -49,16 +49,20 @@ $viridisScale: // generated with 13 steps, using 12 to exclude the last yellow
         cursor: grabbing;
     }
 }
-
+:root {
+    --graph-symbol-color: #{$body-color-dark};
+}
 [data-bs-theme="dark"] {
+    --graph-symbol-color: #{$body-color-dark};
     .graph-container, .graph-canvas {
+        --stroke-color: #{$mute};
         --fill-color: #{$dark-bg-subtle-dark};
     }
 }
 
 .graph-container, .graph-canvas {
-    --stroke-color: #{$mute};
-    --fill-color: #{$body-bg};
+    --stroke-color: #{$dark};
+    --fill-color: #{$gray-700};
     display: flex;
     flex-direction: column;
 
@@ -124,6 +128,7 @@ $viridisScale: // generated with 13 steps, using 12 to exclude the last yellow
         white-space: nowrap;
         text-overflow: ellipsis;
         overflow: hidden;
+        color: #{$body-color-dark};
 
         h3 {
             margin-bottom: calc($spacer / 4);
@@ -208,7 +213,7 @@ $viridisScale: // generated with 13 steps, using 12 to exclude the last yellow
 }
 
 .symbol {
-    fill: var(--bs-body-color);
+    fill: var(--graph-symbol-color);
 }
 
 .start-node circle {
