@@ -179,4 +179,15 @@ input[type="search"]::-webkit-search-cancel-button {
     max-height: 300px;
     overflow: scroll;
     width: 100%;
+
+    .bb-callout {
+        margin-top: 0;
+        margin-bottom: 0;
+
+        .bi.bi-x.position-absolute {
+            cursor: pointer;
+            top: $spacer;
+            right: $spacer;
+        }
+    }
 }

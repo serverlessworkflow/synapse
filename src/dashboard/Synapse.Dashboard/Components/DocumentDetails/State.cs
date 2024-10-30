@@ -67,5 +67,5 @@ public record DocumentDetailsState
     /// <summary>
     /// Gets/sets the list of <see cref="ProblemDetails"/> errors that occurred when trying to save the resource, if any
     /// </summary>
-    public EquatableDictionary<string, string[]> ProblemErrors { get; set; } = new EquatableDictionary<string, string[]>();
+    public IDictionary<string, string[]> ProblemErrors { get; set; } = new EquatableDictionary<string, string[]>();
 }
