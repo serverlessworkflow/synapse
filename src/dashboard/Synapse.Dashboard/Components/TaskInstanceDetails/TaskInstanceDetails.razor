@@ -71,32 +71,6 @@
                 <DocumentDetails Label='Output' Reference="@TaskInstance.OutputReference" />
             }
         </div>
-        <h6 class="pt-3">Executed Tasks</h6>
-        @if (SubTasks == null || SubTasks.Count() == 0)
-        {
-            @("-")
-        }
-        else
-        {
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th class="text-center">Status</th>
-                        <th class="text-center">Start Time</th>
-                        <th class="text-center">End Time</th>
-                        <th class="text-center">Duration</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var task in SubTasks)
-                    {
-                        <TaskInstanceRow TaskInstance="@task" Tasks="@Tasks"/>
-                    }
-                </tbody>
-            </table>
-        }
         <h6 class="pt-3">Runs</h6>
         @if (TaskInstance.Runs == null || TaskInstance.Runs.Count == 0)
         {
@@ -163,13 +137,4 @@
 
 @code {
     [Parameter] public TaskInstance? TaskInstance { get; set; }
-    [Parameter] public IEnumerable<TaskInstance>? Tasks { get; set; }
-
-    IEnumerable<TaskInstance> SubTasks
-    {
-        get
-         {
-            return TaskInstance == null ? [] : (this.Tasks ?? []).Where(t => t.ParentId == TaskInstance.Id);
-        }
-    }
 }

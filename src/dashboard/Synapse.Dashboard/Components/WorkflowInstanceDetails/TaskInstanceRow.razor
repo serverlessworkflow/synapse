@@ -18,6 +18,17 @@
 
 @if (TaskInstance != null) {
     <tr @onclick="async _ => await OnToggleRow()" class="cursor-pointer">
+        <td>
+            @if (HasChildren) {
+                @for(var i = 0; i<Depth; i++)
+                {
+                    <span class="ps-2"></span>
+                }
+                <span @onclick="ToggleChildrenVisibility" @onclick:stopPropagation="true">
+                    <Icon Name="showChildren ? IconName.Dash : IconName.Plus" Class="cursor-pointer" />
+                </span>
+            }
+        </td>
         <td>@TaskInstance.Reference</td>
         <td class="text-center"><span class="badge rounded-pill badge rounded-pill border @TaskInstance.Status.GetColorClass()">@(TaskInstance.Status ?? TaskInstanceStatus.Pending)</span></td>
         <td class="text-center">@(TaskInstance.StartedAt?.RelativeFormat() ?? "-")</td>
@@ -38,7 +49,7 @@
         <tr>
             <td colspan="999">
                 <Collapse @ref="collapse">
-                    <TaskInstanceDetails TaskInstance="@TaskInstance" Tasks="@Tasks" />
+                    <TaskInstanceDetails TaskInstance="@TaskInstance" />
                 </Collapse>
             </td>
         </tr>
@@ -47,9 +58,12 @@
 
 @code {
     [Parameter] public TaskInstance? TaskInstance { get; set; }
-    [Parameter] public IEnumerable<TaskInstance>? Tasks { get; set; }
+    [Parameter] public bool HasChildren { get; set; }
+    [Parameter] public EventCallback<( string, int )> OnToggleChildrenClick { get; set; }
+    [Parameter] public int Depth { get; set; }
     bool isOpen = false;
     Collapse? collapse;
+    bool showChildren = false;
 
     async Task OnToggleRow()
     {
@@ -61,5 +75,14 @@
             await collapse.ToggleAsync();
         }
         StateHasChanged();
+    }
+
+    async Task ToggleChildrenVisibility()
+    {
+        showChildren = !showChildren;
+        if (OnToggleChildrenClick.HasDelegate && TaskInstance != null)
+        {
+            await OnToggleChildrenClick.InvokeAsync((TaskInstance.Id, Depth ));
+        }
     }
 }
