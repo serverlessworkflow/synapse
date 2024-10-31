@@ -1,5 +1,5 @@
 apiVersion: v2
 name: synapse
 description: A Helm chart for deploying Synapse
-version: 1.0.0-alpha5.1
+version: 1.0.0
 appVersion: "1.0.0"

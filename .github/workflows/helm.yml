@@ -27,8 +27,8 @@ jobs:
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.6.0
         with:
-          #skip_existing: true
-          #packages_with_index: true
+          skip_existing: true
+          packages_with_index: true
           charts_dir: deployments
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
