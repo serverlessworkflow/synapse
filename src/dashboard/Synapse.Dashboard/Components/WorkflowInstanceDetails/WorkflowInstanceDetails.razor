@@ -77,6 +77,7 @@
             <table class="table table-hover">
                 <thead>
                     <tr>
+                        <th></th>
                         <th>Name</th>
                         <th class="text-center">Status</th>
                         <th class="text-center">Start Time</th>
@@ -86,9 +87,9 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var task in workflowInstance.Status.Tasks.Where(task => string.IsNullOrWhiteSpace(task.ParentId)) )
+                    @foreach (var task in workflowInstance.Status.Tasks.Where(task => string.IsNullOrWhiteSpace(task.ParentId) || expandedTasks.ContainsKey(task.ParentId)) )
                     {
-                        <TaskInstanceRow TaskInstance="@task" Tasks="@workflowInstance.Status.Tasks" />
+                        <TaskInstanceRow TaskInstance="@task" Depth="string.IsNullOrWhiteSpace(task.ParentId) ? 0 : (expandedTasks[task.ParentId] + 1)" HasChildren="workflowInstance.Status.Tasks.Any(t => t.ParentId == task.Id)" OnToggleChildrenClick="ToggleChildrenTask" />
                     }
                 </tbody>
             </table>
@@ -186,6 +187,7 @@
 @code {
     private WorkflowInstance? workflowInstance;
     [Parameter] public WorkflowInstance? WorkflowInstance { get; set; }
+    private Dictionary<string, int> expandedTasks = new();
 
     protected override void OnParametersSet()
     {
@@ -203,5 +205,28 @@
         if (!shouldRender) return false;
         shouldRender = false;
         return true;
+    }
+
+    protected void CloseChildrenTask(string taskId)
+    {
+        if (expandedTasks.ContainsKey(taskId))
+        {
+            expandedTasks.Remove(taskId);
+        }
+        foreach (var child in workflowInstance?.Status?.Tasks?.Where(task => task.ParentId == taskId) ?? [])
+        {
+            CloseChildrenTask(child.Id);
+        }
+    }
+
+    protected void ToggleChildrenTask((string, int) e)
+    {
+        (string taskId, int depth) = e;
+        if (expandedTasks.ContainsKey(taskId))
+        {
+            CloseChildrenTask(taskId);
+        }
+        else expandedTasks.Add(taskId, depth);
+        shouldRender = true;
     }
 }
