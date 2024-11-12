@@ -2,7 +2,7 @@ title: Synapse
 email: cncf.serverless.workflow@gmail.com
 description: >-
   Serverless Workflow Management System
-baseurl: "/synapse"
+#baseurl: "/synapse"
 url: "https://serverlessworkflow.github.io"
 twitter_username: synapse_wfms
 github_username:  serverlessworkflow
