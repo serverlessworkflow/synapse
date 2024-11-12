@@ -1,0 +1,13 @@
+apiVersion: v1
+entries:
+  synapse:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2024-11-12T14:17:32.186812646Z"
+    description: A Helm chart for deploying Synapse
+    digest: 30c3cef5699aebea6a122ee80cd0d46542c230339b523d7884c1fc32975304b2
+    name: synapse
+    urls:
+    - synapse-1.0.0.tgz
+    version: 1.0.0
+generated: "2024-11-12T14:17:32.186823226Z"
