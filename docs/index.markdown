@@ -8,7 +8,7 @@ permalink: /
   <img src="https://raw.githubusercontent.com/serverlessworkflow/synapse/refs/heads/main/assets/images/transparent_logo.png" height="350px" alt="Synapse Logo"/>
 </p>
 
-Synapse is a vendor-neutral, open-source, and community-driven Workflow Management System (WFMS) designed to implement the Serverless Workflow specification.
+Synapse is a vendor-neutral, open-source, and community-driven Workflow Management System (WFMS) designed to implement the [Serverless Workflow specification](https://github.com/serverlessworkflow/specification).
 
 It enables developers and organizations to define and execute workflows effortlessly using a high-level, intuitive Domain Specific Language (DSL).
 
@@ -20,7 +20,7 @@ With Synapse, you can create powerful workflows that are cloud vendor-agnostic, 
 
 ### Features
 
-- **Easy to Use**: The Serverless Workflow DSL is designed for universal understanding, enabling users to quickly grasp workflow concepts and create complex workflows effortlessly.
+- **Easy to Use**: The [Serverless Workflow DSL](https://github.com/serverlessworkflow/specification) is designed for universal understanding, enabling users to quickly grasp workflow concepts and create complex workflows effortlessly.
 - **Event Driven**: Seamlessly integrate events into workflows with support for various formats, including CloudEvents, allowing for event-driven workflow architectures.
 - **Service Oriented**: Integrate seamlessly with service-oriented architectures, allowing workflows to interact with various services over standard application protocols like HTTP, gRPC, OpenAPI, AsyncAPI, and more.
 - **FaaS Centric**: Invoke functions hosted on various platforms within workflows, promoting a function-as-a-service (FaaS) paradigm and enabling microservices architectures.
