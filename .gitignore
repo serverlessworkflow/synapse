@@ -233,3 +233,8 @@ _Pvt_Extensions
 /deployment/docker-compose/secrets/basic.json
 /src/dashboard/Synapse.Dashboard/wwwroot/lib/bootstrap/node_modules
 /src/dashboard/Synapse.Dashboard/wwwroot/lib/bootstrap/package-lock.json
+
+# Jekyll
+/docs/_site/
+/docs/Gemfile.lock
+/docs/_config.yml.bak
