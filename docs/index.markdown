@@ -5,7 +5,7 @@ permalink: /
 ---
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/serverlessworkflow/synapse/refs/heads/main/assets/images/transparent_logo.png" height="350px" alt="Synapse Logo"/>
+  <img src="https://raw.githubusercontent.com/serverlessworkflow/synapse/refs/heads/main/assets/images/transparent_logomark.png" height="350px" alt="Synapse Logo"/>
 </p>
 
 Synapse is a vendor-neutral, open-source, and community-driven Workflow Management System (WFMS) designed to implement the [Serverless Workflow specification](https://github.com/serverlessworkflow/specification).
