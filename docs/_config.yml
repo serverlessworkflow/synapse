@@ -3,7 +3,7 @@ email: cncf.serverless.workflow@gmail.com
 description: >-
   Serverless Workflow Management System
 baseurl: "/synapse"
-url: "https://serverlessworkflow.github.io/"
+url: "https://serverlessworkflow.github.io"
 twitter_username: synapse_wfms
 github_username:  serverlessworkflow
 
@@ -11,15 +11,3 @@ theme: jekyll-theme-midnight
 plugins:
   - jekyll-feed
   - jekyll-remote-theme
-  
-nav:
-  - name:           "home"
-    href:           "/"
-  - name:           "about"
-    href:           "/about"
-  - name:           "publications"
-    href:           "/publication"
-  - name:           "people"
-    href:           "/people"
-  - name:           "blog"
-    href:           "/blog"
