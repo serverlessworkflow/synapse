@@ -48,8 +48,8 @@ public class AuthorizationInfo(string scheme, string parameter)
     /// <returns>A new <see cref="AuthorizationInfo"/> based on the specified <see cref="AuthenticationPolicyDefinition"/></returns>
     public static async Task<AuthorizationInfo> CreateAsync(WorkflowDefinition workflow, AuthenticationPolicyDefinition authentication, IServiceProvider serviceProvider, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(nameof(authentication));
-        ArgumentNullException.ThrowIfNull(nameof(serviceProvider));
+        ArgumentNullException.ThrowIfNull(authentication);
+        ArgumentNullException.ThrowIfNull(serviceProvider);
         string scheme, parameter;
         var logger = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("AuthenticationPolicyHandler");
         if (!string.IsNullOrWhiteSpace(authentication.Use))

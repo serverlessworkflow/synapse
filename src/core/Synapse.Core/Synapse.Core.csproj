@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<TargetFramework>net8.0</TargetFramework>
+	<TargetFramework>net9.0</TargetFramework>
 	<Nullable>enable</Nullable>
 	<ImplicitUsings>enable</ImplicitUsings>
 	<NeutralLanguage>en</NeutralLanguage>
@@ -66,9 +66,9 @@
   <ItemGroup>
 	<PackageReference Include="Docker.DotNet" Version="3.125.15" />
 	<PackageReference Include="KubernetesClient" Version="15.0.1" />
-	<PackageReference Include="Neuroglia.Data.Infrastructure.ResourceOriented" Version="4.15.8" />
-	<PackageReference Include="Neuroglia.Eventing.CloudEvents" Version="4.15.8" />
-    <PackageReference Include="Semver" Version="2.3.0" />
+	<PackageReference Include="Neuroglia.Data.Infrastructure.ResourceOriented" Version="4.16.0" />
+	<PackageReference Include="Neuroglia.Eventing.CloudEvents" Version="4.16.0" />
+    <PackageReference Include="Semver" Version="3.0.0" />
     <PackageReference Include="ServerlessWorkflow.Sdk" Version="1.0.0-alpha5.1" />
   </ItemGroup>
 

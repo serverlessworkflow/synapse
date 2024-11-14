@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<TargetFramework>net8.0</TargetFramework>
+	<TargetFramework>net9.0</TargetFramework>
 	<Nullable>enable</Nullable>
 	<ImplicitUsings>enable</ImplicitUsings>
 	<OutputType>Exe</OutputType>
@@ -28,6 +28,7 @@
 	<DockerFileTag>ghcr.io/serverlessworkflow/synapse/operator</DockerFileTag>
 	<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
 	<DockerfileContext>..\..\..</DockerfileContext>
+	<CETCompat>false</CETCompat>
   </PropertyGroup>
 
   <ItemGroup>
@@ -50,8 +51,8 @@
 
   <ItemGroup>
 	<PackageReference Include="Cronos" Version="0.8.4" />
-	<PackageReference Include="Microsoft.Extensions.Configuration.KeyPerFile" Version="8.0.10" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
+	<PackageReference Include="Microsoft.Extensions.Configuration.KeyPerFile" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
   </ItemGroup>
 
