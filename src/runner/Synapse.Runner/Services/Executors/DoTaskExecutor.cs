@@ -65,7 +65,7 @@ public class DoTaskExecutor(IServiceProvider serviceProvider, ILogger<DoTaskExec
             : last.Status == null || last.IsOperative || last.Status == TaskInstanceStatus.Suspended
                 ? this.Task.Definition.Do.FirstOrDefault(e => e.Key == last.Name) ?? throw new NullReferenceException($"Failed to find a task with the specified name '{last.Name}' at '{this.Task.Instance.Reference}'")
                 : this.Task.Definition.Do.GetTaskAfter(last);
-        if (last != null && (last.Status == null || last.IsOperative || last.Status == TaskInstanceStatus.Suspended)) last = await subtasks.LastOrDefaultAsync(t => last.Status != null && !t.IsOperative && t.Status != TaskInstanceStatus.Suspended).ConfigureAwait(false);
+        if (last != null && (last.Status == null || last.IsOperative || last.Status == TaskInstanceStatus.Suspended)) last = await subtasks.LastOrDefaultAsync(t => last.Status != null && !t.IsOperative && t.Status != TaskInstanceStatus.Suspended, cancellationToken).ConfigureAwait(false);
         if (nextDefinition == null)
         {
             await this.SetResultAsync(last!.OutputReference, this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
@@ -122,8 +122,36 @@ public class DoTaskExecutor(IServiceProvider serviceProvider, ILogger<DoTaskExec
                 break;
             default:
                 next = await this.Task.Workflow.CreateTaskAsync(nextDefinition.Value, this.GetPathFor(nextDefinitionIndex, nextDefinition.Key), output, null, this.Task, false, cancellationToken).ConfigureAwait(false);
-                var nextExecutor = await this.CreateTaskExecutorAsync(next, nextDefinition.Value, this.Task.ContextData, this.Task.Arguments, cancellationToken).ConfigureAwait(false);
-                await nextExecutor.ExecuteAsync(cancellationToken).ConfigureAwait(false);
+                try
+                {
+                    var nextExecutor = await this.CreateTaskExecutorAsync(next, nextDefinition.Value, this.Task.ContextData, this.Task.Arguments, cancellationToken).ConfigureAwait(false);
+                    await nextExecutor.ExecuteAsync(cancellationToken).ConfigureAwait(false);
+                }
+                catch (HttpRequestException ex)
+                {
+                    this.Logger.LogError("An error occurred while executing the task '{task}': {ex}", this.Task.Instance.Reference, ex);
+                    await this.SetErrorAsync(new Error()
+                    {
+                        Type = ErrorType.Communication,
+                        Title = ErrorTitle.Communication,
+                        Status = ex.StatusCode.HasValue ? (ushort)ex.StatusCode : (ushort)ErrorStatus.Communication,
+                        Detail = ex.Message,
+                        Instance = this.Task.Instance.Reference
+                    }, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    var error = new Error()
+                    {
+                        Type = ErrorType.Runtime,
+                        Title = ErrorTitle.Runtime,
+                        Status = ErrorStatus.Runtime,
+                        Detail = ex.Message,
+                        Instance = this.Task.Instance.Reference
+                    };
+                    await this.Task.Workflow.SetErrorAsync(next, error, cancellationToken).ConfigureAwait(false);
+                    await this.SetErrorAsync(error, cancellationToken).ConfigureAwait(false);
+                }
                 break;
         }
     }

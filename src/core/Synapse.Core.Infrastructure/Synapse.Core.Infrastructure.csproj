@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
 	<Nullable>enable</Nullable>
 	<ImplicitUsings>enable</ImplicitUsings>
 	<NeutralLanguage>en</NeutralLanguage>
@@ -44,12 +44,12 @@
 	
   <ItemGroup>
 	<PackageReference Include="IdentityModel" Version="7.0.0" />
-	<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.1.2" />
-	<PackageReference Include="Neuroglia.Data.Expressions.Abstractions" Version="4.15.8" />
-	<PackageReference Include="Neuroglia.Data.Infrastructure.Redis" Version="4.15.8" />
-	<PackageReference Include="Neuroglia.Data.Infrastructure.ResourceOriented.Redis" Version="4.15.8" />
-	<PackageReference Include="Neuroglia.Mediation" Version="4.15.8" />
-	<PackageReference Include="Neuroglia.Plugins" Version="4.15.8" />
+	<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.2.0" />
+	<PackageReference Include="Neuroglia.Data.Expressions.Abstractions" Version="4.16.0" />
+	<PackageReference Include="Neuroglia.Data.Infrastructure.Redis" Version="4.16.0" />
+	<PackageReference Include="Neuroglia.Data.Infrastructure.ResourceOriented.Redis" Version="4.16.0" />
+	<PackageReference Include="Neuroglia.Mediation" Version="4.16.0" />
+	<PackageReference Include="Neuroglia.Plugins" Version="4.16.0" />
 	<PackageReference Include="ServerlessWorkflow.Sdk.IO" Version="1.0.0-alpha5.1" />
   </ItemGroup>
 	

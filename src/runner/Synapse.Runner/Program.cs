@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Microsoft.Extensions.Http;
 using Synapse;
 using Synapse.Core.Infrastructure.Containers;
 
@@ -89,16 +88,11 @@ var builder = Host.CreateDefaultBuilder()
 
         if (!options.Certificates.Validate)
         {
-            ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
-            services.ConfigureAll<HttpClientFactoryOptions>(options =>
+            services.ConfigureHttpClientDefaults(httpClient =>
             {
-                options.HttpMessageHandlerBuilderActions.Add(builder =>
+                httpClient.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()
                 {
-                    builder.PrimaryHandler = new HttpClientHandler
-                    {
-                        ClientCertificateOptions = ClientCertificateOption.Manual,
-                        ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, cetChain, policyErrors) => true
-                    };
+                    ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
                 });
             });
         }
