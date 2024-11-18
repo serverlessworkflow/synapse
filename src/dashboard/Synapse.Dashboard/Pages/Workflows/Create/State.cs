@@ -12,7 +12,6 @@
 // limitations under the License.
 
 using ServerlessWorkflow.Sdk.Models;
-using Synapse.Resources;
 
 namespace Synapse.Dashboard.Pages.Workflows.Create;
 
