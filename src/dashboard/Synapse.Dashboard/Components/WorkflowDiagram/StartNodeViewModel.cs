@@ -18,13 +18,7 @@ namespace Synapse.Dashboard.Components;
 /// <summary>
 /// Represents the object that holds the data required to render the view of a workflow's start node 
 /// </summary>
-public class StartNodeViewModel(bool hasSuccessor = false)
+public class StartNodeViewModel()
     : WorkflowNodeViewModel("start-node", new() { CssClass = "start-node", Shape = NodeShape.Circle, Width = WorkflowGraphBuilder.StartEndNodeRadius, Height = WorkflowGraphBuilder.StartEndNodeRadius })
 {
-
-    /// <summary>
-    /// Gets a boolean indicating whether or not the node has a successor
-    /// </summary>
-    public bool HasSuccessor { get; } = hasSuccessor;
-
 }
