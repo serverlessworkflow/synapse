@@ -51,7 +51,7 @@ public static class SynapseDefaults
         /// <summary>
         /// Gets the type prefix for all cloud events produced by Synapse
         /// </summary>
-        public const string TypePrefix = "io.synapse-wfms.events.";
+        public const string TypePrefix = "io.synapse-wfms.";
 
         /// <summary>
         /// Exposes constants about the Synapse cloud event bus
