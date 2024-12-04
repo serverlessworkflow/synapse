@@ -96,7 +96,7 @@ return message;
             /// <summary>
             /// Gets the type prefix for all workflow-related cloud events produced by Synapse
             /// </summary>
-            public const string TypePrefix = CloudEvents.TypePrefix + "workflows.";
+            public const string TypePrefix = CloudEvents.TypePrefix + "workflow.";
 
             /// <summary>
             /// Exposes constants about the cloud event used to notify that a workflow started
@@ -235,7 +235,7 @@ return message;
             /// <summary>
             /// Gets the type prefix for all task-related cloud events produced by Synapse
             /// </summary>
-            public const string TypePrefix = CloudEvents.TypePrefix + "tasks.";
+            public const string TypePrefix = CloudEvents.TypePrefix + "task.";
 
             /// <summary>
             /// Exposes constants about the cloud event used to notify that a task has been created
