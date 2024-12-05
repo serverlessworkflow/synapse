@@ -11,8 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Neuroglia.Data.Infrastructure.ResourceOriented;
-
 namespace Synapse.Api.Http;
 
 /// <summary>
@@ -164,12 +162,16 @@ public abstract class NamespacedResourceController<TResource>(IMediator mediator
         this.Response.Headers.CacheControl = "no-cache";
         this.Response.Headers.Connection = "keep-alive";
         await this.Response.Body.FlushAsync(cancellationToken).ConfigureAwait(false);
-        await foreach (var e in response.Data!.WithCancellation(cancellationToken))
+        try
         {
-            var sseMessage = $"data: {this.JsonSerializer.SerializeToText(e)}\n\n";
-            await this.Response.Body.WriteAsync(Encoding.UTF8.GetBytes(sseMessage), cancellationToken).ConfigureAwait(false);
-            await this.Response.Body.FlushAsync(cancellationToken).ConfigureAwait(false);
+            await foreach (var e in response.Data!.WithCancellation(cancellationToken))
+            {
+                var sseMessage = $"data: {this.JsonSerializer.SerializeToText(e)}\n\n";
+                await this.Response.Body.WriteAsync(Encoding.UTF8.GetBytes(sseMessage), cancellationToken).ConfigureAwait(false);
+                await this.Response.Body.FlushAsync(cancellationToken).ConfigureAwait(false);
+            }
         }
+        catch (Exception ex) when(ex is TaskCanceledException || ex is OperationCanceledException) { }
         return this.Ok();
     }
 
@@ -206,12 +208,16 @@ public abstract class NamespacedResourceController<TResource>(IMediator mediator
         this.Response.Headers.CacheControl = "no-cache";
         this.Response.Headers.Connection = "keep-alive";
         await this.Response.Body.FlushAsync(cancellationToken).ConfigureAwait(false);
-        await foreach(var e in response.Data!.WithCancellation(cancellationToken))
+        try
         {
-            var sseMessage = $"data: {this.JsonSerializer.SerializeToText(e)}\n\n";
-            await this.Response.Body.WriteAsync(Encoding.UTF8.GetBytes(sseMessage), cancellationToken).ConfigureAwait(false);
-            await this.Response.Body.FlushAsync(cancellationToken).ConfigureAwait(false);
+            await foreach (var e in response.Data!.WithCancellation(cancellationToken))
+            {
+                var sseMessage = $"data: {this.JsonSerializer.SerializeToText(e)}\n\n";
+                await this.Response.Body.WriteAsync(Encoding.UTF8.GetBytes(sseMessage), cancellationToken).ConfigureAwait(false);
+                await this.Response.Body.FlushAsync(cancellationToken).ConfigureAwait(false);
+            }
         }
+        catch (Exception ex) when (ex is TaskCanceledException || ex is OperationCanceledException) { }
         return this.Ok();
     }
 

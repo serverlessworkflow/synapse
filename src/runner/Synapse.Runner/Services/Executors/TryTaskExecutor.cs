@@ -158,6 +158,7 @@ public class TryTaskExecutor(IServiceProvider serviceProvider, ILogger<TryTaskEx
     protected virtual async Task OnTryCompletedAsync(ITaskExecutor executor, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(executor);
+        if (this.Task.ContextData != executor.Task.ContextData) await this.Task.SetContextDataAsync(executor.Task.ContextData, cancellationToken).ConfigureAwait(false);
         var last = executor.Task.Instance;
         var output = executor.Task.Output!;
         this.Executors.Remove(executor);
@@ -188,6 +189,7 @@ public class TryTaskExecutor(IServiceProvider serviceProvider, ILogger<TryTaskEx
     protected virtual async Task OnHandlerCompletedAsync(ITaskExecutor executor, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(executor);
+        if (this.Task.ContextData != executor.Task.ContextData) await this.Task.SetContextDataAsync(executor.Task.ContextData, cancellationToken).ConfigureAwait(false);
         var last = executor.Task.Instance;
         var output = executor.Task.Output!;
         this.Executors.Remove(executor);

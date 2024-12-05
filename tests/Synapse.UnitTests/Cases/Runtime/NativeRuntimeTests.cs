@@ -31,7 +31,7 @@ public class NativeRuntimeTests
             };
             options.Runtime.Native = new()
             {
-                Directory = Path.Combine("..", "..", "..", "..", "..", "src", "runner", "Synapse.Runner", "bin", "Debug", "net8.0"),
+                Directory = Path.Combine("..", "..", "..", "..", "..", "src", "runner", "Synapse.Runner", "bin", "Debug", "net9.0"),
                 Executable = "Synapse.Runner"
             };
         });
