@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Neuroglia.Data.Infrastructure.Services;
+
 namespace Synapse.Operator.Services;
 
 /// <summary>
@@ -21,7 +23,8 @@ namespace Synapse.Operator.Services;
 /// <param name="controllerOptions">The service used to access the current <see cref="IOptions{TOptions}"/></param>
 /// <param name="repository">The service used to manage <see cref="IResource"/>s</param>
 /// <param name="operatorController">The service used to access the current <see cref="Resources.Operator"/></param>
-public class WorkflowInstanceController(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, IOptions<ResourceControllerOptions<WorkflowInstance>> controllerOptions, IResourceRepository repository, IOperatorController operatorController)
+/// <param name="documents">The <see cref="IRepository"/> used to manage <see cref="Document"/>s</param>
+public class WorkflowInstanceController(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, IOptions<ResourceControllerOptions<WorkflowInstance>> controllerOptions, IResourceRepository repository, IOperatorController operatorController, IRepository<Document, string> documents)
     : ResourceController<WorkflowInstance>(loggerFactory, controllerOptions, repository)
 {
 
@@ -34,6 +37,11 @@ public class WorkflowInstanceController(IServiceProvider serviceProvider, ILogge
     /// Gets the service used to monitor the current <see cref="Operator"/>
     /// </summary>
     protected IResourceMonitor<Resources.Operator> Operator => operatorController.Operator;
+
+    /// <summary>
+    /// Gets the <see cref="IRepository"/> used to manage <see cref="Document"/>s
+    /// </summary>
+    protected IRepository<Document, string> Documents => documents;
 
     /// <summary>
     /// Gets a <see cref="ConcurrentDictionary{TKey, TValue}"/> that contains current <see cref="WorkflowInstanceHandler"/>es
@@ -139,24 +147,54 @@ public class WorkflowInstanceController(IServiceProvider serviceProvider, ILogge
     /// <inheritdoc/>
     protected override async Task OnResourceCreatedAsync(WorkflowInstance workflowInstance, CancellationToken cancellationToken = default)
     {
-        await base.OnResourceCreatedAsync(workflowInstance, cancellationToken).ConfigureAwait(false);
-        if (!await this.TryClaimAsync(workflowInstance, cancellationToken).ConfigureAwait(false)) return;
-        var handler = await this.CreateWorkflowInstanceHandlerAsync(workflowInstance, cancellationToken).ConfigureAwait(false);
-        await handler.HandleAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            await base.OnResourceCreatedAsync(workflowInstance, cancellationToken).ConfigureAwait(false);
+            if (!await this.TryClaimAsync(workflowInstance, cancellationToken).ConfigureAwait(false)) return;
+            var handler = await this.CreateWorkflowInstanceHandlerAsync(workflowInstance, cancellationToken).ConfigureAwait(false);
+            await handler.HandleAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch(Exception ex)
+        {
+            this.Logger.LogError("An error occured while handling the creation of workflow instance '{workflowInstance}': {ex}", workflowInstance.GetQualifiedName(), ex);
+        }
     }
 
     /// <inheritdoc/>
     protected override async Task OnResourceDeletedAsync(WorkflowInstance workflowInstance, CancellationToken cancellationToken = default)
     {
-        await base.OnResourceDeletedAsync(workflowInstance, cancellationToken).ConfigureAwait(false);
-        if (this.Handlers.TryRemove(workflowInstance.GetQualifiedName(), out var process)) await process.DisposeAsync().ConfigureAwait(false);
-        var selectors = new LabelSelector[]
+        try
         {
+            await base.OnResourceDeletedAsync(workflowInstance, cancellationToken).ConfigureAwait(false);
+            if (this.Handlers.TryRemove(workflowInstance.GetQualifiedName(), out var process)) await process.DisposeAsync().ConfigureAwait(false);
+            var selectors = new LabelSelector[]
+            {
             new(SynapseDefaults.Resources.Labels.WorkflowInstance, LabelSelectionOperator.Equals, workflowInstance.GetQualifiedName())
-        };
-        await foreach (var correlation in this.Repository.GetAllAsync<Correlation>(null, selectors, cancellationToken: cancellationToken))
+            };
+            await foreach (var correlation in this.Repository.GetAllAsync<Correlation>(null, selectors, cancellationToken: cancellationToken))
+            {
+                await this.Repository.RemoveAsync<Correlation>(correlation.GetName(), correlation.GetNamespace(), false, cancellationToken).ConfigureAwait(false);
+            }
+            if (workflowInstance.Status != null)
+            {
+                var documentReferences = new List<string>();
+                if (!string.IsNullOrWhiteSpace(workflowInstance.Status.ContextReference)) documentReferences.Add(workflowInstance.Status.ContextReference);
+                if (!string.IsNullOrWhiteSpace(workflowInstance.Status.OutputReference)) documentReferences.Add(workflowInstance.Status.OutputReference);
+                if (workflowInstance.Status.Tasks != null)
+                {
+                    foreach (var task in workflowInstance.Status.Tasks)
+                    {
+                        if (!string.IsNullOrWhiteSpace(task.ContextReference)) documentReferences.Add(task.ContextReference);
+                        if (!string.IsNullOrWhiteSpace(task.InputReference)) documentReferences.Add(task.InputReference);
+                        if (!string.IsNullOrWhiteSpace(task.OutputReference)) documentReferences.Add(task.OutputReference);
+                    }
+                }
+                foreach (var documentReference in documentReferences.Distinct()) await this.Documents.RemoveAsync(documentReference, cancellationToken).ConfigureAwait(false);
+            }
+        }
+        catch(Exception ex)
         {
-            await this.Repository.RemoveAsync<Correlation>(correlation.GetName(), correlation.GetNamespace(), false, cancellationToken).ConfigureAwait(false);
+            this.Logger.LogError("An error occured while handling the deletion of workflow instance '{workflowInstance}': {ex}", workflowInstance.GetQualifiedName(), ex);
         }
     }
 
