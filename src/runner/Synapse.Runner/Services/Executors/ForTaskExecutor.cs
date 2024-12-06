@@ -68,11 +68,15 @@ public class ForTaskExecutor(IServiceProvider serviceProvider, ILogger<ForTaskEx
     {
         if (this.Collection == null) throw new InvalidOperationException("The executor must be initialized before execution");
         var task = await this.Task.GetSubTasksAsync(cancellationToken).OrderBy(t => t.CreatedAt).LastOrDefaultAsync(cancellationToken).ConfigureAwait(false);
-        var index = task == null ? 0 : int.Parse(task.Reference.OriginalString.Split('/', StringSplitOptions.RemoveEmptyEntries).Last());
-        if (index == this.Collection.Count - 1)
+        var index = 0;
+        if (task != null)
         {
-            await this.SetResultAsync(this.Task.Input, this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
-            return;
+            index = int.Parse(task.Reference.OriginalString.Split('/', StringSplitOptions.RemoveEmptyEntries).Last());
+            if (index == this.Collection.Count - 1)
+            {
+                await this.SetResultAsync(this.Task.Input, this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
+                return;
+            }
         }
         var item = this.Collection.ElementAt(index);
         var taskDefinition = new DoTaskDefinition()
