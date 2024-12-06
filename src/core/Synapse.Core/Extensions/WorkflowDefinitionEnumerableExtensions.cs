@@ -26,7 +26,7 @@ public static class WorkflowDefinitionEnumerableExtensions
     /// </summary>
     /// <param name="definitions">An <see cref="IEnumerable{T}"/> containing the <see cref="WorkflowDefinition"/>s to get the latest of</param>
     /// <returns>The latest <see cref="WorkflowDefinition"/></returns>
-    public static WorkflowDefinition GetLatest(this IEnumerable<WorkflowDefinition> definitions) => definitions.OrderByDescending(wf => SemVersion.Parse(wf.Document.Version, SemVersionStyles.Strict)).First();
+    public static WorkflowDefinition GetLatest(this IEnumerable<WorkflowDefinition> definitions) => definitions.OrderByDescending(wf => SemVersion.Parse(wf.Document.Version, SemVersionStyles.Strict), SemVersion.PrecedenceComparer).First();
 
     /// <summary>
     /// Gets the specified <see cref="WorkflowDefinition"/> version
