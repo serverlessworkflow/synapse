@@ -1,0 +1,93 @@
+﻿@*
+    Copyright © 2024-Present The Synapse Authors
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*@
+
+@using Json.Schema
+@using ServerlessWorkflow.Sdk.Models
+@using Synapse.Dashboard.Components.DynamicFormStateManagement
+@namespace Synapse.Dashboard
+@inherits StatefulComponent<DynamicForm, DynamicFormStore, DynamicFormState>
+
+@if (schema != null)
+{
+    <form>
+        @switch(schema.GetJsonType())
+        {
+            case SchemaValueType.Null:
+                break;
+            case SchemaValueType.Array:
+
+                break;
+            case SchemaValueType.Object:
+                var properties = schema.GetProperties() ?? new Dictionary<string, JsonSchema>();
+                var requiredProperties = schema.GetRequired();
+                foreach(var property in properties)
+                {
+                    var required = requiredProperties?.Contains(property.Key) == true;
+                    <DynamicFormField Name="@property.Key" Schema="@property.Value" Required="@required" OnValueChanged="async value => await OnValueChangedAsync(property.Key, value)" />
+                }
+                break;
+            default:
+
+                break;
+        }
+    </form>
+}
+
+@code {
+
+    SchemaDefinition? schemaDefinition;
+    JsonSchema? schema;
+    object? currentValue;
+
+    /// <summary>
+    /// Gets/sets the form's schema definition. Use only if <see cref="Schema"/> has not been set.
+    /// </summary>
+    [Parameter] public SchemaDefinition? SchemaDefinition { get; set; }
+
+    /// <summary>
+    /// Gets/sets the form's JSON schema. Use only if <see cref="SchemaDefinition"/> has not been set.
+    /// </summary>
+    [Parameter] public JsonSchema? Schema { get; set; }
+
+    /// <summary>
+    /// Gets/sets the handler to call whenever the form's value changes
+    /// </summary>
+    [Parameter] public EventCallback<object?> OnValueChanged{ get; set; }
+
+    /// <inheritdoc/>
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync().ConfigureAwait(false);
+        this.Store.SchemaDefinition.Subscribe(value => OnStateChanged(_ => schemaDefinition = value), token: CancellationTokenSource.Token);
+        this.Store.Schema.Subscribe(value => OnStateChanged(_ => schema = value), token: CancellationTokenSource.Token);
+        this.Store.Value.Subscribe(value => OnStateChanged(_ => currentValue = value), token: CancellationTokenSource.Token);
+    }
+
+    /// <inheritdoc/>
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        if (this.SchemaDefinition != this.schemaDefinition) this.Store.SetSchemaDefinition(this.SchemaDefinition);
+        if (this.Schema != null && this.Schema != this.schema) this.Store.SetSchema(this.Schema);
+    }
+
+    async Task OnValueChangedAsync(string name, object? value)
+    {
+        this.Store.SetPropertyValue(name, value);
+        await this.OnValueChanged.InvokeAsync(currentValue);
+    }
+
+}

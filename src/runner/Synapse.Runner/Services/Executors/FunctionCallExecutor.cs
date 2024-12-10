@@ -83,7 +83,7 @@ public class FunctionCallExecutor(IServiceProvider serviceProvider, ILogger<Func
         else if (uri.Host.Contains(GitlabHost)) uri = this.TransformGitlabUriToRawUri(uri);
         var authentication = endpoint.Authentication == null ? null : await this.Task.Workflow.Expressions.EvaluateAsync<AuthenticationPolicyDefinition>(endpoint.Authentication, this.Task.Input, this.Task.Arguments, cancellationToken).ConfigureAwait(false);
         using var httpClient = this.ServiceProvider.GetRequiredService<IHttpClientFactory>().CreateClient();
-        await httpClient.ConfigureAuthenticationAsync(this.Task.Workflow.Definition, authentication, this.ServiceProvider, cancellationToken).ConfigureAwait(false);
+        await httpClient.ConfigureAuthenticationAsync(authentication, this.ServiceProvider, this.Task.Workflow.Definition, cancellationToken).ConfigureAwait(false);
         try
         {
             using var response = await httpClient.GetAsync(uri, cancellationToken).ConfigureAwait(false);

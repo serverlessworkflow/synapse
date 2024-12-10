@@ -239,7 +239,7 @@ public class ResourceEditorStore<TResource>(ILogger<ResourceEditorStore<TResourc
         }
         catch (Exception ex)
         {
-            this.Logger.LogError("Unabled to change text editor language: {exception}", ex.ToString());
+            this.Logger.LogError("Unable to change text editor language: {exception}", ex.ToString());
             await monacoEditorHelper.ChangePreferredLanguageAsync(language == PreferredLanguage.YAML ? PreferredLanguage.JSON : PreferredLanguage.YAML);
         }
     }

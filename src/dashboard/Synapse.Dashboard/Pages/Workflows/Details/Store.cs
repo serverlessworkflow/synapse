@@ -12,10 +12,8 @@
 // limitations under the License.
 
 using Neuroglia.Blazor.Dagre.Models;
-using Neuroglia.Data.Infrastructure.ResourceOriented;
 using ServerlessWorkflow.Sdk.Models;
 using Synapse.Api.Client.Services;
-using Synapse.Dashboard.Components.DocumentDetailsStateManagement;
 using Synapse.Resources;
 
 namespace Synapse.Dashboard.Pages.Workflows.Details;
@@ -319,7 +317,6 @@ public class WorkflowDetailsStore(
         }
     }
 
-
     /// <summary>
     /// Displays the modal used to provide the new workflow input
     /// </summary>
@@ -336,7 +333,7 @@ public class WorkflowDetailsStore(
                 { nameof(WorkflowInstanceCreation.Input), input! },
                 { nameof(WorkflowInstanceCreation.OnCreate), EventCallback.Factory.Create<string>(this, CreateInstanceAsync) }
             };
-            await this.Modal.ShowAsync<WorkflowInstanceCreation>(title: "Start a new worklfow", parameters: parameters);
+            await this.Modal.ShowAsync<WorkflowInstanceCreation>(title: "Start a new workflow", parameters: parameters);
         }
     }
 
@@ -531,7 +528,7 @@ public class WorkflowDetailsStore(
                 await this.MonacoEditorHelper.ChangePreferredLanguageAsync(PreferredLanguage.YAML);
             }
         }, cancellationToken: this.CancellationTokenSource.Token);
-        this.MonacoEditorHelper.PreferredThemeChanged += OnPreferedThemeChangedAsync;
+        this.MonacoEditorHelper.PreferredThemeChanged += OnPreferredThemeChangedAsync;
         await base.InitializeAsync();
     }
 
@@ -540,7 +537,7 @@ public class WorkflowDetailsStore(
     /// </summary>
     /// <param name="newTheme"></param>
     /// <returns></returns>
-    protected async Task OnPreferedThemeChangedAsync(string newTheme)
+    protected async Task OnPreferredThemeChangedAsync(string newTheme)
     {
         if (this.TextEditor != null)
         {
@@ -568,7 +565,7 @@ public class WorkflowDetailsStore(
                     this.TextEditor.Dispose();
                     this.TextEditor = null;
                 }
-                this.MonacoEditorHelper.PreferredThemeChanged -= OnPreferedThemeChangedAsync;
+                this.MonacoEditorHelper.PreferredThemeChanged -= OnPreferredThemeChangedAsync;
             }
             this._disposed = true;
         }

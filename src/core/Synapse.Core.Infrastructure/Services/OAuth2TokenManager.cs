@@ -12,15 +12,18 @@
 // limitations under the License.
 
 using IdentityModel.Client;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
+using Neuroglia.Serialization;
+using ServerlessWorkflow.Sdk;
 using ServerlessWorkflow.Sdk.Models.Authentication;
 using System.Collections.Concurrent;
 using System.Net.Mime;
 using System.Security.Claims;
 using System.Text;
 
-namespace Synapse.Runner.Services;
+namespace Synapse.Core.Infrastructure.Services;
 
 /// <summary>
 /// Represents the default implementation of the <see cref="IOAuth2TokenManager"/> interface

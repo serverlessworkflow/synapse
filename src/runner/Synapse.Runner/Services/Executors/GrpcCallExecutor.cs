@@ -115,7 +115,7 @@ public class GrpcCallExecutor(IServiceProvider serviceProvider, ILogger<GrpcCall
         ArgumentNullException.ThrowIfNull(resource);
         var protoFile = new FileInfo(Path.GetTempFileName());
         var protoDescriptorFileName = Path.Combine(protoFile.Directory!.FullName, $"{Path.GetFileNameWithoutExtension(protoFile.Name)}.desc");
-        using var stream = await this.ExternalResources.ReadAsync(this.Task.Workflow.Definition, resource, cancellationToken).ConfigureAwait(false);
+        using var stream = await this.ExternalResources.ReadAsync(resource, this.Task.Workflow.Definition, cancellationToken).ConfigureAwait(false);
         {
             using var protoFileStream = new FileStream(protoFile.FullName, FileMode.Create);
             {

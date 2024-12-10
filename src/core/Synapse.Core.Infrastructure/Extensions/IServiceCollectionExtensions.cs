@@ -23,6 +23,7 @@ using Neuroglia.Mediation;
 using Neuroglia.Plugins;
 using Neuroglia.Security.Services;
 using Neuroglia.Serialization;
+using Neuroglia.Serialization.Xml;
 using ServerlessWorkflow.Sdk.IO;
 using Synapse.Core.Infrastructure.Services;
 using Synapse.Resources;
@@ -45,6 +46,7 @@ public static class IServiceCollectionExtensions
     {
         services.AddHttpClient();
         services.AddSerialization();
+        services.AddSingleton<IXmlSerializer, XmlSerializer>();
         services.AddMediator();
         services.AddScoped<IUserInfoProvider, UserInfoProvider>();
         services.AddServerlessWorkflowIO();
@@ -61,8 +63,12 @@ public static class IServiceCollectionExtensions
         services.AddSingleton<ITextDocumentRepository<string>, RedisTextDocumentRepository<string>>();
         services.AddSingleton<ITextDocumentRepository>(provider => provider.GetRequiredService<ITextDocumentRepository<string>>());
 
+        services.AddSingleton<IExternalResourceProvider, ExternalResourceProvider>();
+        services.AddSingleton<IOAuth2TokenManager, OAuth2TokenManager>();
         services.AddSingleton<ISchemaHandlerProvider, SchemaHandlerProvider>();
+        services.AddSingleton<ISchemaHandler, AvroSchemaHandler>();
         services.AddSingleton<ISchemaHandler, JsonSchemaHandler>();
+        services.AddSingleton<ISchemaHandler, XmlSchemaHandler>();
 
         services.AddScoped<IResourceRepository, ResourceRepository>();
         services.AddScoped<IAdmissionControl, AdmissionControl>();

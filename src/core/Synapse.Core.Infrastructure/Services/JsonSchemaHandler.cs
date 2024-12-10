@@ -20,12 +20,18 @@ using System.Net;
 namespace Synapse.Core.Infrastructure.Services;
 
 /// <summary>
-/// Represents the default implementation of the <see cref="ISchemaHandler"/> interface
+/// Represents the <see cref="ISchemaHandler"/> implementation used to handle JSON schemas
 /// </summary>
+/// <param name="externalResourceProvider">The service used to provide external resources</param>
 /// <param name="serializer">The service used to serialize/deserialize data to/from JSON</param>
-public class JsonSchemaHandler(IJsonSerializer serializer)
+public class JsonSchemaHandler(IExternalResourceProvider externalResourceProvider, IJsonSerializer serializer)
     : ISchemaHandler
 {
+
+    /// <summary>
+    /// Gets the service used to provide external resources
+    /// </summary>
+    protected IExternalResourceProvider ExternalResourceProvider { get; } = externalResourceProvider;
 
     /// <summary>
     /// Gets the service used to serialize/deserialize data to/from JSON
@@ -41,7 +47,17 @@ public class JsonSchemaHandler(IJsonSerializer serializer)
         ArgumentNullException.ThrowIfNull(graph);
         ArgumentNullException.ThrowIfNull(schema);
         if (!this.Supports(schema.Format)) throw new NotSupportedException($"The specified schema format '{schema.Format}' is not supported in this context");
-        var json = this.Serializer.SerializeToText(schema.Document);
+        var json = string.Empty;
+        if (schema.Resource == null)
+        {
+            json = this.Serializer.SerializeToText(schema.Document);
+        }
+        else
+        {
+            using var stream = await this.ExternalResourceProvider.ReadAsync(schema.Resource, cancellationToken: cancellationToken).ConfigureAwait(false);
+            using var streamReader = new StreamReader(stream);
+            json = await streamReader.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
+        }
         var jsonSchema = JsonSchema.FromText(json);
         var jsonDocument = this.Serializer.SerializeToDocument(graph)!;
         var options = new EvaluationOptions()
@@ -49,7 +65,7 @@ public class JsonSchemaHandler(IJsonSerializer serializer)
              OutputFormat = OutputFormat.List
         };
         var results = jsonSchema.Evaluate(jsonDocument, options);
-        if (results.IsValid) return await Task.FromResult(new OperationResult((int)HttpStatusCode.OK));
+        if (results.IsValid) return new OperationResult((int)HttpStatusCode.OK);
         else return new OperationResult((int)HttpStatusCode.BadRequest, null, new Neuroglia.Error()
         {
             Type = ErrorType.Validation,

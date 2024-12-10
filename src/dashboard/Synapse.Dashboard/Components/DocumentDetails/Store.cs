@@ -27,20 +27,12 @@ namespace Synapse.Dashboard.Components.DocumentDetailsStateManagement;
 /// <param name="jsonSerializer">The service used to serialize and deserialize JSON</param>
 /// <param name="yamlSerializer">The service used to serialize and deserialize YAML</param>
 /// <param name="toastService">The service used display toast messages</param>
-public class DocumentDetailsStore(
-    ILogger<DocumentDetailsStore> logger,
-    ISynapseApiClient apiClient,
-    IJSRuntime jsRuntime,
-    IMonacoEditorHelper monacoEditorHelper,
-    IJsonSerializer jsonSerializer,
-    IYamlSerializer yamlSerializer,
-    ToastService toastService
-)
+public class DocumentDetailsStore(ILogger<DocumentDetailsStore> logger, ISynapseApiClient apiClient, IJSRuntime jsRuntime, IMonacoEditorHelper monacoEditorHelper, IJsonSerializer jsonSerializer, IYamlSerializer yamlSerializer, ToastService toastService)
     : ComponentStore<DocumentDetailsState>(new())
 {
     
-    private TextModel? _textModel = null;
-    private readonly string _textModelUri = monacoEditorHelper.GetResourceUri();
+    TextModel? _textModel;
+    readonly string _textModelUri = monacoEditorHelper.GetResourceUri();
 
     /// <summary>
     /// Gets the service used to perform logging
@@ -288,7 +280,7 @@ public class DocumentDetailsStore(
         }
         catch (Exception ex)
         {
-            this.Logger.LogError("Unabled to load referenced document: {exception}", ex.ToString());
+            this.Logger.LogError("Unable to load referenced document: {exception}", ex.ToString());
         }
     }
 
@@ -331,7 +323,7 @@ public class DocumentDetailsStore(
         }
         catch (Exception ex)
         {
-            this.Logger.LogError("Unabled to set text editor language: {exception}", ex.ToString());
+            this.Logger.LogError("Unable to set text editor language: {exception}", ex.ToString());
         }
     }
 
@@ -355,7 +347,7 @@ public class DocumentDetailsStore(
             }
             catch (Exception ex)
             {
-                this.Logger.LogError("Unabled to set text editor value: {exception}", ex.ToString());
+                this.Logger.LogError("Unable to set text editor value: {exception}", ex.ToString());
                 await this.MonacoEditorHelper.ChangePreferredLanguageAsync(language == PreferredLanguage.YAML ? PreferredLanguage.JSON : PreferredLanguage.YAML);
             }
         }
@@ -405,7 +397,7 @@ public class DocumentDetailsStore(
         this.DocumentJson.SubscribeAsync(async (_) => {
             await this.SetTextEditorValueAsync();
         }, cancellationToken: this.CancellationTokenSource.Token);
-        this.MonacoEditorHelper.PreferredThemeChanged += OnPreferedThemeChangedAsync;
+        this.MonacoEditorHelper.PreferredThemeChanged += OnPreferredThemeChangedAsync;
         return base.InitializeAsync();
     }
 
@@ -414,7 +406,7 @@ public class DocumentDetailsStore(
     /// </summary>
     /// <param name="newTheme"></param>
     /// <returns></returns>
-    protected async Task OnPreferedThemeChangedAsync(string newTheme)
+    protected async Task OnPreferredThemeChangedAsync(string newTheme)
     {
         if (this.TextEditor != null)
         {
@@ -443,7 +435,7 @@ public class DocumentDetailsStore(
                     this.TextEditor.Dispose();
                     this.TextEditor = null;
                 }
-                this.MonacoEditorHelper.PreferredThemeChanged -= OnPreferedThemeChangedAsync;
+                this.MonacoEditorHelper.PreferredThemeChanged -= OnPreferredThemeChangedAsync;
             }
             this.disposed = true;
         }

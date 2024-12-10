@@ -19,9 +19,28 @@
 @inject MonacoInterop MonacoInterop
 @inject IJsonSerializer Serializer
 
-<MonacoEditor OnTextChanged="OnTextChanged" ModelName="@modelName" Document="input" />
+<Tabs>
+    @if(WorkflowDefinition?.Input?.Schema != null)
+    {
+        <Tab Title="Form" Active="true">
+            <Content>
+                <div class="pt-3">
+                    <DynamicForm SchemaDefinition="WorkflowDefinition.Input.Schema" OnValueChanged="value => OnValueChanged(value)" />
+                </div>
+            </Content>
+        </Tab>
+    }
+    <Tab Title="Text">
+        <Content>
+            <div class="pt-3">
+                <MonacoEditor OnTextChanged="OnTextChanged" ModelName="@modelName" Document="input" />
+            </div>
+        </Content>
+    </Tab>
+</Tabs>
+
 <div class="text-center">
-    <Button Outline="true" Color="ButtonColor.Primary" class="m-auto mt-3" @onclick="async (_) => await OnStart()">
+    <Button Outline="true" Color="ButtonColor.Primary" class="m-auto mt-3" @onclick="async _ => await OnStart()">
         <Icon Name="IconName.Play" />
         Start
     </Button>
@@ -35,6 +54,11 @@
     [Parameter] public WorkflowDefinition? WorkflowDefinition { get; set; }
     [Parameter] public EquatableDictionary<string, object>? Input { get; set; }
     [Parameter] public EventCallback<string> OnCreate { get; set; }
+
+    void OnValueChanged(object? value)
+    {
+        payload = value == null ? string.Empty : Serializer.SerializeToText(value);
+    }
 
     void OnTextChanged(string value)
     {

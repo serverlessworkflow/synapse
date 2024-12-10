@@ -1,0 +1,88 @@
+﻿@using Json.Schema
+@using System.Globalization
+@namespace Synapse.Dashboard
+@inject IJsonSerializer JsonSerializer
+
+@if(!string.IsNullOrWhiteSpace(name) && schema != null)
+{
+    var title = schema.GetTitle() ?? CultureInfo.InvariantCulture.TextInfo.ToTitleCase(name.SplitCamelCase());
+    var description = schema.GetDescription();
+    <div class="mb-3">
+        <label for="@name" class="form-label">@title</label>
+        @if (required)
+        {
+            <span role="button" data-bs-toggle="tooltip" data-bs-placement="left" title="Required" class="text-danger ms-2">*</span>
+        }
+        @if (!string.IsNullOrWhiteSpace(description))
+        {
+            <i role="button" data-bs-toggle="tooltip" data-bs-placement="left" title="@description" class="bi bi-info-circle ms-2"></i>
+        }
+        @switch (schema.GetJsonType())
+        {
+            case SchemaValueType.Array:
+
+                break;
+            case SchemaValueType.Object:
+                <div class="border border-muted rounded p-3">
+                    <DynamicForm Schema="schema" OnValueChanged="async e => await OnValueChanged.InvokeAsync(e)" />
+                </div>
+                break;
+            case SchemaValueType.Null:
+                break;
+            default:
+                var enumValuesNodes = schema.GetEnum();
+                var enumValues = enumValuesNodes == null ? null : enumValuesNodes.Select(v => JsonSerializer.SerializeToText(v));
+                @if (enumValues == null)
+                {
+                    <input name="@name" placeholder="@title" required="@required" class="form-control" @oninput="async e => await OnValueChanged.InvokeAsync(e.Value)" />
+                }
+                else
+                {
+                    <select name="@name" required="@required" class="form-select" @onchange="async e => await OnValueChanged.InvokeAsync(e.Value)">
+                        @foreach (var enumValue in enumValues)
+                        {
+                            <option value="@enumValue">@enumValue</option>
+                        }
+                    </select>
+                }
+                break;
+        }
+    </div>
+}
+
+@code {
+
+    string name = null!;
+    JsonSchema schema = null!;
+    bool required;
+
+    /// <summary>
+    /// Gets/sets the form field's name
+    /// </summary>
+    [Parameter] public string Name { get; set; } = null!;
+
+    /// <summary>
+    /// Gets/sets the form field's schema
+    /// </summary>
+    [Parameter] public JsonSchema Schema { get; set; } = null!;
+
+    /// <summary>
+    /// Gets/sets a boolean indicating whether or not the field is required
+    /// </summary>
+    [Parameter] public bool Required { get; set; }
+
+    /// <summary>
+    /// Gets/sets the handler to call whenever the field's value changes
+    /// </summary>
+    [Parameter] public EventCallback<object?> OnValueChanged { get; set; }
+
+    /// <inheritdoc/>
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        if (this.name != this.Name) this.name = this.Name;
+        if (this.schema != this.Schema) this.schema = this.Schema;
+        if (this.required != this.Required) this.required = this.Required;
+    }
+
+}

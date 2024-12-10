@@ -55,7 +55,7 @@ public class ScriptProcessExecutor(IServiceProvider serviceProvider, ILogger<Scr
         if (string.IsNullOrWhiteSpace(script))
         {
             if (this.ProcessDefinition.Source == null) throw new NullReferenceException("The script's code or resource must be set");
-            using var stream = await this.ExternalResourceProvider.ReadAsync(this.Task.Workflow.Definition, this.ProcessDefinition.Source, cancellationToken).ConfigureAwait(false);
+            using var stream = await this.ExternalResourceProvider.ReadAsync(this.ProcessDefinition.Source, this.Task.Workflow.Definition, cancellationToken).ConfigureAwait(false);
             using var streamReader = new StreamReader(stream);
             script = await streamReader.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
         }
