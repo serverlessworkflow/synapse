@@ -56,7 +56,7 @@ public class HttpCallExecutor(IServiceProvider serviceProvider, ILogger<HttpCall
         {
             this.Http = (HttpCallDefinition)this.JsonSerializer.Convert(this.Task.Definition.With, typeof(HttpCallDefinition))!;
             var authentication = this.Http.Endpoint.Authentication == null ? null : await this.Task.Workflow.Expressions.EvaluateAsync<AuthenticationPolicyDefinition>(this.Http.Endpoint.Authentication, this.Task.Input, this.Task.Arguments, cancellationToken).ConfigureAwait(false);
-            await this.HttpClient.ConfigureAuthenticationAsync(this.Task.Workflow.Definition, authentication, this.ServiceProvider, cancellationToken).ConfigureAwait(false);
+            await this.HttpClient.ConfigureAuthenticationAsync(authentication, this.ServiceProvider, this.Task.Workflow.Definition, cancellationToken).ConfigureAwait(false);
         }
         catch(Exception ex)
         {

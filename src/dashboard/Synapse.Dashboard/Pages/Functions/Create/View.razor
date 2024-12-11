@@ -44,7 +44,7 @@ else if (string.IsNullOrEmpty(name) && string.IsNullOrEmpty(chosenName))
 else
 {
     <div class="d-flex justify-content-end mb-2">
-        <PreferredLanguageSelector PreferedLanguageChange="Store.ToggleTextBasedEditorLanguageAsync" />
+        <PreferredLanguageSelector PreferredLanguageChange="Store.ToggleTextBasedEditorLanguageAsync" />
     </div>
     <StandaloneCodeEditor @ref="Store.TextEditor"
                           ConstructionOptions="Store.StandaloneEditorConstructionOptions"

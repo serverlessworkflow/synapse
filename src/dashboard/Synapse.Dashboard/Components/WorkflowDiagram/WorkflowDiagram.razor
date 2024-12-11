@@ -17,7 +17,7 @@
 @using ServerlessWorkflow.Sdk.Models
 @using Synapse.Dashboard.Components.WorkflowDiagramStateManagement
 @namespace Synapse.Dashboard
-@inherits StatefulComponent<WorkflowDiagram,WorkflowDiagramStore, WorkflowDiagramState>
+@inherits StatefulComponent<WorkflowDiagram, WorkflowDiagramStore, WorkflowDiagramState>
 
 @if (graph != null)
 {
@@ -45,7 +45,7 @@
             <SaveAsPngControl />
         </SaveAsPngControl>
         <ExtraControls>
-            <Button Outline="true" Color="ButtonColor.Primary" Size="ButtonSize.Small" @onclick="Store.ToggleLegendAsync" TooltipTitle="Legend">
+            <Button Outline="true" Color="ButtonColor.Primary" Size="ButtonSize.Small" @onclick="Store.ToggleLegend" TooltipTitle="Legend">
                 <svg>
                     <use href="#legend" />
                 </svg>

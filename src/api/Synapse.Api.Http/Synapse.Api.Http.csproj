@@ -8,7 +8,7 @@
 	<OutputType>Library</OutputType>
 	<GenerateDocumentationFile>True</GenerateDocumentationFile>
 	<VersionPrefix>1.0.0</VersionPrefix>
-	<VersionSuffix>alpha5.3</VersionSuffix>
+	<VersionSuffix>alpha5.7</VersionSuffix>
 	<AssemblyVersion>$(VersionPrefix)</AssemblyVersion>
 	<FileVersion>$(VersionPrefix)</FileVersion>
 	<Authors>The Synapse Authors</Authors>
@@ -43,8 +43,8 @@
   </ItemGroup>
 	
   <ItemGroup>
-    <PackageReference Include="Neuroglia.Mediation.AspNetCore" Version="4.16.2" />
-    <PackageReference Include="Neuroglia.Security.AspNetCore" Version="4.16.2" />
+    <PackageReference Include="Neuroglia.Mediation.AspNetCore" Version="4.18.0" />
+    <PackageReference Include="Neuroglia.Security.AspNetCore" Version="4.18.0" />
 	<PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="7.1.0" />
   </ItemGroup>
 

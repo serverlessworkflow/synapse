@@ -142,7 +142,7 @@ public class WorkflowGraphBuilder(ILogger<WorkflowGraphBuilder> logger, IYamlSer
         {
             return (NodeViewModel)context.Graph.AllNodes[reference];
         }
-        throw new IndexOutOfRangeException($"Unabled to find the task with reference '{reference}' in the provided context.");
+        throw new IndexOutOfRangeException($"Unable to find the task with reference '{reference}' in the provided context.");
     }
 
     /// <summary>

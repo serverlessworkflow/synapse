@@ -185,9 +185,11 @@
 }
 
 @code {
-    private WorkflowInstance? workflowInstance;
+
+    Dictionary<string, int> expandedTasks = new();
+    bool shouldRender = true;
+    WorkflowInstance? workflowInstance;
     [Parameter] public WorkflowInstance? WorkflowInstance { get; set; }
-    private Dictionary<string, int> expandedTasks = new();
 
     protected override void OnParametersSet()
     {
@@ -199,7 +201,6 @@
         }
     }
 
-    bool shouldRender = true;
     protected override bool ShouldRender()
     {
         if (!shouldRender) return false;
@@ -229,4 +230,5 @@
         else expandedTasks.Add(taskId, depth);
         shouldRender = true;
     }
+
 }

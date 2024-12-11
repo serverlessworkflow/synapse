@@ -29,7 +29,7 @@
 
     protected string? ClassNames => Class;
     [Parameter] public string? Class { get; set; }
-    [Parameter] public EventCallback<string> PreferedLanguageChange { get; set; }
+    [Parameter] public EventCallback<string> PreferredLanguageChange { get; set; }
 
     protected bool isJsonSelected { get; set; }
 
@@ -53,20 +53,20 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        this.MonacoEditorHelper.PreferredLanguageChanged += this.HandlePreferedLanguageChangeAsync;
+        this.MonacoEditorHelper.PreferredLanguageChanged += this.HandlePreferredLanguageChangeAsync;
     }
 
-    protected async Task HandlePreferedLanguageChangeAsync(string language)
+    protected async Task HandlePreferredLanguageChangeAsync(string language)
     {
         this.isJsonSelected = this.MonacoEditorHelper.PreferredLanguage == PreferredLanguage.JSON;
-        await this.PreferedLanguageChange.InvokeAsync(language);
+        await this.PreferredLanguageChange.InvokeAsync(language);
         this.StateHasChanged();
     }
 
     public void Dispose()
     {
         if (this.MonacoEditorHelper != null) {
-            this.MonacoEditorHelper.PreferredLanguageChanged -= this.HandlePreferedLanguageChangeAsync;
+            this.MonacoEditorHelper.PreferredLanguageChanged -= this.HandlePreferredLanguageChangeAsync;
         }
         GC.SuppressFinalize(this);
     }

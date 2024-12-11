@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Neuroglia.Serialization.Xml;
 using Synapse;
 using Synapse.Core.Infrastructure.Containers;
 
@@ -39,6 +40,7 @@ var builder = Host.CreateDefaultBuilder()
         });
         services.AddSerialization();
         services.AddJsonSerializer(options => options.DefaultBufferSize = 128);
+        services.AddSingleton<IXmlSerializer, XmlSerializer>();
         services.AddJQExpressionEvaluator();
         services.AddJavaScriptExpressionEvaluator();
         services.AddNodeJSScriptExecutor();
@@ -82,7 +84,9 @@ var builder = Host.CreateDefaultBuilder()
         services.AddSingleton<ITaskExecutionContextFactory, TaskExecutionContextFactory>();
         services.AddSingleton<ITaskExecutorFactory, TaskExecutorFactory>();
         services.AddSingleton<ISchemaHandlerProvider, SchemaHandlerProvider>();
+        services.AddSingleton<ISchemaHandler, AvroSchemaHandler>();
         services.AddSingleton<ISchemaHandler, JsonSchemaHandler>();
+        services.AddSingleton<ISchemaHandler, XmlSchemaHandler>();
         services.AddSingleton<IExternalResourceProvider, ExternalResourceProvider>();
         services.AddHostedService<RunnerApplication>();
 

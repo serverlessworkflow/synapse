@@ -11,8 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Neuroglia.Data.Infrastructure.ResourceOriented;
+using ServerlessWorkflow.Sdk;
 using ServerlessWorkflow.Sdk.Models.Authentication;
+using Synapse.Core.Infrastructure.Services;
 using System.Text;
 
 namespace Synapse;
@@ -41,12 +45,12 @@ public class AuthorizationInfo(string scheme, string parameter)
     /// <summary>
     /// Creates a new <see cref="AuthorizationInfo"/> based on the specified <see cref="AuthenticationPolicyDefinition"/>
     /// </summary>
-    /// <param name="workflow">The <see cref="WorkflowDefinition"/> that defines the <see cref="AuthenticationPolicyDefinition"/> to create a new <see cref="AuthorizationInfo"/> for</param>
     /// <param name="authentication">The <see cref="AuthenticationPolicyDefinition"/> to create a new <see cref="AuthorizationInfo"/> for</param>
     /// <param name="serviceProvider">The current <see cref="IServiceProvider"/></param>
+    /// <param name="workflow">The <see cref="WorkflowDefinition"/>, if any, that defines the <see cref="AuthenticationPolicyDefinition"/> to create a new <see cref="AuthorizationInfo"/> for</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>A new <see cref="AuthorizationInfo"/> based on the specified <see cref="AuthenticationPolicyDefinition"/></returns>
-    public static async Task<AuthorizationInfo> CreateAsync(WorkflowDefinition workflow, AuthenticationPolicyDefinition authentication, IServiceProvider serviceProvider, CancellationToken cancellationToken = default)
+    public static async Task<AuthorizationInfo> CreateAsync( AuthenticationPolicyDefinition authentication, IServiceProvider serviceProvider, WorkflowDefinition? workflow = null, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(authentication);
         ArgumentNullException.ThrowIfNull(serviceProvider);
@@ -54,7 +58,7 @@ public class AuthorizationInfo(string scheme, string parameter)
         var logger = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("AuthenticationPolicyHandler");
         if (!string.IsNullOrWhiteSpace(authentication.Use))
         {
-            if (workflow.Use?.Authentications?.TryGetValue(authentication.Use, out AuthenticationPolicyDefinition? referencedAuthentication) != true || referencedAuthentication == null) throw new NullReferenceException($"Failed to find the specified authentication policy '{authentication.Use}'");
+            if (workflow?.Use?.Authentications?.TryGetValue(authentication.Use, out AuthenticationPolicyDefinition? referencedAuthentication) != true || referencedAuthentication == null) throw new NullReferenceException($"Failed to find the specified authentication policy '{authentication.Use}'");
             else authentication = referencedAuthentication;
         }
         var isSecretBased = authentication.TryGetBaseSecret(out var secretName);
@@ -62,7 +66,7 @@ public class AuthorizationInfo(string scheme, string parameter)
         if (isSecretBased && !string.IsNullOrWhiteSpace(secretName))
         {
             logger.LogDebug("Authentication is secret based");
-            var secretsManager = serviceProvider.GetRequiredService<ISecretsManager>();
+            var secretsManager = serviceProvider.GetService<ISecretsManager>() ?? throw new NotSupportedException("Secret based authentication is not supported in this context");
             var secrets = await secretsManager.GetSecretsAsync(cancellationToken).ConfigureAwait(false);
             if (!secrets.TryGetValue(secretName, out authenticationProperties) || authenticationProperties == null)
             {

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Synapse.Runner.Services;
+namespace Synapse.Core.Infrastructure.Services;
 
 /// <summary>
 /// Represents the default implementation of the <see cref="IExternalResourceProvider"/> interface
@@ -33,14 +33,13 @@ public class ExternalResourceProvider(IServiceProvider serviceProvider, IHttpCli
     protected IHttpClientFactory HttpClientFactory { get; } = httpClientFactory;
 
     /// <inheritdoc/>
-    public virtual async Task<Stream> ReadAsync(WorkflowDefinition workflow, ExternalResourceDefinition resource, CancellationToken cancellationToken = default)
+    public virtual async Task<Stream> ReadAsync(ExternalResourceDefinition resource, WorkflowDefinition? workflow = null, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(workflow);
         ArgumentNullException.ThrowIfNull(resource);
         return resource.EndpointUri.Scheme switch
         {
             "file" => new FileStream(resource.EndpointUri.LocalPath, FileMode.Open),
-            "http" or "https" => await this.ReadOverHttpAsync(workflow, resource, cancellationToken).ConfigureAwait(false),
+            "http" or "https" => await this.ReadOverHttpAsync(resource, workflow, cancellationToken).ConfigureAwait(false),
             _ => throw new NotSupportedException($"Cannot retrieve resource at uri '{resource.EndpointUri}': the scheme '{resource.EndpointUri.Scheme}' is not supported")
         };
     }
@@ -48,16 +47,15 @@ public class ExternalResourceProvider(IServiceProvider serviceProvider, IHttpCli
     /// <summary>
     /// Reads the specified <see cref="ExternalResourceDefinition"/>
     /// </summary>
-    /// <param name="workflow">The <see cref="WorkflowDefinition"/> in the context of which to read the specified resource</param>
     /// <param name="resource">A reference to the external resource to read</param>
+    /// <param name="workflow">The <see cref="WorkflowDefinition"/>, if any, in the context of which to read the specified resource</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>The specified <see cref="ExternalResourceDefinition"/>'s content <see cref="Stream"/></returns>
-    protected virtual async Task<Stream> ReadOverHttpAsync(WorkflowDefinition workflow, ExternalResourceDefinition resource, CancellationToken cancellationToken = default)
+    protected virtual async Task<Stream> ReadOverHttpAsync(ExternalResourceDefinition resource, WorkflowDefinition? workflow = null, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(workflow);
         ArgumentNullException.ThrowIfNull(resource);
         using var httpClient = this.HttpClientFactory.CreateClient();
-        await httpClient.ConfigureAuthenticationAsync(workflow, resource.Endpoint.Authentication, this.ServiceProvider, cancellationToken).ConfigureAwait(false);
+        await httpClient.ConfigureAuthenticationAsync(resource.Endpoint.Authentication, this.ServiceProvider, workflow, cancellationToken).ConfigureAwait(false);
         return await httpClient.GetStreamAsync(resource.EndpointUri, cancellationToken).ConfigureAwait(false);
     }
 

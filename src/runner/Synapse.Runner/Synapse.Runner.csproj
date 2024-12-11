@@ -8,7 +8,7 @@
 	<NeutralLanguage>en</NeutralLanguage>
 	<GenerateDocumentationFile>True</GenerateDocumentationFile>
 	<VersionPrefix>1.0.0</VersionPrefix>
-	<VersionSuffix>alpha5.3</VersionSuffix>
+	<VersionSuffix>alpha5.7</VersionSuffix>
 	<AssemblyVersion>$(VersionPrefix)</AssemblyVersion>
 	<FileVersion>$(VersionPrefix)</FileVersion>
 	<Authors>The Synapse Authors</Authors>
@@ -59,12 +59,12 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
 	<PackageReference Include="Microsoft.OpenApi.Readers" Version="1.6.22" />
 	<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
-	<PackageReference Include="MimeKit" Version="4.8.0" />
-	<PackageReference Include="Neuroglia.Data.Expressions.JavaScript" Version="4.16.2" />
-	<PackageReference Include="Neuroglia.Data.Expressions.JQ" Version="4.16.2" />
-	<PackageReference Include="Neuroglia.Eventing.CloudEvents.Infrastructure" Version="4.16.2" />
-	<PackageReference Include="Neuroglia.Scripting.NodeJS" Version="4.16.2" />
-	<PackageReference Include="Neuroglia.Scripting.Python" Version="4.16.2" />
+	<PackageReference Include="MimeKit" Version="4.9.0" />
+	<PackageReference Include="Neuroglia.Data.Expressions.JavaScript" Version="4.18.0" />
+	<PackageReference Include="Neuroglia.Data.Expressions.JQ" Version="4.18.0" />
+	<PackageReference Include="Neuroglia.Eventing.CloudEvents.Infrastructure" Version="4.18.0" />
+	<PackageReference Include="Neuroglia.Scripting.NodeJS" Version="4.18.0" />
+	<PackageReference Include="Neuroglia.Scripting.Python" Version="4.18.0" />
 	<PackageReference Include="protobuf-net.Grpc.ClientFactory" Version="1.2.2" />
     <PackageReference Include="System.Reactive" Version="6.0.1" />
   </ItemGroup>

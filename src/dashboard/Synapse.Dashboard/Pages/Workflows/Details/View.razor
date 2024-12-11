@@ -29,23 +29,23 @@
         <Label>Instances</Label>
         <Content>
             <WorkflowInstancesList class="h-100" 
-                                   Loading="@Loading"
-                                   WorkflowInstances="@Resources"
-                                   SelectedInstanceNames="@SelectedResourceNames"
-                                   ActiveRow="@instanceName"
-                                   Columns="@columns"
-                                   OnSearchInput="Store.SetSearchTerm"
-                                   OnShowDetails="OnShowInstanceDetails"
-                                   OnSuspend="async (instance) => await Store.SuspendInstanceAsync(instance)"
-                                   OnResume="async (instance) => await Store.ResumeInstanceAsync(instance)"
-                                   OnCancel="async (instance) => await Store.CancelInstanceAsync(instance)"
-                                   OnReplay="async (instance) => await Store.OnShowCreateInstanceAsync(workflowDefinition, instance.Spec?.Input)"
-                                   OnDelete="OnDeleteWorkflowInstanceAsync"
-                                   OnToggleSelected="Store.ToggleResourceSelection"
-                                   OnSuspendSelected="async () => await Store.OnSuspendSelectedInstancesAsync()"
-                                   OnResumeSelected="async () => await Store.OnResumeSelectedInstancesAsync()"
-                                   OnCancelSelected="async () => await Store.OnCancelSelectedInstancesAsync()"
-                                   OnDeleteSelected="OnDeleteSelectedResourcesAsync" />
+            Loading="@Loading"
+            WorkflowInstances="@Resources"
+            SelectedInstanceNames="@SelectedResourceNames"
+            ActiveRow="@instanceName"
+            Columns="@columns"
+            OnSearchInput="Store.SetSearchTerm"
+            OnShowDetails="OnShowInstanceDetails"
+            OnSuspend="async (instance) => await Store.SuspendInstanceAsync(instance)"
+            OnResume="async (instance) => await Store.ResumeInstanceAsync(instance)"
+            OnCancel="async (instance) => await Store.CancelInstanceAsync(instance)"
+            OnReplay="async (instance) => await Store.OnShowCreateInstanceAsync(workflowDefinition, instance.Spec?.Input)"
+            OnDelete="OnDeleteWorkflowInstanceAsync"
+            OnToggleSelected="Store.ToggleResourceSelection"
+            OnSuspendSelected="async () => await Store.OnSuspendSelectedInstancesAsync()"
+            OnResumeSelected="async () => await Store.OnResumeSelectedInstancesAsync()"
+            OnCancelSelected="async () => await Store.OnCancelSelectedInstancesAsync()"
+            OnDeleteSelected="OnDeleteSelectedResourcesAsync" />
             <Button Outline="true" Color="ButtonColor.Primary" @onclick="async _ => await Store.OnShowCreateInstanceAsync(workflowDefinition)" class="w-100 mt-3">
                 <Icon Name="IconName.Plus"/>
             </Button>
@@ -63,9 +63,9 @@
             else
             {
                 <WorkflowDiagram 
-                    WorkflowDefinition="@workflowDefinition" 
-                    WorkflowInstances="@(workflowInstance != null ? [workflowInstance] : (Resources ?? []))"
-                    OnMouseUp="async (e) => await Store.SelectNodeInEditor(e)"
+                WorkflowDefinition="@workflowDefinition" 
+                WorkflowInstances="@(workflowInstance != null ? [workflowInstance] : (Resources ?? []))"
+                OnMouseUp="async (e) => await Store.SelectNodeInEditor(e)"
                 />
             }
         </Content>
@@ -91,16 +91,16 @@
                                 <Icon Name="IconName.Clipboard" />
                             </Button>
                         </div>
-                        <PreferredLanguageSelector PreferedLanguageChange="Store.ToggleTextBasedEditorLanguageAsync" />
+                        <PreferredLanguageSelector PreferredLanguageChange="Store.ToggleTextBasedEditorLanguageAsync" />
                     </div>
                     <div class="flex-grow">
                         <StandaloneCodeEditor @ref="Store.TextEditor"
-                                                ConstructionOptions="Store.StandaloneEditorConstructionOptions"
-                                                OnDidInit="Store.OnTextBasedEditorInitAsync"
-                                                CssClass="h-100" />
+                        ConstructionOptions="Store.StandaloneEditorConstructionOptions"
+                        OnDidInit="Store.OnTextBasedEditorInitAsync"
+                        CssClass="h-100" />
                     </div>
                 </div>
-                
+
             }
         </Content>
     </HorizontalCollapsible>
@@ -117,6 +117,29 @@
     }
 </div>
 
+@if (problemDetails != null)
+{
+    <div class="problems problems-bottom z-9999">
+        <Callout Color="CalloutColor.Danger" Heading="@problemDetails.Title" Class="position-relative">
+            <Icon Name="IconName.X" Class="position-absolute" @onclick="OnDismissProblemDetails" />
+            <p>@problemDetails.Detail</p>
+            @if (problemDetails.Errors != null && problemDetails.Errors.Any())
+            {
+                foreach (KeyValuePair<string, string[]> errorContainer in problemDetails.Errors)
+                {
+                    <strong>@errorContainer.Key:</strong>
+                    <ul>
+                        @foreach (string error in errorContainer.Value)
+                        {
+                            <li>@error</li>
+                        }
+                    </ul>
+                }
+            }
+        </Callout>
+    </div>
+}
+
 <Modal @ref="Store.Modal" IsVerticallyCentered="true" />
 
 <ConfirmDialog @ref="Dialog" />
@@ -128,12 +151,14 @@
     Workflow workflow = null!;
     WorkflowDefinition workflowDefinition = null!;
     WorkflowInstance? workflowInstance;
-    readonly IEnumerable<string> columns = [
+    ProblemDetails? problemDetails;
+    readonly IEnumerable<string> columns = 
+    [
         "Name",
-        "Status",
-        "Start Time",
-        "End Time",
-        ..WorkflowInstancesList.DirectActions
+    "Status",
+    "Start Time",
+    "End Time",
+    ..WorkflowInstancesList.DirectActions
     ];
 
     [Parameter] public string? Version { get; set; }
@@ -160,6 +185,7 @@
             OnStateChanged(_ => workflow = value!);
             UpdateBreadcrumb();
         }, token: CancellationTokenSource.Token);
+        Store.ProblemDetails.Subscribe(value => OnStateChanged(_ => problemDetails = value), token: CancellationTokenSource.Token);
         await base.OnInitializedAsync().ConfigureAwait(false);
     }
 
@@ -242,4 +268,10 @@
         NavigationManager.NavigateTo($"/workflows/details/{@namespace}/{Name}/{version}");
         StateHasChanged();
     }
+
+    void OnDismissProblemDetails()
+    {
+        this.Store.SetProblemDetails(null);
+    }
+
 }

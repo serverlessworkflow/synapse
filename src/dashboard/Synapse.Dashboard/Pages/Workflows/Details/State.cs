@@ -22,6 +22,7 @@ namespace Synapse.Dashboard.Pages.Workflows.Details;
 public record WorkflowDetailsState
     : NamespacedResourceManagementComponentState<WorkflowInstance>
 {
+
     /// <summary>
     /// Gets/sets the displayed <see cref="Workflow"/>
     /// </summary>
@@ -46,5 +47,10 @@ public record WorkflowDetailsState
     /// Gets/sets the displayed <see cref="WorkflowInstance"/> id
     /// </summary>
     public string? WorkflowInstanceName { get; set; }
+
+    /// <summary>
+    /// Gets/sets the details of a problem, if any, that has occurred during an operation related to the current workflow
+    /// </summary>
+    public ProblemDetails? ProblemDetails { get; set; }
 
 }

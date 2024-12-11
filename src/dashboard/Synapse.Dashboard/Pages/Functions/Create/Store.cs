@@ -509,7 +509,7 @@ public class CreateFunctionViewStore(
             .SubscribeAsync(async name => 
                 await this.GetCustomFunctionAsync(name!), 
                 cancellationToken: this.CancellationTokenSource.Token);
-        this.MonacoEditorHelper.PreferredThemeChanged += OnPreferedThemeChangedAsync;
+        this.MonacoEditorHelper.PreferredThemeChanged += OnPreferredThemeChangedAsync;
         await this.SetValidationSchema();
         await base.InitializeAsync();
     }
@@ -519,7 +519,7 @@ public class CreateFunctionViewStore(
     /// </summary>
     /// <param name="newTheme"></param>
     /// <returns></returns>
-    protected async Task OnPreferedThemeChangedAsync(string newTheme)
+    protected async Task OnPreferredThemeChangedAsync(string newTheme)
     {
         if (this.TextEditor != null)
         {
@@ -576,7 +576,7 @@ public class CreateFunctionViewStore(
                     this.TextEditor.Dispose();
                     this.TextEditor = null;
                 }
-                this.MonacoEditorHelper.PreferredThemeChanged -= OnPreferedThemeChangedAsync;
+                this.MonacoEditorHelper.PreferredThemeChanged -= OnPreferredThemeChangedAsync;
             }
             this._disposed = true;
         }

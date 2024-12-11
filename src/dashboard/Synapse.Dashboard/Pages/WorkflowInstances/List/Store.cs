@@ -12,7 +12,6 @@
 // limitations under the License.
 
 using Synapse.Api.Client.Services;
-using Synapse.Dashboard.Components.DocumentDetailsStateManagement;
 using Synapse.Dashboard.Pages.Workflows.List;
 using Synapse.Resources;
 

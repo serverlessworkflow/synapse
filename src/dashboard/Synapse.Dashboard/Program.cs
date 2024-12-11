@@ -14,8 +14,10 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Components.Authorization;
 using Neuroglia.Blazor.Dagre;
+using Neuroglia.Serialization.Xml;
 using ServerlessWorkflow.Sdk.Models;
 using ServerlessWorkflow.Sdk.Validation;
+using Synapse.Core.Infrastructure.Services;
 using System.Text.Json;
 
 var defaultPropertyNameResolver = ValidatorOptions.Global.PropertyNameResolver;
@@ -35,6 +37,9 @@ builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 builder.Services.AddLogging();
 builder.Services.AddSerialization();
+builder.Services.AddSingleton<IXmlSerializer, XmlSerializer>();
+builder.Services.AddSingleton<IExternalResourceProvider, ExternalResourceProvider>();
+builder.Services.AddSingleton<IOAuth2TokenManager, OAuth2TokenManager>();
 builder.Services.Configure<JsonSerializerOptions>(options =>
 {
     options.WriteIndented = true;

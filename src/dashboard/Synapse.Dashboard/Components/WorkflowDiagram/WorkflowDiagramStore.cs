@@ -23,9 +23,7 @@ namespace Synapse.Dashboard.Components.WorkflowDiagramStateManagement;
 /// Represents the <see cref="ComponentStore{TState}" /> of a <see cref="WorkflowDiagram"/> component
 /// </summary>
 /// <param name="workflowGraphBuilder">The service used build the workflow graph</param>
-public class WorkflowDiagramStore(
-    IWorkflowGraphBuilder workflowGraphBuilder
-)
+public class WorkflowDiagramStore(IWorkflowGraphBuilder workflowGraphBuilder)
     : ComponentStore<WorkflowDiagramState>(new())
 {
 
@@ -40,7 +38,7 @@ public class WorkflowDiagramStore(
     public Modal? LegendModal { get; set; }
 
     /// <summary>
-    /// Gets/set a refrence to the <see cref="DagreGraph"/> component
+    /// Gets/set a reference to the <see cref="DagreGraph"/> component
     /// </summary>
     public DagreGraph? DagreGraph;
 
@@ -163,9 +161,9 @@ public class WorkflowDiagramStore(
 
     #region Actions
     /// <summary>
-    /// Toggles the legend visibily
+    /// Toggles the legend visibility
     /// </summary>
-    public void ToggleLegendAsync()
+    public void ToggleLegend()
     {
         var isLegendVisible = this.Get(state => state.IsLegendVisible);
         this.Reduce(state => state with

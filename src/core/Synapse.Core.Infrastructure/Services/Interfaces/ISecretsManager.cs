@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Synapse.Runner.Services;
+namespace Synapse.Core.Infrastructure.Services;
 
 /// <summary>
 /// Defines the fundamentals of a service used to manage secrets
