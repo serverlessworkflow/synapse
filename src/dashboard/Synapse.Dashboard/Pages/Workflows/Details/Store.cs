@@ -12,6 +12,7 @@
 // limitations under the License.
 
 using Neuroglia.Blazor.Dagre.Models;
+using Neuroglia.Collections;
 using ServerlessWorkflow.Sdk.Models;
 using Synapse.Api.Client.Services;
 using Synapse.Resources;
@@ -93,6 +94,7 @@ public class WorkflowDetailsStore(
     public Modal? Modal { get; set; }
 
     #region Selectors
+    
     /// <summary>
     /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="WorkflowDetailsState.Workflow"/> changes
     /// </summary>
@@ -157,9 +159,16 @@ public class WorkflowDetailsStore(
             return instances.FirstOrDefault(instance => instance.Metadata.Name == name)?.Clone();
         }
     ).DistinctUntilChanged();
+
+    /// <summary>
+    /// Gets an <see cref="IObservable{T}"/> used to observe the <see cref="WorkflowDetailsState.ProblemDetails"/> changes
+    /// </summary>
+    public IObservable<ProblemDetails?> ProblemDetails => this.Select(state => state.ProblemDetails).DistinctUntilChanged();
+
     #endregion
 
     #region Setters
+
     /// <inheritdoc/>
     public override void SetActiveResourceName(string activeResourceName)
     {
@@ -194,9 +203,23 @@ public class WorkflowDetailsStore(
             WorkflowInstanceName = instanceName
         });
     }
+
+    /// <summary>
+    /// Sets the state's <see cref="WorkflowDetailsState.ProblemDetails"/>
+    /// </summary>
+    /// <param name="problemDetails">The <see cref="ProblemDetails"/> to set</param>
+    public void SetProblemDetails(ProblemDetails? problemDetails)
+    {
+        this.Reduce(state => state with
+        {
+            ProblemDetails = problemDetails
+        });
+    }
+
     #endregion
 
     #region Actions
+
     /// <summary>
     /// Changes the value of the text editor
     /// </summary>
@@ -329,11 +352,12 @@ public class WorkflowDetailsStore(
         {
             var parameters = new Dictionary<string, object>
             {
-                { nameof(WorkflowInstanceCreation.WorkflowDefinition), workflowDefinition },
-                { nameof(WorkflowInstanceCreation.Input), input! },
-                { nameof(WorkflowInstanceCreation.OnCreate), EventCallback.Factory.Create<string>(this, CreateInstanceAsync) }
+                { nameof(CreateWorkflowInstanceDialog.WorkflowDefinition), workflowDefinition },
+                { nameof(CreateWorkflowInstanceDialog.Input), input! },
+                { nameof(CreateWorkflowInstanceDialog.OnCreate), EventCallback.Factory.Create<string>(this, CreateInstanceAsync) },
+                { nameof(CreateWorkflowInstanceDialog.OnProblem), EventCallback.Factory.Create<ProblemDetails>(this, SetProblemDetails) }
             };
-            await this.Modal.ShowAsync<WorkflowInstanceCreation>(title: "Start a new workflow", parameters: parameters);
+            await this.Modal.ShowAsync<CreateWorkflowInstanceDialog>(title: "Start a new workflow", parameters: parameters);
         }
     }
 
@@ -494,6 +518,7 @@ public class WorkflowDetailsStore(
         await this.TextEditor.SetSelection(range, string.Empty);
         await this.TextEditor.RevealRangeInCenter(range);
     }
+
     #endregion
 
     /// <inheritdoc/>

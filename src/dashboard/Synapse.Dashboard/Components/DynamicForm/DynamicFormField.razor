@@ -20,7 +20,9 @@
         @switch (schema.GetJsonType())
         {
             case SchemaValueType.Array:
-
+                <div class="border border-muted rounded p-3">
+                    <DynamicFormArray Schema="Schema" OnValueChanged="async e => await OnValueChanged.InvokeAsync(e)" />
+                </div>
                 break;
             case SchemaValueType.Object:
                 <div class="border border-muted rounded p-3">

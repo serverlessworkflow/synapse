@@ -28,7 +28,13 @@
             case SchemaValueType.Null:
                 break;
             case SchemaValueType.Array:
-
+                var itemsSchema = schema.GetItems();
+                if (itemsSchema != null)
+                {
+                    <div class="border border-muted rounded p-3">
+                        <DynamicFormArray Schema="Schema" OnValueChanged="async value => await OnValueChangedAsync(value)" />
+                    </div>
+                }
                 break;
             case SchemaValueType.Object:
                 var properties = schema.GetProperties() ?? new Dictionary<string, JsonSchema>();
@@ -65,7 +71,7 @@
     /// <summary>
     /// Gets/sets the handler to call whenever the form's value changes
     /// </summary>
-    [Parameter] public EventCallback<object?> OnValueChanged{ get; set; }
+    [Parameter] public EventCallback<object?> OnValueChanged { get; set; }
 
     /// <inheritdoc/>
     protected override async Task OnInitializedAsync()
@@ -82,6 +88,12 @@
         base.OnParametersSet();
         if (this.SchemaDefinition != this.schemaDefinition) this.Store.SetSchemaDefinition(this.SchemaDefinition);
         if (this.Schema != null && this.Schema != this.schema) this.Store.SetSchema(this.Schema);
+    }
+
+    async Task OnValueChangedAsync(object? value)
+    {
+        this.Store.SetValue(value);
+        await this.OnValueChanged.InvokeAsync(currentValue);
     }
 
     async Task OnValueChangedAsync(string name, object? value)

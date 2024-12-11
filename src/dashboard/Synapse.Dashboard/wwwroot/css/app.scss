@@ -190,4 +190,15 @@ input[type="search"]::-webkit-search-cancel-button {
             right: $spacer;
         }
     }
+
+    &.problems-bottom{
+        left: 0;
+        right: 0;
+        bottom: 0;
+    }
+
+}
+
+.z-9999 {
+    z-index: 9999
 }

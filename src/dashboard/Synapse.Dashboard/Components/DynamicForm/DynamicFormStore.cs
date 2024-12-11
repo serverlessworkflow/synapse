@@ -83,6 +83,18 @@ public class DynamicFormStore(ILogger<DynamicFormStore> logger, IExternalResourc
     }
 
     /// <summary>
+    /// Sets the form's value
+    /// </summary>
+    /// <param name="value">The form's value</param>
+    public void SetValue(object? value)
+    {
+        this.Reduce(state => state with
+        {
+            Value = value
+        });
+    }
+
+    /// <summary>
     /// Sets the value of the specified property
     /// </summary>
     /// <param name="name">The name of the property to set</param>
@@ -90,7 +102,7 @@ public class DynamicFormStore(ILogger<DynamicFormStore> logger, IExternalResourc
     public void SetPropertyValue(string name, object? value)
     {
         var map = this.Get(state => (EquatableDictionary<string, object?>)state.Value!);
-        if(value == null) map.Remove(name);
+        if (value == null || (value is string valueStr && string.IsNullOrWhiteSpace(valueStr))) map.Remove(name);
         else map[name] = value;
         this.Reduce(state => state with
         {

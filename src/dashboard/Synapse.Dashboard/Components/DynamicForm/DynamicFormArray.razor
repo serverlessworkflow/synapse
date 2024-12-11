@@ -1,0 +1,84 @@
+﻿@using Json.Schema
+@namespace Synapse.Dashboard
+
+@if(schema != null)
+{
+    if (itemsSchema != null)
+    {
+        @foreach (var form in forms.OrderBy(kvp => kvp.Key))
+        {
+            <div @key="@form.Key">
+                @form.Value
+                <Button Outline="true" Color="ButtonColor.Danger" Class="w-100" @onclick="@(() => OnRemoveItemAsync(form.Key))">
+                    <Icon Name="IconName.Dash" />
+                    Remove
+                </Button>
+                <hr />
+            </div>
+        }
+        <Button Outline="true" Color="ButtonColor.Success" Class="w-100" @onclick="OnAddItemAsync">
+            <Icon Name="IconName.Plus" />
+            Add
+        </Button>
+    }
+}
+
+@code {
+
+    JsonSchema? schema;
+    JsonSchema? itemsSchema;
+    Dictionary<int, RenderFragment> forms = [];
+    Dictionary<int, object> items = [];
+
+    /// <summary>
+    /// Gets/sets the form field's schema
+    /// </summary>
+    [Parameter] public JsonSchema Schema { get; set; } = null!;
+
+    /// <summary>
+    /// Gets/sets the handler to call whenever the field's value changes
+    /// </summary>
+    [Parameter] public EventCallback<object?> OnValueChanged { get; set; }
+
+    /// <inheritdoc/>
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        if (schema != Schema) 
+        {
+            schema = Schema;
+            itemsSchema = schema.GetItems();
+        }
+    }
+
+    async Task OnAddItemAsync()
+    {
+        var key = forms.Count < 1 ? 0 : forms.Max(kvp => kvp.Key) + 1;
+        forms[key] = CreateDynamicForm(key);
+        items[key] = new { };
+        await OnValueChanged.InvokeAsync(items.Values);
+    }
+
+    async Task OnItemChangedAsync(int key, object value)
+    {
+        items[key] = value;
+        await this.OnValueChanged.InvokeAsync(items.Values);
+    }
+
+    async Task OnRemoveItemAsync(int key)
+    {
+        var form = forms[key];
+        forms.Remove(key);
+        items.Remove(key);
+        await this.OnValueChanged.InvokeAsync(items.Values);
+    }
+
+    RenderFragment CreateDynamicForm(int key) => builder =>
+    {
+        builder.OpenComponent<DynamicForm>(0);
+        builder.AddAttribute(1, "Schema", itemsSchema);
+        builder.AddAttribute(2, "OnValueChanged", EventCallback.Factory.Create<object>(this, value => OnItemChangedAsync(key, value)));
+        builder.CloseComponent();
+    };
+
+}
