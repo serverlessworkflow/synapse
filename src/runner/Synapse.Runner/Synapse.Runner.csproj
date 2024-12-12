@@ -60,11 +60,11 @@
 	<PackageReference Include="Microsoft.OpenApi.Readers" Version="1.6.22" />
 	<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
 	<PackageReference Include="MimeKit" Version="4.8.0" />
-	<PackageReference Include="Neuroglia.Data.Expressions.JavaScript" Version="4.16.1" />
-	<PackageReference Include="Neuroglia.Data.Expressions.JQ" Version="4.16.1" />
-	<PackageReference Include="Neuroglia.Eventing.CloudEvents.Infrastructure" Version="4.16.1" />
-	<PackageReference Include="Neuroglia.Scripting.NodeJS" Version="4.16.1" />
-	<PackageReference Include="Neuroglia.Scripting.Python" Version="4.16.1" />
+	<PackageReference Include="Neuroglia.Data.Expressions.JavaScript" Version="4.18.1" />
+	<PackageReference Include="Neuroglia.Data.Expressions.JQ" Version="4.18.1" />
+	<PackageReference Include="Neuroglia.Eventing.CloudEvents.Infrastructure" Version="4.18.1" />
+	<PackageReference Include="Neuroglia.Scripting.NodeJS" Version="4.18.1" />
+	<PackageReference Include="Neuroglia.Scripting.Python" Version="4.18.1" />
 	<PackageReference Include="protobuf-net.Grpc.ClientFactory" Version="1.2.2" />
     <PackageReference Include="System.Reactive" Version="6.0.1" />
   </ItemGroup>
