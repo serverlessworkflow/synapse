@@ -17,7 +17,6 @@ using ServerlessWorkflow.Sdk;
 using ServerlessWorkflow.Sdk.Models;
 using ServerlessWorkflow.Sdk.Models.Calls;
 using ServerlessWorkflow.Sdk.Models.Tasks;
-using Synapse.Dashboard.Components.DocumentDetailsStateManagement;
 using System.Diagnostics;
 
 namespace Synapse.Dashboard.Services;
@@ -32,7 +31,8 @@ public class WorkflowGraphBuilder(ILogger<WorkflowGraphBuilder> logger, IYamlSer
     : IWorkflowGraphBuilder
 {
 
-    const string _portSuffix = "-port";
+    const string _clusterEntrySuffix = "-cluster-entry";
+    const string _clusterExitSuffix = "-cluster-exit";
     const string _trySuffix = "-try";
     const string _catchSuffix = "-catch";
     const double characterSize = 8d;
@@ -78,65 +78,51 @@ public class WorkflowGraphBuilder(ILogger<WorkflowGraphBuilder> logger, IYamlSer
                 nextNode = (NodeViewModel)clusterViewModel.AllNodes.Values.First();
             }
         }
-        this.BuildEdge(graph, startNode, nextNode);
         sw.Stop();
         this.Logger.LogTrace("WorkflowGraphBuilder.Build took {elapsedTime} ms", sw.ElapsedMilliseconds);
         return graph;
     }
 
-    /// <summary>
-    /// Builds a new start <see cref="NodeViewModel"/>
-    /// </summary>
-    /// <param name="hasSuccessor">A boolean indicating whether or not the node has successor</param>
-    /// <returns>A new <see cref="NodeViewModel"/></returns>
-    protected virtual NodeViewModel BuildStartNode(bool hasSuccessor = false) => new StartNodeViewModel(hasSuccessor);
-
-    /// <summary>
-    /// Returns the name, index and reference of the next node
-    /// </summary>
-    /// <param name="context">The rendering context for the task nodes</param>
-    /// <param name="ignoreConditionalTasks">If true, skips <see cref="TaskDefinition"/> with an if clause</param>
-    /// <param name="transition">A transition, if different from the context task definition's</param>
-    /// <returns>The next task <see cref="TaskIdentity"/></returns>
-    protected TaskIdentity? GetNextTaskIdentity(TaskNodeRenderingContext context, bool ignoreConditionalTasks, string? transition = null)
+    protected record TaskContext(ClusterViewModel? taskGroup, int taskIndex, string taskName, TaskDefinition definition)
     {
-        transition = !string.IsNullOrWhiteSpace(transition) ? transition : context.TaskDefinition.Then;
-        if (transition == FlowDirective.End) return null;
-        if (transition == FlowDirective.Exit)
-        {
-            if (context.ParentContext == null)
-            {
-                return null;
-            }
-            return this.GetNextTaskIdentity(context.ParentContext, ignoreConditionalTasks);
-        }
-        var nextTaskName = string.IsNullOrWhiteSpace(transition) || transition == FlowDirective.Continue
-                ? context.Workflow.GetTaskAfter(new(context.TaskName, context.TaskDefinition), context.ParentReference, ignoreConditionalTasks)?.Key
-                : transition;
-        if (string.IsNullOrWhiteSpace(nextTaskName))
-        {
-            if (context.ParentContext == null)
-            {
-                return null;
-            }
-            return this.GetNextTaskIdentity(context.ParentContext, ignoreConditionalTasks);
-        }
-        var nextTaskIndex = context.Workflow.IndexOf(nextTaskName, context.ParentReference);
-        var nextTaskReference = $"{context.ParentReference}/{nextTaskIndex}/{nextTaskName}";
-        return new(nextTaskName, nextTaskIndex, nextTaskReference, context);
+        public virtual int? Index { get; } = taskIndex;
+        public virtual string? Name { get; } = taskName;
+        public virtual TaskDefinition? Definition { get; } = definition;
     }
 
-    /// <summary>
-    /// Gets a <see cref="NodeViewModel"/> by reference in the provided <see cref="TaskNodeRenderingContext"/>
-    /// </summary>
-    /// <param name="context">The source <see cref="TaskNodeRenderingContext"/></param>
-    /// <param name="reference">The reference to look for</param>
-    /// <returns></returns>
-    protected NodeViewModel GetNodeByReference(TaskNodeRenderingContext context, string reference)
+    protected record RenderingContext(WorkflowDefinition workflow, GraphViewModel graph, Map<string, TaskDefinition> tasksList, INodeViewModel node, TaskContext? task = null, RenderingContext? parent = null, INodeViewModel? entryNode = null, INodeViewModel? exitNode = null)
     {
-        if (context.Graph.AllClusters.ContainsKey(reference))
+        public virtual WorkflowDefinition Workflow { get; } = workflow;
+        public virtual GraphViewModel Graph { get; } = graph;
+        public virtual Map<string, TaskDefinition> TasksList { get; } = tasksList;
+        public virtual RenderingContext? Parent { get; } = parent;
+        public virtual TaskContext? Task { get; } = task;
+        public virtual INodeViewModel Node { get; } = node;
+        public virtual INodeViewModel EntryNode { get; } = entryNode;
+        public virtual INodeViewModel ExitNode { get; } = exitNode;
+    }
+
+    protected virtual void BuildTransitions(RenderingContext context)
+    {
+        Map<string, TaskDefinition> transitions = [];
+        MapEntry<string, TaskDefinition>? nextTask = this.GetNextTask(context.TasksList, context.Task?.Name);
+        if (nextTask != null)
         {
-            return (NodeViewModel)context.Graph.AllClusters[reference].AllNodes.First().Value;
+            transitions.Add(nextTask);
+            while (!string.IsNullOrWhiteSpace(nextTask?.Value.If))
+            {
+                nextTask = this.GetNextTask(context.TasksList, nextTask.Key);
+                if (nextTask != null)
+                {
+                    transitions.Add(nextTask);
+                }
+            }
+        }
+        foreach (var transition in transitions)
+        {
+            var transitionNode = this.BuildTaskNode();
+            this.BuildEdge(context.Graph, context.Node, transitionNode);
+
         }
         if (context.Graph.AllNodes.ContainsKey(reference))
         {
@@ -145,35 +131,31 @@ public class WorkflowGraphBuilder(ILogger<WorkflowGraphBuilder> logger, IYamlSer
         throw new IndexOutOfRangeException($"Unable to find the task with reference '{reference}' in the provided context.");
     }
 
-    /// <summary>
-    /// Gets the next <see cref="NodeViewModel"/> in the graph
-    /// </summary>
-    /// <param name="context">The rendering context for the task nodes</param>
-    /// <param name="currentNode">The current task node</param>
-    /// <param name="ignoreConditionalTasks">If true, skips <see cref="TaskDefinition"/> with an if clause</param>
-    /// <param name="transition">A transition, if different from the context task definition's</param>
-    /// <returns>The next task <see cref="NodeViewModel"/></returns>
-    /// <exception cref="Exception"></exception>
-    protected NodeViewModel GetNextNode(TaskNodeRenderingContext context, NodeViewModel currentNode, bool ignoreConditionalTasks = false, string? transition = null)
+    protected virtual MapEntry<string, TaskDefinition>? GetNextTask(Map<string, TaskDefinition> tasksList, string? taskName, string? transition = null) //RenderingContext context, string? transition = null)
     {
-        var nextTaskIdentity = this.GetNextTaskIdentity(context, ignoreConditionalTasks, transition);
-        if (nextTaskIdentity == null)
+        if (transition == FlowDirective.End || transition == FlowDirective.Exit) return null;
+        int index;
+        if (!string.IsNullOrWhiteSpace(transition) && transition != FlowDirective.Continue)
         {
-            return context.EndNode;
+            index = tasksList.Keys.ToList().IndexOf(transition);
         }
-        var nextTask = context.Workflow.GetComponent<TaskDefinition>(nextTaskIdentity.Reference) ?? throw new Exception($"Failed to find the task at '{nextTaskIdentity.Reference}' in workflow '{context.Workflow.Document.Name}.{context.Workflow.Document.Namespace}:{context.Workflow.Document.Version}'");
-        if (!context.Graph.AllNodes.ContainsKey(nextTaskIdentity.Reference) && !context.Graph.AllClusters.ContainsKey(nextTaskIdentity.Reference))
+        else if (!string.IsNullOrWhiteSpace(taskName))
         {
-            this.BuildTaskNode(new(nextTaskIdentity.Context.Workflow, nextTaskIdentity.Context.Graph, nextTaskIdentity.Index, nextTaskIdentity.Name, nextTask, nextTaskIdentity.Context.TaskGroup, nextTaskIdentity.Context.ParentReference, nextTaskIdentity.Context.ParentContext, nextTaskIdentity.Context.EndNode, currentNode));
+            index = tasksList.Keys.ToList().IndexOf(taskName) + 1;
         }
-        if (string.IsNullOrEmpty(nextTask.If))
+        else
         {
-            return this.GetNodeByReference(context, nextTaskIdentity.Reference);
+            index = 0;
         }
-        var nextNode = this.GetNodeByReference(context, nextTaskIdentity.Reference);
-        this.BuildEdge(context.Graph, currentNode, nextNode);
-        return this.GetNextNode(context, currentNode, true, transition);
+        return tasksList.ElementAt(index);
     }
+
+    /// <summary>
+    /// Builds a new start <see cref="NodeViewModel"/>
+    /// </summary>
+    /// <param name="hasSuccessor">A boolean indicating whether or not the node has successor</param>
+    /// <returns>A new <see cref="NodeViewModel"/></returns>
+    protected virtual NodeViewModel BuildStartNode(bool hasSuccessor = false) => new StartNodeViewModel(hasSuccessor);
 
     /// <summary>
     /// Builds a new <see cref="WorkflowClusterViewModel"/> for the specified task
@@ -263,25 +245,30 @@ public class WorkflowGraphBuilder(ILogger<WorkflowGraphBuilder> logger, IYamlSer
         ArgumentNullException.ThrowIfNull(context);
         var taskCount = context.TaskDefinition.Do.Count;
         var cluster = new DoTaskNodeViewModel(context.TaskReference, context.TaskName, $"{taskCount} task{(taskCount > 1 ? "s" : "")}");
-        var port = new PortNodeViewModel(context.TaskReference + _portSuffix);
-        cluster.AddChild(port);
+        var entryPort = new PortNodeViewModel(context.TaskReference + _clusterEntrySuffix);
+        var exitPort = new PortNodeViewModel(context.TaskReference + _clusterExitSuffix);
+        cluster.AddChild(entryPort);
+        cluster.AddChild(exitPort);
         if (context.TaskGroup == null) context.Graph.AddCluster(cluster);
         else context.TaskGroup.AddChild(cluster);
         var innerContext = new TaskNodeRenderingContext(context.Workflow, context.Graph, 0, context.TaskDefinition.Do.First().Key, context.TaskDefinition.Do.First().Value, cluster, context.TaskReference + "/do", context, context.EndNode, context.PreviousNode);
         this.BuildTaskNode(innerContext);
         if (taskCount > 0)
         {
-            var firstDoNode = (NodeViewModel)cluster.AllNodes.Skip(1).First().Value;
-            this.BuildEdge(context.Graph, port, firstDoNode);
+            var firstDoNode = (NodeViewModel)cluster.AllNodes.Skip(2).First().Value;
+            var lastDoNode = (NodeViewModel)cluster.AllNodes.Last().Value;
+            this.BuildEdge(context.Graph, entryPort, firstDoNode);
+            this.BuildEdge(context.Graph, lastDoNode, exitPort);
             if (taskCount > 1 && !string.IsNullOrWhiteSpace(context.TaskDefinition.Do.First().Value.If))
             {
-                this.BuildEdge(context.Graph, port, this.GetNextNode(innerContext, firstDoNode));
+                this.BuildEdge(context.Graph, entryPort, this.GetNextNode(innerContext, firstDoNode));
             }
         }
         else
         {
-            this.BuildEdge(context.Graph, port, this.GetNextNode(context, cluster));
+            this.BuildEdge(context.Graph, entryPort, exitPort);
         }
+        this.BuildEdge(context.Graph, exitPort, this.GetNextNode(context, cluster));
         return cluster;
     }
 
@@ -324,7 +311,7 @@ public class WorkflowGraphBuilder(ILogger<WorkflowGraphBuilder> logger, IYamlSer
     {
         ArgumentNullException.ThrowIfNull(context);
         var cluster = new ForTaskNodeViewModel(context.TaskReference, context.TaskName, this.YamlSerializer.SerializeToText(context.TaskDefinition.For));
-        var port = new PortNodeViewModel(context.TaskReference + _portSuffix);
+        var port = new PortNodeViewModel(context.TaskReference + _clusterEntrySuffix);
         cluster.AddChild(port);
         if (context.TaskGroup == null) context.Graph.AddCluster(cluster);
         else context.TaskGroup.AddChild(cluster);
@@ -349,8 +336,8 @@ public class WorkflowGraphBuilder(ILogger<WorkflowGraphBuilder> logger, IYamlSer
     {
         ArgumentNullException.ThrowIfNull(context);
         var cluster = new ForkTaskNodeViewModel(context.TaskReference, context.TaskName, this.YamlSerializer.SerializeToText(context.TaskDefinition.Fork));
-        var entryPort = new PortNodeViewModel(context.TaskReference + _portSuffix);
-        var exitPort = new PortNodeViewModel(context.TaskReference + "-exit" + _portSuffix);
+        var entryPort = new PortNodeViewModel(context.TaskReference + _clusterEntrySuffix);
+        var exitPort = new PortNodeViewModel(context.TaskReference + "-exit" + _clusterExitSuffix);
         cluster.AddChild(entryPort);
         if (context.TaskGroup == null) context.Graph.AddCluster(cluster);
         else context.TaskGroup.AddChild(cluster);
@@ -499,13 +486,13 @@ public class WorkflowGraphBuilder(ILogger<WorkflowGraphBuilder> logger, IYamlSer
         ArgumentNullException.ThrowIfNull(context);
         var taskCount = context.TaskDefinition.Try.Count;
         var containerCluster = new TryTaskNodeViewModel(context.TaskReference, context.TaskName, $"{taskCount} task{(taskCount > 1 ? "s" : "")}");
-        var containerPort = new PortNodeViewModel(context.TaskReference + _portSuffix);
+        var containerPort = new PortNodeViewModel(context.TaskReference + _clusterEntrySuffix);
         containerCluster.AddChild(containerPort);
         if (context.TaskGroup == null) context.Graph.AddCluster(containerCluster);
         else context.TaskGroup.AddChild(containerCluster);
 
         var tryCluster = new TryNodeViewModel(context.TaskReference + _trySuffix, context.TaskName, string.Empty);
-        var tryPort = new PortNodeViewModel(context.TaskReference + _trySuffix + _portSuffix);
+        var tryPort = new PortNodeViewModel(context.TaskReference + _trySuffix + _clusterEntrySuffix);
         tryCluster.AddChild(tryPort);
         containerCluster.AddChild(tryCluster);
         this.BuildEdge(context.Graph, containerPort, tryPort);
@@ -531,7 +518,7 @@ public class WorkflowGraphBuilder(ILogger<WorkflowGraphBuilder> logger, IYamlSer
         else
         {
             var catchCluster = new CatchDoNodeViewModel(context.TaskReference + _catchSuffix, context.TaskName, catchContent);
-            var catchPort = new PortNodeViewModel(context.TaskReference + _catchSuffix + _portSuffix);
+            var catchPort = new PortNodeViewModel(context.TaskReference + _catchSuffix + _clusterEntrySuffix);
             catchCluster.AddChild(catchPort);
             containerCluster.AddChild(catchCluster);
             this.BuildEdge(context.Graph, tryCluster.AllNodes.Values.Last(), catchPort);
@@ -588,7 +575,7 @@ public class WorkflowGraphBuilder(ILogger<WorkflowGraphBuilder> logger, IYamlSer
             edge.LabelPosition = EdgeLabelPosition.Center;
             edge.Width = edge.Label.Length * characterSize;
         }
-        if (target.Id.EndsWith(_portSuffix))
+        if (target.Id.EndsWith(_clusterEntrySuffix))
         {
             edge.EndMarkerId = null;
         }

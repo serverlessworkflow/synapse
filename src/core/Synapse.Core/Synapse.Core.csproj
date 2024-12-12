@@ -67,8 +67,8 @@
 	<PackageReference Include="Apache.Avro" Version="1.12.0" />
 	<PackageReference Include="Docker.DotNet" Version="3.125.15" />
 	<PackageReference Include="KubernetesClient" Version="15.0.1" />
-	<PackageReference Include="Neuroglia.Data.Infrastructure.ResourceOriented" Version="4.18.0" />
-	<PackageReference Include="Neuroglia.Eventing.CloudEvents" Version="4.18.0" />
+	<PackageReference Include="Neuroglia.Data.Infrastructure.ResourceOriented" Version="4.16.1" />
+	<PackageReference Include="Neuroglia.Eventing.CloudEvents" Version="4.16.1" />
     <PackageReference Include="Semver" Version="3.0.0" />
     <PackageReference Include="ServerlessWorkflow.Sdk" Version="1.0.0-alpha5.2" />
   </ItemGroup>
