@@ -100,7 +100,7 @@ public class WorkflowGraphBuilder(ILogger<WorkflowGraphBuilder> logger, IYamlSer
     {
         ArgumentNullException.ThrowIfNull(tasksList);
         var taskDefinition = tasksList.FirstOrDefault(taskEntry => taskEntry.Key == currentTask)?.Value;
-        transition = !string.IsNullOrWhiteSpace(transition) ? transition : taskDefinition != null ? taskDefinition.Then : null;
+        transition = !string.IsNullOrWhiteSpace(transition) ? transition : taskDefinition?.Then;
         if (transition == FlowDirective.End || transition == FlowDirective.Exit)
         {
             return new TaskIdentity(transition, -1, null);
@@ -122,11 +122,8 @@ public class WorkflowGraphBuilder(ILogger<WorkflowGraphBuilder> logger, IYamlSer
         {
             index = 0;
         }
-        if (context.Graph.AllNodes.ContainsKey(reference))
-        {
-            return (NodeViewModel)context.Graph.AllNodes[reference];
-        }
-        throw new IndexOutOfRangeException($"Unable to find the task with reference '{reference}' in the provided context.");
+        var taskEntry = tasksList.ElementAt(index);
+        return new TaskIdentity(taskEntry.Key, index, taskEntry.Value);
     }
 
     /// <summary>
@@ -138,35 +135,35 @@ public class WorkflowGraphBuilder(ILogger<WorkflowGraphBuilder> logger, IYamlSer
     {
         ArgumentNullException.ThrowIfNull(node);
         ArgumentNullException.ThrowIfNull(context);
-        this.Logger.LogTrace($"Starting WorkflowGraphBuilder.BuildTransitions from '{node.Id}'");
+        this.Logger.LogTrace("Starting WorkflowGraphBuilder.BuildTransitions from '{nodeId}'", node.Id);
         List<TaskIdentity> transitions = [];
         TaskIdentity nextTask = this.GetNextTask(context.TasksList, context.TaskName);
         transitions.Add(nextTask);
-        this.Logger.LogTrace($"[WorkflowGraphBuilder.BuildTransitions][{node.Id}] found transition to '{nextTask?.Name}'");
+        this.Logger.LogTrace("[WorkflowGraphBuilder.BuildTransitions][{nodeId}] found transition to '{nextTaskName}'", node.Id, nextTask?.Name);
         while (!string.IsNullOrWhiteSpace(nextTask?.Definition?.If))
         {
-            this.Logger.LogTrace($"[WorkflowGraphBuilder.BuildTransitions][{node.Id}] if clause found, looking up next task.");
+            this.Logger.LogTrace("[WorkflowGraphBuilder.BuildTransitions][{nodeId}] if clause found, looking up next task.", node.Id);
             nextTask = this.GetNextTask(context.TasksList, nextTask.Name);
             transitions.Add(nextTask);
-            this.Logger.LogTrace($"[WorkflowGraphBuilder.BuildTransitions][{node.Id}] found transition to '{nextTask?.Name}'");
+            this.Logger.LogTrace("[WorkflowGraphBuilder.BuildTransitions][{nodeId}] found transition to '{nextTaskName}'", node.Id, nextTask?.Name);
         }
         foreach (var transition in transitions.Distinct(new TaskIdentityComparer()))
         {
             if (transition.Index != -1)
             {
-                this.Logger.LogTrace($"[WorkflowGraphBuilder.BuildTransitions][{node.Id}] Building node '{transition.Name}'");
+                this.Logger.LogTrace("[WorkflowGraphBuilder.BuildTransitions][{nodeId}] Building node '{transitionName}'", node.Id, transition.Name);
                 var transitionNode = this.BuildTaskNode(new(context.Workflow, context.Graph, context.TasksList, transition.Index, transition.Name, transition.Definition, context.TaskGroup, context.ParentReference, context.ParentContext, context.EntryNode, context.ExitNode));
-                this.Logger.LogTrace($"[WorkflowGraphBuilder.BuildTransitions][{node.Id}] Building edge to node '{transition.Name}'"); 
+                this.Logger.LogTrace("[WorkflowGraphBuilder.BuildTransitions][{nodeId}] Building edge to node '{transitionName}'", node.Id, transition.Name);
                 this.BuildEdge(context.Graph, this.GetNodeAnchor(node, NodePortType.Exit), GetNodeAnchor(transitionNode, NodePortType.Entry));
             }
-            else if(transition.Name == FlowDirective.Exit)
+            else if (transition.Name == FlowDirective.Exit)
             {
-                this.Logger.LogTrace($"[WorkflowGraphBuilder.BuildTransitions][{node.Id}] Exit transition, building edge to node '{context.ExitNode}'");
+                this.Logger.LogTrace("[WorkflowGraphBuilder.BuildTransitions][{nodeId}] Exit transition, building edge to node '{contextExitNode}'", node.Id, context.ExitNode);
                 this.BuildEdge(context.Graph, this.GetNodeAnchor(node, NodePortType.Exit), context.ExitNode);
             }
             else if (transition.Name == FlowDirective.End)
             {
-                this.Logger.LogTrace($"[WorkflowGraphBuilder.BuildTransitions][{node.Id}] End transition, building edge to node '{context.ExitNode}'");
+                this.Logger.LogTrace("[WorkflowGraphBuilder.BuildTransitions][{nodeId}] End transition, building edge to node '{contextExitNode}'", node.Id, context.ExitNode);
                 this.BuildEdge(context.Graph, this.GetNodeAnchor(node, NodePortType.Exit), context.Graph.AllNodes.Skip(1).First().Value);
             }
             else
@@ -174,7 +171,7 @@ public class WorkflowGraphBuilder(ILogger<WorkflowGraphBuilder> logger, IYamlSer
                 throw new IndexOutOfRangeException("Invalid transition");
             }
         }
-        this.Logger.LogTrace($"Exiting WorkflowGraphBuilder.BuildTransitions from '{node.Id}'");
+        this.Logger.LogTrace("Exiting WorkflowGraphBuilder.BuildTransitions from '{nodeId}'", node.Id);
     }
 
     /// <summary>
@@ -191,15 +188,15 @@ public class WorkflowGraphBuilder(ILogger<WorkflowGraphBuilder> logger, IYamlSer
     protected INodeViewModel BuildTaskNode(TaskNodeRenderingContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
-        this.Logger.LogTrace($"Starting WorkflowGraphBuilder.BuildTaskNode for {context.TaskName}");
+        this.Logger.LogTrace("Starting WorkflowGraphBuilder.BuildTaskNode for '{contextTaskName}'", context.TaskName);
         if (context.Graph.AllNodes.ContainsKey(context.TaskReference))
         {
-            this.Logger.LogTrace($"Exiting WorkflowGraphBuilder.BuildTaskNode for {context.TaskName}, found existing node.");
+            this.Logger.LogTrace("Exiting WorkflowGraphBuilder.BuildTaskNode for '{contextTaskName}', found existing node.", context.TaskName);
             return context.Graph.AllNodes[context.TaskReference];
         }
         if (context.Graph.AllClusters.ContainsKey(context.TaskReference))
         {
-            this.Logger.LogTrace($"Exiting WorkflowGraphBuilder.BuildTaskNode for {context.TaskName}, found existing cluster.");
+            this.Logger.LogTrace("Exiting WorkflowGraphBuilder.BuildTaskNode for '{contextTaskName}', found existing cluster.", context.TaskName);
             return context.Graph.AllClusters[context.TaskReference];
         }
         return context.TaskDefinition switch
@@ -360,7 +357,7 @@ public class WorkflowGraphBuilder(ILogger<WorkflowGraphBuilder> logger, IYamlSer
         cluster.AddChild(exitPort);
         if (context.TaskGroup == null) context.Graph.AddCluster(cluster);
         else context.TaskGroup.AddChild(cluster);
-        for (int i = 0, c = context.TaskDefinition.Fork.Branches.Count; i<c; i++)
+        for (int i = 0, c = context.TaskDefinition.Fork.Branches.Count; i < c; i++)
         {
             var branch = context.TaskDefinition.Fork.Branches.ElementAt(i);
             var branchNode = this.BuildTaskNode(new(context.Workflow, context.Graph, [], i, branch.Key, branch.Value, cluster, context.TaskReference + "/fork/branches", context, entryPort, exitPort));
@@ -485,7 +482,7 @@ public class WorkflowGraphBuilder(ILogger<WorkflowGraphBuilder> logger, IYamlSer
         foreach (var switchCase in context.TaskDefinition.Switch)
         {
             var switchCaseTask = this.GetNextTask(context.TasksList, context.TaskName, switchCase.Value.Then)!;
-            var switchCaseNode = this.BuildTaskNode(new( context.Workflow, context.Graph, context.TasksList, switchCaseTask.Index, switchCaseTask.Name, switchCaseTask.Definition, context.TaskGroup, context.ParentReference, context.ParentContext, context.EntryNode, context.ExitNode));
+            var switchCaseNode = this.BuildTaskNode(new(context.Workflow, context.Graph, context.TasksList, switchCaseTask.Index, switchCaseTask.Name, switchCaseTask.Definition, context.TaskGroup, context.ParentReference, context.ParentContext, context.EntryNode, context.ExitNode));
             this.BuildEdge(context.Graph, this.GetNodeAnchor(node, NodePortType.Exit), GetNodeAnchor(switchCaseNode, NodePortType.Entry));
         }
         if (!context.TaskDefinition.Switch.Any(switchCase => string.IsNullOrEmpty(switchCase.Value.When)))
@@ -532,7 +529,7 @@ public class WorkflowGraphBuilder(ILogger<WorkflowGraphBuilder> logger, IYamlSer
         }
         else
         {
-            var catchCluster = new CatchDoNodeViewModel(context.TaskReference + _catchSuffix, context.TaskName, catchContent);
+            var catchCluster = new CatchDoNodeViewModel(context.TaskReference + _catchSuffix, context.TaskName!, catchContent);
             var catchEntryPort = new PortNodeViewModel(context.TaskReference + _catchSuffix + _clusterEntrySuffix);
             var catchExitPort = new PortNodeViewModel(context.TaskReference + _catchSuffix + _clusterExitSuffix);
             catchCluster.AddChild(catchEntryPort);
@@ -581,7 +578,8 @@ public class WorkflowGraphBuilder(ILogger<WorkflowGraphBuilder> logger, IYamlSer
         var edge = graph.Edges.Select(keyValuePair => keyValuePair.Value).FirstOrDefault(edge => edge.SourceId == source.Id && edge.TargetId == target.Id);
         if (edge != null)
         {
-            if (!string.IsNullOrEmpty(label)) { 
+            if (!string.IsNullOrEmpty(label))
+            {
                 edge.Label = edge.Label + " / " + label;
                 edge.Width = edge.Label.Length * characterSize;
             }
@@ -752,7 +750,7 @@ public class WorkflowGraphBuilder(ILogger<WorkflowGraphBuilder> logger, IYamlSer
             if (identity1 is null || identity2 is null)
                 return false;
 
-            return identity1.Name == identity2.Name && 
+            return identity1.Name == identity2.Name &&
                 identity1.Index == identity2.Index &&
                 identity1.Definition == identity2.Definition;
         }
