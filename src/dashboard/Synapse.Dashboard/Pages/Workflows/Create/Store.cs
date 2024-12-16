@@ -12,7 +12,6 @@
 // limitations under the License.
 
 using JsonCons.Utilities;
-using Neuroglia.Collections;
 using Neuroglia.Data;
 using Semver;
 using ServerlessWorkflow.Sdk.Models;
@@ -20,6 +19,7 @@ using ServerlessWorkflow.Sdk.Validation;
 using Synapse.Api.Client.Services;
 using Synapse.Resources;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 
 namespace Synapse.Dashboard.Pages.Workflows.Create;
 
@@ -102,7 +102,7 @@ public class CreateWorkflowViewStore(
     protected MonacoInterop MonacoInterop { get; } = monacoInterop;
 
     /// <summary>
-    /// Gets the service to  to validate workflow defintions
+    /// Gets the service to  to validate workflow definitions
     /// </summary>
     protected IWorkflowDefinitionValidator WorkflowDefinitionValidator { get; } = workflowDefinitionValidator;
 
@@ -215,6 +215,18 @@ public class CreateWorkflowViewStore(
         {
             Name = name,
             Loading = true
+        });
+    }
+
+    /// <summary>
+    /// Sets the state's <see cref="CreateWorkflowViewState.IsNew"/>
+    /// </summary>
+    /// <param name="isNew">The new <see cref="CreateWorkflowViewState.IsNew"/> value</param>
+    public void SetIsNew(bool isNew)
+    {
+        this.Reduce(state => state with
+        {
+            IsNew = isNew
         });
     }
 
@@ -415,56 +427,55 @@ public class CreateWorkflowViewStore(
             var @namespace = workflowDefinition!.Document.Namespace;
             var name = workflowDefinition.Document.Name;
             var version = workflowDefinition.Document.Version;
+            var isNew = this.Get(state => state.IsNew);
             this.Reduce(s => s with
             {
                 Saving = true
             });
             Workflow? workflow = null;
-            try
+            if (isNew)
             {
-                workflow = await this.Api.Workflows.GetAsync(name, @namespace);
-            }
-            catch
-            {
-                // Assume 404, might need actual handling
-            }
-            if (workflow == null)
-            {
-                workflow = await this.Api.Workflows.CreateAsync(new()
-                {
-                    Metadata = new()
+                try { 
+                    workflow = await this.Api.Workflows.CreateAsync(new()
                     {
-                        Namespace = workflowDefinition!.Document.Namespace,
-                        Name = workflowDefinition.Document.Name
-                    },
-                    Spec = new()
-                    {
-                        Versions = [workflowDefinition]
-                    }
-                });
-            }
-            else
-            {
-                var updatedResource = workflow.Clone()!;
-                var documentVersion = SemVersion.Parse(version, SemVersionStyles.Strict)!;
-                var latestVersion = SemVersion.Parse(updatedResource.Spec.Versions.GetLatest().Document.Version, SemVersionStyles.Strict)!;
-                if (updatedResource.Spec.Versions.Any(v => SemVersion.Parse(v.Document.Version, SemVersionStyles.Strict).CompareSortOrderTo(documentVersion) >= 0))
-                {
-                    this.Reduce(state => state with
-                    {
-                        ProblemTitle = "Invalid version",
-                        ProblemDetail = $"The specified version '{documentVersion}' must be strictly superior to the latest version '{latestVersion}'."
+                        Metadata = new()
+                        {
+                            Namespace = workflowDefinition!.Document.Namespace,
+                            Name = workflowDefinition.Document.Name
+                        },
+                        Spec = new()
+                        {
+                            Versions = [workflowDefinition]
+                        }
                     });
+                    this.NavigationManager.NavigateTo($"/workflows/details/{@namespace}/{name}/{version}");
                     return;
                 }
-                updatedResource.Spec.Versions.Add(workflowDefinition!);
-                var jsonPatch = JsonPatch.FromDiff(this.JsonSerializer.SerializeToElement(workflow)!.Value, this.JsonSerializer.SerializeToElement(updatedResource)!.Value);
-                var patch = this.JsonSerializer.Deserialize<Json.Patch.JsonPatch>(jsonPatch.RootElement);
-                if (patch != null)
+                catch (ProblemDetailsException ex) when (ex.Problem.Title == "Conflict" && ex.Problem.Detail != null && ex.Problem.Detail.EndsWith("already exists"))
                 {
-                    var resourcePatch = new Patch(PatchType.JsonPatch, jsonPatch);
-                    await this.Api.ManageNamespaced<Workflow>().PatchAsync(name, @namespace, resourcePatch, null, this.CancellationTokenSource.Token);
+                    // the workflow exists, try to update it instead
                 }
+            }
+            workflow = await this.Api.Workflows.GetAsync(name, @namespace);
+            var updatedResource = workflow.Clone()!;
+            var documentVersion = SemVersion.Parse(version, SemVersionStyles.Strict)!;
+            var latestVersion = SemVersion.Parse(updatedResource.Spec.Versions.GetLatest().Document.Version, SemVersionStyles.Strict)!;
+            if (updatedResource.Spec.Versions.Any(v => SemVersion.Parse(v.Document.Version, SemVersionStyles.Strict).CompareSortOrderTo(documentVersion) >= 0))
+            {
+                this.Reduce(state => state with
+                {
+                    ProblemTitle = "Invalid version",
+                    ProblemDetail = $"The specified version '{documentVersion}' must be strictly superior to the latest version '{latestVersion}'."
+                });
+                return;
+            }
+            updatedResource.Spec.Versions.Add(workflowDefinition!);
+            var jsonPatch = JsonPatch.FromDiff(this.JsonSerializer.SerializeToElement(workflow)!.Value, this.JsonSerializer.SerializeToElement(updatedResource)!.Value);
+            var patch = this.JsonSerializer.Deserialize<Json.Patch.JsonPatch>(jsonPatch.RootElement);
+            if (patch != null)
+            {
+                var resourcePatch = new Patch(PatchType.JsonPatch, jsonPatch);
+                await this.Api.ManageNamespaced<Workflow>().PatchAsync(name, @namespace, resourcePatch, null, this.CancellationTokenSource.Token);
             }
             this.NavigationManager.NavigateTo($"/workflows/details/{@namespace}/{name}/{version}");
         }

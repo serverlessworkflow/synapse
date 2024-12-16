@@ -37,6 +37,11 @@ public record CreateWorkflowViewState
     public string? DslVersion { get; set; }
 
     /// <summary>
+    /// Gets/sets a boolean determining if the workflow is new or if it's an update
+    /// </summary>
+    public bool IsNew { get; set; } = true;
+
+    /// <summary>
     /// Gets/sets the definition of the workflow to create
     /// </summary>
     public WorkflowDefinition WorkflowDefinition { get; set; } = new WorkflowDefinition()
