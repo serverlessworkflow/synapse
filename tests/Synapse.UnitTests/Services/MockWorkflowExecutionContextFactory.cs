@@ -22,7 +22,7 @@ namespace Synapse.UnitTests.Services;
 internal static class MockWorkflowExecutionContextFactory
 {
 
-    internal static IWorkflowExecutionContext Create(IServiceProvider services, WorkflowDefinition definition, WorkflowInstance instance) => ActivatorUtilities.CreateInstance<WorkflowExecutionContext>(services, definition, instance);
+    internal static IWorkflowExecutionContext Create(IServiceProvider services, WorkflowDefinition definition, WorkflowInstance instance) => ActivatorUtilities.CreateInstance<ConnectedWorkflowExecutionContext>(services, definition, instance);
 
     internal static async Task<IWorkflowExecutionContext> CreateAsync(IServiceProvider services, WorkflowDefinition? workflowDefinition = null, EquatableDictionary<string, object>? input = null) 
     {

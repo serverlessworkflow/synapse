@@ -68,7 +68,7 @@ public class DocumentHttpApiClient(IServiceProvider serviceProvider, ILogger<Doc
     }
 
     /// <inheritdoc/>
-    public virtual async Task DeletesAsync(string id, CancellationToken cancellationToken = default)
+    public virtual async Task DeleteAsync(string id, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(id);
         var uri = $"{PathPrefix}/{id}";

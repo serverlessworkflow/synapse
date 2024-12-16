@@ -11,7 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using MimeKit;
+using Neuroglia;
 using Neuroglia.Data.Infrastructure.ResourceOriented;
+using ServerlessWorkflow.Sdk.IO;
+using System.Net.Http.Headers;
+using System.Net.Mime;
 
 namespace Synapse.Runner.Services;
 
@@ -54,6 +59,21 @@ internal class RunnerApplication(IServiceProvider serviceProvider, IHostApplicat
     protected ISynapseApiClient ApiClient => this.ServiceProvider.GetRequiredService<ISynapseApiClient>();
 
     /// <summary>
+    /// Gets the service used to read <see cref="WorkflowDefinition"/>s
+    /// </summary>
+    protected IWorkflowDefinitionReader WorkflowDefinitionReader => this.ServiceProvider.GetRequiredService<IWorkflowDefinitionReader>();
+
+    /// <summary>
+    /// Gets the service used to serialize/deserialize data to/from JSON
+    /// </summary>
+    protected IJsonSerializer JsonSerializer => this.ServiceProvider.GetRequiredService<IJsonSerializer>();
+
+    /// <summary>
+    /// Gets the service used to serialize/deserialize data to/from YAML
+    /// </summary>
+    protected IYamlSerializer YamlSerializer => this.ServiceProvider.GetRequiredService<IYamlSerializer>();
+
+    /// <summary>
     /// Gets the service used to access the current <see cref="RunnerOptions"/>
     /// </summary>
     protected RunnerOptions Options { get; } = options.Value;
@@ -87,15 +107,68 @@ internal class RunnerApplication(IServiceProvider serviceProvider, IHostApplicat
     {
         try
         {
-            if (string.IsNullOrWhiteSpace(this.Options.Workflow?.Instance)) throw new NullReferenceException("The workflow instance to run must be configured, which can be done using the application's appsettings.json file, using command line arguments or using environment variables");
-            var instance = await this.ApiClient.WorkflowInstances.GetAsync(this.Options.Workflow.GetInstanceName(), this.Options.Workflow.GetInstanceNamespace(), cancellationToken).ConfigureAwait(false) ?? throw new NullReferenceException($"Failed to find the specified workflow instance '{this.Options.Workflow.Instance}'");
-            var resource = await this.ApiClient.Workflows.GetAsync(instance.Spec.Definition.Name, instance.Spec.Definition.Namespace, cancellationToken).ConfigureAwait(false) ?? throw new NullReferenceException($"Failed to find the specified workflow '{instance.Spec.Definition.Namespace}.{instance.Spec.Definition.Name}'");
-            var definition = resource.Spec.Versions.FirstOrDefault(v => v.Document.Version == instance.Spec.Definition.Version) ?? throw new NullReferenceException($"Failed to find the specified version '{instance.Spec.Definition.Version}' of the workflow '{instance.Spec.Definition.Namespace}.{instance.Spec.Definition.Name}'");
+            WorkflowDefinition definition;
+            WorkflowInstance instance;
+            Type executionContextType;
+            switch (this.Options.ExecutionMode)
+            {
+                case RunnerExecutionMode.Connected:
+                    if (string.IsNullOrWhiteSpace(this.Options.Workflow.InstanceQualifiedName)) throw new NullReferenceException("The workflow instance to run must be configured, which can be done using the application's appsettings.json file, using command line arguments or using environment variables");
+                    instance = await this.ApiClient.WorkflowInstances.GetAsync(this.Options.Workflow.GetInstanceName(), this.Options.Workflow.GetInstanceNamespace(), cancellationToken).ConfigureAwait(false) ?? throw new NullReferenceException($"Failed to find the specified workflow instance '{this.Options.Workflow.InstanceQualifiedName}'");
+                    var resource = await this.ApiClient.Workflows.GetAsync(instance.Spec.Definition.Name, instance.Spec.Definition.Namespace, cancellationToken).ConfigureAwait(false) ?? throw new NullReferenceException($"Failed to find the specified workflow '{instance.Spec.Definition.Namespace}.{instance.Spec.Definition.Name}'");
+                    definition = resource.Spec.Versions.FirstOrDefault(v => v.Document.Version == instance.Spec.Definition.Version) ?? throw new NullReferenceException($"Failed to find the specified version '{instance.Spec.Definition.Version}' of the workflow '{instance.Spec.Definition.Namespace}.{instance.Spec.Definition.Name}'");
+                    executionContextType = typeof(ConnectedWorkflowExecutionContext);
+                    break;
+                case RunnerExecutionMode.StandAlone:
+                    if (string.IsNullOrWhiteSpace(this.Options.Workflow.DefinitionFilePath)) throw new NullReferenceException("The path to the workflow definition file must be set in stand-alone execution mode");
+                    if (!File.Exists(this.Options.Workflow.DefinitionFilePath)) throw new FileNotFoundException("The workflow definition file does not exist or cannot be found", this.Options.Workflow.DefinitionFilePath);
+                    var stream = new FileStream(this.Options.Workflow.DefinitionFilePath, FileMode.Open);
+                    var readerOptions = new WorkflowDefinitionReaderOptions();
+                    definition = await this.WorkflowDefinitionReader.ReadAsync(stream, readerOptions, cancellationToken).ConfigureAwait(false);
+                    await stream.DisposeAsync().ConfigureAwait(false);
+                    IDictionary<string, object>? input = null;
+                    if (!string.IsNullOrWhiteSpace(this.Options.Workflow.InputFilePath))
+                    {
+                        var inputFile = new FileInfo(this.Options.Workflow.InputFilePath);
+                        if (!inputFile.Exists) throw new FileNotFoundException("The workflow input file does not exist or cannot be found", this.Options.Workflow.InputFilePath);
+                        var extension = inputFile.Extension.ToLowerInvariant().Split('.', StringSplitOptions.RemoveEmptyEntries).Last();
+                        stream = inputFile.OpenRead();
+                        input = extension switch
+                        {
+                            "json" => this.JsonSerializer.Deserialize<IDictionary<string, object>>(stream),
+                            "yaml" or "yml" => this.YamlSerializer.Deserialize<IDictionary<string, object>>(stream),
+                            _ => throw new NotSupportedException($"The workflow input file extension '{extension}' is not supported. Supported extensions are '.json', '.yaml' and '.yml'"),
+                        };
+                        await stream.DisposeAsync().ConfigureAwait(false);
+                    }
+                    instance = new WorkflowInstance()
+                    {
+                        Metadata = new()
+                        {
+                            Namespace = definition.Document.Namespace,
+                            Name = $"{definition.Document.Name}-{Guid.NewGuid().ToShortString()}"
+                        },
+                        Spec = new()
+                        {
+                            Definition = new()
+                            {
+                                Namespace = definition.Document.Namespace,
+                                Name = definition.Document.Name,
+                                Version = definition.Document.Version
+                            },
+                            Input = input == null ? null : new(input)
+                        }
+                    };
+                    executionContextType = typeof(StandAloneWorkflowExecutionContext);
+                    break;
+                default:
+                    throw new NotSupportedException($"The specified runner execution mode '{this.Options.ExecutionMode}' is not supported");
+            }
             var expressionLanguage = definition.Evaluate?.Language ?? RuntimeExpressions.Languages.JQ;
             var expressionEvaluator = this.ServiceProvider.GetRequiredService<IExpressionEvaluatorProvider>().GetEvaluator(expressionLanguage)
                 ?? throw new NullReferenceException($"Failed to find an expression evaluator for the language '{expressionLanguage}' defined by workflow '{instance.Spec.Definition.Namespace}.{instance.Spec.Definition.Name}:{instance.Spec.Definition.Version}'");
-            var context = ActivatorUtilities.CreateInstance<WorkflowExecutionContext>(this.ServiceProvider, expressionEvaluator, definition, instance);
-            this.Events = this.ApiClient.WorkflowInstances.MonitorAsync(this.Options.Workflow.GetInstanceName(), this.Options.Workflow.GetInstanceNamespace(), cancellationToken).ToObservable();
+            var context = (IWorkflowExecutionContext)ActivatorUtilities.CreateInstance(this.ServiceProvider, executionContextType, expressionEvaluator, definition, instance);
+            this.Events = this.ApiClient.WorkflowInstances.MonitorAsync(instance.Metadata.Name!, instance.Metadata.Namespace!, cancellationToken).ToObservable();
             this.Events
                 .Where(e => e.Type == ResourceWatchEventType.Updated && e.Resource.Status?.Phase != context.Instance.Status?.Phase)
                 .Select(e => e.Resource.Status?.Phase)

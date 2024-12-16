@@ -29,7 +29,7 @@ public class RunnerContainerOptions
     public RunnerContainerOptions()
     {
         var env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.ContainerPlatform)?.ToLowerInvariant();
-        if (string.IsNullOrWhiteSpace(env)) throw new NullReferenceException("The runner's container platform must be configured");
+        if (string.IsNullOrWhiteSpace(env)) env = ContainerPlatform.Docker;
         switch (env)
         {
             case ContainerPlatform.Docker:

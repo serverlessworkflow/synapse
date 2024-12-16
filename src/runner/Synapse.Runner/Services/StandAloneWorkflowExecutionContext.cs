@@ -11,48 +11,66 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Json.Patch;
 using Json.Pointer;
+using Moq;
 using Neuroglia;
-using Neuroglia.Data;
 using Neuroglia.Data.Expressions;
 using Neuroglia.Data.Infrastructure.ResourceOriented;
 using Synapse.Events.Tasks;
 using Synapse.Events.Workflows;
 using System.Net.Mime;
-using System.Runtime.CompilerServices;
+using System.Text;
+using System.Text.Json;
 
 namespace Synapse.Runner.Services;
 
 /// <summary>
-/// Represents the default in-memory implementation of the <see cref="IWorkflowExecutionContext"/>
+/// Represents a stand-alone, in-memory implementation of the <see cref="IWorkflowExecutionContext"/> interface
 /// </summary>
 /// <param name="services">The current <see cref="IServiceProvider"/></param>
+/// <param name="logger">The service used to perform logging</param>
 /// <param name="expressionEvaluator">The service used to evaluate runtime expressions</param>
-/// <param name="jsonSerializer">The service used to serialize/deserialize objects to/from JSON</param>
-/// <param name="api">The service used to interact with the Synapse API</param>
+/// <param name="jsonSerializer">The service used to serialize/deserialize data to/from JSON</param>
+/// <param name="yamlSerializer">The service used to serialize/deserialize data to/from YAML</param>
 /// <param name="options">The service used to access the current <see cref="RunnerOptions"/></param>
+/// <param name="httpClient">The service used to perform HTTP requests</param>
 /// <param name="definition">The <see cref="WorkflowDefinition"/> of the <see cref="WorkflowInstance"/> to execute</param>
 /// <param name="instance">The <see cref="WorkflowInstance"/> to execute</param>
-public class WorkflowExecutionContext(IServiceProvider services, IExpressionEvaluator expressionEvaluator, IJsonSerializer jsonSerializer, ISynapseApiClient api, IOptions<RunnerOptions> options, WorkflowDefinition definition, WorkflowInstance instance)
+public class StandAloneWorkflowExecutionContext(IServiceProvider services, ILogger<IWorkflowExecutionContext> logger, IExpressionEvaluator expressionEvaluator, IJsonSerializer jsonSerializer, IYamlSerializer yamlSerializer, IOptions<RunnerOptions> options, HttpClient httpClient, WorkflowDefinition definition, WorkflowInstance instance)
     : IWorkflowExecutionContext
 {
 
+    readonly JsonSerializerOptions _jsonSerializerOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = true
+    };
+
     /// <inheritdoc/>
     public IServiceProvider Services { get; } = services;
+
+    /// <summary>
+    /// Gets the service used to perform logging
+    /// </summary>
+    protected ILogger Logger { get; } = logger;
 
     /// <inheritdoc/>
     public IExpressionEvaluator Expressions { get; } = expressionEvaluator;
 
     /// <summary>
-    /// Gets the service used to serialize/deserialize objects to/from JSON
+    /// Gets the service used to serialize/deserialize data to/from JSON
     /// </summary>
     protected IJsonSerializer JsonSerializer { get; } = jsonSerializer;
 
     /// <summary>
-    /// Gets the service used to interact with the Synapse API
+    /// Gets the service used to serialize/deserialize data to/from YAML
     /// </summary>
-    protected ISynapseApiClient Api { get; } = api;
+    protected IYamlSerializer YamlSerializer { get; } = yamlSerializer;
+
+    /// <summary>
+    /// Gets the service used to perform HTTP requests
+    /// </summary>
+    protected HttpClient HttpClient { get; } = httpClient;
 
     /// <summary>
     /// Gets the current <see cref="RunnerOptions"/>
@@ -66,10 +84,10 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
     public WorkflowInstance Instance { get; set; } = instance;
 
     /// <inheritdoc/>
-    public IDocumentApiClient Documents => this.Api.Documents;
+    public IDocumentApiClient Documents { get; } = new MemoryDocumentManager();
 
     /// <inheritdoc/>
-    public IClusterResourceApiClient<CustomFunction> CustomFunctions => this.Api.CustomFunctions;
+    public IClusterResourceApiClient<CustomFunction> CustomFunctions => Mock.Of<IClusterResourceApiClient<CustomFunction>>();
 
     /// <summary>
     /// Gets the object used to asynchronously lock the <see cref="TaskExecutor{TDefinition}"/>
@@ -109,14 +127,14 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
             else if (!string.IsNullOrWhiteSpace(this.Instance.Status?.ContextReference))
             {
                 contextReference = this.Instance.Status?.ContextReference;
-                var contextDocument = await this.Api.Documents.GetAsync(this.Instance.Status!.ContextReference, cancellationToken).ConfigureAwait(false);
+                var contextDocument = await this.Documents.GetAsync(this.Instance.Status!.ContextReference, cancellationToken).ConfigureAwait(false);
                 context = contextDocument?.Content.ConvertTo<IDictionary<string, object>>() ?? new Dictionary<string, object>();
             }
             else throw new NullReferenceException($"Failed to find the data document with id '{this.Instance.Status!.ContextReference}'");
         }
         else
         {
-            var contextDocument = await this.Api.Documents.CreateAsync($"{reference}/input", context, cancellationToken).ConfigureAwait(false);
+            var contextDocument = await this.Documents.CreateAsync($"{reference}/input", context, cancellationToken).ConfigureAwait(false);
             contextReference = contextDocument.Id;
         }
         var filteredInput = input;
@@ -128,7 +146,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         };
         if (definition.Input?.From is string fromExpression) filteredInput = (await this.Expressions.EvaluateAsync<object>(fromExpression, input, evaluationArguments, cancellationToken).ConfigureAwait(false))!;
         else if (definition.Input?.From != null) filteredInput = (await this.Expressions.EvaluateAsync<object>(definition.Input.From, input, evaluationArguments, cancellationToken).ConfigureAwait(false))!;
-        var inputDocument = await this.Api.Documents.CreateAsync($"{reference}/input", filteredInput, cancellationToken).ConfigureAwait(false);
+        var inputDocument = await this.Documents.CreateAsync($"{reference}/input", filteredInput, cancellationToken).ConfigureAwait(false);
         var task = new TaskInstance()
         {
             Name = name,
@@ -140,10 +158,10 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         };
         var pointer = JsonPointer.Create<WorkflowInstance>(w => w.Status!.Tasks!).ToCamelCase();
         if (this.Instance.Status?.Tasks != null) pointer = JsonPointer.Parse($"{pointer}/-");
-        var patchNode = this.Instance.Status?.Tasks == null ? this.JsonSerializer.SerializeToNode(new TaskInstance[] { task }) : this.JsonSerializer.SerializeToNode(task);
-        var jsonPatch = new JsonPatch(PatchOperation.Add(pointer, patchNode));
-        this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), null, cancellationToken).ConfigureAwait(false);
-        if (this.Options.CloudEvents.PublishLifecycleEvents) await this.Api.Events.PublishAsync(new CloudEvent()
+        this.Instance.Status ??= new();
+        this.Instance.Status.Tasks ??= [];
+        this.Instance.Status.Tasks.Add(task);
+        if (this.Options.CloudEvents.PublishLifecycleEvents) await this.PublishAsync(new CloudEvent()
         {
             SpecVersion = CloudEventSpecVersion.V1.Version,
             Id = Guid.NewGuid().ToString(),
@@ -159,18 +177,19 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
                 CreatedAt = task.CreatedAt
             }
         }, cancellationToken).ConfigureAwait(false);
+        this.Logger.LogInformation("Task '{reference}' created.", reference);
         return task;
     }
 
     /// <inheritdoc/>
     public virtual async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
-        var document = await this.Api.Documents.CreateAsync(this.Instance.GetQualifiedName(), this.Instance.Spec.Input ?? [], cancellationToken).ConfigureAwait(false);
-        var jsonPatch = new JsonPatch(PatchOperation.Add(JsonPointer.Create<WorkflowInstance>(w => w.Status!).ToCamelCase(), this.JsonSerializer.SerializeToNode(new WorkflowInstanceStatus()
+        var document = await this.Documents.CreateAsync(this.Instance.GetQualifiedName(), this.Instance.Spec.Input ?? [], cancellationToken).ConfigureAwait(false);
+        this.Instance.Status = new()
         {
             ContextReference = document.Id
-        })));
-        this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), null, cancellationToken).ConfigureAwait(false);
+        };
+        this.Logger.LogInformation("Workflow initialized.");
     }
 
     /// <inheritdoc/>
@@ -178,6 +197,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
     {
         //task = this.Instance.Status?.Tasks?.FirstOrDefault(t => t.Id == task.Id) ?? throw new NullReferenceException($"Failed to find the task instance with the specified id '{task.Id}'. Make sure the task instance resource has been created using the workflow context.");
         //task.Status = TaskInstanceStatus.Initializing;
+        this.Logger.LogInformation("Task '{reference}' initialized.", task.Reference);
         return Task.FromResult(task);
     }
 
@@ -185,36 +205,13 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
     public virtual async Task StartAsync(CancellationToken cancellationToken = default)
     {
         using var @lock = await this.Lock.LockAsync(cancellationToken).ConfigureAwait(false);
-        while (true)
-        {
-            try
-            {
-                var originalWorkflow = await this.Api.Workflows.GetAsync(this.Definition.Document.Name, this.Definition.Document.Namespace, cancellationToken).ConfigureAwait(false);
-                var updatedWorkflow = originalWorkflow.Clone()!;
-                updatedWorkflow.Status ??= new();
-                if (!updatedWorkflow.Status.Versions.TryGetValue(this.Definition.Document.Version, out var versionStatus))
-                {
-                    versionStatus = new();
-                    updatedWorkflow.Status.Versions[this.Definition.Document.Version] = versionStatus;
-                }
-                versionStatus.LastStartedAt = DateTimeOffset.Now;
-                versionStatus.TotalInstances++;
-                var patch = JsonPatchUtility.CreateJsonPatchFromDiff(originalWorkflow, updatedWorkflow);
-                await this.Api.Workflows.PatchStatusAsync(originalWorkflow.GetName(), originalWorkflow.GetNamespace()!, new(PatchType.JsonPatch, patch), originalWorkflow.Metadata.ResourceVersion, cancellationToken).ConfigureAwait(false);
-                break;
-            }
-            catch (ProblemDetailsException ex) when (ex.Problem.Type == ProblemTypes.OptimisticConcurrencyCheckFailed || ex.Problem.Status == (int)HttpStatusCode.Conflict) { }
-        }
-        var originalInstance = this.Instance.Clone();
         this.Instance.Status ??= new();
         this.Instance.Status.Phase = WorkflowInstanceStatusPhase.Running;
         this.Instance.Status.StartedAt ??= DateTimeOffset.Now;
         this.Instance.Status.Runs ??= [];
         this.Instance.Status.Runs.Add(new() { StartedAt = DateTimeOffset.Now });
         this.Instance.Status.ContextReference ??= (await this.Documents.CreateAsync(this.Instance.GetQualifiedName(), this.ContextData, cancellationToken).ConfigureAwait(false)).Id;
-        var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
-        this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), null, cancellationToken).ConfigureAwait(false);
-        if (this.Options.CloudEvents.PublishLifecycleEvents) await this.Api.Events.PublishAsync(new CloudEvent()
+        if (this.Options.CloudEvents.PublishLifecycleEvents) await this.PublishAsync(new CloudEvent()
         {
             SpecVersion = CloudEventSpecVersion.V1.Version,
             Id = Guid.NewGuid().ToString(),
@@ -230,21 +227,19 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
                 StartedAt = this.Instance.Status?.StartedAt ?? DateTimeOffset.Now
             }
         }, cancellationToken).ConfigureAwait(false);
+        this.Logger.LogInformation("Workflow started.");
     }
 
     /// <inheritdoc/>
     public virtual async Task<TaskInstance> StartAsync(TaskInstance task, CancellationToken cancellationToken = default)
     {
         using var @lock = await this.Lock.LockAsync(cancellationToken).ConfigureAwait(false);
-        var originalInstance = this.Instance.Clone();
         task = this.Instance.Status?.Tasks?.FirstOrDefault(t => t.Id == task.Id) ?? throw new NullReferenceException($"Failed to find the task instance with the specified id '{task.Id}'. Make sure the task instance resource has been created using the workflow context.");
         task.Status = TaskInstanceStatus.Running;
         task.StartedAt ??= DateTimeOffset.Now;
         task.Runs ??= [];
         task.Runs.Add(new() { StartedAt = DateTimeOffset.Now });
-        var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
-        this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), null, cancellationToken).ConfigureAwait(false);
-        if (this.Options.CloudEvents.PublishLifecycleEvents) await this.Api.Events.PublishAsync(new CloudEvent()
+        if (this.Options.CloudEvents.PublishLifecycleEvents) await this.PublishAsync(new CloudEvent()
         {
             SpecVersion = CloudEventSpecVersion.V1.Version,
             Id = Guid.NewGuid().ToString(),
@@ -260,6 +255,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
                 StartedAt = task.StartedAt ?? DateTimeOffset.Now
             }
         }, cancellationToken).ConfigureAwait(false);
+        this.Logger.LogInformation("Task '{reference}' started.", task.Reference);
         return this.Instance.Status?.Tasks?.FirstOrDefault(t => t.Id == task.Id) ?? throw new NullReferenceException($"Failed to find the task instance with the specified id '{task.Id}'. Make sure the task instance resource has been created using the workflow context.");
     }
 
@@ -267,16 +263,13 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
     public virtual async Task ResumeAsync(CancellationToken cancellationToken = default)
     {
         using var @lock = await this.Lock.LockAsync(cancellationToken).ConfigureAwait(false);
-        var originalInstance = this.Instance.Clone();
         this.Instance.Status ??= new();
         this.Instance.Status.Phase = WorkflowInstanceStatusPhase.Running;
         this.Instance.Status.StartedAt ??= DateTimeOffset.Now;
         this.Instance.Status.Runs ??= [];
         this.Instance.Status.Runs.Add(new() { StartedAt = DateTimeOffset.Now });
-        var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
-        this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), null, cancellationToken).ConfigureAwait(false);
-        this.ContextData = (await this.Api.Documents.GetAsync(this.Instance.Status!.ContextReference, cancellationToken).ConfigureAwait(false)).Content.ConvertTo<IDictionary<string, object>>()!;
-        if (this.Options.CloudEvents.PublishLifecycleEvents) await this.Api.Events.PublishAsync(new CloudEvent()
+        this.ContextData = (await this.Documents.GetAsync(this.Instance.Status!.ContextReference, cancellationToken).ConfigureAwait(false)).Content.ConvertTo<IDictionary<string, object>>()!;
+        if (this.Options.CloudEvents.PublishLifecycleEvents) await this.PublishAsync(new CloudEvent()
         {
             SpecVersion = CloudEventSpecVersion.V1.Version,
             Id = Guid.NewGuid().ToString(),
@@ -291,107 +284,31 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
                 ResumedAt = this.Instance.Status?.Runs?.LastOrDefault()?.StartedAt ?? DateTimeOffset.Now
             }
         }, cancellationToken).ConfigureAwait(false);
+        this.Logger.LogInformation("The workflow's execution has been resumed.");
     }
 
     /// <inheritdoc/>
-    public virtual async Task<CorrelationContext> CorrelateAsync(ITaskExecutionContext task, CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(task);
-        if (task.Definition is not ListenTaskDefinition listenTask) throw new ArgumentException("The specified task's definition must be a 'listen' task", nameof(task));
-        if (this.Instance.Status?.Correlation?.Contexts?.TryGetValue(task.Instance.Reference.OriginalString, out var context) == true && context != null) return context;
-        var @namespace = task.Workflow.Instance.GetNamespace()!;
-        var name = $"{task.Workflow.Instance.GetName()}.{task.Instance.Id}";
-        Correlation? correlation = null;
-        try { correlation = await this.Api.Correlations.GetAsync(name, @namespace, cancellationToken).ConfigureAwait(false); }
-        catch { }
-        if (correlation == null)
-        {
-            correlation = await this.Api.Correlations.CreateAsync(new()
-            {
-                Metadata = new()
-                {
-                    Namespace = @namespace,
-                    Name = name,
-                    Labels = new Dictionary<string, string>()
-                    {
-                        { SynapseDefaults.Resources.Labels.WorkflowInstance, this.Instance.GetQualifiedName() }
-                    }
-                },
-                Spec = new()
-                {
-                    Source = new ResourceReference<WorkflowInstance>(task.Workflow.Instance.GetName(), task.Workflow.Instance.GetNamespace()),
-                    Lifetime = CorrelationLifetime.Ephemeral,
-                    Events = listenTask.Listen.To,
-                    Expressions = task.Workflow.Definition.Evaluate ?? new(),
-                    Outcome = new()
-                    {
-                        Correlate = new()
-                        {
-                            Instance = task.Workflow.Instance.GetQualifiedName(),
-                            Task = task.Instance.Reference.OriginalString
-                        }
-                    }
-                }
-            }, cancellationToken).ConfigureAwait(false);
-        }
-        var taskCompletionSource = new TaskCompletionSource<CorrelationContext>();
-        using var cancellationTokenRegistration = cancellationToken.Register(() => taskCompletionSource.TrySetCanceled());
-        using var subscription = this.Api.WorkflowInstances.MonitorAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, cancellationToken)
-            .ToObservable()
-            .Where(e => e.Type == ResourceWatchEventType.Updated)
-            .Select(e => e.Resource.Status?.Correlation?.Contexts)
-            .Scan((Previous: (EquatableDictionary<string, CorrelationContext>?)null, Current: (EquatableDictionary<string, CorrelationContext>?)null), (accumulator, current) => (accumulator.Current ?? [], current))
-            .Where(v => v.Current?.Count > v.Previous?.Count) //ensures we are not handling changes in a circular loop: if length of current is smaller than previous, it means a context has been processed
-            .Subscribe(value =>
-            {
-                var patch = JsonPatchUtility.CreateJsonPatchFromDiff(value.Previous, value.Current);
-                var patchOperation = patch.Operations.FirstOrDefault(o => o.Op == OperationType.Add && o.Path[0] == task.Instance.Reference.OriginalString);
-                if (patchOperation == null) return;
-                context = this.JsonSerializer.Deserialize<CorrelationContext>(patchOperation.Value!)!;
-                taskCompletionSource.SetResult(context);
-            });
-        if (this.Options.CloudEvents.PublishLifecycleEvents) await this.Api.Events.PublishAsync(new CloudEvent()
-        {
-            SpecVersion = CloudEventSpecVersion.V1.Version,
-            Id = Guid.NewGuid().ToString(),
-            Time = DateTimeOffset.Now,
-            Source = this.Options.Api.BaseAddress,
-            Type = SynapseDefaults.CloudEvents.Workflow.CorrelationStarted.v1,
-            Subject = this.Instance.GetQualifiedName(),
-            DataContentType = MediaTypeNames.Application.Json,
-            Data = new WorkflowCorrelationStartedEventV1()
-            {
-                Name = this.Instance.GetQualifiedName(),
-                StartedAt = this.Instance.Status?.StartedAt ?? DateTimeOffset.Now
-            }
-        }, cancellationToken).ConfigureAwait(false);
-        //todo: after a given amount of time, stop the execution of the workflow instance and put it to sleep
-        var correlationContext = await taskCompletionSource.Task.ConfigureAwait(false);
-        if (this.Options.CloudEvents.PublishLifecycleEvents) await this.Api.Events.PublishAsync(new CloudEvent()
-        {
-            SpecVersion = CloudEventSpecVersion.V1.Version,
-            Id = Guid.NewGuid().ToString(),
-            Time = DateTimeOffset.Now,
-            Source = this.Options.Api.BaseAddress,
-            Type = SynapseDefaults.CloudEvents.Workflow.CorrelationCompleted.v1,
-            Subject = this.Instance.GetQualifiedName(),
-            DataContentType = MediaTypeNames.Application.Json,
-            Data = new WorkflowCorrelationCompletedEventV1()
-            {
-                Name = this.Instance.GetQualifiedName(),
-                CorrelationContext = correlationContext.Id,
-                CorrelationKeys = correlationContext.Keys,
-                CompletedAt = DateTimeOffset.Now
-            }
-        }, cancellationToken).ConfigureAwait(false);
-        return correlationContext;
-    }
+    public virtual Task<CorrelationContext> CorrelateAsync(ITaskExecutionContext task, CancellationToken cancellationToken = default) => throw new NotSupportedException("Event correlation is not supported in stand-alone execution mode");
 
     /// <inheritdoc/>
-    public virtual Task PublishAsync(CloudEvent e, CancellationToken cancellationToken = default)
+    public virtual async Task PublishAsync(CloudEvent e, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(e);
-        return this.Api.Events.PublishAsync(e, cancellationToken);
+        if (this.Options.CloudEvents.Sink == null) return;
+        try
+        {
+            var json = this.JsonSerializer.SerializeToText(e);
+            using var request = new HttpRequestMessage(HttpMethod.Post, this.Options.CloudEvents.Sink)
+            {
+                Content = new StringContent(json, Encoding.UTF8, CloudEventContentType.Json)
+            };
+            using var response = await this.HttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
+        }
+        catch (Exception ex)
+        {
+            this.Logger.LogError("An error occurred while publishing a cloud event to the configured sink: {ex}", ex);
+        }
     }
 
     /// <inheritdoc/>
@@ -406,7 +323,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         ArgumentNullException.ThrowIfNull(task);
         ArgumentNullException.ThrowIfNull(cause);
         using var @lock = await this.Lock.LockAsync(cancellationToken).ConfigureAwait(false);
-        var originalInstance = this.Instance.Clone();
+        this.Logger.LogInformation("Retrying task '{reference}'...", task.Reference);
         task = this.Instance.Status?.Tasks?.FirstOrDefault(t => t.Id == task.Id) ?? throw new NullReferenceException($"Failed to find the task instance with the specified id '{task.Id}'. Make sure the task instance resource has been created using the workflow context.");
         task.Retries ??= [];
         task.Retries.Add(new RetryAttempt()
@@ -418,9 +335,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         task.StartedAt ??= DateTimeOffset.Now;
         task.Runs ??= [];
         task.Runs.Add(new() { StartedAt = DateTimeOffset.Now });
-        var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
-        this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), null, cancellationToken).ConfigureAwait(false);
-        if (this.Options.CloudEvents.PublishLifecycleEvents) await this.Api.Events.PublishAsync(new CloudEvent()
+        if (this.Options.CloudEvents.PublishLifecycleEvents) await this.PublishAsync(new CloudEvent()
         {
             SpecVersion = CloudEventSpecVersion.V1.Version,
             Id = Guid.NewGuid().ToString(),
@@ -444,19 +359,15 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
     {
         ArgumentNullException.ThrowIfNull(error);
         using var @lock = await this.Lock.LockAsync(cancellationToken).ConfigureAwait(false);
-        var originalInstance = this.Instance.Clone();
         this.Instance.Status ??= new();
         this.Instance.Status.Phase = WorkflowInstanceStatusPhase.Faulted;
         this.Instance.Status.EndedAt = DateTimeOffset.Now;
         this.Instance.Status.Error = error;
         var run = this.Instance.Status.Runs?.LastOrDefault();
         if (run != null) run.EndedAt = DateTimeOffset.Now;
-        var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
-        this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), null, cancellationToken).ConfigureAwait(false);
-        await this.EndAsync(cancellationToken).ConfigureAwait(false);
         if (this.Options.CloudEvents.PublishLifecycleEvents)
         {
-            await this.Api.Events.PublishAsync(new CloudEvent()
+            await this.PublishAsync(new CloudEvent()
             {
                 SpecVersion = CloudEventSpecVersion.V1.Version,
                 Id = Guid.NewGuid().ToString(),
@@ -472,7 +383,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
                     FaultedAt = run?.EndedAt ?? DateTimeOffset.Now
                 }
             }, cancellationToken).ConfigureAwait(false);
-            await this.Api.Events.PublishAsync(new CloudEvent()
+            await this.PublishAsync(new CloudEvent()
             {
                 SpecVersion = CloudEventSpecVersion.V1.Version,
                 Id = Guid.NewGuid().ToString(),
@@ -497,22 +408,19 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
         ArgumentNullException.ThrowIfNull(task);
         ArgumentNullException.ThrowIfNull(error);
         using var @lock = await this.Lock.LockAsync(cancellationToken).ConfigureAwait(false);
-        var originalInstance = this.Instance.Clone();
         task = this.Instance.Status?.Tasks?.FirstOrDefault(t => t.Id == task.Id) ?? throw new NullReferenceException($"Failed to find the task instance with the specified id '{task.Id}'. Make sure the task instance resource has been created using the workflow context.");
         task.Status = TaskInstanceStatus.Faulted;
         task.EndedAt = DateTimeOffset.Now;
         task.Error = error;
         var run = task.Runs?.LastOrDefault();
-        if(run != null)
+        if (run != null)
         {
             run.EndedAt = DateTimeOffset.Now;
             run.Outcome = task.Status;
         }
-        var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
-        this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), null, cancellationToken).ConfigureAwait(false);
         if (this.Options.CloudEvents.PublishLifecycleEvents)
         {
-            await this.Api.Events.PublishAsync(new CloudEvent()
+            await this.PublishAsync(new CloudEvent()
             {
                 SpecVersion = CloudEventSpecVersion.V1.Version,
                 Id = Guid.NewGuid().ToString(),
@@ -529,7 +437,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
                     FaultedAt = run?.EndedAt ?? DateTimeOffset.Now
                 }
             }, cancellationToken).ConfigureAwait(false);
-            await this.Api.Events.PublishAsync(new CloudEvent()
+            await this.PublishAsync(new CloudEvent()
             {
                 SpecVersion = CloudEventSpecVersion.V1.Version,
                 Id = Guid.NewGuid().ToString(),
@@ -554,22 +462,18 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
     public virtual async Task SetResultAsync(object? result, CancellationToken cancellationToken = default)
     {
         using var @lock = await this.Lock.LockAsync(cancellationToken).ConfigureAwait(false);
-        var originalInstance = this.Instance.Clone();
         result ??= new();
         this.Instance.Status ??= new();
         this.Instance.Status.Phase = WorkflowInstanceStatusPhase.Completed;
         this.Instance.Status.EndedAt = DateTimeOffset.Now;
-        var document = await this.Api.Documents.CreateAsync($"{this.Instance.GetQualifiedName()}/output", result, cancellationToken).ConfigureAwait(false);
+        var document = await this.Documents.CreateAsync($"{this.Instance.GetQualifiedName()}/output", result, cancellationToken).ConfigureAwait(false);
         this.Instance.Status.OutputReference = document.Id;
-        this.Output = document.Content;
+        this.Output = result;
         var run = this.Instance.Status.Runs?.LastOrDefault();
         if (run != null) run.EndedAt = DateTimeOffset.Now;
-        var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
-        this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), null, cancellationToken).ConfigureAwait(false);
-        await this.EndAsync(cancellationToken).ConfigureAwait(false);
         if (this.Options.CloudEvents.PublishLifecycleEvents)
         {
-            await this.Api.Events.PublishAsync(new CloudEvent()
+            await this.PublishAsync(new CloudEvent()
             {
                 SpecVersion = CloudEventSpecVersion.V1.Version,
                 Id = Guid.NewGuid().ToString(),
@@ -585,7 +489,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
                     Output = this.Output
                 }
             }, cancellationToken).ConfigureAwait(false);
-            await this.Api.Events.PublishAsync(new CloudEvent()
+            await this.PublishAsync(new CloudEvent()
             {
                 SpecVersion = CloudEventSpecVersion.V1.Version,
                 Id = Guid.NewGuid().ToString(),
@@ -602,6 +506,15 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
                 }
             }, cancellationToken).ConfigureAwait(false);
         }
+        var output = this.Options.Workflow.OutputFormat switch
+        {
+            WorkflowOutputFormat.Json => System.Text.Json.JsonSerializer.Serialize(this.Output, this._jsonSerializerOptions),
+            WorkflowOutputFormat.Yaml => this.YamlSerializer.SerializeToText(this.Output),
+            _ => throw new NotSupportedException($"The specified workflow output format '{this.Options.Workflow.OutputFormat}' is not supported"),
+        };
+        if (string.IsNullOrWhiteSpace(this.Options.Workflow.OutputFilePath)) Console.WriteLine(output);
+        else await File.WriteAllTextAsync(this.Options.Workflow.OutputFilePath, output, cancellationToken).ConfigureAwait(false);
+        this.Logger.LogInformation("Workflow successfully executed.");
     }
 
     /// <inheritdoc/>
@@ -609,22 +522,19 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
     {
         ArgumentNullException.ThrowIfNull(task);
         using var @lock = await this.Lock.LockAsync(cancellationToken).ConfigureAwait(false);
-        var originalInstance = this.Instance.Clone();
         result ??= new();
         task = this.Instance.Status?.Tasks?.FirstOrDefault(t => t.Id == task.Id) ?? throw new NullReferenceException($"Failed to find the task instance with the specified id '{task.Id}'. Make sure the task instance resource has been created using the workflow context.");
         task.Status = TaskInstanceStatus.Completed;
         task.EndedAt = DateTimeOffset.Now;
-        var document = await this.Api.Documents.CreateAsync($"{this.Instance.GetQualifiedName()}/{task.Reference}/output", result, cancellationToken).ConfigureAwait(false);
+        var document = await this.Documents.CreateAsync($"{this.Instance.GetQualifiedName()}/{task.Reference}/output", result, cancellationToken).ConfigureAwait(false);
         task.OutputReference = document.Id;
         task.Next = then;
         var run = task.Runs!.Last();
         run.EndedAt = DateTimeOffset.Now;
         run.Outcome = task.Status;
-        var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
-        this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), null, cancellationToken).ConfigureAwait(false);
         if (this.Options.CloudEvents.PublishLifecycleEvents)
         {
-            await this.Api.Events.PublishAsync(new CloudEvent()
+            await this.PublishAsync(new CloudEvent()
             {
                 SpecVersion = CloudEventSpecVersion.V1.Version,
                 Id = Guid.NewGuid().ToString(),
@@ -640,7 +550,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
                     CompletedAt = run?.EndedAt ?? DateTimeOffset.Now
                 }
             }, cancellationToken).ConfigureAwait(false);
-            await this.Api.Events.PublishAsync(new CloudEvent()
+            await this.PublishAsync(new CloudEvent()
             {
                 SpecVersion = CloudEventSpecVersion.V1.Version,
                 Id = Guid.NewGuid().ToString(),
@@ -658,6 +568,13 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
                 }
             }, cancellationToken).ConfigureAwait(false);
         }
+        var output = this.Options.Workflow.OutputFormat switch
+        {
+            WorkflowOutputFormat.Json => System.Text.Json.JsonSerializer.Serialize(result, this._jsonSerializerOptions),
+            WorkflowOutputFormat.Yaml => this.YamlSerializer.SerializeToText(result),
+            _ => throw new NotSupportedException($"The specified workflow output format '{this.Options.Workflow.OutputFormat}' is not supported"),
+        };
+        this.Logger.LogInformation("Task '{reference}' successfully executed.", task.Reference);
         return this.Instance.Status?.Tasks?.FirstOrDefault(t => t.Id == task.Id) ?? throw new NullReferenceException($"Failed to find the task instance with the specified id '{task.Id}'. Make sure the task instance resource has been created using the workflow context.");
     }
 
@@ -666,17 +583,14 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
     {
         ArgumentNullException.ThrowIfNull(task);
         using var @lock = await this.Lock.LockAsync(cancellationToken).ConfigureAwait(false);
-        var originalInstance = this.Instance.Clone();
-        var document = await this.Api.Documents.CreateAsync($"{this.Instance.GetQualifiedName()}/{task.Reference}/output", result ?? new(), cancellationToken).ConfigureAwait(false);
+        var document = await this.Documents.CreateAsync($"{this.Instance.GetQualifiedName()}/{task.Reference}/output", result ?? new(), cancellationToken).ConfigureAwait(false);
         result ??= new();
         task = this.Instance.Status?.Tasks?.FirstOrDefault(t => t.Id == task.Id) ?? throw new NullReferenceException($"Failed to find the task instance with the specified id '{task.Id}'. Make sure the task instance resource has been created using the workflow context.");
         task.Status = TaskInstanceStatus.Skipped;
         task.EndedAt = DateTimeOffset.Now;
         task.OutputReference = document.Id;
         task.Next = then;
-        var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
-        this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), null, cancellationToken).ConfigureAwait(false);
-        if (this.Options.CloudEvents.PublishLifecycleEvents) await this.Api.Events.PublishAsync(new CloudEvent()
+        if (this.Options.CloudEvents.PublishLifecycleEvents) await this.PublishAsync(new CloudEvent()
         {
             SpecVersion = CloudEventSpecVersion.V1.Version,
             Id = Guid.NewGuid().ToString(),
@@ -692,6 +606,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
                 SkippedAt = task.EndedAt ?? DateTimeOffset.Now
             }
         }, cancellationToken).ConfigureAwait(false);
+        this.Logger.LogInformation("The execution of task '{reference}' has been skipped.", task.Reference);
         return this.Instance.Status?.Tasks?.FirstOrDefault(t => t.Id == task.Id) ?? throw new NullReferenceException($"Failed to find the task instance with the specified id '{task.Id}'. Make sure the task instance resource has been created using the workflow context.");
     }
 
@@ -700,14 +615,11 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
     {
         if (this.Instance.Status?.Phase == WorkflowInstanceStatusPhase.Suspended) return;
         using var @lock = await this.Lock.LockAsync(cancellationToken).ConfigureAwait(false);
-        var originalInstance = this.Instance.Clone();
         this.Instance.Status ??= new();
         this.Instance.Status.Phase = WorkflowInstanceStatusPhase.Suspended;
         var run = this.Instance.Status.Runs?.LastOrDefault();
         if (run != null) run.EndedAt = DateTimeOffset.Now;
-        var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
-        this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), null, cancellationToken).ConfigureAwait(false);
-        if (this.Options.CloudEvents.PublishLifecycleEvents) await this.Api.Events.PublishAsync(new CloudEvent()
+        if (this.Options.CloudEvents.PublishLifecycleEvents) await this.PublishAsync(new CloudEvent()
         {
             SpecVersion = CloudEventSpecVersion.V1.Version,
             Id = Guid.NewGuid().ToString(),
@@ -722,6 +634,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
                 SuspendedAt = run?.EndedAt ?? DateTimeOffset.Now
             }
         }, cancellationToken).ConfigureAwait(false);
+        this.Logger.LogInformation("The workflow's execution has been suspended.");
     }
 
     /// <inheritdoc/>
@@ -729,15 +642,12 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
     {
         ArgumentNullException.ThrowIfNull(task);
         using var @lock = await this.Lock.LockAsync(cancellationToken).ConfigureAwait(false);
-        var originalInstance = this.Instance.Clone();
         task = this.Instance.Status?.Tasks?.FirstOrDefault(t => t.Id == task.Id) ?? throw new NullReferenceException($"Failed to find the task instance with the specified id '{task.Id}'. Make sure the task instance resource has been created using the workflow context.");
         task.Status = TaskInstanceStatus.Suspended;
         var run = task.Runs!.Last();
         run.EndedAt = DateTimeOffset.Now;
         run.Outcome = task.Status;
-        var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
-        this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), null, cancellationToken).ConfigureAwait(false);
-        if (this.Options.CloudEvents.PublishLifecycleEvents) await this.Api.Events.PublishAsync(new CloudEvent()
+        if (this.Options.CloudEvents.PublishLifecycleEvents) await this.PublishAsync(new CloudEvent()
         {
             SpecVersion = CloudEventSpecVersion.V1.Version,
             Id = Guid.NewGuid().ToString(),
@@ -753,6 +663,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
                 SuspendedAt = run?.EndedAt ?? DateTimeOffset.Now
             }
         }, cancellationToken).ConfigureAwait(false);
+        this.Logger.LogInformation("The execution of task '{reference}' has been suspended.", task.Reference);
         return this.Instance.Status?.Tasks?.FirstOrDefault(t => t.Id == task.Id) ?? throw new NullReferenceException($"Failed to find the task instance with the specified id '{task.Id}'. Make sure the task instance resource has been created using the workflow context.");
     }
 
@@ -761,18 +672,14 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
     {
         if (this.Instance.Status?.Phase == WorkflowInstanceStatusPhase.Cancelled) return;
         using var @lock = await this.Lock.LockAsync(cancellationToken).ConfigureAwait(false);
-        var originalInstance = this.Instance.Clone();
         this.Instance.Status ??= new();
         this.Instance.Status.Phase = WorkflowInstanceStatusPhase.Cancelled;
         this.Instance.Status.EndedAt = DateTimeOffset.Now;
         var run = this.Instance.Status.Runs?.LastOrDefault();
         if (run != null) run.EndedAt = DateTimeOffset.Now;
-        var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
-        this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), null, cancellationToken).ConfigureAwait(false);
-        await this.EndAsync(cancellationToken).ConfigureAwait(false);
         if (this.Options.CloudEvents.PublishLifecycleEvents)
         {
-            await this.Api.Events.PublishAsync(new CloudEvent()
+            await this.PublishAsync(new CloudEvent()
             {
                 SpecVersion = CloudEventSpecVersion.V1.Version,
                 Id = Guid.NewGuid().ToString(),
@@ -787,7 +694,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
                     CancelledAt = run?.EndedAt ?? DateTimeOffset.Now
                 }
             }, cancellationToken).ConfigureAwait(false);
-            await this.Api.Events.PublishAsync(new CloudEvent()
+            await this.PublishAsync(new CloudEvent()
             {
                 SpecVersion = CloudEventSpecVersion.V1.Version,
                 Id = Guid.NewGuid().ToString(),
@@ -804,6 +711,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
                 }
             }, cancellationToken).ConfigureAwait(false);
         }
+        this.Logger.LogInformation("The workflow's execution cancelled.");
     }
 
     /// <inheritdoc/>
@@ -811,18 +719,15 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
     {
         ArgumentNullException.ThrowIfNull(task);
         using var @lock = await this.Lock.LockAsync(cancellationToken).ConfigureAwait(false);
-        var originalInstance = this.Instance.Clone();
         task = this.Instance.Status?.Tasks?.FirstOrDefault(t => t.Id == task.Id) ?? throw new NullReferenceException($"Failed to find the task instance with the specified id '{task.Id}'. Make sure the task instance resource has been created using the workflow context.");
         task.Status = TaskInstanceStatus.Cancelled;
         task.EndedAt = DateTimeOffset.Now;
         var run = task.Runs!.Last();
         run.EndedAt = DateTimeOffset.Now;
         run.Outcome = task.Status;
-        var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
-        this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), null, cancellationToken).ConfigureAwait(false);
         if (this.Options.CloudEvents.PublishLifecycleEvents)
         {
-            await this.Api.Events.PublishAsync(new CloudEvent()
+            await this.PublishAsync(new CloudEvent()
             {
                 SpecVersion = CloudEventSpecVersion.V1.Version,
                 Id = Guid.NewGuid().ToString(),
@@ -838,7 +743,7 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
                     CancelledAt = run?.EndedAt ?? DateTimeOffset.Now
                 }
             }, cancellationToken).ConfigureAwait(false);
-            await this.Api.Events.PublishAsync(new CloudEvent()
+            await this.PublishAsync(new CloudEvent()
             {
                 SpecVersion = CloudEventSpecVersion.V1.Version,
                 Id = Guid.NewGuid().ToString(),
@@ -856,35 +761,8 @@ public class WorkflowExecutionContext(IServiceProvider services, IExpressionEval
                 }
             }, cancellationToken).ConfigureAwait(false);
         }
+        this.Logger.LogInformation("The execution of task '{reference}' has been cancelled.", task.Reference);
         return this.Instance.Status?.Tasks?.FirstOrDefault(t => t.Id == task.Id) ?? throw new NullReferenceException($"Failed to find the task instance with the specified id '{task.Id}'. Make sure the task instance resource has been created using the workflow context.");
-    }
-
-    /// <summary>
-    /// Ends the workflow instance execution
-    /// </summary>
-    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-    /// <returns>A new awaitable <see cref="Task"/></returns>
-    protected virtual async Task EndAsync(CancellationToken cancellationToken)
-    {
-        while (true)
-        {
-            try
-            {
-                var originalWorkflow = await this.Api.Workflows.GetAsync(this.Definition.Document.Name, this.Definition.Document.Namespace, cancellationToken).ConfigureAwait(false);
-                var updatedWorkflow = originalWorkflow.Clone()!;
-                updatedWorkflow.Status ??= new();
-                if (!updatedWorkflow.Status.Versions.TryGetValue(this.Definition.Document.Version, out var versionStatus))
-                {
-                    versionStatus = new();
-                    updatedWorkflow.Status.Versions[this.Definition.Document.Version] = versionStatus;
-                }
-                versionStatus.LastEndedAt = DateTimeOffset.Now;
-                var patch = JsonPatchUtility.CreateJsonPatchFromDiff(originalWorkflow, updatedWorkflow);
-                await this.Api.Workflows.PatchStatusAsync(originalWorkflow.GetName(), originalWorkflow.GetNamespace()!, new(PatchType.JsonPatch, patch), originalWorkflow.Metadata.ResourceVersion, cancellationToken).ConfigureAwait(false);
-                break;
-            }
-            catch (ProblemDetailsException ex) when (ex.Problem.Type == ProblemTypes.OptimisticConcurrencyCheckFailed || ex.Problem.Status == (int)HttpStatusCode.Conflict) { }
-        }
     }
 
 }
