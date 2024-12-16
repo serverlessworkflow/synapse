@@ -678,6 +678,24 @@ return message;
             /// </summary>
             public const string Name = Prefix + "NAME";
 
+            /// <summary>
+            /// Exposes constants about environment variables related to runner cloud events
+            /// </summary>
+            public static class CloudEvents
+            {
+
+                /// <summary>
+                /// Gets the prefix for all environment variables related to runner cloud events
+                /// </summary>
+                public const string Prefix = Runner.Prefix + "CLOUD_EVENTS_";
+
+                /// <summary>
+                /// Gets the environment variable used to configure the runner's cloud event sink
+                /// </summary>
+                public const string Sink = Prefix + "SINK";
+
+            }
+
         }
 
         /// <summary>

@@ -1,7 +1,8 @@
 {
   "profiles": {
     "Synapse.Runner": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "commandLineArgs": "-w definition.yaml -i input.yaml -f yaml"
     },
     "Container (Dockerfile)": {
       "commandName": "Docker"

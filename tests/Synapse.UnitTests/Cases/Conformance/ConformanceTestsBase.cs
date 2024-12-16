@@ -160,7 +160,7 @@ public abstract class ConformanceTestsBase
                 Input = Input
             }
         });
-        ExecutionContext = ActivatorUtilities.CreateInstance<WorkflowExecutionContext>(Services, Definition, Instance);
+        ExecutionContext = ActivatorUtilities.CreateInstance<ConnectedWorkflowExecutionContext>(Services, Definition, Instance);
         var executor = ActivatorUtilities.CreateInstance<WorkflowExecutor>(Services, ExecutionContext);
         await executor.ExecuteAsync();
     }

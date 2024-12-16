@@ -51,6 +51,6 @@ public interface IDocumentApiClient
     /// <param name="id">The id of the <see cref="Document"/> to delete</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>The <see cref="Document"/> with the specified id</returns>
-    Task DeletesAsync(string id, CancellationToken cancellationToken = default);
+    Task DeleteAsync(string id, CancellationToken cancellationToken = default);
 
 }

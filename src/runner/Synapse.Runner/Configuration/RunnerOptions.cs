@@ -24,6 +24,11 @@ public class RunnerOptions
 {
 
     /// <summary>
+    /// Gets/sets the runner's execution mode
+    /// </summary>
+    public RunnerExecutionMode ExecutionMode => string.IsNullOrWhiteSpace(this.Workflow.DefinitionFilePath) ? RunnerExecutionMode.Connected : RunnerExecutionMode.StandAlone;
+
+    /// <summary>
     /// Gets/sets the options used to configure the Synapse API the runner must use
     /// </summary>
     public virtual SynapseHttpApiClientOptions Api { get; set; } = new();
@@ -42,6 +47,11 @@ public class RunnerOptions
     /// Gets/sets the options used to configure the containers spawned by the Synapse Runner
     /// </summary>
     public virtual RunnerContainerOptions Containers { get; set; } = new();
+
+    /// <summary>
+    /// Gets/sets the options used to configure a Synapse Runner's logging
+    /// </summary>
+    public virtual RunnerLoggingOptions Logging { get; set; } = new();
 
     /// <summary>
     /// Gets the  options used to configure the secrets of the Synapse Runner

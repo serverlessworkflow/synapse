@@ -28,12 +28,19 @@ public class RunnerCloudEventOptions
     public RunnerCloudEventOptions()
     {
         var env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.LifecycleEvents);
-        if(!string.IsNullOrWhiteSpace(env) && bool.TryParse(env, out var publishLifecycleEvents)) this.PublishLifecycleEvents = publishLifecycleEvents;
+        if (!string.IsNullOrWhiteSpace(env) && bool.TryParse(env, out var publishLifecycleEvents)) this.PublishLifecycleEvents = publishLifecycleEvents;
+        env = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.CloudEvents.Sink);
+        if (!string.IsNullOrWhiteSpace(env) && Uri.TryCreate(env, UriKind.RelativeOrAbsolute, out var sink)) this.Sink = sink;
     }
 
     /// <summary>
     /// Gets/sets a boolean indicating whether or not the Synapse Runner should produce lifecycle events. Defaults to `true`.
     /// </summary>
     public virtual bool PublishLifecycleEvents { get; set; } = true;
+
+    /// <summary>
+    /// Gets/sets the 
+    /// </summary>
+    public virtual Uri? Sink { get; set; }
 
 }

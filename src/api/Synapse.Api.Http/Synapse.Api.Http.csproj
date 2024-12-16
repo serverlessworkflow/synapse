@@ -8,7 +8,7 @@
 	<OutputType>Library</OutputType>
 	<GenerateDocumentationFile>True</GenerateDocumentationFile>
 	<VersionPrefix>1.0.0</VersionPrefix>
-	<VersionSuffix>alpha5.7</VersionSuffix>
+	<VersionSuffix>alpha5.8</VersionSuffix>
 	<AssemblyVersion>$(VersionPrefix)</AssemblyVersion>
 	<FileVersion>$(VersionPrefix)</FileVersion>
 	<Authors>The Synapse Authors</Authors>

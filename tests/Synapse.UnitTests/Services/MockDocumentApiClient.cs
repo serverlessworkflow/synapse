@@ -31,6 +31,6 @@ internal class MockDocumentApiClient(IRepository<Document, string> documents)
         await documents.UpdateAsync(document, cancellationToken);
     }
 
-    public Task DeletesAsync(string id, CancellationToken cancellationToken = default) => documents.RemoveAsync(id, cancellationToken);
+    public Task DeleteAsync(string id, CancellationToken cancellationToken = default) => documents.RemoveAsync(id, cancellationToken);
 
 }
