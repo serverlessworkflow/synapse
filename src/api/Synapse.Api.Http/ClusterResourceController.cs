@@ -174,7 +174,7 @@ public abstract class ClusterResourceController<TResource>(IMediator mediator, I
     /// <param name="resourceVersion">The expected resource version, if any, used for optimistic concurrency</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>A new <see cref="IActionResult"/></returns>
-    [HttpPatch("{namespace}/{name}")]
+    [HttpPatch("{name}")]
     [ProducesResponseType(typeof(Resource), (int)HttpStatusCode.OK)]
     [ProducesErrorResponseType(typeof(Neuroglia.ProblemDetails))]
     public virtual async Task<IActionResult> PatchResource(string name, [FromBody] Patch patch, string? resourceVersion = null, CancellationToken cancellationToken = default)
@@ -191,7 +191,7 @@ public abstract class ClusterResourceController<TResource>(IMediator mediator, I
     /// <param name="resourceVersion">The expected resource version, if any, used for optimistic concurrency</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>A new <see cref="IActionResult"/></returns>
-    [HttpPatch("{namespace}/{name}/status")]
+    [HttpPatch("{name}/status")]
     [ProducesResponseType(typeof(Resource), (int)HttpStatusCode.OK)]
     [ProducesErrorResponseType(typeof(Neuroglia.ProblemDetails))]
     public virtual async Task<IActionResult> PatchResourceStatus(string name, [FromBody] Patch patch, string? resourceVersion = null, CancellationToken cancellationToken = default)

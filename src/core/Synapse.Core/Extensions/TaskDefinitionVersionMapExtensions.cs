@@ -26,14 +26,14 @@ public static class TaskDefinitionVersionMapExtensions
     /// </summary>
     /// <param name="definitions">An <see cref="IEnumerable{T}"/> containing the <see cref="TaskDefinition"/>s to get the latest of</param>
     /// <returns>The latest <see cref="TaskDefinition"/></returns>
-    public static TaskDefinition GetLatest(this Map<string, TaskDefinition> definitions) => definitions.OrderByDescending(kvp => SemVersion.Parse(kvp.Key, SemVersionStyles.Strict)).First().Value;
+    public static TaskDefinition GetLatest(this Map<string, TaskDefinition> definitions) => definitions.OrderByDescending(kvp => SemVersion.Parse(kvp.Key, SemVersionStyles.Strict), SemVersion.PrecedenceComparer).First().Value;
 
     /// <summary>
     /// Gets the latest version of the <see cref="TaskDefinition"/>
     /// </summary>
     /// <param name="definitions">An <see cref="IEnumerable{T}"/> containing the <see cref="TaskDefinition"/>s to get the latest of</param>
     /// <returns>The latest version</returns>
-    public static string GetLatestVersion(this Map<string, TaskDefinition> definitions) => definitions.OrderByDescending(kvp => SemVersion.Parse(kvp.Key, SemVersionStyles.Strict)).First().Key;
+    public static string GetLatestVersion(this Map<string, TaskDefinition> definitions) => definitions.OrderByDescending(kvp => SemVersion.Parse(kvp.Key, SemVersionStyles.Strict), SemVersion.PrecedenceComparer).First().Key;
 
     /// <summary>
     /// Gets the specified <see cref="TaskDefinition"/> version
