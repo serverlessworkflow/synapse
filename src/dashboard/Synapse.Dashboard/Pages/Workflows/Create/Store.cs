@@ -19,7 +19,6 @@ using ServerlessWorkflow.Sdk.Validation;
 using Synapse.Api.Client.Services;
 using Synapse.Resources;
 using System.Text.RegularExpressions;
-using System.Xml.Linq;
 
 namespace Synapse.Dashboard.Pages.Workflows.Create;
 
@@ -513,6 +512,15 @@ public class CreateWorkflowViewStore(
         catch (Exception ex)
         {
             this.Logger.LogError("Unable to save workflow definition: {exception}", ex.ToString());
+            this.Reduce(state => state with
+            {
+                ProblemTitle = "Error",
+                ProblemDetail = "An error occurred while saving the workflow.",
+                ProblemErrors = new Dictionary<string, string[]>()
+                {
+                    {"Message", [ex.ToString()] }
+                }
+            });
         }
         finally
         {

@@ -47,10 +47,10 @@ else
         <PreferredLanguageSelector PreferredLanguageChange="Store.ToggleTextBasedEditorLanguageAsync" />
     </div>
     <StandaloneCodeEditor @ref="Store.TextEditor"
-                          ConstructionOptions="Store.StandaloneEditorConstructionOptions"
-                          OnDidInit="Store.OnTextBasedEditorInitAsync"
-                          OnDidChangeModelContent="Store.OnDidChangeModelContent"
-                          CssClass="h-100" />
+    ConstructionOptions="Store.StandaloneEditorConstructionOptions"
+    OnDidInit="Store.OnTextBasedEditorInitAsync"
+    OnDidChangeModelContent="Store.OnDidChangeModelContent"
+    CssClass="h-100" />
     @if (problemDetails != null)
     {
         <div class="problems px-3">
@@ -104,6 +104,7 @@ else
         await base.OnInitializedAsync();
         BreadcrumbManager.Use(Breadcrumbs.Functions);
         BreadcrumbManager.Add(new("New", "/functions/new"));
+        Store.SetIsNew(true);
         Store.Name.Subscribe(value => OnStateChanged(_ => name = value), token: CancellationTokenSource.Token);
         Store.ChosenName.Subscribe(value => OnStateChanged(_ => chosenName = value), token: CancellationTokenSource.Token);
         Store.Version.Subscribe(value => OnStateChanged(_ => version = value?.ToString()), token: CancellationTokenSource.Token);
@@ -115,7 +116,11 @@ else
     /// <inheritdoc/>
     protected override void OnParametersSet()
     {
-        if (Name != name) Store.SetName(Name);
+        if (Name != name)
+        {
+            Store.SetName(Name);
+            Store.SetIsNew(false);
+        }
     }
 
     protected void SetName()
