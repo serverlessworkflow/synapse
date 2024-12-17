@@ -37,10 +37,10 @@ else
         <PreferredLanguageSelector PreferredLanguageChange="Store.ToggleTextBasedEditorLanguageAsync" />
     </div>
     <StandaloneCodeEditor @ref="Store.TextEditor"
-                          ConstructionOptions="Store.StandaloneEditorConstructionOptions"
-                          OnDidInit="Store.OnTextBasedEditorInitAsync"
-                          OnDidChangeModelContent="Store.OnDidChangeModelContent"
-                          CssClass="h-100" />
+    ConstructionOptions="Store.StandaloneEditorConstructionOptions"
+    OnDidInit="Store.OnTextBasedEditorInitAsync"
+    OnDidChangeModelContent="Store.OnDidChangeModelContent"
+    CssClass="h-100" />
     @if (problemDetails != null)
     {
         <div class="problems px-3">
@@ -93,6 +93,7 @@ else
         await base.OnInitializedAsync();
         BreadcrumbManager.Use(Breadcrumbs.Workflows);
         BreadcrumbManager.Add(new($"New", $"/workflows/new"));
+        Store.SetIsNew(true);
         Store.Namespace.Subscribe(value => OnStateChanged(_ => ns = value), token: CancellationTokenSource.Token);
         Store.Name.Subscribe(value => OnStateChanged(_ => name = value), token: CancellationTokenSource.Token);
         Store.Loading.Subscribe(value => OnStateChanged(_ => loading = value), token: CancellationTokenSource.Token);
@@ -110,6 +111,7 @@ else
         if (Name != name)
         {
             Store.SetName(Name);
+            Store.SetIsNew(false);
         }
     }
 

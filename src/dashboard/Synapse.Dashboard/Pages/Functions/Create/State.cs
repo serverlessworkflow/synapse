@@ -18,7 +18,7 @@ using Synapse.Resources;
 namespace Synapse.Dashboard.Pages.Functions.Create;
 
 /// <summary>
-/// The <see cref="State{TState}"/> of the workflow editor
+/// The <see cref="State{TState}"/> of the function editor
 /// </summary>
 [Feature]
 public record CreateFunctionViewState
@@ -40,7 +40,12 @@ public record CreateFunctionViewState
     public SemVersion Version { get; set; } = new SemVersion(1, 0, 0);
 
     /// <summary>
-    /// Gets/sets the definition of the workflow to create
+    /// Gets/sets a boolean determining if the function is new or if it's an update
+    /// </summary>
+    public bool IsNew { get; set; } = true;
+
+    /// <summary>
+    /// Gets/sets the definition of the function to create
     /// </summary>
     public TaskDefinition? Function { get; set; } = null;
 

@@ -16,6 +16,7 @@ using Neuroglia.Data;
 using Semver;
 using ServerlessWorkflow.Sdk.Models;
 using Synapse.Api.Client.Services;
+using Synapse.Dashboard.Pages.Workflows.Create;
 using Synapse.Resources;
 
 namespace Synapse.Dashboard.Pages.Functions.Create;
@@ -189,7 +190,6 @@ public class CreateFunctionViewStore(
     #endregion
 
     #region Setters
-
     /// <summary>
     /// Sets the state's <see cref="CreateFunctionViewState.Name"/>
     /// </summary>
@@ -212,6 +212,18 @@ public class CreateFunctionViewStore(
         this.Reduce(state => state with
         {
             ChosenName = name
+        });
+    }
+
+    /// <summary>
+    /// Sets the state's <see cref="CreateFunctionViewState.IsNew"/>
+    /// </summary>
+    /// <param name="isNew">The new <see cref="CreateFunctionViewState.IsNew"/> value</param>
+    public void SetIsNew(bool isNew)
+    {
+        this.Reduce(state => state with
+        {
+            IsNew = isNew
         });
     }
 
@@ -393,6 +405,7 @@ public class CreateFunctionViewStore(
                 this.YamlSerializer.Deserialize<TaskDefinition>(functionText)!;
             var name = this.Get(state => state.Name) ?? this.Get(state => state.ChosenName);
             var version = this.Get(state => state.Version).ToString();
+            var isNew = this.Get(state => state.IsNew);
             if (string.IsNullOrEmpty(name))
             {
                 this.Reduce(state => state with
@@ -407,41 +420,41 @@ public class CreateFunctionViewStore(
                 Saving = true
             });
             CustomFunction? resource = null;
-            try
+            if (isNew)
             {
-                resource = await this.ApiClient.CustomFunctions.GetAsync(name);
-            }
-            catch
-            {
-                // Assume 404, might need actual handling
-            }
-            if (resource == null)
-            {
-                resource = await this.ApiClient.CustomFunctions.CreateAsync(new()
+
+                try
                 {
-                    Metadata = new()
+                    resource = await this.ApiClient.CustomFunctions.CreateAsync(new()
                     {
-                        Name = name
-                    },
-                    Spec = new()
-                    {
-                        Versions = [new(version, function)]
-                    }
-                });
-            }
-            else
-            {
-                var updatedResource = resource.Clone()!;
-                updatedResource.Spec.Versions.Add(new(version, function));
-                var jsonPatch = JsonPatch.FromDiff(this.JsonSerializer.SerializeToElement(resource)!.Value, this.JsonSerializer.SerializeToElement(updatedResource)!.Value);
-                var patch = this.JsonSerializer.Deserialize<Json.Patch.JsonPatch>(jsonPatch.RootElement);
-                if (patch != null)
+                        Metadata = new()
+                        {
+                            Name = name
+                        },
+                        Spec = new()
+                        {
+                            Versions = [new(version, function)]
+                        }
+                    });
+                    this.NavigationManager.NavigateTo($"/functions/{name}");
+                    return;
+                }
+                catch (ProblemDetailsException ex) when (ex.Problem.Title == "Conflict" && ex.Problem.Detail != null && ex.Problem.Detail.EndsWith("already exists"))
                 {
-                    var resourcePatch = new Patch(PatchType.JsonPatch, jsonPatch);
-                    await this.ApiClient.ManageCluster<CustomFunction>().PatchAsync(name, resourcePatch, null, this.CancellationTokenSource.Token);
+                    // the function exists, try to update it instead
                 }
             }
-            this.NavigationManager.NavigateTo($"/functions/{name}");
+            resource = await this.ApiClient.CustomFunctions.GetAsync(name);
+            var updatedResource = resource.Clone()!;
+            updatedResource.Spec.Versions.Add(new(version, function));
+            var jsonPatch = JsonPatch.FromDiff(this.JsonSerializer.SerializeToElement(resource)!.Value, this.JsonSerializer.SerializeToElement(updatedResource)!.Value);
+            var patch = this.JsonSerializer.Deserialize<Json.Patch.JsonPatch>(jsonPatch.RootElement);
+            if (patch != null)
+            {
+                var resourcePatch = new Patch(PatchType.JsonPatch, jsonPatch);
+                await this.ApiClient.ManageCluster<CustomFunction>().PatchAsync(name, resourcePatch, null, this.CancellationTokenSource.Token);
+            }
+            
         }
         catch (ProblemDetailsException ex)
         {
@@ -477,6 +490,15 @@ public class CreateFunctionViewStore(
         catch (Exception ex)
         {
             this.Logger.LogError("Unable to save function definition: {exception}", ex.ToString());
+            this.Reduce(state => state with
+            {
+                ProblemTitle = "Error",
+                ProblemDetail = "An error occurred while saving the function.",
+                ProblemErrors = new Dictionary<string, string[]>()
+                {
+                    {"Message", [ex.ToString()] }
+                }
+            });
         }
         finally
         {
