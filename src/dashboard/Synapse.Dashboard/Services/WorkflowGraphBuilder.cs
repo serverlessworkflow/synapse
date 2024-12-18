@@ -143,7 +143,7 @@ public class WorkflowGraphBuilder(ILogger<WorkflowGraphBuilder> logger, IYamlSer
         while (!string.IsNullOrWhiteSpace(nextTask?.Definition?.If))
         {
             this.Logger.LogTrace("[WorkflowGraphBuilder.BuildTransitions][{nodeId}] if clause found, looking up next task.", node.Id);
-            nextTask = this.GetNextTask(context.TasksList, nextTask.Name);
+            nextTask = this.GetNextTask(context.TasksList, nextTask.Name, FlowDirective.Continue);
             transitions.Add(nextTask);
             this.Logger.LogTrace("[WorkflowGraphBuilder.BuildTransitions][{nodeId}] found transition to '{nextTaskName}'", node.Id, nextTask?.Name);
         }
@@ -214,7 +214,7 @@ public class WorkflowGraphBuilder(ILogger<WorkflowGraphBuilder> logger, IYamlSer
             SwitchTaskDefinition => this.BuildSwitchTaskNode(context.OfType<SwitchTaskDefinition>()),
             TryTaskDefinition => this.BuildTryTaskNode(context.OfType<TryTaskDefinition>()),
             WaitTaskDefinition => this.BuildWaitTaskNode(context.OfType<WaitTaskDefinition>()),
-            _ => throw new NotSupportedException($"The specified task type '{context.TaskDefinition?.GetType()}' is not supported")
+            _ => throw new NotSupportedException($"The specified task type '{context.TaskDefinition?.GetType()}' is not supported. (reference: '{context.TaskReference}')")
         } ?? throw new Exception($"Unable to define a last node for task '{context.TaskName}'");
     }
 
@@ -259,7 +259,8 @@ public class WorkflowGraphBuilder(ILogger<WorkflowGraphBuilder> logger, IYamlSer
                     break;
                 }
             default:
-                callType = context.TaskDefinition.Call.ToLower();
+                callType = "custom-function";
+                content = context.TaskDefinition.Call.ToLower();
                 break;
         }
         var node = new CallTaskNodeViewModel(context.TaskReference, context.TaskName!, content, callType);
@@ -482,8 +483,19 @@ public class WorkflowGraphBuilder(ILogger<WorkflowGraphBuilder> logger, IYamlSer
         foreach (var switchCase in context.TaskDefinition.Switch)
         {
             var switchCaseTask = this.GetNextTask(context.TasksList, context.TaskName, switchCase.Value.Then)!;
-            var switchCaseNode = this.BuildTaskNode(new(context.Workflow, context.Graph, context.TasksList, switchCaseTask.Index, switchCaseTask.Name, switchCaseTask.Definition, context.TaskGroup, context.ParentReference, context.ParentContext, context.EntryNode, context.ExitNode));
-            this.BuildEdge(context.Graph, this.GetNodeAnchor(node, NodePortType.Exit), GetNodeAnchor(switchCaseNode, NodePortType.Entry));
+            if (switchCaseTask.Index != -1)
+            {
+                var switchCaseNode = this.BuildTaskNode(new(context.Workflow, context.Graph, context.TasksList, switchCaseTask.Index, switchCaseTask.Name, switchCaseTask.Definition, context.TaskGroup, context.ParentReference, context.ParentContext, context.EntryNode, context.ExitNode));
+                this.BuildEdge(context.Graph, this.GetNodeAnchor(node, NodePortType.Exit), GetNodeAnchor(switchCaseNode, NodePortType.Entry));
+            }
+            else if (switchCaseTask.Name == FlowDirective.Exit)
+            {
+                this.BuildEdge(context.Graph, this.GetNodeAnchor(node, NodePortType.Exit), context.ExitNode);
+            }
+            else if (switchCaseTask.Name == FlowDirective.End)
+            {
+                this.BuildEdge(context.Graph, this.GetNodeAnchor(node, NodePortType.Exit), context.Graph.AllNodes.Skip(1).First().Value);
+            }
         }
         if (!context.TaskDefinition.Switch.Any(switchCase => string.IsNullOrEmpty(switchCase.Value.When)))
         {
