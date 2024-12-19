@@ -69,7 +69,8 @@ public class WorkflowDiagramStore(IWorkflowGraphBuilder workflowGraphBuilder)
     public IObservable<DagreGraphOptions> Options => this.Orientation
         .Select(orientation => new DagreGraphOptions()
         {
-            Direction = orientation == WorkflowDiagramOrientation.LeftToRight ? DagreGraphDirection.LeftToRight : DagreGraphDirection.TopToBottom
+            Direction = orientation == WorkflowDiagramOrientation.LeftToRight ? DagreGraphDirection.LeftToRight : DagreGraphDirection.TopToBottom,
+            RankSeparation = 30
         })
         .DistinctUntilChanged();
 
