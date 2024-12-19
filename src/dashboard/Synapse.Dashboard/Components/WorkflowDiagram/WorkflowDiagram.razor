@@ -27,6 +27,18 @@
          xmlns="http://www.w3.org/2000/svg"
          xmlns:xlink="http://www.w3.org/1999/xlink">
         <defs>
+            <!-- Instead of thoses defs, we could use graph.referenceableComponentTypes, but it needs to be set in the constructor which is not handy -->
+            <marker id="large-end-arrow"
+                    class="marker arrow"
+                    viewBox="0 0 10 10"
+                    refX="0"
+                    refY="5"
+                    markerUnits="strokeWidth"
+                    markerWidth="15"
+                    markerHeight="15"
+                    orient="auto">
+                <path d="M 0 0 L 10 5 L 0 10 z" />
+            </marker>
             <svg id="legend" viewBox="0 0 18 18">
                 <!-- from https://www.svgrepo.com/svg/451049/legend -->
                 <path fill-rule="evenodd" d="m2.4 8.1q-0.2-0.1-0.5-0.3-0.2-0.2-0.3-0.5-0.1-0.3-0.1-0.5c0-0.7 0.4-1.2 0.9-1.4 0.6-0.3 1.2-0.1 1.7 0.3 0.4 0.4 0.5 1.1 0.3 1.6-0.2 0.6-0.8 1-1.4 1q-0.3-0.1-0.6-0.2zm0.3-2q-0.1 0-0.2 0.1-0.1 0.1-0.2 0.3 0 0.1 0 0.3c0 0.3 0.1 0.5 0.4 0.6 0.3 0.2 0.6 0.1 0.8-0.1 0.2-0.2 0.3-0.6 0.2-0.8-0.1-0.3-0.4-0.5-0.7-0.5q-0.1 0-0.3 0.1zm13.8-3.8v0.7h-9.8v-0.7zm0 4.5v0.7h-9.7v-0.7zm0 4.5v0.7h-9.8v-0.7zm0 4.5v0.7h-9.7v-0.7zm-13.5-1.4l1.5 2.9h-3zm0.2 2l-0.2-0.5-0.3 0.5zm1.2-15.7v3h-3v-3zm-0.8 0.7h-1.5v1.5h1.5zm0.8 8.3v3h-3v-3zm-0.8 0.7h-1.5v1.5h1.5z" />

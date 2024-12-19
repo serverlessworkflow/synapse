@@ -67,7 +67,7 @@ public abstract class WorkflowNodeViewModel
     public bool IsCluster => false;
 
     /// <summary>
-    /// Initialiazes a new <see cref="WorkflowNodeViewModel"/>
+    /// Initializes a new <see cref="WorkflowNodeViewModel"/>
     /// </summary>
     /// <param name="taskReference">The node task reference</param>
     /// <param name="config">The <see cref="NodeViewModelConfig"/> for the node</param>

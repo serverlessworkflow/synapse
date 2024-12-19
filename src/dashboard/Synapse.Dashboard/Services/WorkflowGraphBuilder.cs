@@ -33,8 +33,8 @@ public class WorkflowGraphBuilder(ILogger<WorkflowGraphBuilder> logger, IYamlSer
 
     const string _clusterEntrySuffix = "-cluster-entry-port";
     const string _clusterExitSuffix = "-cluster-exit-port";
-    const string _trySuffix = "-try";
-    const string _catchSuffix = "-catch";
+    const string _trySuffix = "/try";
+    const string _catchSuffix = "/catch";
     const double characterSize = 8d;
 
     /// <summary>
@@ -530,6 +530,7 @@ public class WorkflowGraphBuilder(ILogger<WorkflowGraphBuilder> logger, IYamlSer
         this.BuildEdge(context.Graph, containerEntryPort, tryEntryPort);
         var innerContext = new TaskNodeRenderingContext(context.Workflow, context.Graph, context.TaskDefinition.Try, null, null, null, tryCluster, context.TaskReference + "/try", context, tryEntryPort, tryExitPort);
         this.BuildTransitions(tryEntryPort, innerContext);
+        //this.BuildEdge(context.Graph, tryExitPort, containerExitPort);
 
         var catchContent = this.YamlSerializer.SerializeToText(context.TaskDefinition.Catch);
         if (context.TaskDefinition.Catch.Do == null || context.TaskDefinition.Catch.Do.Count == 0)
@@ -606,6 +607,10 @@ public class WorkflowGraphBuilder(ILogger<WorkflowGraphBuilder> logger, IYamlSer
         if (target.Id.EndsWith(_clusterEntrySuffix) || target.Id.EndsWith(_clusterExitSuffix))
         {
             edge.EndMarkerId = null;
+        }
+        else
+        {
+            edge.EndMarkerId = "large-end-arrow"; ;
         }
         return graph.AddEdge(edge);
     }
