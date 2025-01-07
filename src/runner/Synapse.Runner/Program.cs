@@ -12,6 +12,9 @@
 // limitations under the License.
 
 using Moq;
+using Neuroglia.AsyncApi;
+using Neuroglia.AsyncApi.Client;
+using Neuroglia.AsyncApi.Client.Bindings;
 using Neuroglia.Serialization.Xml;
 using NReco.Logging.File;
 using ServerlessWorkflow.Sdk.IO;
@@ -97,6 +100,8 @@ var builder = Host.CreateDefaultBuilder()
         services.AddServerlessWorkflowIO();
         services.AddNodeJSScriptExecutor();
         services.AddPythonScriptExecutor();
+        services.AddAsyncApi();
+        services.AddAsyncApiClient(options => options.AddAllBindingHandlers());
         services.AddSingleton<SecretsManager>();
         services.AddSingleton<ISecretsManager>(provider => provider.GetRequiredService<SecretsManager>());
         services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<SecretsManager>());

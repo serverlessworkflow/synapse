@@ -15,9 +15,8 @@ using Neuroglia;
 using Neuroglia.Serialization;
 using ServerlessWorkflow.Sdk;
 using System.Net;
-using System.Xml.Schema;
 using System.Xml;
-using Avro.Generic;
+using System.Xml.Schema;
 
 namespace Synapse.Core.Infrastructure.Services;
 
