@@ -67,6 +67,7 @@ public class TaskExecutorFactory
         ArgumentNullException.ThrowIfNull(context);
         return context.Definition.Call switch
         {
+            Function.AsyncApi => ActivatorUtilities.CreateInstance<AsyncApiCallExecutor>(serviceProvider, context),
             Function.Grpc => ActivatorUtilities.CreateInstance<GrpcCallExecutor>(serviceProvider, context),
             Function.Http => ActivatorUtilities.CreateInstance<HttpCallExecutor>(serviceProvider, context),
             Function.OpenApi => ActivatorUtilities.CreateInstance<OpenApiCallExecutor>(serviceProvider, context),

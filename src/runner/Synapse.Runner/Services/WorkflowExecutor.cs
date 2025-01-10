@@ -12,7 +12,6 @@
 // limitations under the License.
 
 using Neuroglia.Data.Infrastructure.ResourceOriented;
-using ServerlessWorkflow.Sdk.Models;
 
 namespace Synapse.Runner.Services;
 

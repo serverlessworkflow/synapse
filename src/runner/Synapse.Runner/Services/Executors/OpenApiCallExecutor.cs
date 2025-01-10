@@ -22,7 +22,7 @@ using System.Text;
 namespace Synapse.Runner.Services.Executors;
 
 /// <summary>
-/// Represents an <see cref="ITaskExecutor"/> used to execute http <see cref="CallTaskDefinition"/>s using an <see cref="HttpClient"/>
+/// Represents an <see cref="ITaskExecutor"/> used to execute OpenAPI <see cref="CallTaskDefinition"/>s using an <see cref="HttpClient"/>
 /// </summary>
 /// <param name="serviceProvider">The current <see cref="IServiceProvider"/></param>
 /// <param name="logger">The service used to perform logging</param>
@@ -111,7 +111,7 @@ public class OpenApiCallExecutor(IServiceProvider serviceProvider, ILogger<OpenA
         await httpClient.ConfigureAuthenticationAsync(this.OpenApi.Document.Endpoint.Authentication, this.ServiceProvider, this.Task.Workflow.Definition, cancellationToken).ConfigureAwait(false);
         var uriString = StringFormatter.NamedFormat(this.OpenApi.Document.EndpointUri.OriginalString, this.Task.Input.ToDictionary());
         if (uriString.IsRuntimeExpression()) uriString = await this.Task.Workflow.Expressions.EvaluateAsync<string>(uriString, this.Task.Input, this.GetExpressionEvaluationArguments(), cancellationToken).ConfigureAwait(false);
-        if (string.IsNullOrWhiteSpace(uriString)) throw new NullReferenceException("The OpenAPI endpoint URI cannot be null or whitespace");
+        if (string.IsNullOrWhiteSpace(uriString)) throw new NullReferenceException("The OpenAPI endpoint URI cannot be null or empty");
         if (!Uri.TryCreate(uriString, UriKind.RelativeOrAbsolute, out var uri) || uri == null) throw new Exception($"Failed to parse the specified string '{uriString}' into a new URI");
         using var request = new HttpRequestMessage(HttpMethod.Get, uriString);
         using var response = await httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);

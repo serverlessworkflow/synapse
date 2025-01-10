@@ -113,7 +113,7 @@ public class FunctionCallExecutor(IServiceProvider serviceProvider, ILogger<Func
         if (components.Length != 2) throw new Exception($"The specified value '{functionName}' is not a valid custom function qualified name ({{name}}:{{version}})");
         var name = components[0];
         var version = components[1];
-        if (!SemVersion.TryParse(version, SemVersionStyles.Strict, out _)) throw new Exception($"The specified value '{version}' is not a valid semantic version 2.0");
+        if (!Semver.SemVersion.TryParse(version, SemVersionStyles.Strict, out _)) throw new Exception($"The specified value '{version}' is not a valid semantic version 2.0");
         if (catalogName == SynapseDefaults.Tasks.CustomFunctions.Catalogs.Default)
         {
             var function = await this.Task.Workflow.CustomFunctions.GetAsync(name, cancellationToken).ConfigureAwait(false) ?? throw new NullReferenceException($"Failed to find the specified custom function '{name}'");

@@ -226,7 +226,7 @@ public class WorkflowGraphBuilder(ILogger<WorkflowGraphBuilder> logger, IYamlSer
     protected virtual NodeViewModel BuildCallTaskNode(TaskNodeRenderingContext<CallTaskDefinition> context)
     {
         ArgumentNullException.ThrowIfNull(context);
-        var content = string.Empty;
+        string content; ;
         string callType;
         switch (context.TaskDefinition.Call.ToLower())
         {
@@ -234,7 +234,7 @@ public class WorkflowGraphBuilder(ILogger<WorkflowGraphBuilder> logger, IYamlSer
                 {
                     var definition = (AsyncApiCallDefinition)this.JsonSerializer.Convert(context.TaskDefinition.With, typeof(AsyncApiCallDefinition))!;
                     callType = context.TaskDefinition.Call.ToLower();
-                    content = definition.OperationRef;
+                    content = definition.Operation!;
                     break;
                 }
             case "grpc":
