@@ -20,6 +20,19 @@ public static class RunnerDefaults
 {
 
     /// <summary>
+    /// Exposes constants about <see cref="HttpClient"/>s
+    /// </summary>
+    public static class HttpClients
+    {
+
+        /// <summary>
+        /// Gets the name of the <see cref="HttpClient"/> configured to not automatically allow redirects
+        /// </summary>
+        public const string NoRedirect = "no-redirect";
+
+    }
+
+    /// <summary>
     /// Exposes constants about the Synapse Runner command line
     /// </summary>
     public static class CommandLine

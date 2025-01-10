@@ -102,6 +102,10 @@ var builder = Host.CreateDefaultBuilder()
         services.AddPythonScriptExecutor();
         services.AddAsyncApi();
         services.AddAsyncApiClient(options => options.AddAllBindingHandlers());
+        services.AddHttpClient(RunnerDefaults.HttpClients.NoRedirect, _ => { }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()
+        {
+            AllowAutoRedirect = false
+        });
         services.AddSingleton<SecretsManager>();
         services.AddSingleton<ISecretsManager>(provider => provider.GetRequiredService<SecretsManager>());
         services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<SecretsManager>());

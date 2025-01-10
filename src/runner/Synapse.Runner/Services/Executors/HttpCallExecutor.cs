@@ -40,9 +40,9 @@ public class HttpCallExecutor(IServiceProvider serviceProvider, ILogger<HttpCall
     protected ISerializerProvider SerializerProvider { get; } = serializerProvider;
 
     /// <summary>
-    /// Gets the service used to perform HTTP requests
+    /// Gets the service used to create <see cref="HttpClient"/>s
     /// </summary>
-    protected HttpClient HttpClient { get; } = httpClientFactory.CreateClient();
+    protected IHttpClientFactory HttpClientFactory { get; } = httpClientFactory;
 
     /// <summary>
     /// Gets the definition of the http call to perform
@@ -56,7 +56,8 @@ public class HttpCallExecutor(IServiceProvider serviceProvider, ILogger<HttpCall
         {
             this.Http = (HttpCallDefinition)this.JsonSerializer.Convert(this.Task.Definition.With, typeof(HttpCallDefinition))!;
             var authentication = this.Http.Endpoint.Authentication == null ? null : await this.Task.Workflow.Expressions.EvaluateAsync<AuthenticationPolicyDefinition>(this.Http.Endpoint.Authentication, this.Task.Input, this.Task.Arguments, cancellationToken).ConfigureAwait(false);
-            await this.HttpClient.ConfigureAuthenticationAsync(authentication, this.ServiceProvider, this.Task.Workflow.Definition, cancellationToken).ConfigureAwait(false);
+            using var httpClient = this.HttpClientFactory.CreateClient();
+            await httpClient.ConfigureAuthenticationAsync(authentication, this.ServiceProvider, this.Task.Workflow.Definition, cancellationToken).ConfigureAwait(false);
         }
         catch(Exception ex)
         {
@@ -76,9 +77,7 @@ public class HttpCallExecutor(IServiceProvider serviceProvider, ILogger<HttpCall
     {
         if (this.Http == null) throw new InvalidOperationException("The executor must be initialized before execution");
         ISerializer? serializer;
-        var defaultMediaType = this.Http.Body is string
-            ? MediaTypeNames.Text.Plain
-            : MediaTypeNames.Application.Json;
+        var defaultMediaType = this.Http.Body is string ? MediaTypeNames.Text.Plain : MediaTypeNames.Application.Json;
         if ((this.Http.Headers?.TryGetValue("Content-Type", out var mediaType) != true && this.Http.Headers?.TryGetValue("Content-Type", out mediaType) != true) || string.IsNullOrWhiteSpace(mediaType)) mediaType = defaultMediaType;
         else mediaType = mediaType.Split(';', StringSplitOptions.RemoveEmptyEntries)[0].Trim();
         var requestContent = (HttpContent?)null;
@@ -133,9 +132,19 @@ public class HttpCallExecutor(IServiceProvider serviceProvider, ILogger<HttpCall
         }
         var uri = StringFormatter.NamedFormat(this.Http.EndpointUri.OriginalString, this.Task.Input.ToDictionary());
         if (uri.IsRuntimeExpression()) uri = await this.Task.Workflow.Expressions.EvaluateAsync<string>(uri, this.Task.Input, this.GetExpressionEvaluationArguments(), cancellationToken).ConfigureAwait(false);
+        using var httpClient = this.Http.Redirect ? this.HttpClientFactory.CreateClient() : this.HttpClientFactory.CreateClient(RunnerDefaults.HttpClients.NoRedirect); ;
         using var request = new HttpRequestMessage(new HttpMethod(this.Http.Method), uri) { Content = requestContent };
-        using var response = await this.HttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
-        if (!response.IsSuccessStatusCode) //todo: could be configurable on HTTP call?
+        if (this.Http.Headers != null)
+        {
+            foreach(var header in this.Http.Headers)
+            {
+                var headerValue = header.Value;
+                if (headerValue.IsRuntimeExpression()) headerValue = await this.Task.Workflow.Expressions.EvaluateAsync<string>(headerValue, this.Task.Input, this.GetExpressionEvaluationArguments(), cancellationToken).ConfigureAwait(false);
+                request.Headers.TryAddWithoutValidation(header.Key, headerValue);
+            }
+        }
+        using var response = await httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
+        if (!response.IsSuccessStatusCode)
         {
             var detail = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
             this.Logger.LogError("Failed to request '{method} {uri}'. The remote server responded with a non-success status code '{statusCode}'.", this.Http.Method, uri, response.StatusCode);
@@ -183,20 +192,6 @@ public class HttpCallExecutor(IServiceProvider serviceProvider, ILogger<HttpCall
             _ => result
         };
         await this.SetResultAsync(result, this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
-    }
-
-    /// <inheritdoc/>
-    protected override async ValueTask DisposeAsync(bool disposing)
-    {
-        await base.DisposeAsync(disposing).ConfigureAwait(false);
-        this.HttpClient.Dispose();
-    }
-
-    /// <inheritdoc/>
-    protected override void Dispose(bool disposing)
-    {
-        base.Dispose(disposing);
-        this.HttpClient.Dispose();
     }
 
 }
