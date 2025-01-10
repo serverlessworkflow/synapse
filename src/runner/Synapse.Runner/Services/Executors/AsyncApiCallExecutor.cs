@@ -107,11 +107,12 @@ public class AsyncApiCallExecutor(IServiceProvider serviceProvider, ILogger<Asyn
         var document = await this.AsyncApiDocumentReader.ReadAsync(responseStream, cancellationToken).ConfigureAwait(false);
         if (document is not V3AsyncApiDocument v3Document) throw new NotSupportedException("Synapse only supports AsyncAPI v3.0.0 at the moment");
         this.Document = v3Document;
-        var operationId = this.AsyncApi.OperationRef;
+        if (string.IsNullOrWhiteSpace(this.AsyncApi.Operation)) throw new NullReferenceException("The 'operation' parameter must be set when performing an AsyncAPI v3 call");
+        var operationId = this.AsyncApi.Operation;
         if (operationId.IsRuntimeExpression()) operationId = await this.Task.Workflow.Expressions.EvaluateAsync<string>(operationId, this.Task.Input, this.GetExpressionEvaluationArguments(), cancellationToken).ConfigureAwait(false);
         if (string.IsNullOrWhiteSpace(operationId)) throw new NullReferenceException("The operation ref cannot be null or empty");
-        var operation = this.Document.Operations.FirstOrDefault(o => o.Key == operationId);
-        if (operation.Value == null) throw new NullReferenceException($"Failed to find an operation with id '{operationId}' in AsyncAPI document at '{uri}'");
+        this.Operation = this.Document.Operations.FirstOrDefault(o => o.Key == operationId);
+        if (this.Operation.Value == null) throw new NullReferenceException($"Failed to find an operation with id '{operationId}' in AsyncAPI document at '{uri}'");
         if (this.AsyncApi.Authentication != null) this.Authorization = await AuthorizationInfo.CreateAsync(this.AsyncApi.Authentication, this.ServiceProvider, this.Task.Workflow.Definition, cancellationToken).ConfigureAwait(false);
         switch (this.Operation.Value.Action)
         {
@@ -119,11 +120,8 @@ public class AsyncApiCallExecutor(IServiceProvider serviceProvider, ILogger<Asyn
                 await this.BuildMessagePayloadAsync(cancellationToken).ConfigureAwait(false);
                 await this.BuildMessageHeadersAsync(cancellationToken).ConfigureAwait(false);
                 break;
-            case V3OperationAction.Send:
-
-                break;
-            default:
-                throw new NotSupportedException($"The specified operation action '{this.Operation.Value.Action}' is not supported");
+            case V3OperationAction.Send: break;
+            default: throw new NotSupportedException($"The specified operation action '{this.Operation.Value.Action}' is not supported");
         }
     }
 
@@ -134,16 +132,16 @@ public class AsyncApiCallExecutor(IServiceProvider serviceProvider, ILogger<Asyn
     /// <returns>A new awaitable <see cref="Task"/></returns>
     protected virtual async Task BuildMessagePayloadAsync(CancellationToken cancellationToken = default)
     {
-        if (this.AsyncApi == null || this.Operation == null) throw new InvalidOperationException("The executor must be initialized before execution");
+        if (this.AsyncApi == null || this.Operation.Value == null) throw new InvalidOperationException("The executor must be initialized before execution");
         if (this.Task.Input == null) this.MessagePayload = new { };
-        if (this.AsyncApi.Payload == null) return;
+        if (this.AsyncApi.Message?.Payload == null) return;
         var arguments = this.GetExpressionEvaluationArguments();
         if (this.Authorization != null)
         {
             arguments ??= new Dictionary<string, object>();
             arguments.Add("authorization", this.Authorization);
         }
-        this.MessagePayload = await this.Task.Workflow.Expressions.EvaluateAsync<object>(this.AsyncApi.Payload, this.Task.Input!, arguments, cancellationToken).ConfigureAwait(false);
+        this.MessagePayload = await this.Task.Workflow.Expressions.EvaluateAsync<object>(this.AsyncApi.Message.Payload, this.Task.Input!, arguments, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -153,30 +151,27 @@ public class AsyncApiCallExecutor(IServiceProvider serviceProvider, ILogger<Asyn
     /// <returns>A new awaitable <see cref="Task"/></returns>
     protected virtual async Task BuildMessageHeadersAsync(CancellationToken cancellationToken = default)
     {
-        if (this.AsyncApi == null || this.Operation == null) throw new InvalidOperationException("The executor must be initialized before execution");
-        if (this.AsyncApi.Headers == null) return;
+        if (this.AsyncApi == null || this.Operation.Value == null) throw new InvalidOperationException("The executor must be initialized before execution");
+        if (this.AsyncApi.Message?.Headers == null) return;
         var arguments = this.GetExpressionEvaluationArguments();
         if (this.Authorization != null)
         {
             arguments ??= new Dictionary<string, object>();
             arguments.Add("authorization", this.Authorization);
         }
-        this.MessageHeaders = await this.Task.Workflow.Expressions.EvaluateAsync<object>(this.AsyncApi.Headers, this.Task.Input!, arguments, cancellationToken).ConfigureAwait(false);
+        this.MessageHeaders = await this.Task.Workflow.Expressions.EvaluateAsync<object>(this.AsyncApi.Message.Headers, this.Task.Input!, arguments, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
     protected override Task DoExecuteAsync(CancellationToken cancellationToken)
     {
         if (this.AsyncApi == null || this.Document == null || this.Operation.Value == null) throw new InvalidOperationException("The executor must be initialized before execution");
-        switch (this.Operation.Value.Action)
+        return this.Operation.Value.Action switch
         {
-            case V3OperationAction.Receive:
-                return this.DoExecutePublishOperationAsync(cancellationToken);
-            case V3OperationAction.Send:
-                return this.DoExecuteSubscribeOperationAsync(cancellationToken);
-            default:
-                throw new NotSupportedException($"The specified operation action '{this.Operation.Value.Action}' is not supported");
-        }
+            V3OperationAction.Receive => this.DoExecutePublishOperationAsync(cancellationToken),
+            V3OperationAction.Send => this.DoExecuteSubscribeOperationAsync(cancellationToken),
+            _ => throw new NotSupportedException($"The specified operation action '{this.Operation.Value.Action}' is not supported"),
+        };
     }
 
     /// <summary>
@@ -195,6 +190,7 @@ public class AsyncApiCallExecutor(IServiceProvider serviceProvider, ILogger<Asyn
         };
         await using var result = await asyncApiClient.PublishAsync(parameters, cancellationToken).ConfigureAwait(false);
         if (!result.IsSuccessful) throw new Exception("Failed to execute the AsyncAPI publish operation");
+        await this.SetResultAsync(null, this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -205,10 +201,31 @@ public class AsyncApiCallExecutor(IServiceProvider serviceProvider, ILogger<Asyn
     protected virtual async Task DoExecuteSubscribeOperationAsync(CancellationToken cancellationToken)
     {
         if (this.AsyncApi == null || this.Document == null || this.Operation.Value == null) throw new InvalidOperationException("The executor must be initialized before execution");
+        if (this.AsyncApi.Subscription == null) throw new NullReferenceException("The 'subscription' must be set when performing an AsyncAPI v3 subscribe operation");
         await using var asyncApiClient = this.AsyncApiClientFactory.CreateFor(this.Document);
         var parameters = new AsyncApiSubscribeOperationParameters(this.Operation.Key, this.AsyncApi.Server, this.AsyncApi.Protocol);
         await using var result = await asyncApiClient.SubscribeAsync(parameters, cancellationToken).ConfigureAwait(false);
         if (!result.IsSuccessful) throw new Exception("Failed to execute the AsyncAPI subscribe operation");
+        if(result.Messages == null)
+        {
+            await this.SetResultAsync(null, this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
+            return;
+        }
+        var observable = result.Messages;
+        if (this.AsyncApi.Subscription.Consume.For != null) observable = observable.TakeUntil(Observable.Timer(this.AsyncApi.Subscription.Consume.For.ToTimeSpan()));
+        if (this.AsyncApi.Subscription.Consume.Amount.HasValue) observable = observable.Take(this.AsyncApi.Subscription.Consume.Amount.Value);
+        else if (!string.IsNullOrWhiteSpace(this.AsyncApi.Subscription.Consume.While)) observable = observable.Select(message => Observable.FromAsync(async () =>
+        {
+            var keepGoing = await this.Task.Workflow.Expressions.EvaluateConditionAsync(this.AsyncApi.Subscription.Consume.While, this.Task.Input!,this.GetExpressionEvaluationArguments(),cancellationToken).ConfigureAwait(false);
+            return (message, keepGoing);
+        })).Concat().TakeWhile(i => i.keepGoing).Select(i => i.message);
+        else if (!string.IsNullOrWhiteSpace(this.AsyncApi.Subscription.Consume.Until)) observable = observable.Select(message => Observable.FromAsync(async () =>
+        {
+            var keepGoing = !(await this.Task.Workflow.Expressions.EvaluateConditionAsync(this.AsyncApi.Subscription.Consume.Until, this.Task.Input!, this.GetExpressionEvaluationArguments(), cancellationToken).ConfigureAwait(false));
+            return (message, keepGoing);
+        })).Concat().TakeWhile(i => i.keepGoing).Select(i => i.message);
+        var messages = await observable.ToAsyncEnumerable().ToListAsync(cancellationToken).ConfigureAwait(false);
+        await this.SetResultAsync(messages, this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
     }
 
 }

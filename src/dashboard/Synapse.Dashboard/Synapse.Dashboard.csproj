@@ -11,7 +11,7 @@
 
   <ItemGroup>
 	<PackageReference Include="Blazor.Bootstrap" Version="3.2.0" />
-    <PackageReference Include="BlazorMonaco" Version="3.2.0" />
+    <PackageReference Include="BlazorMonaco" Version="3.3.0" />
     <PackageReference Include="IdentityModel" Version="7.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.0" />
 	<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="9.0.0" />

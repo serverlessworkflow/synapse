@@ -51,7 +51,7 @@
 	<PackageReference Include="Neuroglia.Mediation" Version="4.18.1" />
 	<PackageReference Include="Neuroglia.Plugins" Version="4.18.1" />
 	<PackageReference Include="Neuroglia.Serialization.Xml" Version="4.18.1" />
-	<PackageReference Include="ServerlessWorkflow.Sdk.IO" Version="1.0.0-alpha5.2" />
+	<PackageReference Include="ServerlessWorkflow.Sdk.IO" Version="1.0.0-alpha6.2" />
   </ItemGroup>
 	
   <ItemGroup>

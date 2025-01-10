@@ -52,14 +52,14 @@
   <ItemGroup>
 	<PackageReference Include="Docker.DotNet" Version="3.125.15" />
 	<PackageReference Include="DynamicGrpc" Version="1.4.0" />
-	<PackageReference Include="Google.Protobuf" Version="3.29.1" />
+	<PackageReference Include="Google.Protobuf" Version="3.29.3" />
 	<PackageReference Include="Grpc.Core" Version="2.46.6" />
 	<PackageReference Include="Microsoft.Extensions.Configuration.KeyPerFile" Version="9.0.0" />
 	<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
-	<PackageReference Include="Microsoft.OpenApi.Readers" Version="1.6.22" />
+	<PackageReference Include="Microsoft.OpenApi.Readers" Version="1.6.23" />
 	<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
-	<PackageReference Include="MimeKit" Version="4.8.0" />
+	<PackageReference Include="MimeKit" Version="4.9.0" />
 	<PackageReference Include="Moq" Version="4.20.72" />
 	<PackageReference Include="Neuroglia.AsyncApi.Client.Bindings.All" Version="3.0.1" />
 	<PackageReference Include="Neuroglia.AsyncApi.DependencyInjectionExtensions" Version="3.0.1" />
