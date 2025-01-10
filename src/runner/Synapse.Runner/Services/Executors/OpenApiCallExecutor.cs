@@ -237,7 +237,7 @@ public class OpenApiCallExecutor(IServiceProvider serviceProvider, ILogger<OpenA
                     request.Content.Headers.ContentType.MediaType = content.MediaType;
                 }
             }
-            using var httpClient = this.HttpClientFactory.CreateClient();
+            using var httpClient = this.OpenApi.Redirect ? this.HttpClientFactory.CreateClient() : this.HttpClientFactory.CreateClient(RunnerDefaults.HttpClients.NoRedirect);
             await httpClient.ConfigureAuthenticationAsync(this.OpenApi.Authentication, this.ServiceProvider, this.Task.Workflow.Definition, cancellationToken).ConfigureAwait(false);
             using var response = await httpClient.SendAsync(request, cancellationToken);
             if (response.StatusCode == HttpStatusCode.ServiceUnavailable) continue;
