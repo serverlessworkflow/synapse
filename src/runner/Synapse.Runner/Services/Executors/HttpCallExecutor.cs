@@ -49,15 +49,18 @@ public class HttpCallExecutor(IServiceProvider serviceProvider, ILogger<HttpCall
     /// </summary>
     protected HttpCallDefinition? Http { get; set; }
 
+    /// <summary>
+    /// Gets the <see cref="AuthenticationPolicyDefinition"/>, if any, to use to perform HTTP calls
+    /// </summary>
+    protected AuthenticationPolicyDefinition? Authentication { get; set; }
+
     /// <inheritdoc/>
     protected override async Task DoInitializeAsync(CancellationToken cancellationToken)
     {
         try
         {
             this.Http = (HttpCallDefinition)this.JsonSerializer.Convert(this.Task.Definition.With, typeof(HttpCallDefinition))!;
-            var authentication = this.Http.Endpoint.Authentication == null ? null : await this.Task.Workflow.Expressions.EvaluateAsync<AuthenticationPolicyDefinition>(this.Http.Endpoint.Authentication, this.Task.Input, this.Task.Arguments, cancellationToken).ConfigureAwait(false);
-            using var httpClient = this.HttpClientFactory.CreateClient();
-            await httpClient.ConfigureAuthenticationAsync(authentication, this.ServiceProvider, this.Task.Workflow.Definition, cancellationToken).ConfigureAwait(false);
+            this.Authentication = this.Http.Endpoint.Authentication == null ? null : await this.Task.Workflow.Expressions.EvaluateAsync<AuthenticationPolicyDefinition>(this.Http.Endpoint.Authentication, this.Task.Input, this.Task.Arguments, cancellationToken).ConfigureAwait(false);
         }
         catch(Exception ex)
         {
@@ -132,7 +135,8 @@ public class HttpCallExecutor(IServiceProvider serviceProvider, ILogger<HttpCall
         }
         var uri = StringFormatter.NamedFormat(this.Http.EndpointUri.OriginalString, this.Task.Input.ToDictionary());
         if (uri.IsRuntimeExpression()) uri = await this.Task.Workflow.Expressions.EvaluateAsync<string>(uri, this.Task.Input, this.GetExpressionEvaluationArguments(), cancellationToken).ConfigureAwait(false);
-        using var httpClient = this.Http.Redirect ? this.HttpClientFactory.CreateClient() : this.HttpClientFactory.CreateClient(RunnerDefaults.HttpClients.NoRedirect); ;
+        using var httpClient = this.Http.Redirect ? this.HttpClientFactory.CreateClient() : this.HttpClientFactory.CreateClient(RunnerDefaults.HttpClients.NoRedirect);
+        await httpClient.ConfigureAuthenticationAsync(this.Authentication, this.ServiceProvider, this.Task.Workflow.Definition, cancellationToken).ConfigureAwait(false);
         using var request = new HttpRequestMessage(new HttpMethod(this.Http.Method), uri) { Content = requestContent };
         if (this.Http.Headers != null)
         {
