@@ -54,9 +54,9 @@
 	<PackageReference Include="DynamicGrpc" Version="1.4.0" />
 	<PackageReference Include="Google.Protobuf" Version="3.29.3" />
 	<PackageReference Include="Grpc.Core" Version="2.46.6" />
-	<PackageReference Include="Microsoft.Extensions.Configuration.KeyPerFile" Version="9.0.0" />
-	<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
+	<PackageReference Include="Microsoft.Extensions.Configuration.KeyPerFile" Version="9.0.1" />
+	<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.1" />
 	<PackageReference Include="Microsoft.OpenApi.Readers" Version="1.6.23" />
 	<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
 	<PackageReference Include="MimeKit" Version="4.9.0" />

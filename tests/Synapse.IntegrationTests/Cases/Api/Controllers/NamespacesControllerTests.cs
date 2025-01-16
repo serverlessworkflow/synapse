@@ -36,7 +36,7 @@ public class NamespacesControllerTests(HttpApiFactory factory)
         var response = await client.PostAsJsonAsync(this.Path, resource);
 
         //assert
-        response.Should().BeSuccessful();
+        response.IsSuccessStatusCode.Should().BeTrue();
         (await response.Content.ReadFromJsonAsync<Namespace>()).Should().NotBeNull();
     }
 
@@ -84,7 +84,7 @@ public class NamespacesControllerTests(HttpApiFactory factory)
         var response = await client.DeleteAsync($"{this.Path}/{resource.GetName()}");
 
         //assert
-        response.Should().BeSuccessful();
+        response.IsSuccessStatusCode.Should().BeTrue();
         (await response.Content.ReadFromJsonAsync<Namespace>()).Should().NotBeNull();
     }
 

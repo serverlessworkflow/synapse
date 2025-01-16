@@ -156,7 +156,7 @@ public class WorkflowInstanceController(IServiceProvider serviceProvider, ILogge
         }
         catch(Exception ex)
         {
-            this.Logger.LogError("An error occured while handling the creation of workflow instance '{workflowInstance}': {ex}", workflowInstance.GetQualifiedName(), ex);
+            this.Logger.LogError("An error occurred while handling the creation of workflow instance '{workflowInstance}': {ex}", workflowInstance.GetQualifiedName(), ex);
         }
     }
 
