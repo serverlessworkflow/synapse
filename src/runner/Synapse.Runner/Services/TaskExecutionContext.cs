@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 namespace Synapse.Runner.Services;
 
 /// <summary>
@@ -67,6 +66,9 @@ public class TaskExecutionContext<TDefinition>(IWorkflowExecutionContext workflo
     {
         this.Instance = await this.Workflow.StartAsync(this.Instance, cancellationToken).ConfigureAwait(false);
     }
+
+    /// <inheritdoc/>
+    public virtual Task<IObservable<IStreamedCloudEvent>> StreamAsync(CancellationToken cancellationToken) => this.Workflow.StreamAsync(this, cancellationToken);
 
     /// <inheritdoc/>
     public virtual Task<CorrelationContext> CorrelateAsync(CancellationToken cancellationToken = default) => this.Workflow.CorrelateAsync(this, cancellationToken);

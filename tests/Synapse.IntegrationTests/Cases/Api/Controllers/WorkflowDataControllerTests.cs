@@ -43,7 +43,7 @@ public class WorkflowDataControllerTests(HttpApiFactory factory)
         var result = await response.Content.ReadFromJsonAsync<Document>();
 
         //assert
-        response.Should().BeSuccessful();
+        response.IsSuccessStatusCode.Should().BeTrue();
         //result.Should().BeEquivalentTo(document);
     }
 

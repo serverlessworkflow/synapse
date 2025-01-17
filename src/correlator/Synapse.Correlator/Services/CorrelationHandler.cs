@@ -334,7 +334,7 @@ public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRep
         {
             var index = updatedResource.Status.Contexts.IndexOf(existingContext);
             updatedResource.Status.Contexts.Remove(existingContext);
-            if (!completed) updatedResource.Status.Contexts.Insert(index, context);
+            updatedResource.Status.Contexts.Insert(index, context);
         }
         if (completed)
         {

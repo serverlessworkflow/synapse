@@ -47,9 +47,15 @@ public record CorrelationSpec
     public virtual EventConsumptionStrategyDefinition Events { get; set; } = null!;
 
     /// <summary>
+    /// Gets/sets a boolean indicating whether or not to stream events. When enabled, each correlated event is atomically published to the subscriber immediately rather than waiting for the entire correlation to complete
+    /// </summary>
+    [DataMember(Name = "stream", Order = 5), JsonPropertyName("stream"), JsonPropertyOrder(5), YamlMember(Alias = "stream", Order = 5)]
+    public virtual bool Stream { get; set; }
+
+    /// <summary>
     /// Gets/sets an object used to configure the correlation's outcome
     /// </summary>
-    [DataMember(Name = "outcome", Order = 5), JsonPropertyName("outcome"), JsonPropertyOrder(5), YamlMember(Alias = "outcome", Order = 5)]
+    [DataMember(Name = "outcome", Order = 6), JsonPropertyName("outcome"), JsonPropertyOrder(6), YamlMember(Alias = "outcome", Order = 6)]
     public virtual CorrelationOutcomeDefinition Outcome { get; set; } = null!;
 
 }

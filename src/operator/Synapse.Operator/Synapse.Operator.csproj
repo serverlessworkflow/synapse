@@ -51,8 +51,8 @@
 
   <ItemGroup>
 	<PackageReference Include="Cronos" Version="0.9.0" />
-	<PackageReference Include="Microsoft.Extensions.Configuration.KeyPerFile" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
+	<PackageReference Include="Microsoft.Extensions.Configuration.KeyPerFile" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.1" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
   </ItemGroup>
 
