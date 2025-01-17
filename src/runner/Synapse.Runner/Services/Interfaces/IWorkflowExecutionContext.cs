@@ -138,6 +138,14 @@ public interface IWorkflowExecutionContext
     Task ResumeAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Streams the events defined by the specified task
+    /// </summary>
+    /// <param name="task">The execution of the task to stream events for</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>A new <see cref="IObservable{T}"/> used to stream events</returns>
+    Task<IObservable<IStreamedCloudEvent>> StreamAsync(ITaskExecutionContext task, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Begins correlating the events defined by the specified task
     /// </summary>
     /// <param name="task">The execution of the task to correlate events for</param>

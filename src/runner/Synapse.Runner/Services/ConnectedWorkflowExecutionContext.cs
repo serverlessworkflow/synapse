@@ -20,6 +20,8 @@ using Neuroglia.Data.Infrastructure.ResourceOriented;
 using Synapse.Events.Tasks;
 using Synapse.Events.Workflows;
 using System.Net.Mime;
+using System.Reactive.Disposables;
+using System.Reactive.Threading.Tasks;
 
 namespace Synapse.Runner.Services;
 
@@ -305,10 +307,124 @@ public class ConnectedWorkflowExecutionContext(IServiceProvider services, ILogge
     }
 
     /// <inheritdoc/>
+    public virtual async Task<IObservable<IStreamedCloudEvent>> StreamAsync(ITaskExecutionContext task, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(task);
+        if (task.Definition is not ListenTaskDefinition listenTask) throw new ArgumentException("The specified task's definition must be a 'listen' task", nameof(task));
+        if (listenTask.Foreach == null) throw new ArgumentException($"Since the specified listen task doesn't use streaming, the {nameof(CorrelateAsync)} method must be used instead");
+        if (this.Instance.Status?.Correlation?.Contexts?.TryGetValue(task.Instance.Reference.OriginalString, out var context) == true && context != null) return Observable.Empty<IStreamedCloudEvent>();
+        var @namespace = task.Workflow.Instance.GetNamespace()!;
+        var name = $"{task.Workflow.Instance.GetName()}.{task.Instance.Id}";
+        Correlation? correlation = null;
+        try { correlation = await this.Api.Correlations.GetAsync(name, @namespace, cancellationToken).ConfigureAwait(false); }
+        catch { }
+        if (correlation == null)
+        {
+            correlation = await this.Api.Correlations.CreateAsync(new()
+            {
+                Metadata = new()
+                {
+                    Namespace = @namespace,
+                    Name = name,
+                    Labels = new Dictionary<string, string>()
+                    {
+                        { SynapseDefaults.Resources.Labels.WorkflowInstance, this.Instance.GetQualifiedName() }
+                    }
+                },
+                Spec = new()
+                {
+                    Source = new ResourceReference<WorkflowInstance>(task.Workflow.Instance.GetName(), task.Workflow.Instance.GetNamespace()),
+                    Lifetime = CorrelationLifetime.Ephemeral,
+                    Events = listenTask.Listen.To,
+                    Stream = true,
+                    Expressions = task.Workflow.Definition.Evaluate ?? new(),
+                    Outcome = new()
+                    {
+                        Correlate = new()
+                        {
+                            Instance = task.Workflow.Instance.GetQualifiedName(),
+                            Task = task.Instance.Reference.OriginalString
+                        }
+                    }
+                }
+            }, cancellationToken).ConfigureAwait(false);
+        }
+        var taskCompletionSource = new TaskCompletionSource<CorrelationContext>();
+        var cancellationTokenRegistration = cancellationToken.Register(() => taskCompletionSource.TrySetCanceled());
+        var correlationSubscription = this.Api.WorkflowInstances.MonitorAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, cancellationToken)
+            .ToObservable()
+            .Where(e => e.Type == ResourceWatchEventType.Updated)
+            .Select(e => e.Resource.Status?.Correlation?.Contexts)
+            .Scan((Previous: (EquatableDictionary<string, CorrelationContext>?)null, Current: (EquatableDictionary<string, CorrelationContext>?)null), (accumulator, current) => (accumulator.Current ?? [], current))
+            .Where(v => v.Current?.Count > v.Previous?.Count) //ensures we are not handling changes in a circular loop: if length of current is smaller than previous, it means a context has been processed
+            .Subscribe(value =>
+            {
+                var patch = JsonPatchUtility.CreateJsonPatchFromDiff(value.Previous, value.Current);
+                var patchOperation = patch.Operations.FirstOrDefault(o => o.Op == OperationType.Add && o.Path[0] == task.Instance.Reference.OriginalString);
+                if (patchOperation == null) return;
+                context = this.JsonSerializer.Deserialize<CorrelationContext>(patchOperation.Value!)!;
+                taskCompletionSource.SetResult(context);
+            });
+        var endOfStream = false;
+        var stopObservable = taskCompletionSource.Task.ToObservable();
+        var stopSubscription = stopObservable.Take(1).Subscribe(_ => endOfStream = true);
+        return Observable.Create<StreamedCloudEvent>(observer =>
+        {
+            var subscription = Observable.Using(
+                () => new CompositeDisposable
+                {
+                    cancellationTokenRegistration,
+                    correlationSubscription
+                },
+                disposable => this.Api.Correlations.MonitorAsync(correlation.GetName(), correlation.GetNamespace()!, cancellationToken)
+                    .ToObservable()
+                    .Where(e => e.Type == ResourceWatchEventType.Updated)
+                    .Select(e => e.Resource.Status?.Contexts?.FirstOrDefault())
+                    .Where(c => c != null)
+                    .SelectMany(c =>
+                    {
+                        var acknowledgedOffset = c!.Offset.HasValue ? (int)c.Offset.Value : 0;
+                        return c.Events.Values
+                            .Skip(acknowledgedOffset)
+                            .Select((evt, index) => new
+                            {
+                                ContextId = c.Id,
+                                Event = evt,
+                                Offset = (uint)(acknowledgedOffset + index + 1)
+                            });
+                    })
+                    .Distinct(e => e.Offset)
+                    .Select(e => new StreamedCloudEvent(e.Event, e.Offset, async (offset, token) =>
+                    {
+                        var original = await this.Api.Correlations.GetAsync(name, @namespace, token).ConfigureAwait(false);
+                        var updated = original.Clone()!;
+                        var context = updated.Status?.Contexts.FirstOrDefault(c => c.Id == e.ContextId);
+                        if (context == null)
+                        {
+                            this.Logger.LogError("Failed to find a context with the specified id '{contextId}' in correlation '{name}.{@namespace}'", e.ContextId, name, @namespace);
+                            throw new Exception($"Failed to find a context with the specified id '{e.ContextId}' in correlation '{name}.{@namespace}'");
+                        }
+                        context.Offset = offset;
+                        var patch = JsonPatchUtility.CreateJsonPatchFromDiff(original, updated);
+                        await this.Api.Correlations.PatchStatusAsync(name, @namespace, new Patch(PatchType.JsonPatch, patch), cancellationToken: token).ConfigureAwait(false);
+                    })))
+                    .Subscribe(e =>
+                    {
+                        observer.OnNext(e);
+                        if (endOfStream) observer.OnCompleted();
+                    },
+                        ex => observer.OnError(ex),
+                        () => observer.OnCompleted());
+            return new CompositeDisposable(subscription, stopSubscription);
+        });
+    }
+
+    /// <inheritdoc/>
     public virtual async Task<CorrelationContext> CorrelateAsync(ITaskExecutionContext task, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(task);
         if (task.Definition is not ListenTaskDefinition listenTask) throw new ArgumentException("The specified task's definition must be a 'listen' task", nameof(task));
+        if (listenTask.Foreach == null) throw new ArgumentException($"Since the specified listen task uses streaming, the {nameof(StreamAsync)} method must be used instead");
         if (this.Instance.Status?.Correlation?.Contexts?.TryGetValue(task.Instance.Reference.OriginalString, out var context) == true && context != null) return context;
         var @namespace = task.Workflow.Instance.GetNamespace()!;
         var name = $"{task.Workflow.Instance.GetName()}.{task.Instance.Id}";

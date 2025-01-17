@@ -84,6 +84,36 @@ public class AsyncApiCallExecutor(IServiceProvider serviceProvider, ILogger<Asyn
     /// </summary>
     protected object? MessageHeaders { get; set; }
 
+    /// <summary>
+    /// Gets the <see cref="AsyncApiCallExecutor"/>'s <see cref="IAsyncApiMessage"/> subscription
+    /// </summary>
+    protected IDisposable? Subscription { get; set; }
+
+    /// <summary>
+    /// Gets/sets the position of the <see cref="IAsyncApiMessage"/> within its originating stream
+    /// </summary>
+    protected uint? Offset { get; set; }
+
+    /// <summary>
+    /// Gets the path for the specified message
+    /// </summary>
+    /// <param name="offset">The offset of the message to get the path for</param>
+    /// <returns>The path for the specified message</returns>
+    protected virtual string GetPathFor(uint offset) => $"{nameof(AsyncApiSubscriptionDefinition.Foreach).ToCamelCase()}/{offset}/{nameof(ForTaskDefinition.Do).ToCamelCase()}";
+
+    /// <inheritdoc/>
+    protected override async Task<ITaskExecutor> CreateTaskExecutorAsync(TaskInstance task, TaskDefinition definition, IDictionary<string, object> contextData, IDictionary<string, object>? arguments = null, CancellationToken cancellationToken = default)
+    {
+        var executor = await base.CreateTaskExecutorAsync(task, definition, contextData, arguments, cancellationToken).ConfigureAwait(false);
+        executor.SubscribeAsync
+        (
+            _ => System.Threading.Tasks.Task.CompletedTask,
+            async ex => await this.OnMessageProcessingErrorAsync(executor, this.CancellationTokenSource!.Token).ConfigureAwait(false),
+            async () => await this.OnMessageProcessingCompletedAsync(executor, this.CancellationTokenSource!.Token).ConfigureAwait(false)
+        );
+        return executor;
+    }
+
     /// <inheritdoc/>
     protected override async Task DoInitializeAsync(CancellationToken cancellationToken)
     {
@@ -224,8 +254,127 @@ public class AsyncApiCallExecutor(IServiceProvider serviceProvider, ILogger<Asyn
             var keepGoing = !(await this.Task.Workflow.Expressions.EvaluateConditionAsync(this.AsyncApi.Subscription.Consume.Until, this.Task.Input!, this.GetExpressionEvaluationArguments(), cancellationToken).ConfigureAwait(false));
             return (message, keepGoing);
         })).Concat().TakeWhile(i => i.keepGoing).Select(i => i.message);
-        var messages = await observable.ToAsyncEnumerable().ToListAsync(cancellationToken).ConfigureAwait(false);
-        await this.SetResultAsync(messages, this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
+        if (this.AsyncApi.Subscription.Foreach == null)
+        {
+            var messages = await observable.ToAsyncEnumerable().ToListAsync(cancellationToken).ConfigureAwait(false);
+            await this.SetResultAsync(messages, this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
+        }
+        else
+        {
+            this.Subscription = observable.SubscribeAsync(OnStreamingMessageAsync, OnStreamingErrorAsync, OnStreamingCompletedAsync);
+        }
+    }
+
+    /// <summary>
+    /// Handles the streaming of a <see cref="IAsyncApiMessage"/>
+    /// </summary>
+    /// <param name="message">The streamed <see cref="IAsyncApiMessage"/></param>
+    /// <returns>A new awaitable <see cref="Task"/></returns>
+    protected virtual async Task OnStreamingMessageAsync(IAsyncApiMessage message)
+    {
+        if (this.AsyncApi == null || this.Document == null || this.Operation.Value == null) throw new InvalidOperationException("The executor must be initialized before execution");
+        if (this.AsyncApi.Subscription == null) throw new NullReferenceException("The 'subscription' must be set when performing an AsyncAPI v3 subscribe operation");
+        if (this.AsyncApi.Subscription.Foreach?.Do != null)
+        {
+            var taskDefinition = new DoTaskDefinition()
+            {
+                Do = this.AsyncApi.Subscription.Foreach.Do,
+                Metadata =
+                [
+                    new(SynapseDefaults.Tasks.Metadata.PathPrefix.Name, false)
+                ]
+            };
+            var arguments = this.GetExpressionEvaluationArguments();
+            var messageData = message as object;
+            if (this.AsyncApi.Subscription.Foreach.Output?.As is string fromExpression) messageData = await this.Task.Workflow.Expressions.EvaluateAsync<object>(fromExpression, messageData ?? new(), arguments, this.CancellationTokenSource!.Token).ConfigureAwait(false);
+            else if (this.AsyncApi.Subscription.Foreach.Output?.As != null) messageData = await this.Task.Workflow.Expressions.EvaluateAsync<object>(this.AsyncApi.Subscription.Foreach.Output.As, messageData ?? new(), arguments, this.CancellationTokenSource!.Token).ConfigureAwait(false);
+            if (this.AsyncApi.Subscription.Foreach.Export?.As is string toExpression)
+            {
+                var context = (await this.Task.Workflow.Expressions.EvaluateAsync<IDictionary<string, object>>(toExpression, messageData ?? new(), arguments, this.CancellationTokenSource!.Token).ConfigureAwait(false))!;
+                await this.Task.SetContextDataAsync(context, this.CancellationTokenSource!.Token).ConfigureAwait(false);
+            }
+            else if (this.AsyncApi.Subscription.Foreach.Export?.As != null)
+            {
+                var context = (await this.Task.Workflow.Expressions.EvaluateAsync<IDictionary<string, object>>(this.AsyncApi.Subscription.Foreach.Export.As, messageData ?? new(), arguments, this.CancellationTokenSource!.Token).ConfigureAwait(false))!;
+                await this.Task.SetContextDataAsync(context, this.CancellationTokenSource!.Token).ConfigureAwait(false);
+            }
+            var offset = this.Offset ?? 0;
+            if (!this.Offset.HasValue) this.Offset = 0;
+            arguments ??= new Dictionary<string, object>();
+            arguments[this.AsyncApi.Subscription.Foreach.Item ?? RuntimeExpressions.Arguments.Each] = messageData!;
+            arguments[this.AsyncApi.Subscription.Foreach.At ?? RuntimeExpressions.Arguments.Index] = offset;
+            var task = await this.Task.Workflow.CreateTaskAsync(taskDefinition, this.GetPathFor(offset), this.Task.Input, null, this.Task, false, this.CancellationTokenSource!.Token).ConfigureAwait(false);
+            var taskExecutor = await this.CreateTaskExecutorAsync(task, taskDefinition, this.Task.ContextData, arguments, this.CancellationTokenSource!.Token).ConfigureAwait(false);
+            await taskExecutor.ExecuteAsync(this.CancellationTokenSource!.Token).ConfigureAwait(false);
+            this.Offset++;
+        }
+    }
+
+    /// <summary>
+    /// Handles an <see cref="Exception"/> that occurred while streaming messages
+    /// </summary>
+    /// <param name="ex">The <see cref="Exception"/> to handle</param>
+    /// <returns>A new awaitable <see cref="Task"/></returns>
+    protected virtual Task OnStreamingErrorAsync(Exception ex) => this.SetErrorAsync(new Error()
+    {
+        Type = ServerlessWorkflow.Sdk.ErrorType.Communication,
+        Title = ServerlessWorkflow.Sdk.ErrorTitle.Communication,
+        Status = ServerlessWorkflow.Sdk.ErrorStatus.Communication,
+        Detail = ex.Message,
+        Instance = this.Task.Instance.Reference
+    }, this.CancellationTokenSource!.Token);
+
+    /// <summary>
+    /// Handles the completion of the message streaming
+    /// </summary>
+    /// <returns>A new awaitable <see cref="Task"/></returns>
+    protected virtual async Task OnStreamingCompletedAsync()
+    {
+        var last = await this.Task.GetSubTasksAsync(this.CancellationTokenSource!.Token).OrderBy(t => t.CreatedAt).LastOrDefaultAsync(this.CancellationTokenSource!.Token).ConfigureAwait(false);
+        var output = (object?)null;
+        if (last != null && !string.IsNullOrWhiteSpace(last.OutputReference)) output = (await this.Task.Workflow.Documents.GetAsync(last.OutputReference, this.CancellationTokenSource.Token).ConfigureAwait(false)).Content;
+        await this.SetResultAsync(output, this.Task.Definition.Then, this.CancellationTokenSource!.Token).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Handles an <see cref="Exception"/> that occurred while processing a streamed message
+    /// </summary>
+    /// <param name="executor">The service used to execute the message processing that has faulted</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>A new awaitable <see cref="Task"/></returns>
+    protected virtual async Task OnMessageProcessingErrorAsync(ITaskExecutor executor, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(executor);
+        var error = executor.Task.Instance.Error ?? throw new NullReferenceException();
+        this.Executors.Remove(executor);
+        await this.SetErrorAsync(error, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Handles the completion of a message's processing
+    /// </summary>
+    /// <param name="executor">The service used to execute the message processing that has completed</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>A new awaitable <see cref="Task"/></returns>
+    protected virtual async Task OnMessageProcessingCompletedAsync(ITaskExecutor executor, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(executor);
+        this.Executors.Remove(executor);
+        if (this.Task.ContextData != executor.Task.ContextData) await this.Task.SetContextDataAsync(executor.Task.ContextData, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    protected override ValueTask DisposeAsync(bool disposing)
+    {
+        if (disposing) this.Subscription?.Dispose();
+        return base.DisposeAsync(disposing);
+    }
+
+    /// <inheritdoc/>
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing) this.Subscription?.Dispose();
+        base.Dispose(disposing);
     }
 
 }

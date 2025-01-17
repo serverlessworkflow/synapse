@@ -37,13 +37,19 @@ public record CorrelationContext
     /// <summary>
     /// Gets a key/value mapping of the context's correlation keys
     /// </summary>
-    [DataMember(Name = "keys", Order = 2), JsonPropertyName("keys"), JsonPropertyOrder(2), YamlMember(Alias = "keys", Order = 2)]
+    [DataMember(Name = "keys", Order = 3), JsonPropertyName("keys"), JsonPropertyOrder(3), YamlMember(Alias = "keys", Order = 3)]
     public virtual EquatableDictionary<string, string> Keys { get; set; } = [];
 
     /// <summary>
     /// Gets a key/value mapping of all correlated events, with the key being the index of the matched correlation filter
     /// </summary>
-    [DataMember(Name = "events", Order = 3), JsonPropertyName("events"), JsonPropertyOrder(3), YamlMember(Alias = "events", Order = 3)]
+    [DataMember(Name = "events", Order = 4), JsonPropertyName("events"), JsonPropertyOrder(4), YamlMember(Alias = "events", Order = 4)]
     public virtual EquatableDictionary<int, CloudEvent> Events { get; set; } = [];
+
+    /// <summary>
+    /// Gets the offset that serves as the index of the event being processed by the consumer, if streaming has been enabled for the correlation associated with the context.
+    /// </summary>
+    [DataMember(Name = "offset", Order = 5), JsonPropertyName("offset"), JsonPropertyOrder(5), YamlMember(Alias = "offset", Order = 5)]
+    public virtual uint? Offset { get; set; }
 
 }

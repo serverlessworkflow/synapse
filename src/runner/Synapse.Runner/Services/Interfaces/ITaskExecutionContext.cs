@@ -69,6 +69,13 @@ public interface ITaskExecutionContext
     Task ExecuteAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Streams events
+    /// </summary>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>The resulting <see cref="CorrelationContext"/></returns>
+    Task<IObservable<IStreamedCloudEvent>> StreamAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Begins correlating events
     /// </summary>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>

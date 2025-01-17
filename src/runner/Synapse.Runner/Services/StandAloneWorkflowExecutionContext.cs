@@ -288,6 +288,9 @@ public class StandAloneWorkflowExecutionContext(IServiceProvider services, ILogg
     }
 
     /// <inheritdoc/>
+    public virtual Task<IObservable<IStreamedCloudEvent>> StreamAsync(ITaskExecutionContext task, CancellationToken cancellationToken = default) => throw new NotSupportedException("Event streaming is not supported in stand-alone execution mode");
+
+    /// <inheritdoc/>
     public virtual Task<CorrelationContext> CorrelateAsync(ITaskExecutionContext task, CancellationToken cancellationToken = default) => throw new NotSupportedException("Event correlation is not supported in stand-alone execution mode");
 
     /// <inheritdoc/>
