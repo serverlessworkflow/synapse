@@ -565,7 +565,7 @@ public class CreateFunctionViewStore(
         this._processingVersion = true;
         try
         {
-            var schema = $"https://raw.githubusercontent.com/serverlessworkflow/serverlessworkflow.github.io/main/static/schemas/{version}/workflow.yaml#/$defs/task";
+            var schema = $"https://raw.githubusercontent.com/serverlessworkflow/serverlessworkflow.github.io/main/public/schemas/{version}/workflow.yaml#/$defs/task";
             var type = $"create_{typeof(CustomFunction).Name.ToLower()}_{version}_schema";
             await this.MonacoInterop.AddValidationSchemaAsync(schema, $"https://synapse.io/schemas/{type}.json", $"{type}*").ConfigureAwait(false);
             this._textModelUri = this.MonacoEditorHelper.GetResourceUri(type);
