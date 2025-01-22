@@ -37,10 +37,10 @@ else
         <PreferredLanguageSelector PreferredLanguageChange="Store.ToggleTextBasedEditorLanguageAsync" />
     </div>
     <StandaloneCodeEditor @ref="Store.TextEditor"
-    ConstructionOptions="Store.StandaloneEditorConstructionOptions"
-    OnDidInit="Store.OnTextBasedEditorInitAsync"
-    OnDidChangeModelContent="Store.OnDidChangeModelContent"
-    CssClass="h-100" />
+        ConstructionOptions="Store.StandaloneEditorConstructionOptions"
+        OnDidInit="Store.OnTextBasedEditorInitAsync"
+        OnDidChangeModelContent="Store.OnDidChangeModelContent"
+        CssClass="h-100" />
     @if (problemDetails != null)
     {
         <div class="problems px-3">
@@ -80,7 +80,7 @@ else
 
     string? ns;
     string? name;
-    bool loading;
+    bool loading = true;
     bool saving;
     private ProblemDetails? problemDetails = null;
 

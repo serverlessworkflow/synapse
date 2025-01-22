@@ -16,7 +16,6 @@ using Neuroglia.Data;
 using Semver;
 using ServerlessWorkflow.Sdk.Models;
 using Synapse.Api.Client.Services;
-using Synapse.Dashboard.Pages.Workflows.Create;
 using Synapse.Resources;
 
 namespace Synapse.Dashboard.Pages.Functions.Create;
@@ -51,6 +50,7 @@ public class CreateFunctionViewStore(
     private string _textModelUri = string.Empty;
     private bool _disposed = false;
     private bool _processingVersion = false;
+    private bool _hasTextEditorInitialized = false;
 
     /// <summary>
     /// Gets the service used to perform logging
@@ -292,7 +292,7 @@ public class CreateFunctionViewStore(
             {
                 FunctionText = document
             });
-            await this.OnTextBasedEditorInitAsync();
+            await this.InitializeTextBasedEditorAsync();
         }
         catch (Exception ex)
         {
@@ -307,6 +307,17 @@ public class CreateFunctionViewStore(
     /// <returns></returns>
     public async Task OnTextBasedEditorInitAsync()
     {
+        this._hasTextEditorInitialized = true;
+        await this.InitializeTextBasedEditorAsync();
+    }
+
+    /// <summary>
+    /// Initializes the text editor
+    /// </summary>
+    /// <returns></returns>
+    public async Task InitializeTextBasedEditorAsync()
+    {
+        if (this.TextEditor == null || !this._hasTextEditorInitialized) return;
         await this.SetTextBasedEditorLanguageAsync();
         await this.SetTextEditorValueAsync();
     }
@@ -317,10 +328,7 @@ public class CreateFunctionViewStore(
     /// <returns></returns>
     public async Task SetTextBasedEditorLanguageAsync()
     {
-        if (this.TextEditor == null)
-        {
-            return;
-        }
+        if (this.TextEditor == null || !this._hasTextEditorInitialized) return;
         try
         {
             var language = this.MonacoEditorHelper.PreferredLanguage;
@@ -342,10 +350,7 @@ public class CreateFunctionViewStore(
     async Task SetTextEditorValueAsync()
     {
         var document = this.Get(state => state.FunctionText);
-        if (this.TextEditor == null || string.IsNullOrWhiteSpace(document))
-        {
-            return;
-        }
+        if (this.TextEditor == null || string.IsNullOrWhiteSpace(document) || !this._hasTextEditorInitialized) return;
         try
         {
             await this.TextEditor.SetValue(document);
@@ -365,7 +370,7 @@ public class CreateFunctionViewStore(
     /// <returns>An awaitable task</returns>
     public async Task OnDidChangeModelContent(ModelContentChangedEvent e)
     {
-        if (this.TextEditor == null) return;
+        if (this.TextEditor == null || !this._hasTextEditorInitialized) return;
         var document = await this.TextEditor.GetValue();
         this.Reduce(state => state with
         {
@@ -379,7 +384,7 @@ public class CreateFunctionViewStore(
     /// <returns>A new awaitable <see cref="Task"/></returns>
     public async Task SaveCustomFunctionAsync()
     {
-        if (this.TextEditor == null)
+        if (this.TextEditor == null || !this._hasTextEditorInitialized)
         {
             this.Reduce(state => state with
             {
@@ -513,6 +518,10 @@ public class CreateFunctionViewStore(
     /// <inheritdoc/>
     public override async Task InitializeAsync()
     {
+        this.Loading.Where(loading => loading == true).Subscribe(loading =>
+        {
+            this._hasTextEditorInitialized = false; // reset text editor state when loading
+        }, token: this.CancellationTokenSource.Token);
         this.Function.SubscribeAsync(async definition => {
             string document = string.Empty;
             if (definition != null)
@@ -543,7 +552,7 @@ public class CreateFunctionViewStore(
     /// <returns></returns>
     protected async Task OnPreferredThemeChangedAsync(string newTheme)
     {
-        if (this.TextEditor != null)
+        if (this.TextEditor != null && this._hasTextEditorInitialized)
         {
             await this.TextEditor.UpdateOptions(new EditorUpdateOptions() { Theme = newTheme });
         }

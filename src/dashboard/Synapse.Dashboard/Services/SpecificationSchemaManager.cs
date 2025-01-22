@@ -50,7 +50,7 @@ public class SpecificationSchemaManager(IYamlSerializer yamlSerializer, HttpClie
     }
 
     /// <summary>
-    /// Gets the specification's JSON schema for the specificed version
+    /// Gets the specification's JSON schema for the specified version
     /// </summary>
     /// <param name="version">The version to get the schema for</param>
     /// <returns>A awaitable task</returns>

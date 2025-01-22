@@ -47,6 +47,7 @@ public class WorkflowDetailsStore(
 
     private TextModel? _textModel = null;
     private bool _disposed;
+    private bool _hasTextEditorInitialized = false;
 
     /// <summary>
     /// Gets the service used for JS interop
@@ -275,15 +276,26 @@ public class WorkflowDetailsStore(
     /// <returns>A awaitable task</returns>
     public async Task ToggleTextBasedEditorLanguageAsync(string _)
     {
-        await this.OnTextBasedEditorInitAsync();
+        await this.InitializeTextBasedEditorAsync();
     }
 
     /// <summary>
     /// Handles initialization of the text editor
     /// </summary>
-    /// <returns>A awaitable task</returns>
+    /// <returns></returns>
     public async Task OnTextBasedEditorInitAsync()
     {
+        this._hasTextEditorInitialized = true;
+        await this.InitializeTextBasedEditorAsync();
+    }
+
+    /// <summary>
+    /// Initializes the text editor
+    /// </summary>
+    /// <returns></returns>
+    public async Task InitializeTextBasedEditorAsync()
+    {
+        if (this.TextEditor == null || !this._hasTextEditorInitialized) return;
         await this.SetTextBasedEditorLanguageAsync();
         await this.SetTextEditorValueAsync();
     }
@@ -297,7 +309,7 @@ public class WorkflowDetailsStore(
         try
         {
             var language = this.MonacoEditorHelper.PreferredLanguage;
-            if (this.TextEditor != null)
+            if (this.TextEditor != null && this._hasTextEditorInitialized)
             {
                 if (this._textModel != null)
                 {
@@ -325,7 +337,7 @@ public class WorkflowDetailsStore(
     /// <returns>A awaitable task</returns>
     public async Task OnCopyToClipboard()
     {
-        if (this.TextEditor == null) return;
+        if (this.TextEditor == null || !this._hasTextEditorInitialized) return;
         var text = await this.TextEditor.GetValue();
         if (string.IsNullOrWhiteSpace(text)) return;
         try
@@ -510,7 +522,7 @@ public class WorkflowDetailsStore(
     public async Task SelectNodeInEditor(GraphEventArgs<MouseEventArgs> e)
     {
         if (e.GraphElement == null) return;
-        if (this.TextEditor == null) return;
+        if (this.TextEditor == null || !this._hasTextEditorInitialized) return;
         var source = await this.TextEditor.GetValue();
         var pointer = e.GraphElement.Id;
         var language = this.MonacoEditorHelper.PreferredLanguage;
@@ -564,7 +576,7 @@ public class WorkflowDetailsStore(
     /// <returns></returns>
     protected async Task OnPreferredThemeChangedAsync(string newTheme)
     {
-        if (this.TextEditor != null)
+        if (this.TextEditor != null && this._hasTextEditorInitialized)
         {
             await this.TextEditor.UpdateOptions(new EditorUpdateOptions() { Theme = newTheme });
         }

@@ -33,6 +33,7 @@ public class DocumentDetailsStore(ILogger<DocumentDetailsStore> logger, ISynapse
     
     TextModel? _textModel;
     readonly string _textModelUri = monacoEditorHelper.GetResourceUri();
+    private bool _hasTextEditorInitialized = false;
 
     /// <summary>
     /// Gets the service used to perform logging
@@ -291,7 +292,7 @@ public class DocumentDetailsStore(ILogger<DocumentDetailsStore> logger, ISynapse
     /// <returns></returns>
     public async Task ToggleTextBasedEditorLanguageAsync(string _)
     {
-        await this.OnTextBasedEditorInitAsync();
+        await this.InitializeTextBasedEditorAsync();
     }
 
     /// <summary>
@@ -300,6 +301,17 @@ public class DocumentDetailsStore(ILogger<DocumentDetailsStore> logger, ISynapse
     /// <returns></returns>
     public async Task OnTextBasedEditorInitAsync()
     {
+        this._hasTextEditorInitialized = true;
+        await this.InitializeTextBasedEditorAsync();
+    }
+
+    /// <summary>
+    /// Initializes the text editor
+    /// </summary>
+    /// <returns></returns>
+    public async Task InitializeTextBasedEditorAsync()
+    {
+        if (this.TextEditor == null || !this._hasTextEditorInitialized) return;
         await this.SetTextBasedEditorLanguageAsync();
         await this.SetTextEditorValueAsync();
     }
@@ -313,10 +325,10 @@ public class DocumentDetailsStore(ILogger<DocumentDetailsStore> logger, ISynapse
         try
         {
             var language = this.MonacoEditorHelper.PreferredLanguage;
-            if (this.TextEditor != null)
+            if (this.TextEditor != null && this._hasTextEditorInitialized)
             {
                 this._textModel = await Global.GetModel(this.JSRuntime, this._textModelUri);
-                this._textModel ??= await Global.CreateModel(this.JSRuntime, "", language, this._textModelUri);
+                this._textModel ??= await Global.CreateModel(this.JSRuntime, " ", language, this._textModelUri);
                 await Global.SetModelLanguage(this.JSRuntime, this._textModel, language);
                 await this.TextEditor!.SetModel(this._textModel);
             }
@@ -335,7 +347,7 @@ public class DocumentDetailsStore(ILogger<DocumentDetailsStore> logger, ISynapse
     {
         var document = this.Get(state => state.DocumentJson);
         var language = this.MonacoEditorHelper.PreferredLanguage;
-        if (this.TextEditor != null && !string.IsNullOrWhiteSpace(document))
+        if (this.TextEditor != null && !string.IsNullOrWhiteSpace(document) && this._hasTextEditorInitialized)
         {
             try
             {
@@ -359,7 +371,7 @@ public class DocumentDetailsStore(ILogger<DocumentDetailsStore> logger, ISynapse
     /// <returns>A awaitable task</returns>
     public async Task OnCopyToClipboard()
     {
-        if (this.TextEditor == null) return;
+        if (this.TextEditor == null || !this._hasTextEditorInitialized) return;
         var text = await this.TextEditor.GetValue();
         if (string.IsNullOrWhiteSpace(text)) return;
         try
@@ -408,7 +420,7 @@ public class DocumentDetailsStore(ILogger<DocumentDetailsStore> logger, ISynapse
     /// <returns></returns>
     protected async Task OnPreferredThemeChangedAsync(string newTheme)
     {
-        if (this.TextEditor != null)
+        if (this.TextEditor != null && this._hasTextEditorInitialized)
         {
             await this.TextEditor.UpdateOptions(new EditorUpdateOptions() { Theme = newTheme });
         }
@@ -430,7 +442,7 @@ public class DocumentDetailsStore(ILogger<DocumentDetailsStore> logger, ISynapse
                     this._textModel.DisposeModel();
                     this._textModel = null;
                 }
-                if (this.TextEditor != null)
+                if (this.TextEditor != null && this._hasTextEditorInitialized)
                 {
                     this.TextEditor.Dispose();
                     this.TextEditor = null;
