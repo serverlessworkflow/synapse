@@ -50,14 +50,14 @@ public class SpecificationSchemaManager(IYamlSerializer yamlSerializer, HttpClie
     }
 
     /// <summary>
-    /// Gets the specification's JSON schema for the specificed version
+    /// Gets the specification's JSON schema for the specified version
     /// </summary>
     /// <param name="version">The version to get the schema for</param>
     /// <returns>A awaitable task</returns>
     public async Task<string> GetSchema(string version)
     {
         if (_knownSchemas.TryGetValue(version, out string? value)) return value;
-        var address = $"https://raw.githubusercontent.com/serverlessworkflow/serverlessworkflow.github.io/main/static/schemas/{version}/workflow.yaml";
+        var address = $"https://raw.githubusercontent.com/serverlessworkflow/serverlessworkflow.github.io/main/public/schemas/{version}/workflow.yaml";
         var yamlSchema = await this.HttpClient.GetStringAsync(address);
         this._knownSchemas.Add(version, this.YamlSerializer.ConvertToJson(yamlSchema));
         return this._knownSchemas[version];

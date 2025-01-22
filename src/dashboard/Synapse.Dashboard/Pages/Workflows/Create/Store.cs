@@ -54,6 +54,7 @@ public class CreateWorkflowViewStore(
     private string _textModelUri = string.Empty;
     private bool _disposed = false;
     private bool _processingVersion = false;
+    private bool _hasTextEditorInitialized = false;
 
     /// <summary>
     /// Gets the service used to perform logging
@@ -108,7 +109,7 @@ public class CreateWorkflowViewStore(
     /// <summary>
     /// The <see cref="BlazorMonaco.Editor.StandaloneEditorConstructionOptions"/> provider function
     /// </summary>
-    public Func<StandaloneCodeEditor, StandaloneEditorConstructionOptions> StandaloneEditorConstructionOptions = monacoEditorHelper.GetStandaloneEditorConstructionOptions(string.Empty, false, monacoEditorHelper.PreferredLanguage);
+    public Func<StandaloneCodeEditor, StandaloneEditorConstructionOptions> StandaloneEditorConstructionOptions = monacoEditorHelper.GetStandaloneEditorConstructionOptions(" ", false, monacoEditorHelper.PreferredLanguage);
 
     /// <summary>
     /// The <see cref="StandaloneCodeEditor"/> reference
@@ -276,18 +277,12 @@ public class CreateWorkflowViewStore(
     /// <returns></returns>
     public async Task ToggleTextBasedEditorLanguageAsync(string _)
     {
-        if (this.TextEditor == null)
-        {
-            return;
-        }
+        if (this.TextEditor == null || !this._hasTextEditorInitialized) return;
         var language = this.MonacoEditorHelper.PreferredLanguage;
         try
         {
             var document = await this.TextEditor.GetValue();
-            if (document == null)
-            {
-                return;
-            }
+            if (document == null) return;
             document = language == PreferredLanguage.YAML ?
                 this.YamlSerializer.ConvertFromJson(document) :
                 this.YamlSerializer.ConvertToJson(document);
@@ -295,7 +290,7 @@ public class CreateWorkflowViewStore(
             {
                 WorkflowDefinitionText = document
             });
-            await this.OnTextBasedEditorInitAsync();
+            await this.InitializeTextBasedEditorAsync();
         }
         catch (Exception ex)
         {
@@ -310,6 +305,17 @@ public class CreateWorkflowViewStore(
     /// <returns></returns>
     public async Task OnTextBasedEditorInitAsync()
     {
+        this._hasTextEditorInitialized = true;
+        await this.InitializeTextBasedEditorAsync();
+    }
+
+    /// <summary>
+    /// Initializes the text editor
+    /// </summary>
+    /// <returns></returns>
+    public async Task InitializeTextBasedEditorAsync()
+    {
+        if (this.TextEditor == null || !this._hasTextEditorInitialized) return;
         await this.SetTextBasedEditorLanguageAsync();
         await this.SetTextEditorValueAsync();
     }
@@ -320,10 +326,7 @@ public class CreateWorkflowViewStore(
     /// <returns></returns>
     public async Task SetTextBasedEditorLanguageAsync()
     {
-        if (this.TextEditor == null)
-        {
-            return;
-        }
+        if (this.TextEditor == null || !this._hasTextEditorInitialized) return;
         try
         {
             var language = this.MonacoEditorHelper.PreferredLanguage;
@@ -345,10 +348,7 @@ public class CreateWorkflowViewStore(
     async Task SetTextEditorValueAsync()
     {
         var document = this.Get(state => state.WorkflowDefinitionText);
-        if (this.TextEditor == null || string.IsNullOrWhiteSpace(document))
-        {
-            return;
-        }
+        if (this.TextEditor == null || string.IsNullOrWhiteSpace(document) || !this._hasTextEditorInitialized) return;
         try
         {
             await this.TextEditor.SetValue(document);
@@ -368,8 +368,7 @@ public class CreateWorkflowViewStore(
     /// <returns>An awaitable task</returns>
     public async Task OnDidChangeModelContent(ModelContentChangedEvent e)
     {
-        if (this.TextEditor == null) return;
-
+        if (this.TextEditor == null || !this._hasTextEditorInitialized) return;
         var document = await this.TextEditor.GetValue();
         this.Reduce(state => state with
         {
@@ -383,7 +382,7 @@ public class CreateWorkflowViewStore(
     /// <returns>A new awaitable <see cref="Task"/></returns>
     public async Task SaveWorkflowDefinitionAsync()
     {
-        if (this.TextEditor == null)
+        if (this.TextEditor == null || !this._hasTextEditorInitialized)
         {
             this.Reduce(state => state with
             {
@@ -535,6 +534,10 @@ public class CreateWorkflowViewStore(
     /// <inheritdoc/>
     public override async Task InitializeAsync()
     {
+        this.Loading.Where(loading => loading == true).Subscribe(loading =>
+        {
+            this._hasTextEditorInitialized = false; // reset text editor state when loading
+        }, token: this.CancellationTokenSource.Token);
         this.WorkflowDefinition.SubscribeAsync(async definition => {
             string document = "";
             if (definition != null)
@@ -547,7 +550,7 @@ public class CreateWorkflowViewStore(
             {
                 WorkflowDefinitionText = document
             });
-            await this.OnTextBasedEditorInitAsync();
+            await this.InitializeTextBasedEditorAsync();
         }, cancellationToken: this.CancellationTokenSource.Token);
         Observable.CombineLatest(
             this.Namespace.Where(ns => !string.IsNullOrWhiteSpace(ns)),
@@ -617,7 +620,7 @@ public class CreateWorkflowViewStore(
     /// <returns></returns>
     protected async Task OnPreferredThemeChangedAsync(string newTheme)
     {
-        if (this.TextEditor != null)
+        if (this.TextEditor != null && this._hasTextEditorInitialized)
         {
             await this.TextEditor.UpdateOptions(new EditorUpdateOptions() { Theme = newTheme });
         }
