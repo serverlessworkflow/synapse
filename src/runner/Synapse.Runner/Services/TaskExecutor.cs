@@ -379,20 +379,6 @@ public abstract class TaskExecutor<TDefinition>(IServiceProvider serviceProvider
         this.Stopwatch.Stop();
         if (string.IsNullOrWhiteSpace(then)) then = FlowDirective.Continue;
         var output = result;
-        var arguments = this.GetExpressionEvaluationArguments() ?? new Dictionary<string, object>();
-        arguments[RuntimeExpressions.Arguments.Output] = output!;
-        if (this.Task.Definition.Output?.As is string fromExpression) output = await this.Task.Workflow.Expressions.EvaluateAsync<object>(fromExpression, output ?? new(), arguments, cancellationToken).ConfigureAwait(false);
-        else if (this.Task.Definition.Output?.As != null) output = await this.Task.Workflow.Expressions.EvaluateAsync<object>(this.Task.Definition.Output.As, output ?? new(), arguments, cancellationToken).ConfigureAwait(false);
-        if (this.Task.Definition.Export?.As is string toExpression)
-        {
-            var context = (await this.Task.Workflow.Expressions.EvaluateAsync<IDictionary<string, object>>(toExpression, this.Task.ContextData, arguments, cancellationToken).ConfigureAwait(false))!;
-            await this.Task.SetContextDataAsync(context, cancellationToken).ConfigureAwait(false);
-        }
-        else if (this.Task.Definition.Export?.As != null)
-        {
-            var context = (await this.Task.Workflow.Expressions.EvaluateAsync<IDictionary<string, object>>(this.Task.Definition.Export.As, this.Task.ContextData, this.GetExpressionEvaluationArguments(), cancellationToken).ConfigureAwait(false))!;
-            await this.Task.SetContextDataAsync(context, cancellationToken).ConfigureAwait(false);
-        }
         await this.Task.SkipAsync(output, then, cancellationToken).ConfigureAwait(false);
         this.Subject.OnNext(new TaskLifeCycleEvent(TaskLifeCycleEventType.Skipped));
         this.Subject.OnCompleted();
