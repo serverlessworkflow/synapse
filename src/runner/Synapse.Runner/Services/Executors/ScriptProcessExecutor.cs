@@ -1,4 +1,4 @@
-﻿// Copyright © 2024-Present The Synapse Authors
+// Copyright © 2024-Present The Synapse Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"),
 // you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ public class ScriptProcessExecutor(IServiceProvider serviceProvider, ILogger<Scr
             ? null 
             : await this.ProcessDefinition.Environment.ToAsyncEnumerable().ToDictionaryAwaitAsync(kvp => ValueTask.FromResult(kvp.Key), async kvp => (await this.EvaluateAndSerializeAsync(kvp.Value, cancellationToken).ConfigureAwait(false))!, cancellationToken).ConfigureAwait(false);
         var process = await executor.ExecuteAsync(script, arguments, environment, cancellationToken).ConfigureAwait(false);
-        if (this.Task.Definition.Run.Await != false)
+        if (this.Task.Definition.Run.Await == false)
         {
             await this.SetResultAsync(new(), this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
             return;
