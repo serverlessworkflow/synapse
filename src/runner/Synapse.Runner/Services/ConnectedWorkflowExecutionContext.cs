@@ -123,7 +123,7 @@ public class ConnectedWorkflowExecutionContext(IServiceProvider services, ILogge
         }
         else
         {
-            var contextDocument = await this.Documents.CreateAsync($"{reference}/input", context, cancellationToken).ConfigureAwait(false);
+            var contextDocument = await this.Documents.CreateAsync($"{reference}/context", context, cancellationToken).ConfigureAwait(false);
             contextReference = contextDocument.Id;
         }
         var filteredInput = input;

@@ -31,8 +31,7 @@ public static class WorkflowDefinitionExtensions
         switch (after.Status == TaskInstanceStatus.Skipped ? FlowDirective.Continue : after.Next)
         {
             case FlowDirective.Continue:
-                var afterTask = workflow.Do[after.Name!];
-                var afterIndex = workflow.Do.Select(e => e.Value).ToList().IndexOf(afterTask);
+                var afterIndex = workflow.Do.Select(kvp => kvp.Key).ToList().IndexOf(after.Name!);
                 return workflow.Do.Skip(afterIndex + 1).FirstOrDefault();
             case FlowDirective.End: case FlowDirective.Exit: return default;
             default: return new(after.Next!, workflow.Do[after.Next!]);

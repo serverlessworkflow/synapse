@@ -31,8 +31,7 @@ public static class DoTaskDefinitionExtensions
         switch (after.Next)
         {
             case FlowDirective.Continue:
-                var afterTask = doTask.Do[after.Name!];
-                var afterIndex = doTask.Do.Select(t => t.Value).ToList().IndexOf(afterTask);
+                var afterIndex = doTask.Do.Select(t => t.Key).ToList().IndexOf(after.Name!);
                 return doTask.Do.Skip(afterIndex + 1).FirstOrDefault();
             case FlowDirective.End: case FlowDirective.Exit: return default;
             default: return new(after.Next!, doTask.Do[after.Next!]);
