@@ -424,7 +424,7 @@ public class ConnectedWorkflowExecutionContext(IServiceProvider services, ILogge
     {
         ArgumentNullException.ThrowIfNull(task);
         if (task.Definition is not ListenTaskDefinition listenTask) throw new ArgumentException("The specified task's definition must be a 'listen' task", nameof(task));
-        if (listenTask.Foreach == null) throw new ArgumentException($"Since the specified listen task uses streaming, the {nameof(StreamAsync)} method must be used instead");
+        if (listenTask.Foreach != null) throw new ArgumentException($"Since the specified listen task uses streaming, the {nameof(StreamAsync)} method must be used instead");
         if (this.Instance.Status?.Correlation?.Contexts?.TryGetValue(task.Instance.Reference.OriginalString, out var context) == true && context != null) return context;
         var @namespace = task.Workflow.Instance.GetNamespace()!;
         var name = $"{task.Workflow.Instance.GetName()}.{task.Instance.Id}";

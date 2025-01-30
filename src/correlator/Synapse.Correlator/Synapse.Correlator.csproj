@@ -8,7 +8,7 @@
 	<NeutralLanguage>en</NeutralLanguage>
 	<GenerateDocumentationFile>True</GenerateDocumentationFile>
 	<VersionPrefix>1.0.0</VersionPrefix>
-	<VersionSuffix>alpha5.12</VersionSuffix>
+	<VersionSuffix></VersionSuffix>
 	<AssemblyVersion>$(VersionPrefix)</AssemblyVersion>
 	<FileVersion>$(VersionPrefix)</FileVersion>
 	<Authors>The Synapse Authors</Authors>
@@ -36,12 +36,12 @@
 	<PackageReference Include="Microsoft.Extensions.Configuration.KeyPerFile" Version="9.0.1" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.1" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
-	<PackageReference Include="Neuroglia.Data.Expressions.JavaScript" Version="4.18.1" />
-	<PackageReference Include="Neuroglia.Data.Expressions.JQ" Version="4.18.1" />
-    <PackageReference Include="Neuroglia.Eventing.CloudEvents.AspNetCore" Version="4.18.1" />
-	<PackageReference Include="Neuroglia.Mediation.AspNetCore" Version="4.18.1" />
-	<PackageReference Include="Neuroglia.Eventing.CloudEvents.Infrastructure" Version="4.18.1" />
-	<PackageReference Include="Neuroglia.Security.AspNetCore" Version="4.18.1" />
+	<PackageReference Include="Neuroglia.Data.Expressions.JavaScript" Version="4.19.0" />
+	<PackageReference Include="Neuroglia.Data.Expressions.JQ" Version="4.19.0" />
+    <PackageReference Include="Neuroglia.Eventing.CloudEvents.AspNetCore" Version="4.19.0" />
+	<PackageReference Include="Neuroglia.Mediation.AspNetCore" Version="4.19.0" />
+	<PackageReference Include="Neuroglia.Eventing.CloudEvents.Infrastructure" Version="4.19.0" />
+	<PackageReference Include="Neuroglia.Security.AspNetCore" Version="4.19.0" />
 	<PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="7.2.0" />
 	<PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="7.2.0" />
   </ItemGroup>

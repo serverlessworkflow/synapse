@@ -8,7 +8,7 @@
 	<NeutralLanguage>en</NeutralLanguage>
 	<GenerateDocumentationFile>True</GenerateDocumentationFile>
 	<VersionPrefix>1.0.0</VersionPrefix>
-	<VersionSuffix>alpha5.12</VersionSuffix>
+	<VersionSuffix></VersionSuffix>
 	<AssemblyVersion>$(VersionPrefix)</AssemblyVersion>
 	<FileVersion>$(VersionPrefix)</FileVersion>
 	<Authors>The Synapse Authors</Authors>
@@ -33,7 +33,7 @@
 	<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.1" />
 	<PackageReference Include="moment.net" Version="1.3.4" />
 	<PackageReference Include="NetEscapades.Configuration.Yaml" Version="3.1.0" />
-	<PackageReference Include="ServerlessWorkflow.Sdk.IO" Version="1.0.0-alpha6.3" />
+	<PackageReference Include="ServerlessWorkflow.Sdk.IO" Version="1.0.0" />
 	<PackageReference Include="Spectre.Console" Version="0.49.1" />
     <PackageReference Include="System.CommandLine.NamingConventionBinder" Version="2.0.0-beta4.22272.1" />
   </ItemGroup>
