@@ -27,7 +27,6 @@
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..\..</DockerfileContext>
 	<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
-	<CETCompat>false</CETCompat>
   </PropertyGroup>
 
   <ItemGroup>

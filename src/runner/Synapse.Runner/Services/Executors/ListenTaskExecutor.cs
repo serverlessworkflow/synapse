@@ -64,8 +64,8 @@ public class ListenTaskExecutor(IServiceProvider serviceProvider, ILogger<Listen
             var context = await this.Task.CorrelateAsync(cancellationToken).ConfigureAwait(false);
             var events = this.Task.Definition.Listen.Read switch
             {
-                EventReadMode.Data or EventReadMode.Raw => context.Events.Select(e => e.Value.Data),
-                EventReadMode.Envelope => context.Events.Select(e => e.Value.Data),
+                EventReadMode.Data or EventReadMode.Raw or null => context.Events.Select(e => e.Value.Data),
+                EventReadMode.Envelope => context.Events.Select(e => e.Value),
                 _ => throw new NotSupportedException($"The specified event read mode '{this.Task.Definition.Listen.Read}' is not supported")
             };
             await this.SetResultAsync(events, this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
@@ -115,7 +115,7 @@ public class ListenTaskExecutor(IServiceProvider serviceProvider, ILogger<Listen
             var arguments = this.GetExpressionEvaluationArguments();
             var eventData = this.Task.Definition.Listen.Read switch
             {
-                EventReadMode.Data or EventReadMode.Raw => e.Event.Data,
+                EventReadMode.Data or EventReadMode.Raw or null => e.Event.Data,
                 EventReadMode.Envelope => e.Event,
                 _ => throw new NotSupportedException($"The specified event read mode '{this.Task.Definition.Listen.Read}' is not supported")
             };
