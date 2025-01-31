@@ -449,6 +449,7 @@ public class ConnectedWorkflowExecutionContext(IServiceProvider services, ILogge
                     Source = new ResourceReference<WorkflowInstance>(task.Workflow.Instance.GetName(), task.Workflow.Instance.GetNamespace()),
                     Lifetime = CorrelationLifetime.Ephemeral,
                     Events = listenTask.Listen.To,
+                    Keys = this.Instance.Status?.Correlation?.Keys,
                     Expressions = task.Workflow.Definition.Evaluate ?? new(),
                     Outcome = new()
                     {
@@ -511,6 +512,17 @@ public class ConnectedWorkflowExecutionContext(IServiceProvider services, ILogge
                 CompletedAt = DateTimeOffset.Now
             }
         }, cancellationToken).ConfigureAwait(false);
+        using var @lock = await this.Lock.LockAsync(cancellationToken).ConfigureAwait(false);
+        this.Instance = await this.Api.WorkflowInstances.GetAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, cancellationToken).ConfigureAwait(false);
+        var originalInstance = this.Instance.Clone();
+        foreach(var correlationKey in correlationContext.Keys)
+        {
+            this.Instance.Status!.Correlation!.Keys ??= [];
+            this.Instance.Status!.Correlation!.Keys[correlationKey.Key] = correlationKey.Value;
+        }
+        this.Instance.Status!.Correlation!.Contexts!.Remove(task.Instance.Reference.OriginalString);
+        var jsonPatch = JsonPatchUtility.CreateJsonPatchFromDiff(originalInstance, this.Instance);
+        this.Instance = await this.Api.WorkflowInstances.PatchStatusAsync(this.Instance.GetName(), this.Instance.GetNamespace()!, new Patch(PatchType.JsonPatch, jsonPatch), null, cancellationToken).ConfigureAwait(false);
         return correlationContext;
     }
 

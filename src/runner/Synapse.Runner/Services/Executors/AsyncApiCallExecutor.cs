@@ -18,6 +18,7 @@ using Neuroglia.AsyncApi.Client.Services;
 using Neuroglia.AsyncApi.IO;
 using Neuroglia.AsyncApi.v3;
 using Neuroglia.Data.Expressions;
+using System.Threading;
 
 namespace Synapse.Runner.Services.Executors;
 
@@ -93,6 +94,11 @@ public class AsyncApiCallExecutor(IServiceProvider serviceProvider, ILogger<Asyn
     /// Gets/sets the position of the <see cref="IAsyncApiMessage"/> within its originating stream
     /// </summary>
     protected uint? Offset { get; set; }
+
+    /// <summary>
+    /// Gets/sets a boolean indicating whether or not to keep consuming incoming messages 
+    /// </summary>
+    protected bool KeepConsume { get; set; } = true;
 
     /// <summary>
     /// Gets the path for the specified message
@@ -234,7 +240,7 @@ public class AsyncApiCallExecutor(IServiceProvider serviceProvider, ILogger<Asyn
         if (this.AsyncApi.Subscription == null) throw new NullReferenceException("The 'subscription' must be set when performing an AsyncAPI v3 subscribe operation");
         await using var asyncApiClient = this.AsyncApiClientFactory.CreateFor(this.Document);
         var parameters = new AsyncApiSubscribeOperationParameters(this.Operation.Key, this.AsyncApi.Server, this.AsyncApi.Protocol);
-        await using var result = await asyncApiClient.SubscribeAsync(parameters, cancellationToken).ConfigureAwait(false);
+        var result = await asyncApiClient.SubscribeAsync(parameters, cancellationToken).ConfigureAwait(false);
         if (!result.IsSuccessful) throw new Exception("Failed to execute the AsyncAPI subscribe operation");
         if(result.Messages == null)
         {
@@ -244,24 +250,24 @@ public class AsyncApiCallExecutor(IServiceProvider serviceProvider, ILogger<Asyn
         var observable = result.Messages;
         if (this.AsyncApi.Subscription.Consume.For != null) observable = observable.TakeUntil(Observable.Timer(this.AsyncApi.Subscription.Consume.For.ToTimeSpan()));
         if (this.AsyncApi.Subscription.Consume.Amount.HasValue) observable = observable.Take(this.AsyncApi.Subscription.Consume.Amount.Value);
-        else if (!string.IsNullOrWhiteSpace(this.AsyncApi.Subscription.Consume.While)) observable = observable.Select(message => Observable.FromAsync(async () =>
-        {
-            var keepGoing = await this.Task.Workflow.Expressions.EvaluateConditionAsync(this.AsyncApi.Subscription.Consume.While, this.Task.Input!,this.GetExpressionEvaluationArguments(),cancellationToken).ConfigureAwait(false);
-            return (message, keepGoing);
-        })).Concat().TakeWhile(i => i.keepGoing).Select(i => i.message);
-        else if (!string.IsNullOrWhiteSpace(this.AsyncApi.Subscription.Consume.Until)) observable = observable.Select(message => Observable.FromAsync(async () =>
-        {
-            var keepGoing = !(await this.Task.Workflow.Expressions.EvaluateConditionAsync(this.AsyncApi.Subscription.Consume.Until, this.Task.Input!, this.GetExpressionEvaluationArguments(), cancellationToken).ConfigureAwait(false));
-            return (message, keepGoing);
-        })).Concat().TakeWhile(i => i.keepGoing).Select(i => i.message);
         if (this.AsyncApi.Subscription.Foreach == null)
         {
-            var messages = await observable.ToAsyncEnumerable().ToListAsync(cancellationToken).ConfigureAwait(false);
+            var messages = await observable.ToAsyncEnumerable().TakeWhileAwait(async m =>
+            {
+                if (!string.IsNullOrWhiteSpace(this.AsyncApi.Subscription.Consume.While)) return await this.Task.Workflow.Expressions.EvaluateConditionAsync(this.AsyncApi.Subscription.Consume.While, this.Task.Input!, this.GetExpressionEvaluationArguments(), cancellationToken).ConfigureAwait(false);
+                if (!string.IsNullOrWhiteSpace(this.AsyncApi.Subscription.Consume.Until)) return !await this.Task.Workflow.Expressions.EvaluateConditionAsync(this.AsyncApi.Subscription.Consume.Until, this.Task.Input!, this.GetExpressionEvaluationArguments(), cancellationToken).ConfigureAwait(false);
+                return true;
+            }).ToListAsync(cancellationToken).ConfigureAwait(false);
             await this.SetResultAsync(messages, this.Task.Definition.Then, cancellationToken).ConfigureAwait(false);
         }
         else
         {
-            this.Subscription = observable.SubscribeAsync(OnStreamingMessageAsync, OnStreamingErrorAsync, OnStreamingCompletedAsync);
+            //todo: fix
+            this.Subscription = observable.TakeWhile(_ => this.KeepConsume).SelectMany(m =>
+            {
+                OnStreamingMessageAsync(m).GetAwaiter().GetResult();
+                return Observable.Return(m);
+            }).SubscribeAsync(_ => System.Threading.Tasks.Task.CompletedTask, OnStreamingErrorAsync, OnStreamingCompletedAsync);
         }
     }
 
@@ -274,6 +280,11 @@ public class AsyncApiCallExecutor(IServiceProvider serviceProvider, ILogger<Asyn
     {
         if (this.AsyncApi == null || this.Document == null || this.Operation.Value == null) throw new InvalidOperationException("The executor must be initialized before execution");
         if (this.AsyncApi.Subscription == null) throw new NullReferenceException("The 'subscription' must be set when performing an AsyncAPI v3 subscribe operation");
+        if (!string.IsNullOrWhiteSpace(this.AsyncApi.Subscription.Consume.While) && !await this.Task.Workflow.Expressions.EvaluateConditionAsync(this.AsyncApi.Subscription.Consume.While, this.Task.Input!, this.GetExpressionEvaluationArguments(), this.CancellationTokenSource!.Token).ConfigureAwait(false))
+        {
+            this.KeepConsume = false;
+            return;
+        }
         if (this.AsyncApi.Subscription.Foreach?.Do != null)
         {
             var taskDefinition = new DoTaskDefinition()
@@ -284,10 +295,15 @@ public class AsyncApiCallExecutor(IServiceProvider serviceProvider, ILogger<Asyn
                     new(SynapseDefaults.Tasks.Metadata.PathPrefix.Name, false)
                 ]
             };
-            var arguments = this.GetExpressionEvaluationArguments();
             var messageData = message as object;
+            var offset = this.Offset ?? 0;
+            if (!this.Offset.HasValue) this.Offset = 0;
+            var arguments = this.GetExpressionEvaluationArguments();
+            arguments ??= new Dictionary<string, object>();
+            arguments[this.AsyncApi.Subscription.Foreach.Item ?? RuntimeExpressions.Arguments.Each] = messageData!;
+            arguments[this.AsyncApi.Subscription.Foreach.At ?? RuntimeExpressions.Arguments.Index] = offset;
             if (this.AsyncApi.Subscription.Foreach.Output?.As is string fromExpression) messageData = await this.Task.Workflow.Expressions.EvaluateAsync<object>(fromExpression, messageData ?? new(), arguments, this.CancellationTokenSource!.Token).ConfigureAwait(false);
-            else if (this.AsyncApi.Subscription.Foreach.Output?.As != null) messageData = await this.Task.Workflow.Expressions.EvaluateAsync<object>(this.AsyncApi.Subscription.Foreach.Output.As, messageData ?? new(), arguments, this.CancellationTokenSource!.Token).ConfigureAwait(false);
+            else if (this.AsyncApi.Subscription.Foreach.Output?.As != null) messageData = await this.Task.Workflow.Expressions.EvaluateAsync<object>(this.AsyncApi.Subscription.Foreach.Output.As!, messageData ?? new(), arguments, this.CancellationTokenSource!.Token).ConfigureAwait(false);
             if (this.AsyncApi.Subscription.Foreach.Export?.As is string toExpression)
             {
                 var context = (await this.Task.Workflow.Expressions.EvaluateAsync<IDictionary<string, object>>(toExpression, messageData ?? new(), arguments, this.CancellationTokenSource!.Token).ConfigureAwait(false))!;
@@ -295,18 +311,19 @@ public class AsyncApiCallExecutor(IServiceProvider serviceProvider, ILogger<Asyn
             }
             else if (this.AsyncApi.Subscription.Foreach.Export?.As != null)
             {
-                var context = (await this.Task.Workflow.Expressions.EvaluateAsync<IDictionary<string, object>>(this.AsyncApi.Subscription.Foreach.Export.As, messageData ?? new(), arguments, this.CancellationTokenSource!.Token).ConfigureAwait(false))!;
+                var context = (await this.Task.Workflow.Expressions.EvaluateAsync<IDictionary<string, object>>(this.AsyncApi.Subscription.Foreach.Export.As!, messageData ?? new(), arguments, this.CancellationTokenSource!.Token).ConfigureAwait(false))!;
                 await this.Task.SetContextDataAsync(context, this.CancellationTokenSource!.Token).ConfigureAwait(false);
             }
-            var offset = this.Offset ?? 0;
-            if (!this.Offset.HasValue) this.Offset = 0;
-            arguments ??= new Dictionary<string, object>();
-            arguments[this.AsyncApi.Subscription.Foreach.Item ?? RuntimeExpressions.Arguments.Each] = messageData!;
-            arguments[this.AsyncApi.Subscription.Foreach.At ?? RuntimeExpressions.Arguments.Index] = offset;
             var task = await this.Task.Workflow.CreateTaskAsync(taskDefinition, this.GetPathFor(offset), this.Task.Input, null, this.Task, false, this.CancellationTokenSource!.Token).ConfigureAwait(false);
             var taskExecutor = await this.CreateTaskExecutorAsync(task, taskDefinition, this.Task.ContextData, arguments, this.CancellationTokenSource!.Token).ConfigureAwait(false);
             await taskExecutor.ExecuteAsync(this.CancellationTokenSource!.Token).ConfigureAwait(false);
+            if (this.Task.ContextData != taskExecutor.Task.ContextData) await this.Task.SetContextDataAsync(taskExecutor.Task.ContextData, this.CancellationTokenSource!.Token).ConfigureAwait(false);
             this.Offset++;
+        }
+        if (!string.IsNullOrWhiteSpace(this.AsyncApi.Subscription.Consume.Until) && await this.Task.Workflow.Expressions.EvaluateConditionAsync(this.AsyncApi.Subscription.Consume.Until, this.Task.Input!, this.GetExpressionEvaluationArguments(), this.CancellationTokenSource!.Token).ConfigureAwait(false))
+        {
+            this.KeepConsume = false;
+            return;
         }
     }
 
