@@ -25,7 +25,7 @@
 <ApplicationTitle>Workflow @($"{Name}.{@namespace}:{version}")</ApplicationTitle>
 
 <div class="d-flex flex-grow mh-100">
-    <HorizontalCollapsible class="collapsible-instances">
+    <HorizontalCollapsible @ref="instancesListPanel" class="collapsible-instances">
         <Label>Instances</Label>
         <Content>
             <WorkflowInstancesList class="h-100" 
@@ -51,7 +51,7 @@
             </Button>
         </Content>
     </HorizontalCollapsible>
-    <HorizontalCollapsible class="user-select-none position-relative">
+    <HorizontalCollapsible @ref="graphPanel" class="user-select-none position-relative">
         <Label>Graph</Label>
         <Content>
             @if (workflowDefinition == null)
@@ -70,7 +70,7 @@
             }
         </Content>
     </HorizontalCollapsible>
-    <HorizontalCollapsible>
+    <HorizontalCollapsible @ref="definitionPanel">
         <Label>Definition</Label>
         <Content>
             @if (workflowDefinition == null)
@@ -106,7 +106,7 @@
     </HorizontalCollapsible>
     @if (workflowInstance != null)
     {
-        <HorizontalCollapsible OnClose="OnCloseWorkflowInstance">
+        <HorizontalCollapsible OnClose="async() => await OnCloseWorkflowInstanceAsync()">
             <Label>Instance</Label>
             <Content>
                 <div class="d-flex flex-column h-100 mh-100">
@@ -152,6 +152,9 @@
     WorkflowDefinition workflowDefinition = null!;
     WorkflowInstance? workflowInstance;
     ProblemDetails? problemDetails;
+    HorizontalCollapsible instancesListPanel = null!;
+    HorizontalCollapsible graphPanel = null!;
+    HorizontalCollapsible definitionPanel = null!;
     readonly IEnumerable<string> columns = 
     [
         "Name",
@@ -189,8 +192,9 @@
         await base.OnInitializedAsync().ConfigureAwait(false);
     }
 
+
     /// <inheritdoc/>
-    protected override void OnParametersSet()
+    protected override async Task OnParametersSetAsync()
     {
         if (Version != version)
         {
@@ -199,7 +203,14 @@
         if (InstanceName != instanceName)
         {
             Store.SetWorkflowInstanceName(InstanceName);
+            if (!string.IsNullOrWhiteSpace(InstanceName))
+            {
+                await instancesListPanel.HideAsync();
+                await graphPanel.HideAsync();
+                await definitionPanel.HideAsync();
+            }
         }
+        await base.OnParametersSetAsync();
     }
 
     /// <summary>
@@ -263,8 +274,11 @@
 
     void OnShowInstanceDetails(WorkflowInstance instance) => NavigationManager.NavigateTo($"/workflows/details/{@namespace}/{Name}/{version}/{instance.GetName()}");
 
-    void OnCloseWorkflowInstance()
+    async Task OnCloseWorkflowInstanceAsync()
     {
+        await instancesListPanel.ShowAsync();
+        await graphPanel.ShowAsync();
+        await definitionPanel.ShowAsync();
         NavigationManager.NavigateTo($"/workflows/details/{@namespace}/{Name}/{version}");
         StateHasChanged();
     }
