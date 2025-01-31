@@ -26,7 +26,7 @@
             {
                 <Icon Name="IconName.CaretDown"></Icon>
             }
-            </span>
+        </span>
         <span class="label">@Label</span>
         @if (OnClose.HasDelegate)
         {
@@ -55,6 +55,24 @@
     protected override async Task OnParametersSetAsync()
     {
         await base.OnParametersSetAsync();
+    }
+
+    public async Task HideAsync()
+    {
+        isCollapsed = true;
+        if (OnHidden.HasDelegate)
+        {
+            await OnHidden.InvokeAsync();
+        }
+    }
+
+    public async Task ShowAsync()
+    {
+        isCollapsed = false;
+        if (OnShown.HasDelegate)
+        {
+            await OnShown.InvokeAsync();
+        }
     }
 
     async Task OnToggleAsync()
