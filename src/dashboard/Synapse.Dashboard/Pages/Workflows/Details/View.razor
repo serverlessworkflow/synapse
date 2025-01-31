@@ -170,6 +170,7 @@
     /// <inheritdoc/>
     protected override async Task OnInitializedAsync()
     {
+        Store.DisableNamespaceListing();
         UpdateBreadcrumb();
         Store.WorkflowInstanceName.Subscribe(value => OnStateChanged(_ => instanceName = value), token: CancellationTokenSource.Token);
         Store.WorkflowDefinition.Where(value => value != null).Subscribe(value => OnStateChanged(_ => workflowDefinition = value!), token: CancellationTokenSource.Token);

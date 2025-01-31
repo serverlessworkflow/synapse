@@ -23,6 +23,11 @@ public record NamespacedResourceManagementComponentState<TResource>
 {
 
     /// <summary>
+    /// Gets/sets a boolean value that indicates whether to list <see cref="Neuroglia.Data.Infrastructure.ResourceOriented.Namespace"/>s
+    /// </summary>
+    public bool ListNamespaces { get; set; } = true;
+
+    /// <summary>
     /// Gets a <see cref="EquatableList{T}"/> that contains all <see cref="Neuroglia.Data.Infrastructure.ResourceOriented.Namespace"/>s
     /// </summary>
     public EquatableList<Namespace>? Namespaces { get; set; }
