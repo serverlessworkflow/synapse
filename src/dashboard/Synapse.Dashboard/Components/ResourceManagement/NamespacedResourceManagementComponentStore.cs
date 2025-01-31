@@ -30,7 +30,12 @@ public class NamespacedResourceManagementComponentStore<TState, TResource>(ILogg
 {
 
     /// <summary>
-    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="Namespace"/>s
+    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="NamespacedResourceManagementComponentState{T}.ListNamespaces"/>
+    /// </summary>
+    public IObservable<bool> ListNamespaces => this.Select(s => s.ListNamespaces).DistinctUntilChanged();
+
+    /// <summary>
+    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="NamespacedResourceManagementComponentState{T}.Namespace"/>s
     /// </summary>
     public IObservable<EquatableList<Namespace>?> Namespaces => this.Select(s => s.Namespaces).DistinctUntilChanged();
 
@@ -50,6 +55,27 @@ public class NamespacedResourceManagementComponentStore<TState, TResource>(ILogg
             }
         )
         .DistinctUntilChanged();
+
+    /// <summary>
+    /// Sets the <see cref="NamespacedResourceManagementComponentState{TResource}.ListNamespaces"/> to true
+    /// </summary>
+    public void EnableNamespaceListing()
+    {
+        this.Reduce(state => state with
+        {
+            ListNamespaces = true
+        });
+    }
+    /// <summary>
+    /// Sets the <see cref="NamespacedResourceManagementComponentState{TResource}.ListNamespaces"/> to false
+    /// </summary>
+    public void DisableNamespaceListing()
+    {
+        this.Reduce(state => state with
+        {
+            ListNamespaces = false
+        });
+    }
 
     /// <summary>
     /// Sets the <see cref="NamespacedResourceManagementComponentState{TResource}.Namespace"/>
@@ -85,8 +111,8 @@ public class NamespacedResourceManagementComponentStore<TState, TResource>(ILogg
     /// <inheritdoc/>
     public override async Task InitializeAsync()
     {
-        await this.ListNamespacesAsync().ConfigureAwait(false);
         await base.InitializeAsync();
+        if (this.Get(state => state.ListNamespaces)) await this.ListNamespacesAsync().ConfigureAwait(false);
     }
 
 }
