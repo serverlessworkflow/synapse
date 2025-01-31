@@ -20,6 +20,7 @@ using Synapse.Api.Application.Services;
 using Synapse.Api.Http.Controllers;
 using Synapse.Core.Api.Services;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Synapse.Api.Http;
 
@@ -44,6 +45,7 @@ public static class IServiceCollectionExtensions
             .AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull | JsonIgnoreCondition.WhenWritingDefault;
             })
             .AddApplicationPart(typeof(WorkflowsController).Assembly);
         services.AddIdentityServer(options =>

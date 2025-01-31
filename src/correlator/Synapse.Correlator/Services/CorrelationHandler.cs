@@ -123,7 +123,7 @@ public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRep
                         {
                             Id = Guid.NewGuid().ToString("N")[..12],
                             Events = [new(filter.Key, e)],
-                            Keys = CorrelationKeys == null ? new() : new(CorrelationKeys)
+                            Keys = CorrelationKeys == null ? this.Correlation.Resource.Spec.Keys ?? [] : new(CorrelationKeys)
                         };
                         this.Logger.LogInformation("Correlation context with id '{contextId}' successfully created", context.Id);
                         this.Logger.LogInformation("Event successfully correlated to context with id '{contextId}'", context.Id);
@@ -152,7 +152,7 @@ public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRep
                         {
                             Id = Guid.NewGuid().ToString("N")[..12],
                             Events = [new(filter.Key, e)],
-                            Keys = CorrelationKeys == null ? new() : new(CorrelationKeys)
+                            Keys = CorrelationKeys == null ? this.Correlation.Resource.Spec.Keys ?? [] : new(CorrelationKeys)
                         };
                         await this.CreateOrUpdateContextAsync(context, cancellationToken).ConfigureAwait(false);
                         this.Logger.LogInformation("Correlation context with id '{contextId}' successfully created", context.Id);
@@ -289,7 +289,7 @@ public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRep
     protected virtual async Task<(bool Succeeded, IDictionary<string, string>? CorrelationKeys)> TryExtractCorrelationKeysAsync(CloudEvent e, IDictionary<string, CorrelationKeyDefinition>? keyDefinitions, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(e);
-        var correlationKeys = new Dictionary<string, string>();
+        var correlationKeys = this.Correlation.Resource.Spec.Keys ?? [];
         if (keyDefinitions == null || keyDefinitions.Count < 1) return (true, correlationKeys);
         foreach (var keyDefinition in keyDefinitions)
         {
@@ -305,6 +305,7 @@ public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRep
                 }
                 else if (!keyDefinition.Value.Expect.Equals(correlationTerm, StringComparison.OrdinalIgnoreCase)) return (false, null);
             }
+            if (correlationKeys.ContainsKey(keyDefinition.Key) && correlationTerm != correlationKeys[keyDefinition.Key]) return (false, null);
             correlationKeys[keyDefinition.Key] = correlationTerm;
         }
         return (true, correlationKeys);
@@ -361,7 +362,7 @@ public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRep
                     await this.Resources.PatchStatusAsync<WorkflowInstance>(new(PatchType.JsonPatch, patch), workflowInstance.GetName(), workflowInstance.GetNamespace(), null, false, cancellationToken).ConfigureAwait(false);
                     break;
                 case CorrelationOutcomeType.Start:
-                    var input = this.Correlation.Resource.Spec.Outcome.Start!.Input == null ? [] : await this.ExpressionEvaluator.EvaluateAsync<EquatableDictionary<string, object>>(this.Correlation.Resource.Spec.Outcome.Start!.Input!, context, cancellationToken: cancellationToken).ConfigureAwait(false);
+                    var input = (this.Correlation.Resource.Spec.Outcome.Start!.Input == null ? new() { { "events", context.Events.Values } } : await this.ExpressionEvaluator.EvaluateAsync<EquatableDictionary<string, object>>(this.Correlation.Resource.Spec.Outcome.Start!.Input!, context, cancellationToken: cancellationToken).ConfigureAwait(false));
                     workflowInstance = new()
                     {
                         Metadata = new()
@@ -373,6 +374,13 @@ public class CorrelationHandler(ILogger<CorrelationHandler> logger, IResourceRep
                         {
                             Definition = this.Correlation.Resource.Spec.Outcome.Start!.Workflow,
                             Input = input
+                        },
+                        Status = new()
+                        {
+                            Correlation = new()
+                            {
+                                Keys = context.Keys
+                            }
                         }
                     };
                     await this.Resources.AddAsync(workflowInstance, false, cancellationToken).ConfigureAwait(false);
