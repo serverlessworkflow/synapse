@@ -153,6 +153,10 @@
             graph.CssClass = "";
             isDirty = true;
         }
+        if (graph != null && this.Store.DagreGraph != null && e.GraphElement is INodeViewModel node)
+        {
+            await this.Store.DagreGraph.CenterAsync(node);
+        }
         if (OnMouseUp.HasDelegate)
         {
             await OnMouseUp.InvokeAsync(e);
