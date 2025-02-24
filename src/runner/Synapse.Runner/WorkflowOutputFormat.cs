@@ -28,6 +28,6 @@ public enum WorkflowOutputFormat
     /// <summary>
     /// Indicates that the workflow output should be formatted to YAML
     /// </summary>
-    [EnumMember(Value = "json")]
+    [EnumMember(Value = "yaml")]
     Yaml
 }
