@@ -60,7 +60,7 @@ public class WorkflowProcessExecutor(IServiceProvider serviceProvider, ILogger<W
     {
         var hash = Convert.ToHexString(MD5.HashData(Encoding.UTF8.GetBytes($"{Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.Name)}{this.Task.Instance.Reference}"))).ToLowerInvariant();
         var workflowInstanceName = $"{this.ProcessDefinition.Name}-{hash}";
-        var workflowInstanceNamespace = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.Namespace)!;
+        var workflowInstanceNamespace = this.ProcessDefinition.Namespace;
         try
         {
             this.Subflow = await this.Api.WorkflowInstances.GetAsync(workflowInstanceName, workflowInstanceNamespace, cancellationToken).ConfigureAwait(false);
