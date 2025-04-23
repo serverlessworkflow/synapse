@@ -15,6 +15,8 @@ using Docker.DotNet;
 using Docker.DotNet.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Synapse.Runtime.Services;
+using static Synapse.SynapseDefaults.Resources;
+using System.Net;
 
 namespace Synapse.Runtime.Docker.Services;
 
@@ -76,8 +78,20 @@ public class DockerRuntime(IServiceProvider serviceProvider, ILoggerFactory logg
         try
         {
             this.Logger.LogDebug("Creating a new Docker container for workflow instance '{workflowInstance}'...", workflowInstance.GetQualifiedName());
-            if (this.Docker == null) await this.InitializeAsync(cancellationToken).ConfigureAwait(false);
+            if (this.Docker == null) await this.InitializeAsync(cancellationToken).ConfigureAwait(false); 
             var container = this.Runner.Runtime.Docker!.ContainerTemplate.Clone()!;
+            try
+            {
+                await this.Docker!.Images.InspectImageAsync(container.Image, cancellationToken).ConfigureAwait(false);
+            }
+            catch (DockerApiException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+            {
+                var downloadProgress = new Progress<JSONMessage>();
+                var imageComponents = container.Image.Split(':');
+                var imageName = imageComponents[0];
+                var imageTag = imageComponents.Length > 1 ? imageComponents[1] : null;
+                await this.Docker!.Images.CreateImageAsync(new() { FromImage = imageName, Tag = imageTag }, new(), downloadProgress, cancellationToken).ConfigureAwait(false);
+            }
             container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.Namespace, workflowInstance.GetNamespace()!);
             container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.Name, $"{workflowInstance.GetName()}-{Guid.NewGuid().ToString("N")[..12].ToLowerInvariant()}");
             container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Api.Uri, this.Runner.Api.Uri.OriginalString);
