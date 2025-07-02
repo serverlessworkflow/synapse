@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Json.Schema;
 using Moq;
 using Neuroglia.AsyncApi;
 using Neuroglia.AsyncApi.Client;
@@ -128,5 +129,18 @@ var builder = Host.CreateDefaultBuilder()
     });
 
 using var app = builder.Build();
+
+SchemaRegistry.Global.Fetch = uri =>
+{
+    using var scope = app.Services.CreateScope();
+    using var client = scope.ServiceProvider.GetRequiredService<IHttpClientFactory>().CreateClient();
+    using var request = new HttpRequestMessage(HttpMethod.Get, uri);
+    using var response = client.Send(request);
+    response.EnsureSuccessStatusCode();
+    using var stream = response.Content.ReadAsStream();
+    var contentType = response.Content.Headers.ContentType?.MediaType!;
+    var serializer = scope.ServiceProvider.GetRequiredService<ISerializerProvider>().GetSerializersFor(contentType).FirstOrDefault() ?? throw new NullReferenceException($"Failed to find a serializer for the specified content type '{contentType}'");
+    return serializer.Deserialize<JsonSchema>(stream);
+};
 
 await app.RunAsync();
