@@ -35,8 +35,8 @@ public class FunctionCallExecutor(IServiceProvider serviceProvider, ILogger<Func
 {
 
     const string CustomFunctionDefinitionFile = "function.yaml";
-    const string GithubHost = "github.com";
-    const string GitlabHost = "gitlab";
+    const string GitHubHost = "github.com";
+    const string GitLabHost = "gitlab";
 
     /// <summary>
     /// Gets the service used to serialize/deserialize objects to/from YAML
@@ -65,6 +65,15 @@ public class FunctionCallExecutor(IServiceProvider serviceProvider, ILogger<Func
             if (components.Length != 2) throw new NotSupportedException($"Unknown/unsupported function '{this.Task.Definition.Call}'");
             this.Function = await this.GetCustomFunctionAsync(components[0], components[1], cancellationToken).ConfigureAwait(false);
         }
+        else if (this.Task.Definition.Call.Contains(':'))
+        {
+            var components = this.Task.Definition.Call.Split(':', StringSplitOptions.RemoveEmptyEntries);
+            if (components.Length != 2) throw new Exception($"The specified value '{this.Task.Definition.Call}' is not a valid custom function qualified name ({{name}}:{{version}})");
+            var functionName = components[0];
+            var functionVersion = components[1];
+            uri = new Uri($"https://github.com/serverlessworkflow/catalog/tree/main/functions/{functionName}/{functionVersion}/{CustomFunctionDefinitionFile}");
+            this.Function = await this.GetCustomFunctionAsync(new() { Uri = uri }, cancellationToken).ConfigureAwait(false);
+        }
         else throw new NotSupportedException($"Unknown/unsupported function '{this.Task.Definition.Call}'");
     }
 
@@ -79,8 +88,8 @@ public class FunctionCallExecutor(IServiceProvider serviceProvider, ILogger<Func
         ArgumentNullException.ThrowIfNull(endpoint);
         var uri = endpoint.Uri;
         if (!uri.OriginalString.EndsWith(CustomFunctionDefinitionFile)) uri = new Uri(uri, CustomFunctionDefinitionFile);
-        if (uri.Host.Equals(GithubHost, StringComparison.OrdinalIgnoreCase)) uri = this.TransformGithubUriToRawUri(uri);
-        else if (uri.Host.Contains(GitlabHost)) uri = this.TransformGitlabUriToRawUri(uri);
+        if (uri.Host.Equals(GitHubHost, StringComparison.OrdinalIgnoreCase)) uri = this.TransformGithubUriToRawUri(uri);
+        else if (uri.Host.Contains(GitLabHost)) uri = this.TransformGitlabUriToRawUri(uri);
         var authentication = endpoint.Authentication == null ? null : await this.Task.Workflow.Expressions.EvaluateAsync<AuthenticationPolicyDefinition>(endpoint.Authentication, this.Task.Input, this.Task.Arguments, cancellationToken).ConfigureAwait(false);
         using var httpClient = this.ServiceProvider.GetRequiredService<IHttpClientFactory>().CreateClient();
         await httpClient.ConfigureAuthenticationAsync(authentication, this.ServiceProvider, this.Task.Workflow.Definition, cancellationToken).ConfigureAwait(false);
@@ -138,8 +147,8 @@ public class FunctionCallExecutor(IServiceProvider serviceProvider, ILogger<Func
     protected virtual Uri TransformGithubUriToRawUri(Uri uri)
     {
         ArgumentNullException.ThrowIfNull(uri);
-        if (uri.Host.Equals(GithubHost, StringComparison.OrdinalIgnoreCase)) return uri;
-        var rawUri = uri.AbsoluteUri.Replace(GithubHost, "raw.githubusercontent.com", StringComparison.OrdinalIgnoreCase);
+        if (!uri.Host.Equals(GitHubHost, StringComparison.OrdinalIgnoreCase)) return uri;
+        var rawUri = uri.AbsoluteUri.Replace(GitHubHost, "raw.githubusercontent.com", StringComparison.OrdinalIgnoreCase);
         rawUri = rawUri.Replace("/tree/", "/refs/heads/", StringComparison.OrdinalIgnoreCase);
         return new(rawUri, UriKind.Absolute);
     }
@@ -152,7 +161,7 @@ public class FunctionCallExecutor(IServiceProvider serviceProvider, ILogger<Func
     protected virtual Uri TransformGitlabUriToRawUri(Uri uri)
     {
         ArgumentNullException.ThrowIfNull(uri);
-        if (!uri.AbsoluteUri.Contains(GitlabHost, StringComparison.OrdinalIgnoreCase)) return uri;
+        if (!uri.Host.Equals(GitLabHost, StringComparison.OrdinalIgnoreCase)) return uri;
         var rawUri = uri.AbsoluteUri.Replace("/-/blob/", "/-/raw/", StringComparison.OrdinalIgnoreCase);
         return new(rawUri, UriKind.Absolute);
     }

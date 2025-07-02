@@ -104,7 +104,7 @@ public class HttpCallExecutor(IServiceProvider serviceProvider, ILogger<HttpCall
         {
             requestContent = this.Http.Body switch
             {
-                string stringContent => new StringContent(stringContent, Encoding.UTF8, mediaType),
+                string stringContent => stringContent.IsRuntimeExpression() ? null : new StringContent(stringContent, Encoding.UTF8, mediaType),
                 byte[] byteArrayContent => new StreamContent(new MemoryStream(byteArrayContent)),
                 _ => null
             };
