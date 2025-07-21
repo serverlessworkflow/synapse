@@ -95,7 +95,7 @@ public class WorkflowController(IServiceProvider serviceProvider, ILoggerFactory
     {
         ArgumentNullException.ThrowIfNull(workflow);
         if (this.Operator == null) throw new Exception("The controller must be started before attempting any operation");
-        if (workflow.Metadata.Labels != null && workflow.Metadata.Labels.TryGetValue(SynapseDefaults.Resources.Labels.Operator, out var operatorQualifiedName) && operatorQualifiedName == this.Operator.Resource.GetQualifiedName()) return true;
+        if (workflow.Metadata.Labels != null && workflow.Metadata.Labels.TryGetValue(SynapseDefaults.Resources.Labels.Operator, out var operatorQualifiedName)) return operatorQualifiedName == this.Operator.Resource.GetQualifiedName();
         try
         {
             var originalResource = workflow.Clone();
@@ -120,7 +120,7 @@ public class WorkflowController(IServiceProvider serviceProvider, ILoggerFactory
     protected virtual async Task<bool> TryReleaseAsync(Workflow workflow, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(workflow);
-        if (workflow.Metadata.Labels != null && workflow.Metadata.Labels.TryGetValue(SynapseDefaults.Resources.Labels.Operator, out var operatorQualifiedName) && operatorQualifiedName == this.Operator.Resource.GetQualifiedName()) return true;
+        if (workflow.Metadata.Labels != null && workflow.Metadata.Labels.TryGetValue(SynapseDefaults.Resources.Labels.Operator, out var operatorQualifiedName)) return operatorQualifiedName == this.Operator.Resource.GetQualifiedName();
         try
         {
             var originalResource = workflow.Clone();
