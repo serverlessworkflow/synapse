@@ -20,14 +20,9 @@ namespace Synapse.Api.Http;
 /// <param name="mediator">The service used to mediate calls</param>
 /// <param name="jsonSerializer">The service used to serialize/deserialize data to/from JSON</param>
 public abstract class NamespacedResourceController<TResource>(IMediator mediator, IJsonSerializer jsonSerializer)
-    : ResourceController<TResource>(mediator)
+    : ResourceController<TResource>(mediator, jsonSerializer)
     where TResource : class, IResource, new()
 {
-
-    /// <summary>
-    /// Gets the service used to serialize/deserialize data to/from JSON
-    /// </summary>
-    protected IJsonSerializer JsonSerializer { get; } = jsonSerializer;
 
     /// <summary>
     /// Gets the resource with the specified name and namespace
@@ -150,13 +145,17 @@ public abstract class NamespacedResourceController<TResource>(IMediator mediator
     /// <param name="namespace">The namespace the resources to watch belong to</param>
     /// <param name="labelSelector">A comma-separated list of label selectors, if any</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-    /// <returns>A new <see cref="IActionResult"/></returns>
+    /// <returns>A new awaitable <see cref="Task"/></returns>
     [HttpGet("{namespace}/watch/sse")]
     [ProducesResponseType(typeof(IAsyncEnumerable<ResourceWatchEvent>), (int)HttpStatusCode.OK)]
     [ProducesErrorResponseType(typeof(Neuroglia.ProblemDetails))]
-    public virtual async Task<IActionResult> WatchResourcesUsingSSE(string @namespace, string? labelSelector = null, CancellationToken cancellationToken = default) 
+    public virtual async Task WatchResourcesUsingSSE(string @namespace, string? labelSelector = null, CancellationToken cancellationToken = default) 
     {
-        if (!this.TryParseLabelSelectors(labelSelector, out var labelSelectors)) return this.InvalidLabelSelector(labelSelector!);
+        if (!this.TryParseLabelSelectors(labelSelector, out var labelSelectors))
+        {
+            await WriteInvalidLabelSelectorResponseAsync(labelSelector!, cancellationToken).ConfigureAwait(false);
+            return;
+        }
         var response = await this.Mediator.ExecuteAsync(new WatchResourcesQuery<TResource>(@namespace, labelSelectors), cancellationToken).ConfigureAwait(false);
         this.Response.Headers.ContentType = "text/event-stream";
         this.Response.Headers.CacheControl = "no-cache";
@@ -172,7 +171,6 @@ public abstract class NamespacedResourceController<TResource>(IMediator mediator
             }
         }
         catch (Exception ex) when(ex is TaskCanceledException || ex is OperationCanceledException) { }
-        return this.Ok();
     }
 
     /// <summary>
@@ -197,11 +195,11 @@ public abstract class NamespacedResourceController<TResource>(IMediator mediator
     /// <param name="namespace">The namespace the resource to monitor belongs to</param>
     /// <param name="name">The name of the resource to monitor</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-    /// <returns>A new <see cref="IActionResult"/></returns>
+    /// <returns>A new awaitable <see cref="Task"/></returns>
     [HttpGet("{namespace}/{name}/monitor/sse")]
     [ProducesResponseType(typeof(IAsyncEnumerable<ResourceWatchEvent>), (int)HttpStatusCode.OK)]
     [ProducesErrorResponseType(typeof(Neuroglia.ProblemDetails))]
-    public virtual async Task<IActionResult> MonitorResourceUsingSSE(string name, string @namespace, CancellationToken cancellationToken = default)
+    public virtual async Task MonitorResourceUsingSSE(string name, string @namespace, CancellationToken cancellationToken = default)
     {
         var response = await this.Mediator.ExecuteAsync(new MonitorResourceQuery<TResource>(name, @namespace), cancellationToken).ConfigureAwait(false);
         this.Response.Headers.ContentType = "text/event-stream";
@@ -218,7 +216,6 @@ public abstract class NamespacedResourceController<TResource>(IMediator mediator
             }
         }
         catch (Exception ex) when (ex is TaskCanceledException || ex is OperationCanceledException) { }
-        return this.Ok();
     }
 
     /// <summary>

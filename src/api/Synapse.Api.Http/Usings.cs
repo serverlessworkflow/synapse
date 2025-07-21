@@ -27,4 +27,5 @@ global using Synapse.Api.Http.Hubs;
 global using Synapse.Resources;
 global using System.Collections.Concurrent;
 global using System.Net;
+global using System.Net.Mime;
 global using System.Text;
