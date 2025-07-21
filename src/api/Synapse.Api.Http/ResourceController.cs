@@ -18,7 +18,8 @@ namespace Synapse.Api.Http;
 /// </summary>
 /// <typeparam name="TResource">The type of <see cref="IResource"/> to manage</typeparam>
 /// <param name="mediator">The service used to mediate calls</param>
-public abstract class ResourceController<TResource>(IMediator mediator)
+/// <param name="jsonSerializer">The service used to serialize/deserialize data to/from JSON.</param>
+public abstract class ResourceController<TResource>(IMediator mediator, IJsonSerializer jsonSerializer)
     : Controller
     where TResource : class, IResource, new()
 {
@@ -27,6 +28,11 @@ public abstract class ResourceController<TResource>(IMediator mediator)
     /// Gets the service used to mediate calls
     /// </summary>
     protected IMediator Mediator { get; } = mediator;
+
+    /// <summary>
+    /// Gets the service used to serialize/deserialize data to/from JSON.
+    /// </summary>
+    protected IJsonSerializer JsonSerializer { get; } = jsonSerializer;
 
     /// <summary>
     /// Creates a new resource of the specified type
@@ -115,6 +121,32 @@ public abstract class ResourceController<TResource>(IMediator mediator)
     {
         this.ModelState.AddModelError(nameof(labelSelector), $"The specified value '{labelSelector}' is not a valid comma-separated label selector list");
         return this.ValidationProblem("Bad Request", statusCode: (int)HttpStatusCode.BadRequest, title: "Bad Request", modelStateDictionary: this.ModelState);
+    }
+
+    /// <summary>
+    /// Writes to the response the description of a validation problem that occurred while processing the request.
+    /// </summary>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
+    /// <returns>A new awaitable <see cref="Task"/>.</returns>
+    protected virtual async Task WriteValidationProblemResponseAsync(CancellationToken cancellationToken)
+    {
+        var problem = new ValidationProblemDetails(ModelState);
+        var json = JsonSerializer.SerializeToText(problem);
+        Response.StatusCode = (int)HttpStatusCode.BadRequest;
+        Response.ContentType = MediaTypeNames.Application.Json;
+        await Response.WriteAsync(json, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Writes to the response the description of an error that occurred while parsing the request's label selector.
+    /// </summary>
+    /// <param name="labelSelector">The invalid label selector.</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
+    /// <returns>A new awaitable <see cref="Task"/>.</returns>
+    protected virtual async Task WriteInvalidLabelSelectorResponseAsync(string labelSelector, CancellationToken cancellationToken)
+    {
+        ModelState.AddModelError(nameof(labelSelector), $"The specified value '{labelSelector}' is not a valid comma-separated label selector list");
+        await WriteValidationProblemResponseAsync(cancellationToken).ConfigureAwait(false);
     }
 
 }
