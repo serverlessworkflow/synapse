@@ -98,7 +98,7 @@ public abstract class ClusterResourceController<TResource>(IMediator mediator, I
     [ProducesErrorResponseType(typeof(Neuroglia.ProblemDetails))]
     public virtual async Task WatchResourcesUsingSSE(string? labelSelector = null, CancellationToken cancellationToken = default)
     {
-        if (!TryParseLabelSelectors(labelSelector, out var labelSelectors))
+        if (!this.TryParseLabelSelectors(labelSelector, out var labelSelectors))
         {
             await WriteInvalidLabelSelectorResponseAsync(labelSelector!, cancellationToken).ConfigureAwait(false);
             return;
