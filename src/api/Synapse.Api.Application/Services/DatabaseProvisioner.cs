@@ -33,7 +33,7 @@ namespace Synapse.Api.Application.Services;
 /// <param name="yamlSerializer">The service used to serialize/deserialize data to/from YAML</param>
 /// <param name="workflowDefinitionReader">The service used to read <see cref="WorkflowDefinition"/>s</param>
 /// <param name="options">The service used to access the current <see cref="ApiServerOptions"/></param>
-public class WorkflowDatabaseInitializer(IServiceProvider serviceProvider, ILogger<WorkflowDatabaseInitializer> logger, IJsonSerializer jsonSerializer, IYamlSerializer yamlSerializer, IWorkflowDefinitionReader workflowDefinitionReader, IOptions<ApiServerOptions> options)
+public class DatabaseProvisioner(IServiceProvider serviceProvider, ILogger<DatabaseProvisioner> logger, IJsonSerializer jsonSerializer, IYamlSerializer yamlSerializer, IWorkflowDefinitionReader workflowDefinitionReader, IOptions<ApiServerOptions> options)
     : IHostedService
 {
 
@@ -132,7 +132,7 @@ public class WorkflowDatabaseInitializer(IServiceProvider serviceProvider, ILogg
                 using var stream = file.OpenRead();
                 using var streamReader = new StreamReader(stream);
                 var text = await streamReader.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
-                var ns = serializer.Deserialize<NamespaceDefinition>(text)!;
+                var ns = serializer.Deserialize<Namespace>(text)!;
                 await resources.AddAsync(ns, false, cancellationToken).ConfigureAwait(false);
                 this.Logger.LogInformation("Successfully imported namespace '{namespace}' from file '{file}'", $"{ns.Metadata.Name}", file.FullName);
                 count++;
