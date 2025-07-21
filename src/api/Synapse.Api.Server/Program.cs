@@ -25,7 +25,7 @@ builder.Services.AddResponseCompression();
 builder.Services.AddSynapse(builder.Configuration);
 builder.Services.AddSynapseApi();
 builder.Services.AddSynapseHttpApi(authority);
-builder.Services.AddHostedService<WorkflowDatabaseInitializer>();
+builder.Services.AddHostedService<DatabaseProvisioner>();
 
 var authentication = builder.Services.AddAuthentication(FallbackPolicySchemeDefaults.AuthenticationScheme);
 authentication.AddScheme<StaticBearerAuthenticationOptions, StaticBearerAuthenticationHandler>(StaticBearerDefaults.AuthenticationScheme, options =>
