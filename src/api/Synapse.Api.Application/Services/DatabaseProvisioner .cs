@@ -132,7 +132,7 @@ public class WorkflowDatabaseInitializer(IServiceProvider serviceProvider, ILogg
                 using var stream = file.OpenRead();
                 using var streamReader = new StreamReader(stream);
                 var text = await streamReader.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
-                var ns = serializer.Deserialize<NamespaceDefinition>(text)!;
+                var ns = serializer.Deserialize<Namespace>(text)!;
                 await resources.AddAsync(ns, false, cancellationToken).ConfigureAwait(false);
                 this.Logger.LogInformation("Successfully imported namespace '{namespace}' from file '{file}'", $"{ns.Metadata.Name}", file.FullName);
                 count++;
