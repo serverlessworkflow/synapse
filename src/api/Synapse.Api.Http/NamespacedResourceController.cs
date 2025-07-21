@@ -151,7 +151,7 @@ public abstract class NamespacedResourceController<TResource>(IMediator mediator
     [ProducesErrorResponseType(typeof(Neuroglia.ProblemDetails))]
     public virtual async Task WatchResourcesUsingSSE(string @namespace, string? labelSelector = null, CancellationToken cancellationToken = default) 
     {
-        if (!TryParseLabelSelectors(labelSelector, out var labelSelectors))
+        if (!this.TryParseLabelSelectors(labelSelector, out var labelSelectors))
         {
             await WriteInvalidLabelSelectorResponseAsync(labelSelector!, cancellationToken).ConfigureAwait(false);
             return;
