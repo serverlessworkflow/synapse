@@ -53,4 +53,14 @@ public record WorkflowDetailsState
     /// </summary>
     public ProblemDetails? ProblemDetails { get; set; }
 
+    /// <summary>
+    /// Gets a <see cref="EquatableList{T}"/> that contains all <see cref="Operator"/>s
+    /// </summary>
+    public EquatableList<Operator>? Operators { get; set; }
+
+    /// <summary>
+    /// Gets/sets the active operator filter
+    /// </summary>
+    public string? Operator { get; set; } = null;
+
 }

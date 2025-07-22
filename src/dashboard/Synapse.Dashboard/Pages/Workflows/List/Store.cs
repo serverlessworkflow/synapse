@@ -12,7 +12,6 @@
 // limitations under the License.
 
 using Synapse.Api.Client.Services;
-using Synapse.Dashboard.Components.DocumentDetailsStateManagement;
 using Synapse.Resources;
 
 namespace Synapse.Dashboard.Pages.Workflows.List;
@@ -43,8 +42,8 @@ public class WorkflowListComponentStore(ILogger<WorkflowListComponentStore> logg
     /// <returns>A new awaitable <see cref="Task"/></returns>
     public async Task ListOperatorsAsync()
     {
-        var operatorList = new EquatableList<Operator>(await (await this.ApiClient.Operators.ListAsync().ConfigureAwait(false)).OrderBy(ns => ns.GetQualifiedName()).ToListAsync().ConfigureAwait(false));
-        this.Reduce(s => s with
+        var operatorList = new EquatableList<Operator>(await (await ApiClient.Operators.ListAsync().ConfigureAwait(false)).OrderBy(ns => ns.GetQualifiedName()).ToListAsync().ConfigureAwait(false));
+        Reduce(s => s with
         {
             Operators = operatorList
         });
@@ -56,7 +55,7 @@ public class WorkflowListComponentStore(ILogger<WorkflowListComponentStore> logg
     /// <param name="operatorName">The new value</param>
     public void SetOperator(string? operatorName)
     {
-        this.Reduce(state => state with
+        Reduce(state => state with
         {
             Operator = operatorName
         });
@@ -66,16 +65,16 @@ public class WorkflowListComponentStore(ILogger<WorkflowListComponentStore> logg
     public override async Task InitializeAsync()
     {
         await base.InitializeAsync();
-        await this.ListOperatorsAsync().ConfigureAwait(false);
-        this.Operator.Subscribe(operatorName => {
+        await ListOperatorsAsync().ConfigureAwait(false);
+        Operator.Subscribe(operatorName => {
             if (string.IsNullOrWhiteSpace(operatorName))
             {
-                this.RemoveLabelSelector(SynapseDefaults.Resources.Labels.Operator);
+                RemoveLabelSelector(SynapseDefaults.Resources.Labels.Operator);
             }
             else
             {
-                this.AddLabelSelector(new(SynapseDefaults.Resources.Labels.Operator, LabelSelectionOperator.Equals, operatorName));
+                AddLabelSelector(new(SynapseDefaults.Resources.Labels.Operator, LabelSelectionOperator.Equals, operatorName));
             }
-        }, token: this.CancellationTokenSource.Token);
+        }, token: CancellationTokenSource.Token);
     }
 }
