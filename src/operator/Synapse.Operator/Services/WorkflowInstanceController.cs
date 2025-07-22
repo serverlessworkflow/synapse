@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Neuroglia.Data.Infrastructure.ResourceOriented;
 using Neuroglia.Data.Infrastructure.Services;
 
 namespace Synapse.Operator.Services;
@@ -23,8 +24,9 @@ namespace Synapse.Operator.Services;
 /// <param name="controllerOptions">The service used to access the current <see cref="IOptions{TOptions}"/></param>
 /// <param name="repository">The service used to manage <see cref="IResource"/>s</param>
 /// <param name="operatorController">The service used to access the current <see cref="Resources.Operator"/></param>
+/// <param name="workflowController">The service used to access all monitored <see cref="Workflow"/>s</param>
 /// <param name="documents">The <see cref="IRepository"/> used to manage <see cref="Document"/>s</param>
-public class WorkflowInstanceController(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, IOptions<ResourceControllerOptions<WorkflowInstance>> controllerOptions, IResourceRepository repository, IOperatorController operatorController, IRepository<Document, string> documents)
+public class WorkflowInstanceController(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, IOptions<ResourceControllerOptions<WorkflowInstance>> controllerOptions, IResourceRepository repository, IOperatorController operatorController, IWorkflowController workflowController, IRepository<Document, string> documents)
     : ResourceController<WorkflowInstance>(loggerFactory, controllerOptions, repository)
 {
 
@@ -37,6 +39,11 @@ public class WorkflowInstanceController(IServiceProvider serviceProvider, ILogge
     /// Gets the service used to monitor the current <see cref="Operator"/>
     /// </summary>
     protected IResourceMonitor<Resources.Operator> Operator => operatorController.Operator;
+
+    /// <summary>
+    /// Gets a dictionary containing all monitored <see cref="Workflow"/>s
+    /// </summary>
+    protected IReadOnlyDictionary<string, Workflow> Workflows => workflowController.Workflows;
 
     /// <summary>
     /// Gets the <see cref="IRepository"/> used to manage <see cref="Document"/>s
@@ -87,7 +94,8 @@ public class WorkflowInstanceController(IServiceProvider serviceProvider, ILogge
     protected virtual async Task<bool> TryClaimAsync(WorkflowInstance resource, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(resource);
-        if (resource.Metadata.Labels != null && resource.Metadata.Labels.TryGetValue(SynapseDefaults.Resources.Labels.Operator, out var operatorQualifiedName)) return operatorQualifiedName == this.Operator.Resource.GetQualifiedName();
+        var isClaimable = this.IsWorkflowInstanceClaimable(resource);
+        if (isClaimable.HasValue) return isClaimable.Value;
         try
         {
             var originalResource = resource.Clone();
@@ -112,7 +120,8 @@ public class WorkflowInstanceController(IServiceProvider serviceProvider, ILogge
     protected virtual async Task<bool> TryReleaseAsync(WorkflowInstance resource, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(resource);
-        if (resource.Metadata.Labels != null && resource.Metadata.Labels.TryGetValue(SynapseDefaults.Resources.Labels.Operator, out var operatorQualifiedName)) return operatorQualifiedName == this.Operator.Resource.GetQualifiedName();
+        var isClaimable = this.IsWorkflowInstanceClaimable(resource);
+        if (isClaimable.HasValue) return isClaimable.Value;
         try
         {
             var originalResource = resource.Clone();
@@ -204,6 +213,20 @@ public class WorkflowInstanceController(IServiceProvider serviceProvider, ILogge
     /// <param name="selector">A key/value mapping of the labels both workflows and workflow instances to select must define</param>
     /// <returns>A new awaitable <see cref="Task"/></returns>
     protected virtual Task OnResourceSelectorChangedAsync(IDictionary<string, string>? selector) => this.ReconcileAsync(this.CancellationTokenSource.Token);
+
+    /// <summary>
+    /// Determines whether or not the specified <see cref="WorkflowInstance"/> can be claimed by the current <see cref="Resources.Operator"/>
+    /// </summary>
+    /// <param name="workflowInstance">The <see cref="WorkflowInstance"/> to check</param>
+    /// <returns>A boolean indicating whether or not the specified <see cref="WorkflowInstance"/> can be claimed by the current <see cref="Resources.Operator"/></returns>
+    protected virtual bool? IsWorkflowInstanceClaimable(WorkflowInstance workflowInstance)
+    {
+        ArgumentNullException.ThrowIfNull(workflowInstance);
+        if (workflowInstance.Metadata.Labels != null && workflowInstance.Metadata.Labels.TryGetValue(SynapseDefaults.Resources.Labels.Operator, out var operatorQualifiedName)) return operatorQualifiedName == this.Operator.Resource.GetQualifiedName();
+        if (this.Workflows.TryGetValue(this.GetResourceCacheKey(workflowInstance.Spec.Definition.Name, workflowInstance.Spec.Definition.Namespace), out var workflow) && workflow != null
+            && workflow.Metadata.Labels != null && workflow.Metadata.Labels.TryGetValue(SynapseDefaults.Resources.Labels.Operator, out operatorQualifiedName)) return operatorQualifiedName == this.Operator.Resource.GetQualifiedName();
+        return null;
+    }
 
     /// <inheritdoc/>
     protected override async ValueTask DisposeAsync(bool disposing)

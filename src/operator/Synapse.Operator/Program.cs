@@ -62,6 +62,7 @@ var builder = Host.CreateDefaultBuilder()
 
         services.AddScoped<WorkflowController>();
         services.AddScoped<IResourceController<Workflow>>(provider => provider.GetRequiredService<WorkflowController>());
+        services.AddScoped<IWorkflowController>(provider => provider.GetRequiredService<WorkflowController>());
 
         services.AddScoped<WorkflowInstanceController>();
         services.AddScoped<IResourceController<WorkflowInstance>>(provider => provider.GetRequiredService<WorkflowInstanceController>());
