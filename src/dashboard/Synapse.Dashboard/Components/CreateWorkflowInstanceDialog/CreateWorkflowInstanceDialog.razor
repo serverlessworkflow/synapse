@@ -78,7 +78,7 @@
     string? operatorName;
 
     [Parameter] public WorkflowDefinition? WorkflowDefinition { get; set; }
-    [Parameter] public EquatableList<Operator> Operators { get; set; } = [];
+    [Parameter] public IEnumerable<Operator> Operators { get; set; } = [];
     [Parameter] public string? OperatorName { get; set; } = null;
     [Parameter] public EquatableDictionary<string, object>? Input { get; set; }
     [Parameter] public EventCallback<CreateWorkflowInstanceParameters> OnCreate { get; set; }

@@ -98,7 +98,7 @@ else
     bool loading = true;
     bool saving;
     private ProblemDetails? problemDetails = null;
-    protected EquatableList<Operator>? operators { get; set; }
+    protected IEnumerable<Operator>? operators { get; set; }
     protected string? operatorName { get; set; }
     
     [Parameter] public string? Namespace { get; set; }
