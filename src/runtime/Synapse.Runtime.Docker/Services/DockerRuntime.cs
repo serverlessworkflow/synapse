@@ -104,18 +104,16 @@ public class DockerRuntime(IServiceProvider serviceProvider, ILoggerFactory logg
             container.SetEnvironmentVariable("DOCKER_HOST", "unix:///var/run/docker.sock");
             container.User = "root";
             if (this.Runner.Certificates?.Validate == false) container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.SkipCertificateValidation, "true");
-            var hostConfig = new HostConfig()
-            {
-                Mounts = []
-            };
+            var hostConfig = this.Runner.Runtime.Docker.HostConfig?.Clone()! ?? new();
             if (!Directory.Exists(this.Runner.Runtime.Docker.Secrets.Directory)) Directory.CreateDirectory(this.Runner.Runtime.Docker.Secrets.Directory);
-            hostConfig.Mounts.Add(new()
+            hostConfig.Mounts ??= [];
+            hostConfig.Mounts.Insert(0, new()
             {
                 Type = "bind",
                 Source = this.Runner.Runtime.Docker.Secrets.Directory,
                 Target = this.Runner.Runtime.Docker.Secrets.MountPath
             });
-            hostConfig.Mounts.Add(new()
+            hostConfig.Mounts.Insert(1, new()
             {
                 Type = "bind",
                 Source = "/var/run/docker.sock",

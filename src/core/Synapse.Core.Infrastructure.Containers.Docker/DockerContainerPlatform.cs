@@ -100,7 +100,7 @@ public class DockerContainerPlatform(ILogger<DockerContainerPlatform> logger, IH
             HostConfig = new()
             {
                 PortBindings = definition.Ports?.ToDictionary(kvp => kvp.Value.ToString(), kvp => (IList<PortBinding>)[new PortBinding() { HostPort = kvp.Key.ToString() }]),
-                Binds = definition.Volumes?.Select(e => $"{e.Key}={e.Value}")?.ToList() ?? []
+                Binds = definition.Volumes?.Select(e => $"{e.Key}:{e.Value}")?.ToList() ?? []
             }
         };
         var response = await this.Docker.Containers.CreateContainerAsync(parameters, cancellationToken).ConfigureAwait(false);

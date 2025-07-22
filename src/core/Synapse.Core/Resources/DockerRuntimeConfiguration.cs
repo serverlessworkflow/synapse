@@ -81,15 +81,21 @@ public record DockerRuntimeConfiguration
     public virtual Config ContainerTemplate { get; set; } = LoadContainerTemplate();
 
     /// <summary>
+    /// Gets/sets the configuration of the host to use when running runner containers
+    /// </summary>
+    [DataMember(Order = 5, Name = "hostConfig"), JsonPropertyOrder(5), JsonPropertyName("hostConfig"), YamlMember(Order = 5, Alias = "hostConfig")]
+    public virtual HostConfig? HostConfig { get; set; }
+
+    /// <summary>
     /// Gets/sets the path to the directory that contains the secrets to mount in runner containers on a per workflow configuration basis
     /// </summary>
-    [DataMember(Order = 5, Name = "secrets"), JsonPropertyOrder(5), JsonPropertyName("secrets"), YamlMember(Order = 5, Alias = "secrets")]
+    [DataMember(Order = 6, Name = "secrets"), JsonPropertyOrder(6), JsonPropertyName("secrets"), YamlMember(Order = 6, Alias = "secrets")]
     public virtual DockerRuntimeSecretsConfiguration Secrets { get; set; } = new();
 
     /// <summary>
     /// Gets/sets the name of the network, if any, to connect Runner containers to
     /// </summary>
-    [DataMember(Order = 6, Name = "network"), JsonPropertyOrder(6), JsonPropertyName("network"), YamlMember(Order = 6, Alias = "network")]
+    [DataMember(Order = 7, Name = "network"), JsonPropertyOrder(7), JsonPropertyName("network"), YamlMember(Order = 7, Alias = "network")]
     public virtual string Network { get; set; } = DefaultNetwork;
 
     /// <summary>
