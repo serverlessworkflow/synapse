@@ -25,7 +25,7 @@ namespace Synapse.Operator.Services;
 /// <param name="operatorOptions">The current <see cref="Configuration.OperatorOptions"/></param>
 /// <param name="operatorAccessor">The service used to access the current <see cref="Resources.Operator"/></param>
 public class WorkflowController(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, IOptions<ResourceControllerOptions<Workflow>> controllerOptions, IResourceRepository resources, IOptions<OperatorOptions> operatorOptions, IOperatorController operatorAccessor)
-    : ResourceController<Workflow>(loggerFactory, controllerOptions, resources)
+    : ResourceController<Workflow>(loggerFactory, controllerOptions, resources), IWorkflowController
 {
 
     /// <summary>
@@ -47,6 +47,9 @@ public class WorkflowController(IServiceProvider serviceProvider, ILoggerFactory
     /// Gets a <see cref="ConcurrentDictionary{TKey, TValue}"/> that contains current <see cref="WorkflowScheduler"/>s
     /// </summary>
     protected ConcurrentDictionary<string, WorkflowScheduler> Schedulers { get; } = [];
+
+    /// <inheritdoc/>
+    public IReadOnlyDictionary<string, Workflow> Workflows => this.Resources.AsReadOnly();
 
     /// <inheritdoc/>
     public override async Task StartAsync(CancellationToken cancellationToken)

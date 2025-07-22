@@ -14,15 +14,14 @@
 namespace Synapse.Operator.Services;
 
 /// <summary>
-/// Defines the fundamentals of a service used to access the current Synapse Operator
+/// Defines the fundamentals of a service used to access all monitored workflows
 /// </summary>
-public interface IOperatorController
-    : IHostedService
+public interface IWorkflowController
 {
 
     /// <summary>
-    /// Gets the service used to monitor the current <see cref="Resources.Operator"/>
+    /// Gets a dictionary containing all monitored workflows
     /// </summary>
-    IResourceMonitor<Resources.Operator> Operator { get; }
+    IReadOnlyDictionary<string, Workflow> Workflows { get; }
 
 }

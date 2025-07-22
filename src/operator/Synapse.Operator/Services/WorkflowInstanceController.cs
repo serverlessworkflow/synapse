@@ -23,8 +23,9 @@ namespace Synapse.Operator.Services;
 /// <param name="controllerOptions">The service used to access the current <see cref="IOptions{TOptions}"/></param>
 /// <param name="repository">The service used to manage <see cref="IResource"/>s</param>
 /// <param name="operatorController">The service used to access the current <see cref="Resources.Operator"/></param>
+/// <param name="workflowController">The service used to access all monitored <see cref="Workflow"/>s</param>
 /// <param name="documents">The <see cref="IRepository"/> used to manage <see cref="Document"/>s</param>
-public class WorkflowInstanceController(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, IOptions<ResourceControllerOptions<WorkflowInstance>> controllerOptions, IResourceRepository repository, IOperatorController operatorController, IRepository<Document, string> documents)
+public class WorkflowInstanceController(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, IOptions<ResourceControllerOptions<WorkflowInstance>> controllerOptions, IResourceRepository repository, IOperatorController operatorController, IWorkflowController workflowController, IRepository<Document, string> documents)
     : ResourceController<WorkflowInstance>(loggerFactory, controllerOptions, repository)
 {
 
@@ -37,6 +38,11 @@ public class WorkflowInstanceController(IServiceProvider serviceProvider, ILogge
     /// Gets the service used to monitor the current <see cref="Operator"/>
     /// </summary>
     protected IResourceMonitor<Resources.Operator> Operator => operatorController.Operator;
+
+    /// <summary>
+    /// Gets a dictionary containing all monitored <see cref="Workflow"/>s
+    /// </summary>
+    protected IReadOnlyDictionary<string, Workflow> Workflows => workflowController.Workflows;
 
     /// <summary>
     /// Gets the <see cref="IRepository"/> used to manage <see cref="Document"/>s
@@ -88,6 +94,8 @@ public class WorkflowInstanceController(IServiceProvider serviceProvider, ILogge
     {
         ArgumentNullException.ThrowIfNull(resource);
         if (resource.Metadata.Labels != null && resource.Metadata.Labels.TryGetValue(SynapseDefaults.Resources.Labels.Operator, out var operatorQualifiedName)) return operatorQualifiedName == this.Operator.Resource.GetQualifiedName();
+        if (this.Workflows.TryGetValue(this.GetResourceCacheKey(resource.Spec.Definition.Name, resource.Spec.Definition.Namespace), out var workflow) && workflow != null 
+            && workflow.Metadata.Labels != null && workflow.Metadata.Labels.TryGetValue(SynapseDefaults.Resources.Labels.Operator, out operatorQualifiedName)) return operatorQualifiedName == this.Operator.Resource.GetQualifiedName();
         try
         {
             var originalResource = resource.Clone();
@@ -113,6 +121,8 @@ public class WorkflowInstanceController(IServiceProvider serviceProvider, ILogge
     {
         ArgumentNullException.ThrowIfNull(resource);
         if (resource.Metadata.Labels != null && resource.Metadata.Labels.TryGetValue(SynapseDefaults.Resources.Labels.Operator, out var operatorQualifiedName)) return operatorQualifiedName == this.Operator.Resource.GetQualifiedName();
+        if (this.Workflows.TryGetValue(this.GetResourceCacheKey(resource.Spec.Definition.Name, resource.Spec.Definition.Namespace), out var workflow) && workflow != null
+           && workflow.Metadata.Labels != null && workflow.Metadata.Labels.TryGetValue(SynapseDefaults.Resources.Labels.Operator, out operatorQualifiedName)) return operatorQualifiedName == this.Operator.Resource.GetQualifiedName();
         try
         {
             var originalResource = resource.Clone();
