@@ -65,19 +65,24 @@ else
         </div>
     }
 
-    <div class="py-3">
-        @if (operators != null && operators.Count() > 0)
-        {
-            <select class="form-select m-2" @onchange="(e) => Store.SetOperator(e.Value?.ToString())">
-                <option value="">Any Operator</option>
-                @foreach (var op in operators)
-                {
-                    var name = op.GetName() + "." + op.GetNamespace();
-                    <option value="@name" selected="@(name == operatorName)">@name</option>
-                }
-            </select>
-        }
-    </div>
+    <Accordion class="py-3">
+        <AccordionItem Title="Advanced Settings">
+            <Content>
+            @if (operators != null && operators.Count() > 0)
+            {
+                <label for="operator">Select an Operator to run the Workflow:</label>
+                <select id="operator" class="form-select" @onchange="(e) => Store.SetOperator(e.Value?.ToString())">
+                    <option value="">Any Operator</option>
+                    @foreach (var op in operators)
+                    {
+                        var name = op.GetName() + "." + op.GetNamespace();
+                        <option value="@name" selected="@(name == operatorName)">@name</option>
+                    }
+                </select>
+             }
+            </Content>
+        </AccordionItem>
+    </Accordion>
 
     <Button class="mt-3" Color="ButtonColor.Primary" Outline="true" Disabled="saving" @onclick="async (_) => await Store.SaveWorkflowDefinitionAsync()">
         @if(!saving)
