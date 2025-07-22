@@ -61,7 +61,7 @@ public class JSInterop(IJSRuntime jsRuntime, ILocalStorage storage, IMonacoEdito
     {
         var module = await moduleTask.Value;
         await module.InvokeVoidAsync("setTheme", theme);
-        await storage.SetItemAsync("preferedTheme", theme);
+        await storage.SetItemAsync("preferredTheme", theme);
         await monacoEditorHelper.ChangePreferredThemeAsync(theme);
     }
 

@@ -133,7 +133,7 @@
     {
         user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
         AuthenticationStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
-        theme = await Storage.GetItemAsync("preferedTheme") ?? "dark";
+        theme = await Storage.GetItemAsync("preferredTheme") ?? "dark";
         await MonacoEditorHelper.ChangePreferredThemeAsync(theme);
         await base.OnInitializedAsync();
     }
