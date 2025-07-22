@@ -43,7 +43,11 @@
                 OnSuspend="async (instance) => await Store.SuspendInstanceAsync(instance)"
                 OnResume="async (instance) => await Store.ResumeInstanceAsync(instance)"
                 OnCancel="async (instance) => await Store.CancelInstanceAsync(instance)"
-                                   OnReplay="async (instance) => await Store.OnShowCreateInstanceAsync(workflowDefinition, operators ?? [], instance.Spec?.Input, instance.Metadata.Labels?.Get(SynapseDefaults.Resources.Labels.Operator) ?? operatorName)"
+                OnReplay="async (instance) => await Store.OnShowCreateInstanceAsync(
+                    workflowDefinition, operators ?? [], 
+                    instance.Spec?.Input, 
+                    instance.Metadata.Labels?.Get(SynapseDefaults.Resources.Labels.Operator) ?? operatorName
+                )"
                 OnDelete="OnDeleteWorkflowInstanceAsync"
                 OnToggleSelected="Store.ToggleResourceSelection"
                 OnSuspendSelected="async () => await Store.OnSuspendSelectedInstancesAsync()"
