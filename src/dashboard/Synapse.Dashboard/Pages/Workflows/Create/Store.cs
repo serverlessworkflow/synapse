@@ -17,6 +17,7 @@ using Semver;
 using ServerlessWorkflow.Sdk.Models;
 using ServerlessWorkflow.Sdk.Validation;
 using Synapse.Api.Client.Services;
+using Synapse.Dashboard.Pages.Workflows.List;
 using Synapse.Resources;
 using System.Text.RegularExpressions;
 
@@ -172,14 +173,24 @@ public class CreateWorkflowViewStore(
     public IObservable<IDictionary<string, string[]>> ProblemErrors => this.Select(state => state.ProblemErrors).DistinctUntilChanged();
 
     /// <summary>
+    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="WorkflowListState.Operators"/> changes
+    /// </summary>
+    public IObservable<EquatableList<Operator>?> Operators => this.Select(s => s.Operators).DistinctUntilChanged();
+
+    /// <summary>
+    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="WorkflowListState.Operator"/> changes
+    /// </summary>
+    public IObservable<string?> Operator => this.Select(s => s.Operator).DistinctUntilChanged();
+
+    /// <summary>
     /// Gets an <see cref="IObservable{T}"/> used to observe computed <see cref="Neuroglia.ProblemDetails"/>
     /// </summary>
     public IObservable<ProblemDetails?> ProblemDetails => Observable.CombineLatest(
-        this.ProblemType,
-        this.ProblemTitle,
-        this.ProblemStatus,
-        this.ProblemDetail,
-        this.ProblemErrors,
+        ProblemType,
+        ProblemTitle,
+        ProblemStatus,
+        ProblemDetail,
+        ProblemErrors,
         (type, title, status, details, errors) =>
         {
             if (string.IsNullOrWhiteSpace(title))
@@ -198,7 +209,7 @@ public class CreateWorkflowViewStore(
     /// <param name="ns">The new <see cref="CreateWorkflowViewState.Namespace"/> value</param>
     public void SetNamespace(string? ns)
     {
-        this.Reduce(state => state with
+        Reduce(state => state with
         {
             Namespace = ns,
             Loading = true
@@ -211,7 +222,7 @@ public class CreateWorkflowViewStore(
     /// <param name="name">The new <see cref="CreateWorkflowViewState.Name"/> value</param>
     public void SetName(string? name)
     {
-        this.Reduce(state => state with
+        Reduce(state => state with
         {
             Name = name,
             Loading = true
@@ -224,7 +235,7 @@ public class CreateWorkflowViewStore(
     /// <param name="isNew">The new <see cref="CreateWorkflowViewState.IsNew"/> value</param>
     public void SetIsNew(bool isNew)
     {
-        this.Reduce(state => state with
+        Reduce(state => state with
         {
             IsNew = isNew
         });
@@ -236,7 +247,7 @@ public class CreateWorkflowViewStore(
     /// <param name="problem">The <see cref="ProblemDetails"/> to populate the data with</param>
     public void SetProblemDetails(ProblemDetails? problem)
     {
-        this.Reduce(state => state with
+        Reduce(state => state with
         {
             ProblemType = problem?.Type,
             ProblemTitle = problem?.Title ?? string.Empty,
@@ -258,14 +269,16 @@ public class CreateWorkflowViewStore(
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(@namespace);
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
-        var workflow = await this.Api.Workflows.GetAsync(name, @namespace) ?? throw new NullReferenceException($"Failed to find the specified workflow '{name}.{@namespace}'");
+        var workflow = await Api.Workflows.GetAsync(name, @namespace) ?? throw new NullReferenceException($"Failed to find the specified workflow '{name}.{@namespace}'");
+        var operatorName = workflow.Metadata.Labels?.Get(SynapseDefaults.Resources.Labels.Operator);
         var definition = workflow.Spec.Versions.GetLatest();
         var nextVersion = SemVersion.Parse(definition.Document.Version, SemVersionStyles.Strict);
         nextVersion = nextVersion.WithPatch(nextVersion.Patch + 1);
         definition.Document.Version = nextVersion.ToString();
-        this.Reduce(s => s with
+        Reduce(s => s with
         {
             WorkflowDefinition = definition,
+            Operator = operatorName,
             Loading = false
         });
     }
@@ -277,25 +290,25 @@ public class CreateWorkflowViewStore(
     /// <returns></returns>
     public async Task ToggleTextBasedEditorLanguageAsync(string _)
     {
-        if (this.TextEditor == null || !this._hasTextEditorInitialized) return;
-        var language = this.MonacoEditorHelper.PreferredLanguage;
+        if (TextEditor == null || !_hasTextEditorInitialized) return;
+        var language = MonacoEditorHelper.PreferredLanguage;
         try
         {
-            var document = await this.TextEditor.GetValue();
+            var document = await TextEditor.GetValue();
             if (document == null) return;
             document = language == PreferredLanguage.YAML ?
-                this.YamlSerializer.ConvertFromJson(document) :
-                this.YamlSerializer.ConvertToJson(document);
-            this.Reduce(state => state with
+                YamlSerializer.ConvertFromJson(document) :
+                YamlSerializer.ConvertToJson(document);
+            Reduce(state => state with
             {
                 WorkflowDefinitionText = document
             });
-            await this.InitializeTextBasedEditorAsync();
+            await InitializeTextBasedEditorAsync();
         }
         catch (Exception ex)
         {
-            this.Logger.LogError("Unable to change text editor language: {exception}", ex.ToString());
-            await this.MonacoEditorHelper.ChangePreferredLanguageAsync(language == PreferredLanguage.YAML ? PreferredLanguage.JSON : PreferredLanguage.YAML);
+            Logger.LogError("Unable to change text editor language: {exception}", ex.ToString());
+            await MonacoEditorHelper.ChangePreferredLanguageAsync(language == PreferredLanguage.YAML ? PreferredLanguage.JSON : PreferredLanguage.YAML);
         }
     }
 
@@ -305,8 +318,8 @@ public class CreateWorkflowViewStore(
     /// <returns></returns>
     public async Task OnTextBasedEditorInitAsync()
     {
-        this._hasTextEditorInitialized = true;
-        await this.InitializeTextBasedEditorAsync();
+        _hasTextEditorInitialized = true;
+        await InitializeTextBasedEditorAsync();
     }
 
     /// <summary>
@@ -315,9 +328,9 @@ public class CreateWorkflowViewStore(
     /// <returns></returns>
     public async Task InitializeTextBasedEditorAsync()
     {
-        if (this.TextEditor == null || !this._hasTextEditorInitialized) return;
-        await this.SetTextBasedEditorLanguageAsync();
-        await this.SetTextEditorValueAsync();
+        if (TextEditor == null || !_hasTextEditorInitialized) return;
+        await SetTextBasedEditorLanguageAsync();
+        await SetTextEditorValueAsync();
     }
 
     /// <summary>
@@ -326,18 +339,18 @@ public class CreateWorkflowViewStore(
     /// <returns></returns>
     public async Task SetTextBasedEditorLanguageAsync()
     {
-        if (this.TextEditor == null || !this._hasTextEditorInitialized) return;
+        if (TextEditor == null || !_hasTextEditorInitialized) return;
         try
         {
-            var language = this.MonacoEditorHelper.PreferredLanguage;
-            this._textModel = await Global.GetModel(this.JSRuntime, this._textModelUri);
-            this._textModel ??= await Global.CreateModel(this.JSRuntime, "", language, this._textModelUri);
-            await Global.SetModelLanguage(this.JSRuntime, this._textModel, language);
-            await this.TextEditor!.SetModel(this._textModel);
+            var language = MonacoEditorHelper.PreferredLanguage;
+            _textModel = await Global.GetModel(JSRuntime, _textModelUri);
+            _textModel ??= await Global.CreateModel(JSRuntime, "", language, _textModelUri);
+            await Global.SetModelLanguage(JSRuntime, _textModel, language);
+            await TextEditor!.SetModel(_textModel);
         }
         catch (Exception ex)
         {
-            this.Logger.LogError("Unable to set text editor language: {exception}", ex.ToString());
+            Logger.LogError("Unable to set text editor language: {exception}", ex.ToString());
         }
     }
 
@@ -347,17 +360,17 @@ public class CreateWorkflowViewStore(
     /// <returns></returns>
     async Task SetTextEditorValueAsync()
     {
-        var document = this.Get(state => state.WorkflowDefinitionText);
-        if (this.TextEditor == null || string.IsNullOrWhiteSpace(document) || !this._hasTextEditorInitialized) return;
+        var document = Get(state => state.WorkflowDefinitionText);
+        if (TextEditor == null || string.IsNullOrWhiteSpace(document) || !_hasTextEditorInitialized) return;
         try
         {
-            await this.TextEditor.SetValue(document);
+            await TextEditor.SetValue(document);
             await Task.Delay(10);
-            await this.TextEditor.Trigger("", "editor.action.formatDocument");
+            await TextEditor.Trigger("", "editor.action.formatDocument");
         }
         catch (Exception ex)
         {
-            this.Logger.LogError("Unable to set text editor value: {exception}", ex.ToString());
+            Logger.LogError("Unable to set text editor value: {exception}", ex.ToString());
         }
     }
 
@@ -368,9 +381,9 @@ public class CreateWorkflowViewStore(
     /// <returns>An awaitable task</returns>
     public async Task OnDidChangeModelContent(ModelContentChangedEvent e)
     {
-        if (this.TextEditor == null || !this._hasTextEditorInitialized) return;
-        var document = await this.TextEditor.GetValue();
-        this.Reduce(state => state with
+        if (TextEditor == null || !_hasTextEditorInitialized) return;
+        var document = await TextEditor.GetValue();
+        Reduce(state => state with
         {
             WorkflowDefinitionText = document
         });
@@ -382,19 +395,19 @@ public class CreateWorkflowViewStore(
     /// <returns>A new awaitable <see cref="Task"/></returns>
     public async Task SaveWorkflowDefinitionAsync()
     {
-        if (this.TextEditor == null || !this._hasTextEditorInitialized)
+        if (TextEditor == null || !_hasTextEditorInitialized)
         {
-            this.Reduce(state => state with
+            Reduce(state => state with
             {
                 ProblemTitle = "Text editor",
                 ProblemDetail = "The text editor must be initialized."
             });
             return;
         }
-        var workflowDefinitionText = await this.TextEditor.GetValue();
+        var workflowDefinitionText = await TextEditor.GetValue();
         if (string.IsNullOrWhiteSpace(workflowDefinitionText))
         {
-            this.Reduce(state => state with
+            Reduce(state => state with
             {
                 ProblemTitle = "Invalid definition",
                 ProblemDetail = "The workflow definition cannot be empty."
@@ -403,10 +416,10 @@ public class CreateWorkflowViewStore(
         }
         try
         {
-            var workflowDefinition = this.MonacoEditorHelper.PreferredLanguage == PreferredLanguage.JSON ?
-                this.JsonSerializer.Deserialize<WorkflowDefinition>(workflowDefinitionText)! :
-                this.YamlSerializer.Deserialize<WorkflowDefinition>(workflowDefinitionText)!;
-            var validationResult = await this.WorkflowDefinitionValidator.ValidateAsync(workflowDefinition);
+            var workflowDefinition = MonacoEditorHelper.PreferredLanguage == PreferredLanguage.JSON ?
+                JsonSerializer.Deserialize<WorkflowDefinition>(workflowDefinitionText)! :
+                YamlSerializer.Deserialize<WorkflowDefinition>(workflowDefinitionText)!;
+            var validationResult = await WorkflowDefinitionValidator.ValidateAsync(workflowDefinition);
             if (!validationResult.IsValid)
             {
                 var errors = new Dictionary<string, string[]>();
@@ -414,7 +427,7 @@ public class CreateWorkflowViewStore(
                 {
                     errors.Add(reference, validationResult.Errors!.Where(e => e.Reference == reference).Select(e => e.Details ?? "").ToArray());
                 });
-                this.Reduce(state => state with
+                Reduce(state => state with
                 {
                     ProblemTitle = "Invalid definition",
                     ProblemDetail = "The workflow definition is not valid.",
@@ -425,16 +438,17 @@ public class CreateWorkflowViewStore(
             var @namespace = workflowDefinition!.Document.Namespace;
             var name = workflowDefinition.Document.Name;
             var version = workflowDefinition.Document.Version;
-            var isNew = this.Get(state => state.IsNew);
-            this.Reduce(s => s with
+            var isNew = Get(state => state.IsNew);
+            var operatorName = Get(state => state.Operator);
+            Reduce(s => s with
             {
                 Saving = true
             });
             Workflow? workflow = null;
             if (isNew)
             {
-                try { 
-                    workflow = await this.Api.Workflows.CreateAsync(new()
+                try {
+                    workflow = new()
                     {
                         Metadata = new()
                         {
@@ -445,8 +459,14 @@ public class CreateWorkflowViewStore(
                         {
                             Versions = [workflowDefinition]
                         }
-                    });
-                    this.NavigationManager.NavigateTo($"/workflows/details/{@namespace}/{name}/{version}");
+                    };
+                    if (!string.IsNullOrWhiteSpace(operatorName))
+                    {
+                        workflow.Metadata.Labels = workflow.Metadata.Labels ?? new EquatableDictionary<string, string>();
+                        workflow.Metadata.Labels.Add(SynapseDefaults.Resources.Labels.Operator, operatorName);
+                    }
+                    workflow = await Api.Workflows.CreateAsync(workflow);
+                    NavigationManager.NavigateTo($"/workflows/details/{@namespace}/{name}/{version}");
                     return;
                 }
                 catch (ProblemDetailsException ex) when (ex.Problem.Title == "Conflict" && ex.Problem.Detail != null && ex.Problem.Detail.EndsWith("already exists"))
@@ -454,36 +474,41 @@ public class CreateWorkflowViewStore(
                     // the workflow exists, try to update it instead
                 }
             }
-            workflow = await this.Api.Workflows.GetAsync(name, @namespace);
+            workflow = await Api.Workflows.GetAsync(name, @namespace);
             var updatedResource = workflow.Clone()!;
             var documentVersion = SemVersion.Parse(version, SemVersionStyles.Strict)!;
             var latestVersion = SemVersion.Parse(updatedResource.Spec.Versions.GetLatest().Document.Version, SemVersionStyles.Strict)!;
             if (updatedResource.Spec.Versions.Any(v => SemVersion.Parse(v.Document.Version, SemVersionStyles.Strict).CompareSortOrderTo(documentVersion) >= 0))
             {
-                this.Reduce(state => state with
+                Reduce(state => state with
                 {
                     ProblemTitle = "Invalid version",
                     ProblemDetail = $"The specified version '{documentVersion}' must be strictly superior to the latest version '{latestVersion}'."
                 });
                 return;
             }
+            if (!string.IsNullOrWhiteSpace(operatorName) && updatedResource.Metadata.Labels?.Get(SynapseDefaults.Resources.Labels.Operator) != operatorName)
+            {
+                updatedResource.Metadata.Labels ??= new EquatableDictionary<string, string>();
+                updatedResource.Metadata.Labels[SynapseDefaults.Resources.Labels.Operator] = operatorName;
+            }
             updatedResource.Spec.Versions.Add(workflowDefinition!);
-            var jsonPatch = JsonPatch.FromDiff(this.JsonSerializer.SerializeToElement(workflow)!.Value, this.JsonSerializer.SerializeToElement(updatedResource)!.Value);
-            var patch = this.JsonSerializer.Deserialize<Json.Patch.JsonPatch>(jsonPatch.RootElement);
+            var jsonPatch = JsonPatch.FromDiff(JsonSerializer.SerializeToElement(workflow)!.Value, JsonSerializer.SerializeToElement(updatedResource)!.Value);
+            var patch = JsonSerializer.Deserialize<Json.Patch.JsonPatch>(jsonPatch.RootElement);
             if (patch != null)
             {
                 var resourcePatch = new Patch(PatchType.JsonPatch, jsonPatch);
-                await this.Api.ManageNamespaced<Workflow>().PatchAsync(name, @namespace, resourcePatch, null, this.CancellationTokenSource.Token);
+                await Api.ManageNamespaced<Workflow>().PatchAsync(name, @namespace, resourcePatch, null, CancellationTokenSource.Token);
             }
-            this.NavigationManager.NavigateTo($"/workflows/details/{@namespace}/{name}/{version}");
+            NavigationManager.NavigateTo($"/workflows/details/{@namespace}/{name}/{version}");
         }
         catch (ProblemDetailsException ex)
         {
-            this.SetProblemDetails(ex.Problem);
+            SetProblemDetails(ex.Problem);
         }
         catch (YamlDotNet.Core.YamlException ex)
         {
-            this.Reduce(state => state with
+            Reduce(state => state with
             {
                 ProblemTitle = "Serialization error",
                 ProblemDetail = "The workflow definition cannot be serialized.",
@@ -497,7 +522,7 @@ public class CreateWorkflowViewStore(
         }
         catch (System.Text.Json.JsonException ex)
         {
-            this.Reduce(state => state with
+            Reduce(state => state with
             {
                 ProblemTitle = "Serialization error",
                 ProblemDetail = "The workflow definition cannot be serialized.",
@@ -510,8 +535,8 @@ public class CreateWorkflowViewStore(
         }
         catch (Exception ex)
         {
-            this.Logger.LogError("Unable to save workflow definition: {exception}", ex.ToString());
-            this.Reduce(state => state with
+            Logger.LogError("Unable to save workflow definition: {exception}", ex.ToString());
+            Reduce(state => state with
             {
                 ProblemTitle = "Error",
                 ProblemDetail = "An error occurred while saving the workflow.",
@@ -523,55 +548,80 @@ public class CreateWorkflowViewStore(
         }
         finally
         {
-            this.Reduce(s => s with
+            Reduce(s => s with
             {
                 Saving = false
             });
         }
+    }
+    /// <summary>
+    /// Lists all available <see cref="Operator"/>s
+    /// </summary>
+    /// <returns>A new awaitable <see cref="Task"/></returns>
+    public async Task ListOperatorsAsync()
+    {
+        var operatorList = new EquatableList<Operator>(await (await api.Operators.ListAsync().ConfigureAwait(false)).OrderBy(ns => ns.GetQualifiedName()).ToListAsync().ConfigureAwait(false));
+        Reduce(s => s with
+        {
+            Operators = operatorList
+        });
+    }
+
+    /// <summary>
+    /// Sets the <see cref="WorkflowListState.Operator"/> 
+    /// </summary>
+    /// <param name="operatorName">The new value</param>
+    public void SetOperator(string? operatorName)
+    {
+        Reduce(state => state with
+        {
+            Operator = operatorName
+        });
     }
     #endregion
 
     /// <inheritdoc/>
     public override async Task InitializeAsync()
     {
-        this.Loading.Where(loading => loading == true).Subscribe(loading =>
+        await ListOperatorsAsync().ConfigureAwait(false);
+        Loading.Where(loading => loading == true).Subscribe(loading =>
         {
-            this._hasTextEditorInitialized = false; // reset text editor state when loading
-        }, token: this.CancellationTokenSource.Token);
-        this.WorkflowDefinition.SubscribeAsync(async definition => {
+            _hasTextEditorInitialized = false; // reset text editor state when loading
+        }, token: CancellationTokenSource.Token);
+        WorkflowDefinition.SubscribeAsync(async definition => {
             string document = "";
             if (definition != null)
             {
-                document = this.MonacoEditorHelper.PreferredLanguage == PreferredLanguage.JSON ?
-                    this.JsonSerializer.SerializeToText(definition) :
-                    this.YamlSerializer.SerializeToText(definition);
+                document = MonacoEditorHelper.PreferredLanguage == PreferredLanguage.JSON ?
+                    JsonSerializer.SerializeToText(definition) :
+                    YamlSerializer.SerializeToText(definition);
             }
-            this.Reduce(state => state with
+            Reduce(state => state with
             {
                 WorkflowDefinitionText = document
             });
-            await this.InitializeTextBasedEditorAsync();
-        }, cancellationToken: this.CancellationTokenSource.Token);
+            await InitializeTextBasedEditorAsync();
+        }, cancellationToken: CancellationTokenSource.Token);
         Observable.CombineLatest(
-            this.Namespace.Where(ns => !string.IsNullOrWhiteSpace(ns)),
-            this.Name.Where(name => !string.IsNullOrWhiteSpace(name)),
+            Namespace.Where(ns => !string.IsNullOrWhiteSpace(ns)),
+            Name.Where(name => !string.IsNullOrWhiteSpace(name)),
             (ns, name) => (ns!, name!)
         ).SubscribeAsync(async ((string ns, string name) workflow) =>
         {
-            await this.GetWorkflowDefinitionAsync(workflow.ns, workflow.name);
-        }, cancellationToken: this.CancellationTokenSource.Token);
-        this.WorkflowDefinitionText.Where(document => !string.IsNullOrEmpty(document)).Throttle(new(100)).SubscribeAsync(async (document) => 
+            await GetWorkflowDefinitionAsync(workflow.ns, workflow.name);
+        }, cancellationToken: CancellationTokenSource.Token);
+        WorkflowDefinitionText.Where(document => !string.IsNullOrEmpty(document)).Throttle(new(100)).SubscribeAsync(async (document) => 
         {
             if (string.IsNullOrWhiteSpace(document)) return;
-            var currentDslVersion = this.Get(state => state.DslVersion);
+            var currentDslVersion = Get(state => state.DslVersion);
             var versionExtractor = new Regex("'?\"?(dsl|DSL)'?\"?\\s*:\\s*'?\"?([\\w\\.\\-\\+]*)'?\"?");
             var match = versionExtractor.Match(document);
             if (match == null) return;
             var documentDslVersion = match.Groups[2].Value;
             if (documentDslVersion == currentDslVersion) return;
-            await this.SetValidationSchema(documentDslVersion);
-        }, cancellationToken: this.CancellationTokenSource.Token);
-        this.MonacoEditorHelper.PreferredThemeChanged += OnPreferredThemeChangedAsync;
+            await SetValidationSchema(documentDslVersion);
+        }, cancellationToken: CancellationTokenSource.Token);
+        MonacoEditorHelper.PreferredThemeChanged += OnPreferredThemeChangedAsync;
         await base.InitializeAsync();
     }
 
@@ -582,35 +632,35 @@ public class CreateWorkflowViewStore(
     /// <returns>An awaitable task</returns>
     protected async Task SetValidationSchema(string? version = null)
     {
-        version ??= await this.SpecificationSchemaManager.GetLatestVersion();
-        var currentVersion = this.Get(state => state.DslVersion);
+        version ??= await SpecificationSchemaManager.GetLatestVersion();
+        var currentVersion = Get(state => state.DslVersion);
         if (currentVersion == version)
         {
             return;
         }
-        if (this._processingVersion)
+        if (_processingVersion)
         {
             return;
         }
-        this.SetProblemDetails(null);
-        this._processingVersion = true;
+        SetProblemDetails(null);
+        _processingVersion = true;
         try
         {
-            var schema = await this.SpecificationSchemaManager.GetSchema(version);
+            var schema = await SpecificationSchemaManager.GetSchema(version);
             var type = $"create_{typeof(WorkflowDefinition).Name.ToLower()}_{version}_schema";
-            await this.MonacoInterop.AddValidationSchemaAsync(schema, $"https://synapse.io/schemas/{type}.json", $"{type}*").ConfigureAwait(false);
-            this._textModelUri = this.MonacoEditorHelper.GetResourceUri(type);
-            this.Reduce(state => state with
+            await MonacoInterop.AddValidationSchemaAsync(schema, $"https://synapse.io/schemas/{type}.json", $"{type}*").ConfigureAwait(false);
+            _textModelUri = MonacoEditorHelper.GetResourceUri(type);
+            Reduce(state => state with
             {
                 DslVersion = version
             });
         }
         catch (Exception ex)
         {
-            this.Logger.LogError("Unable to set the validation schema: {exception}", ex.ToString());
-            this.SetProblemDetails(new ProblemDetails(new Uri("about:blank"), "Unable to set the validation schema", 404, $"Unable to set the validation schema for the specification version '{version}'. Make sure the version exists."));
+            Logger.LogError("Unable to set the validation schema: {exception}", ex.ToString());
+            SetProblemDetails(new ProblemDetails(new Uri("about:blank"), "Unable to set the validation schema", 404, $"Unable to set the validation schema for the specification version '{version}'. Make sure the version exists."));
         }
-        this._processingVersion = false;
+        _processingVersion = false;
     }
 
     /// <summary>
@@ -620,9 +670,9 @@ public class CreateWorkflowViewStore(
     /// <returns></returns>
     protected async Task OnPreferredThemeChangedAsync(string newTheme)
     {
-        if (this.TextEditor != null && this._hasTextEditorInitialized)
+        if (TextEditor != null && _hasTextEditorInitialized)
         {
-            await this.TextEditor.UpdateOptions(new EditorUpdateOptions() { Theme = newTheme });
+            await TextEditor.UpdateOptions(new EditorUpdateOptions() { Theme = newTheme });
         }
     }
 
@@ -632,23 +682,23 @@ public class CreateWorkflowViewStore(
     /// <param name="disposing">A boolean indicating whether or not the dispose of the store</param>
     protected override void Dispose(bool disposing)
     {
-        if (!this._disposed)
+        if (!_disposed)
         {
             if (disposing)
             {
-                if (this._textModel != null)
+                if (_textModel != null)
                 {
-                    this._textModel.DisposeModel();
-                    this._textModel = null;
+                    _textModel.DisposeModel();
+                    _textModel = null;
                 }
-                if (this.TextEditor != null)
+                if (TextEditor != null)
                 {
-                    this.TextEditor.Dispose();
-                    this.TextEditor = null;
+                    TextEditor.Dispose();
+                    TextEditor = null;
                 }
-                this.MonacoEditorHelper.PreferredThemeChanged -= OnPreferredThemeChangedAsync;
+                MonacoEditorHelper.PreferredThemeChanged -= OnPreferredThemeChangedAsync;
             }
-            this._disposed = true;
+            _disposed = true;
         }
     }
 

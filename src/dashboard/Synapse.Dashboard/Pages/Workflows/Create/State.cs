@@ -12,6 +12,7 @@
 // limitations under the License.
 
 using ServerlessWorkflow.Sdk.Models;
+using Synapse.Resources;
 
 namespace Synapse.Dashboard.Pages.Workflows.Create;
 
@@ -95,6 +96,16 @@ public record CreateWorkflowViewState
     /// Gets/sets the <see cref="ProblemDetails"/> status that occurred when trying to save the resource, if any
     /// </summary>
     public int ProblemStatus { get; set; } = 0;
+
+    /// <summary>
+    /// Gets a <see cref="EquatableList{T}"/> that contains all <see cref="Operator"/>s
+    /// </summary>
+    public EquatableList<Operator>? Operators { get; set; }
+
+    /// <summary>
+    /// Gets/sets the active operator filter
+    /// </summary>
+    public string? Operator { get; set; } = null;
 
     /// <summary>
     /// Gets/sets the list of <see cref="ProblemDetails"/> errors that occurred when trying to save the resource, if any

@@ -163,9 +163,9 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        this.BreadcrumbManager.Use(Breadcrumbs.Workflows);
-        this.Store.Operators.Subscribe(value => this.OnStateChanged(_ => Operators = value), token: this.CancellationTokenSource.Token);
-        this.Store.Operator.Subscribe(value => this.OnStateChanged(_ => Operator = value), token: this.CancellationTokenSource.Token);
+        BreadcrumbManager.Use(Breadcrumbs.Workflows);
+        Store.Operators.Subscribe(value => OnStateChanged(_ => Operators = value), token: CancellationTokenSource.Token);
+        Store.Operator.Subscribe(value => OnStateChanged(_ => Operator = value), token: CancellationTokenSource.Token);
     }
 
     string GetScheduleType(Workflow workflow)
@@ -179,10 +179,10 @@
         else throw new NotSupportedException("The specified schedule type is not supported");
     }
 
-    void OnViewWorkflow(Workflow workflow) => this.NavigationManager.NavigateTo($"workflows/details/{workflow.GetNamespace()}/{workflow.GetName()}/{workflow.Spec.Versions.GetLatest().Document.Version}");
+    void OnViewWorkflow(Workflow workflow) => NavigationManager.NavigateTo($"workflows/details/{workflow.GetNamespace()}/{workflow.GetName()}/{workflow.Spec.Versions.GetLatest().Document.Version}");
 
-    void OnCreateWorkflow() => this.NavigationManager.NavigateTo("/workflows/new");
+    void OnCreateWorkflow() => NavigationManager.NavigateTo("/workflows/new");
 
-    void OnCreateWorkflowVersion(string ns, string name) => this.NavigationManager.NavigateTo($"/workflows/new/{ns}/{name}");
+    void OnCreateWorkflowVersion(string ns, string name) => NavigationManager.NavigateTo($"/workflows/new/{ns}/{name}");
 
 }

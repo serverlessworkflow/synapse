@@ -15,6 +15,7 @@ using Neuroglia.Blazor.Dagre.Models;
 using Neuroglia.Collections;
 using ServerlessWorkflow.Sdk.Models;
 using Synapse.Api.Client.Services;
+using Synapse.Dashboard.Pages.Workflows.List;
 using Synapse.Resources;
 
 namespace Synapse.Dashboard.Pages.Workflows.Details;
@@ -95,7 +96,7 @@ public class WorkflowDetailsStore(
     public Modal? Modal { get; set; }
 
     #region Selectors
-    
+
     /// <summary>
     /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="WorkflowDetailsState.Workflow"/> changes
     /// </summary>
@@ -112,11 +113,21 @@ public class WorkflowDetailsStore(
     public IObservable<string?> WorkflowInstanceName => this.Select(state => state.WorkflowInstanceName).DistinctUntilChanged();
 
     /// <summary>
+    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="WorkflowListState.Operators"/> changes
+    /// </summary>
+    public IObservable<EquatableList<Operator>?> Operators => this.Select(s => s.Operators).DistinctUntilChanged();
+
+    /// <summary>
+    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="WorkflowListState.Operator"/> changes
+    /// </summary>
+    public IObservable<string?> Operator => this.Select(s => s.Operator).DistinctUntilChanged();
+
+    /// <summary>
     /// Gets an <see cref="IObservable{T}"/> exposing the <see cref="WorkflowDefinition"/>
     /// </summary>
     public IObservable<WorkflowDefinition?> WorkflowDefinition => Observable.CombineLatest(
-        this.Workflow,
-        this.WorkflowDefinitionVersion,
+        Workflow,
+        WorkflowDefinitionVersion,
         (workflow, version) =>
         {
             if (workflow == null)
@@ -128,7 +139,7 @@ public class WorkflowDetailsStore(
                 var latest = workflow.Spec.Versions.GetLatest()?.Document.Version;
                 if (!string.IsNullOrWhiteSpace(latest))
                 {
-                    this.SetWorkflowDefinitionVersion(latest);
+                    SetWorkflowDefinitionVersion(latest);
                 }
                 return null;
             }
@@ -150,8 +161,8 @@ public class WorkflowDetailsStore(
     /// Gets an <see cref="IObservable{T}"/> used to observe the displayed <see cref="WorkflowInstance"/> changes
     /// </summary>
     public IObservable<WorkflowInstance?> WorkflowInstance => Observable.CombineLatest(
-        this.Resources,
-        this.WorkflowInstanceName,
+        Resources,
+        WorkflowInstanceName,
         (instances, name) => {
             if (instances == null || instances.Count == 0 || name == null)
             {
@@ -174,7 +185,7 @@ public class WorkflowDetailsStore(
     public override void SetActiveResourceName(string activeResourceName)
     {
         //base.SetActiveResourceName(activeResourceName);
-        this.Reduce(state => state with
+        Reduce(state => state with
         {
             ActiveResourceName = activeResourceName,
             Workflow = null
@@ -187,7 +198,7 @@ public class WorkflowDetailsStore(
     /// <param name="workflowDefinitionVersion">The new <see cref="WorkflowDetailsState.WorkflowDefinitionVersion"/> value</param>
     public void SetWorkflowDefinitionVersion(string? workflowDefinitionVersion)
     {
-        this.Reduce(state => state with
+        Reduce(state => state with
         {
             WorkflowDefinitionVersion = workflowDefinitionVersion
         });
@@ -199,7 +210,7 @@ public class WorkflowDetailsStore(
     /// <param name="instanceName">The new <see cref="WorkflowDetailsState.WorkflowInstanceName"/> value</param>
     public void SetWorkflowInstanceName(string? instanceName)
     {
-        this.Reduce(state => state with
+        Reduce(state => state with
         {
             WorkflowInstanceName = instanceName
         });
@@ -211,7 +222,7 @@ public class WorkflowDetailsStore(
     /// <param name="problemDetails">The <see cref="ProblemDetails"/> to set</param>
     public void SetProblemDetails(ProblemDetails? problemDetails)
     {
-        this.Reduce(state => state with
+        Reduce(state => state with
         {
             ProblemDetails = problemDetails
         });
@@ -227,22 +238,22 @@ public class WorkflowDetailsStore(
     /// <returns>A awaitable task</returns>
     async Task SetTextEditorValueAsync()
     {
-        var document = this.Get(state => state.WorkflowDefinitionJson);
-        var language = this.MonacoEditorHelper.PreferredLanguage;
-        if (this.TextEditor != null && !string.IsNullOrWhiteSpace(document))
+        var document = Get(state => state.WorkflowDefinitionJson);
+        var language = MonacoEditorHelper.PreferredLanguage;
+        if (TextEditor != null && !string.IsNullOrWhiteSpace(document))
         {
             try
             {
                 if (language == PreferredLanguage.YAML)
                 {
-                    document = this.YamlSerializer.ConvertFromJson(document);
+                    document = YamlSerializer.ConvertFromJson(document);
                 }
-                await this.TextEditor.SetValue(document);
+                await TextEditor.SetValue(document);
             }
             catch (Exception ex)
             {
-                this.Logger.LogError("Unable to set text editor value: {exception}", ex.ToString());
-                await this.MonacoEditorHelper.ChangePreferredLanguageAsync(language == PreferredLanguage.YAML ? PreferredLanguage.JSON : PreferredLanguage.YAML);
+                Logger.LogError("Unable to set text editor value: {exception}", ex.ToString());
+                await MonacoEditorHelper.ChangePreferredLanguageAsync(language == PreferredLanguage.YAML ? PreferredLanguage.JSON : PreferredLanguage.YAML);
             }
         }
     }
@@ -257,15 +268,15 @@ public class WorkflowDetailsStore(
     {
         try
         {
-            var workflow = await this.ApiClient.Workflows.GetAsync(name, ns);
-            this.Reduce(state => state with
+            var workflow = await ApiClient.Workflows.GetAsync(name, ns);
+            Reduce(state => state with
             {
                 Workflow = workflow
             });
         }
         catch (Exception ex)
         {
-            this.Logger.LogError("Unable to get workflow '{name}.{ns}': {exception}", name, ns, ex.ToString());
+            Logger.LogError("Unable to get workflow '{name}.{ns}': {exception}", name, ns, ex.ToString());
         }
     }
 
@@ -276,7 +287,7 @@ public class WorkflowDetailsStore(
     /// <returns>A awaitable task</returns>
     public async Task ToggleTextBasedEditorLanguageAsync(string _)
     {
-        await this.InitializeTextBasedEditorAsync();
+        await InitializeTextBasedEditorAsync();
     }
 
     /// <summary>
@@ -285,8 +296,8 @@ public class WorkflowDetailsStore(
     /// <returns></returns>
     public async Task OnTextBasedEditorInitAsync()
     {
-        this._hasTextEditorInitialized = true;
-        await this.InitializeTextBasedEditorAsync();
+        _hasTextEditorInitialized = true;
+        await InitializeTextBasedEditorAsync();
     }
 
     /// <summary>
@@ -295,9 +306,9 @@ public class WorkflowDetailsStore(
     /// <returns></returns>
     public async Task InitializeTextBasedEditorAsync()
     {
-        if (this.TextEditor == null || !this._hasTextEditorInitialized) return;
-        await this.SetTextBasedEditorLanguageAsync();
-        await this.SetTextEditorValueAsync();
+        if (TextEditor == null || !_hasTextEditorInitialized) return;
+        await SetTextBasedEditorLanguageAsync();
+        await SetTextEditorValueAsync();
     }
 
     /// <summary>
@@ -308,26 +319,26 @@ public class WorkflowDetailsStore(
     {
         try
         {
-            var language = this.MonacoEditorHelper.PreferredLanguage;
-            if (this.TextEditor != null && this._hasTextEditorInitialized)
+            var language = MonacoEditorHelper.PreferredLanguage;
+            if (TextEditor != null && _hasTextEditorInitialized)
             {
-                if (this._textModel != null)
+                if (_textModel != null)
                 {
-                    await Global.SetModelLanguage(this.JSRuntime, this._textModel, language);
+                    await Global.SetModelLanguage(JSRuntime, _textModel, language);
                 }
                 else
                 {
-                    var version = this.Get(state => state.WorkflowDefinitionVersion);
-                    var reference = this.Get(state => state.Namespaces) + "." + this.Get(state => state.ActiveResourceName) + (!string.IsNullOrWhiteSpace(version) ? $":{version}" : "");
+                    var version = Get(state => state.WorkflowDefinitionVersion);
+                    var reference = Get(state => state.Namespaces) + "." + Get(state => state.ActiveResourceName) + (!string.IsNullOrWhiteSpace(version) ? $":{version}" : "");
                     var resourceUri = $"inmemory://{reference.ToLower()}";
-                    this._textModel = await Global.CreateModel(this.JSRuntime, "", language, resourceUri);
+                    _textModel = await Global.CreateModel(JSRuntime, "", language, resourceUri);
                 }
-                await this.TextEditor!.SetModel(this._textModel);
+                await TextEditor!.SetModel(_textModel);
             }
         }
         catch (Exception ex)
         {
-            this.Logger.LogError("Unable to set text editor language: {exception}", ex.ToString());
+            Logger.LogError("Unable to set text editor language: {exception}", ex.ToString());
         }
     }
 
@@ -337,18 +348,18 @@ public class WorkflowDetailsStore(
     /// <returns>A awaitable task</returns>
     public async Task OnCopyToClipboard()
     {
-        if (this.TextEditor == null || !this._hasTextEditorInitialized) return;
-        var text = await this.TextEditor.GetValue();
+        if (TextEditor == null || !_hasTextEditorInitialized) return;
+        var text = await TextEditor.GetValue();
         if (string.IsNullOrWhiteSpace(text)) return;
         try
         {
-            await this.JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", text);
-            this.ToastService.Notify(new(ToastType.Success, "Copied to the clipboard!"));
+            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", text);
+            ToastService.Notify(new(ToastType.Success, "Copied to the clipboard!"));
         }
         catch (Exception ex)
         {
-            this.ToastService.Notify(new(ToastType.Danger, "Failed to copy the definition to the clipboard."));
-            this.Logger.LogError("Unable to copy to clipboard: {exception}", ex.ToString());
+            ToastService.Notify(new(ToastType.Danger, "Failed to copy the definition to the clipboard."));
+            Logger.LogError("Unable to copy to clipboard: {exception}", ex.ToString());
         }
     }
 
@@ -356,20 +367,24 @@ public class WorkflowDetailsStore(
     /// Displays the modal used to provide the new workflow input
     /// </summary>
     /// <param name="workflowDefinition">The definition to start a new instance of</param>
+    /// <param name="operators">The list of available operators</param>
     /// <param name="input">A default input payload, if any</param>
+    /// <param name="operatorName">A default operator name, if any</param>
     /// <returns>A awaitable task</returns>
-    public async Task OnShowCreateInstanceAsync(WorkflowDefinition workflowDefinition, EquatableDictionary<string, object>? input = null)
+    public async Task OnShowCreateInstanceAsync(WorkflowDefinition workflowDefinition, EquatableList<Operator> operators, EquatableDictionary<string, object>? input = null, string? operatorName = null)
     {
-        if (this.Modal != null)
+        if (Modal != null)
         {
             var parameters = new Dictionary<string, object>
             {
                 { nameof(CreateWorkflowInstanceDialog.WorkflowDefinition), workflowDefinition },
+                { nameof(CreateWorkflowInstanceDialog.Operators), operators },
+                { nameof(CreateWorkflowInstanceDialog.OperatorName), operatorName },
                 { nameof(CreateWorkflowInstanceDialog.Input), input! },
-                { nameof(CreateWorkflowInstanceDialog.OnCreate), EventCallback.Factory.Create<string>(this, CreateInstanceAsync) },
+                { nameof(CreateWorkflowInstanceDialog.OnCreate), EventCallback.Factory.Create<CreateWorkflowInstanceParameters>(this, CreateInstanceAsync) },
                 { nameof(CreateWorkflowInstanceDialog.OnProblem), EventCallback.Factory.Create<ProblemDetails>(this, SetProblemDetails) }
             };
-            await this.Modal.ShowAsync<CreateWorkflowInstanceDialog>(title: "Start a new workflow", parameters: parameters);
+            await Modal.ShowAsync<CreateWorkflowInstanceDialog>(title: "Start a new workflow", parameters: parameters);
         }
     }
 
@@ -380,7 +395,7 @@ public class WorkflowDetailsStore(
     /// <returns>A awaitable task</returns>
     public async Task SuspendInstanceAsync(WorkflowInstance workflowInstance)
     {
-        await this.ApiClient.WorkflowInstances.SuspendAsync(workflowInstance.GetName(), workflowInstance.GetNamespace()!).ConfigureAwait(false);
+        await ApiClient.WorkflowInstances.SuspendAsync(workflowInstance.GetName(), workflowInstance.GetNamespace()!).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -390,7 +405,7 @@ public class WorkflowDetailsStore(
     /// <returns>A awaitable task</returns>
     public async Task ResumeInstanceAsync(WorkflowInstance workflowInstance)
     {
-        await this.ApiClient.WorkflowInstances.ResumeAsync(workflowInstance.GetName(), workflowInstance.GetNamespace()!).ConfigureAwait(false);
+        await ApiClient.WorkflowInstances.ResumeAsync(workflowInstance.GetName(), workflowInstance.GetNamespace()!).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -400,7 +415,7 @@ public class WorkflowDetailsStore(
     /// <returns>A awaitable task</returns>
     public async Task CancelInstanceAsync(WorkflowInstance workflowInstance)
     {
-        await this.ApiClient.WorkflowInstances.CancelAsync(workflowInstance.GetName(), workflowInstance.GetNamespace()!).ConfigureAwait(false);
+        await ApiClient.WorkflowInstances.CancelAsync(workflowInstance.GetName(), workflowInstance.GetNamespace()!).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -409,13 +424,13 @@ public class WorkflowDetailsStore(
     /// <returns>A awaitable task</returns>
     public async Task OnSuspendSelectedInstancesAsync()
     {
-        var selectedResourcesNames = this.Get(state => state.SelectedResourceNames);
-        var resources = (this.Get(state => state.Resources) ?? []).Where(resource => selectedResourcesNames.Contains(resource.GetName()));
+        var selectedResourcesNames = Get(state => state.SelectedResourceNames);
+        var resources = (Get(state => state.Resources) ?? []).Where(resource => selectedResourcesNames.Contains(resource.GetName()));
         foreach (var resource in resources)
         {
-            await this.SuspendInstanceAsync(resource);
+            await SuspendInstanceAsync(resource);
         }
-        this.Reduce(state => state with
+        Reduce(state => state with
         {
             SelectedResourceNames = []
         });
@@ -427,13 +442,13 @@ public class WorkflowDetailsStore(
     /// <returns>A awaitable task</returns>
     public async Task OnResumeSelectedInstancesAsync()
     {
-        var selectedResourcesNames = this.Get(state => state.SelectedResourceNames);
-        var resources = (this.Get(state => state.Resources) ?? []).Where(resource => selectedResourcesNames.Contains(resource.GetName()));
+        var selectedResourcesNames = Get(state => state.SelectedResourceNames);
+        var resources = (Get(state => state.Resources) ?? []).Where(resource => selectedResourcesNames.Contains(resource.GetName()));
         foreach (var resource in resources)
         {
-            await this.ResumeInstanceAsync(resource);
+            await ResumeInstanceAsync(resource);
         }
-        this.Reduce(state => state with
+        Reduce(state => state with
         {
             SelectedResourceNames = []
         });
@@ -445,13 +460,13 @@ public class WorkflowDetailsStore(
     /// <returns>A awaitable task</returns>
     public async Task OnCancelSelectedInstancesAsync()
     {
-        var selectedResourcesNames = this.Get(state => state.SelectedResourceNames);
-        var resources = (this.Get(state => state.Resources) ?? []).Where(resource => selectedResourcesNames.Contains(resource.GetName()));
+        var selectedResourcesNames = Get(state => state.SelectedResourceNames);
+        var resources = (Get(state => state.Resources) ?? []).Where(resource => selectedResourcesNames.Contains(resource.GetName()));
         foreach (var resource in resources)
         {
-            await this.CancelInstanceAsync(resource);
+            await CancelInstanceAsync(resource);
         }
-        this.Reduce(state => state with
+        Reduce(state => state with
         {
             SelectedResourceNames = []
         });
@@ -460,29 +475,29 @@ public class WorkflowDetailsStore(
     /// <summary>
     /// Creates a new instance of the workflow
     /// </summary>
-    /// <param name="input">The input data, if any</param>
+    /// <param name="parameters">The <see cref="CreateWorkflowInstanceParameters"/> used to create the instance.</param>
     /// <returns>A awaitable task</returns>
-    public async Task CreateInstanceAsync(string input)
+    public async Task CreateInstanceAsync(CreateWorkflowInstanceParameters parameters)
     {
-        var workflowName = this.Get(state => state.ActiveResourceName);
-        var workflowVersion = this.Get(state => state.WorkflowDefinitionVersion);
-        var ns = this.Get(state => state.Namespace);
+        var workflowName = Get(state => state.ActiveResourceName);
+        var workflowVersion = Get(state => state.WorkflowDefinitionVersion);
+        var ns = Get(state => state.Namespace);
         if (string.IsNullOrWhiteSpace(workflowName) || string.IsNullOrWhiteSpace(workflowVersion) || string.IsNullOrWhiteSpace(ns))
         {
-            await this.Modal!.HideAsync();
+            await Modal!.HideAsync();
             return;
         }
         var inputData = new EquatableDictionary<string, object> { };
-        if (!string.IsNullOrWhiteSpace(input)) inputData = this.MonacoEditorHelper.PreferredLanguage == PreferredLanguage.JSON ?
-                this.JsonSerializer.Deserialize<EquatableDictionary<string, object>>(input) :
-                this.YamlSerializer.Deserialize<EquatableDictionary<string, object>>(input);
+        if (!string.IsNullOrWhiteSpace(parameters.Input)) inputData = MonacoEditorHelper.PreferredLanguage == PreferredLanguage.JSON ?
+                JsonSerializer.Deserialize<EquatableDictionary<string, object>>(parameters.Input) :
+                YamlSerializer.Deserialize<EquatableDictionary<string, object>>(parameters.Input);
         try
         {
-            var instance = await this.ApiClient.WorkflowInstances.CreateAsync(new()
+            var instance = new WorkflowInstance()
             {
                 Metadata = new()
                 {
-                    Namespace =ns,
+                    Namespace = ns,
                     Name = $"{workflowName}-"
                 },
                 Spec = new()
@@ -495,13 +510,31 @@ public class WorkflowDetailsStore(
                     },
                     Input = inputData
                 }
-            });
+            };
+            if (!string.IsNullOrWhiteSpace(parameters.Operator))
+            {
+                instance.Metadata.Labels = instance.Metadata.Labels ?? new EquatableDictionary<string, string>();
+                instance.Metadata.Labels.Add(SynapseDefaults.Resources.Labels.Operator, parameters.Operator);
+            }
+            instance = await ApiClient.WorkflowInstances.CreateAsync(instance);
         }
         catch (Exception ex)
         {
-            this.Logger.LogError("Unable to set create workflow instance: {exception}", ex.ToString());
+            Logger.LogError("Unable to set create workflow instance: {exception}", ex.ToString());
         }
-        await this.Modal!.HideAsync();
+        await Modal!.HideAsync();
+    }
+
+    /// <summary>
+    /// Sets the <see cref="WorkflowListState.Operator"/> 
+    /// </summary>
+    /// <param name="operatorName">The new value</param>
+    public void SetOperator(string? operatorName)
+    {
+        Reduce(state => state with
+        {
+            Operator = operatorName
+        });
     }
 
     /// <summary>
@@ -511,7 +544,7 @@ public class WorkflowDetailsStore(
     /// <returns>A awaitable task</returns>
     public async Task DeleteWorkflowInstanceAsync(WorkflowInstance workflowInstance)
     {
-        await this.ApiClient.ManageNamespaced<WorkflowInstance>().DeleteAsync(workflowInstance.GetName(), workflowInstance.GetNamespace()!).ConfigureAwait(false);
+        await ApiClient.ManageNamespaced<WorkflowInstance>().DeleteAsync(workflowInstance.GetName(), workflowInstance.GetNamespace()!).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -522,50 +555,73 @@ public class WorkflowDetailsStore(
     public async Task SelectNodeInEditor(GraphEventArgs<MouseEventArgs> e)
     {
         if (e.GraphElement == null) return;
-        if (this.TextEditor == null || !this._hasTextEditorInitialized) return;
-        var source = await this.TextEditor.GetValue();
+        if (TextEditor == null || !_hasTextEditorInitialized) return;
+        var source = await TextEditor.GetValue();
         var pointer = e.GraphElement.Id;
-        var language = this.MonacoEditorHelper.PreferredLanguage;
-        var range = await this.MonacoInterop.GetJsonPointerRangeAsync(source, pointer, language);
-        await this.TextEditor.SetSelection(range, string.Empty);
-        await this.TextEditor.RevealRangeInCenter(range);
+        var language = MonacoEditorHelper.PreferredLanguage;
+        var range = await MonacoInterop.GetJsonPointerRangeAsync(source, pointer, language);
+        await TextEditor.SetSelection(range, string.Empty);
+        await TextEditor.RevealRangeInCenter(range);
     }
 
+    /// <summary>
+    /// Lists all available <see cref="Operator"/>s
+    /// </summary>
+    /// <returns>A new awaitable <see cref="Task"/></returns>
+    public async Task ListOperatorsAsync()
+    {
+        var operatorList = new EquatableList<Operator>(await (await ApiClient.Operators.ListAsync().ConfigureAwait(false)).OrderBy(ns => ns.GetQualifiedName()).ToListAsync().ConfigureAwait(false));
+        Reduce(s => s with
+        {
+            Operators = operatorList
+        });
+    }
     #endregion
 
     /// <inheritdoc/>
     public override async Task InitializeAsync()
     {
+        await ListOperatorsAsync().ConfigureAwait(false);
+        Operator.Subscribe(operatorName => {
+            if (string.IsNullOrWhiteSpace(operatorName))
+            {
+                RemoveLabelSelector(SynapseDefaults.Resources.Labels.Operator);
+            }
+            else
+            {
+                AddLabelSelector(new(SynapseDefaults.Resources.Labels.Operator, LabelSelectionOperator.Equals, operatorName));
+            }
+        }, token: CancellationTokenSource.Token);
         Observable.CombineLatest(
-            this.Namespace.Where(ns => !string.IsNullOrWhiteSpace(ns)),
-            this.ActiveResourceName.Where(name => !string.IsNullOrWhiteSpace(name)),
+            Namespace.Where(ns => !string.IsNullOrWhiteSpace(ns)),
+            ActiveResourceName.Where(name => !string.IsNullOrWhiteSpace(name)),
             (ns, name) => (ns!, name!)
         ).SubscribeAsync(async ((string ns, string name) workflow) =>
         {
-            this.RemoveLabelSelector(SynapseDefaults.Resources.Labels.Workflow);
-            this.AddLabelSelector(new(SynapseDefaults.Resources.Labels.Workflow, LabelSelectionOperator.Equals, $"{workflow.name}.{workflow.ns}"));
-            await this.GetWorkflowAsync(workflow.ns, workflow.name);
-        }, cancellationToken: this.CancellationTokenSource.Token);
-        this.WorkflowDefinitionVersion.Where(version => version != null).Subscribe(version =>
+            RemoveLabelSelector(SynapseDefaults.Resources.Labels.Workflow);
+            AddLabelSelector(new(SynapseDefaults.Resources.Labels.Workflow, LabelSelectionOperator.Equals, $"{workflow.name}.{workflow.ns}"));
+            await GetWorkflowAsync(workflow.ns, workflow.name);
+        }, cancellationToken: CancellationTokenSource.Token);
+        WorkflowDefinitionVersion.Where(version => version != null).Subscribe(version =>
         {
-            this.RemoveLabelSelector(SynapseDefaults.Resources.Labels.WorkflowVersion);
-            this.AddLabelSelector(new(SynapseDefaults.Resources.Labels.WorkflowVersion, LabelSelectionOperator.Equals, version!));
+            RemoveLabelSelector(SynapseDefaults.Resources.Labels.WorkflowVersion);
+            AddLabelSelector(new(SynapseDefaults.Resources.Labels.WorkflowVersion, LabelSelectionOperator.Equals, version!));
         });
-        this.WorkflowDefinition.Where(definition => definition != null).SubscribeAsync(async (definition) =>
+        WorkflowDefinition.Where(definition => definition != null).SubscribeAsync(async (definition) =>
         {
             await Task.Delay(1);
-            var document = this.JsonSerializer.SerializeToText(definition.Clone());
-            this.Reduce(state => state with
+            var document = JsonSerializer.SerializeToText(definition.Clone());
+            Reduce(state => state with
             {
                 WorkflowDefinitionJson = document
             });
-            await this.SetTextEditorValueAsync();
-            if (this.MonacoEditorHelper.PreferredLanguage != PreferredLanguage.YAML)
+            await SetTextEditorValueAsync();
+            if (MonacoEditorHelper.PreferredLanguage != PreferredLanguage.YAML)
             {
-                await this.MonacoEditorHelper.ChangePreferredLanguageAsync(PreferredLanguage.YAML);
+                await MonacoEditorHelper.ChangePreferredLanguageAsync(PreferredLanguage.YAML);
             }
-        }, cancellationToken: this.CancellationTokenSource.Token);
-        this.MonacoEditorHelper.PreferredThemeChanged += OnPreferredThemeChangedAsync;
+        }, cancellationToken: CancellationTokenSource.Token);
+        MonacoEditorHelper.PreferredThemeChanged += OnPreferredThemeChangedAsync;
         await base.InitializeAsync();
     }
 
@@ -576,9 +632,9 @@ public class WorkflowDetailsStore(
     /// <returns></returns>
     protected async Task OnPreferredThemeChangedAsync(string newTheme)
     {
-        if (this.TextEditor != null && this._hasTextEditorInitialized)
+        if (TextEditor != null && _hasTextEditorInitialized)
         {
-            await this.TextEditor.UpdateOptions(new EditorUpdateOptions() { Theme = newTheme });
+            await TextEditor.UpdateOptions(new EditorUpdateOptions() { Theme = newTheme });
         }
     }
 
@@ -588,23 +644,23 @@ public class WorkflowDetailsStore(
     /// <param name="disposing">A boolean indicating whether or not the dispose of the store</param>
     protected override void Dispose(bool disposing)
     {
-        if (!this._disposed)
+        if (!_disposed)
         {
             if (disposing)
             {
-                if (this._textModel != null)
+                if (_textModel != null)
                 {
-                    this._textModel.DisposeModel();
-                    this._textModel = null;
+                    _textModel.DisposeModel();
+                    _textModel = null;
                 }
-                if (this.TextEditor != null)
+                if (TextEditor != null)
                 {
-                    this.TextEditor.Dispose();
-                    this.TextEditor = null;
+                    TextEditor.Dispose();
+                    TextEditor = null;
                 }
-                this.MonacoEditorHelper.PreferredThemeChanged -= OnPreferredThemeChangedAsync;
+                MonacoEditorHelper.PreferredThemeChanged -= OnPreferredThemeChangedAsync;
             }
-            this._disposed = true;
+            _disposed = true;
         }
     }
 }

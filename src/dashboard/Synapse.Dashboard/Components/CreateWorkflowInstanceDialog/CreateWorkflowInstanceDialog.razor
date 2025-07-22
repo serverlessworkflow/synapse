@@ -47,6 +47,20 @@
     </Tab>
 </Tabs>
 
+<div class="py-3">
+    @if (Operators != null && Operators.Count() > 0)
+    {
+        <select class="form-select m-2" @onchange="OnSelectOperatorChanged">
+            <option value="">Any Operator</option>
+            @foreach (var op in Operators)
+            {
+                var name = op.GetName() + "." + op.GetNamespace();
+                <option value="@name" selected="@(name == operatorName)">@name</option>
+            }
+        </select>
+    }
+</div>
+
 <div class="text-center">
     <Button Outline="true" Color="ButtonColor.Primary" class="m-auto mt-3 w-100" @onclick="async _ => await OnStartAsync()">
         <Icon Name="IconName.Play" />
@@ -61,10 +75,13 @@
     string payload = string.Empty;
     string modelName = string.Empty;
     EquatableDictionary<string, object>? input;
+    string? operatorName;
 
     [Parameter] public WorkflowDefinition? WorkflowDefinition { get; set; }
+    [Parameter] public IEnumerable<Operator> Operators { get; set; } = [];
+    [Parameter] public string? OperatorName { get; set; } = null;
     [Parameter] public EquatableDictionary<string, object>? Input { get; set; }
-    [Parameter] public EventCallback<string> OnCreate { get; set; }
+    [Parameter] public EventCallback<CreateWorkflowInstanceParameters> OnCreate { get; set; }
     [Parameter] public EventCallback<ProblemDetails> OnProblem { get; set; }
 
     void OnValueChanged(object? value)
@@ -81,6 +98,7 @@
     {
         await base.OnParametersSetAsync();
         if (input != Input) input = Input;
+        if (operatorName != OperatorName) operatorName = OperatorName;
         if (workflowDefinition != WorkflowDefinition) 
         {
             workflowDefinition = WorkflowDefinition;
@@ -91,6 +109,11 @@
             modelName = WorkflowDefinition.Document.Name + "-" + WorkflowDefinition.Document.Version;
             await MonacoInterop.AddValidationSchemaAsync(JsonSerializer.SerializeToText(WorkflowDefinition.Input.Schema.Document), $"https://synapse.io/schemas/{modelName}.json", $"{modelName}*").ConfigureAwait(false);
         }
+    }
+
+    protected void OnSelectOperatorChanged(ChangeEventArgs e)
+    {
+        operatorName = e.Value?.ToString();
     }
 
     async Task OnStartAsync()
@@ -111,7 +134,13 @@
                 return;
             }
         }
-        if (OnCreate.HasDelegate) await OnCreate.InvokeAsync(payload);
+        if (OnCreate.HasDelegate)
+        {
+            await OnCreate.InvokeAsync(new CreateWorkflowInstanceParameters() { 
+                Input = payload,
+                Operator = operatorName
+            });
+        }
     }
 
     async Task LoadSchemaAsync()

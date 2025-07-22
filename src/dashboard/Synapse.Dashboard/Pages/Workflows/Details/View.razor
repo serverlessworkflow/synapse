@@ -28,25 +28,34 @@
     <HorizontalCollapsible @ref="instancesListPanel" class="collapsible-instances">
         <Label>Instances</Label>
         <Content>
-            <WorkflowInstancesList class="h-100" 
-            Loading="@Loading"
-            WorkflowInstances="@Resources"
-            SelectedInstanceNames="@SelectedResourceNames"
-            ActiveRow="@instanceName"
-            Columns="@columns"
-            OnSearchInput="Store.SetSearchTerm"
-            OnShowDetails="OnShowInstanceDetails"
-            OnSuspend="async (instance) => await Store.SuspendInstanceAsync(instance)"
-            OnResume="async (instance) => await Store.ResumeInstanceAsync(instance)"
-            OnCancel="async (instance) => await Store.CancelInstanceAsync(instance)"
-            OnReplay="async (instance) => await Store.OnShowCreateInstanceAsync(workflowDefinition, instance.Spec?.Input)"
-            OnDelete="OnDeleteWorkflowInstanceAsync"
-            OnToggleSelected="Store.ToggleResourceSelection"
-            OnSuspendSelected="async () => await Store.OnSuspendSelectedInstancesAsync()"
-            OnResumeSelected="async () => await Store.OnResumeSelectedInstancesAsync()"
-            OnCancelSelected="async () => await Store.OnCancelSelectedInstancesAsync()"
-            OnDeleteSelected="OnDeleteSelectedResourcesAsync" />
-            <Button Outline="true" Color="ButtonColor.Primary" @onclick="async _ => await Store.OnShowCreateInstanceAsync(workflowDefinition)" class="w-100 mt-3">
+            <WorkflowInstancesList 
+                class="h-100" 
+                Loading="@Loading"
+                Operators="operators"
+                OperatorName="@operatorName"
+                WorkflowInstances="@Resources"
+                SelectedInstanceNames="@SelectedResourceNames"
+                ActiveRow="@instanceName"
+                Columns="@columns"
+                OnSearchInput="Store.SetSearchTerm"
+                OnShowDetails="OnShowInstanceDetails"
+                OnOperatorChanged="Store.SetOperator"
+                OnSuspend="async (instance) => await Store.SuspendInstanceAsync(instance)"
+                OnResume="async (instance) => await Store.ResumeInstanceAsync(instance)"
+                OnCancel="async (instance) => await Store.CancelInstanceAsync(instance)"
+                OnReplay="async (instance) => await Store.OnShowCreateInstanceAsync(
+                    workflowDefinition, operators ?? [], 
+                    instance.Spec?.Input, 
+                    instance.Metadata.Labels?.Get(SynapseDefaults.Resources.Labels.Operator) ?? operatorName
+                )"
+                OnDelete="OnDeleteWorkflowInstanceAsync"
+                OnToggleSelected="Store.ToggleResourceSelection"
+                OnSuspendSelected="async () => await Store.OnSuspendSelectedInstancesAsync()"
+                OnResumeSelected="async () => await Store.OnResumeSelectedInstancesAsync()"
+                OnCancelSelected="async () => await Store.OnCancelSelectedInstancesAsync()"
+                OnDeleteSelected="OnDeleteSelectedResourcesAsync" 
+            />
+            <Button Outline="true" Color="ButtonColor.Primary" @onclick="async _ => await Store.OnShowCreateInstanceAsync(workflowDefinition, operators ?? [], null, operatorName)" class="w-100 mt-3">
                 <Icon Name="IconName.Plus"/>
             </Button>
         </Content>
@@ -63,9 +72,9 @@
             else
             {
                 <WorkflowDiagram 
-                WorkflowDefinition="@workflowDefinition" 
-                WorkflowInstances="@(workflowInstance != null ? [workflowInstance] : (Resources ?? []))"
-                OnMouseUp="async (e) => await Store.SelectNodeInEditor(e)"
+                    WorkflowDefinition="@workflowDefinition" 
+                    WorkflowInstances="@(workflowInstance != null ? [workflowInstance] : (Resources ?? []))"
+                    OnMouseUp="async (e) => await Store.SelectNodeInEditor(e)"
                 />
             }
         </Content>
@@ -158,11 +167,13 @@
     readonly IEnumerable<string> columns = 
     [
         "Name",
-    "Status",
-    "Start Time",
-    "End Time",
-    ..WorkflowInstancesList.DirectActions
+        "Status",
+        "Start Time",
+        "End Time",
+        ..WorkflowInstancesList.DirectActions
     ];
+    protected EquatableList<Operator>? operators { get; set; }
+    protected string? operatorName { get; set; }
 
     [Parameter] public string? Version { get; set; }
     [Parameter] public string? InstanceName { get; set; }
@@ -174,6 +185,8 @@
         UpdateBreadcrumb();
         Store.WorkflowInstanceName.Subscribe(value => OnStateChanged(_ => instanceName = value), token: CancellationTokenSource.Token);
         Store.WorkflowDefinition.Where(value => value != null).Subscribe(value => OnStateChanged(_ => workflowDefinition = value!), token: CancellationTokenSource.Token);
+        Store.Operators.Subscribe(value => OnStateChanged(_ => operators = value), token: CancellationTokenSource.Token);
+        Store.Operator.Subscribe(value => OnStateChanged(_ => operatorName = value), token: CancellationTokenSource.Token);
         Store.WorkflowDefinitionVersion.Where(value => !string.IsNullOrWhiteSpace(value)).Subscribe(value =>
         {
             OnStateChanged(_ => version = value!);
@@ -255,8 +268,8 @@
     /// <param name="instance">The <see cref="WorkflowInstance"/> to delete</param>
     protected async Task OnDeleteWorkflowInstanceAsync(WorkflowInstance instance)
     {
-        if (this.Dialog == null) return;
-        var confirmation = await this.Dialog.ShowAsync(
+        if (Dialog == null) return;
+        var confirmation = await Dialog.ShowAsync(
             title: $"Are you sure you want to delete '{instance.Metadata.Name}'?",
             message1: $"The workflow instance will be permanently deleted. Are you sure you want to proceed ?",
             confirmDialogOptions: new ConfirmDialogOptions()
@@ -268,10 +281,10 @@
                 }
         );
         if (!confirmation) return;
-        await this.Store.DeleteWorkflowInstanceAsync(instance);
+        await Store.DeleteWorkflowInstanceAsync(instance);
     }
 
-    void OnCreateWorkflowVersion() => this.NavigationManager.NavigateTo($"/workflows/new/{@namespace}/{Name}");
+    void OnCreateWorkflowVersion() => NavigationManager.NavigateTo($"/workflows/new/{@namespace}/{Name}");
 
     void OnShowInstanceDetails(WorkflowInstance instance) => NavigationManager.NavigateTo($"/workflows/details/{@namespace}/{Name}/{version}/{instance.GetName()}");
 
@@ -286,7 +299,7 @@
 
     void OnDismissProblemDetails()
     {
-        this.Store.SetProblemDetails(null);
+        Store.SetProblemDetails(null);
     }
 
 }
