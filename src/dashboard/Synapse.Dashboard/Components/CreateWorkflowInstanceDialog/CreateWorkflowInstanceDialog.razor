@@ -47,19 +47,24 @@
     </Tab>
 </Tabs>
 
-<div class="py-3">
-    @if (Operators != null && Operators.Count() > 0)
-    {
-        <select class="form-select m-2" @onchange="OnSelectOperatorChanged">
-            <option value="">Any Operator</option>
-            @foreach (var op in Operators)
+<Accordion class="py-3">
+        <AccordionItem Title="Advanced Settings">
+            <Content>
+            @if (Operators != null && Operators.Count() > 0)
             {
-                var name = op.GetName() + "." + op.GetNamespace();
-                <option value="@name" selected="@(name == operatorName)">@name</option>
+                <label for="operator">Select an Operator to run the Workflow:</label>
+                <select id="operator" class="form-select" @onchange="OnSelectOperatorChanged">
+                    <option value="">Any Operator</option>
+                    @foreach (var op in Operators)
+                    {
+                        var name = op.GetName() + "." + op.GetNamespace();
+                        <option value="@name" selected="@(name == operatorName)">@name</option>
+                    }
+                </select>
             }
-        </select>
-    }
-</div>
+        </Content>
+    </AccordionItem>
+</Accordion>
 
 <div class="text-center">
     <Button Outline="true" Color="ButtonColor.Primary" class="m-auto mt-3 w-100" @onclick="async _ => await OnStartAsync()">
