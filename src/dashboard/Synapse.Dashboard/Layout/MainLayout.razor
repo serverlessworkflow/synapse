@@ -63,6 +63,11 @@
                             </NavLink>
                         </li>
                         <li class="nav-item">
+                            <NavLink class="nav-link" href="namespaces" Match="NavLinkMatch.All">
+                                <span class="btn-label">Namespaces</span>
+                            </NavLink>
+                        </li>
+                        <li class="nav-item">
                             <div class="dropdown">
                                 <button class="btn nav-link dropdown-toggle @(IsActive("correlators", NavLinkMatch.Prefix) || IsActive("operators", NavLinkMatch.Prefix) || IsActive("service-accounts", NavLinkMatch.Prefix)  ? "active" : "")" type="button" id="servicesDropdownButton" data-bs-toggle="dropdown" aria-expanded="false">
                                     <span class="btn-label">Services</span>
