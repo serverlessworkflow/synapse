@@ -125,9 +125,9 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync().ConfigureAwait(false);
+        this.Store.IsSaving.Subscribe(saving => this.OnStateChanged(cmp  => this.OnSavingChanged(saving)), token: this.CancellationTokenSource.Token);
         this.Store.Resource.Subscribe(resource => this.OnStateChanged(cmp => cmp.resource = resource), token: this.CancellationTokenSource.Token);
         this.Store.IsUpdating.Subscribe(updating => this.OnStateChanged(cmp => cmp.isUpdating = updating), token: this.CancellationTokenSource.Token);
-        this.Store.IsSaving.Subscribe(OnSavingChanged, token: this.CancellationTokenSource.Token);
         this.Store.ProblemDetails.Subscribe(problemDetails => this.OnStateChanged(cmp => cmp.problemDetails = problemDetails), token: this.CancellationTokenSource.Token);
         this.textEditorInput
             .Throttle(TimeSpan.FromMilliseconds(300))
@@ -148,6 +148,7 @@
         {
             this.resource = this.Resource; // should happen in this.Store.Resource.Subscribe but prevents possible race when multiple params are set
             this.Store.SetResource(this.Resource);
+            this.Store.SetProblemDetails(null);
         }
         if (this.isCluster != this.IsCluster)
         {
@@ -178,7 +179,6 @@
     {
         this.isSaving = saving;
         if (this.textBasedEditor != null) this.textBasedEditor.UpdateOptions(new EditorUpdateOptions() { ReadOnly = saving });
-        this.StateHasChanged();
     }
 
     /// <summary>
@@ -199,7 +199,7 @@
             await this.SetTextEditorValueAsync();
             await this.SetTextBasedEditorLanguageAsync();
         }
-        this.StateHasChanged();
+        this.OnStateChanged();
     }
 
     /// <summary>
