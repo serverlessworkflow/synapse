@@ -61,9 +61,9 @@ public abstract class StatefulComponent<TComponent, TStore, TState>
     /// Patches the component fields after a change
     /// </summary>
     /// <param name="patch">The patch to apply</param>
-    protected void OnStateChanged(Action<TComponent> patch)
+    protected void OnStateChanged(Action<TComponent>? patch = null)
     {
-        patch((TComponent)this);
+        if (patch != null) patch((TComponent)this);
         this.shouldRender = true;
         this.StateHasChanged();
     }

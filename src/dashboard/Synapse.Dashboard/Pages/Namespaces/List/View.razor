@@ -95,15 +95,16 @@
     /// Opens the targeted <see cref="Resource"/>'s edition
     /// </summary>
     /// <param name="resource">The <see cref="Resource"/> to edit</param>
-    protected override Task OnShowResourceEditorAsync(Namespace? resource = null)
+    protected override async Task OnShowResourceEditorAsync(Namespace? resource = null)
     {
-        if (this.EditorOffCanvas == null) return Task.CompletedTask;
+        if (this.EditorOffCanvas == null) return;
         var parameters = new Dictionary<string, object>
         {
             { nameof(ResourceEditor<Namespace>.Resource), resource! },
             { nameof(ResourceEditor<Namespace>.IsCluster), true }
         };
         string actionType = resource == null ? "creation" : "edition";
-        return this.EditorOffCanvas.ShowAsync<ResourceEditor<Namespace>>(title: typeof(Namespace).Name + " " + actionType, parameters: parameters);
+        await this.EditorOffCanvas.ShowAsync<ResourceEditor<Namespace>>(title: typeof(Namespace).Name + " " + actionType);
+        await this.EditorOffCanvas.ShowAsync<ResourceEditor<Namespace>>(title: typeof(Namespace).Name + " " + actionType, parameters: parameters);
     }
 }
