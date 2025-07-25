@@ -46,7 +46,8 @@
                 OnReplay="async (instance) => await Store.OnShowCreateInstanceAsync(
                     workflowDefinition, operators ?? [], 
                     instance.Spec?.Input, 
-                    instance.Metadata.Labels?.Get(SynapseDefaults.Resources.Labels.Operator) ?? operatorName
+                    instance.Metadata.Labels,
+                    instance.Metadata.Annotations
                 )"
                 OnDelete="OnDeleteWorkflowInstanceAsync"
                 OnToggleSelected="Store.ToggleResourceSelection"
@@ -55,7 +56,7 @@
                 OnCancelSelected="async () => await Store.OnCancelSelectedInstancesAsync()"
                 OnDeleteSelected="OnDeleteSelectedResourcesAsync" 
             />
-            <Button Outline="true" Color="ButtonColor.Primary" @onclick="async _ => await Store.OnShowCreateInstanceAsync(workflowDefinition, operators ?? [], null, operatorName)" class="w-100 mt-3">
+            <Button Outline="true" Color="ButtonColor.Primary" @onclick="async _ => await Store.OnShowCreateInstanceAsync(workflowDefinition, operators ?? [])" class="w-100 mt-3">
                 <Icon Name="IconName.Plus"/>
             </Button>
         </Content>
@@ -170,6 +171,7 @@
         "Status",
         "Start Time",
         "End Time",
+        "Operator",
         ..WorkflowInstancesList.DirectActions
     ];
     protected EquatableList<Operator>? operators { get; set; }

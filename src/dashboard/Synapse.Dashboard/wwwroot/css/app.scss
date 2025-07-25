@@ -59,6 +59,10 @@ h1:focus {
     flex-grow: 1;
 }
 
+.flex-shrink-0 {
+    flex-shrink: 0;
+}
+
 .svg-definitions, #svg-definitions {
     width: 0 !important;
     height: 0 !important;
@@ -141,6 +145,10 @@ h1:focus {
     height: 500px;
 }
 
+.min-h-0 {
+    min-height: 0;
+}
+
 input[type="search"]::-webkit-search-cancel-button {
     -webkit-appearance: none;
     height: 16px;
@@ -173,9 +181,7 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 .problems {
-    position: absolute;
-    bottom: 65px;
-    left: 0;
+    min-height: 150px;
     max-height: 300px;
     overflow: scroll;
     width: 100%;
@@ -190,13 +196,6 @@ input[type="search"]::-webkit-search-cancel-button {
             right: $spacer;
         }
     }
-
-    &.problems-bottom{
-        left: 0;
-        right: 0;
-        bottom: 0;
-    }
-
 }
 
 .z-9999 {

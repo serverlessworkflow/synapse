@@ -63,6 +63,16 @@ public record CreateWorkflowViewState
     public string? WorkflowDefinitionText { get; set; }
 
     /// <summary>
+    /// Gets/sets the workflow's labels
+    /// </summary>
+    public EquatableDictionary<string, string> Labels { get; set; } = [];
+
+    /// <summary>
+    /// Gets/sets the workflow's annotations
+    /// </summary>
+    public EquatableDictionary<string, string> Annotations { get; set; } = [];
+
+    /// <summary>
     /// Gets/sets a boolean indicating whether or not the state is being loaded
     /// </summary>
     public bool Loading { get; set; } = false;
@@ -101,11 +111,6 @@ public record CreateWorkflowViewState
     /// Gets a <see cref="EquatableList{T}"/> that contains all <see cref="Operator"/>s
     /// </summary>
     public EquatableList<Operator>? Operators { get; set; }
-
-    /// <summary>
-    /// Gets/sets the active operator filter
-    /// </summary>
-    public string? Operator { get; set; } = null;
 
     /// <summary>
     /// Gets/sets the list of <see cref="ProblemDetails"/> errors that occurred when trying to save the resource, if any
