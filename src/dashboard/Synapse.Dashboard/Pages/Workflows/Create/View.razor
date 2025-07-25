@@ -136,8 +136,6 @@ else
     protected string? operatorName { get; set; }
     protected EquatableDictionary<string, string> labels { get; set; } = [];
     protected EquatableDictionary<string, string> annotations { get; set; } = [];
-    string labelKey = string.Empty;
-    string labelValue = string.Empty;
 
     [Parameter] public string? Namespace { get; set; }
     [Parameter] public string? Name { get; set; }
@@ -172,14 +170,6 @@ else
             Store.SetName(Name);
             Store.SetIsNew(false);
         }
-    }
-
-    protected void AddLabel()
-    {
-        Store.AddLabel(labelKey, labelValue);
-        labelKey = string.Empty;
-        labelValue = string.Empty;
-        OnStateChanged();
     }
 
 }
