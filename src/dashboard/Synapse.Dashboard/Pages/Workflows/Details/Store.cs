@@ -369,9 +369,10 @@ public class WorkflowDetailsStore(
     /// <param name="workflowDefinition">The definition to start a new instance of</param>
     /// <param name="operators">The list of available operators</param>
     /// <param name="input">A default input payload, if any</param>
-    /// <param name="operatorName">A default operator name, if any</param>
+    /// <param name="labels">A default labels dictionary, if any</param>
+    /// <param name="annotations">A default labels annotations, if any</param>
     /// <returns>A awaitable task</returns>
-    public async Task OnShowCreateInstanceAsync(WorkflowDefinition workflowDefinition, EquatableList<Operator> operators, EquatableDictionary<string, object>? input = null, string? operatorName = null)
+    public async Task OnShowCreateInstanceAsync(WorkflowDefinition workflowDefinition, EquatableList<Operator> operators, EquatableDictionary<string, object>? input = null, IDictionary<string, string>? labels = null, IDictionary<string, string>? annotations = null)
     {
         if (Modal != null)
         {
@@ -379,12 +380,13 @@ public class WorkflowDetailsStore(
             {
                 { nameof(CreateWorkflowInstanceDialog.WorkflowDefinition), workflowDefinition },
                 { nameof(CreateWorkflowInstanceDialog.Operators), operators },
-                { nameof(CreateWorkflowInstanceDialog.OperatorName), operatorName },
                 { nameof(CreateWorkflowInstanceDialog.Input), input! },
+                { nameof(CreateWorkflowInstanceDialog.Labels), labels != null ? new EquatableDictionary<string, string>(labels) : [] },
+                { nameof(CreateWorkflowInstanceDialog.Annotations), annotations != null ? new EquatableDictionary<string, string>(annotations) : [] },
                 { nameof(CreateWorkflowInstanceDialog.OnCreate), EventCallback.Factory.Create<CreateWorkflowInstanceParameters>(this, CreateInstanceAsync) },
                 { nameof(CreateWorkflowInstanceDialog.OnProblem), EventCallback.Factory.Create<ProblemDetails>(this, SetProblemDetails) }
             };
-            await Modal.ShowAsync<CreateWorkflowInstanceDialog>(title: "Start a new workflow", parameters: parameters);
+            await Modal.ShowAsync<CreateWorkflowInstanceDialog>(title: "Start A New Workflow", parameters: parameters);
         }
     }
 
@@ -511,11 +513,8 @@ public class WorkflowDetailsStore(
                     Input = inputData
                 }
             };
-            if (!string.IsNullOrWhiteSpace(parameters.Operator))
-            {
-                instance.Metadata.Labels = instance.Metadata.Labels ?? new EquatableDictionary<string, string>();
-                instance.Metadata.Labels.Add(SynapseDefaults.Resources.Labels.Operator, parameters.Operator);
-            }
+            if (parameters.Labels.Count > 0) instance.Metadata.Labels = parameters.Labels;
+            if (parameters.Annotations.Count > 0) instance.Metadata.Annotations = parameters.Annotations;
             instance = await ApiClient.WorkflowInstances.CreateAsync(instance);
         }
         catch (Exception ex)

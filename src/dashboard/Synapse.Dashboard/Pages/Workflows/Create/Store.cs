@@ -138,6 +138,16 @@ public class CreateWorkflowViewStore(
     public IObservable<string?> WorkflowDefinitionText => this.Select(state => state.WorkflowDefinitionText).DistinctUntilChanged();
 
     /// <summary>
+    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="CreateWorkflowViewState.Labels"/> changes
+    /// </summary>
+    public IObservable<EquatableDictionary<string, string>> Labels => this.Select(state => state.Labels).DistinctUntilChanged();
+
+    /// <summary>
+    /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="CreateWorkflowViewState.Annotations"/> changes
+    /// </summary>
+    public IObservable<EquatableDictionary<string, string>> Annotations => this.Select(state => state.Annotations).DistinctUntilChanged();
+
+    /// <summary>
     /// Gets an <see cref="IObservable{T}"/> used to observe changes to the state's <see cref="CreateWorkflowViewState.Loading"/> property
     /// </summary>
     public IObservable<bool> Loading => this.Select(state => state.Loading).DistinctUntilChanged();
@@ -180,7 +190,7 @@ public class CreateWorkflowViewStore(
     /// <summary>
     /// Gets an <see cref="IObservable{T}"/> used to observe <see cref="WorkflowListState.Operator"/> changes
     /// </summary>
-    public IObservable<string?> Operator => this.Select(s => s.Operator).DistinctUntilChanged();
+    public IObservable<string?> Operator => this.Select(state => state.Labels.TryGetValue(SynapseDefaults.Resources.Labels.Operator, out var label) ? label : null).DistinctUntilChanged();
 
     /// <summary>
     /// Gets an <see cref="IObservable{T}"/> used to observe computed <see cref="Neuroglia.ProblemDetails"/>
@@ -270,7 +280,6 @@ public class CreateWorkflowViewStore(
         ArgumentException.ThrowIfNullOrWhiteSpace(@namespace);
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         var workflow = await Api.Workflows.GetAsync(name, @namespace) ?? throw new NullReferenceException($"Failed to find the specified workflow '{name}.{@namespace}'");
-        var operatorName = workflow.Metadata.Labels?.Get(SynapseDefaults.Resources.Labels.Operator);
         var definition = workflow.Spec.Versions.GetLatest();
         var nextVersion = SemVersion.Parse(definition.Document.Version, SemVersionStyles.Strict);
         nextVersion = nextVersion.WithPatch(nextVersion.Patch + 1);
@@ -278,7 +287,8 @@ public class CreateWorkflowViewStore(
         Reduce(s => s with
         {
             WorkflowDefinition = definition,
-            Operator = operatorName,
+            Labels = workflow.Metadata.Labels != null ? [..workflow.Metadata.Labels] : [],
+            Annotations = workflow.Metadata.Annotations != null ? [.. workflow.Metadata.Annotations] : [],
             Loading = false
         });
     }
@@ -390,6 +400,118 @@ public class CreateWorkflowViewStore(
     }
 
     /// <summary>
+    /// Sets the workflow labels
+    /// </summary>
+    /// <param name="labels">The new labels</param>
+    public virtual void SetLabels(EquatableDictionary<string, string>? labels)
+    {
+        this.Reduce(state => state with
+        {
+            Labels = labels != null ? [.. labels] : []
+        });
+    }
+
+    /// <summary>
+    /// Adds a single label
+    /// </summary>
+    /// <param name="key">The key of the label</param>
+    /// <param name="value">The value of the label</param>
+    public virtual void AddLabel(string key, string value)
+    {
+        if (string.IsNullOrEmpty(key) || string.IsNullOrEmpty(value))
+        {
+            return;
+        }
+        var labels = new EquatableDictionary<string, string>(this.Get(state => state.Labels));
+        if (labels.ContainsKey(key))
+        {
+            labels.Remove(key);
+        }
+        labels.Add(key, value);
+        this.SetLabels(labels);
+    }
+
+    /// <summary>
+    /// Removes a single label using it's key
+    /// </summary>
+    /// <param name="key">The label selector key to remove</param>
+    public void RemoveLabel(string key)
+    {
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            return;
+        }
+        var labels = new EquatableDictionary<string, string>(this.Get(state => state.Labels));
+        if (labels.ContainsKey(key))
+        {
+            labels.Remove(key);
+        }
+        this.SetLabels(labels);
+    }
+
+    /// <summary>
+    /// Sets the <see cref="WorkflowListState.Operator"/> 
+    /// </summary>
+    /// <param name="operatorName">The new value</param>
+    public void SetOperator(string? operatorName)
+    {
+        if (string.IsNullOrEmpty(operatorName))
+            RemoveLabel(SynapseDefaults.Resources.Labels.Operator);
+        else
+            AddLabel(SynapseDefaults.Resources.Labels.Operator, operatorName);
+    }
+
+    /// <summary>
+    /// Sets the workflow annotations
+    /// </summary>
+    /// <param name="annotations">The new annotations</param>
+    public virtual void SetAnnotations(EquatableDictionary<string, string>? annotations)
+    {
+        this.Reduce(state => state with
+        {
+            Annotations = annotations != null ? [.. annotations] : []
+        });
+    }
+
+    /// <summary>
+    /// Adds a single annotation
+    /// </summary>
+    /// <param name="key">The key of the annotation</param>
+    /// <param name="value">The value of the annotation</param>
+    public virtual void AddAnnotation(string key, string value)
+    {
+        if (string.IsNullOrEmpty(key) || string.IsNullOrEmpty(value))
+        {
+            return;
+        }
+        var annotations = new EquatableDictionary<string, string>(this.Get(state => state.Annotations));
+        if (annotations.ContainsKey(key))
+        {
+            annotations.Remove(key);
+        }
+        annotations.Add(key, value);
+        this.SetAnnotations(annotations);
+    }
+
+    /// <summary>
+    /// Removes a single annotation using it's key
+    /// </summary>
+    /// <param name="key">The annotation selector key to remove</param>
+    public void RemoveAnnotation(string key)
+    {
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            return;
+        }
+        var annotations = new EquatableDictionary<string, string>(this.Get(state => state.Annotations));
+        if (annotations.ContainsKey(key))
+        {
+            annotations.Remove(key);
+        }
+        this.SetAnnotations(annotations);
+    }
+
+    /// <summary>
     /// Saves the <see cref="WorkflowDefinition"/> by posting it to the Synapse API
     /// </summary>
     /// <returns>A new awaitable <see cref="Task"/></returns>
@@ -438,8 +560,9 @@ public class CreateWorkflowViewStore(
             var @namespace = workflowDefinition!.Document.Namespace;
             var name = workflowDefinition.Document.Name;
             var version = workflowDefinition.Document.Version;
+            var labels = Get(state => state.Labels);
+            var annotations = Get(state => state.Annotations);
             var isNew = Get(state => state.IsNew);
-            var operatorName = Get(state => state.Operator);
             Reduce(s => s with
             {
                 Saving = true
@@ -460,11 +583,8 @@ public class CreateWorkflowViewStore(
                             Versions = [workflowDefinition]
                         }
                     };
-                    if (!string.IsNullOrWhiteSpace(operatorName))
-                    {
-                        workflow.Metadata.Labels = workflow.Metadata.Labels ?? new EquatableDictionary<string, string>();
-                        workflow.Metadata.Labels.Add(SynapseDefaults.Resources.Labels.Operator, operatorName);
-                    }
+                    if (labels.Count > 0) workflow.Metadata.Labels = labels;
+                    if (annotations.Count > 0) workflow.Metadata.Annotations = annotations;
                     workflow = await Api.Workflows.CreateAsync(workflow);
                     NavigationManager.NavigateTo($"/workflows/details/{@namespace}/{name}/{version}");
                     return;
@@ -487,11 +607,8 @@ public class CreateWorkflowViewStore(
                 });
                 return;
             }
-            if (!string.IsNullOrWhiteSpace(operatorName) && updatedResource.Metadata.Labels?.Get(SynapseDefaults.Resources.Labels.Operator) != operatorName)
-            {
-                updatedResource.Metadata.Labels ??= new EquatableDictionary<string, string>();
-                updatedResource.Metadata.Labels[SynapseDefaults.Resources.Labels.Operator] = operatorName;
-            }
+            updatedResource.Metadata.Labels = labels;
+            updatedResource.Metadata.Annotations = annotations;
             updatedResource.Spec.Versions.Add(workflowDefinition!);
             var jsonPatch = JsonPatch.FromDiff(JsonSerializer.SerializeToElement(workflow)!.Value, JsonSerializer.SerializeToElement(updatedResource)!.Value);
             var patch = JsonSerializer.Deserialize<Json.Patch.JsonPatch>(jsonPatch.RootElement);
@@ -554,6 +671,7 @@ public class CreateWorkflowViewStore(
             });
         }
     }
+    
     /// <summary>
     /// Lists all available <see cref="Operator"/>s
     /// </summary>
@@ -564,18 +682,6 @@ public class CreateWorkflowViewStore(
         Reduce(s => s with
         {
             Operators = operatorList
-        });
-    }
-
-    /// <summary>
-    /// Sets the <see cref="WorkflowListState.Operator"/> 
-    /// </summary>
-    /// <param name="operatorName">The new value</param>
-    public void SetOperator(string? operatorName)
-    {
-        Reduce(state => state with
-        {
-            Operator = operatorName
         });
     }
     #endregion

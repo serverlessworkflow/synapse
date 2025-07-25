@@ -72,3 +72,8 @@ tr.row-placeholder td::after {
     animation-timing-function: linear;
     animation-fill-mode: forwards;
 }
+
+
+td.fit, th.fit {
+    width: 1%;
+}

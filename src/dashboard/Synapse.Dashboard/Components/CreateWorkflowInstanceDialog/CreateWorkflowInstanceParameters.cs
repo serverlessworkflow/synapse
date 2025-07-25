@@ -24,7 +24,12 @@ public record CreateWorkflowInstanceParameters
     public string? Input { get; set; }
 
     /// <summary>
-    /// Gets/sets the workflow instance operator.
+    /// Gets/sets the workflow instance's labels.
     /// </summary>
-    public string? Operator { get; set; }
+    public EquatableDictionary<string, string> Labels { get; set; } = [];
+
+    /// <summary>
+    /// Gets/sets the workflow instance's annotations.
+    /// </summary>
+    public EquatableDictionary<string, string> Annotations { get; set; } = [];
 }

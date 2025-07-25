@@ -14,6 +14,7 @@
     limitations under the License.
 *@
 
+@namespace Synapse.Dashboard.Components
 @using Json.Schema
 @using Neuroglia.Data.Infrastructure.ResourceOriented.Properties
 @using ServerlessWorkflow.Sdk
@@ -21,7 +22,6 @@
 @using System.Xml.Schema
 @using Synapse.Core.Infrastructure.Services
 @using System.Text.Json.Nodes
-@namespace Synapse.Dashboard.Components
 @inject MonacoInterop MonacoInterop
 @inject IExternalResourceProvider ExternalResourceProvider
 @inject IJsonSerializer JsonSerializer
@@ -38,7 +38,7 @@
             </Content>
         </Tab>
     }
-    <Tab Title="Text">
+    <Tab Title="Raw">
         <Content>
             <div class="pt-3">
                 <MonacoEditor OnTextChanged="OnTextChanged" ModelName="@modelName" Document="input" />
@@ -49,19 +49,37 @@
 
 <Accordion class="py-3">
         <AccordionItem Title="Advanced Settings">
-            <Content>
-            @if (Operators != null && Operators.Count() > 0)
-            {
-                <label for="operator">Select an Operator to run the Workflow:</label>
-                <select id="operator" class="form-select" @onchange="OnSelectOperatorChanged">
-                    <option value="">Any Operator</option>
-                    @foreach (var op in Operators)
-                    {
-                        var name = op.GetName() + "." + op.GetNamespace();
-                        <option value="@name" selected="@(name == operatorName)">@name</option>
-                    }
-                </select>
-            }
+        <Content>
+            <div>
+                @if (Operators != null && Operators.Count() > 0)
+                {
+                    <label for="operator" class="fw-bolder mb-2">Run on:</label>
+                    <select id="operator" class="form-select" @onchange="(e) => SetOperator(e.Value?.ToString())">
+                        <option value="">Any Operator</option>
+                        @foreach (var op in Operators)
+                        {
+                            var name = op.GetName() + "." + op.GetNamespace();
+                            <option value="@name" selected="@(name == operatorName)">@name</option>
+                        }
+                    </select>
+                }
+            </div>
+            <div class="mt-4">
+                <DictionaryEditor Title="Labels"
+                                  KeyPlaceholder="Enter label key"
+                                  ValuePlaceholder="Enter label value"
+                                  Entries="parameters.Labels"
+                                  OnAddEntry="(kvp) => AddLabel(kvp.Key, kvp.Value)"
+                                  OnRemoveEntry="RemoveLabel" />
+            </div>
+            <div class="mt-4">
+                <DictionaryEditor Title="Annotations"
+                                  KeyPlaceholder="Enter annotation key"
+                                  ValuePlaceholder="Enter annotation value"
+                                  Entries="parameters.Annotations"
+                                  OnAddEntry="(kvp) => AddAnnotation(kvp.Key, kvp.Value)"
+                                  OnRemoveEntry="RemoveAnnotation" />
+            </div>
         </Content>
     </AccordionItem>
 </Accordion>
@@ -77,33 +95,37 @@
 
     WorkflowDefinition? workflowDefinition;
     JsonSchema? schema;
-    string payload = string.Empty;
     string modelName = string.Empty;
     EquatableDictionary<string, object>? input;
+    CreateWorkflowInstanceParameters parameters = new();
     string? operatorName;
 
     [Parameter] public WorkflowDefinition? WorkflowDefinition { get; set; }
     [Parameter] public IEnumerable<Operator> Operators { get; set; } = [];
-    [Parameter] public string? OperatorName { get; set; } = null;
     [Parameter] public EquatableDictionary<string, object>? Input { get; set; }
+    [Parameter] public EquatableDictionary<string, string>? Labels { get; set; }
+    [Parameter] public EquatableDictionary<string, string>? Annotations { get; set; }
     [Parameter] public EventCallback<CreateWorkflowInstanceParameters> OnCreate { get; set; }
     [Parameter] public EventCallback<ProblemDetails> OnProblem { get; set; }
 
     void OnValueChanged(object? value)
     {
-        payload = value == null ? string.Empty : JsonSerializer.SerializeToText(value);
+        parameters.Input = value == null ? string.Empty : JsonSerializer.SerializeToText(value);
     }
 
     void OnTextChanged(string value)
     {
-        payload = value;
+        parameters.Input = value;
     }
 
     protected override async Task OnParametersSetAsync()
     {
         await base.OnParametersSetAsync();
         if (input != Input) input = Input;
-        if (operatorName != OperatorName) operatorName = OperatorName;
+        if (Labels != null && Labels.Count > 0) SetLabels(Labels);
+        else SetLabels(null);
+        if (Annotations != null && Annotations.Count > 0) SetAnnotations(Annotations);
+        else SetAnnotations(null);
         if (workflowDefinition != WorkflowDefinition) 
         {
             workflowDefinition = WorkflowDefinition;
@@ -116,16 +138,80 @@
         }
     }
 
-    protected void OnSelectOperatorChanged(ChangeEventArgs e)
+    protected void SetLabels(EquatableDictionary<string, string>? labels)
     {
-        operatorName = e.Value?.ToString();
+        parameters.Labels = labels != null ? [.. labels] : [];
+        if (labels != null) operatorName = labels.TryGetValue(SynapseDefaults.Resources.Labels.Operator, out var label) ? label : null;
+    }
+
+    protected void AddLabel(string key, string value)
+    {
+        if (string.IsNullOrEmpty(key) || string.IsNullOrEmpty(value))
+        {
+            return;
+        }
+        if (parameters.Labels.ContainsKey(key))
+        {
+            parameters.Labels.Remove(key);
+        }
+        parameters.Labels.Add(key, value);
+    }
+
+    protected void RemoveLabel(string key)
+    {
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            return;
+        }
+        if (parameters.Labels.ContainsKey(key))
+        {
+            parameters.Labels.Remove(key);
+        }
+    }
+
+    protected void SetOperator(string? operatorName)
+    {
+        if (string.IsNullOrEmpty(operatorName))
+            RemoveLabel(SynapseDefaults.Resources.Labels.Operator);
+        else
+            AddLabel(SynapseDefaults.Resources.Labels.Operator, operatorName);
+    }
+
+    protected void SetAnnotations(EquatableDictionary<string, string>? annotations)
+    {
+        parameters.Annotations = annotations != null ? [.. annotations] : [];
+    }
+
+    protected void AddAnnotation(string key, string value)
+    {
+        if (string.IsNullOrEmpty(key) || string.IsNullOrEmpty(value))
+        {
+            return;
+        }
+        if (parameters.Annotations.ContainsKey(key))
+        {
+            parameters.Annotations.Remove(key);
+        }
+        parameters.Annotations.Add(key, value);
+    }
+
+    protected void RemoveAnnotation(string key)
+    {
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            return;
+        }
+        if (parameters.Annotations.ContainsKey(key))
+        {
+            parameters.Annotations.Remove(key);
+        }
     }
 
     async Task OnStartAsync()
     {
         if (schema != null)
         {
-            var node = string.IsNullOrWhiteSpace(payload) ? null : JsonSerializer.Deserialize<JsonNode>(payload);
+            var node = string.IsNullOrWhiteSpace(parameters.Input) ? null : JsonSerializer.Deserialize<JsonNode>(parameters.Input);
             var evaluationOptions = new EvaluationOptions()
             {
                 OutputFormat = OutputFormat.List
@@ -141,10 +227,7 @@
         }
         if (OnCreate.HasDelegate)
         {
-            await OnCreate.InvokeAsync(new CreateWorkflowInstanceParameters() { 
-                Input = payload,
-                Operator = operatorName
-            });
+            await OnCreate.InvokeAsync(parameters);
         }
     }
 

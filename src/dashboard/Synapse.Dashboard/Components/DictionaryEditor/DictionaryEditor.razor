@@ -1,0 +1,85 @@
+﻿﻿@*
+    Copyright © 2024-Present The Synapse Authors
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*@
+
+@namespace Synapse.Dashboard.Components
+
+<div class="fw-bolder mb-2">@Title:</div>
+<div class="border rounded p-3">
+    <table class="table">
+        <tbody>
+            <tr>
+                <td class="ps-0 py-0 pe-2">
+                    <input name="label-key" type="text" class="form-control border-0" placeholder="@KeyPlaceholder" @bind="newKey" />
+                </td>
+                <td class="ps-0 py-0 pe-2">
+                    <input name="label-value" type="text" class="form-control border-0" placeholder="@ValuePlaceholder" @bind="newValue" />
+                </td>
+                <td class="text-end pt-2 fit">
+                    <Button Color="ButtonColor.Primary" Size="ButtonSize.Small" Outline="true" class="m-1" @onclick="_ => AddLabel()">
+                        <Icon Color="IconColor.Primary" Name="IconName.Plus" />
+                    </Button>
+                </td>
+            </tr>
+            @foreach (KeyValuePair<string, string> entry in Entries)
+            {
+                <tr>
+                    <td class="pt-2 ps-2">@entry.Key</td>
+                    <td class="pt-2 ps-2">@entry.Value</td>
+                    <td class="text-end pt-2 fit">
+                        <Button Color="ButtonColor.Primary" Size="ButtonSize.Small" Outline="true" class="m-1" @onclick="() => RemoveLabel(entry.Key)">
+                            <Icon Color="IconColor.Primary" Name="IconName.Trash" />
+                        </Button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+@code {
+    private string newKey = string.Empty;
+    private string newValue = string.Empty;
+
+    [Parameter] public string Title { get; set; } = "Labels";
+    [Parameter] public string KeyPlaceholder { get; set; } = "Enter label key";
+    [Parameter] public string ValuePlaceholder { get; set; } = "Enter label value";
+    [Parameter] public EquatableDictionary<string, string> Entries { get; set; } = new();
+    [Parameter] public EventCallback<KeyValuePair<string, string>> OnAddEntry { get; set; }
+    [Parameter] public EventCallback<string> OnRemoveEntry { get; set; }
+
+    private void AddLabel()
+    {
+        if (string.IsNullOrWhiteSpace(newKey) || string.IsNullOrWhiteSpace(newValue)) return;
+        var entry = new KeyValuePair<string, string>(newKey.Trim(), newValue.Trim());
+        if (OnAddEntry.HasDelegate)
+        {
+            OnAddEntry.InvokeAsync(entry);
+        }
+        newKey = string.Empty;
+        newValue = string.Empty;
+    }
+
+    private void RemoveLabel(string key)
+    {
+        if (string.IsNullOrWhiteSpace(key)) return;
+        if (OnRemoveEntry.HasDelegate)
+        {
+            OnRemoveEntry.InvokeAsync(key);
+        }
+    }
+
+}

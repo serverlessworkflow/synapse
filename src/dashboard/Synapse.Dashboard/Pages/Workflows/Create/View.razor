@@ -40,23 +40,71 @@ else
         ConstructionOptions="Store.StandaloneEditorConstructionOptions"
         OnDidInit="Store.OnTextBasedEditorInitAsync"
         OnDidChangeModelContent="Store.OnDidChangeModelContent"
-        CssClass="h-100" />
+        CssClass="h-100 min-h-0" 
+    />
+
+    <Accordion class="py-3 flex-shrink-0">
+        <AccordionItem Title="Advanced Settings">
+            <Content>
+                <div>
+                @if (operators != null && operators.Count() > 0)
+                {
+                    <label for="operator" class="fw-bolder mb-2">Run on:</label>
+                    <select id="operator" class="form-select" @onchange="(e) => Store.SetOperator(e.Value?.ToString())">
+                        <option value="">Any Operator</option>
+                        @foreach (var op in operators)
+                        {
+                            var name = op.GetName() + "." + op.GetNamespace();
+                            <option value="@name" selected="@(name == operatorName)">@name</option>
+                        }
+                    </select>
+                }
+                </div>
+                <div class="mt-4">
+                    <DictionaryEditor 
+                        Title="Labels"
+                        KeyPlaceholder="Enter label key"
+                        ValuePlaceholder="Enter label value"
+                        Entries="labels"
+                        OnAddEntry="(kvp) => Store.AddLabel(kvp.Key, kvp.Value)"
+                        OnRemoveEntry="Store.RemoveLabel"
+                    />
+                </div>                
+                <div class="mt-4">
+                    <DictionaryEditor 
+                        Title="Annotations"
+                        KeyPlaceholder="Enter annotation key"
+                        ValuePlaceholder="Enter annotation value"
+                        Entries="annotations"
+                        OnAddEntry="(kvp) => Store.AddAnnotation(kvp.Key, kvp.Value)"
+                        OnRemoveEntry="Store.RemoveAnnotation"
+                    />
+                </div>
+            </Content>
+        </AccordionItem>
+    </Accordion>
+
     @if (problemDetails != null)
     {
-        <div class="problems px-3">
+        <div class="problems mt-2">
             <Callout Color="CalloutColor.Danger" Heading="@problemDetails.Title" Class="position-relative">
                 <Icon Name="IconName.X" Class="position-absolute" @onclick="() => Store.SetProblemDetails(null)" />
-                <p>@problemDetails.Detail</p>
+                <p>@problemDetails.Detail?.Trim()</p>
 
                 @if (problemDetails.Errors != null && problemDetails.Errors.Any())
                 {
                     foreach (KeyValuePair<string, string[]> errorContainer in problemDetails.Errors)
                     {
-                        <strong>@errorContainer.Key:</strong>
+                        @if (!string.IsNullOrWhiteSpace(errorContainer.Key)) {
+                            <strong>@errorContainer.Key:</strong>
+                        }
                         <ul>
                             @foreach (string error in errorContainer.Value)
                             {
-                                <li>@error</li>
+                                @if (!string.IsNullOrWhiteSpace(error))
+                                {
+                                    <li>@error</li>
+                                }
                             }
                         </ul>
                     }
@@ -64,25 +112,6 @@ else
             </Callout>
         </div>
     }
-
-    <Accordion class="py-3">
-        <AccordionItem Title="Advanced Settings">
-            <Content>
-            @if (operators != null && operators.Count() > 0)
-            {
-                <label for="operator">Select an Operator to run the Workflow:</label>
-                <select id="operator" class="form-select" @onchange="(e) => Store.SetOperator(e.Value?.ToString())">
-                    <option value="">Any Operator</option>
-                    @foreach (var op in operators)
-                    {
-                        var name = op.GetName() + "." + op.GetNamespace();
-                        <option value="@name" selected="@(name == operatorName)">@name</option>
-                    }
-                </select>
-             }
-            </Content>
-        </AccordionItem>
-    </Accordion>
 
     <Button class="mt-3" Color="ButtonColor.Primary" Outline="true" Disabled="saving" @onclick="async (_) => await Store.SaveWorkflowDefinitionAsync()">
         @if(!saving)
@@ -105,7 +134,11 @@ else
     private ProblemDetails? problemDetails = null;
     protected IEnumerable<Operator>? operators { get; set; }
     protected string? operatorName { get; set; }
-    
+    protected EquatableDictionary<string, string> labels { get; set; } = [];
+    protected EquatableDictionary<string, string> annotations { get; set; } = [];
+    string labelKey = string.Empty;
+    string labelValue = string.Empty;
+
     [Parameter] public string? Namespace { get; set; }
     [Parameter] public string? Name { get; set; }
 
@@ -117,6 +150,8 @@ else
         BreadcrumbManager.Add(new($"New", $"/workflows/new"));
         Store.SetIsNew(true);
         Store.Operators.Subscribe(value => OnStateChanged(_ => operators = value), token: CancellationTokenSource.Token);
+        Store.Labels.Subscribe(value => OnStateChanged(_ => labels = value), token: CancellationTokenSource.Token);
+        Store.Annotations.Subscribe(value => OnStateChanged(_ => annotations = value), token: CancellationTokenSource.Token);
         Store.Operator.Subscribe(value => OnStateChanged(_ => operatorName = value), token: CancellationTokenSource.Token);
         Store.Namespace.Subscribe(value => OnStateChanged(_ => ns = value), token: CancellationTokenSource.Token);
         Store.Name.Subscribe(value => OnStateChanged(_ => name = value), token: CancellationTokenSource.Token);
@@ -137,6 +172,14 @@ else
             Store.SetName(Name);
             Store.SetIsNew(false);
         }
+    }
+
+    protected void AddLabel()
+    {
+        Store.AddLabel(labelKey, labelValue);
+        labelKey = string.Empty;
+        labelValue = string.Empty;
+        OnStateChanged();
     }
 
 }
