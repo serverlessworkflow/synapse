@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Neuroglia.Data.Infrastructure.ResourceOriented;
 using Neuroglia.Data.Infrastructure.Services;
 
 namespace Synapse.Operator.Services;
@@ -61,6 +60,7 @@ public class WorkflowInstanceController(IServiceProvider serviceProvider, ILogge
         await base.StartAsync(cancellationToken).ConfigureAwait(false);
         this.Operator!.Select(b => b.Resource.Spec.Selector).SubscribeAsync(this.OnResourceSelectorChangedAsync, cancellationToken: cancellationToken);
         await this.OnResourceSelectorChangedAsync(this.Operator!.Resource.Spec.Selector).ConfigureAwait(false);
+        if (this.Operator?.Resource?.Spec?.Cleanup != null)_ = Task.Run(this.CleanupAsync, CancellationTokenSource.Token);
     }
 
     /// <inheritdoc/>
@@ -68,6 +68,59 @@ public class WorkflowInstanceController(IServiceProvider serviceProvider, ILogge
     {
         this.Options.LabelSelectors = this.Operator?.Resource.Spec.Selector?.Select(s => new LabelSelector(s.Key, LabelSelectionOperator.Equals, s.Value)).ToList();
         return base.ReconcileAsync(cancellationToken);
+    }
+
+    /// <inheritdoc/>
+    protected virtual async Task CleanupAsync()
+    {
+        while (!CancellationTokenSource.IsCancellationRequested)
+        {
+            try
+            {
+                if (this.Operator?.Resource?.Spec?.Cleanup == null) break;
+                var cutoff = DateTimeOffset.UtcNow - this.Operator?.Resource?.Spec?.Cleanup.Ttl;
+                var deleted = 0;
+                var selectors = this.Options.LabelSelectors;
+
+                await foreach (var instance in this.Repository.GetAllAsync<WorkflowInstance>(labelSelectors: selectors, cancellationToken: CancellationTokenSource.Token))
+                {
+                    if (Handlers.ContainsKey(instance.GetQualifiedName())) continue;
+                    if (instance.IsOperative) continue;
+                    var finishedAt = instance.Status?.EndedAt ?? instance.Metadata.CreationTimestamp;
+                    if (finishedAt <= cutoff && !this.Handlers.ContainsKey(instance.GetQualifiedName()))
+                    {
+                        try { await this.TryReleaseAsync(instance, CancellationTokenSource.Token).ConfigureAwait(false); } catch { }
+                        try
+                        {
+                            await this.Repository.RemoveAsync<WorkflowInstance>(instance.GetName(), instance.GetNamespace(), false, CancellationTokenSource.Token).ConfigureAwait(false);
+                            deleted++;
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.LogWarning(ex, "Failed to delete expired workflow instance {instance}", instance.GetQualifiedName());
+                        }
+                    }
+                }
+            }
+            catch (OperationCanceledException) when (CancellationTokenSource.Token.IsCancellationRequested)
+            {
+                break;
+            }
+            catch (Exception ex)
+            {
+                this.Logger.LogError(ex, "Instance cleanup sweep failed");
+                try { await Task.Delay(TimeSpan.FromSeconds(5), CancellationTokenSource.Token).ConfigureAwait(false); } catch { }
+            }
+            try
+            {
+                var delay = this.Operator?.Resource?.Spec?.Cleanup?.Interval ?? TimeSpan.FromMinutes(5);
+                await Task.Delay(delay, CancellationTokenSource.Token).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) when (CancellationTokenSource.IsCancellationRequested)
+            {
+                break;
+            }
+        }
     }
 
     /// <summary>

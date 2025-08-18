@@ -12,7 +12,6 @@
 // limitations under the License.
 
 using Neuroglia.Data.Infrastructure.Services;
-using Neuroglia.Mediation;
 using System.Text;
 
 namespace Synapse.Operator.Services;

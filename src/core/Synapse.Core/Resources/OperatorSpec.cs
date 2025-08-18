@@ -36,4 +36,10 @@ public record OperatorSpec
     [DataMember(Order = 2, Name = "selector"), JsonPropertyOrder(2), JsonPropertyName("selector"), YamlMember(Order = 2, Alias = "selector")]
     public virtual IDictionary<string, string>? Selector { get; set; }
 
+    /// <summary>
+    /// Gets/sets options controlling retention of completed workflow instances and cleanup sweep behavior.
+    /// </summary>
+    [DataMember(Order = 3, Name = "cleanup"), JsonPropertyOrder(3), JsonPropertyName("cleanup"), YamlMember(Order = 3, Alias = "cleanup")]
+    public virtual OperatorCleanupOptions? Cleanup { get; set; } = new();
+
 }
