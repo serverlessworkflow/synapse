@@ -16,56 +16,58 @@
 @namespace Synapse.Dashboard.Components
 @inject JSInterop jsInterop
 
+<div class="d-flex flex-row justify-content-between align-items-center">
+    @Title
+    <span>@(WorkflowInstances?.Count() ?? 0) items</span>
+    <div class="d-flex">
+        @if (Workflows != null && Workflows.Count() > 0)
+        {
+            <select class="form-select m-2" @onchange="OnSelectWorkflowChangedAsync">
+                <option value="">All workflows</option>
+                @foreach (var workflowResource in Workflows)
+                {
+                    <option value="@workflowResource.GetQualifiedName()">@workflowResource.GetQualifiedName()</option>
+                }
+            </select>
+        }
+        @if (Namespaces != null && Namespaces.Count() > 0)
+        {
+            <select class="form-select m-2" @onchange="OnSelectNamespaceChangedAsync">
+                <option value="">All namespaces</option>
+                @foreach (var namespaceResource in Namespaces)
+                {
+                    <option value="@namespaceResource.GetName()" selected="@(@namespaceResource.GetName() == @namespace)">@namespaceResource.GetName()</option>
+                }
+            </select>
+        }
+        @if (Operators != null && Operators.Count() > 0)
+        {
+            <select class="form-select m-2" @onchange="OnSelectOperatorChangedAsync">
+                <option value="">All operators</option>
+                @foreach (var operatorResource in Operators)
+                {
+                    var name = operatorResource.GetName() + "." + operatorResource.GetNamespace();
+                    <option value="@name" selected="@(name == operatorName)">@name</option>
+                }
+            </select>
+        }
+        <input type="search" class="form-control rounded my-2 me-2" placeholder="Search" @oninput="OnSearchInputAsync" />
+        <div class="dropdown d-flex align-content-center">
+            <button class="btn btn-sm" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="" @onclick:stopPropagation="true"><i class="bi bi-three-dots-vertical"></i></button>
+            <ul class="dropdown-menu">
+                <li><button class="dropdown-item @(selectedInstanceNames.Count() == 0 ? "text-mute" : "")" disabled="@(selectedInstanceNames.Count() == 0)" @onclick="OnSuspendSelectedClickedAsync" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Pause" /> Suspend selected</button></li>
+                <li><button class="dropdown-item @(selectedInstanceNames.Count() == 0 ? "text-mute" : "")" disabled="@(selectedInstanceNames.Count() == 0)" @onclick="OnResumeSelectedClickedAsync" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Play" /> Resume selected</button></li>
+                <li><button class="dropdown-item @(selectedInstanceNames.Count() == 0 ? "text-mute" : "")" disabled="@(selectedInstanceNames.Count() == 0)" @onclick="OnCancelSelectedClickedAsync" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.X" /> Cancel selected</button></li>
+                <li><button class="dropdown-item @(selectedInstanceNames.Count() == 0 ? "text-mute" : "text-danger")" disabled="@(selectedInstanceNames.Count() == 0)" @onclick="OnDeleteSelected" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Trash" /> Delete selected</button></li>
+            </ul>
+        </div>
+    </div>
+</div>
 <div class="table-container @ClassNames">
     @if (Loading)
     {
         <Loader />
     }
-    <div class="d-flex flex-row justify-content-between align-items-center">
-        @Title
-        <span>@(WorkflowInstances?.Count() ?? 0) items</span>
-        <div class="d-flex">
-            @if (Workflows != null && Workflows.Count() > 0) {
-                <select class="form-select m-2" @onchange="OnSelectWorkflowChangedAsync">
-                    <option value="">All workflows</option>
-                    @foreach (var workflowResource in Workflows)
-                    {
-                        <option value="@workflowResource.GetQualifiedName()">@workflowResource.GetQualifiedName()</option>
-                    }
-                </select>
-            }
-            @if (Namespaces != null && Namespaces.Count() > 0) {
-                <select class="form-select m-2" @onchange="OnSelectNamespaceChangedAsync">
-                    <option value="">All namespaces</option>
-                    @foreach (var namespaceResource in Namespaces)
-                    {
-                        <option value="@namespaceResource.GetName()" selected="@(@namespaceResource.GetName() == @namespace)">@namespaceResource.GetName()</option>
-                    }
-                </select>
-            }
-            @if (Operators != null && Operators.Count() > 0)
-            {
-                <select class="form-select m-2" @onchange="OnSelectOperatorChangedAsync">
-                    <option value="">All operators</option>
-                    @foreach (var operatorResource in Operators)
-                    {
-                        var name = operatorResource.GetName() + "." + operatorResource.GetNamespace();
-                        <option value="@name" selected="@(name == operatorName)">@name</option>
-                    }
-                </select>
-            }
-            <input type="search" class="form-control rounded my-2 me-2" placeholder="Search" @oninput="OnSearchInputAsync" />
-            <div class="dropdown d-flex align-content-center">
-                <button class="btn btn-sm" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="" @onclick:stopPropagation="true"><i class="bi bi-three-dots-vertical"></i></button>
-                <ul class="dropdown-menu">
-                    <li><button class="dropdown-item @(selectedInstanceNames.Count() == 0 ? "text-mute" : "")" disabled="@(selectedInstanceNames.Count() == 0)" @onclick="OnSuspendSelectedClickedAsync" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Pause" /> Suspend selected</button></li>
-                    <li><button class="dropdown-item @(selectedInstanceNames.Count() == 0 ? "text-mute" : "")" disabled="@(selectedInstanceNames.Count() == 0)" @onclick="OnResumeSelectedClickedAsync" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Play" /> Resume selected</button></li>
-                    <li><button class="dropdown-item @(selectedInstanceNames.Count() == 0 ? "text-mute" : "")" disabled="@(selectedInstanceNames.Count() == 0)" @onclick="OnCancelSelectedClickedAsync" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.X" /> Cancel selected</button></li>
-                    <li><button class="dropdown-item @(selectedInstanceNames.Count() == 0 ? "text-mute" : "text-danger")" disabled="@(selectedInstanceNames.Count() == 0)" @onclick="OnDeleteSelected" @onclick:preventDefault="true" @onclick:stopPropagation="true"><Icon Name="IconName.Trash" /> Delete selected</button></li>
-                </ul>
-            </div>
-        </div>
-    </div>
     <table class="table table-hover">
         <thead>
             <tr>
