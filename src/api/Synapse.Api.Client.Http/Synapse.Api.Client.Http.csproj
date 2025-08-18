@@ -42,8 +42,8 @@
   </ItemGroup>
 	
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.1" />
-	<PackageReference Include="ServerlessWorkflow.Sdk.IO" Version="1.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.8" />
+	<PackageReference Include="ServerlessWorkflow.Sdk.IO" Version="1.0.1" />
     <PackageReference Include="System.Reactive" Version="6.0.1" />
   </ItemGroup>
 
