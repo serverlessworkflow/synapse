@@ -33,6 +33,16 @@ public interface IClusterResourceApiClient<TResource>
     Task<IAsyncEnumerable<TResource>> ListAsync(IEnumerable<LabelSelector>? labelSelectors = null, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Lists <see cref="IResource"/>s with support for continuation tokens
+    /// </summary>
+    /// <param name="labelSelectors">An <see cref="IEnumerable{T}"/> containing the <see cref="LabelSelector"/>s used to select the <see cref="IResource"/>s to list by, if any</param>
+    /// <param name="maxResults">The maximum number of results to return</param>
+    /// <param name="continuationToken">The continuation token to use for pagination</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>A new <see cref="Neuroglia.Data.Infrastructure.ResourceOriented.ICollection{T}"/> used to asynchronously enumerate resulting <see cref="IResource"/>s</returns>
+    Task<Neuroglia.Data.Infrastructure.ResourceOriented.ICollection<TResource>> ListWithContinuationAsync(IEnumerable<LabelSelector>? labelSelectors = null, ulong? maxResults = null, string? continuationToken = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Watches matching resources
     /// </summary>
     /// <param name="labelSelectors">Defines the expected labels, if any, of the resources to watch</param>

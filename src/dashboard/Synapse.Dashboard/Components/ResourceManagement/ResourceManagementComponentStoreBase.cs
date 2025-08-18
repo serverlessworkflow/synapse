@@ -55,6 +55,11 @@ public abstract class ResourceManagementComponentStoreBase<TState, TResource>(IL
     public IObservable<string?> SearchTerm => this.Select(state => state.SearchTerm).DistinctUntilChanged();
 
     /// <summary>
+    /// Gets an <see cref="IObservable{T}"/> used to observe the  <see cref="ResourceManagementComponentState{TResource}.MaxResults"/> changes
+    /// </summary>
+    public IObservable<ulong> MaxResults => this.Select(state => state.MaxResults).DistinctUntilChanged();
+
+    /// <summary>
     /// Gets an <see cref="IObservable{T}"/> used to observe the <see cref="ResourceManagementComponentState{TResource}.LabelSelectors"/> changes
     /// </summary>
     public IObservable<EquatableList<LabelSelector>?> LabelSelectors => this.Select(state => state.LabelSelectors).DistinctUntilChanged();
@@ -80,7 +85,7 @@ public abstract class ResourceManagementComponentStoreBase<TState, TResource>(IL
                 {
                     return resources!;
                 }
-                return new EquatableList<TResource>(resources!.Where(r => r.GetName().Contains(searchTerm)));
+                return [.. resources!.Where(r => r.GetName().Contains(searchTerm))];
             }
          )
         .DistinctUntilChanged();
@@ -113,7 +118,7 @@ public abstract class ResourceManagementComponentStoreBase<TState, TResource>(IL
     protected ISynapseApiClient ApiClient { get; } = apiClient;
 
     /// <summary>
-    /// Gets the <see cref="IResourceEventWatchHub"/> websocket service client
+    /// Gets the <see cref="IResourceEventWatchHub"/> web socket service client
     /// </summary>
     protected ResourceWatchEventHubClient ResourceEventHub { get; } = resourceEventHub;
 
@@ -182,7 +187,7 @@ public abstract class ResourceManagementComponentStoreBase<TState, TResource>(IL
     {
         this.Reduce(state => state with
         {
-            LabelSelectors = new EquatableList<LabelSelector>(labelSelectors ?? [])
+            LabelSelectors = [.. labelSelectors ?? []]
         });
     }
 
@@ -312,11 +317,22 @@ public abstract class ResourceManagementComponentStoreBase<TState, TResource>(IL
             {
                 Loading = true,
             });
-            var resourceList = new EquatableList<TResource>(await (await this.ApiClient.ManageNamespaced<TResource>().ListAsync(filter?.Namespace, filter?.LabelSelectors).ConfigureAwait(false)).OrderBy(r => r.Metadata.CreationTimestamp).ToListAsync().ConfigureAwait(false));
+            var existingResources = this.Get(state => state.Resources);
+            var maxResults = this.Get(state => state.MaxResults);
+            var continuationToken = this.Get(state => state.ContinuationToken);
+            var response = await this.ApiClient.ManageNamespaced<TResource>().ListWithContinuationAsync(filter?.Namespace, filter?.LabelSelectors, maxResults, continuationToken).ConfigureAwait(false);
+            var newResources = response.Items ?? [];
+            var itemsCount = (ulong)newResources.Count;
+            var resourceList = new EquatableList<TResource>([
+                .. existingResources ?? [],
+                .. newResources
+            ]).OrderByDescending(r => r.Metadata.CreationTimestamp);
+            continuationToken = itemsCount == maxResults ? response.Metadata.Continue : null;
             this.Reduce(s => s with
             {
-                Resources = resourceList,
-                Loading = false
+                Resources = [.. resourceList],
+                Loading = false,
+                ContinuationToken = continuationToken,
             });
         }
         catch (Exception ex)

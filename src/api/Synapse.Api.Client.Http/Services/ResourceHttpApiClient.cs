@@ -107,6 +107,40 @@ public class ResourceHttpApiClient<TResource>(IServiceProvider serviceProvider, 
     }
 
     /// <inheritdoc/>
+    public virtual async Task<Neuroglia.Data.Infrastructure.ResourceOriented.ICollection<TResource>> ListWithContinuationAsync(string? @namespace = null, IEnumerable<LabelSelector>? labelSelectors = null, ulong? maxResults = null, string? continuationToken = null, CancellationToken cancellationToken = default)
+    {
+        var resource = new TResource();
+        var uri = string.IsNullOrWhiteSpace(@namespace) ? $"/api/{resource.Definition.Version}/{resource.Definition.Plural}/list" : $"/api/{resource.Definition.Version}/{resource.Definition.Plural}/{@namespace}/list";
+        var queryStringArguments = new Dictionary<string, string>();
+        if (labelSelectors?.Any() == true) queryStringArguments.Add("labelSelector", labelSelectors.Select(s => s.ToString()).Join(','));
+        if (maxResults.HasValue) queryStringArguments.Add("maxResults", maxResults.Value.ToString());
+        if (!string.IsNullOrWhiteSpace(continuationToken)) queryStringArguments.Add("continuationToken", continuationToken);
+        if (queryStringArguments.Count != 0) uri += $"?{queryStringArguments.Select(kvp => $"{kvp.Key}={kvp.Value}").Join('&')}";
+        using var request = await this.ProcessRequestAsync(new HttpRequestMessage(HttpMethod.Get, uri), cancellationToken).ConfigureAwait(false);
+        request.EnableWebAssemblyStreamingResponse();
+        var response = await this.ProcessResponseAsync(await this.HttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false), cancellationToken).ConfigureAwait(false);
+        var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+        return this.JsonSerializer.Deserialize<Neuroglia.Data.Infrastructure.ResourceOriented.ICollection<TResource>>(responseStream)!;
+    }
+
+    /// <inheritdoc/>
+    public virtual async Task<Neuroglia.Data.Infrastructure.ResourceOriented.ICollection<TResource>> ListWithContinuationAsync(IEnumerable<LabelSelector>? labelSelectors = null, ulong? maxResults = null, string? continuationToken = null, CancellationToken cancellationToken = default)
+    {
+        var resource = new TResource();
+        var uri = $"/api/{resource.Definition.Version}/{resource.Definition.Plural}/list";
+        var queryStringArguments = new Dictionary<string, string>();
+        if (labelSelectors?.Any() == true) queryStringArguments.Add("labelSelector", labelSelectors.Select(s => s.ToString()).Join(','));
+        if (maxResults.HasValue) queryStringArguments.Add("maxResults", maxResults.Value.ToString());
+        if (!string.IsNullOrWhiteSpace(continuationToken)) queryStringArguments.Add("continuationToken", continuationToken);
+        if (queryStringArguments.Count != 0) uri += $"?{queryStringArguments.Select(kvp => $"{kvp.Key}={kvp.Value}").Join('&')}";
+        using var request = await this.ProcessRequestAsync(new HttpRequestMessage(HttpMethod.Get, uri), cancellationToken).ConfigureAwait(false);
+        request.EnableWebAssemblyStreamingResponse();
+        var response = await this.ProcessResponseAsync(await this.HttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false), cancellationToken).ConfigureAwait(false);
+        var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+        return this.JsonSerializer.Deserialize<Neuroglia.Data.Infrastructure.ResourceOriented.ICollection<TResource>>(responseStream)!;
+    }
+
+    /// <inheritdoc/>
     public virtual async IAsyncEnumerable<IResourceWatchEvent<TResource>> WatchAsync(string? @namespace = null, IEnumerable<LabelSelector>? labelSelectors = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var resource = new TResource();

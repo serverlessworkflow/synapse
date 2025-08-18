@@ -47,6 +47,16 @@ public record ResourceManagementComponentState<TResource>
     public string? SearchTerm { get; set; }
 
     /// <summary>
+    /// Gets/sets the maximum number of results to return when listing resources. Defaults to 25.
+    /// </summary>
+    public ulong MaxResults { get; set; } = 25;
+
+    /// <summary>
+    /// Gets/sets the token used to continue listing resources when there are more results than the specified <see cref="MaxResults"/>
+    /// </summary>
+    public string? ContinuationToken { get; set; }
+
+    /// <summary>
     /// Gets/sets a boolean value that indicates whether data is currently being gathered
     /// </summary>
     public bool Loading { get; set; } = true;
