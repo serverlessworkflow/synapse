@@ -698,9 +698,8 @@ public class CreateWorkflowViewStore(
             string document = "";
             if (definition != null)
             {
-                document = MonacoEditorHelper.PreferredLanguage == PreferredLanguage.JSON ?
-                    JsonSerializer.SerializeToText(definition) :
-                    YamlSerializer.SerializeToText(definition);
+                document = JsonSerializer.SerializeToText(definition);
+                if (MonacoEditorHelper.PreferredLanguage == PreferredLanguage.YAML) document = YamlSerializer.ConvertFromJson(document);
             }
             Reduce(state => state with
             {
