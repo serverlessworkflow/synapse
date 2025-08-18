@@ -82,14 +82,14 @@ public class KubernetesRuntime(IServiceProvider serviceProvider, ILoggerFactory 
         ArgumentNullException.ThrowIfNull(serviceAccount);
         try
         {
-            this.Logger.LogDebug("Creating a new Kubernetes pod for workflow instance '{workflowInstance}'...", workflowInstance.GetQualifiedName());
+            this.Logger.LogDebug("Creating a new Kubernetes job for workflow instance '{workflowInstance}'...", workflowInstance.GetQualifiedName());
             if (this.Kubernetes == null) await this.InitializeAsync(cancellationToken).ConfigureAwait(false);
             var workflowDefinition = workflow.Spec.Versions.Get(workflowInstance.Spec.Definition.Version) ?? throw new NullReferenceException($"Failed to find version '{workflowInstance.Spec.Definition.Version}' of workflow '{workflow.GetQualifiedName()}'");
             var pod = this.Runner.Runtime.Kubernetes!.PodTemplate.Clone()!;
             pod.Metadata ??= new();
             pod.Metadata.Name = $"{workflowInstance.GetQualifiedName()}-{Guid.NewGuid().ToString("N")[..12].ToLowerInvariant()}";
             if (!string.IsNullOrWhiteSpace(this.Runner.Runtime.Kubernetes.Namespace)) pod.Metadata.NamespaceProperty = this.Runner.Runtime.Kubernetes.Namespace;
-            if (pod.Spec == null || pod.Spec.Containers == null || !pod.Spec.Containers.Any()) throw new InvalidOperationException("The specified Kubernetes runtime pod template is not valid");
+            if (pod.Spec == null || pod.Spec.Containers == null || !pod.Spec.Containers.Any()) throw new InvalidOperationException("The configured Kubernetes runtime pod template is not valid");
             var volumeMounts = new List<V1VolumeMount>();
             pod.Spec.Volumes ??= [];
             if (workflowDefinition.Use?.Secrets?.Count > 0)
@@ -131,7 +131,7 @@ public class KubernetesRuntime(IServiceProvider serviceProvider, ILoggerFactory 
                 if (this.Runner.Certificates?.Validate == false) container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.SkipCertificateValidation, "true");
                 container.VolumeMounts = volumeMounts;
             }
-            if(this.Runner.ContainerPlatform == ContainerPlatform.Kubernetes) pod.Spec.ServiceAccountName = this.Runner.Runtime.Kubernetes.ServiceAccount;
+            if (this.Runner.ContainerPlatform == ContainerPlatform.Kubernetes) pod.Spec.ServiceAccountName = this.Runner.Runtime.Kubernetes.ServiceAccount;
             var process = ActivatorUtilities.CreateInstance<KubernetesWorkflowProcess>(this.ServiceProvider, this.Kubernetes!, pod);
             this.Processes.AddOrUpdate(process.Id, _ => process, (key, current) =>
             {
@@ -141,12 +141,51 @@ public class KubernetesRuntime(IServiceProvider serviceProvider, ILoggerFactory 
 #pragma warning restore CA2012 // Use ValueTasks correctly
                 return process;
             });
-            this.Logger.LogDebug("A new container with id '{id}' has been successfully created to run workflow instance '{workflowInstance}'", process.Id, workflowInstance.GetQualifiedName());
+            this.Logger.LogDebug("A new job with id '{id}' has been successfully created to run workflow instance '{workflowInstance}'", process.Id, workflowInstance.GetQualifiedName());
             return process;
         }
         catch (Exception ex)
         {
             this.Logger.LogError("An error occurred while creating a new Kubernetes process for workflow instance '{workflowInstance}': {ex}", workflowInstance.GetQualifiedName(), ex);
+            throw;
+        }
+    }
+
+    /// <inheritdoc/>
+    public override async Task DeleteProcessAsync(string processId, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(processId);
+        try
+        {
+            Logger.LogDebug("Deleting the Kubernetes process with id '{processId}'...", processId);
+            var components = processId.Split('.', StringSplitOptions.RemoveEmptyEntries);
+            if (components.Length < 2) throw new ArgumentException($"The specified value '{processId}' is not valid Kubernetes process id", nameof(processId));
+            var name = components[0];
+            var @namespace = components[1];
+            if (Processes.TryGetValue(processId, out var process))
+            {
+                try
+                {
+                    Logger.LogDebug("Attempting graceful shutdown for process '{processId}'...", processId);
+                    await process.StopAsync(cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogWarning("Failed to gracefully stop process '{processId}': {ex}", processId, ex);
+                }
+            }
+            await Kubernetes!.BatchV1.DeleteNamespacedJobAsync(name, @namespace, new()
+            {
+                GracePeriodSeconds = 0,
+                PropagationPolicy = "Foreground",
+                IgnoreStoreReadErrorWithClusterBreakingPotential = true,
+            }, cancellationToken: cancellationToken).ConfigureAwait(false);
+            Processes.TryRemove(processId, out _);
+            Logger.LogDebug("The Kubernetes process with id '{processId}' has been successfully deleted", processId);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError("An error occurred while deleting the Kubernetes process with id '{processId}': {ex}", processId, ex);
             throw;
         }
     }

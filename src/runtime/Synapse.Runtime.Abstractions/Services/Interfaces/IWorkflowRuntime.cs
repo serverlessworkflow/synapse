@@ -30,4 +30,12 @@ public interface IWorkflowRuntime
     /// <returns>A new <see cref="IWorkflowProcess"/></returns>
     Task<IWorkflowProcess> CreateProcessAsync(Workflow workflow, WorkflowInstance workflowInstance, ServiceAccount serviceAccount, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Deletes the <see cref="IWorkflowProcess"/> with the specified id
+    /// </summary>
+    /// <param name="processId">The unique identifier of the process to delete</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>A new awaitable <see cref="Task"/></returns>
+    Task DeleteProcessAsync(string processId, CancellationToken cancellationToken = default);
+
 }

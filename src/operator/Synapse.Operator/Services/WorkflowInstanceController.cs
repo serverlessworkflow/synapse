@@ -22,10 +22,11 @@ namespace Synapse.Operator.Services;
 /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
 /// <param name="controllerOptions">The service used to access the current <see cref="IOptions{TOptions}"/></param>
 /// <param name="repository">The service used to manage <see cref="IResource"/>s</param>
-/// <param name="operatorController">The service used to access the current <see cref="Resources.Operator"/></param>
-/// <param name="workflowController">The service used to access all monitored <see cref="Workflow"/>s</param>
+/// <param name="operator">The service used to access the current <see cref="Resources.Operator"/></param>
+/// <param name="workflows">The service used to access all monitored <see cref="Workflow"/>s</param>
+/// <param name="workflowRuntime">The  service used to run workflows</param>
 /// <param name="documents">The <see cref="IRepository"/> used to manage <see cref="Document"/>s</param>
-public class WorkflowInstanceController(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, IOptions<ResourceControllerOptions<WorkflowInstance>> controllerOptions, IResourceRepository repository, IOperatorController operatorController, IWorkflowController workflowController, IRepository<Document, string> documents)
+public class WorkflowInstanceController(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, IOptions<ResourceControllerOptions<WorkflowInstance>> controllerOptions, IResourceRepository repository, IOperatorController @operator, IWorkflowController workflows, IWorkflowRuntime workflowRuntime, IRepository<Document, string> documents)
     : ResourceController<WorkflowInstance>(loggerFactory, controllerOptions, repository)
 {
 
@@ -37,12 +38,17 @@ public class WorkflowInstanceController(IServiceProvider serviceProvider, ILogge
     /// <summary>
     /// Gets the service used to monitor the current <see cref="Operator"/>
     /// </summary>
-    protected IResourceMonitor<Resources.Operator> Operator => operatorController.Operator;
+    protected IResourceMonitor<Resources.Operator> Operator => @operator.Operator;
 
     /// <summary>
     /// Gets a dictionary containing all monitored <see cref="Workflow"/>s
     /// </summary>
-    protected IReadOnlyDictionary<string, Workflow> Workflows => workflowController.Workflows;
+    protected IReadOnlyDictionary<string, Workflow> Workflows => workflows.Workflows;
+
+    /// <summary>
+    /// Gets the service used to run workflows
+    /// </summary>
+    protected IWorkflowRuntime WorkflowRuntime { get; } = workflowRuntime;
 
     /// <summary>
     /// Gets the <see cref="IRepository"/> used to manage <see cref="Document"/>s
@@ -231,11 +237,18 @@ public class WorkflowInstanceController(IServiceProvider serviceProvider, ILogge
             if (this.Handlers.TryRemove(workflowInstance.GetQualifiedName(), out var process)) await process.DisposeAsync().ConfigureAwait(false);
             var selectors = new LabelSelector[]
             {
-            new(SynapseDefaults.Resources.Labels.WorkflowInstance, LabelSelectionOperator.Equals, workflowInstance.GetQualifiedName())
+                new(SynapseDefaults.Resources.Labels.WorkflowInstance, LabelSelectionOperator.Equals, workflowInstance.GetQualifiedName())
             };
             await foreach (var correlation in this.Repository.GetAllAsync<Correlation>(null, selectors, cancellationToken: cancellationToken))
             {
-                await this.Repository.RemoveAsync<Correlation>(correlation.GetName(), correlation.GetNamespace(), false, cancellationToken).ConfigureAwait(false);
+                try
+                {
+                    await this.Repository.RemoveAsync<Correlation>(correlation.GetName(), correlation.GetNamespace(), false, cancellationToken).ConfigureAwait(false);
+                }
+                catch(Exception ex)
+                {
+                    Logger.LogWarning(ex, "Failed to delete correlation '{correlation}' for workflow instance '{workflowInstance}'", correlation.GetQualifiedName(), workflowInstance.GetQualifiedName());
+                }
             }
             if (workflowInstance.Status != null)
             {
@@ -251,12 +264,33 @@ public class WorkflowInstanceController(IServiceProvider serviceProvider, ILogge
                         if (!string.IsNullOrWhiteSpace(task.OutputReference)) documentReferences.Add(task.OutputReference);
                     }
                 }
-                foreach (var documentReference in documentReferences.Distinct()) await this.Documents.RemoveAsync(documentReference, cancellationToken).ConfigureAwait(false);
+                foreach (var documentReference in documentReferences.Distinct())
+                {
+                    try
+                    {
+                        await this.Documents.RemoveAsync(documentReference, cancellationToken).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogWarning(ex, "Failed to delete document '{document}' for workflow instance '{workflowInstance}'", documentReference, workflowInstance.GetQualifiedName());
+                    }
+                }
+                if (!string.IsNullOrWhiteSpace(workflowInstance.Status.ProcessId))
+                {
+                    try
+                    {
+                        await WorkflowRuntime.DeleteProcessAsync(workflowInstance.Status.ProcessId, cancellationToken).ConfigureAwait(false);
+                    }
+                    catch(Exception ex)
+                    {
+                        Logger.LogWarning(ex, "Failed to delete process with id '{processId}' for workflow instance '{workflowInstance}'", workflowInstance.Status.ProcessId, workflowInstance.GetQualifiedName());
+                    }
+                }
             }
         }
         catch(Exception ex)
         {
-            this.Logger.LogError("An error occured while handling the deletion of workflow instance '{workflowInstance}': {ex}", workflowInstance.GetQualifiedName(), ex);
+            Logger.LogError("An error occurred while handling the deletion of workflow instance '{workflowInstance}': {ex}", workflowInstance.GetQualifiedName(), ex);
         }
     }
 

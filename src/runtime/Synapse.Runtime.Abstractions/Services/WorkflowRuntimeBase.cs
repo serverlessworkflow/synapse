@@ -39,6 +39,9 @@ public abstract class WorkflowRuntimeBase
     /// <inheritdoc/>
     public abstract Task<IWorkflowProcess> CreateProcessAsync(Workflow workflow, WorkflowInstance workflowInstance, ServiceAccount serviceAccount, CancellationToken cancellationToken = default);
 
+    /// <inheritdoc/>
+    public abstract Task DeleteProcessAsync(string processId, CancellationToken cancellationToken = default);
+
     /// <summary>
     /// Disposes of the <see cref="WorkflowProcessBase"/>
     /// </summary>
