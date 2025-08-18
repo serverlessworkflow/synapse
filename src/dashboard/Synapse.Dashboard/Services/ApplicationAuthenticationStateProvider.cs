@@ -55,7 +55,7 @@ public class ApplicationAuthenticationStateProvider(ILogger<ApplicationAuthentic
             var token = await this.TokenManager.GetTokenAsync();
             if (string.IsNullOrWhiteSpace(token)) return new AuthenticationState(Anonymous);
             var profile = await this.Api.Users.GetUserProfileAsync();
-            var claims = profile.Claims?.Select(c => new Claim(c.Key, c.Value)).ToList() ?? [];
+            var claims = profile.Claims?.Select(c => new Claim(c.Type, c.Value)).ToList() ?? [];
             var identity = new ClaimsIdentity(claims, profile.AuthenticationType, JwtClaimTypes.Name, JwtClaimTypes.Role);
             var principal = new ClaimsPrincipal(identity);
             return new AuthenticationState(principal);
