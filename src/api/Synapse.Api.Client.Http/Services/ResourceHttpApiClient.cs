@@ -77,7 +77,7 @@ public class ResourceHttpApiClient<TResource>(IServiceProvider serviceProvider, 
     }
 
     /// <inheritdoc/>
-    public virtual async Task<IAsyncEnumerable<TResource>> ListAsync(string? @namespace = null, IEnumerable<LabelSelector>? labelSelectors = null, CancellationToken cancellationToken = default)
+    public virtual async Task<IAsyncEnumerable<TResource>> GetAllAsync(string? @namespace = null, IEnumerable<LabelSelector>? labelSelectors = null, CancellationToken cancellationToken = default)
     {
         var resource = new TResource();
         var uri = string.IsNullOrWhiteSpace(@namespace) ? $"/api/{resource.Definition.Version}/{resource.Definition.Plural}" : $"/api/{resource.Definition.Version}/{resource.Definition.Plural}/{@namespace}";
@@ -92,7 +92,7 @@ public class ResourceHttpApiClient<TResource>(IServiceProvider serviceProvider, 
     }
 
     /// <inheritdoc/>
-    public virtual async Task<IAsyncEnumerable<TResource>> ListAsync(IEnumerable<LabelSelector>? labelSelectors = null, CancellationToken cancellationToken = default)
+    public virtual async Task<IAsyncEnumerable<TResource>> GetAllAsync(IEnumerable<LabelSelector>? labelSelectors = null, CancellationToken cancellationToken = default)
     {
         var resource = new TResource();
         var uri = $"/api/{resource.Definition.Version}/{resource.Definition.Plural}";
@@ -107,7 +107,7 @@ public class ResourceHttpApiClient<TResource>(IServiceProvider serviceProvider, 
     }
 
     /// <inheritdoc/>
-    public virtual async Task<Neuroglia.Data.Infrastructure.ResourceOriented.ICollection<TResource>> ListWithContinuationAsync(string? @namespace = null, IEnumerable<LabelSelector>? labelSelectors = null, ulong? maxResults = null, string? continuationToken = null, CancellationToken cancellationToken = default)
+    public virtual async Task<Neuroglia.Data.Infrastructure.ResourceOriented.ICollection<TResource>> ListAsync(string? @namespace = null, IEnumerable<LabelSelector>? labelSelectors = null, ulong? maxResults = null, string? continuationToken = null, CancellationToken cancellationToken = default)
     {
         var resource = new TResource();
         var uri = string.IsNullOrWhiteSpace(@namespace) ? $"/api/{resource.Definition.Version}/{resource.Definition.Plural}/list" : $"/api/{resource.Definition.Version}/{resource.Definition.Plural}/{@namespace}/list";
@@ -120,7 +120,7 @@ public class ResourceHttpApiClient<TResource>(IServiceProvider serviceProvider, 
         request.EnableWebAssemblyStreamingResponse();
         var response = await this.ProcessResponseAsync(await this.HttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false), cancellationToken).ConfigureAwait(false);
         var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-        return this.JsonSerializer.Deserialize<Neuroglia.Data.Infrastructure.ResourceOriented.ICollection<TResource>>(responseStream)!;
+        return this.JsonSerializer.Deserialize<Collection<TResource>>(responseStream)!;
     }
 
     /// <inheritdoc/>

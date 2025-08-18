@@ -320,7 +320,7 @@ public abstract class ResourceManagementComponentStoreBase<TState, TResource>(IL
             var existingResources = this.Get(state => state.Resources);
             var maxResults = this.Get(state => state.MaxResults);
             var continuationToken = this.Get(state => state.ContinuationToken);
-            var response = await this.ApiClient.ManageNamespaced<TResource>().ListWithContinuationAsync(filter?.Namespace, filter?.LabelSelectors, maxResults, continuationToken).ConfigureAwait(false);
+            var response = await this.ApiClient.ManageNamespaced<TResource>().ListAsync(filter?.Namespace, filter?.LabelSelectors, maxResults, continuationToken).ConfigureAwait(false);
             var newResources = response.Items ?? [];
             var itemsCount = (ulong)newResources.Count;
             var resourceList = new EquatableList<TResource>([

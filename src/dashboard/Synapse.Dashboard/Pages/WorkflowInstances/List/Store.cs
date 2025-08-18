@@ -48,7 +48,7 @@ public class WorkflowInstanceListComponentStore(ILogger<WorkflowInstanceListComp
     /// <returns>A new awaitable <see cref="Task"/></returns>
     public virtual async Task ListWorkflowsAsync()
     {
-        var workflowList = new EquatableList<Workflow>(await (await this.ApiClient.Workflows.ListAsync(null!).ConfigureAwait(false)).OrderBy(ns => ns.GetQualifiedName()).ToListAsync().ConfigureAwait(false));
+        var workflowList = new EquatableList<Workflow>(await (await this.ApiClient.Workflows.GetAllAsync(null!).ConfigureAwait(false)).OrderBy(ns => ns.GetQualifiedName()).ToListAsync().ConfigureAwait(false));
         this.Reduce(s => s with
         {
             Workflows = workflowList
@@ -61,7 +61,7 @@ public class WorkflowInstanceListComponentStore(ILogger<WorkflowInstanceListComp
     /// <returns>A new awaitable <see cref="Task"/></returns>
     public async Task ListOperatorsAsync()
     {
-        var operatorList = new EquatableList<Operator>(await (await this.ApiClient.Operators.ListAsync().ConfigureAwait(false)).OrderBy(ns => ns.GetQualifiedName()).ToListAsync().ConfigureAwait(false));
+        var operatorList = new EquatableList<Operator>(await (await this.ApiClient.Operators.GetAllAsync().ConfigureAwait(false)).OrderBy(ns => ns.GetQualifiedName()).ToListAsync().ConfigureAwait(false));
         this.Reduce(s => s with
         {
             Operators = operatorList

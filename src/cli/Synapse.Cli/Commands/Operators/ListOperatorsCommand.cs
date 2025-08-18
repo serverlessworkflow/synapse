@@ -68,7 +68,7 @@ internal class ListOperatorsCommand
         {
             column.Alignment = Justify.Center;
         });
-        await foreach (var @operator in await this.Api.Operators.ListAsync(@namespace))
+        await foreach (var @operator in await this.Api.Operators.GetAllAsync(@namespace))
         {
             isEmpty = false;
             table.AddRow

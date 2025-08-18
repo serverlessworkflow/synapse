@@ -30,7 +30,7 @@ public interface IClusterResourceApiClient<TResource>
     /// <param name="labelSelectors">An <see cref="IEnumerable{T}"/> containing the <see cref="LabelSelector"/>s used to select the <see cref="IResource"/>s to list by, if any</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>A new <see cref="IAsyncEnumerable{T}"/> used to asynchronously enumerate resulting <see cref="IResource"/>s</returns>
-    Task<IAsyncEnumerable<TResource>> ListAsync(IEnumerable<LabelSelector>? labelSelectors = null, CancellationToken cancellationToken = default);
+    Task<IAsyncEnumerable<TResource>> GetAllAsync(IEnumerable<LabelSelector>? labelSelectors = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Lists <see cref="IResource"/>s with support for continuation tokens

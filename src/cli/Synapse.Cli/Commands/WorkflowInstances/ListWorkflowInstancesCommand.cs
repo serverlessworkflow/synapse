@@ -91,7 +91,7 @@ internal class ListWorkflowInstancesCommand
             column.NoWrap = true;
             column.Alignment = Justify.Center;
         });
-        await foreach (var workflow in await this.Api.WorkflowInstances.ListAsync(@namespace))
+        await foreach (var workflow in await this.Api.WorkflowInstances.GetAllAsync(@namespace))
         {
             isEmpty = false;
             table.AddRow

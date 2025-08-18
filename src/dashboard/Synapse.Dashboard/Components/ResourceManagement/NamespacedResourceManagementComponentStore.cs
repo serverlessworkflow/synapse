@@ -95,7 +95,7 @@ public class NamespacedResourceManagementComponentStore<TState, TResource>(ILogg
     /// <returns>A new awaitable <see cref="Task"/></returns>
     public virtual async Task ListNamespacesAsync()
     {
-        var namespaceList = new EquatableList<Namespace>(await (await this.ApiClient.Namespaces.ListAsync().ConfigureAwait(false)).OrderBy(ns => ns.GetQualifiedName()).ToListAsync().ConfigureAwait(false));
+        var namespaceList = new EquatableList<Namespace>(await (await this.ApiClient.Namespaces.GetAllAsync().ConfigureAwait(false)).OrderBy(ns => ns.GetQualifiedName()).ToListAsync().ConfigureAwait(false));
         this.Reduce(s => s with
         {
             Namespaces = namespaceList

@@ -31,7 +31,7 @@ public interface INamespacedResourceApiClient<TResource>
     /// <param name="labelSelectors">An <see cref="IEnumerable{T}"/> containing the <see cref="LabelSelector"/>s used to select the <see cref="IResource"/>s to list by, if any</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>A new <see cref="IAsyncEnumerable{T}"/> used to asynchronously enumerate resulting <see cref="IResource"/>s</returns>
-    Task<IAsyncEnumerable<TResource>> ListAsync(string? @namespace = null, IEnumerable<LabelSelector>? labelSelectors = null, CancellationToken cancellationToken = default);
+    Task<IAsyncEnumerable<TResource>> GetAllAsync(string? @namespace = null, IEnumerable<LabelSelector>? labelSelectors = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Lists <see cref="IResource"/>s with support for continuation tokens
@@ -42,7 +42,7 @@ public interface INamespacedResourceApiClient<TResource>
     /// <param name="continuationToken">The continuation token to use for pagination</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>A new <see cref="Neuroglia.Data.Infrastructure.ResourceOriented.ICollection{T}"/> used to asynchronously enumerate resulting <see cref="IResource"/>s</returns>
-    Task<Neuroglia.Data.Infrastructure.ResourceOriented.ICollection<TResource>> ListWithContinuationAsync(string? @namespace = null, IEnumerable<LabelSelector>? labelSelectors = null, ulong? maxResults = null, string? continuationToken = null, CancellationToken cancellationToken = default);
+    Task<Neuroglia.Data.Infrastructure.ResourceOriented.ICollection<TResource>> ListAsync(string? @namespace = null, IEnumerable<LabelSelector>? labelSelectors = null, ulong? maxResults = null, string? continuationToken = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Watches matching resources

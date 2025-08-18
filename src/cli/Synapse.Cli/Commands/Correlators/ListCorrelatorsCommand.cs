@@ -68,7 +68,7 @@ internal class ListCorrelatorsCommand
         {
             column.Alignment = Justify.Center;
         });
-        await foreach (var correlator in await this.Api.Correlators.ListAsync(@namespace))
+        await foreach (var correlator in await this.Api.Correlators.GetAllAsync(@namespace))
         {
             isEmpty = false;
             table.AddRow

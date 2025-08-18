@@ -56,7 +56,7 @@ public class ClusterResourceManagementComponentStore<TResource>(ILogger<ClusterR
             {
                 Loading = true,
             });
-            var resourceList = new EquatableList<TResource>(await (await this.ApiClient.ManageCluster<TResource>().ListAsync(filter?.LabelSelectors).ConfigureAwait(false)).OrderBy(r => r.Metadata.CreationTimestamp).ToListAsync().ConfigureAwait(false));
+            var resourceList = new EquatableList<TResource>(await (await this.ApiClient.ManageCluster<TResource>().GetAllAsync(filter?.LabelSelectors).ConfigureAwait(false)).OrderBy(r => r.Metadata.CreationTimestamp).ToListAsync().ConfigureAwait(false));
             this.Reduce(s => s with
             {
                 Resources = resourceList,

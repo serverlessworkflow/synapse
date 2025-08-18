@@ -55,7 +55,7 @@ internal class ListNamespacesCommand
         {
             column.Alignment = Justify.Center;
         });
-        await foreach (var @namespace in await this.Api.Namespaces.ListAsync())
+        await foreach (var @namespace in await this.Api.Namespaces.GetAllAsync())
         {
             isEmpty = false;
             table.AddRow

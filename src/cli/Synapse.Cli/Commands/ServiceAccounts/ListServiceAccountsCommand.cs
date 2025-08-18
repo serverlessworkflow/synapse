@@ -57,7 +57,7 @@ internal class ListServiceAccountsCommand
         {
             column.Alignment = Justify.Center;
         });
-        await foreach (var serviceAccount in await this.Api.ServiceAccounts.ListAsync(@namespace))
+        await foreach (var serviceAccount in await this.Api.ServiceAccounts.GetAllAsync(@namespace))
         {
             isEmpty = false;
             table.AddRow

@@ -42,7 +42,7 @@ public class WorkflowListComponentStore(ILogger<WorkflowListComponentStore> logg
     /// <returns>A new awaitable <see cref="Task"/></returns>
     public async Task ListOperatorsAsync()
     {
-        var operatorList = new EquatableList<Operator>(await (await ApiClient.Operators.ListAsync().ConfigureAwait(false)).OrderBy(ns => ns.GetQualifiedName()).ToListAsync().ConfigureAwait(false));
+        var operatorList = new EquatableList<Operator>(await (await ApiClient.Operators.GetAllAsync().ConfigureAwait(false)).OrderBy(ns => ns.GetQualifiedName()).ToListAsync().ConfigureAwait(false));
         Reduce(s => s with
         {
             Operators = operatorList

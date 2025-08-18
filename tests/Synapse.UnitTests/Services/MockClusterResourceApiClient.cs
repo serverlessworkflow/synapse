@@ -26,7 +26,7 @@ internal class MockClusterResourceApiClient<TResource>(IResourceRepository resou
 
     public Task<TResource> CreateAsync(TResource resource, CancellationToken cancellationToken = default) => resources.AddAsync(resource, false, cancellationToken);
 
-    public Task<IAsyncEnumerable<TResource>> ListAsync(IEnumerable<LabelSelector>? labelSelectors = null, CancellationToken cancellationToken = default) => Task.FromResult(resources.GetAllAsync<TResource>(null, labelSelectors, cancellationToken)!);
+    public Task<IAsyncEnumerable<TResource>> GetAllAsync(IEnumerable<LabelSelector>? labelSelectors = null, CancellationToken cancellationToken = default) => Task.FromResult(resources.GetAllAsync<TResource>(null, labelSelectors, cancellationToken)!);
 
     public async IAsyncEnumerable<IResourceWatchEvent<TResource>> WatchAsync(IEnumerable<LabelSelector>? labelSelectors = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
