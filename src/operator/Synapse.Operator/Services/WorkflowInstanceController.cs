@@ -60,7 +60,7 @@ public class WorkflowInstanceController(IServiceProvider serviceProvider, ILogge
         await base.StartAsync(cancellationToken).ConfigureAwait(false);
         this.Operator!.Select(b => b.Resource.Spec.Selector).SubscribeAsync(this.OnResourceSelectorChangedAsync, cancellationToken: cancellationToken);
         await this.OnResourceSelectorChangedAsync(this.Operator!.Resource.Spec.Selector).ConfigureAwait(false);
-        if (this.Operator?.Resource?.Spec?.Cleanup != null)_ = Task.Run(() => this.CleanupAsync(), CancellationTokenSource.Token);
+        if (this.Operator?.Resource?.Spec?.Cleanup != null)_ = Task.Run(this.CleanupAsync, CancellationTokenSource.Token);
     }
 
     /// <inheritdoc/>
