@@ -84,7 +84,7 @@ public record DockerRuntimeConfiguration
     /// Gets/sets the configuration of the host to use when running runner containers
     /// </summary>
     [DataMember(Order = 5, Name = "hostConfig"), JsonPropertyOrder(5), JsonPropertyName("hostConfig"), YamlMember(Order = 5, Alias = "hostConfig")]
-    public virtual HostConfig? HostConfig { get; set; }
+    public virtual HostConfig? HostConfig { get; set; } = LoadHostConfig();
 
     /// <summary>
     /// Gets/sets the path to the directory that contains the secrets to mount in runner containers on a per workflow configuration basis
@@ -108,6 +108,18 @@ public record DockerRuntimeConfiguration
         if (string.IsNullOrWhiteSpace(templateFilePath) || !File.Exists(templateFilePath)) return DefaultContainerTemplate;
         var yaml = File.ReadAllText(templateFilePath);
         return YamlSerializer.Default.Deserialize<Config>(yaml)!;
+    }
+
+    /// <summary>
+    /// Loads the host configuration to use when running runner containers
+    /// </summary>
+    /// <returns>The host configuration to use when running runner containers, or <c>null</c> if no host configuration is defined</returns>
+    public static HostConfig? LoadHostConfig()
+    {
+        var hostConfigFilePath = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runtime.Docker.Host);
+        if (string.IsNullOrWhiteSpace(hostConfigFilePath) || !File.Exists(hostConfigFilePath)) return null;
+        var yaml = File.ReadAllText(hostConfigFilePath);
+        return YamlSerializer.Default.Deserialize<HostConfig>(yaml);
     }
 
 }
