@@ -133,7 +133,12 @@ public class WorkflowInstanceHandler(ILogger<WorkflowInstanceHandler> logger, IO
         this.LogSubscription?.Dispose();
         var workflow = await this.GetWorkflowAsync(cancellationToken).ConfigureAwait(false);
         var serviceAccount = await this.GetServiceAccountAsync(cancellationToken).ConfigureAwait(false);
+        if (!string.IsNullOrWhiteSpace(WorkflowInstance.Resource.Status?.ProcessId)) await Runtime.DeleteProcessAsync(WorkflowInstance.Resource.Status.ProcessId, cancellationToken).ConfigureAwait(false);
         this.Process = await this.Runtime.CreateProcessAsync(workflow, this.WorkflowInstance.Resource, serviceAccount, cancellationToken).ConfigureAwait(false);
+        if (!string.IsNullOrWhiteSpace(this.Process.Id)) await UpdateWorkflowInstanceStatusAsync(status =>
+        {
+            status.ProcessId = this.Process.Id;
+        }, cancellationToken).ConfigureAwait(false);
         await this.Process.StartAsync(cancellationToken).ConfigureAwait(false);
         this.LogSubscription = this.Process.StandardOutput?.Subscribe(this.LogBatchQueue.Enqueue);
         this.LogBatchTimer ??= new(async _ => await this.OnPersistLogBatchAsync(), null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
@@ -203,6 +208,34 @@ public class WorkflowInstanceHandler(ILogger<WorkflowInstanceHandler> logger, IO
         var logs = stringBuilder.ToString();
         await this.Logs.AppendAsync($"{this.WorkflowInstance.Resource.GetName()}.{this.WorkflowInstance.Resource.GetNamespace()}", logs, this.CancellationTokenSource.Token).ConfigureAwait(false);
         this._persistingLogs = false;
+    }
+
+    /// <summary>
+    /// Updates the status of the handled <see cref="Resources.WorkflowInstance"/>
+    /// </summary>
+    /// <param name="statusUpdate">An <see cref="Action{T}"/> used to update the <see cref="Resources.WorkflowInstance"/>'s status</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>A new awaitable <see cref="Task"/></returns>
+    protected virtual async Task UpdateWorkflowInstanceStatusAsync(Action<WorkflowInstanceStatus> statusUpdate, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(statusUpdate);
+        var maxRetries = 3;
+        for (var attempt = 0; attempt < maxRetries; attempt++)
+        {
+            try
+            {
+                var original = this.WorkflowInstance.Resource;
+                var updated = original.Clone()!;
+                updated.Status ??= new();
+                statusUpdate(updated.Status);
+                var patch = JsonPatchUtility.CreateJsonPatchFromDiff(original, updated);
+                await this.Resources.PatchAsync<WorkflowInstance>(new Patch(PatchType.JsonPatch, patch), updated.GetName(), updated.GetNamespace(), original.Metadata.ResourceVersion, false, cancellationToken).ConfigureAwait(false);
+            }
+            catch (ConcurrencyException) when (attempt + 1 < maxRetries)
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(100 * (attempt + 1)), cancellationToken).ConfigureAwait(false);
+            }
+        }
     }
 
     /// <summary>

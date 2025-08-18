@@ -24,9 +24,9 @@ public record KubernetesRuntimeConfiguration
 {
 
     /// <summary>
-    /// Gets the default worker <see cref="V1Pod"/>
+    /// Gets the default worker <see cref="V1PodTemplateSpec"/>
     /// </summary>
-    public static readonly V1Pod DefaultPodTemplate = new()
+    public static readonly V1PodTemplateSpec DefaultPodTemplate = new()
     {
         Metadata = new(),
         Spec = new()
@@ -79,7 +79,7 @@ public record KubernetesRuntimeConfiguration
     /// Gets/sets the template to use to create runner containers
     /// </summary>
     [DataMember(Order = 2, Name = "podTemplate"), JsonPropertyOrder(2), JsonPropertyName("podTemplate"), YamlMember(Order = 2, Alias = "podTemplate")]
-    public virtual V1Pod PodTemplate { get; set; } = LoadPodTemplate();
+    public virtual V1PodTemplateSpec PodTemplate { get; set; } = LoadPodTemplate();
 
     /// <summary>
     /// Gets/sets the configuration of the secrets used by the Kubernetes runtime
@@ -103,12 +103,12 @@ public record KubernetesRuntimeConfiguration
     /// Loads the runner container template
     /// </summary>
     /// <returns>The runner container template</returns>
-    public static V1Pod LoadPodTemplate()
+    public static V1PodTemplateSpec LoadPodTemplate()
     {
         var templateFilePath = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runtime.Kubernetes.Pod);
         if (string.IsNullOrWhiteSpace(templateFilePath) || !File.Exists(templateFilePath)) return DefaultPodTemplate;
         var yaml = File.ReadAllText(templateFilePath);
-        return YamlSerializer.Default.Deserialize<V1Pod>(yaml)!;
+        return YamlSerializer.Default.Deserialize<V1PodTemplateSpec>(yaml)!;
     }
 
 }

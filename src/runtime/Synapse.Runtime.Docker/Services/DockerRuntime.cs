@@ -15,7 +15,6 @@ using Docker.DotNet;
 using Docker.DotNet.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Synapse.Runtime.Services;
-using static Synapse.SynapseDefaults.Resources;
 using System.Net;
 
 namespace Synapse.Runtime.Docker.Services;
@@ -139,6 +138,29 @@ public class DockerRuntime(IServiceProvider serviceProvider, ILoggerFactory logg
         catch(Exception ex)
         {
             this.Logger.LogError("An error occurred while creating a new Docker process for workflow instance '{workflowInstance}': {ex}", workflowInstance.GetQualifiedName(), ex);
+            throw;
+        }
+    }
+
+    /// <inheritdoc/>
+    public override async Task DeleteProcessAsync(string processId, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(processId);
+        try
+        {
+            Logger.LogDebug("Deleting the Docker process with id '{processId}'...", processId);
+            await Docker!.Containers.RemoveContainerAsync(processId, new()
+            {
+                Force = true,
+                RemoveVolumes = true,
+                RemoveLinks = true
+            }, cancellationToken).ConfigureAwait(false);
+            Processes.TryRemove(processId, out _);
+            Logger.LogDebug("The Docker process with id '{processId}' has been successfully deleted", processId);
+        }
+        catch(Exception ex)
+        {
+            Logger.LogError("An error occurred while deleting the Docker process with id '{processId}': {ex}", processId, ex);
             throw;
         }
     }

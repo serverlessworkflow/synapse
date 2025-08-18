@@ -12,7 +12,6 @@
 // limitations under the License.
 
 using Neuroglia.Data.Infrastructure.ResourceOriented;
-using System.ComponentModel;
 
 namespace Synapse.Runtime.Services;
 
@@ -87,6 +86,13 @@ public class NativeRuntime(ILoggerFactory loggerFactory, IHostEnvironment enviro
             EnableRaisingEvents = true
         };
         return Task.FromResult<IWorkflowProcess>(this.Processes.AddOrUpdate(workflowInstance.GetQualifiedName(), new NativeProcess(process), (key, current) => current));
+    }
+
+    /// <inheritdoc/>
+    public override async Task DeleteProcessAsync(string processId, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(processId);
+        if (this.Processes.TryRemove(processId, out var process)) await process.DisposeAsync().ConfigureAwait(false);
     }
 
     /// <summary>

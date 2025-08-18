@@ -22,22 +22,27 @@ namespace Synapse.Runtime.Kubernetes.Services;
 /// <summary>
 /// Represents the Kubernetes implementation of the <see cref="IWorkflowProcess"/> interface
 /// </summary>
-/// <param name="pod">The <see cref="V1Pod"/> associated with the <see cref="IWorkflowProcess"/></param>
+/// <param name="pod">The <see cref="V1PodTemplateSpec"/> associated with the <see cref="KubernetesWorkflowProcess"/></param>
 /// <param name="logger">The service used to perform logging</param>
 /// <param name="kubernetes">The service used to interact with the Kubernetes API</param>
-public class KubernetesWorkflowProcess(V1Pod pod, ILogger<KubernetesWorkflowProcess> logger, IKubernetes kubernetes)
+public class KubernetesWorkflowProcess(V1PodTemplateSpec pod, ILogger<KubernetesWorkflowProcess> logger, IKubernetes kubernetes)
     : WorkflowProcessBase
 {
 
     long? _exitCode;
 
     /// <inheritdoc/>
-    public override string Id => $"{this.Pod.Name()}.{this.Pod.Namespace()}";
+    public override string Id => $"{this.PodTemplate.Name()}.{this.PodTemplate.Namespace()}";
 
     /// <summary>
-    /// Gets the <see cref="V1Pod"/> the container belongs to
+    /// Gets the <see cref="V1PodTemplateSpec"/> used to configure the Kubernetes pod
     /// </summary>
-    protected V1Pod Pod { get; set; } = pod;
+    protected V1PodTemplateSpec PodTemplate { get; } = pod;
+
+    /// <summary>
+    /// Gets the Kubernetes <see cref="V1Job"/> associated with the <see cref="KubernetesWorkflowProcess"/>
+    /// </summary>
+    protected V1Job? Job { get; set; }
 
     /// <summary>
     /// Gets the service used to perform logging
@@ -78,13 +83,30 @@ public class KubernetesWorkflowProcess(V1Pod pod, ILogger<KubernetesWorkflowProc
     {
         try
         {
-            this.Logger.LogDebug("Creating pod '{pod}'...", $"{this.Pod.Name()}.{this.Pod.Namespace()}");
-            this.Pod = await this.Kubernetes.CoreV1.CreateNamespacedPodAsync(this.Pod, this.Pod.Namespace(), cancellationToken: cancellationToken);
-            this.Logger.LogDebug("The pod '{pod}' has been successfully created", $"{this.Pod.Name()}.{this.Pod.Namespace()}");
+            this.Logger.LogDebug("Creating pod '{pod}'...", $"{this.PodTemplate.Name()}.{this.PodTemplate.Namespace()}");
+            this.Job = await this.Kubernetes.BatchV1.CreateNamespacedJobAsync(new()
+            {
+                Metadata = new V1ObjectMeta()
+                {
+                    Name = this.PodTemplate.Name(),
+                    NamespaceProperty = this.PodTemplate.Namespace(),
+                    Labels = this.PodTemplate.Metadata?.Labels ?? new Dictionary<string, string>()
+                },
+                Spec = new V1JobSpec()
+                {
+                    Template = PodTemplate,
+                    BackoffLimit = 0,
+                    Completions = 1,
+                    Parallelism = 1,
+                    TtlSecondsAfterFinished = 7 * 24 * 60 * 60
+                }
+            }, this.PodTemplate.Namespace(), cancellationToken: cancellationToken);
+            this.Job.Spec.Template.Spec.RestartPolicy = "Never";
+            this.Logger.LogDebug("The job '{job}' has been successfully created", $"{this.PodTemplate.Name()}.{this.PodTemplate.Namespace()}");
         }
         catch(Exception ex)
         {
-            this.Logger.LogError("An error occurred while creating the specified pod '{pod}': {ex}", $"{this.Pod.Name()}.{this.Pod.Namespace()}", ex);
+            this.Logger.LogError("An error occurred while creating the specified job '{job}': {ex}", $"{this.PodTemplate.Name()}.{this.PodTemplate.Namespace()}", ex);
         }
         _ = Task.Run(() => this.ReadPodLogsAsync(cancellationToken), cancellationToken);
     }
@@ -97,7 +119,7 @@ public class KubernetesWorkflowProcess(V1Pod pod, ILogger<KubernetesWorkflowProc
     protected virtual async Task ReadPodLogsAsync(CancellationToken cancellationToken = default)
     {
         await this.WaitForReadyAsync(cancellationToken);
-        var logStream = await this.Kubernetes.CoreV1.ReadNamespacedPodLogAsync(this.Pod.Name(), this.Pod.Namespace(), cancellationToken: cancellationToken).ConfigureAwait(false);
+        var logStream = await this.Kubernetes.CoreV1.ReadNamespacedPodLogAsync(this.PodTemplate.Name(), this.PodTemplate.Namespace(), cancellationToken: cancellationToken).ConfigureAwait(false);
         using var reader = new StreamReader(logStream);
         string? line;
         while ((line = await reader.ReadLineAsync(cancellationToken).ConfigureAwait(false)) != null) this.StandardOutputSubject.OnNext(line);
@@ -110,20 +132,23 @@ public class KubernetesWorkflowProcess(V1Pod pod, ILogger<KubernetesWorkflowProc
     /// <returns>A new awaitable <see cref="Task"/></returns>
     protected virtual async Task WaitForReadyAsync(CancellationToken cancellationToken = default)
     {
-        this.Logger.LogDebug("Waiting for pod '{pod}'...", $"{this.Pod.Name()}.{this.Pod.Namespace()}");
-        this.Pod = await this.Kubernetes.CoreV1.ReadNamespacedPodAsync(this.Pod.Name(), this.Pod.Namespace(), cancellationToken: cancellationToken);
-        while (this.Pod.Status.Phase == "Pending")
+        this.Logger.LogDebug("Waiting for job '{job}'...", $"{this.Job.Name()}.{this.Job.Namespace()}");
+        V1Job? job;
+        do
         {
+            job = await this.Kubernetes.BatchV1.ReadNamespacedJobAsync(this.Job.Name(), this.Job.Namespace(), cancellationToken: cancellationToken);
+            var jobStatus = job?.Status;
+            if (jobStatus != null && (jobStatus.Active > 0 || jobStatus.Succeeded > 0 || jobStatus.Failed > 0)) break;
             await Task.Delay(100, cancellationToken).ConfigureAwait(false);
-            this.Pod = await this.Kubernetes.CoreV1.ReadNamespacedPodAsync(this.Pod.Name(), this.Pod.Namespace(), cancellationToken: cancellationToken);
         }
-        this.Logger.LogDebug("The pod '{pod}' is up and running", $"{this.Pod.Name()}.{this.Pod.Namespace()}");
+        while (!cancellationToken.IsCancellationRequested);
+        this.Logger.LogDebug("The job '{job}' is up and running", $"{this.Job.Name()}.{this.Job.Namespace()}");
     }
 
     /// <inheritdoc/>
     public virtual async Task WaitForExitAsync(CancellationToken cancellationToken = default)
     {
-        var response = this.Kubernetes.CoreV1.ListNamespacedPodWithHttpMessagesAsync(this.Pod.Namespace(), fieldSelector: $"metadata.name={Pod.Name()}", watch: true, cancellationToken: cancellationToken);
+        var response = this.Kubernetes.CoreV1.ListNamespacedPodWithHttpMessagesAsync(this.PodTemplate.Namespace(), fieldSelector: $"metadata.name={PodTemplate.Name()}", watch: true, cancellationToken: cancellationToken);
         await foreach (var (_, item) in response.WatchAsync<V1Pod, V1PodList>(cancellationToken: cancellationToken).ConfigureAwait(false))
         {
             if (item.Status.Phase != "Succeeded" && item.Status.Phase != "Failed") continue;
@@ -136,7 +161,7 @@ public class KubernetesWorkflowProcess(V1Pod pod, ILogger<KubernetesWorkflowProc
     /// <inheritdoc/>
     public override async Task StopAsync(CancellationToken cancellationToken = default)
     {
-        await this.Kubernetes.CoreV1.DeleteNamespacedPodAsync(this.Pod.Name(), this.Pod.Namespace(), cancellationToken: cancellationToken).ConfigureAwait(false);
+        await this.Kubernetes.BatchV1.DeleteNamespacedJobAsync(this.PodTemplate.Name(), this.PodTemplate.Namespace(), cancellationToken: cancellationToken).ConfigureAwait(false);
         await this.CancellationTokenSource.CancelAsync().ConfigureAwait(false);
     }
 
