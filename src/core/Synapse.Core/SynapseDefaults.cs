@@ -730,6 +730,10 @@ return message;
                 /// </summary>
                 public const string Container = Prefix + "CONTAINER";
                 /// <summary>
+                /// Gets the environment variable used to specify the YAML file used to configure the Docker runner host
+                /// </summary>
+                public const string Host = Prefix + "HOST";
+                /// <summary>
                 /// Gets the environment variable used to configure the network runner containers should be connected to
                 /// </summary>
                 public const string Network = Prefix + "NETWORK";
