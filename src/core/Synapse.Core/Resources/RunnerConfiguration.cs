@@ -55,4 +55,5 @@ public record RunnerConfiguration
     /// </summary>
     [DataMember(Order = 5, Name = "publishLifecycleEvents"), JsonPropertyOrder(5), JsonPropertyName("publishLifecycleEvents"), YamlMember(Order = 5, Alias = "publishLifecycleEvents")]
     public virtual bool? PublishLifecycleEvents { get; set; } = true;
+
 }
