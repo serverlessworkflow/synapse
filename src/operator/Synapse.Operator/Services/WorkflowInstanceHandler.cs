@@ -229,7 +229,7 @@ public class WorkflowInstanceHandler(ILogger<WorkflowInstanceHandler> logger, IO
                 updated.Status ??= new();
                 statusUpdate(updated.Status);
                 var patch = JsonPatchUtility.CreateJsonPatchFromDiff(original, updated);
-                await this.Resources.PatchAsync<WorkflowInstance>(new Patch(PatchType.JsonPatch, patch), updated.GetName(), updated.GetNamespace(), original.Metadata.ResourceVersion, false, cancellationToken).ConfigureAwait(false);
+                await this.Resources.PatchStatusAsync<WorkflowInstance>(new Patch(PatchType.JsonPatch, patch), updated.GetName(), updated.GetNamespace(), original.Metadata.ResourceVersion, false, cancellationToken).ConfigureAwait(false);
             }
             catch (ConcurrencyException) when (attempt + 1 < maxRetries)
             {
