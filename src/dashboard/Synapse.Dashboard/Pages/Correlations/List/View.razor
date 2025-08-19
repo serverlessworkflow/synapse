@@ -8,7 +8,7 @@
 
 <div class="d-flex flex-row justify-content-between align-items-center">
     <h4>Correlations</h4>
-    <span>@(Resources?.Count ?? 0) items</span>
+    <span><!--@(Resources?.Count ?? 0) items--></span>
     <div class="d-flex">
         <select class="form-select m-2" @onchange="OnNamespaceChanged">
             <option value="">All namespaces</option>
@@ -55,9 +55,8 @@
             </tr>
         </thead>
         <tbody>
-            @if (Resources != null && Resources.Any())
-            {
-                <Virtualize Context="correlation" Items="@Resources">
+            <Virtualize @ref="Store.Virtualize" Context="correlation" ItemsProvider="Store.ProvideResources" ItemSize="61">
+                <ItemContent>
                     <tr @onclick="async _ => await OnShowResourceDetailsAsync(correlation)" class="cursor-pointer">
                         <td class="text-start" title="The namespace the correlation belongs to">@correlation.Metadata.Namespace</td>
                         <td class="text-start" title="The correlation's name">@correlation.Metadata.Name</td>
@@ -81,8 +80,25 @@
                             <input type="checkbox" checked="@SelectedResourceNames.Contains(correlation.GetName())" @onclick="(_) => Store.ToggleResourceSelection(correlation.GetName())" @onclick:preventDefault="true" @onclick:stopPropagation="true" />
                         </td>
                     </tr>
-                </Virtualize>
-            }
+                </ItemContent>
+                <Placeholder>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </Placeholder>
+            </Virtualize>
         </tbody>
     </table>
 </div>

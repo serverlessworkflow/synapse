@@ -18,7 +18,7 @@
 
 <div class="d-flex flex-row justify-content-between align-items-center">
     @Title
-    <span>@(WorkflowInstances?.Count() ?? 0) items</span>
+    <span><!--@(WorkflowInstances?.Count() ?? 0) items--></span>
     <div class="d-flex">
         @if (Workflows != null && Workflows.Count() > 0)
         {
@@ -84,122 +84,133 @@
             </tr>
         </thead>
         <tbody>
-            @if (WorkflowInstances != null && WorkflowInstances.Any())
-            {
-                <Virtualize Context="instance" Items="@WorkflowInstances.ToList()">
-                    <tr @onclick="async _ => await OnShowClickedAsync(instance)" class="cursor-pointer @(ActiveRow == instance.GetName() ? "table-active" : "")">
+            <Virtualize @ref="Virtualize" Context="instance" ItemsProvider="ProvideWorkflowInstances" ItemSize="61">
+                <ItemContent>
+                <tr @onclick="async _ => await OnShowClickedAsync(instance)" class="cursor-pointer @(ActiveRow == instance.GetName() ? "table-active" : "")">
+                    @foreach (var column in knownColumns)
+                    {
+                        if ((Columns.Count() == 0 && !DirectActions.Contains(column)) || Columns.Contains(column))
+                        {
+                            <td class="text-@GetColumnAlignment(column) text-truncate">
+                                @switch(column)
+                                {
+                                    case "Name":
+                                        @instance.Metadata.Name
+                                        break;
+                                    case "Namespace":
+                                        <a href="#" @onclick="async (_) => { if (OnNamespaceChanged.HasDelegate) await OnNamespaceChanged.InvokeAsync(instance.Metadata.Namespace); }" @onclick:preventDefault="true" @onclick:stopPropagation="true">@instance.Metadata.Namespace</a>
+                                        <a href="/namespaces/@instance.Metadata.Namespace" @onclick:stopPropagation="true"><Icon Name="IconName.BoxArrowUpRight" Class="small" /></a>
+                                        break;
+                                    case "Definition":
+                                        {
+                                            var definitionSegments = instance.Spec.Definition.ToString().Split(':');
+                                            var version = definitionSegments.Last();
+                                            var nameNs = definitionSegments.First();
+                                            var segments = nameNs.Split('.');
+                                            var ns = segments.Last();
+                                            var name = segments.Take(segments.Count() - 1).Join('.');
+                                            <a href="#" @onclick="async (_) => { if (OnWorkflowChanged.HasDelegate) await OnWorkflowChanged.InvokeAsync(nameNs); }" @onclick:preventDefault="true" @onclick:stopPropagation="true">@instance.Spec.Definition.ToString()</a>
+                                            <a href="/workflows/details/@ns/@name/@version" @onclick:stopPropagation="true"><Icon Name="IconName.BoxArrowUpRight" Class="small" /></a>
+                                            break;
+                                        }
+                                    case "Status":
+                                        <span class="badge rounded-pill badge rounded-pill border @((instance.Status?.Phase ?? WorkflowInstanceStatusPhase.Pending).GetColorClass())">@(instance.Status?.Phase ?? WorkflowInstanceStatusPhase.Pending)</span>
+                                        break;
+                                    case "Creation Time":
+                                        @instance.Metadata.CreationTimestamp?.RelativeFormat()
+                                        break;
+                                    case "Start Time":
+                                        @(instance.Status?.StartedAt?.RelativeFormat() ?? "-")
+                                        break;
+                                    case "End Time":
+                                        @(instance.Status?.EndedAt?.RelativeFormat() ?? "-")
+                                        break;
+                                    case "Duration":
+                                        @(instance.Status?.StartedAt.HasValue == true && instance.Status?.EndedAt.HasValue == true ? instance.Status.EndedAt.Value.Subtract(instance.Status.StartedAt.Value).ToString("hh\\:mm\\:ss\\.fff") : "-")
+                                        break;
+                                    case "Operator":
+                                        {
+                                            @if (instance.Metadata.Labels?.TryGetValue(SynapseDefaults.Resources.Labels.Operator, out var operatorName) == true && !string.IsNullOrWhiteSpace(operatorName))
+                                            {
+                                                    var operatorSegments = operatorName.Split(".");
+                                                var ns = operatorSegments.Last();
+                                                var name = operatorSegments.Take(operatorSegments.Count() - 1).Join('.');
+                                                <a href="#" @onclick="async (_) => { if(OnOperatorChanged.HasDelegate) await OnOperatorChanged.InvokeAsync(operatorName); }" @onclick:preventDefault="true" @onclick:stopPropagation="true">@operatorName</a>
+                                                <a href="/operators/@ns/@name" @onclick:stopPropagation="true"><Icon Name="IconName.BoxArrowUpRight" Class="small" /></a>
+                                            }
+                                            else
+                                            {
+                                                <span>-</span>
+                                            }
+                                            break;
+                                        }
+                                    case "Actions":
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="" @onclick:stopPropagation="true"><i class="bi bi-three-dots-vertical"></i></button>
+                                            <ul class="dropdown-menu">
+                                                @if (instance.Status?.Phase == WorkflowInstanceStatusPhase.Running)
+                                                {
+                                                    <li><button class="dropdown-item" @onclick="async _ => await OnSuspendClickedAsync(instance)" @onclick:stopPropagation="true"><Icon Name="IconName.Pause" /> Suspend</button></li>
+                                                }
+                                                @if (instance.Status?.Phase == WorkflowInstanceStatusPhase.Suspended)
+                                                {
+                                                    <li><button class="dropdown-item" @onclick="async _ => await OnResumeClickedAsync(instance)" @onclick:stopPropagation="true"><Icon Name="IconName.Play" /> Resume</button></li>
+                                                }
+                                                @if (instance.IsOperative)
+                                                {
+                                                    <li><button class="dropdown-item" @onclick="async _ => await OnCancelClickedAsync(instance)" @onclick:stopPropagation="true"><Icon Name="IconName.X" /> Cancel</button></li>
+                                                }
+                                                <li><button class="dropdown-item" @onclick="async _ => await OnReplayClickedAsync(instance)" @onclick:stopPropagation="true"><Icon Name="IconName.ArrowClockwise" /> Replay</button></li>
+                                                <li><button class="dropdown-item text-danger" @onclick="async _ => await OnDeleteClickedAsync(instance)" @onclick:stopPropagation="true"><Icon Name="IconName.Trash" /> Delete</button></li>
+                                            </ul>
+                                        </div>
+                                        break;
+                                    case "Resume":
+                                        @if (instance.Status?.Phase == WorkflowInstanceStatusPhase.Running)
+                                        {
+                                            <button class="btn btn-sm text-primary" @onclick="async _ => await OnSuspendClickedAsync(instance)" @onclick:stopPropagation="true" title="Suspend"><Icon Name="IconName.Pause" /></button>
+                                        }
+                                        @if (instance.Status?.Phase == WorkflowInstanceStatusPhase.Suspended)
+                                        {
+                                            <button class="btn btn-sm text-primary" @onclick="async _ => await OnResumeClickedAsync(instance)" @onclick:stopPropagation="true" title="Resume"><Icon Name="IconName.Play" /></button>
+                                        }
+                                        break;
+                                    case "Cancel":
+                                        @if (instance.IsOperative)
+                                        {
+                                            <button class="btn btn-sm text-warning" @onclick="async _ => await OnCancelClickedAsync(instance)" @onclick:stopPropagation="true" title="Cancel"><Icon Name="IconName.X" /></button>
+                                        }
+                                        break;
+                                    case "Replay":
+                                        <button class="btn btn-sm text-primary" @onclick="async _ => await OnReplayClickedAsync(instance)" @onclick:stopPropagation="true" title="Replay"><Icon Name="IconName.ArrowClockwise" /></button>
+                                        break;
+                                    case "Delete":
+                                        <button class="btn btn-sm text-danger" @onclick="async _ => await OnDeleteClickedAsync(instance)" @onclick:stopPropagation="true" title="Delete"><Icon Name="IconName.Trash" /></button>
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            </td>
+                        }
+                    }
+                    <td class="text-center align-middle text-truncate">
+                        <input type="checkbox" checked="@selectedInstanceNames.Contains(instance.GetName())" @onclick="async (_) => await OnToggleSelected.InvokeAsync(instance.GetName())" @onclick:preventDefault="true" @onclick:stopPropagation="true" />
+                    </td>
+                </tr>
+                </ItemContent>
+                <Placeholder>
+                    <tr>
                         @foreach (var column in knownColumns)
                         {
                             if ((Columns.Count() == 0 && !DirectActions.Contains(column)) || Columns.Contains(column))
                             {
-                                <td class="text-@GetColumnAlignment(column)">
-                                    @switch(column)
-                                    {
-                                        case "Name":
-                                            @instance.Metadata.Name
-                                            break;
-                                        case "Namespace":
-                                            <a href="#" @onclick="async (_) => { if (OnNamespaceChanged.HasDelegate) await OnNamespaceChanged.InvokeAsync(instance.Metadata.Namespace); }" @onclick:preventDefault="true" @onclick:stopPropagation="true">@instance.Metadata.Namespace</a>
-                                            <a href="/namespaces/@instance.Metadata.Namespace" @onclick:stopPropagation="true"><Icon Name="IconName.BoxArrowUpRight" Class="small" /></a>
-                                            break;
-                                        case "Definition":
-                                            {
-                                                var definitionSegments = instance.Spec.Definition.ToString().Split(':');
-                                                var version = definitionSegments.Last();
-                                                var nameNs = definitionSegments.First();
-                                                var segments = nameNs.Split('.');
-                                                var ns = segments.Last();
-                                                var name = segments.Take(segments.Count() - 1).Join('.');
-                                                <a href="#" @onclick="async (_) => { if (OnWorkflowChanged.HasDelegate) await OnWorkflowChanged.InvokeAsync(nameNs); }" @onclick:preventDefault="true" @onclick:stopPropagation="true">@instance.Spec.Definition.ToString()</a>
-                                                <a href="/workflows/details/@ns/@name/@version" @onclick:stopPropagation="true"><Icon Name="IconName.BoxArrowUpRight" Class="small" /></a>
-                                                break;
-                                            }
-                                        case "Status":
-                                            <span class="badge rounded-pill badge rounded-pill border @((instance.Status?.Phase ?? WorkflowInstanceStatusPhase.Pending).GetColorClass())">@(instance.Status?.Phase ?? WorkflowInstanceStatusPhase.Pending)</span>
-                                            break;
-                                        case "Creation Time":
-                                            @instance.Metadata.CreationTimestamp?.RelativeFormat()
-                                            break;
-                                        case "Start Time":
-                                            @(instance.Status?.StartedAt?.RelativeFormat() ?? "-")
-                                            break;
-                                        case "End Time":
-                                            @(instance.Status?.EndedAt?.RelativeFormat() ?? "-")
-                                            break;
-                                        case "Duration":
-                                            @(instance.Status?.StartedAt.HasValue == true && instance.Status?.EndedAt.HasValue == true ? instance.Status.EndedAt.Value.Subtract(instance.Status.StartedAt.Value).ToString("hh\\:mm\\:ss\\.fff") : "-")
-                                            break;
-                                        case "Operator":
-                                            {
-                                                @if (instance.Metadata.Labels?.TryGetValue(SynapseDefaults.Resources.Labels.Operator, out var operatorName) == true && !string.IsNullOrWhiteSpace(operatorName))
-                                                {
-                                                        var operatorSegments = operatorName.Split(".");
-                                                    var ns = operatorSegments.Last();
-                                                    var name = operatorSegments.Take(operatorSegments.Count() - 1).Join('.');
-                                                    <a href="#" @onclick="async (_) => { if(OnOperatorChanged.HasDelegate) await OnOperatorChanged.InvokeAsync(operatorName); }" @onclick:preventDefault="true" @onclick:stopPropagation="true">@operatorName</a>
-                                                    <a href="/operators/@ns/@name" @onclick:stopPropagation="true"><Icon Name="IconName.BoxArrowUpRight" Class="small" /></a>
-                                                }
-                                                else
-                                                {
-                                                    <span>-</span>
-                                                }
-                                                break;
-                                            }
-                                        case "Actions":
-                                            <div class="dropdown">
-                                                <button class="btn btn-sm" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="" @onclick:stopPropagation="true"><i class="bi bi-three-dots-vertical"></i></button>
-                                                <ul class="dropdown-menu">
-                                                    @if (instance.Status?.Phase == WorkflowInstanceStatusPhase.Running)
-                                                    {
-                                                        <li><button class="dropdown-item" @onclick="async _ => await OnSuspendClickedAsync(instance)" @onclick:stopPropagation="true"><Icon Name="IconName.Pause" /> Suspend</button></li>
-                                                    }
-                                                    @if (instance.Status?.Phase == WorkflowInstanceStatusPhase.Suspended)
-                                                    {
-                                                        <li><button class="dropdown-item" @onclick="async _ => await OnResumeClickedAsync(instance)" @onclick:stopPropagation="true"><Icon Name="IconName.Play" /> Resume</button></li>
-                                                    }
-                                                    @if (instance.IsOperative)
-                                                    {
-                                                        <li><button class="dropdown-item" @onclick="async _ => await OnCancelClickedAsync(instance)" @onclick:stopPropagation="true"><Icon Name="IconName.X" /> Cancel</button></li>
-                                                    }
-                                                    <li><button class="dropdown-item" @onclick="async _ => await OnReplayClickedAsync(instance)" @onclick:stopPropagation="true"><Icon Name="IconName.ArrowClockwise" /> Replay</button></li>
-                                                    <li><button class="dropdown-item text-danger" @onclick="async _ => await OnDeleteClickedAsync(instance)" @onclick:stopPropagation="true"><Icon Name="IconName.Trash" /> Delete</button></li>
-                                                </ul>
-                                            </div>
-                                            break;
-                                        case "Resume":
-                                            @if (instance.Status?.Phase == WorkflowInstanceStatusPhase.Running)
-                                            {
-                                                <button class="btn btn-sm text-primary" @onclick="async _ => await OnSuspendClickedAsync(instance)" @onclick:stopPropagation="true" title="Suspend"><Icon Name="IconName.Pause" /></button>
-                                            }
-                                            @if (instance.Status?.Phase == WorkflowInstanceStatusPhase.Suspended)
-                                            {
-                                                <button class="btn btn-sm text-primary" @onclick="async _ => await OnResumeClickedAsync(instance)" @onclick:stopPropagation="true" title="Resume"><Icon Name="IconName.Play" /></button>
-                                            }
-                                            break;
-                                        case "Cancel":
-                                            @if (instance.IsOperative)
-                                            {
-                                                <button class="btn btn-sm text-warning" @onclick="async _ => await OnCancelClickedAsync(instance)" @onclick:stopPropagation="true" title="Cancel"><Icon Name="IconName.X" /></button>
-                                            }
-                                            break;
-                                        case "Replay":
-                                            <button class="btn btn-sm text-primary" @onclick="async _ => await OnReplayClickedAsync(instance)" @onclick:stopPropagation="true" title="Replay"><Icon Name="IconName.ArrowClockwise" /></button>
-                                            break;
-                                        case "Delete":
-                                            <button class="btn btn-sm text-danger" @onclick="async _ => await OnDeleteClickedAsync(instance)" @onclick:stopPropagation="true" title="Delete"><Icon Name="IconName.Trash" /></button>
-                                            break;
-                                        default:
-                                            break;
-                                    }
-                                </td>
+                                <td></td>
                             }
                         }
-                        <td class="text-center align-middle">
-                            <input type="checkbox" checked="@selectedInstanceNames.Contains(instance.GetName())" @onclick="async (_) => await OnToggleSelected.InvokeAsync(instance.GetName())" @onclick:preventDefault="true" @onclick:stopPropagation="true" />
-                        </td>
+                        <td></td>
                     </tr>
-                </Virtualize>
-            }
+                </Placeholder>
+            </Virtualize>
         </tbody>
     </table>
 </div>
@@ -218,6 +229,8 @@
     [Parameter] public IEnumerable<string> Columns { get; set; } = [];
     IEnumerable<WorkflowInstance>? workflowInstances;
     [Parameter] public IEnumerable<WorkflowInstance>? WorkflowInstances { get; set; }
+    ItemsProviderDelegate<WorkflowInstance>? provideWorkflowInstances;
+    [Parameter] public ItemsProviderDelegate<WorkflowInstance>? ProvideWorkflowInstances { get; set; }
     IEnumerable<string> selectedInstanceNames = [];
     [Parameter] public IEnumerable<string> SelectedInstanceNames { get; set; } = [];
     IEnumerable<Workflow>? workflows { get; set; }
@@ -249,24 +262,26 @@
     [Parameter] public EventCallback OnResumeSelected { get; set; }
     [Parameter] public EventCallback OnCancelSelected { get; set; }
 
+    public Virtualize<WorkflowInstance>? Virtualize;
+
     public static IEnumerable<string> DirectActions = [
         "Resume",
-    "Cancel",
-    "Replay",
-    "Delete"
+        "Cancel",
+        "Replay",
+        "Delete"
     ];
     static IEnumerable<string> knownColumns = [
         "Name",
-    "Namespace",
-    "Definition",
-    "Status",
-    "Creation Time",
-    "Start Time",
-    "End Time",
-    "Duration",
-    "Operator",
-    "Actions",
-    ..DirectActions
+        "Namespace",
+        "Definition",
+        "Status",
+        "Creation Time",
+        "Start Time",
+        "End Time",
+        "Duration",
+        "Operator",
+        "Actions",
+        ..DirectActions
     ];
 
     ElementReference checkboxAll = default!;
@@ -295,6 +310,11 @@
         if (columns != Columns)
         {
             columns = Columns;
+            shouldRender = true;
+        }
+        if (provideWorkflowInstances != ProvideWorkflowInstances)
+        {
+            provideWorkflowInstances = ProvideWorkflowInstances;
             shouldRender = true;
         }
         if (workflowInstances != WorkflowInstances)

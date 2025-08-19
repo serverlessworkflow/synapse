@@ -124,7 +124,7 @@ public class ResourceHttpApiClient<TResource>(IServiceProvider serviceProvider, 
     }
 
     /// <inheritdoc/>
-    public virtual async Task<Neuroglia.Data.Infrastructure.ResourceOriented.ICollection<TResource>> ListWithContinuationAsync(IEnumerable<LabelSelector>? labelSelectors = null, ulong? maxResults = null, string? continuationToken = null, CancellationToken cancellationToken = default)
+    public virtual async Task<Neuroglia.Data.Infrastructure.ResourceOriented.ICollection<TResource>> ListAsync(IEnumerable<LabelSelector>? labelSelectors = null, ulong? maxResults = null, string? continuationToken = null, CancellationToken cancellationToken = default)
     {
         var resource = new TResource();
         var uri = $"/api/{resource.Definition.Version}/{resource.Definition.Plural}/list";

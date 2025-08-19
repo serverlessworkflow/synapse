@@ -66,4 +66,9 @@ public record ResourceManagementComponentState<TResource>
     /// </summary>
     public string ActiveResourceName { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Gets/sets a <see cref="ResourcesFilter"/> used to filter the resources to list
+    /// </summary>
+    public ResourcesFilter Filter { get; set; } = new ResourcesFilter();
+
 }

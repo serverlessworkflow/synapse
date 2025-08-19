@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.AspNetCore.Components.Web.Virtualization;
 using Synapse.Api.Client.Services;
-using Synapse.Dashboard.Components.DocumentDetailsStateManagement;
 
 namespace Synapse.Dashboard.Components.ResourceManagement;
 
@@ -25,7 +25,7 @@ namespace Synapse.Dashboard.Components.ResourceManagement;
 /// </remarks>
 /// <param name="logger">The service used to perform logging</param>
 /// <param name="apiClient">The service used to interact with the Synapse API</param>
-/// <param name="resourceEventHub">The <see cref="IResourceEventWatchHub"/> websocket service client</param>
+/// <param name="resourceEventHub">The <see cref="IResourceEventWatchHub"/> web socket service client</param>
 public class ClusterResourceManagementComponentStore<TResource>(ILogger<ClusterResourceManagementComponentStore<TResource>> logger, ISynapseApiClient apiClient, ResourceWatchEventHubClient resourceEventHub)
     : ResourceManagementComponentStoreBase<TResource>(logger, apiClient, resourceEventHub)
     where TResource : Resource, new()
@@ -48,25 +48,25 @@ public class ClusterResourceManagementComponentStore<TResource>(ILogger<ClusterR
     }
 
     /// <inheritdoc/>
-    public override async Task ListResourcesAsync(ResourcesFilter? filter = null)
+    public override async ValueTask<ItemsProviderResult<TResource>> ProvideResources(ItemsProviderRequest request)
     {
-        try
+        this.Reduce(state => state with
         {
-            this.Reduce(state => state with
-            {
-                Loading = true,
-            });
-            var resourceList = new EquatableList<TResource>(await (await this.ApiClient.ManageCluster<TResource>().GetAllAsync(filter?.LabelSelectors).ConfigureAwait(false)).OrderBy(r => r.Metadata.CreationTimestamp).ToListAsync().ConfigureAwait(false));
-            this.Reduce(s => s with
-            {
-                Resources = resourceList,
-                Loading = false
-            });
-        }
-        catch (Exception ex)
+            Loading = true,
+        });
+        var filter = this.Get(state => state.Filter);
+        var response = await this.ApiClient.ManageCluster<TResource>().ListAsync(filter.LabelSelectors, (ulong)request.Count, request.StartIndex.ToString(), request.CancellationToken).ConfigureAwait(false);
+        var resources = response.Items ?? [];
+        this.Reduce(s => s with
         {
-            this.Logger.LogError("Unable to list resources, {exception}", ex.ToString());
+            Loading = false,
+            Resources = [.. resources],
+        });
+        if (!string.IsNullOrWhiteSpace(response.Metadata.Continue))
+        {
+            return new ItemsProviderResult<TResource>(resources, resources.Count + Convert.ToInt32(response.Metadata.Continue));
         }
+        return new ItemsProviderResult<TResource>(resources, resources.Count + request.StartIndex);
     }
 
 

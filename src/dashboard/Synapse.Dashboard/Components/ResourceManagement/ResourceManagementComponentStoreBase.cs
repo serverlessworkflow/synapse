@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.AspNetCore.Components.Web.Virtualization;
 using Synapse.Api.Client.Services;
 
 namespace Synapse.Dashboard.Components.ResourceManagement;
@@ -22,7 +23,7 @@ namespace Synapse.Dashboard.Components.ResourceManagement;
 /// <typeparam name="TResource">The type of <see cref="IResource"/>s to manage</typeparam>
 /// <param name="logger">The service used to perform logging</param>
 /// <param name="apiClient">The service used to interact with the Synapse API</param>
-/// <param name="resourceEventHub">The <see cref="IResourceEventWatchHub"/> websocket service client</param>
+/// <param name="resourceEventHub">The <see cref="IResourceEventWatchHub"/> web socket service client</param>
 public abstract class ResourceManagementComponentStoreBase<TState, TResource>(ILogger<ResourceManagementComponentStoreBase<TState, TResource>> logger, ISynapseApiClient apiClient, ResourceWatchEventHubClient resourceEventHub)
      : ComponentStore<TState>(new())
     where TResource : Resource, new()
@@ -132,6 +133,11 @@ public abstract class ResourceManagementComponentStoreBase<TState, TResource>(IL
     /// </summary>
     protected IDisposable ResourceWatchSubscription { get; private set; } = null!;
 
+    /// <summary>
+    /// Gets/sets the <see cref="Virtualize{TItem}"/> used to virtualize the resources of the specified type
+    /// </summary>
+    public Virtualize<TResource>? Virtualize { get; set; }
+
     /// <inheritdoc/>
     public override async Task InitializeAsync()
     {
@@ -139,6 +145,7 @@ public abstract class ResourceManagementComponentStoreBase<TState, TResource>(IL
         await this.ResourceEventHub.StartAsync().ConfigureAwait(false);
         this.ResourceWatch = await this.ResourceEventHub.WatchAsync<TResource>().ConfigureAwait(false);
         this.ResourceWatch
+            .Throttle(TimeSpan.FromMilliseconds(10))
             .Do(e => this.Logger.LogTrace("ResourceWatch received event '{type}' for '{name}'", e.Type.ToString(), e.Resource.GetName()))
             .SubscribeAsync(
                 onNextAsync: this.OnResourceWatchEventAsync,
@@ -147,7 +154,13 @@ public abstract class ResourceManagementComponentStoreBase<TState, TResource>(IL
                 cancellationToken: this.CancellationTokenSource.Token
             );
         this.Filter.Throttle(TimeSpan.FromMilliseconds(10)).SubscribeAsync(
-            onNextAsync: this.ListResourcesAsync,
+            onNextAsync: async (filter) => {
+                this.Reduce(state => state with
+                {
+                    Filter = filter,
+                }); 
+                if (this.Virtualize != null) await this.Virtualize.RefreshDataAsync().ConfigureAwait(false);
+            },
             onErrorAsync: ex => Task.Run(() => this.Logger.LogError("Resource filter exception: {exception}", ex.ToString())),
             onCompletedAsync: () => Task.CompletedTask,
             cancellationToken: this.CancellationTokenSource.Token
@@ -305,48 +318,37 @@ public abstract class ResourceManagementComponentStoreBase<TState, TResource>(IL
     }
 
     /// <summary>
-    /// Lists all the resources managed by Synapse
+    /// Provides items to the <see cref="Virtualize{TItem}"/> component
     /// </summary>
-    /// <param name="filter">The <see cref="ResourcesFilter" />, if any, to list the resources of</param>
-    /// <returns>A new awaitable <see cref="Task"/></returns>
-    public virtual async Task ListResourcesAsync(ResourcesFilter? filter = null)
+    /// <param name="request">The <see cref="ItemsProviderRequest"/> to execute</param>
+    /// <returns>The resulting <see cref="ItemsProviderResult{TResult}"/></returns>
+    public virtual async ValueTask<ItemsProviderResult<TResource>> ProvideResources(ItemsProviderRequest request)
     {
-        try
+        this.Reduce(state => state with
         {
-            this.Reduce(state => state with
-            {
-                Loading = true,
-            });
-            var existingResources = this.Get(state => state.Resources);
-            var maxResults = this.Get(state => state.MaxResults);
-            var continuationToken = this.Get(state => state.ContinuationToken);
-            var response = await this.ApiClient.ManageNamespaced<TResource>().ListAsync(filter?.Namespace, filter?.LabelSelectors, maxResults, continuationToken).ConfigureAwait(false);
-            var newResources = response.Items ?? [];
-            var itemsCount = (ulong)newResources.Count;
-            var resourceList = new EquatableList<TResource>([
-                .. existingResources ?? [],
-                .. newResources
-            ]).OrderByDescending(r => r.Metadata.CreationTimestamp);
-            continuationToken = itemsCount == maxResults ? response.Metadata.Continue : null;
-            this.Reduce(s => s with
-            {
-                Resources = [.. resourceList],
-                Loading = false,
-                ContinuationToken = continuationToken,
-            });
-        }
-        catch (Exception ex)
+            Loading = true,
+        });
+        var filter = this.Get(state => state.Filter);
+        var response = await this.ApiClient.ManageNamespaced<TResource>().ListAsync(filter.Namespace, filter.LabelSelectors, (ulong)request.Count, request.StartIndex.ToString(), request.CancellationToken).ConfigureAwait(false);
+        var resources = response.Items ?? [];
+        this.Reduce(s => s with
         {
-            this.Logger.LogError("Unable to list resources: {exception}", ex.ToString());
+            Loading = false,
+            Resources = [.. resources],
+        });
+        if (!string.IsNullOrWhiteSpace(response.Metadata.Continue))
+        {
+            return new ItemsProviderResult<TResource>(resources, resources.Count + Convert.ToInt32(response.Metadata.Continue));
         }
-    }
+        return new ItemsProviderResult<TResource>(resources, resources.Count + request.StartIndex);
+    }   
 
     /// <summary>
     /// Handles the specified <see cref="IResourceWatchEvent"/>
     /// </summary>
     /// <param name="e">The <see cref="IResourceWatchEvent"/> to handle</param>
     /// <returns>A new awaitable <see cref="Task"/></returns>
-    protected virtual Task OnResourceWatchEventAsync(IResourceWatchEvent<TResource> e)
+    protected virtual async Task OnResourceWatchEventAsync(IResourceWatchEvent<TResource> e)
     {
         var labelSelectors = this.Get(state => state.LabelSelectors);
         if (labelSelectors != null && labelSelectors.Count > 0 && !labelSelectors.All(selector => {
@@ -365,62 +367,10 @@ public abstract class ResourceManagementComponentStoreBase<TState, TResource>(IL
             };
         }))
         {
-            return Task.CompletedTask;
+            return;
         }
-        switch (e.Type)
-        {
-            case ResourceWatchEventType.Created:
-                this.Reduce(state =>
-                {
-                    var resources = state.Resources == null ? [] : new EquatableList<TResource>(state.Resources);
-                    if (resources.Any(r => r.GetQualifiedName() == e.Resource.GetQualifiedName()))
-                    {
-                        return state;
-                    }
-                    resources.Add(e.Resource);
-                    return state with
-                    {
-                        Resources = resources
-                    };
-                });
-                break;
-            case ResourceWatchEventType.Updated:
-                this.Reduce(state =>
-                {
-                    if (state.Resources == null) return state;
-                    var resources = new EquatableList<TResource>(state.Resources);
-                    var resource = resources.FirstOrDefault(r => r.GetQualifiedName() == e.Resource.GetQualifiedName());
-                    if (resource == null) return state;
-                    var index = resources.IndexOf(resource);
-                    resources.Remove(resource);
-                    resources.Insert(index, e.Resource);
-                    return state with
-                    {
-                        Resources = resources
-                    };
-                });
-                break;
-            case ResourceWatchEventType.Deleted:
-                this.Reduce(state =>
-                {
-                    if (state.Resources == null)
-                    {
-                        return state;
-                    }
-                    var resources = new EquatableList<TResource>(state.Resources);
-                    var resource = resources.FirstOrDefault(r => r.GetQualifiedName() == e.Resource.GetQualifiedName());
-                    if (resource == null) return state;
-                    resources.Remove(resource);
-                    return state with
-                    {
-                        Resources = resources
-                    };
-                });
-                break;
-            default:
-                throw new NotSupportedException($"The specified {nameof(ResourceWatchEventType)} '{e.Type}' is not supported");
-        }
-        return Task.CompletedTask;
+        if (this.Virtualize != null) await this.Virtualize.RefreshDataAsync().ConfigureAwait(false);
+        return;
     }
 
     /// <inheritdoc/>
@@ -451,7 +401,7 @@ public abstract class ResourceManagementComponentStoreBase<TState, TResource>(IL
 /// </remarks>
 /// <param name="logger">The service used to perform logging</param>
 /// <param name="apiClient">The service used to interact with the Synapse API</param>
-/// <param name="resourceEventHub">The <see cref="IResourceEventWatchHub"/> websocket service client</param>
+/// <param name="resourceEventHub">The <see cref="IResourceEventWatchHub"/> web socket service client</param>
 public abstract class ResourceManagementComponentStoreBase<TResource>(ILogger<ResourceManagementComponentStoreBase<TResource>> logger, ISynapseApiClient apiClient, ResourceWatchEventHubClient resourceEventHub)
      : ResourceManagementComponentStoreBase<ResourceManagementComponentState<TResource>, TResource>(logger, apiClient, resourceEventHub)
     where TResource : Resource, new()

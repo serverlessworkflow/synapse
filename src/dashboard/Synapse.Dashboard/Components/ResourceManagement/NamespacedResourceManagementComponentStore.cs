@@ -22,7 +22,7 @@ namespace Synapse.Dashboard.Components.ResourceManagement;
 /// <typeparam name="TResource">The type of <see cref="IResource"/>s to manage</typeparam>
 /// <param name="logger">The service used to perform logging</param>
 /// <param name="apiClient">The service used to interact with the Synapse API</param>
-/// <param name="resourceEventHub">The <see cref="IResourceEventWatchHub"/> websocket service client</param>
+/// <param name="resourceEventHub">The <see cref="IResourceEventWatchHub"/> web socket service client</param>
 public class NamespacedResourceManagementComponentStore<TState, TResource>(ILogger<NamespacedResourceManagementComponentStore<TState, TResource>> logger, ISynapseApiClient apiClient, ResourceWatchEventHubClient resourceEventHub)
     : ResourceManagementComponentStoreBase<TState, TResource>(logger, apiClient, resourceEventHub)
     where TState : NamespacedResourceManagementComponentState<TResource>, new()

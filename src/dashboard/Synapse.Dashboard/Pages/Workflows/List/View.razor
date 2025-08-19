@@ -27,7 +27,7 @@
 
 <div class="d-flex flex-row justify-content-between align-items-center">
     <h4>Workflows</h4>
-    <span>@(Resources?.Count ?? 0) items</span>
+    <span><!--@(Resources?.Count ?? 0) items--></span>
     <div class="d-flex">
         <select class="form-select m-2" @onchange="OnNamespaceChanged">
             <option value="">All namespaces</option>
@@ -84,9 +84,8 @@
             </tr>
         </thead>
         <tbody>
-            @if (Resources != null && Resources.Count > 0)
-            {
-                <Virtualize Context="resource" Items="@Resources">
+            <Virtualize @ref="Store.Virtualize" Context="resource" ItemsProvider="Store.ProvideResources" ItemSize="61">
+                <ItemContent>
                     <tr @onclick="_ => OnViewWorkflow(resource)" class="cursor-pointer">
                         <td class="text-start">@resource.Metadata.Name</td>
                         <td class="text-start">
@@ -136,8 +135,24 @@
                             <input type="checkbox" checked="@SelectedResourceNames.Contains(resource.GetName())" @onclick="(_) => Store.ToggleResourceSelection(resource.GetName())" @onclick:preventDefault="true" @onclick:stopPropagation="true" />
                         </td>
                     </tr>
-                </Virtualize>
-            }
+                </ItemContent>
+                <Placeholder>
+                    <tr class="row-placeholder">
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </Placeholder>
+            </Virtualize>
         </tbody>
     </table>
 </div>
