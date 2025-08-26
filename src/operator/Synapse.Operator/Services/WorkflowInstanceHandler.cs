@@ -219,23 +219,16 @@ public class WorkflowInstanceHandler(ILogger<WorkflowInstanceHandler> logger, IO
     protected virtual async Task UpdateWorkflowInstanceStatusAsync(Action<WorkflowInstanceStatus> statusUpdate, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(statusUpdate);
-        var maxRetries = 3;
-        for (var attempt = 0; attempt < maxRetries; attempt++)
+        try
         {
-            try
-            {
-                var original = this.WorkflowInstance.Resource;
-                var updated = original.Clone()!;
-                updated.Status ??= new();
-                statusUpdate(updated.Status);
-                var patch = JsonPatchUtility.CreateJsonPatchFromDiff(original, updated);
-                await this.Resources.PatchStatusAsync<WorkflowInstance>(new Patch(PatchType.JsonPatch, patch), updated.GetName(), updated.GetNamespace(), null, false, cancellationToken).ConfigureAwait(false);
-            }
-            catch (ConcurrencyException) when (attempt + 1 < maxRetries)
-            {
-                await Task.Delay(TimeSpan.FromMilliseconds(100 * (attempt + 1)), cancellationToken).ConfigureAwait(false);
-            }
+            var original = this.WorkflowInstance.Resource;
+            var updated = original.Clone()!;
+            updated.Status ??= new();
+            statusUpdate(updated.Status);
+            var patch = JsonPatchUtility.CreateJsonPatchFromDiff(original, updated);
+            await this.Resources.PatchStatusAsync<WorkflowInstance>(new Patch(PatchType.JsonPatch, patch), updated.GetName(), updated.GetNamespace(), null, false, cancellationToken).ConfigureAwait(false);
         }
+        catch (ProblemDetailsException ex) when (ex.Problem.Status == (int)HttpStatusCode.NotModified) { }
     }
 
     /// <summary>

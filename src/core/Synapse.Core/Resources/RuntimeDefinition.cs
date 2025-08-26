@@ -42,6 +42,6 @@ public record RuntimeDefinition
     /// Gets the runtime mode
     /// </summary>
     [IgnoreDataMember, JsonIgnore, YamlIgnore]
-    public virtual string Mode => this.Native != null ? OperatorRuntimeMode.Native : this.Docker != null ? OperatorRuntimeMode.Docker : this.Kubernetes != null ? OperatorRuntimeMode.Kubernetes : throw new Exception("The runtime mode must be set");
+    public virtual string Mode => this.Kubernetes != null ? OperatorRuntimeMode.Kubernetes : this.Native != null ? OperatorRuntimeMode.Native : this.Docker != null ? OperatorRuntimeMode.Docker : throw new Exception("The runtime mode must be set");
 
 }
