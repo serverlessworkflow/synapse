@@ -68,10 +68,12 @@ public class KubernetesRuntime(IServiceProvider serviceProvider, ILoggerFactory 
     protected virtual async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
         if (this.Runner.Runtime.Kubernetes == null) throw new NullReferenceException($"Failed to initialize the Kubernetes Runtime because the operator is not configured to use Kubernetes as a runtime");
-        var kubeconfig = string.IsNullOrWhiteSpace(this.Runner.Runtime.Kubernetes.Kubeconfig) 
-            ? KubernetesClientConfiguration.InClusterConfig() 
-            : await KubernetesClientConfiguration.BuildConfigFromConfigFileAsync(new FileInfo(this.Runner.Runtime.Kubernetes.Kubeconfig)).ConfigureAwait(false);
-        this.Kubernetes = new k8s.Kubernetes(kubeconfig);
+        var configuration = Environment.RunsInKubernetes()
+            ? KubernetesClientConfiguration.InClusterConfig()
+            : (string.IsNullOrWhiteSpace(this.Runner.Runtime.Kubernetes.Kubeconfig)
+                ? KubernetesClientConfiguration.BuildDefaultConfig()
+                : await KubernetesClientConfiguration.BuildConfigFromConfigFileAsync(new FileInfo(this.Runner.Runtime.Kubernetes.Kubeconfig)).ConfigureAwait(false));
+        this.Kubernetes = new k8s.Kubernetes(configuration);
     }
 
     /// <inheritdoc/>
