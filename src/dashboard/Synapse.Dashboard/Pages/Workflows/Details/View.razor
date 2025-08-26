@@ -28,34 +28,36 @@
     <HorizontalCollapsible @ref="instancesListPanel" class="collapsible-instances">
         <Label>Instances</Label>
         <Content>
-            <WorkflowInstancesList 
-                class="h-100" 
-                Loading="@Loading"
-                Operators="operators"
-                OperatorName="@operatorName"
-                WorkflowInstances="@Resources"
-                SelectedInstanceNames="@SelectedResourceNames"
-                ActiveRow="@instanceName"
-                Columns="@columns"
-                OnSearchInput="Store.SetSearchTerm"
-                OnShowDetails="OnShowInstanceDetails"
-                OnOperatorChanged="Store.SetOperator"
-                OnSuspend="async (instance) => await Store.SuspendInstanceAsync(instance)"
-                OnResume="async (instance) => await Store.ResumeInstanceAsync(instance)"
-                OnCancel="async (instance) => await Store.CancelInstanceAsync(instance)"
-                OnReplay="async (instance) => await Store.OnShowCreateInstanceAsync(
-                    workflowDefinition, operators ?? [], 
-                    instance.Spec?.Input, 
-                    instance.Metadata.Labels,
-                    instance.Metadata.Annotations
-                )"
-                OnDelete="OnDeleteWorkflowInstanceAsync"
-                OnToggleSelected="Store.ToggleResourceSelection"
-                OnSuspendSelected="async () => await Store.OnSuspendSelectedInstancesAsync()"
-                OnResumeSelected="async () => await Store.OnResumeSelectedInstancesAsync()"
-                OnCancelSelected="async () => await Store.OnCancelSelectedInstancesAsync()"
-                OnDeleteSelected="OnDeleteSelectedResourcesAsync" 
-            />
+            <div class="h-100 d-flex flex-column">
+                <WorkflowInstancesList 
+                    class="h-100" 
+                    Loading="@Loading"
+                    Operators="operators"
+                    OperatorName="@operatorName"
+                    WorkflowInstances="@Resources"
+                    SelectedInstanceNames="@SelectedResourceNames"
+                    ActiveRow="@instanceName"
+                    Columns="@columns"
+                    OnSearchInput="Store.SetSearchTerm"
+                    OnShowDetails="OnShowInstanceDetails"
+                    OnOperatorChanged="Store.SetOperator"
+                    OnSuspend="async (instance) => await Store.SuspendInstanceAsync(instance)"
+                    OnResume="async (instance) => await Store.ResumeInstanceAsync(instance)"
+                    OnCancel="async (instance) => await Store.CancelInstanceAsync(instance)"
+                    OnReplay="async (instance) => await Store.OnShowCreateInstanceAsync(
+                        workflowDefinition, operators ?? [], 
+                        instance.Spec?.Input, 
+                        instance.Metadata.Labels,
+                        instance.Metadata.Annotations
+                    )"
+                    OnDelete="OnDeleteWorkflowInstanceAsync"
+                    OnToggleSelected="Store.ToggleResourceSelection"
+                    OnSuspendSelected="async () => await Store.OnSuspendSelectedInstancesAsync()"
+                    OnResumeSelected="async () => await Store.OnResumeSelectedInstancesAsync()"
+                    OnCancelSelected="async () => await Store.OnCancelSelectedInstancesAsync()"
+                    OnDeleteSelected="OnDeleteSelectedResourcesAsync" 
+                />
+            </div>
             <Button Outline="true" Color="ButtonColor.Primary" @onclick="async _ => await Store.OnShowCreateInstanceAsync(workflowDefinition, operators ?? [])" class="w-100 mt-3">
                 <Icon Name="IconName.Plus"/>
             </Button>
