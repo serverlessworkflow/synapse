@@ -24,8 +24,8 @@ namespace Synapse.Runtime.Services;
 /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
 /// <param name="environment">The current <see cref="IHostEnvironment"/></param>
 /// <param name="httpClientFactory">The service used to create <see cref="System.Net.Http.HttpClient"/>s</param>
-/// <param name="options">The service used to access the current <see cref="RunnerConfiguration"/></param>
-public class NativeRuntime(ILoggerFactory loggerFactory, IHostEnvironment environment, IHttpClientFactory httpClientFactory, IOptionsMonitor<RunnerConfiguration> options)
+/// <param name="runnerConfigurationMonitor">The service used to access the current <see cref="Resources.RunnerConfiguration"/></param>
+public class NativeRuntime(ILoggerFactory loggerFactory, IHostEnvironment environment, IHttpClientFactory httpClientFactory, IOptionsMonitor<RunnerConfiguration> runnerConfigurationMonitor)
     : WorkflowRuntimeBase(loggerFactory)
 {
 
@@ -40,9 +40,14 @@ public class NativeRuntime(ILoggerFactory loggerFactory, IHostEnvironment enviro
     protected HttpClient HttpClient { get; } = httpClientFactory.CreateClient();
 
     /// <summary>
-    /// Gets the current <see cref="RunnerConfiguration"/>
+    /// Gets the service used to access the current <see cref="Resources.RunnerConfiguration"/>
     /// </summary>
-    protected RunnerConfiguration Options => options.CurrentValue;
+    protected IOptionsMonitor<RunnerConfiguration> RunnerConfigurationMonitor { get; } = runnerConfigurationMonitor;
+
+    /// <summary>
+    /// Gets the current <see cref="Resources.RunnerConfiguration"/>
+    /// </summary>
+    protected RunnerConfiguration RunnerConfiguration => RunnerConfigurationMonitor.CurrentValue;
 
     /// <summary>
     /// Gets a <see cref="ConcurrentDictionary{TKey, TValue}"/> containing all known worker processes
@@ -55,16 +60,16 @@ public class NativeRuntime(ILoggerFactory loggerFactory, IHostEnvironment enviro
         ArgumentNullException.ThrowIfNull(workflow);
         ArgumentNullException.ThrowIfNull(workflowInstance);
         ArgumentNullException.ThrowIfNull(serviceAccount);
-        if (this.Options.Runtime.Native == null) throw new NullReferenceException("The native runtime must be configured");
-        var fileName = this.Options.Runtime.Native.Executable;
+        if (this.RunnerConfiguration.Runtime.Native == null) throw new NullReferenceException("The native runtime must be configured");
+        var fileName = this.RunnerConfiguration.Runtime.Native.Executable;
         var args = string.Empty;
         if (this.Environment.IsDevelopment()) args += "--debug";
-        var filePath = Path.Combine(this.Options.Runtime.Native.Directory, fileName);
+        var filePath = Path.Combine(this.RunnerConfiguration.Runtime.Native.Directory, fileName);
         var startInfo = new ProcessStartInfo()
         {
             FileName = filePath,
             Arguments = args,
-            WorkingDirectory = this.Options.Runtime.Native.Directory,
+            WorkingDirectory = this.RunnerConfiguration.Runtime.Native.Directory,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             CreateNoWindow = true,
@@ -72,14 +77,14 @@ public class NativeRuntime(ILoggerFactory loggerFactory, IHostEnvironment enviro
         };
         startInfo.Environment[SynapseDefaults.EnvironmentVariables.Runner.Namespace] = workflowInstance.GetNamespace()!;
         startInfo.Environment[SynapseDefaults.EnvironmentVariables.Runner.Name] = $"{workflowInstance.GetName()}-{Guid.NewGuid().ToString("N")[..12].ToLowerInvariant()}";
-        startInfo.Environment[SynapseDefaults.EnvironmentVariables.Api.Uri] = this.Options.Api.Uri.OriginalString;
-        startInfo.Environment[SynapseDefaults.EnvironmentVariables.Runner.ContainerPlatform] = this.Options.ContainerPlatform;
-        startInfo.Environment[SynapseDefaults.EnvironmentVariables.Runner.LifecycleEvents] = (this.Options.PublishLifecycleEvents ?? true).ToString();
-        startInfo.Environment[SynapseDefaults.EnvironmentVariables.Secrets.Directory] = this.Options.Runtime.Native.SecretsDirectory;
+        startInfo.Environment[SynapseDefaults.EnvironmentVariables.Api.Uri] = this.RunnerConfiguration.Api.Uri.OriginalString;
+        startInfo.Environment[SynapseDefaults.EnvironmentVariables.Runner.ContainerPlatform] = this.RunnerConfiguration.ContainerPlatform;
+        startInfo.Environment[SynapseDefaults.EnvironmentVariables.Runner.LifecycleEvents] = (this.RunnerConfiguration.PublishLifecycleEvents ?? true).ToString();
+        startInfo.Environment[SynapseDefaults.EnvironmentVariables.Secrets.Directory] = this.RunnerConfiguration.Runtime.Native.SecretsDirectory;
         startInfo.Environment[SynapseDefaults.EnvironmentVariables.ServiceAccount.Name] = serviceAccount.GetQualifiedName();
         startInfo.Environment[SynapseDefaults.EnvironmentVariables.ServiceAccount.Key] = serviceAccount.Spec.Key;
         startInfo.Environment[SynapseDefaults.EnvironmentVariables.Workflow.Instance] = workflowInstance.GetQualifiedName();
-        if (this.Options.Certificates?.Validate == false) startInfo.Environment.Add(SynapseDefaults.EnvironmentVariables.SkipCertificateValidation, "true");
+        if (this.RunnerConfiguration.Certificates?.Validate == false) startInfo.Environment.Add(SynapseDefaults.EnvironmentVariables.SkipCertificateValidation, "true");
         var process = new Process()
         {
             StartInfo = startInfo,

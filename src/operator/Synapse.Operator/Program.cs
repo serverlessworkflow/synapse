@@ -28,11 +28,6 @@ var builder = Host.CreateDefaultBuilder()
     .ConfigureServices((context, services) =>
     {
         services.Configure<OperatorOptions>(context.Configuration);
-        services.AddSingleton(provider =>
-        {
-            var options = provider.GetRequiredService<IOptionsMonitor<OperatorOptions>>().CurrentValue;
-            return Options.Create(options.Runner);
-        });
         services.AddLogging(builder =>
         {
             builder.AddSimpleConsole(options =>
@@ -67,7 +62,11 @@ var builder = Host.CreateDefaultBuilder()
         services.AddScoped<WorkflowInstanceController>();
         services.AddScoped<IResourceController<WorkflowInstance>>(provider => provider.GetRequiredService<WorkflowInstanceController>());
 
-        services.AddHostedService<OperatorApplication>();
+        services.AddSingleton<OperatorApplication>();
+        services.AddHostedService(provider => provider.GetRequiredService<OperatorApplication>());
+        services.AddSingleton<RunnerConfigurationMonitor>();
+        services.AddHostedService(provider => provider.GetRequiredService<RunnerConfigurationMonitor>());
+        services.AddSingleton<IOptionsMonitor<RunnerConfiguration>>(provider => provider.GetRequiredService<RunnerConfigurationMonitor>());
     });
 
 using var app = builder.Build();
