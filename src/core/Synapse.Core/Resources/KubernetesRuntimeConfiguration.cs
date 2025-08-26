@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using k8s;
 using k8s.Models;
 using Neuroglia.Serialization.Yaml;
 
@@ -108,7 +109,7 @@ public record KubernetesRuntimeConfiguration
         var templateFilePath = Environment.GetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runtime.Kubernetes.Pod);
         if (string.IsNullOrWhiteSpace(templateFilePath) || !File.Exists(templateFilePath)) return DefaultPodTemplate;
         var yaml = File.ReadAllText(templateFilePath);
-        return YamlSerializer.Default.Deserialize<V1PodTemplateSpec>(yaml)!;
+        return KubernetesYaml.Deserialize<V1PodTemplateSpec>(yaml);
     }
 
 }

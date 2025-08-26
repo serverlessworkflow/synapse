@@ -25,8 +25,8 @@ namespace Synapse.Runtime.Docker.Services;
 /// <param name="serviceProvider">The current <see cref="IServiceProvider"/></param>
 /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
 /// <param name="environment">The current <see cref="IHostEnvironment"/></param>
-/// <param name="runner">The service used to access the current <see cref="RunnerConfiguration"/></param>
-public class DockerRuntime(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, IHostEnvironment environment, IOptions<RunnerConfiguration> runner)
+/// <param name="runnerConfigurationMonitor">The service used to access the current <see cref="Resources.RunnerConfiguration"/></param>
+public class DockerRuntime(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, IHostEnvironment environment, IOptionsMonitor<RunnerConfiguration> runnerConfigurationMonitor)
     : WorkflowRuntimeBase(loggerFactory)
 {
 
@@ -41,9 +41,14 @@ public class DockerRuntime(IServiceProvider serviceProvider, ILoggerFactory logg
     protected IHostEnvironment Environment { get; } = environment;
 
     /// <summary>
-    /// Gets the current <see cref="RunnerConfiguration"/>
+    /// Gets the service used to access the current <see cref="Resources.RunnerConfiguration"/>
     /// </summary>
-    protected RunnerConfiguration Runner => runner.Value;
+    protected IOptionsMonitor<RunnerConfiguration> RunnerConfigurationMonitor { get; } = runnerConfigurationMonitor;
+
+    /// <summary>
+    /// Gets the current <see cref="Resources.RunnerConfiguration"/>
+    /// </summary>
+    protected RunnerConfiguration RunnerConfiguration => RunnerConfigurationMonitor.CurrentValue;
 
     /// <summary>
     /// Gets the service used to interact with the Docker API
@@ -62,9 +67,9 @@ public class DockerRuntime(IServiceProvider serviceProvider, ILoggerFactory logg
     /// <returns>A new awaitable <see cref="Task"/></returns>
     protected virtual Task InitializeAsync(CancellationToken cancellationToken = default)
     {
-        if (this.Runner.Runtime.Docker == null) throw new NullReferenceException($"Failed to initialize the Docker Runtime because the operator is not configured to use Docker as a runtime");
-        var dockerConfiguration = new DockerClientConfiguration(this.Runner.Runtime.Docker.Api.Endpoint);
-        this.Docker = dockerConfiguration.CreateClient(string.IsNullOrWhiteSpace(this.Runner.Runtime.Docker.Api.Version) ? null : System.Version.Parse(this.Runner.Runtime.Docker.Api.Version!));
+        if (this.RunnerConfiguration.Runtime.Docker == null) throw new NullReferenceException($"Failed to initialize the Docker Runtime because the operator is not configured to use Docker as a runtime");
+        var dockerConfiguration = new DockerClientConfiguration(this.RunnerConfiguration.Runtime.Docker.Api.Endpoint);
+        this.Docker = dockerConfiguration.CreateClient(string.IsNullOrWhiteSpace(this.RunnerConfiguration.Runtime.Docker.Api.Version) ? null : System.Version.Parse(this.RunnerConfiguration.Runtime.Docker.Api.Version!));
         return Task.CompletedTask;
     }
 
@@ -78,7 +83,7 @@ public class DockerRuntime(IServiceProvider serviceProvider, ILoggerFactory logg
         {
             this.Logger.LogDebug("Creating a new Docker container for workflow instance '{workflowInstance}'...", workflowInstance.GetQualifiedName());
             if (this.Docker == null) await this.InitializeAsync(cancellationToken).ConfigureAwait(false); 
-            var container = this.Runner.Runtime.Docker!.ContainerTemplate.Clone()!;
+            var container = this.RunnerConfiguration.Runtime.Docker!.ContainerTemplate.Clone()!;
             try
             {
                 await this.Docker!.Images.InspectImageAsync(container.Image, cancellationToken).ConfigureAwait(false);
@@ -93,24 +98,24 @@ public class DockerRuntime(IServiceProvider serviceProvider, ILoggerFactory logg
             }
             container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.Namespace, workflowInstance.GetNamespace()!);
             container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.Name, $"{workflowInstance.GetName()}-{Guid.NewGuid().ToString("N")[..12].ToLowerInvariant()}");
-            container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Api.Uri, this.Runner.Api.Uri.OriginalString);
-            container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.ContainerPlatform, this.Runner.ContainerPlatform);
-            container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.LifecycleEvents, (this.Runner.PublishLifecycleEvents ?? true).ToString());
-            container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Secrets.Directory, this.Runner.Runtime.Docker.Secrets.MountPath);
+            container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Api.Uri, this.RunnerConfiguration.Api.Uri.OriginalString);
+            container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.ContainerPlatform, this.RunnerConfiguration.ContainerPlatform);
+            container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.LifecycleEvents, (this.RunnerConfiguration.PublishLifecycleEvents ?? true).ToString());
+            container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Secrets.Directory, this.RunnerConfiguration.Runtime.Docker.Secrets.MountPath);
             container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.ServiceAccount.Name, serviceAccount.GetQualifiedName());
             container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.ServiceAccount.Key, serviceAccount.Spec.Key);
             container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Workflow.Instance, workflowInstance.GetQualifiedName());
             container.SetEnvironmentVariable("DOCKER_HOST", "unix:///var/run/docker.sock");
             container.User = "root";
-            if (this.Runner.Certificates?.Validate == false) container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.SkipCertificateValidation, "true");
-            var hostConfig = this.Runner.Runtime.Docker.HostConfig?.Clone()! ?? new();
-            if (!Directory.Exists(this.Runner.Runtime.Docker.Secrets.Directory)) Directory.CreateDirectory(this.Runner.Runtime.Docker.Secrets.Directory);
+            if (this.RunnerConfiguration.Certificates?.Validate == false) container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.SkipCertificateValidation, "true");
+            var hostConfig = this.RunnerConfiguration.Runtime.Docker.HostConfig?.Clone()! ?? new();
+            if (!Directory.Exists(this.RunnerConfiguration.Runtime.Docker.Secrets.Directory)) Directory.CreateDirectory(this.RunnerConfiguration.Runtime.Docker.Secrets.Directory);
             hostConfig.Mounts ??= [];
             hostConfig.Mounts.Insert(0, new()
             {
                 Type = "bind",
-                Source = this.Runner.Runtime.Docker.Secrets.Directory,
-                Target = this.Runner.Runtime.Docker.Secrets.MountPath
+                Source = this.RunnerConfiguration.Runtime.Docker.Secrets.Directory,
+                Target = this.RunnerConfiguration.Runtime.Docker.Secrets.MountPath
             });
             hostConfig.Mounts.Insert(1, new()
             {
@@ -128,7 +133,7 @@ public class DockerRuntime(IServiceProvider serviceProvider, ILoggerFactory logg
                 HostConfig = hostConfig
             };
             var result = await this.Docker!.Containers.CreateContainerAsync(parameters, cancellationToken).ConfigureAwait(false);
-            if (this.Environment.RunsInDocker()) await this.Docker.Networks.ConnectNetworkAsync(this.Runner.Runtime.Docker.Network, new NetworkConnectParameters() { Container = result.ID }, cancellationToken);
+            if (this.Environment.RunsInDocker()) await this.Docker.Networks.ConnectNetworkAsync(this.RunnerConfiguration.Runtime.Docker.Network, new NetworkConnectParameters() { Container = result.ID }, cancellationToken);
             if (result.Warnings.Count > 0) this.Logger.LogWarning("Warnings have been raised during container creation: {warnings}", string.Join(System.Environment.NewLine, result.Warnings));
             var process = ActivatorUtilities.CreateInstance<DockerWorkflowProcess>(this.ServiceProvider, this.Docker!, result.ID);
             this.Processes.TryAdd(process.Id, process);

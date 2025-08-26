@@ -30,8 +30,8 @@ namespace Synapse.Runtime.Kubernetes.Services;
 /// <param name="serviceProvider">The current <see cref="IServiceProvider"/></param>
 /// <param name="loggerFactory">The service used to create <see cref="ILogger"/>s</param>
 /// <param name="environment">The current <see cref="IHostEnvironment"/></param>
-/// <param name="runner">The service used to access the current <see cref="RunnerConfiguration"/></param>
-public class KubernetesRuntime(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, IHostEnvironment environment, IOptions<RunnerConfiguration> runner)
+/// <param name="runnerConfigurationMonitor">The service used to access the current <see cref="Resources.RunnerConfiguration"/></param>
+public class KubernetesRuntime(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, IHostEnvironment environment, IOptionsMonitor<RunnerConfiguration> runnerConfigurationMonitor)
     : WorkflowRuntimeBase(loggerFactory)
 {
 
@@ -46,9 +46,14 @@ public class KubernetesRuntime(IServiceProvider serviceProvider, ILoggerFactory 
     protected IHostEnvironment Environment { get; } = environment;
 
     /// <summary>
-    /// Gets the current <see cref="RunnerConfiguration"/>
+    /// Gets the service used to access the current <see cref="Resources.RunnerConfiguration"/>
     /// </summary>
-    protected RunnerConfiguration Runner => runner.Value;
+    protected IOptionsMonitor<RunnerConfiguration> RunnerConfigurationMonitor { get; } = runnerConfigurationMonitor;
+
+    /// <summary>
+    /// Gets the current <see cref="Resources.RunnerConfiguration"/>
+    /// </summary>
+    protected RunnerConfiguration RunnerConfiguration => RunnerConfigurationMonitor.CurrentValue;
 
     /// <summary>
     /// Gets the service used to interact with the Kubernetes API
@@ -67,12 +72,12 @@ public class KubernetesRuntime(IServiceProvider serviceProvider, ILoggerFactory 
     /// <returns>A new awaitable <see cref="Task"/></returns>
     protected virtual async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
-        if (this.Runner.Runtime.Kubernetes == null) throw new NullReferenceException($"Failed to initialize the Kubernetes Runtime because the operator is not configured to use Kubernetes as a runtime");
+        if (this.RunnerConfiguration.Runtime.Kubernetes == null) throw new NullReferenceException($"Failed to initialize the Kubernetes Runtime because the operator is not configured to use Kubernetes as a runtime");
         var configuration = Environment.RunsInKubernetes()
             ? KubernetesClientConfiguration.InClusterConfig()
-            : (string.IsNullOrWhiteSpace(this.Runner.Runtime.Kubernetes.Kubeconfig)
+            : (string.IsNullOrWhiteSpace(this.RunnerConfiguration.Runtime.Kubernetes.Kubeconfig)
                 ? KubernetesClientConfiguration.BuildDefaultConfig()
-                : await KubernetesClientConfiguration.BuildConfigFromConfigFileAsync(new FileInfo(this.Runner.Runtime.Kubernetes.Kubeconfig)).ConfigureAwait(false));
+                : await KubernetesClientConfiguration.BuildConfigFromConfigFileAsync(new FileInfo(this.RunnerConfiguration.Runtime.Kubernetes.Kubeconfig)).ConfigureAwait(false));
         this.Kubernetes = new k8s.Kubernetes(configuration);
     }
 
@@ -87,16 +92,16 @@ public class KubernetesRuntime(IServiceProvider serviceProvider, ILoggerFactory 
             this.Logger.LogDebug("Creating a new Kubernetes job for workflow instance '{workflowInstance}'...", workflowInstance.GetQualifiedName());
             if (this.Kubernetes == null) await this.InitializeAsync(cancellationToken).ConfigureAwait(false);
             var workflowDefinition = workflow.Spec.Versions.Get(workflowInstance.Spec.Definition.Version) ?? throw new NullReferenceException($"Failed to find version '{workflowInstance.Spec.Definition.Version}' of workflow '{workflow.GetQualifiedName()}'");
-            var pod = this.Runner.Runtime.Kubernetes!.PodTemplate.Clone()!;
+            var pod = this.RunnerConfiguration.Runtime.Kubernetes!.PodTemplate.Clone()!;
             pod.Metadata ??= new();
             pod.Metadata.Name = $"{workflowInstance.GetQualifiedName()}-{Guid.NewGuid().ToString("N")[..12].ToLowerInvariant()}";
-            if (!string.IsNullOrWhiteSpace(this.Runner.Runtime.Kubernetes.Namespace)) pod.Metadata.NamespaceProperty = this.Runner.Runtime.Kubernetes.Namespace;
+            if (!string.IsNullOrWhiteSpace(this.RunnerConfiguration.Runtime.Kubernetes.Namespace)) pod.Metadata.NamespaceProperty = this.RunnerConfiguration.Runtime.Kubernetes.Namespace;
             if (pod.Spec == null || pod.Spec.Containers == null || !pod.Spec.Containers.Any()) throw new InvalidOperationException("The configured Kubernetes runtime pod template is not valid");
             var volumeMounts = new List<V1VolumeMount>();
             pod.Spec.Volumes ??= [];
             if (workflowDefinition.Use?.Secrets?.Count > 0)
             {
-                var secretsVolume = new V1Volume(this.Runner.Runtime.Kubernetes.Secrets.VolumeName)
+                var secretsVolume = new V1Volume(this.RunnerConfiguration.Runtime.Kubernetes.Secrets.VolumeName)
                 {
                     Projected = new()
                     {
@@ -104,7 +109,7 @@ public class KubernetesRuntime(IServiceProvider serviceProvider, ILoggerFactory 
                     }
                 };
                 pod.Spec.Volumes.Add(secretsVolume);
-                var secretsVolumeMount = new V1VolumeMount(this.Runner.Runtime.Kubernetes.Secrets.MountPath, secretsVolume.Name, readOnlyProperty: true);
+                var secretsVolumeMount = new V1VolumeMount(this.RunnerConfiguration.Runtime.Kubernetes.Secrets.MountPath, secretsVolume.Name, readOnlyProperty: true);
                 volumeMounts.Add(secretsVolumeMount);
                 foreach (var secret in workflowDefinition.Use.Secrets)
                 {
@@ -123,17 +128,17 @@ public class KubernetesRuntime(IServiceProvider serviceProvider, ILoggerFactory 
                 container.Env ??= [];
                 container.Env.Add(new(SynapseDefaults.EnvironmentVariables.Runner.Namespace, valueFrom: new(fieldRef: new("metadata.namespace"))));
                 container.Env.Add(new(SynapseDefaults.EnvironmentVariables.Runner.Name, valueFrom: new(fieldRef: new("metadata.name"))));
-                container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Api.Uri, this.Runner.Api.Uri.OriginalString);
-                container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.ContainerPlatform, this.Runner.ContainerPlatform);
-                container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.LifecycleEvents, (this.Runner.PublishLifecycleEvents ?? true).ToString());
-                container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Secrets.Directory, this.Runner.Runtime.Kubernetes.Secrets.MountPath);
+                container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Api.Uri, this.RunnerConfiguration.Api.Uri.OriginalString);
+                container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.ContainerPlatform, this.RunnerConfiguration.ContainerPlatform);
+                container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Runner.LifecycleEvents, (this.RunnerConfiguration.PublishLifecycleEvents ?? true).ToString());
+                container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Secrets.Directory, this.RunnerConfiguration.Runtime.Kubernetes.Secrets.MountPath);
                 container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.ServiceAccount.Name, serviceAccount.GetQualifiedName());
                 container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.ServiceAccount.Key, serviceAccount.Spec.Key);
                 container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.Workflow.Instance, workflowInstance.GetQualifiedName());
-                if (this.Runner.Certificates?.Validate == false) container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.SkipCertificateValidation, "true");
+                if (this.RunnerConfiguration.Certificates?.Validate == false) container.SetEnvironmentVariable(SynapseDefaults.EnvironmentVariables.SkipCertificateValidation, "true");
                 container.VolumeMounts = volumeMounts;
             }
-            if (this.Runner.ContainerPlatform == ContainerPlatform.Kubernetes) pod.Spec.ServiceAccountName = this.Runner.Runtime.Kubernetes.ServiceAccount;
+            if (this.RunnerConfiguration.ContainerPlatform == ContainerPlatform.Kubernetes) pod.Spec.ServiceAccountName = this.RunnerConfiguration.Runtime.Kubernetes.ServiceAccount;
             var process = ActivatorUtilities.CreateInstance<KubernetesWorkflowProcess>(this.ServiceProvider, this.Kubernetes!, pod);
             this.Processes.AddOrUpdate(process.Id, _ => process, (key, current) =>
             {
@@ -162,8 +167,8 @@ public class KubernetesRuntime(IServiceProvider serviceProvider, ILoggerFactory 
             Logger.LogDebug("Deleting the Kubernetes process with id '{processId}'...", processId);
             var components = processId.Split('.', StringSplitOptions.RemoveEmptyEntries);
             if (components.Length < 2) throw new ArgumentException($"The specified value '{processId}' is not valid Kubernetes process id", nameof(processId));
-            var name = components[0];
-            var @namespace = components[1];
+            var name = string.Join('.', components.Take(components.Length - 1));
+            var @namespace = components[^1];
             if (Processes.TryGetValue(processId, out var process))
             {
                 try
