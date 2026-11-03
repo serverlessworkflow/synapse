@@ -201,13 +201,24 @@ public class WorkflowInstanceHandler(ILogger<WorkflowInstanceHandler> logger, IO
     /// <returns>A new awaitable <see cref="Task"/></returns>
     protected virtual async Task OnPersistLogBatchAsync()
     {
-        if (this._persistingLogs || this.LogBatchQueue.Count < 1) return;
+        if (this._disposed || this._persistingLogs || this.LogBatchQueue.Count < 1) return;
         this._persistingLogs = true;
-        var stringBuilder = new StringBuilder();
-        while (this.LogBatchQueue.TryDequeue(out var log)) stringBuilder.AppendLine(log);
-        var logs = stringBuilder.ToString();
-        await this.Logs.AppendAsync($"{this.WorkflowInstance.Resource.GetName()}.{this.WorkflowInstance.Resource.GetNamespace()}", logs, this.CancellationTokenSource.Token).ConfigureAwait(false);
-        this._persistingLogs = false;
+        try
+        {
+            var stringBuilder = new StringBuilder();
+            while (this.LogBatchQueue.TryDequeue(out var log)) stringBuilder.AppendLine(log);
+            var logs = stringBuilder.ToString();
+            await this.Logs.AppendAsync($"{this.WorkflowInstance.Resource.GetName()}.{this.WorkflowInstance.Resource.GetNamespace()}", logs, this.CancellationTokenSource.Token).ConfigureAwait(false);
+        }
+        catch (Exception ex) when (ex is ObjectDisposedException || ex is OperationCanceledException) { }
+        catch (Exception ex)
+        {
+            this.Logger.LogError("An error occurred while persisting the logs of workflow instance '{workflowInstance}': {ex}", this.WorkflowInstance.Resource.GetQualifiedName(), ex);
+        }
+        finally
+        {
+            this._persistingLogs = false;
+        }
     }
 
     /// <summary>
