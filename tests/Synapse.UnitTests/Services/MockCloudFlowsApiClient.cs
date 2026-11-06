@@ -28,7 +28,7 @@ internal class MockSynapseApiClient(IServiceProvider serviceProvider)
 
     public IClusterResourceApiClient<Namespace> Namespaces { get; } = ActivatorUtilities.CreateInstance<MockClusterResourceApiClient<Namespace>>(serviceProvider);
 
-    public INamespacedResourceApiClient<Operator> Operators { get; } = ActivatorUtilities.CreateInstance<MockNamespacedResourceApiClient<Operator>>(serviceProvider);
+    public INamespacedResourceApiClient<Synapse.Resources.Operator> Operators { get; } = ActivatorUtilities.CreateInstance<MockNamespacedResourceApiClient<Synapse.Resources.Operator>>(serviceProvider);
 
     public INamespacedResourceApiClient<Workflow> Workflows { get; } = ActivatorUtilities.CreateInstance<MockNamespacedResourceApiClient<Workflow>>(serviceProvider);
 
